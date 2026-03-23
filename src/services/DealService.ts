@@ -1,0 +1,489 @@
+import { createAdminClient } from '@/lib/supabase/admin';
+import { sortProductsHierarchically } from '@/utils/productSorting';
+import { normalizeCasing } from '@/lib/string-utils';
+
+/**
+ * DealService handles all business logic and database interactions for Deals and Pipeline.
+ * Uses service role client + explicit organization_id filter for tenant isolation.
+ */
+export class DealService {
+
+    static async getPipelineData(userId: string, organizationId: string) {
+        const supabase = createAdminClient();
+
+        // 1. Fetch Deals
+        const { data: deals, error } = await supabase
+            .from('deals')
+            .select(`
+                *,
+                deal_products(*),
+                account_data:accounts!deals_account_id_fkey(id, name)
+            `)
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('❌ Error pipeline data fetch: ', JSON.stringify(error, null, 2));
+            return { deals: [], profile: null, distributors: [], allAccounts: [] };
+        }
+
+        // 2. Fetch Profiles for mapping
+        const { data: allProfiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url, commission_rules');
+
+        const profilesMap = (allProfiles || []).reduce((acc: any, p: any) => {
+            acc[p.id] = p;
+            return acc;
+        }, {});
+
+        const profile = profilesMap[userId] || null;
+
+        // 3. Map Data
+        const finalDeals = (deals || []).map((d: any) => {
+            const ownerProfile = profilesMap[d.owner_id] || null;
+            return {
+                ...d,
+                owner_profile: ownerProfile,
+                owner: ownerProfile?.full_name || d.owner || 'Desconhecido',
+                company: d.account_data?.name || d.company || 'Cliente',
+                deal_products: sortProductsHierarchically(d.deal_products || [])
+            };
+        });
+
+        // 4. Fetch Distributors
+        const { data: distributors, error: distError } = await supabase
+            .from('accounts')
+            .select('id, name, cnpj, payment_terms, logo_url, account_branches(id, name, cnpj), account_contacts(id, name, email, mobile_phone, landline_phone, role)')
+            .eq('organization_id', organizationId)
+            .eq('relationship_type', 'Distribuidor')
+            .order('name');
+
+        if (distError) console.error('❌ Error fetching distributors:', distError);
+
+        // 5. Fetch all accounts (for Manufacturer mapping)
+        const { data: allAccounts } = await supabase
+            .from('accounts')
+            .select('id, name, logo_url, relationship_type, account_contacts(id, name, email, mobile_phone, landline_phone, role)')
+            .eq('organization_id', organizationId)
+            .order('name');
+
+        return {
+            deals: finalDeals,
+            profile,
+            distributors: distributors || [],
+            allAccounts: allAccounts || []
+        };
+    }
+
+    static async getDealDetails(userId: string, dealId: string, organizationId: string) {
+        const supabase = createAdminClient();
+
+        const { data: deal, error } = await supabase
+            .from('deals')
+            .select('*')
+            .eq('id', dealId)
+            .eq('organization_id', organizationId)
+            .single();
+
+        if (error) {
+            console.error('❌ Error fetching deal details:', error);
+            return null;
+        }
+
+        const { data: products } = await supabase
+            .from('deal_products')
+            .select('*')
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId)
+            .order('display_order', { ascending: true });
+
+        const { data: activities } = await supabase
+            .from('activities')
+            .select('*')
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: false });
+
+        let account = null;
+        if (deal.account_id) {
+            const { data: acc } = await supabase
+                .from('accounts')
+                .select('*')
+                .eq('id', deal.account_id)
+                .eq('organization_id', organizationId)
+                .single();
+            if (acc) {
+                const { data: contacts } = await supabase
+                    .from('account_contacts')
+                    .select('*')
+                    .eq('account_id', acc.id)
+                    .eq('organization_id', organizationId);
+                account = { ...acc, contacts: contacts || [] };
+            }
+        }
+
+        let owner_profile = null;
+        if (deal.owner_id) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('id, full_name, avatar_url, commission_rules')
+                .eq('id', deal.owner_id)
+                .single();
+            if (profile) {
+                owner_profile = profile;
+            } else {
+                console.log("❌ Profile not found for owner_id:", deal.owner_id);
+            }
+        } else {
+            console.log("❌ Deal has no owner_id:", deal.id);
+        }
+
+        return {
+            ...deal,
+            owner_profile,
+            deal_products: products ? sortProductsHierarchically(products) : [],
+            activities: activities || [],
+            account: account
+        };
+    }
+
+    static async createDeal(userId: string, organizationId: string, dealData: any) {
+        const supabase = createAdminClient();
+
+        const payload: any = {
+            title: normalizeCasing(dealData.title, 'title'),
+            account_id: dealData.account_id || null,
+            owner_id: userId,
+            owner: dealData.owner || 'Me',
+            company: normalizeCasing(dealData.company, 'name') || null,
+            value: dealData.value || 0,
+            stage: dealData.stage || 'qualification',
+            probability: dealData.probability || 20,
+            expected_close_date: dealData.expected_close_date || null,
+            description: dealData.description || null,
+            organization_id: organizationId
+        };
+
+        const { data, error } = await supabase.from('deals').insert([payload]).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async updateDeal(userId: string, dealId: string, organizationId: string, updates: any) {
+        const supabase = createAdminClient();
+
+        // Valid columns for the 'deals' table
+        const allowedColumns = [
+            'title', 'account_id', 'owner_id', 'owner', 'company', 'value', 'stage',
+            'probability', 'expected_close_date', 'description', 'won_at', 'lost_at',
+            'loss_reason', 'health_score', 'health_trend', 'risk_factors', 'tags',
+            'billing_type', 'distributor_id', 'client_contact_id', 'lead_source',
+            'next_step', 'commission_deduction', 'custom_fields'
+        ];
+
+        const sanitizedUpdates = Object.entries(updates).reduce((acc, [key, value]) => {
+            if (allowedColumns.includes(key)) {
+                let val = value === '' ? null : value;
+                if (key === 'title') val = normalizeCasing(val as string, 'title');
+                if (key === 'company') val = normalizeCasing(val as string, 'name');
+                acc[key] = val;
+            }
+            return acc;
+        }, {} as Record<string, any>);
+
+        if (Object.keys(sanitizedUpdates).length === 0) {
+            console.warn('⚠️ No valid columns provided for deal update');
+            return null;
+        }
+
+        const { data, error } = await supabase
+            .from('deals')
+            .update(sanitizedUpdates)
+            .eq('id', dealId)
+            .eq('organization_id', organizationId)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async updateDealStage(userId: string, dealId: string, organizationId: string, newStage: string, probability?: number) {
+        const supabase = createAdminClient();
+        const updates: any = { stage: newStage };
+
+        if (probability !== undefined) updates.probability = probability;
+        if (newStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
+        else if (newStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
+
+        const { data, error } = await supabase
+            .from('deals')
+            .update(updates)
+            .eq('id', dealId)
+            .eq('organization_id', organizationId)
+            .select()
+            .single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async duplicateDeal(userId: string, dealId: string, organizationId: string) {
+        const supabase = createAdminClient();
+
+        // 1. Fetch original deal
+        const { data: originalDeal, error: dealError } = await supabase
+            .from('deals')
+            .select('*')
+            .eq('id', dealId)
+            .eq('organization_id', organizationId)
+            .single();
+
+        if (dealError || !originalDeal) {
+            throw new Error(`Failed to fetch original deal: ${dealError?.message}`);
+        }
+
+        // 2. Fetch original products
+        const { data: originalProducts, error: productsError } = await supabase
+            .from('deal_products')
+            .select('*')
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId);
+
+        if (productsError) {
+            throw new Error(`Failed to fetch original products: ${productsError?.message}`);
+        }
+
+        // 3. Prepare duplicated deal data
+        const { id, created_at, updated_at, ...baseDealData } = originalDeal;
+
+        const duplicatedDealPayload = {
+            ...baseDealData,
+            title: `Cópia de ${originalDeal.title}`,
+            owner_id: userId, // Current user becomes the owner of the copy
+            won_at: null,
+            lost_at: null,
+            loss_reason: null,
+            days_in_stage: 0,
+            organization_id: organizationId // Explicit SaaS Multitenant attribution
+            // Stage remains the same as requested, and other relation IDs remain untouched
+        };
+
+        const { data: newDeal, error: insertDealError } = await supabase
+            .from('deals')
+            .insert([duplicatedDealPayload])
+            .select()
+            .single();
+
+        if (insertDealError || !newDeal) {
+            throw new Error(`Failed to duplicate deal: ${insertDealError?.message}`);
+        }
+
+        // 4. Duplicate Products if any
+        if (originalProducts && originalProducts.length > 0) {
+            const duplicatedProductsPayload = originalProducts.map(p => {
+                const { id, created_at, updated_at, ...baseProductData } = p;
+                return {
+                    ...baseProductData,
+                    deal_id: newDeal.id, // Link to the newly duplicated deal
+                    organization_id: organizationId // Explicit SaaS Multitenant attribution
+                };
+            });
+
+            const { error: insertProductsError } = await supabase
+                .from('deal_products')
+                .insert(duplicatedProductsPayload);
+
+            if (insertProductsError) {
+                console.error('Failed to duplicate deal products:', insertProductsError);
+                // Return deal even if products fail to avoid complete block
+            }
+        }
+
+        return newDeal;
+    }
+
+    static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: any) {
+        const supabase = createAdminClient();
+
+        const payload = {
+            deal_id: dealId,
+            organization_id: organizationId,
+            product_id: productData.product_id || productData.id,
+            name: productData.name,
+            unit_price: productData.unit_price || productData.price || 0,
+            quantity: typeof productData.quantity === 'number' ? productData.quantity : 1,
+            cost: productData.cost || 0,
+            sku: productData.sku || '',
+            description: productData.description || '',
+            margin: productData.margin || 0,
+            manufacturer: productData.manufacturer || '',
+            category: productData.category || '',
+            subcategory: productData.subcategory || '',
+            is_bid: productData.is_bid || false,
+            is_usd: productData.is_usd || false,
+            usd_cost: productData.usd_cost || 0,
+            exchange_rate: productData.exchange_rate || 5.0,
+            billing_type: productData.billing_type || 'indirect',
+            distributor_id: productData.distributor_id || null,
+            distributor_cnpj: productData.distributor_cnpj || null
+        };
+
+        const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: any) {
+        const supabase = createAdminClient();
+        const { data, error } = await supabase
+            .from('deal_products')
+            .update(updates)
+            .eq('id', itemId)
+            .eq('organization_id', organizationId)
+            .select()
+            .single();
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async removeDealProduct(userId: string, itemId: string, organizationId: string) {
+        const supabase = createAdminClient();
+        const { error } = await supabase
+            .from('deal_products')
+            .delete()
+            .eq('id', itemId)
+            .eq('organization_id', organizationId);
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    static async bulkRemoveDealProducts(userId: string, itemIds: string[], organizationId: string) {
+        const supabase = createAdminClient();
+        const { error } = await supabase
+            .from('deal_products')
+            .delete()
+            .in('id', itemIds)
+            .eq('organization_id', organizationId);
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    static async reorderDealProducts(userId: string, organizationId: string, items: { id: string, display_order: number }[]) {
+        const supabase = createAdminClient();
+        try {
+            await Promise.all(items.map(item =>
+                supabase
+                    .from('deal_products')
+                    .update({ display_order: item.display_order })
+                    .eq('id', item.id)
+                    .eq('organization_id', organizationId)
+            ));
+            return true;
+        } catch (error) {
+            throw new Error('Falha ao reordenar alguns produtos');
+        }
+    }
+
+    static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]) {
+        const supabase = createAdminClient();
+
+        const isValidUUID = (id: any) =>
+            typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+        const potentialProductIds = products.map(p => p.product_id || p.external_id).filter(id => isValidUUID(id));
+        const validProductIds = new Set<string>();
+
+        if (potentialProductIds.length > 0) {
+            const { data: existingProducts, error: verifyError } = await supabase
+                .from('products')
+                .select('id')
+                .in('id', potentialProductIds)
+                .eq('organization_id', organizationId);
+            if (!verifyError && existingProducts) existingProducts.forEach(p => validProductIds.add(p.id));
+        }
+
+        const payload = products.map(p => {
+            const candidateId = p.product_id || p.external_id || p.id;
+            const finalProductId = (isValidUUID(candidateId) && validProductIds.has(candidateId)) ? candidateId : null;
+            const finalExternalId = p.external_id || (candidateId !== finalProductId && isValidUUID(candidateId) ? candidateId : null);
+            const unitPrice = typeof p.unit_price === 'number' ? p.unit_price : (parseFloat(String(p.unit_price || p.price || 0).replace(/[^0-9.-]+/g, "")) || 0);
+            const quantity = typeof p.quantity === 'number' ? p.quantity : (parseFloat(String(p.quantity || 1)) || 1);
+            const cost = typeof p.cost === 'number' ? p.cost : (parseFloat(String(p.cost || 0).replace(/[^0-9.-]+/g, "")) || 0);
+            const margin = typeof p.margin === 'number' ? p.margin : (parseFloat(String(p.margin || 0)) || 0);
+
+            return {
+                deal_id: dealId,
+                organization_id: organizationId,
+                product_id: finalProductId,
+                external_id: finalExternalId,
+                name: p.name || 'Produto Sem Nome',
+                unit_price: unitPrice,
+                quantity,
+                cost,
+                sku: p.sku || '',
+                description: typeof p.description === 'string' ? p.description : JSON.stringify(p.description || ''),
+                margin,
+                manufacturer: p.manufacturer || '',
+                category: p.category || '',
+                subcategory: p.subcategory || '',
+                distributor_id: isValidUUID(p.distributor_id) ? p.distributor_id : null,
+                is_bid: !!p.is_bid,
+                bid_number: p.bid_number || null,
+                bid_validity: p.bid_validity || null,
+                display_order: p.display_order || 999,
+                billing_type: p.billing_type || 'indirect',
+                distributor_cnpj: p.distributor_cnpj || null
+            };
+        });
+
+        const { data, error } = await supabase.from('deal_products').insert(payload).select();
+        if (error) throw new Error(`Database Error: ${error.message}`);
+        return data;
+    }
+
+    static async getOrCreateRoom(userId: string, dealId: string, organizationId: string) {
+        const supabase = createAdminClient();
+
+        // 1. Double check the deal belongs to the organization first (security)
+        const { data: deal, error: dealError } = await supabase
+            .from('deals')
+            .select('id')
+            .eq('id', dealId)
+            .eq('organization_id', organizationId)
+            .single();
+
+        if (dealError || !deal) {
+            console.error('Deal room access denied: deal not found or not in org', dealError);
+            return { error: 'Acesso negado ou oportunidade não encontrada' };
+        }
+
+        const { data: existing, error: fetchError } = await supabase
+            .from('deal_rooms')
+            .select('*')
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+
+        if (fetchError) {
+            console.error('Error fetching existing deal room:', fetchError);
+            return { error: `Erro ao buscar sala: ${fetchError.message}` };
+        }
+
+        if (existing) return { room: existing };
+
+        // 3. Try to insert with organization_id
+        const { data: newRoom, error: insertError } = await supabase
+            .from('deal_rooms')
+            .insert([{ deal_id: dealId, organization_id: organizationId }])
+            .select()
+            .single();
+
+        if (insertError) {
+            console.error('Error creating deal room:', insertError);
+            return { error: `Erro ao criar sala: ${insertError.message}` };
+        }
+
+        return { room: newRoom };
+    }
+}

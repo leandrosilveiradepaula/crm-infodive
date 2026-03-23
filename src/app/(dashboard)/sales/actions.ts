@@ -1,0 +1,312 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { SalesService } from '@/services/SalesService';
+import { requireSessionContext } from '@/lib/auth-server';
+import { DistributorOrderService } from '@/services/DistributorOrderService';
+import { DocumentService } from '@/services/DocumentService';
+import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
+import { createAdminClient } from '@/lib/supabase/admin';
+
+export async function getSalesOrders(dealId?: string) {
+    try {
+        const { organizationId } = await requireSessionContext();
+        const data = await SalesService.getSalesOrders(organizationId, dealId);
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('Error fetching sales orders:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function createSalesOrder(order: Partial<SalesOrder>, items: Partial<SalesOrderItem>[]) {
+    try {
+        const { organizationId } = await requireSessionContext();
+        const data = await SalesService.createSalesOrder(organizationId, order, items);
+        revalidatePath('/sales');
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('Error creating sales order:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>) {
+    try {
+        const { organizationId } = await requireSessionContext();
+        const data = await SalesService.updateSalesOrder(organizationId, id, updates);
+        revalidatePath('/sales');
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('Error updating sales order:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function deleteSalesOrder(id: string) {
+    try {
+        const { organizationId } = await requireSessionContext();
+        await SalesService.deleteSalesOrder(organizationId, id);
+        revalidatePath('/sales');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error deleting sales order:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateInstallmentStatusAction(installmentId: string, status: string) {
+    try {
+        const { userId, organizationId } = await requireSessionContext();
+        if (!userId || !organizationId) throw new Error('Unauthorized');
+
+        await SalesService.updateInstallmentStatus(organizationId, installmentId, status);
+        revalidatePath('/sales');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error updating installment status:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function processInvoiceAction(orderId: string, formData: FormData) {
+    try {
+        const { organizationId, userId } = await requireSessionContext();
+        const file = formData.get('file') as File;
+        const confirmSave = formData.get('confirmSave') === 'true';
+        if (!file) throw new Error('Arquivo não encontrado');
+
+        const supabase = createAdminClient();
+
+        // 1. Upload to Storage (Using 'invoices' bucket from migration)
+        const fileExt = file.name.split('.').pop()?.toLowerCase();
+        const fileName = `${organizationId}/invoices/${orderId}_${Date.now()}.${fileExt}`;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('documents')
+            .upload(fileName, arrayBuffer, {
+                contentType: file.type,
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error('Upload error details:', uploadError);
+            throw new Error(`Falha no upload: ${uploadError.message}`);
+        }
+
+        // 2. Extract Info
+        let extractedData: any = null;
+        if (fileExt === 'xml') {
+            const text = Buffer.from(arrayBuffer).toString('utf-8');
+            // Improved Regex for server-side too
+            const nNFMatch = text.match(/<nNF>(\d+)<\/nNF>/);
+            const dhEmiMatch = text.match(/<dhEmi>([^<|T]+)/);
+            const vNFMatch = text.match(/<vNF>(\d+\.\d+)<\/vNF>/);
+            const emitMatch = text.match(/<emit>[\s\S]*?<xNome>([^<]+)<\/xNome>/);
+
+            extractedData = {
+                number: nNFMatch ? nNFMatch[1] : '',
+                date: dhEmiMatch ? new Date(dhEmiMatch[1]).toLocaleDateString('pt-BR') : '',
+                total: vNFMatch ? parseFloat(vNFMatch[1]) : 0,
+                issuer: emitMatch ? emitMatch[1] : ''
+            };
+        } else if (fileExt === 'pdf') {
+            try {
+                // 1. Parse Access Key from filename (most reliable for Number/CNPJ)
+                const keyMatch = file.name.match(/\d{44}/);
+                let extractedNumber = 'Não encontrado';
+                let extractedCNPJ = '';
+
+                if (keyMatch) {
+                    const key = keyMatch[0];
+                    const rawCNPJ = key.substring(6, 20); // Pos 7-20 is CNPJ
+                    extractedCNPJ = rawCNPJ.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+                    extractedNumber = parseInt(key.substring(25, 34), 10).toString(); // Pos 26-34 is nNF
+                }
+
+                // 2. Parse text to find Date, Total Value and Name
+                let extractedTotal = 0;
+                let extractedDate = new Date().toLocaleDateString('pt-BR');
+                let extractedIssuer = extractedCNPJ ? `CNPJ Emitente: ${extractedCNPJ}` : 'Desconhecido';
+                let extractedBoletos: { dueDate: string, amount: number }[] = [];
+
+                try {
+                    const pdfParse = require('pdf-parse');
+                    const data = await pdfParse(Buffer.from(arrayBuffer));
+                    const text = data.text;
+
+                    // 1. Find Date (NFe Emission Date)
+                    const emissionMatch = text.match(/DATA DE EMISS.O[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i) ||
+                        text.match(/EMISSAO:\s*(\d{2}\/\d{2}\/\d{4})/i) ||
+                        text.match(/(?:^|\s)(\d{2}\/\d{2}\/\d{4})(?:\s|$)/);
+                    if (emissionMatch) {
+                        extractedDate = emissionMatch[1];
+                    }
+
+                    // 2. Look for Total Value
+                    const totalMatch = text.match(/VALOR TOTAL DA NOTA[\s\S]{0,150}?([\d\.,]{5,})/i) ||
+                        text.match(/VALOR TOTAL DOS PRODUTOS[\s\S]{0,150}?([\d\.,]{5,})/i) ||
+                        text.match(/R\$\s*([\d\.,]{5,})/i);
+
+                    if (totalMatch) {
+                        const cleanValue = totalMatch[1].replace(/[^\d,]/g, '').replace(',', '.');
+                        extractedTotal = parseFloat(cleanValue) || 0;
+                    }
+
+                    // 3. Issuer Name (usually extracted from CNPJ mapping or text heuristics)
+                    if (text.match(/INGRAM MICRO/i)) {
+                        extractedIssuer = 'INGRAM MICRO BRASIL LTDA';
+                    } else {
+                        const lines = text.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 5);
+                        if (lines.length > 0 && lines[0].length > 10) {
+                            if (!lines[0].toLowerCase().includes("danfe")) {
+                                extractedIssuer = lines[0].substring(0, 40);
+                            } else if (lines.length > 1) {
+                                extractedIssuer = lines[1].substring(0, 40);
+                            }
+                        }
+                    }
+
+                    // 4. Extract Boletos (specific to Ingram Micro embedded boletos)
+                    const blocks = text.split(/PAGAVEL EM QUALQUER BANCO ATE VENCIMENTO/i);
+                    for (let i = 1; i < blocks.length; i++) {
+                        const block = blocks[i];
+                        const dateMatch = block.match(/^(\d{2}\/\d{2}\/\d{4})/);
+                        const valMatch = block.match(/109R\$\s*([\d\.,]+)/);
+                        if (dateMatch && valMatch) {
+                            extractedBoletos.push({
+                                dueDate: dateMatch[1],
+                                amount: parseFloat(valMatch[1].replace(/[^\d,]/g, '').replace(',', '.'))
+                            });
+                        }
+                    }
+
+                } catch (pdfErr) {
+                    console.error('PDF Text Extraction failed, relying on filename key:', pdfErr);
+                }
+
+                extractedData = {
+                    number: extractedNumber,
+                    date: extractedDate,
+                    total: extractedTotal,
+                    issuer: extractedIssuer,
+                    boletos: extractedBoletos
+                };
+            } catch (err) {
+                console.error('PDF Extraction Error:', err);
+                // Fallback if completely fails
+                extractedData = {
+                    number: `PDF-${Math.floor(Math.random() * 10000)}`,
+                    date: new Date().toLocaleDateString('pt-BR'),
+                    total: 0,
+                    issuer: 'Erro na leitura do arquivo',
+                    boletos: []
+                };
+            }
+        }
+
+        // 3. Update Sales Order (ONLY if confirmSave is true)
+        if (confirmSave) {
+            const updates: any = {
+                status: 'nf_emitida',
+                invoice_url: fileName,
+                billed_at: new Date().toISOString()
+            };
+
+            if (extractedData?.number) updates.tax_invoice_number = extractedData.number;
+
+            await SalesService.updateSalesOrder(organizationId, orderId, updates);
+
+            if (extractedData?.boletos && extractedData.boletos.length > 0) {
+                await SalesService.createInstallments(organizationId, orderId, extractedData.boletos);
+            }
+
+            // 4. Register as Document
+            const { data: order } = await supabase.from('sales_orders').select('deal_id').eq('id', orderId).single();
+            if (order?.deal_id) {
+                await DocumentService.uploadDocument(userId, organizationId, 'deal', order.deal_id, {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    arrayBuffer
+                }, {
+                    category: 'outro',
+                    description: `Nota Fiscal do pedido ${orderId}`
+                });
+            }
+            revalidatePath('/sales');
+        }
+
+        return { success: true, extractedData, fileUrl: fileName };
+    } catch (error: any) {
+        console.error('Process Invoice Error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function convertDealToSalesOrdersAction(dealId: string, extraData?: any) {
+    try {
+        const { userId, organizationId } = await requireSessionContext();
+
+        // 1. Convert Deal to Sales Orders (Internal Records)
+        const result = await SalesService.convertDealToSalesOrders(userId, organizationId, dealId);
+
+        // 2. Automatically Generate and Save Distributor Excel Order
+        try {
+            const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(dealId, organizationId, extraData);
+
+            await DocumentService.uploadDocument(
+                userId,
+                organizationId,
+                'deal',
+                dealId,
+                {
+                    name: fileName,
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    size: buffer.length,
+                    arrayBuffer: buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer,
+                },
+                {
+                    category: 'outro',
+                    description: 'Pedido gerado automaticamente no fechamento.'
+                }
+            );
+        } catch (excelError) {
+            console.error('Failed to auto-generate Excel order:', excelError);
+            // Non-blocking for the transaction
+        }
+
+        revalidatePath('/sales');
+        revalidatePath('/pipeline');
+        return result;
+    } catch (error: any) {
+        console.error('Error converting deal to sales orders:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function downloadDistributorOrderAction(dealId: string, extraData?: any) {
+    try {
+        const { organizationId } = await requireSessionContext();
+        const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(dealId, organizationId, extraData);
+
+        // Convert Buffer to base64 for transfer
+        const base64 = buffer.toString('base64');
+        return { success: true, base64, fileName };
+    } catch (error: any) {
+        console.error('Error in downloadDistributorOrderAction:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getAllInstallmentsAction() {
+    try {
+        const { organizationId } = await requireSessionContext();
+        const data = await SalesService.getAllInstallments(organizationId);
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('Error fetching all installments:', error);
+        return { success: false, error: error.message };
+    }
+}

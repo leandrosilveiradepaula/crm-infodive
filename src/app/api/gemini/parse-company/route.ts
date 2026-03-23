@@ -1,0 +1,93 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextResponse } from 'next/server';
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
+export async function POST(req: Request) {
+    try {
+        const { text, image } = await req.json();
+
+        if (!text && !image) {
+            return NextResponse.json({ error: 'Text or image is required' }, { status: 400 });
+        }
+
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+        const promptParts: any[] = [];
+
+        if (image) {
+            const matches = image.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+
+            if (matches && matches.length === 3) {
+                promptParts.push({
+                    inlineData: {
+                        data: matches[2],
+                        mimeType: matches[1]
+                    }
+                });
+                promptParts.push('Analise este documento/imagem de empresa (Cartão CNPJ, Cartão de Visitas, etc).');
+            } else {
+                return NextResponse.json({ error: 'Invalid image format' }, { status: 400 });
+            }
+        }
+
+        if (text) {
+            promptParts.push(`Texto extraído/fornecido:\n"""\n${text}\n"""`);
+        }
+
+        promptParts.push(`
+        Extraia os dados da empresa em formato JSON estrito.
+        Não inclua markdown, apenas o JSON.
+        
+        Campos requeridos (retorne string vazia "" se não encontrar):
+        - name (Razão Social ou Nome Fantasia principal)
+        - cnpj (Formato XX.XXX.XXX/0001-XX)
+        - ie (Inscrição Estadual)
+        - zip (CEP - Formato XXXXX-XXX)
+        - street (Logradouro)
+        - number (Número)
+        - complement (Complemento)
+        - neighborhood (Bairro)
+        - city (Cidade)
+        - state (UF - Sigla)
+        - email
+        - phone (Telefone principal)
+        - website
+        
+        Exemplo de saída:
+        {
+            "name": "Empresa Exemplo Ltda",
+            "cnpj": "12.345.678/0001-90",
+            "ie": "123.456.789.111",
+            "zip": "01000-000",
+            "street": "Av. Paulista",
+            "number": "1000",
+            "complement": "Sala 10",
+            "neighborhood": "Bela Vista",
+            "city": "São Paulo",
+            "state": "SP",
+            "email": "contato@empresa.com",
+            "phone": "(11) 3000-0000",
+            "website": "www.empresa.com"
+        }
+        `);
+
+        const result = await model.generateContent(promptParts);
+        const response = await result.response;
+        const responseText = response.text();
+
+        const jsonString = responseText.replace(/```json\n|\n```/g, '').trim();
+
+        try {
+            const data = JSON.parse(jsonString);
+            return NextResponse.json({ data });
+        } catch (e) {
+            console.error('Erro ao fazer parse do JSON:', responseText);
+            return NextResponse.json({ error: 'Falha ao processar resposta da IA' }, { status: 500 });
+        }
+
+    } catch (error: any) {
+        console.error('Error parsing company:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
+}
