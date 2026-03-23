@@ -12,9 +12,13 @@ interface ProposalInvestmentPageProps {
     themeAccent?: string;
 }
 
-export function ProposalInvestmentPage({ deal, distributors = [], config, billingOverrides = {}, themePrimary, themeAccent }: ProposalInvestmentPageProps) {
+export function ProposalInvestmentPage({ deal, distributors = [], config, billingOverrides = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalInvestmentPageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '293mm';
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -80,11 +84,12 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
     const hasOptionals = optionalProducts.length > 0;
 
     // Chunk optional products (Top-level blocks)
-    // Max 3 per page to avoid overflow since they can have children
+    // Max 3 per page (or 2 in landscape) to avoid overflow since they can have children
     const topLevelOptionals = optionalProducts.filter(p => !p.parent_id || !optionalProducts.some(op => op.id === p.parent_id));
+    const optionalsPerPage = isLandscape ? 2 : 3;
     const optionalChunks: any[][] = [];
-    for (let i = 0; i < topLevelOptionals.length; i += 3) {
-        optionalChunks.push(topLevelOptionals.slice(i, i + 3));
+    for (let i = 0; i < topLevelOptionals.length; i += optionalsPerPage) {
+        optionalChunks.push(topLevelOptionals.slice(i, i + optionalsPerPage));
     }
 
     const totalOptionalPages = optionalChunks.length;
@@ -96,8 +101,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                 className="proposal-investment-page"
                 data-proposal-page="true"
                 style={{
-                    width: '210mm',
-                    minHeight: '293mm',
+                    width: width,
+                    minHeight: height,
                     backgroundColor: '#ffffff',
                     display: 'flex',
                     flexDirection: 'column',
@@ -105,13 +110,13 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     fontFamily: "'Inter', system-ui, sans-serif",
                     color: primaryColor,
                     marginBottom: '40px',
-                    paddingBottom: '40px'
+                    paddingBottom: isLandscape ? '20px' : '40px'
                 }}
             >
                 <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
 
-                <div style={{ padding: '40px 80px 20px 80px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                <div style={{ padding: isLandscape ? '25px 80px 15px 80px' : '40px 80px 20px 80px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
                         <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                     </div>
                     <h1 style={{ fontSize: '32px', fontWeight: '800', color: primaryColor, marginBottom: '8px', letterSpacing: '-1px' }}>
@@ -181,8 +186,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     className="proposal-investment-page"
                     data-proposal-page="true"
                     style={{
-                        width: '210mm',
-                        height: '293mm',
+                        width: width,
+                        height: height,
                         backgroundColor: '#ffffff',
                         display: 'flex',
                         flexDirection: 'column',
@@ -194,8 +199,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     }}
                 >
                     <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
-                    <div style={{ padding: '40px 80px 10px 80px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                    <div style={{ padding: isLandscape ? '25px 80px 10px 80px' : '40px 80px 10px 80px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                         </div>
                         <h2 style={{ fontSize: '24px', fontWeight: '800', color: primaryColor, marginBottom: '8px' }}>
@@ -242,8 +247,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     className="proposal-investment-page"
                     data-proposal-page="true"
                     style={{
-                        width: '210mm',
-                        height: '293mm',
+                        width: width,
+                        height: height,
                         backgroundColor: '#ffffff',
                         display: 'flex',
                         flexDirection: 'column',
@@ -255,8 +260,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     }}
                 >
                     <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
-                    <div style={{ padding: '60px 80px 20px 80px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+                    <div style={{ padding: isLandscape ? '30px 80px 20px 80px' : '60px 80px 20px 80px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '30px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                         </div>
                         <h2 style={{ fontSize: '24px', fontWeight: '800', color: primaryColor, marginBottom: '8px' }}>Condições de <span style={{ color: accentColor }}>Pagamento</span></h2>

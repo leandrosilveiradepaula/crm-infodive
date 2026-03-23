@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { type SalesOrder } from '../../hooks/useSalesOrders';
-import { getSalesOrders } from '@/app/(dashboard)/sales/actions';
+import { getSalesOrders, getSignedUrlForRawPath } from '@/app/(dashboard)/sales/actions';
+import { toast } from 'sonner';
 import {
     Package,
     Calendar,
@@ -85,15 +86,15 @@ export const SalesOrderList: React.FC = () => {
         <div className="h-full flex flex-col bg-background text-foreground p-6 overflow-hidden">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                    <h1 className="text-3xl font-bold text-foreground">
                         Pedidos de Venda
                     </h1>
                     <p className="text-muted-foreground mt-1">Gestão de entregas e faturamento</p>
                 </div>
                 <div className="flex gap-3">
                     <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
-                        <div className="p-2 bg-blue-500/20 rounded-lg">
-                            <Clock className="h-5 w-5 text-blue-500" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <Clock className="h-5 w-5 text-primary" />
                         </div>
                         <div>
                             <p className="text-xs text-muted-foreground uppercase">Pendentes</p>
@@ -135,7 +136,7 @@ export const SalesOrderList: React.FC = () => {
                         placeholder="Buscar por cliente, deal ou ID..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
+                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
                     />
                 </div>
                 <div className="relative min-w-[200px]">
@@ -143,7 +144,7 @@ export const SalesOrderList: React.FC = () => {
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none font-medium text-muted-foreground"
+                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none font-medium text-muted-foreground"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="pedido_gerado">Pedido Gerado</option>
@@ -198,7 +199,7 @@ export const SalesOrderList: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-blue-500 border-b border-transparent group-hover:border-blue-500/50 inline-block transition-colors">
+                                        <div className="text-sm font-medium text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors">
                                             {order.deal?.customer?.name || 'Cliente N/A'}
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate max-w-[250px]">
@@ -217,16 +218,24 @@ export const SalesOrderList: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {order.invoice_url ? (
-                                            <a
-                                                href={order.invoice_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={e => e.stopPropagation()}
-                                                className="text-blue-500 hover:text-blue-400 flex items-center gap-1 text-sm transition-colors"
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    const toastId = toast.loading('Gerando link seguro...');
+                                                    try {
+                                                        const signedUrl = await getSignedUrlForRawPath(order.invoice_url!);
+                                                        toast.dismiss(toastId);
+                                                        window.open(signedUrl, '_blank');
+                                                    } catch (err: any) {
+                                                        toast.dismiss(toastId);
+                                                        toast.error(err.message || 'Erro ao abrir arquivo');
+                                                    }
+                                                }}
+                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm transition-colors focus:outline-none"
                                             >
                                                 <FileText className="h-4 w-4" />
                                                 Visualizar
-                                            </a>
+                                            </button>
                                         ) : (
                                             <span className="text-xs text-muted-foreground italic">Pendente</span>
                                         )}

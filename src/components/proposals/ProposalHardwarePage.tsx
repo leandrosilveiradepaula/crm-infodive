@@ -79,9 +79,13 @@ function TechnicalSummaryGrid({ specs, primaryColor }: { specs: Array<{ label: s
 
 type RenderItem = { type: 'header'; label: string } | { type: 'product'; product: any } | { type: 'grid'; specs: Array<{ label: string; value: string }> };
 
-export function ProposalHardwarePage({ deal, themePrimary, themeAccent }: ProposalHardwarePageProps) {
+export function ProposalHardwarePage({ deal, themePrimary, themeAccent, layout = 'portrait' }: ProposalHardwarePageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '293mm';
 
     // 1. Filter out completely irrelevant products and deduplicate by name to match PDF
     const hardwareProducts = deal.deal_products?.filter(p =>
@@ -145,8 +149,8 @@ export function ProposalHardwarePage({ deal, themePrimary, themeAccent }: Propos
 
     // 5. Chunk items into pages
     // We assign weights to items to know when to break the page
-    // Headers cost 0.5, grid costs 1.5, product costs 1. Max capacity ~ 3 per page.
-    const MAX_PAGE_CAPACITY = 3;
+    // Headers cost 0.5, grid costs 1.5, product costs 1. Max capacity ~ 3 per page (or 2 for landscape).
+    const MAX_PAGE_CAPACITY = isLandscape ? 2 : 3;
     const pages: RenderItem[][] = [];
     let currentPage: RenderItem[] = [];
     let currentCapacity = 0;
@@ -204,15 +208,15 @@ export function ProposalHardwarePage({ deal, themePrimary, themeAccent }: Propos
                     className="proposal-hardware-page"
                     data-proposal-page="true"
                     style={{
-                        width: '210mm',
-                        height: '293mm',
+                        width: width,
+                        height: height,
                         backgroundColor: '#ffffff',
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
                         overflow: 'hidden',
                         fontFamily: "'Inter', system-ui, sans-serif",
-                        padding: '40px 60px',
+                        padding: isLandscape ? '20px 60px' : '40px 60px',
                         color: primaryColor,
                         marginBottom: chunkIndex < pages.length - 1 ? '30px' : 0,
                         pageBreakAfter: 'always'
@@ -229,8 +233,8 @@ export function ProposalHardwarePage({ deal, themePrimary, themeAccent }: Propos
                     }} />
 
                     {/* Standardized Header Section */}
-                    <div style={{ marginBottom: '25px', position: 'relative' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+                    <div style={{ marginBottom: isLandscape ? '15px' : '25px', position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '10px' : '20px' }}>
                             <img
                                 src="/assets/logo-infodive.png"
                                 alt="Infodive"

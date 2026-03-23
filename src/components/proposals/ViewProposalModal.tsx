@@ -450,10 +450,10 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                     </Tabs>
                 </div>
 
-                {/* Hidden Render Container for PDF */}
+                {/* Hidden Render Container for PDF / PPT */}
                 {
-                    generatingPdf && (
-                        <div className="fixed left-[-9999px] top-0 overflow-hidden">
+                    (generatingPdf || generatingPpt) && (
+                        <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
                             <div ref={coverRef}>
                                 <ProposalCoverPage
                                     dealTitle={pseudoDeal.title}
@@ -462,6 +462,8 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     clientLogo={config.clientLogo}
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
+                                    hideValues={generatingPpt}
                                 />
                             </div>
 
@@ -469,6 +471,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                 <ProposalConfidentialityPage
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
 
@@ -478,6 +481,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     aiSummary={aiSummary}
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
 
@@ -486,6 +490,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     deal={pseudoDeal}
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
 
@@ -494,6 +499,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     deal={pseudoDeal}
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
 
@@ -504,6 +510,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     config={config}
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
 
@@ -511,6 +518,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                 <ProposalDifferentialsPage
                                     themePrimary={orgTheme.theme_primary || undefined}
                                     themeAccent={orgTheme.theme_accent || undefined}
+                                    layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
                             </div>
                         </div>

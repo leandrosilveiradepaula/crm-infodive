@@ -314,6 +314,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
             company_name: deal.company,
             createdAt: new Date().toISOString(),
             content: {
+                activeSections: activeSections.map(s => s.id),
                 config: state.config,
                 editableTexts: state.editableTexts
             }
@@ -774,7 +775,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
 
             {/* Hidden Render Container for PPT */}
             {generatingPpt && (
-                <div className="fixed left-[-9999px] top-0 overflow-hidden">
+                <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
                     <div ref={coverRef}>
                         <ProposalCoverPage
                             dealTitle={previewDeal.title}
@@ -783,6 +784,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             clientLogo={state.config.clientLogo}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
+                            hideValues={true}
                         />
                     </div>
 
@@ -790,6 +793,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         <ProposalConfidentialityPage
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
 
@@ -799,6 +803,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             aiSummary={state.aiSummary}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
 
@@ -807,6 +812,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             deal={previewDeal}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
 
@@ -815,6 +821,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             deal={previewDeal}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
 
@@ -825,6 +832,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             config={state.config as any}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
 
@@ -832,6 +840,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         <ProposalDifferentialsPage
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
+                            layout="landscape"
                         />
                     </div>
                 </div>

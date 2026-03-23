@@ -11,9 +11,13 @@ interface ProposalSoftwarePageProps {
     themeAccent?: string;
 }
 
-export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, themePrimary, themeAccent }: ProposalSoftwarePageProps) {
+export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, themePrimary, themeAccent, layout = 'portrait' }: ProposalSoftwarePageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '293mm';
     // Filter and deduplicate software products by name to avoid repeating items in listing
     const rawSoftwareProducts = deal.deal_products?.filter(p => isSoftware(p) && p.is_visible_on_proposal !== false) || [];
     const softwareProducts = rawSoftwareProducts.filter((product, index, self) =>
@@ -33,8 +37,8 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, t
 
     // Pagination logic for "Additional Software"
     const additionalItems = softwareProducts.filter(p => p.id !== mainSoftware?.id);
-    const firstPageLimit = 8;
-    const subsequentPageLimit = 20;
+    const firstPageLimit = isLandscape ? 4 : 8;
+    const subsequentPageLimit = isLandscape ? 12 : 20;
 
     const firstPageItems = additionalItems.slice(0, firstPageLimit);
     const remainingItems = additionalItems.slice(firstPageLimit);
@@ -62,15 +66,15 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, t
                 className="proposal-software-page"
                 data-proposal-page="true"
                 style={{
-                    width: '210mm',
-                    height: '293mm',
+                    width: width,
+                    height: height,
                     backgroundColor: '#ffffff',
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
                     overflow: 'hidden',
                     fontFamily: "'Inter', system-ui, sans-serif",
-                    padding: '60px 80px',
+                    padding: isLandscape ? '30px 60px' : '60px 80px',
                     color: primaryColor,
                     marginBottom: totalPages > 1 ? '40px' : 0
                 }}
@@ -85,8 +89,8 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, t
                 }} />
 
                 {/* Header */}
-                <div style={{ marginBottom: '50px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px' }}>
+                <div style={{ marginBottom: isLandscape ? '25px' : '50px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '30px' }}>
                         <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                     </div>
                     <h1 style={{ fontSize: '32px', fontWeight: '800', color: primaryColor, marginBottom: '8px', letterSpacing: '-1px' }}>
@@ -105,10 +109,10 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, t
                 />
 
                 {/* Benefits Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: isLandscape ? '15px' : '30px' }}>
                     {tiles.map((tile, idx) => (
                         <div key={idx} style={{
-                            padding: '25px',
+                            padding: isLandscape ? '15px' : '25px',
                             backgroundColor: idx === 0 ? '#f0f9ff' : idx === 1 ? '#fef2f2' : '#f0fdf4',
                             borderRadius: '8px',
                             textAlign: 'center',
@@ -147,22 +151,22 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, t
                     className="proposal-software-page"
                     data-proposal-page="true"
                     style={{
-                        width: '210mm',
-                        height: '293mm',
+                        width: width,
+                        height: height,
                         backgroundColor: '#ffffff',
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
                         overflow: 'hidden',
                         fontFamily: "'Inter', system-ui, sans-serif",
-                        padding: '60px 80px',
+                        padding: isLandscape ? '30px 60px' : '60px 80px',
                         color: primaryColor,
                         marginBottom: index < extraChunks.length - 1 ? '40px' : 0
                     }}
                 >
                     <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
-                    <div style={{ marginBottom: '50px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+                    <div style={{ marginBottom: isLandscape ? '25px' : '50px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '20px' : '40px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                         </div>
                         <h1 style={{ fontSize: '32px', fontWeight: '800', color: primaryColor, marginBottom: '8px', letterSpacing: '-1px' }}>

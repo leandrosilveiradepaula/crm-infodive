@@ -33,6 +33,12 @@ export function useProposalPdf() {
             const width = pdf.internal.pageSize.getWidth();
             const height = pdf.internal.pageSize.getHeight();
             const config = proposal.content.config || {};
+            const activeSections = proposal.content.activeSections || [];
+            
+            const isSectionActive = (id: string, legacyFlag?: boolean) => {
+                if (activeSections.length > 0) return activeSections.includes(id);
+                return !!legacyFlag;
+            };
 
             let pageAdded = false;
 
@@ -67,13 +73,13 @@ export function useProposalPdf() {
 
             const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef } = refs;
 
-            if (config.includeCover && coverRef.current) await processPage(coverRef, 'cover');
-            if (config.includeConfidentiality && confidentialityRef.current) await processPage(confidentialityRef, 'confidentiality');
-            if (config.includeOverview && overviewRef.current) await processPage(overviewRef, 'overview');
-            if (config.includeDifferentials && differentialsRef.current) await processPage(differentialsRef, 'differentials');
-            if (config.includeHardware && hardwareRef.current) await processPage(hardwareRef, 'hardware');
-            if (config.includeSoftware && softwareRef.current) await processPage(softwareRef, 'software');
-            if (config.includeInvestment && investmentRef.current) await processPage(investmentRef, 'investment');
+            if (isSectionActive('cover', config.includeCover) && coverRef.current) await processPage(coverRef, 'cover');
+            if (isSectionActive('confidentiality', config.includeConfidentiality) && confidentialityRef.current) await processPage(confidentialityRef, 'confidentiality');
+            if (isSectionActive('overview', config.includeOverview) && overviewRef.current) await processPage(overviewRef, 'overview');
+            if (isSectionActive('differentials', config.includeDifferentials) && differentialsRef.current) await processPage(differentialsRef, 'differentials');
+            if (isSectionActive('hardware', config.includeHardware) && hardwareRef.current) await processPage(hardwareRef, 'hardware');
+            if (isSectionActive('software', config.includeSoftware) && softwareRef.current) await processPage(softwareRef, 'software');
+            if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processPage(investmentRef, 'investment');
 
             const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
             pdf.save(filename);

@@ -22,11 +22,15 @@ export interface SalesOrder {
     created_by: string;
     items?: SalesOrderItem[];
     installments?: SalesOrderInstallment[];
+    commissions?: any[];
     deal?: {
         title: string;
         customer?: {
             name: string;
         };
+    };
+    user?: {
+        name: string;
     };
 }
 

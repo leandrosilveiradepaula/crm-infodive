@@ -5,6 +5,7 @@ import { SalesService } from '@/services/SalesService';
 import { requireSessionContext } from '@/lib/auth-server';
 import { DistributorOrderService } from '@/services/DistributorOrderService';
 import { DocumentService } from '@/services/DocumentService';
+import type { DocumentCategory } from '@/types/document';
 import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
 import { createAdminClient } from '@/lib/supabase/admin';
 
@@ -310,3 +311,86 @@ export async function getAllInstallmentsAction() {
         return { success: false, error: error.message };
     }
 }
+
+// ============================================================
+// Sales Order Documents (via deal entity — multitenant safe)
+// organizationId is ALWAYS derived from the server session.
+// ============================================================
+
+/**
+ * Fetch all documents linked to the deal that owns this sales order.
+ * dealId comes from the client, but access is validated via organizationId.
+ */
+export async function getSalesOrderDocuments(dealId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    return await DocumentService.getDocuments(userId, organizationId, 'deal', dealId);
+}
+
+/**
+ * Upload a document for a sales order (stored under the deal entity).
+ */
+export async function uploadSalesOrderDocument(dealId: string, formData: FormData) {
+    const { userId, organizationId } = await requireSessionContext();
+
+    const file = formData.get('file') as File | null;
+    if (!file) throw new Error('Nenhum arquivo enviado.');
+
+    const category = (formData.get('category') as DocumentCategory) || 'outro';
+    const description = (formData.get('description') as string) || '';
+    const arrayBuffer = await file.arrayBuffer();
+
+    const result = await DocumentService.uploadDocument(
+        userId,
+        organizationId,
+        'deal',
+        dealId,
+        { name: file.name, type: file.type, size: file.size, arrayBuffer },
+        { category, description }
+    );
+
+    revalidatePath('/sales');
+    return result;
+}
+
+/**
+ * Generate a short-lived signed URL for a sales-related document.
+ */
+export async function getSalesDocumentSignedUrl(documentId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    return await DocumentService.getSignedUrl(userId, organizationId, documentId);
+}
+
+/**
+ * Delete a document linked to a sales order.
+ */
+export async function deleteSalesDocument(documentId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    await DocumentService.deleteDocument(userId, organizationId, documentId);
+    revalidatePath('/sales');
+    return true;
+}
+
+/**
+ * Generate a signed URL for a raw storage path (like invoice_url).
+ * Safely validates that the path belongs to the current organization.
+ */
+export async function getSignedUrlForRawPath(filePath: string) {
+    const { organizationId } = await requireSessionContext();
+    
+    // Security Check: Ensure the path belongs to the user's organization
+    if (!filePath.startsWith(`${organizationId}/`)) {
+        throw new Error('Acesso negado: o arquivo não pertence à sua organização.');
+    }
+
+    const supabase = createAdminClient();
+    const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(filePath, 300);
+
+    if (error || !data?.signedUrl) {
+        throw new Error('Erro ao gerar link seguro para o arquivo.');
+    }
+
+    return data.signedUrl;
+}
+

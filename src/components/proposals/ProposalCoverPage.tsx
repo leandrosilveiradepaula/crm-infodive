@@ -9,7 +9,9 @@ export function ProposalCoverPage({
     mainTitle,
     proposalNumber,
     themePrimary,
-    themeAccent
+    themeAccent,
+    layout = 'portrait',
+    hideValues = false
 }: {
     dealTitle: string;
     companyName: string;
@@ -20,15 +22,22 @@ export function ProposalCoverPage({
     mainTitle?: string;
     themePrimary?: string;
     themeAccent?: string;
+    layout?: 'portrait' | 'landscape';
+    hideValues?: boolean;
 }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '297mm';
+
     return (
         <div
             id="proposal-cover-page"
             style={{
-                width: '210mm',
-                height: '297mm',
+                width: width,
+                height: height,
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 position: 'relative',
@@ -49,12 +58,12 @@ export function ProposalCoverPage({
             {/* Left Side - Information */}
             <div style={{
                 width: '65%',
-                padding: '60px 50px',
+                padding: isLandscape ? '40px 50px' : '60px 50px',
                 display: 'flex',
                 flexDirection: 'column'
             }}>
                 {/* Logos */}
-                <div style={{ marginBottom: '80px', display: 'flex', alignItems: 'center', gap: '24px' }}>
+                <div style={{ marginBottom: isLandscape ? '40px' : '80px', display: 'flex', alignItems: 'center', gap: '24px' }}>
                     <img
                         src="/assets/logo-infodive.png"
                         alt="Infodive Logo"
@@ -82,10 +91,11 @@ export function ProposalCoverPage({
 
                 {/* Title */}
                 <h1 style={{
-                    fontSize: '36px',
+                    fontSize: isLandscape ? '30px' : '36px',
                     fontWeight: '700',
                     color: '#000000',
-                    marginBottom: '24px',
+                    opacity: hideValues ? 0 : 1,
+                    marginBottom: isLandscape ? '16px' : '24px',
                     lineHeight: '1.3',
                     letterSpacing: '-0.02em'
                 }}>
@@ -96,18 +106,23 @@ export function ProposalCoverPage({
                 <div style={{
                     fontSize: '16px',
                     color: accentColor,
-                    marginBottom: '100px',
                     fontWeight: '600'
                 }}>
                     Infodive IT - Soluções Inteligentes
                 </div>
+            </div>
 
-                {/* Metadata Table */}
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0'
-                }}>
+            {/* Metadata Table (Absolutely Positioned to prevent layout drift) */}
+            <div style={{
+                position: 'absolute',
+                top: isLandscape ? '330px' : '520px',
+                left: '50px',
+                width: 'calc(65% - 100px)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0',
+                zIndex: 20
+            }}>
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: '140px 1fr',
@@ -117,7 +132,7 @@ export function ProposalCoverPage({
                         <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
                             Projeto
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b' }}>
+                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
                             {dealTitle}
                         </div>
                     </div>
@@ -131,7 +146,7 @@ export function ProposalCoverPage({
                         <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
                             Cliente
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b' }}>
+                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
                             {companyName}
                         </div>
                     </div>
@@ -159,7 +174,7 @@ export function ProposalCoverPage({
                         <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
                             Data
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b' }}>
+                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
                             {date}
                         </div>
                     </div>
@@ -174,13 +189,12 @@ export function ProposalCoverPage({
                             <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
                                 Nº Proposta
                             </div>
-                            <div style={{ fontSize: '14px', color: accentColor, fontWeight: '700' }}>
+                            <div style={{ fontSize: '14px', color: accentColor, fontWeight: '700', opacity: hideValues ? 0 : 1 }}>
                                 {proposalNumber}
                             </div>
                         </div>
                     )}
                 </div>
-            </div>
 
             {/* Right Side - Data Center Image */}
             <div style={{

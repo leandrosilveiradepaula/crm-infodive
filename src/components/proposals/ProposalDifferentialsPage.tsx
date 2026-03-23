@@ -5,9 +5,13 @@ interface ProposalDifferentialsPageProps {
     themeAccent?: string;
 }
 
-export function ProposalDifferentialsPage({ themePrimary, themeAccent }: ProposalDifferentialsPageProps) {
+export function ProposalDifferentialsPage({ themePrimary, themeAccent, layout = 'portrait' }: ProposalDifferentialsPageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '297mm';
     const differentials = [
         {
             title: 'Expertise Técnica Comprovada',
@@ -30,15 +34,15 @@ export function ProposalDifferentialsPage({ themePrimary, themeAccent }: Proposa
         <div
             className="proposal-differentials-page"
             style={{
-                width: '210mm',
-                height: '297mm',
+                width: width,
+                height: height,
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Inter', system-ui, sans-serif",
-                padding: '60px 80px',
+                padding: isLandscape ? '40px 60px' : '60px 80px',
                 color: primaryColor
             }}
         >
@@ -53,8 +57,8 @@ export function ProposalDifferentialsPage({ themePrimary, themeAccent }: Proposa
             }} />
 
             {/* Standardized Header */}
-            <div style={{ marginBottom: '50px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+            <div style={{ marginBottom: isLandscape ? '30px' : '50px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '20px' : '40px' }}>
                     <img
                         src="/assets/logo-infodive.png"
                         alt="Infodive"
@@ -89,15 +93,15 @@ export function ProposalDifferentialsPage({ themePrimary, themeAccent }: Proposa
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '30px'
+                gap: isLandscape ? '15px' : '30px'
             }}>
                 {differentials.map((differential, index) => (
                     <div
                         key={index}
                         style={{
                             display: 'flex',
-                            gap: '30px',
-                            padding: '35px',
+                            gap: isLandscape ? '20px' : '30px',
+                            padding: isLandscape ? '20px' : '35px',
                             backgroundColor: index === 0 ? '#f0f9ff' : index === 1 ? '#fef2f2' : '#f0fdf4',
                             borderRadius: '12px',
                             border: `2px solid ${index === 0 ? primaryColor : index === 1 ? accentColor : '#16a34a'}`,
@@ -138,8 +142,8 @@ export function ProposalDifferentialsPage({ themePrimary, themeAccent }: Proposa
 
             {/* Bottom Banner */}
             <div style={{
-                marginTop: '40px',
-                padding: '30px',
+                marginTop: isLandscape ? '20px' : '40px',
+                padding: isLandscape ? '20px' : '30px',
                 backgroundColor: primaryColor,
                 borderRadius: '12px',
                 textAlign: 'center'

@@ -35,6 +35,14 @@ export default function SalesList() {
         return await updateInstallment(id, status);
     };
 
+    const handleCommissionUpdate = async (id: string, status: string) => {
+        const updated = await updateSalesOrder(id, { commission_status: status as any });
+        if (updated) {
+            setOrders(prev => prev.map(o => o.id === id ? { ...o, commission_status: status as any } : o));
+        }
+        return !!updated;
+    };
+
     const navigateToOrders = (filter?: string) => {
         setOrdersFilter(filter || null);
         setActiveTab('orders');
@@ -99,7 +107,7 @@ export default function SalesList() {
             <TabsContent value="commissions">
                 <CommissionsTab
                     orders={orders}
-                    onStatusUpdate={handleStatusUpdate}
+                    onUpdateStatus={handleCommissionUpdate}
                 />
             </TabsContent>
         </Tabs>

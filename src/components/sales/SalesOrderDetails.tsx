@@ -16,7 +16,7 @@ import {
     Building2,
     Save
 } from 'lucide-react';
-import { processInvoiceAction } from '@/app/(dashboard)/sales/actions';
+import { processInvoiceAction, getSalesDocumentSignedUrl, getSignedUrlForRawPath } from '@/app/(dashboard)/sales/actions';
 
 interface SalesOrderDetailsProps {
     order: SalesOrder;
@@ -28,6 +28,19 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
     const [loading, setLoading] = useState(false);
     const [invoiceUrl, setInvoiceUrl] = useState(order.invoice_url || '');
     const [uploading, setUploading] = useState(false);
+    const [openingInvoice, setOpeningInvoice] = useState(false);
+
+    const handleOpenInvoice = async (docPath: string) => {
+        setOpeningInvoice(true);
+        try {
+            const signedUrl = await getSignedUrlForRawPath(docPath);
+            window.open(signedUrl, '_blank');
+        } catch (err: any) {
+            alert(err.message || 'Não foi possível abrir o arquivo. Use a aba de Documentos.');
+        } finally {
+            setOpeningInvoice(false);
+        }
+    };
 
     const steps = [
         { id: 'pedido_gerado', label: 'Pedido Gerado', icon: Clock },
@@ -99,8 +112,8 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-500/20 rounded-xl">
-                            <Package className="h-6 w-6 text-blue-500" />
+                        <div className="p-3 bg-primary/10 rounded-xl">
+                            <Package className="h-6 w-6 text-primary" />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h2>
@@ -159,7 +172,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
                         <div>
                             <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-blue-500" />
+                                <FileText className="h-5 w-5 text-primary" />
                                 Nota Fiscal e Documentos
                             </h3>
                             <div className="bg-muted/10 rounded-xl border border-border p-6">
@@ -171,20 +184,20 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                             value={invoiceUrl}
                                             onChange={e => setInvoiceUrl(e.target.value)}
                                             placeholder="https://..."
-                                            className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:ring-2 focus:ring-blue-500/50 outline-none"
+                                            className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
                                         />
                                         {invoiceUrl !== order.invoice_url && (
                                             <button
                                                 onClick={() => handleStatusChange(order.status)} // Just save
                                                 disabled={loading}
-                                                className="px-4 py-2 bg-primary hover:bg-blue-500 text-white rounded-lg transition-colors"
+                                                className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
                                             >
                                                 <Save className="h-5 w-5" />
                                             </button>
                                         )}
                                     </div>
 
-                                    <div className="relative border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-blue-500/50 transition-colors group">
+                                    <div className="relative border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors group">
                                         <input
                                             type="file"
                                             accept=".pdf,.xml"
@@ -192,7 +205,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                             onChange={handleFileUpload}
                                             disabled={uploading}
                                         />
-                                        <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-blue-500 transition-colors">
+                                        <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
                                             <Upload className={`h-8 w-8 ${uploading ? 'animate-bounce' : ''}`} />
                                             <span className="text-sm font-medium">
                                                 {uploading ? 'Enviando...' : 'Clique ou arraste o arquivo da NF-e aqui'}
@@ -201,14 +214,13 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                     </div>
 
                                     {order.invoice_url && (
-                                        <a
-                                            href={order.invoice_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block mt-2 text-xs text-blue-500 hover:text-blue-400 underline text-center"
+                                        <button
+                                            onClick={() => handleOpenInvoice(order.invoice_url!)}
+                                            disabled={openingInvoice}
+                                            className="block mt-2 text-xs text-primary hover:text-primary/80 underline text-center w-full disabled:opacity-50"
                                         >
-                                            Visualizar Nota Fiscal Atual
-                                        </a>
+                                            {openingInvoice ? 'Abrindo...' : 'Visualizar Nota Fiscal Atual'}
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -244,7 +256,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                                     {step.label}
                                                 </h4>
                                                 {isCurrent && (
-                                                    <span className="text-[10px] uppercase font-bold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
+                                                    <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                                         Atual
                                                     </span>
                                                 )}

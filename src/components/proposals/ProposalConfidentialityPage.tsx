@@ -2,19 +2,25 @@ import React from 'react';
 
 export function ProposalConfidentialityPage({
     themePrimary,
-    themeAccent
+    themeAccent,
+    layout = 'portrait'
 }: {
     themePrimary?: string;
     themeAccent?: string;
+    layout?: 'portrait' | 'landscape';
 }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '297mm';
     return (
         <div
             className="proposal-confidentiality-page"
             style={{
-                width: '210mm',
-                height: '297mm',
+                width: width,
+                height: height,
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 position: 'relative',
@@ -35,12 +41,12 @@ export function ProposalConfidentialityPage({
             {/* Left Side - Content */}
             <div style={{
                 width: '50%',
-                padding: '60px 50px',
+                padding: isLandscape ? '40px 50px' : '60px 50px',
                 display: 'flex',
                 flexDirection: 'column'
             }}>
                 {/* Standardized Logo Area */}
-                <div style={{ marginBottom: '60px' }}>
+                <div style={{ marginBottom: isLandscape ? '30px' : '60px' }}>
                     <img
                         src="/assets/logo-infodive.png"
                         alt="Infodive Logo"
@@ -49,7 +55,7 @@ export function ProposalConfidentialityPage({
                 </div>
 
                 {/* Standardized Title Section */}
-                <div style={{ position: 'relative', marginBottom: '40px' }}>
+                <div style={{ position: 'relative', marginBottom: isLandscape ? '20px' : '40px' }}>
                     <h1 style={{
                         fontSize: '32px',
                         fontWeight: '800',
@@ -67,7 +73,7 @@ export function ProposalConfidentialityPage({
                     fontSize: '14px',
                     color: '#374151',
                     lineHeight: '1.8',
-                    marginBottom: '40px',
+                    marginBottom: isLandscape ? '20px' : '40px',
                     textAlign: 'justify'
                 }}>
                     O conteúdo deste documento destina-se exclusivamente à avaliação interna da organização
@@ -99,7 +105,7 @@ export function ProposalConfidentialityPage({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '80px'
+                padding: isLandscape ? '40px' : '80px'
             }}>
                 <img
                     src="/assets/digital-handshake.jpg"

@@ -192,7 +192,7 @@ export const DocumentsTab = ({
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value as DocumentCategory)}
-                        className="h-9 rounded-lg border border-border bg-card text-xs font-bold px-2 text-foreground focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                        className="h-9 rounded-lg border border-border bg-card text-xs font-bold px-2 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     >
                         {categories.map((cat) => (
                             <option key={cat.value} value={cat.value}>
@@ -237,22 +237,22 @@ export const DocumentsTab = ({
                     border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer
                     transition-all duration-300 group
                     ${isDragging
-                        ? 'border-blue-500 bg-blue-500/10 scale-[1.01] shadow-lg'
-                        : 'border-border hover:border-blue-400/60 hover:bg-blue-50/50 dark:hover:bg-blue-900/10'
+                        ? 'border-primary bg-primary/10 scale-[1.01] shadow-lg'
+                        : 'border-border hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10'
                     }
                 `}
             >
                 <div className={`
                     h-12 w-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300
                     ${isDragging
-                        ? 'bg-blue-500/20 scale-110'
-                        : 'bg-muted group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:scale-110'
+                        ? 'bg-primary/20 scale-110'
+                        : 'bg-muted group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:scale-110'
                     }
                 `}>
                     {uploading ? (
-                        <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-primary animate-spin" />
                     ) : (
-                        <HardDrive className={`w-6 h-6 transition-colors ${isDragging ? 'text-blue-500' : 'text-muted-foreground group-hover:text-blue-500'}`} />
+                        <HardDrive className={`w-6 h-6 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'}`} />
                     )}
                 </div>
                 <p className="text-sm font-bold text-foreground">
@@ -297,7 +297,7 @@ export const DocumentsTab = ({
             {/* File List */}
             {loading ? (
                 <div className="flex-1 flex items-center justify-center py-16">
-                    <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
             ) : filteredDocs.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
@@ -324,7 +324,7 @@ export const DocumentsTab = ({
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-bold text-foreground truncate group-hover:text-primary dark:group-hover:text-blue-400 transition-colors">
+                                        <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
                                             {doc.name}
                                         </p>
                                         {doc.source_name && (
@@ -352,7 +352,7 @@ export const DocumentsTab = ({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-primary"
+                                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
                                     onClick={() => handleDownload(doc)}
                                     title="Baixar"
                                 >

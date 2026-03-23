@@ -12,23 +12,29 @@ export function ProposalOverviewPage({
     objectives = defaultObjectives,
     aiSummary,
     themePrimary,
-    themeAccent
-}: ProposalOverviewPageProps & { aiSummary?: string; themePrimary?: string; themeAccent?: string }) {
+    themeAccent,
+    layout = 'portrait'
+}: ProposalOverviewPageProps & { aiSummary?: string; themePrimary?: string; themeAccent?: string; layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
+    
+    const isLandscape = layout === 'landscape';
+    const width = isLandscape ? '297mm' : '210mm';
+    const height = isLandscape ? '167mm' : '297mm';
+
     return (
         <div
             className="proposal-overview-page"
             style={{
-                width: '210mm',
-                height: '297mm',
+                width: width,
+                height: height,
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: "'Inter', system-ui, sans-serif",
-                padding: '60px 80px',
+                padding: isLandscape ? '40px 60px' : '60px 80px',
                 color: primaryColor
             }}
         >
@@ -43,8 +49,8 @@ export function ProposalOverviewPage({
             }} />
 
             {/* Standardized Header */}
-            <div style={{ marginBottom: '50px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+            <div style={{ marginBottom: isLandscape ? '25px' : '50px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '20px' : '40px' }}>
                     <img
                         src="/assets/logo-infodive.png"
                         alt="Infodive"

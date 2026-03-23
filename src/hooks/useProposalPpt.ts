@@ -31,12 +31,17 @@ export function useProposalPpt() {
 
             const pptx = new pptxgen();
             
-            // Define custom A4 Portrait layout to match the PDF/HTML design
-            pptx.defineLayout({ name: 'A4', width: 8.27, height: 11.69 });
-            pptx.layout = 'A4';
+            // Use standard Widescreen 16:9 layout for PPT
+            pptx.layout = 'LAYOUT_16x9'; // 10 x 5.625 inches
             
             const config = proposal.content.config || {};
             const editableTexts = proposal.content.editableTexts || {};
+            const activeSections = proposal.content.activeSections || [];
+            
+            const isSectionActive = (id: string, legacyFlag?: boolean) => {
+                if (activeSections.length > 0) return activeSections.includes(id);
+                return !!legacyFlag;
+            };
             const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef } = refs;
 
             const processSlide = async (ref: React.RefObject<HTMLDivElement | null>, name: string, addOverlays?: (slide: pptxgen.Slide) => void) => {
@@ -45,8 +50,7 @@ export function useProposalPpt() {
                 try {
                     const imgData = await domToPng(ref.current, {
                         scale: 2,
-                        backgroundColor: '#ffffff',
-                        style: { width: '210mm', height: '297mm' }
+                        backgroundColor: '#ffffff'
                     });
 
                     if (!imgData || !imgData.startsWith('data:image/png;base64,')) {
@@ -64,8 +68,8 @@ export function useProposalPpt() {
                         data: imgData, 
                         x: 0, 
                         y: 0, 
-                        w: 8.27, 
-                        h: 11.69
+                        w: 10, 
+                        h: 5.625
                     });
 
                     // Add hybrid overlays if provided
@@ -78,45 +82,46 @@ export function useProposalPpt() {
             };
 
             // CAPA - Com textos editáveis sobrepostos
-            if (config.includeCover && coverRef.current) {
+            if (isSectionActive('cover', config.includeCover) && coverRef.current) {
                 await processSlide(coverRef, 'cover', (slide) => {
                     // Main Title Overlay (approximate position for Cover)
                     slide.addText(editableTexts.proposalTitle || "Proposta de Solução", {
-                        x: 1.0,
-                        y: 3.2,
-                        w: 5.0,
-                        fontSize: 24,
+                        x: 0.44,
+                        y: 1.35,
+                        w: 6.0,
+                        fontSize: 22,
                         bold: true,
                         color: '000000',
-                        fontFace: 'Arial'
+                        fontFace: 'Arial',
+                        margin: 0,
                     });
 
                     // Metadata Overlays
-                    const metadataStyle = { fontSize: 11, color: '64748B', fontFace: 'Arial' };
+                    const metadataStyle: pptxgen.TextPropsOptions = { fontSize: 10, color: '64748B', fontFace: 'Arial', margin: 0 };
                     
-                    // Project Title
-                    slide.addText(proposal.title || '', { x: 3.5, y: 4.85, w: 3, ...metadataStyle });
+                    // Project Title (Row 1)
+                    slide.addText(proposal.title || '', { x: 2.15, y: 3.04, w: 6, ...metadataStyle });
                     
-                    // Company Name
-                    slide.addText(proposal.company_name || 'Cliente', { x: 3.5, y: 5.35, w: 3, ...metadataStyle });
+                    // Company Name (Row 2)
+                    slide.addText(proposal.company_name || 'Cliente', { x: 2.15, y: 3.38, w: 6, ...metadataStyle });
                     
-                    // Date
-                    slide.addText(new Date(proposal.createdAt).toLocaleDateString('pt-BR'), { x: 3.5, y: 6.35, w: 3, ...metadataStyle });
+                    // Date (Row 4)
+                    slide.addText(new Date(proposal.createdAt).toLocaleDateString('pt-BR'), { x: 2.15, y: 4.06, w: 6, ...metadataStyle });
 
-                    // Proposal Number
+                    // Proposal Number (Row 5 - Optional)
                     if (proposal.number) {
-                        slide.addText(proposal.number, { x: 3.5, y: 6.9, w: 3, fontSize: 11, color: 'E31837', bold: true, fontFace: 'Arial' });
+                        slide.addText(proposal.number, { x: 2.15, y: 4.40, w: 6, fontSize: 11, color: 'E31837', bold: true, fontFace: 'Arial', margin: 0 });
                     }
                 });
             }
 
             // Other pages as pure images (to maintain complex layouts)
-            if (config.includeConfidentiality && confidentialityRef.current) await processSlide(confidentialityRef, 'confidentiality');
-            if (config.includeOverview && overviewRef.current) await processSlide(overviewRef, 'overview');
-            if (config.includeDifferentials && differentialsRef.current) await processSlide(differentialsRef, 'differentials');
-            if (config.includeHardware && hardwareRef.current) await processSlide(hardwareRef, 'hardware');
-            if (config.includeSoftware && softwareRef.current) await processSlide(softwareRef, 'software');
-            if (config.includeInvestment && investmentRef.current) await processSlide(investmentRef, 'investment');
+            if (isSectionActive('confidentiality', config.includeConfidentiality) && confidentialityRef.current) await processSlide(confidentialityRef, 'confidentiality');
+            if (isSectionActive('overview', config.includeOverview) && overviewRef.current) await processSlide(overviewRef, 'overview');
+            if (isSectionActive('differentials', config.includeDifferentials) && differentialsRef.current) await processSlide(differentialsRef, 'differentials');
+            if (isSectionActive('hardware', config.includeHardware) && hardwareRef.current) await processSlide(hardwareRef, 'hardware');
+            if (isSectionActive('software', config.includeSoftware) && softwareRef.current) await processSlide(softwareRef, 'software');
+            if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processSlide(investmentRef, 'investment');
 
             const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pptx`;
             await pptx.writeFile({ fileName: filename });

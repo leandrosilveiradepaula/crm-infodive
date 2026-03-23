@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { SalesOrder } from '@/hooks/useSalesOrders';
 import { formatCurrency } from '@/utils/format';
-import { processInvoiceAction } from '../actions';
+import { processInvoiceAction, getSalesOrderDocuments, uploadSalesOrderDocument, getSalesDocumentSignedUrl, deleteSalesDocument } from '../actions';
+import { DocumentsTab } from '@/components/shared/DocumentsTab';
 import { toast } from 'sonner';
 import {
     FileText,
@@ -22,7 +23,8 @@ import {
     RotateCcw,
     Upload,
     ShoppingBag,
-    Search
+    Search,
+    FolderOpen
 } from 'lucide-react';
 import {
     Dialog,
@@ -433,6 +435,22 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             <FileText className="w-8 h-8 opacity-20 mb-2" />
                                                             <p className="text-sm font-medium">Nenhuma parcela cadastrada</p>
                                                             <p className="text-xs opacity-70 mt-1">Faça o upload da Nota Fiscal para gerar as parcelas automaticamente.</p>
+                                                        </div>
+                                                    )}
+                                                    {/* Documents Section */}
+                                                    {order.deal_id && (
+                                                        <div className="mt-4 border-t border-border pt-4">
+                                                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-3">
+                                                                <FolderOpen className="w-4 h-4" /> Documentos / Notas Fiscais
+                                                            </h4>
+                                                            <DocumentsTab
+                                                                entityType="deal"
+                                                                entityId={order.deal_id}
+                                                                fetchDocuments={(id) => getSalesOrderDocuments(id)}
+                                                                uploadDocument={(id, fd) => uploadSalesOrderDocument(id, fd)}
+                                                                getSignedUrl={(docId) => getSalesDocumentSignedUrl(docId)}
+                                                                deleteDocument={async (docId) => { await deleteSalesDocument(docId); return true; }}
+                                                            />
                                                         </div>
                                                     )}
                                                 </div>
