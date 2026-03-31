@@ -116,7 +116,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
             {/* Header / Filters */}
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
@@ -180,33 +180,41 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                     subtitle={`${formatCurrency(stats.topPerformer?.totalSold || 0)} vendido`}
                 />
                 {/* Mini Chart Card */}
-                <div className="bg-card border border-border rounded-2xl p-4 shadow-sm flex flex-col justify-between relative overflow-hidden">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest z-10">Meta vs Realizado</h3>
-                    <div className="h-20 mt-2 z-10">
+                <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden group hover:border-primary/30 transition-all">
+                    <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest z-10">Meta vs Realizado</h3>
+                        <div className="flex gap-2">
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-muted"></div><span className="text-[9px] font-bold text-muted-foreground uppercase">Meta</span></div>
+                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-primary"></div><span className="text-[9px] font-bold text-primary uppercase">Fatura</span></div>
+                        </div>
+                    </div>
+                    <div className="h-24 mt-1 z-10 w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={[{ name: 'Total', Meta: stats.totalGoal, Realizado: stats.totalSoldAll }]}>
-                                <Bar dataKey="Meta" fill="var(--muted)" radius={[4, 4, 4, 4]} barSize={20} />
-                                <Bar dataKey="Realizado" fill="var(--primary)" radius={[4, 4, 4, 4]} barSize={20} />
+                            <BarChart data={[{ name: 'Total', Meta: stats.totalGoal, Realizado: stats.totalSoldAll }]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                                <XAxis type="category" dataKey="name" hide />
+                                <YAxis type="number" hide />
+                                <Bar dataKey="Meta" fill="var(--muted)" radius={[4, 4, 4, 4]} barSize={24} />
+                                <Bar dataKey="Realizado" fill="var(--primary)" radius={[4, 4, 4, 4]} barSize={24} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Enhanced Table */}
                 <div className="lg:col-span-2 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <table className="w-full">
                         <thead className="bg-muted/10 border-b border-border">
                             <tr>
-                                <th className="text-left py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
-                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[100px]">
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
+                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
                                     {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
                                 </th>
-                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[100px]">
+                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
                                     Realizado
                                 </th>
-                                <th className="text-right py-4 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[150px]">Progresso</th>
+                                <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
                                 {selectedPeriod === 'all' && (
                                     <>
                                         <th className="text-center py-5 px-2 text-[9px] font-bold text-muted-foreground">Q1</th>
@@ -224,7 +232,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
 
                                 return (
                                     <tr key={user.user_id} className="group hover:bg-muted/30 transition-all duration-200">
-                                        <td className="py-4 px-6">
+                                        <td className="py-2.5 px-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-xs font-black shadow-md">
                                                     {(user as any).avatar || (user as any).name?.charAt(0) || 'U'}
@@ -237,16 +245,23 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         </td>
 
                                         {/* Dynamic Target Input */}
-                                        <td className="py-4 px-3 text-center">
-                                            {selectedPeriod === 'all' ? (
-                                                <div className="flex flex-col items-center gap-1">
-                                                    <GoalInput
-                                                        value={user.yearly_goal ?? 0}
-                                                        onSave={(val) => handleUpdate(user.user_id, { yearly_goal: val })}
-                                                        hasError={hasError}
-                                                    />
-                                                    {hasError && <span className="text-[9px] text-red-500 font-bold">≠ Soma Qs</span>}
-                                                </div>
+                                        <td className="py-2.5 px-3 text-center">
+                                    {selectedPeriod === 'all' ? (
+                                        <div className="flex flex-col items-center gap-1">
+                                            <GoalInput
+                                                value={user.yearly_goal ?? 0}
+                                                onSave={(val) => handleUpdate(user.user_id, { yearly_goal: val })}
+                                                hasError={hasError}
+                                            />
+                                            {hasError && (
+                                                <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">
+                                                    {((user.yearly_goal || 0) - quarterlyTotal) > 0 
+                                                        ? `Faltam ${formatCurrency((user.yearly_goal || 0) - quarterlyTotal)}`
+                                                        : `Sobram ${formatCurrency(Math.abs((user.yearly_goal || 0) - quarterlyTotal))}`
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
                                             ) : (
                                                 <GoalInput
                                                     value={user.quarterly_goals?.[selectedPeriod] ?? 0}
@@ -257,12 +272,12 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                             )}
                                         </td>
 
-                                        <td className="py-4 px-3 text-center">
+                                        <td className="py-2.5 px-3 text-center">
                                             <span className="font-black text-emerald-600 text-sm">
                                                 {formatCurrency(user.totalSold)}
                                             </span>
                                         </td>
-                                        <td className="py-4 px-6">
+                                        <td className="py-2.5 px-4">
                                             <EnhancedProgressBar value={user.progress} size="md" />
                                         </td>
 
@@ -291,8 +306,8 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                 </div>
 
                 {/* Main Comparison Chart */}
-                <div className="lg:col-span-1 bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col">
-                    <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-6">Performance {getPeriodLabel()}</h3>
+                <div className="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
+                    <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">Performance {getPeriodLabel()}</h3>
                     <div className="flex-1 min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>

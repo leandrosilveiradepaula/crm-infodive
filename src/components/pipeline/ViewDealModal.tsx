@@ -40,6 +40,7 @@ import { HistoryTab } from './tabs/HistoryTab';
 import { FilesTab } from './tabs/FilesTab';
 import { DealDoctorFinal } from './ai/DealDoctorFinal';
 import { RiskRadar } from './ai/RiskRadar';
+import { DealSuggestedActions } from './ai/DealSuggestedActions';
 import { AIEmailDrafter } from './ai/AIEmailDrafter';
 import { ContractBuilder } from '../contracts/ContractBuilder';
 import { LostDealModal } from './LostDealModal';
@@ -54,12 +55,15 @@ import { formatCurrency } from '@/utils/format';
 import { calculateDealValue } from '@/utils/dealCalculations';
 import { useDeals } from '@/hooks/useDeals';
 
+import { Account } from '@/types/account';
+import { Contact } from '@/types/contact';
+
 interface ViewDealModalProps {
     deal: Deal;
     isOpen: boolean;
     onClose: () => void;
-    distributors?: any[];
-    allAccounts?: any[];
+    distributors?: Account[];
+    allAccounts?: Account[];
     initialTab?: string;
 }
 
@@ -72,7 +76,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     const [isLoading, setIsLoading] = useState(false);
     const [isProductsLoading, setIsProductsLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
-    const [allContacts, setAllContacts] = useState<any[]>([]);
+    const [allContacts, setAllContacts] = useState<Contact[]>([]);
     const [contactsLoaded, setContactsLoaded] = useState(false);
 
     // AI & Modules State
@@ -223,7 +227,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
             // Capture commission_deduction from local deal state if modified
             if (deal.commission_deduction !== undefined && deal.commission_deduction !== null) {
-                (updatePayload as any).commission_deduction = deal.commission_deduction;
+                (updatePayload as Partial<Deal>).commission_deduction = deal.commission_deduction;
             }
 
             await updateDeal(deal.id, updatePayload);
@@ -431,18 +435,27 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 {isEditing ? 'Salvar' : 'Editar'}
                             </Button>
                             <div className="w-px h-4 bg-border mx-1" />
-                            {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map((stage) => (
-                                <button
-                                    key={stage}
-                                    onClick={() => handleStageChange(stage)}
-                                    className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${deal.stage === stage
-                                        ? 'bg-primary text-white shadow-lg'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                                        }`}
-                                >
-                                    {stage}
-                                </button>
-                            ))}
+                            {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map((stage) => {
+                                const stageLabels: Record<string, string> = {
+                                    'qualification': 'Qualificação',
+                                    'proposal': 'Proposta',
+                                    'negotiation': 'Negociação',
+                                    'won': 'Ganho',
+                                    'lost': 'Perdido'
+                                };
+                                return (
+                                    <button
+                                        key={stage}
+                                        onClick={() => handleStageChange(stage)}
+                                        className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${deal.stage === stage
+                                            ? 'bg-primary text-white shadow-lg'
+                                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                            }`}
+                                    >
+                                        {stageLabels[stage]}
+                                    </button>
+                                );
+                            })}
                         </div>
                         <div className="flex items-center gap-1 border-l border-border pl-4 ml-2">
                             <Button
@@ -518,7 +531,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                     dealTitle: deal.title,
                                                     company: deal.company,
                                                     customer_name: deal.company // Fallback 
-                                                } as any);
+                                                } as Proposal);
                                                 setShowViewProposalModal(true);
                                             }}
                                         />
@@ -684,10 +697,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 />
                                 <div className="h-px bg-card/5"></div>
                                 <RiskRadar deal={deal} />
+                                <div className="h-px bg-card/5"></div>
+                                <DealSuggestedActions dealId={deal.id} />
                             </div>
 
                             {/* Client Portal Card */}
-                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200 relative overflow-hidden group">
+                            <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-6 rounded-2xl border border-blue-200 relative overflow-hidden group">
                                 <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <Globe className="h-24 w-24 text-primary" />
                                 </div>
@@ -748,9 +763,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => router.push(`/pipeline/proposals/editor/${deal.id}`)}
-                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-purple-300"
+                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-teal-300"
                                 >
-                                    <FileText className="h-4 w-4 text-purple-500" />
+                                    <FileText className="h-4 w-4 text-teal-500" />
                                     Proposta
                                 </button>
 

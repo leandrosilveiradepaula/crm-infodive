@@ -11,20 +11,20 @@ export const HealthWidget = ({ metrics }: HealthWidgetProps) => {
     const router = useRouter();
 
     return (
-        <div className="glass-card rounded-2xl p-6 border border-white/5 h-full flex flex-col">
-            <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2 shrink-0">
-                <ShieldCheck className="h-5 w-5 text-emerald-400" />
+        <div className="glass-card rounded-2xl p-4 border border-white/5 h-full flex flex-col">
+            <h2 className="text-base font-bold text-white mb-4 flex items-center gap-2 shrink-0">
+                <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 Pipeline Health
             </h2>
 
-            <div className="space-y-8 flex-1">
+            <div className="space-y-6 flex-1">
                 {/* Health Gauge */}
-                <div className="relative pt-2">
-                    <div className="flex items-end gap-4 mb-3">
-                        <span className={`text-6xl font-black tracking-tighter ${metrics.healthScore > 7 ? 'text-emerald-400' : metrics.healthScore > 4 ? 'text-amber-400' : 'text-lenovo-red'}`}>
+                <div className="relative pt-1">
+                    <div className="flex items-end gap-3 mb-2">
+                        <span className={`text-4xl font-black tracking-tighter ${metrics.healthScore > 7 ? 'text-emerald-400' : metrics.healthScore > 4 ? 'text-amber-400' : 'text-lenovo-red'}`}>
                             {metrics.healthScore}
                         </span>
-                        <div className="mb-2 text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">Score / 10</div>
+                        <div className="mb-1.5 text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Score / 10</div>
                     </div>
                     <div className="w-full bg-card/5 h-3 rounded-full overflow-hidden">
                         <div
@@ -50,10 +50,10 @@ export const HealthWidget = ({ metrics }: HealthWidgetProps) => {
                 </div>
             </div>
 
-            <div className="mt-8 shrink-0">
+            <div className="mt-4 shrink-0">
                 <button
                     onClick={() => router.push('/reports')}
-                    className="w-full py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/20"
+                    className="w-full py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                 >
                     Ver Relatório Detalhado
                 </button>

@@ -107,6 +107,7 @@ export class ActivityService {
             "dueTime": activity.dueTime,
             "assignedTo": activity.assignedTo,
             organization_id: organizationId,
+            source: activity.source || 'manual',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };

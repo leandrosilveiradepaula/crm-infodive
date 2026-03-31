@@ -6,9 +6,10 @@ import { type ProductTechDetail } from '@/types/deal';
 
 interface ProposalHardwareProductProps {
     product: any;
+    simplifiedName?: string;
 }
 
-export function ProposalHardwareProduct({ product }: ProposalHardwareProductProps) {
+export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHardwareProductProps) {
     let rawSpecs: Array<ProductTechDetail> = [];
     const { isStructured, items } = getSmartDetails(product);
 
@@ -46,7 +47,7 @@ export function ProposalHardwareProduct({ product }: ProposalHardwareProductProp
         if (serverBase) serverQty = Number(serverBase.quantity) || 1;
     }
 
-    let finalSpecs = getSmartProductDescription(rawSpecs, serverQty);
+    const finalSpecs = getSmartProductDescription(rawSpecs, serverQty);
 
     const isStorage = product.name.toLowerCase().match(/storage|flash|ds8|v5000|v7000|v9000|fs7300|fs9200/) ||
         product.category?.toLowerCase().includes('storage');
@@ -75,7 +76,7 @@ export function ProposalHardwareProduct({ product }: ProposalHardwareProductProp
         if (highlightedStructuredItems.length > 0) {
             highlightedStructuredItems.forEach(spec => {
                 // Infer a color or default to indigo based on the manual labels
-                let label = spec.grid_label || 'Destaque Técnico';
+                const label = spec.grid_label || 'Destaque Técnico';
                 let color: 'gray' | 'blue' | 'green' | 'amber' | 'indigo' | 'teal' = 'indigo';
                 const lowerLabel = label.toLowerCase();
                 if (lowerLabel.includes('bruta')) color = 'gray';
@@ -83,7 +84,7 @@ export function ProposalHardwareProduct({ product }: ProposalHardwareProductProp
                 else if (lowerLabel.includes('efetiva')) color = 'green';
                 else if (lowerLabel.includes('cache')) color = 'amber';
 
-                let value = spec.description;
+                const value = spec.description;
 
                 // If a similar label exists, append to avoid overwriting unless exact
                 items.push({ label, value, color });
@@ -150,7 +151,7 @@ export function ProposalHardwareProduct({ product }: ProposalHardwareProductProp
                     </div>
                     <div>
                         <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.3px', lineHeight: '1.2' }}>
-                            {product.name}
+                            {simplifiedName || product.name}
                         </h2>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '2px', alignItems: 'center' }}>
                             {isStorage && (

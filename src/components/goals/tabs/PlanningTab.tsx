@@ -248,7 +248,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
             />
 
             {/* --- TOP ACTIONS BAR --- */}
-            <div className="col-span-12 flex flex-col md:flex-row justify-between items-start md:items-center bg-card p-5 rounded-2xl border border-border shadow-sm mb-[-1rem] relative overflow-hidden">
+            <div className="col-span-12 flex flex-col md:flex-row justify-between items-start md:items-center bg-card p-3 px-5 rounded-2xl border border-border shadow-sm mb-[-1rem] relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
                     <TrendingUp className="h-24 w-24" />
                 </div>
@@ -264,13 +264,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                     <div className="flex gap-3 mt-4 md:mt-0">
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-muted hover:bg-muted/80 text-foreground px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-border"
+                            className="bg-muted hover:bg-muted/80 text-foreground px-4 h-[38px] rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-border"
                         >
                             <FolderOpen className="h-4 w-4 text-primary" /> Meus Cenários ({scenarios.length})
                         </button>
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-primary hover:bg-primary text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
+                            className="bg-primary hover:bg-primary text-white px-4 h-[38px] rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
                         >
                             <Save className="h-4 w-4" /> Salvar Configuração Atual
                         </button>
@@ -332,7 +332,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div className="relative">
                                         {goalMode !== 'profit_percent' ? (
                                             <ThemeCurrencyInput
-                                                className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none py-1.5 h-auto pl-8 text-left"
+                                                className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[38px] pl-8 text-left"
                                                 value={goalValue || 0}
                                                 onChange={(e) => setGoalValue(e.target.value)}
                                             />
@@ -340,7 +340,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             <>
                                                 <input
                                                     type="number"
-                                                    className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none py-1.5 px-3"
+                                                    className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none px-3 h-[38px]"
                                                     value={goalValue}
                                                     onChange={(e) => setGoalValue(e.target.value)}
                                                 />
@@ -352,7 +352,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                 <div className="col-span-1">
                                     <label className="text-[10px] uppercase font-bold text-muted-foreground block mb-1">Ticket Médio Projetado</label>
                                     <ThemeCurrencyInput
-                                        className="w-full bg-background border border-border rounded-lg pl-8 pr-3 py-1.5 h-auto text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none text-left"
+                                        className="w-full bg-background border border-border rounded-lg pl-8 pr-3 h-[38px] text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none text-left"
                                         value={avgTicket || 0}
                                         onChange={(e) => setAvgTicket(e.target.value)}
                                     />
@@ -362,7 +362,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div className="relative">
                                         <input
                                             type="number"
-                                            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none"
+                                            className="w-full bg-background border border-border rounded-lg px-3 h-[38px] text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none"
                                             value={conversionRate}
                                             onChange={(e) => setConversionRate(e.target.value)}
                                         />

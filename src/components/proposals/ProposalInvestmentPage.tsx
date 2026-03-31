@@ -1,18 +1,20 @@
 import React from 'react';
-import type { Deal } from '@/types/deal';
+import type { Deal, DealProduct } from '@/types/deal';
+import type { Account } from '@/types/account';
 import type { BillingOverride } from '@/hooks/useProposalEditorState';
 import { ProposalInvestmentTable, ProposalInvestmentOptionals } from './ProposalInvestmentComponents';
 
 interface ProposalInvestmentPageProps {
     deal: Deal;
-    distributors?: any[];
+    distributors?: Account[];
     config?: any;
+    simplifiedProductNames?: Record<string, string>;
     billingOverrides?: Record<string, BillingOverride>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentPage({ deal, distributors = [], config, billingOverrides = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalInvestmentPageProps & { layout?: 'portrait' | 'landscape' }) {
+export function ProposalInvestmentPage({ deal, distributors = [], config, simplifiedProductNames = {}, billingOverrides = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalInvestmentPageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     
@@ -41,44 +43,56 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
     const totalConsolidatedValue = mainProducts.reduce((acc, item) => acc + ((item.unit_price || 0) * (item.quantity || 1)), 0);
 
     // Grouping logic for Main Products
-    const groups: { title: string, products: any[], type: 'reseller' | 'direct', distributor?: any }[] = [];
+    interface BillingGroup {
+        title: string;
+        products: DealProduct[];
+        type: 'reseller' | 'direct';
+        distributor?: Account;
+        distributorCnpj?: string;
+    }
+    const groups: BillingGroup[] = [];
 
     // 1. Reseller Group
     const resellerProducts = mainProducts.filter(p => p.billing_type === 'direct' || !p.billing_type);
     if (resellerProducts.length > 0) {
+        // Find the CNPJ from any product in this group
+        const resellerCnpjOverride = resellerProducts.find(p => p.distributor_cnpj && p.distributor_cnpj.length > 5)?.distributor_cnpj;
+        
         groups.push({
             title: 'Faturamento Revenda (Infodive)',
             products: resellerProducts,
-            type: 'reseller'
+            type: 'reseller',
+            // Pass the override directly in the group metadata for easier access
+            distributorCnpj: resellerCnpjOverride
         });
     }
 
-    // 2. Direct Groups by Distributor
+    // 2. Direct Groups by Distributor + CNPJ (Branch Support)
     const directProducts = mainProducts.filter(p => p.billing_type === 'indirect');
-    const distributorIds = Array.from(new Set(directProducts.map(p => p.distributor_id).filter(Boolean)));
+    
+    // Create unique keys for each unique billing entity (Distributor + Specific CNPJ)
+    const directGroupKeys = Array.from(new Set(directProducts.map(p => `${p.distributor_id || 'no-dist'}|${p.distributor_cnpj || 'no-cnpj'}`)));
 
-    distributorIds.forEach(dId => {
-        const dProducts = directProducts.filter(p => p.distributor_id === dId);
-        const dist = distributors.find(d => d.id === dId);
-        if (dProducts.length > 0) {
-            groups.push({
-                title: `Faturamento Direto (${dist?.name || 'Distribuidor'})`,
-                products: dProducts,
-                type: 'direct',
-                distributor: dist
-            });
-        }
+    directGroupKeys.forEach(key => {
+        const [dId, dCnpj] = key.split('|');
+        const productsInGroup = directProducts.filter(p => 
+            (p.distributor_id || 'no-dist') === dId && 
+            (p.distributor_cnpj || 'no-cnpj') === dCnpj
+        );
+        
+        if (productsInGroup.length === 0) return;
+
+        const dist = dId !== 'no-dist' ? distributors.find(d => d.id === dId) : undefined;
+        
+        groups.push({
+            title: `Faturamento Direto (${dist?.name || 'Distribuidor'})`,
+            products: productsInGroup,
+            type: 'direct',
+            distributor: dist,
+            distributorCnpj: dCnpj !== 'no-cnpj' ? dCnpj : undefined
+        });
     });
 
-    // 3. Fallback: indirect products without a distributor_id
-    const orphanDirectProducts = directProducts.filter(p => !p.distributor_id);
-    if (orphanDirectProducts.length > 0) {
-        groups.push({
-            title: 'Faturamento Direto',
-            products: orphanDirectProducts,
-            type: 'direct'
-        });
-    }
 
     const showBilling = config?.showBillingInfo !== false;
     const hasOptionals = optionalProducts.length > 0;
@@ -87,7 +101,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
     // Max 3 per page (or 2 in landscape) to avoid overflow since they can have children
     const topLevelOptionals = optionalProducts.filter(p => !p.parent_id || !optionalProducts.some(op => op.id === p.parent_id));
     const optionalsPerPage = isLandscape ? 2 : 3;
-    const optionalChunks: any[][] = [];
+    const optionalChunks: DealProduct[][] = [];
     for (let i = 0; i < topLevelOptionals.length; i += optionalsPerPage) {
         optionalChunks.push(topLevelOptionals.slice(i, i + optionalsPerPage));
     }
@@ -130,6 +144,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                     mainProducts={mainProducts}
                     formatCurrency={formatCurrency}
                     totalMainValue={totalConsolidatedValue}
+                    simplifiedProductNames={simplifiedProductNames}
                     themePrimary={primaryColor}
                     themeAccent={accentColor}
                 />
@@ -158,10 +173,23 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                                     type={group.type}
                                     distributor={group.distributor}
                                     formatCNPJ={formatCNPJ}
-                                    productNames={group.products.map(p => p.name)}
+                                    productNames={Array.from(
+                                        group.products.reduce((acc, p) => {
+                                            const rawName = (simplifiedProductNames[p.name] || p.display_name || p.name || '').toString();
+                                            // Nuclear clean: remove ALL types of invisible spaces, normalize to single space, trim, and handle Case
+                                            const clean = rawName.replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff\u200b]+/g, ' ').trim();
+                                            const key = clean.toLowerCase();
+                                            
+                                            if (clean && !acc.has(key)) {
+                                                acc.set(key, clean);
+                                            }
+                                            return acc;
+                                        }, new Map<string, string>()).values()
+                                    )}
                                     billingOverrides={billingOverrides}
                                     themePrimary={primaryColor}
                                     themeAccent={accentColor}
+                                    displayCnpjOverride={group.distributorCnpj}
                                 />
                             ))}
                         </div>
@@ -214,6 +242,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                         optionalProducts={optionalProducts}
                         rootProducts={chunk}
                         formatCurrency={formatCurrency}
+                        simplifiedProductNames={simplifiedProductNames}
                         themePrimary={primaryColor}
                         themeAccent={accentColor}
                     />
@@ -223,7 +252,23 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
                         <>
                             {showBilling && !config?.isPriceStudy && (
                                 <div style={{ padding: '0 80px', marginTop: '10px' }}>
-                                    <GroupBillingInfo type="reseller" formatCNPJ={formatCNPJ} themePrimary={primaryColor} themeAccent={accentColor} />
+                                    <GroupBillingInfo 
+                                        type="reseller" 
+                                        formatCNPJ={formatCNPJ} 
+                                        themePrimary={primaryColor} 
+                                        themeAccent={accentColor}
+                                        productNames={Array.from(
+                                            optionalProducts
+                                                .filter(p => p.billing_type === 'direct' || !p.billing_type)
+                                                .reduce((acc, p) => {
+                                                    const rawName = (simplifiedProductNames[p.name] || p.display_name || p.name || '').toString();
+                                                    const clean = rawName.replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff\u200b]+/g, ' ').trim();
+                                                    const key = clean.toLowerCase();
+                                                    if (clean && !acc.has(key)) acc.set(key, clean);
+                                                    return acc;
+                                                }, new Map<string, string>()).values()
+                                        )}
+                                    />
                                 </div>
                             )}
 
@@ -270,8 +315,23 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
 
                     {!config?.isPriceStudy && (
                         <div style={{ padding: '0 80px', marginTop: '10px' }}>
-                            {/* If no main products and no optionals, and showBilling is true, default to reseller billing */}
-                            <GroupBillingInfo type="reseller" formatCNPJ={formatCNPJ} themePrimary={primaryColor} themeAccent={accentColor} />
+                            {/* If no main products and no optionals, and showBilling is true, default to reseller billing with override check */}
+                            <GroupBillingInfo 
+                                type="reseller" 
+                                formatCNPJ={formatCNPJ} 
+                                themePrimary={primaryColor} 
+                                themeAccent={accentColor}
+                                displayCnpjOverride={products.find(p => p.distributor_cnpj && p.distributor_cnpj.length > 5)?.distributor_cnpj}
+                                productNames={Array.from(
+                                    products.reduce((acc, p) => {
+                                        const rawName = (simplifiedProductNames[p.name] || p.display_name || p.name || '').toString();
+                                        const clean = rawName.replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff\u200b]+/g, ' ').trim();
+                                        const key = clean.toLowerCase();
+                                        if (clean && !acc.has(key)) acc.set(key, clean);
+                                        return acc;
+                                    }, new Map<string, string>()).values()
+                                )}
+                            />
                         </div>
                     )}
 
@@ -285,17 +345,30 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, billin
 }
 
 // New helper component for Group Billing Info
-function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], billingOverrides = {}, themePrimary, themeAccent }: { type: 'reseller' | 'direct', distributor?: any, formatCNPJ: (v: string) => string, productNames?: string[], billingOverrides?: Record<string, BillingOverride>, themePrimary?: string, themeAccent?: string }) {
+function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], billingOverrides = {}, themePrimary, themeAccent, displayCnpjOverride }: { type: 'reseller' | 'direct', distributor?: Account, formatCNPJ: (v: string) => string, productNames?: string[], billingOverrides?: Record<string, BillingOverride>, themePrimary?: string, themeAccent?: string, displayCnpjOverride?: string }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
 
-    const productList = productNames.length > 0 ? (
+    // Ultimate deduplication logic inside the component to be 100% sure
+    const deduplicatedNames = React.useMemo(() => {
+        const seen = new Set<string>();
+        return productNames.filter(name => {
+            if (!name) return false;
+            // Normalize for comparison: lowercase and single spaces
+            const clean = name.toLowerCase().replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff]+/g, ' ').trim();
+            if (seen.has(clean)) return false;
+            seen.add(clean);
+            return true;
+        });
+    }, [productNames]);
+
+    const productList = deduplicatedNames.length > 0 ? (
         <div style={{ marginTop: '10px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '8px' }}>
             <div style={{ fontSize: '9px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                 Produtos neste faturamento:
             </div>
             <div style={{ fontSize: '11px', color: primaryColor, fontWeight: '600', lineHeight: '1.6' }}>
-                {productNames.join(' • ')}
+                {deduplicatedNames.join(' • ')}
             </div>
         </div>
     ) : null;
@@ -316,7 +389,7 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
                 <div style={{ fontSize: '10px', fontWeight: '800', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Faturamento Direto</div>
                 <div style={{ fontSize: '14px', color: primaryColor, fontWeight: '800' }}>Infodive Representações e Serviços Ltda</div>
                 <div style={{ display: 'flex', gap: '20px', marginTop: '10px', fontSize: '11px', color: '#475569' }}>
-                    <div><span style={{ fontWeight: '700', color: primaryColor }}>CNPJ:</span> 05.613.186/0001-78</div>
+                    <div><span style={{ fontWeight: '700', color: primaryColor }}>CNPJ:</span> {formatCNPJ(displayCnpjOverride || '05.613.186/0001-78')}</div>
                     <div><span style={{ fontWeight: '700', color: primaryColor }}>IE:</span> Isento</div>
                 </div>
                 {productList}
@@ -326,9 +399,16 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
 
     if (distributor) {
         const override = billingOverrides[distributor.id];
-        const displayCnpj = override?.selectedCnpj || distributor.cnpj;
-        const displayName = override?.selectedBranchName || distributor.name;
-        const displayTerms = override?.paymentTerms ?? distributor.payment_terms;
+        // 1. Prioritize Product-level override (from opportunity selection)
+        // 2. Fallback to Proposal-level override (from editor state)
+        // 3. Fallback to Distributor main CNPJ
+        const displayCnpj = displayCnpjOverride || override?.selectedCnpj || distributor.cnpj;
+
+        // Try to resolve branch name if a specific CNPJ is chosen
+        const branch = (distributor as any).account_branches?.find((b: any) => b.cnpj === displayCnpjOverride);
+        const displayName = branch?.name || override?.selectedBranchName || distributor.name;
+        
+        const displayTerms = override?.paymentTerms ?? branch?.payment_terms ?? distributor.payment_terms;
         return (
             <div style={{
                 border: '1px solid #fecdd3',

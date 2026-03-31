@@ -6,12 +6,15 @@ import { useTheme } from '@/components/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AiAssistant } from '@/components/ai/AiAssistant';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
     onMenuClick: () => void;
+    isSidebarCollapsed?: boolean;
+    onToggleSidebar?: () => void;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
     const { theme, toggleTheme } = useTheme();
     const [isAiOpen, setIsAiOpen] = useState(false);
 
@@ -24,6 +27,15 @@ export function Header({ onMenuClick }: HeaderProps) {
                 >
                     <Menu className="h-6 w-6" />
                 </button>
+                <div className="hidden lg:flex items-center gap-2">
+                    <button
+                        onClick={onToggleSidebar}
+                        className="p-2 text-muted-foreground hover:bg-muted/50 rounded-lg transition-all"
+                        title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
+                    >
+                        <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
+                    </button>
+                </div>
                 <h2 className="text-lg lg:text-xl font-bold text-foreground dark:text-white truncate">Bem-vindo, Leandro 👋</h2>
             </div>
 

@@ -26,35 +26,35 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
     return (
         <div
             onClick={() => onView(proposal)}
-            className="group bg-card border border-border hover:border-primary/50 hover:shadow-2xl rounded-2xl p-6 transition-all cursor-pointer relative overflow-hidden"
+            className="group bg-card border border-border hover:border-primary/50 hover:shadow-2xl rounded-2xl p-4 transition-all cursor-pointer relative overflow-hidden"
         >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
-            <div className="flex items-start justify-between gap-6">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+            <div className="flex items-start justify-between gap-4">
                 {/* Left: Icon + Info */}
-                <div className="flex items-start gap-4 flex-1 relative z-10">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-all shadow-inner">
-                        <FileText className="h-6 w-6 text-primary" />
+                <div className="flex items-start gap-3 flex-1 relative z-10">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-all shadow-inner">
+                        <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
+                        <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none">
                                 #{proposal.number}
                             </span>
-                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${status.color}`}>
-                                <StatusIcon className="h-3 w-3" /> {status.label}
+                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border flex items-center gap-1 leading-none ${status.color}`}>
+                                <StatusIcon className="h-2.5 w-2.5" /> {status.label}
                             </span>
                         </div>
-                        <h4 className="text-base font-bold text-foreground mb-2 group-hover:text-primary transition-colors truncate tracking-tight">
+                        <h4 className="text-sm font-bold text-foreground mb-1 group-hover:text-primary transition-colors truncate tracking-tight">
                             {proposal.title}
                         </h4>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1.5">
-                                <Calendar className="h-4 w-4" />
+                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                            <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
                                 {new Date(proposal.createdAt).toLocaleDateString('pt-BR')}
                             </span>
                             {proposal.template && (
-                                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-muted border border-border capitalize">
-                                    <TrendingUp className="h-3 w-3" />
+                                <span className="flex items-center gap-1 px-1.5 py-0 rounded bg-muted border border-border">
+                                    <TrendingUp className="h-2.5 w-2.5" />
                                     {proposal.template}
                                 </span>
                             )}
@@ -62,17 +62,17 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6 relative z-10">
+                <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right">
-                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-black mb-1">
+                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-black mb-0.5 opacity-60">
                             Valor Total
                         </p>
-                        <p className="text-2xl font-black text-foreground group-hover:text-primary transition-colors tracking-tighter">
+                        <p className="text-xl font-black text-foreground group-hover:text-primary transition-colors tracking-tighter">
                             {formatCurrency(proposal.total)}
                         </p>
                     </div>
-                    <div className="h-10 w-10 rounded-xl border border-border flex items-center justify-center text-muted-foreground group-hover:text-white group-hover:bg-primary group-hover:border-primary transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:scale-110">
-                        <Eye className="h-5 w-5" />
+                    <div className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground group-hover:text-white group-hover:bg-primary group-hover:border-primary transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:scale-110">
+                        <Eye className="h-4 w-4" />
                     </div>
                 </div>
             </div>

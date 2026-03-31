@@ -150,7 +150,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                             variant="outline"
                             size="sm"
                             onClick={() => setIsParserOpen(true)}
-                            className="relative z-10 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 hover:text-purple-700 border-purple-200 dark:border-purple-500/30 rounded-xl font-bold px-4 h-10 shadow-sm"
+                            className="relative z-10 bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 hover:text-teal-700 border-teal-200 dark:border-teal-500/30 rounded-xl font-bold px-4 h-10 shadow-sm"
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
                             Importar de Assinatura

@@ -5,9 +5,10 @@ import { Draggable } from '@hello-pangea/dnd';
 import { Building, Clock, Mail, Phone, ExternalLink, FileText, ChevronRight, AlertCircle, ShoppingBag, User, Calendar, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/utils/format';
+import { Deal } from '@/types/deal';
 
 interface DealCardProps {
-    deal: any;
+    deal: Deal;
     index: number;
     hasProposal?: boolean;
     onClick?: () => void;
@@ -58,7 +59,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         onClick={onClick}
                         className={`
                             relative group cursor-pointer
-                            bg-card rounded-[1.75rem] p-4 border shadow-sm transition-all duration-300
+                            bg-card rounded-2xl p-2.5 border shadow-sm transition-all duration-300
                             ${snapshot.isDragging
                                 ? 'shadow-2xl shadow-primary/30 ring-2 ring-primary/40 border-primary/50 z-50 bg-card/90 backdrop-blur-md scale-105 rotate-2'
                                 : 'hover:shadow-lg hover:border-primary/30 border-border hover:-translate-y-1'
@@ -84,7 +85,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         <div className="relative z-10 pl-2">
 
                             {/* Tags & Header */}
-                            <div className="space-y-2.5">
+                            <div className="space-y-2">
                                 <div className="flex flex-wrap gap-1">
                                     {(deal.tags || []).slice(0, 3).map((tag: string) => (
                                         <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted/50 text-[8px] font-black text-muted-foreground border border-border/50 uppercase tracking-tighter">
@@ -118,18 +119,18 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                             </div>
 
                             {/* Value & Metadata Footer */}
-                            <div className="mt-4 pt-3 border-t border-border/50 flex flex-col gap-2">
+                            <div className="mt-3 pt-2 border-t border-border/50 flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-xl font-black text-foreground tracking-tight group-hover:scale-105 transition-transform origin-left">
+                                    <span className="text-base font-black text-foreground tracking-tight group-hover:scale-105 transition-transform origin-left">
                                         {formatCompact(deal.value)}
                                     </span>
 
                                     {/* Owner Bubble - Overlapping or singular */}
                                     <div className={`
                                         h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-md ring-2 ring-card
-                                        ${deal.owner_name === 'Leandro Silveira' ? 'bg-primary' : 'bg-info'}
-                                    `} title={`Responsável: ${deal.owner_name || deal.owner || 'N/A'}`}>
-                                        {(deal.owner_name || deal.owner || 'LS').substring(0, 2).toUpperCase()}
+                                        ${deal.owner === 'Leandro Silveira' ? 'bg-primary' : 'bg-info'}
+                                    `} title={`Responsável: ${deal.owner || 'N/A'}`}>
+                                        {(deal.owner || 'LS').substring(0, 2).toUpperCase()}
                                     </div>
                                 </div>
 

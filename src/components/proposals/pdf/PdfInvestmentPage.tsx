@@ -7,6 +7,7 @@ import type { BillingOverride } from '@/hooks/useProposalEditorState';
 
 interface PdfInvestmentPageProps {
     products: any[];
+    simplifiedProductNames?: Record<string, string>;
     showBillingInfo: boolean;
     isPriceStudy: boolean;
     priceStudyValidity: string;
@@ -19,6 +20,7 @@ interface PdfInvestmentPageProps {
 
 export function PdfInvestmentPage({
     products,
+    simplifiedProductNames = {},
     showBillingInfo,
     isPriceStudy,
     priceStudyValidity,
@@ -129,7 +131,7 @@ export function PdfInvestmentPage({
                                 </View>
                                 <View style={{ flex: 1 }}>
                                     <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.text }}>
-                                        {product.name}
+                                        {simplifiedProductNames[product.name] || product.display_name || product.name}
                                     </Text>
                                     {product.duration && product.duration_unit && (
                                         <Text style={{ fontSize: 8, color: pdfColors.green, fontFamily: 'Helvetica-Oblique' }}>
@@ -210,7 +212,7 @@ export function PdfInvestmentPage({
                                 }}>
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.primary }}>
-                                            {product.name}
+                                            {simplifiedProductNames[product.name] || product.display_name || product.name}
                                         </Text>
                                         <Text style={{ fontSize: 9, color: pdfColors.textLight }}>
                                             {product.category || 'Opcional'} - Qtd: {product.quantity || 1}
@@ -255,130 +257,140 @@ export function PdfInvestmentPage({
                             </Text>
                         </View>
 
-                        {/* Infodive Billing Card — only if reseller products exist */}
+                        {/* ═══ Billing Info — Grouped by Billing Entity ═══ */}
                         {(() => {
-                            const resellerProducts = mainProducts.filter(p => (p.billing_type === 'direct' || !p.billing_type) && !p.distributor_id);
-                            if (resellerProducts.length === 0) return null;
-                            return (
-                                <View wrap={false} style={{
-                                    padding: 16,
-                                    backgroundColor: '#f8fafc',
-                                    borderRadius: 10,
-                                    borderWidth: 1,
-                                    borderColor: '#e2e8f0',
-                                    borderLeftWidth: 4,
-                                    borderLeftColor: '#64748b',
-                                    marginBottom: distributors.length > 0 ? 10 : 0,
-                                }}>
-                                    <Text style={{
-                                        fontSize: 8, fontWeight: 'bold', color: '#64748b',
-                                        textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6,
-                                    }}>
-                                        Faturamento Direto
-                                    </Text>
-                                    <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.primary, marginBottom: 6 }}>
-                                        Infodive Representações e Serviços Ltda
-                                    </Text>
-                                    <View style={{ flexDirection: 'row', gap: 20 }}>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>CNPJ: </Text>
-                                            <Text style={{ fontSize: 9, color: '#475569' }}>05.613.186/0001-78</Text>
-                                        </View>
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>IE: </Text>
-                                            <Text style={{ fontSize: 9, color: '#475569' }}>Isento</Text>
-                                        </View>
-                                    </View>
-                                    <View style={{ marginTop: 8, padding: 8, backgroundColor: '#f1f5f9', borderRadius: 6 }}>
-                                        <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 3 }}>
-                                            Produtos neste faturamento:
-                                        </Text>
-                                        <Text style={{ fontSize: 9, color: pdfColors.primary, fontWeight: 'bold', lineHeight: 1.4 }}>
-                                            {resellerProducts.map(p => p.name).join(' • ')}
-                                        </Text>
-                                    </View>
-                                </View>
-                            );
-                        })()}
+                            const billingGroups: any[] = [];
+                            
+                            // 1. Reseller Group
+                            const resellerProducts = mainProducts.filter(p => p.billing_type === 'direct' || !p.billing_type);
+                            if (resellerProducts.length > 0) {
+                                billingGroups.push({
+                                    title: 'Faturamento Direto', // Label used for Infodive card header
+                                    displayTitle: 'Infodive Representações e Serviços Ltda',
+                                    products: resellerProducts,
+                                    type: 'reseller',
+                                    displayCnpj: resellerProducts.find(p => p.distributor_cnpj && p.distributor_cnpj.length > 5)?.distributor_cnpj || '05.613.186/0001-78'
+                                });
+                            }
 
-                        {/* Distributor Billing Cards */}
-                        {distributors.map((dist, dIdx) => {
-                            const distProducts = mainProducts.filter(p => p.distributor_id === dist.id);
-                            if (distProducts.length === 0) return null;
-                            const override = billingOverrides[dist.id];
-                            const displayCnpj = override?.selectedCnpj || dist.cnpj;
-                            const displayName = override?.selectedBranchName || dist.name;
-                            const displayTerms = override?.paymentTerms ?? dist.payment_terms;
-                            return (
-                                <View key={dIdx} wrap={false} style={{
-                                    padding: 16,
-                                    backgroundColor: '#ffffff',
-                                    borderRadius: 10,
-                                    borderWidth: 1,
-                                    borderColor: '#fecdd3',
-                                    borderLeftWidth: 4,
-                                    borderLeftColor: pdfColors.accent,
-                                    marginBottom: dIdx < distributors.length - 1 ? 10 : 0,
-                                }}>
-                                    {/* Header Info - Keep together */}
-                                    <View wrap={false}>
+                            // 2. Direct Groups by Distributor + CNPJ
+                            const directProducts = mainProducts.filter(p => p.billing_type === 'indirect');
+                            const directGroupKeys = Array.from(new Set(directProducts.map(p => `${p.distributor_id || 'no-dist'}|${p.distributor_cnpj || 'no-cnpj'}`)));
+
+                            directGroupKeys.forEach(key => {
+                                const [dId, dCnpj] = key.split('|');
+                                const productsInGroup = directProducts.filter(p => 
+                                    (p.distributor_id || 'no-dist') === dId && 
+                                    (p.distributor_cnpj || 'no-cnpj') === dCnpj
+                                );
+                                
+                                if (productsInGroup.length === 0) return;
+
+                                const dist = dId !== 'no-dist' ? distributors.find(d => d.id === dId) : undefined;
+                                const override = dist ? billingOverrides[dist.id] : undefined;
+
+                                // 1. Prioritize Product-level override (from opportunity selection)
+                                // 2. Fallback to Proposal-level override (from editor state)
+                                // 3. Fallback to Distributor main CNPJ
+                                const displayCnpj = (dCnpj !== 'no-cnpj' ? dCnpj : undefined) || override?.selectedCnpj || dist?.cnpj;
+
+                                // Try to resolve branch name if a specific CNPJ is chosen
+                                const branch = dist?.account_branches?.find((b: any) => b.cnpj === dCnpj);
+                                const displayName = branch?.name || override?.selectedBranchName || dist?.name || 'Distribuidor';
+                                
+                                billingGroups.push({
+                                    title: 'Faturamento Direto',
+                                    displayTitle: displayName,
+                                    products: productsInGroup,
+                                    type: 'direct',
+                                    displayCnpj: displayCnpj,
+                                    displayTerms: override?.paymentTerms ?? branch?.payment_terms ?? dist?.payment_terms
+                                });
+                            });
+
+                            return billingGroups.map((group, bIdx) => {
+                                const isReseller = group.type === 'reseller';
+                                return (
+                                    <View key={bIdx} wrap={false} style={{
+                                        padding: 16,
+                                        backgroundColor: isReseller ? '#f8fafc' : '#ffffff',
+                                        borderRadius: 10,
+                                        borderWidth: 1,
+                                        borderColor: isReseller ? '#e2e8f0' : '#fecdd3',
+                                        borderLeftWidth: 4,
+                                        borderLeftColor: isReseller ? '#64748b' : pdfColors.accent,
+                                        marginBottom: bIdx < billingGroups.length - 1 ? 10 : 0,
+                                    }}>
                                         <Text style={{
-                                            fontSize: 8, fontWeight: 'bold', color: pdfColors.accent,
+                                            fontSize: 8, fontWeight: 'bold', color: isReseller ? '#64748b' : pdfColors.accent,
                                             textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6,
                                         }}>
-                                            Faturamento Direto
+                                            {group.title}
                                         </Text>
-                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.primary, marginBottom: 4 }}>
-                                            {displayName}
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.primary, marginBottom: isReseller ? 6 : 4 }}>
+                                            {group.displayTitle}
                                         </Text>
-                                        <View style={{ flexDirection: 'row', gap: 20, marginBottom: 8 }}>
+                                        
+                                        <View style={{ flexDirection: 'row', gap: 20, marginBottom: isReseller ? 0 : 8 }}>
                                             <View style={{ flexDirection: 'row' }}>
                                                 <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>CNPJ: </Text>
-                                                <Text style={{ fontSize: 9, color: '#475569' }}>{formatCNPJ(displayCnpj)}</Text>
+                                                <Text style={{ fontSize: 9, color: '#475569' }}>{formatCNPJ(group.displayCnpj)}</Text>
+                                            </View>
+                                            <View style={{ flexDirection: 'row' }}>
+                                                <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>IE: </Text>
+                                                <Text style={{ fontSize: 9, color: '#475569' }}>Isento</Text>
                                             </View>
                                         </View>
-                                    </View>
 
-                                    {/* Products - Keep together */}
-                                    <View wrap={false} style={{ padding: 8, backgroundColor: '#f1f5f9', borderRadius: 6, marginBottom: 8 }}>
-                                        <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 3 }}>
-                                            Produtos neste faturamento:
-                                        </Text>
-                                        <Text style={{ fontSize: 9, color: pdfColors.primary, fontWeight: 'bold', lineHeight: 1.4 }}>
-                                            {distProducts.map(p => p.name).join(' • ')}
-                                        </Text>
-                                    </View>
+                                        {/* Products in this billing entity */}
+                                        <View style={{ marginTop: isReseller ? 8 : 0, padding: 8, backgroundColor: '#f1f5f9', borderRadius: 6, marginBottom: isReseller ? 0 : 8 }}>
+                                            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 3 }}>
+                                                Produtos neste faturamento:
+                                            </Text>
+                                            <Text style={{ fontSize: 9, color: pdfColors.primary, fontWeight: 'bold', lineHeight: 1.4 }}>
+                                                {Array.from(group.products.reduce((acc: Map<string, string>, p: any) => {
+                                                    const rawName = (simplifiedProductNames[p.name] || p.display_name || p.name || '').toString();
+                                                    // Nuclear clean: remove ALL types of invisible spaces, normalize to single space, trim, and handle Case
+                                                    const clean = rawName.replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff\u200b]+/g, ' ').trim();
+                                                    const key = clean.toLowerCase();
+                                                    if (clean && !acc.has(key)) acc.set(key, clean);
+                                                    return acc;
+                                                }, new Map<string, string>()).values()).join(' • ')}
+                                            </Text>
+                                        </View>
 
-                                    {/* Payment Terms Container (Allows wrapping) */}
-                                    {displayTerms && (
-                                        <View style={{
-                                            padding: 12, backgroundColor: '#fff1f2',
-                                            borderRadius: 8, borderWidth: 1, borderColor: '#fecdd3',
-                                        }}>
-                                            {/* Header of Payment Terms - Keep together */}
-                                            <View wrap={false}>
-                                                <Text style={{
-                                                    fontSize: 8, fontWeight: 'bold', color: pdfColors.accent,
-                                                    textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 6,
-                                                }}>
-                                                    Condições e Prazos de Pagamento:
-                                                </Text>
-                                            </View>
-                                            
-                                            {/* Individual bullet points - Keep EACH bullet point together, but allow splitting BETWEEN them */}
-                                            {displayTerms.split(';').filter((t: string) => t.trim()).map((term: string, tIdx: number) => (
-                                                <View key={tIdx} wrap={false} style={{ flexDirection: 'row', gap: 6, marginBottom: 4 }}>
-                                                    <Text style={{ fontSize: 10, color: pdfColors.accent }}>•</Text>
-                                                    <Text style={{ fontSize: 9, color: '#9f1239', fontWeight: 'bold', flex: 1, lineHeight: 1.4 }}>
-                                                        {term.trim()}
+                                        {/* Payment Terms (Direct Billing only) */}
+                                        {!isReseller && group.displayTerms && (
+                                            <View style={{
+                                                padding: 12, backgroundColor: '#fff1f2',
+                                                borderRadius: 8, borderWidth: 1, borderColor: '#fecdd3',
+                                            }}>
+                                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                                                    <View style={{ width: 4, height: 4, backgroundColor: pdfColors.accent, borderRadius: 2 }} />
+                                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: pdfColors.accent, textTransform: 'uppercase' }}>
+                                                        Condições e Prazos de Pagamento
                                                     </Text>
                                                 </View>
-                                            ))}
-                                        </View>
-                                    )}
-                                </View>
-                            );
-                        })}
+                                                <View style={{ gap: 4 }}>
+                                                    {group.displayTerms.split(';').map((part: string, pIdx: number) => {
+                                                        if (!part.trim()) return null;
+                                                        return (
+                                                            <View key={pIdx} wrap={false} style={{ flexDirection: 'row', gap: 6, marginBottom: 4 }}>
+                                                                <Text style={{ fontSize: 10, color: pdfColors.accent }}>•</Text>
+                                                                <Text style={{ fontSize: 9, color: '#9f1239', fontWeight: 'bold', flex: 1, lineHeight: 1.4 }}>
+                                                                    {part.trim()}
+                                                                </Text>
+                                                            </View>
+                                                        );
+                                                    })}
+                                                </View>
+                                            </View>
+                                        )}
+                                    </View>
+                                );
+                            });
+                        })()}
+
                     </View>
                 )}
             </View>

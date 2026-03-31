@@ -1,11 +1,13 @@
-export interface AccountContact {
+import { Contact } from './contact';
+
+export interface AccountContact extends Partial<Contact> {
     id: string;
     name: string;
     email: string;
-    mobile: string;
-    landline: string;
+    mobile_phone: string;
+    landline_phone: string;
     role: string;
-    isPrimary: boolean;
+    is_primary: boolean;
 }
 
 export interface AccountBranch {
@@ -20,6 +22,7 @@ export interface AccountBranch {
     state: string;
     cnpj?: string;
     ie?: string;
+    payment_terms?: string;
 }
 
 export interface Account {
@@ -37,7 +40,7 @@ export interface Account {
     neighborhood: string;
     city: string;
     state: string;
-    contacts: AccountContact[];
+    contacts: Contact[];
     branches: AccountBranch[];
     tags?: string[];
     relationship_type?: string;

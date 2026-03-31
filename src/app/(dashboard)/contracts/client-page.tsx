@@ -113,7 +113,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     };
 
     return (
-        <div className="flex-1 space-y-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
             <PageHeader 
                 title="Gestão de Contratos" 
@@ -132,7 +132,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Total Contracts */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-6 rounded-3xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <FileText className="w-32 h-32 text-primary" />
                     </div>
@@ -149,7 +149,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 </div>
 
                 {/* Pending Contracts */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-6 rounded-3xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <Clock className="w-32 h-32 text-amber-600" />
                     </div>
@@ -168,7 +168,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 </div>
 
                 {/* Signed Contracts */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <CheckCircle2 className="w-32 h-32 text-emerald-600" />
                     </div>
@@ -187,7 +187,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 </div>
 
                 {/* Total Value */}
-                <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-card p-6 rounded-3xl border border-blue-100 dark:border-blue-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-card p-4 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <TrendingUp className="w-32 h-32 text-blue-600" />
                     </div>
@@ -210,12 +210,12 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
 
             {/* Filters */}
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-3xl border border-border shadow-sm animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar contratos por título ou empresa..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -224,7 +224,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <ThemeSelect
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all" className="bg-popover text-popover-foreground">Status: Todos</option>
                         <option value="draft" className="bg-popover text-popover-foreground">Rascunho</option>
@@ -241,52 +241,52 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <table className="w-full">
                         <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="text-left py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Documento</th>
-                                <th className="text-left py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Cliente</th>
-                                <th className="text-left py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Valor</th>
-                                <th className="text-left py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
-                                <th className="text-left py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Data</th>
-                                <th className="text-right py-5 px-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Ações</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Documento</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Cliente</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Valor</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
+                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Data</th>
+                                <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {filteredContracts.map(contract => (
-                                <tr key={contract.id} className="transition-all duration-300 group hover:bg-muted/50 cursor-pointer border-l-4 border-l-transparent hover:border-l-primary">
-                                    <td className="py-5 px-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all">
-                                                <FileText className="h-5 w-5" />
+                                <tr key={contract.id} className="transition-all duration-300 group hover:bg-muted/50 cursor-pointer border-l-2 border-l-transparent hover:border-l-primary">
+                                    <td className="py-3 px-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all">
+                                                <FileText className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <p className="text-base font-black text-foreground group-hover:text-primary transition-colors cursor-pointer tracking-tight" onClick={() => handleViewContract(contract)}>{contract.title}</p>
+                                                <p className="text-sm font-black text-foreground group-hover:text-primary transition-colors cursor-pointer tracking-tight" onClick={() => handleViewContract(contract)}>{contract.title}</p>
                                                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{contract.type}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="py-5 px-6">
+                                    <td className="py-3 px-4">
                                         <span className="text-sm font-bold text-muted-foreground">{contract.company}</span>
                                     </td>
-                                    <td className="py-5 px-6">
+                                    <td className="py-3 px-4">
                                         <span className="text-sm font-black text-foreground tracking-tight">
                                             {contract.value > 0
                                                 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)
                                                 : '-'}
                                         </span>
                                     </td>
-                                    <td className="py-5 px-6">
-                                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black border ${getStatusColor(contract.status)} uppercase tracking-widest flex items-center w-fit gap-1.5`}>
+                                    <td className="py-3 px-4">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${getStatusColor(contract.status)} uppercase tracking-widest flex items-center w-fit gap-1.5`}>
                                             {contract.status === 'signed' && <CheckCircle2 className="h-3 w-3" />}
                                             {contract.status === 'sent' && <Clock className="h-3 w-3" />}
                                             {getStatusLabel(contract.status)}
                                         </span>
                                     </td>
-                                    <td className="py-5 px-6">
+                                    <td className="py-3 px-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-foreground">{new Date(contract.createdAt).toLocaleDateString('pt-BR')}</span>
                                             <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Criado em</span>
                                         </div>
                                     </td>
-                                    <td className="py-5 px-6 text-right">
+                                    <td className="py-3 px-4 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 duration-200">
                                             <button
                                                 className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors border border-transparent hover:border-border"

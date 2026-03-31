@@ -11,7 +11,8 @@ export function ProposalCoverPage({
     themePrimary,
     themeAccent,
     layout = 'portrait',
-    hideValues = false
+    hideValues = false,
+    sellerName
 }: {
     dealTitle: string;
     companyName: string;
@@ -24,6 +25,7 @@ export function ProposalCoverPage({
     themeAccent?: string;
     layout?: 'portrait' | 'landscape';
     hideValues?: boolean;
+    sellerName?: string;
 }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
@@ -161,7 +163,7 @@ export function ProposalCoverPage({
                             Responsável
                         </div>
                         <div style={{ fontSize: '14px', color: '#64748b' }}>
-                            Infodive IT
+                            {sellerName ? `${sellerName} (Infodive IT)` : 'Infodive IT'}
                         </div>
                     </div>
 

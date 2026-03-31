@@ -128,7 +128,8 @@ export class AccountService {
                     city: b.city,
                     state: b.state,
                     cnpj: b.cnpj,
-                    ie: b.ie
+                    ie: b.ie,
+                    payment_terms: b.payment_terms
                 }));
                 await supabase.from('account_branches').insert(branchesToInsert);
             }
@@ -211,7 +212,8 @@ export class AccountService {
                         city: b.city,
                         state: b.state,
                         cnpj: b.cnpj,
-                        ie: b.ie
+                        ie: b.ie,
+                        payment_terms: b.payment_terms
                     }));
                     await supabase.from('account_branches').insert(branchesToInsert);
                 }

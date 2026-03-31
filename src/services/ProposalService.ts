@@ -1,7 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/admin';
+import type { Proposal } from '@/types/proposal';
 
 export class ProposalService {
-    static async fetchProposals(userId: string, dealId: string, organizationId: string) {
+    static async fetchProposals(userId: string, dealId: string, organizationId: string): Promise<Proposal[]> {
         const supabase = createAdminClient();
 
         // 2. Fetch proposals strictly within the user's organization
@@ -17,26 +18,16 @@ export class ProposalService {
             return [];
         }
 
-        return data.map((p: any) => ({
+        return (data || []).map((p: any) => ({
             ...p,
             createdAt: p.created_at,
             updatedAt: p.updated_at,
             dealId: p.deal_id,
             content: p.content || p.content_json,
-        }));
+        })) as Proposal[];
     }
 
-    static async updateProposal(userId: string, proposalId: string, organizationId: string, updates: Partial<{
-        status: string;
-        sent_at: string;
-        sentAt: string;
-        viewed_at: string;
-        viewedAt: string;
-        signed_at: string;
-        signedAt: string;
-        public_token: string;
-        allow_signature: boolean;
-    }>) {
+    static async updateProposal(userId: string, proposalId: string, organizationId: string, updates: Partial<Proposal>): Promise<Proposal> {
         const supabase = createAdminClient();
         const dbUpdates: any = {};
 
@@ -44,14 +35,14 @@ export class ProposalService {
         if (updates.public_token) dbUpdates.public_token = updates.public_token;
         if (updates.allow_signature !== undefined) dbUpdates.allow_signature = updates.allow_signature;
 
-        if (updates.sent_at || updates.sentAt) {
-            dbUpdates.sent_at = updates.sent_at || updates.sentAt;
+        if (updates.sentAt) {
+            dbUpdates.sent_at = updates.sentAt;
         }
-        if (updates.viewed_at || updates.viewedAt) {
-            dbUpdates.viewed_at = updates.viewed_at || updates.viewedAt;
+        if (updates.viewedAt) {
+            dbUpdates.viewed_at = updates.viewedAt;
         }
-        if (updates.signed_at || updates.signedAt) {
-            dbUpdates.signed_at = updates.signed_at || updates.signedAt;
+        if (updates.signedAt) {
+            dbUpdates.signed_at = updates.signedAt;
         }
 
         const { data, error } = await supabase
@@ -66,8 +57,11 @@ export class ProposalService {
 
         return {
             ...data,
-            content: data.content || data.content_json
-        };
+            content: data.content || data.content_json,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            dealId: data.deal_id
+        } as Proposal;
     }
 
     static async deleteProposal(userId: string, id: string, organizationId: string) {
@@ -83,9 +77,8 @@ export class ProposalService {
         return true;
     }
 
-    static async createProposal(userId: string, organizationId: string, payload: any) {
+    static async createProposal(userId: string, organizationId: string, payload: Partial<Proposal>): Promise<Proposal> {
         const supabase = createAdminClient();
-        // ... (truncated in my head, but I'll update the rest)
         const insertData: any = { ...payload, organization_id: organizationId };
 
         insertData.created_by = userId;
@@ -129,6 +122,12 @@ export class ProposalService {
             throw new Error(error.message);
         }
 
-        return data;
+        return {
+            ...data,
+            content: data.content || data.content_json,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+            dealId: data.deal_id
+        } as Proposal;
     }
 }

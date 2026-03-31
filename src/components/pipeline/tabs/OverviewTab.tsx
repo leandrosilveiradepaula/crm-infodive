@@ -62,8 +62,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
             action: "Enviar Mensagem",
             onClick: () => { }, // Would open omnichannel
             icon: MessageSquare,
-            color: "text-purple-500",
-            bg: "bg-purple-500/10"
+            color: "text-teal-500",
+            bg: "bg-teal-500/10"
         };
     };
 
@@ -111,10 +111,10 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 </div>
 
                 {/* Metric: Momentum */}
-                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-purple-500/30 transition-all shadow-sm">
+                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-teal-500/30 transition-all shadow-sm">
                     <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-purple-500/10 rounded-lg">
-                            <Clock className="h-4 w-4 text-purple-500" />
+                        <div className="p-2 bg-teal-500/10 rounded-lg">
+                            <Clock className="h-4 w-4 text-teal-500" />
                         </div>
                     </div>
                     <div>
@@ -143,11 +143,11 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
             </div>
 
             {/* 2. AI Next Best Action spotlight */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-purple-600/5 border border-blue-500/20 rounded-3xl p-8 backdrop-blur-sm group">
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-teal-600/5 border border-blue-500/20 rounded-3xl p-8 backdrop-blur-sm group">
                 <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
                 <div className="relative z-10 flex items-center justify-between gap-8">
                     <div className="flex gap-6 items-start max-w-2xl">
-                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-xl shadow-blue-500/20 shrink-0">
+                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-xl shadow-blue-500/20 shrink-0">
                             <Bot className="h-7 w-7 text-white" />
                         </div>
                         <div>
@@ -193,7 +193,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                             <div key={i} className="relative pl-10 group">
                                 <div className={`
                                     absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-all group-hover:scale-110 shadow-sm
-                                    ${item.type === 'proposal' ? 'bg-purple-500' : item.type === 'products' ? 'bg-blue-500' : 'bg-emerald-500'}
+                                    ${item.type === 'proposal' ? 'bg-teal-500' : item.type === 'products' ? 'bg-blue-500' : 'bg-emerald-500'}
                                 `}>
                                     {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-white" /> : <ActivityIcon className="h-2.5 w-2.5 text-white" />}
                                 </div>
@@ -268,12 +268,12 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                 </div>
                                 {deal.custom_fields?.technical_influencer && (
                                     <div className="flex items-center gap-3 opacity-60">
-                                        <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                                            <User className="h-4 w-4 text-purple-500" />
+                                        <div className="h-8 w-8 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-500/20">
+                                            <User className="h-4 w-4 text-teal-500" />
                                         </div>
                                         <div>
                                             <p className="text-[11px] font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
-                                            <p className="text-[9px] text-purple-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
+                                            <p className="text-[9px] text-teal-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
                                         </div>
                                     </div>
                                 )}

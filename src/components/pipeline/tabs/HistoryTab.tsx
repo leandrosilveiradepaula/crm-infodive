@@ -44,7 +44,7 @@ export const HistoryTab = ({ deal }: HistoryTabProps) => {
             user: deal.owner || 'Leandro',
             date: deal.created_at || new Date(Date.now() - 172800000).toISOString(),
             icon: <History className="w-4 h-4 text-white" />,
-            color: 'bg-purple-500'
+            color: 'bg-teal-500'
         }
     ];
 

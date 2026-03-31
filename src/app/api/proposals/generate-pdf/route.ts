@@ -17,6 +17,8 @@ export async function POST(request: Request) {
             editableTexts,
             config,
             aiSummary,
+            objectives,
+            simplifiedProductNames,
             softwareHighlights,
             benefitTiles,
         } = body as {
@@ -25,6 +27,8 @@ export async function POST(request: Request) {
             editableTexts: EditableTexts;
             config: EditorConfig;
             aiSummary?: string;
+            objectives?: any[];
+            simplifiedProductNames?: Record<string, string>;
             softwareHighlights?: Array<{ title: string; value: string }>;
             benefitTiles?: Array<{ value: string; label: string }>;
         };
@@ -47,14 +51,24 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Deal not found or access denied' }, { status: 404 });
         }
 
-        // Fetch organization theme
-        const { data: org, error: orgError } = await supabase
-            .from('organizations')
-            .select('theme_primary, theme_accent')
-            .eq('id', organizationId)
-            .single();
-
-        if (orgError) {
+        // Fetch organization theme safely
+        let orgTheme = { theme_primary: null, theme_accent: null };
+        try {
+            const { data: settingData } = await supabase
+                .from('app_settings')
+                .select('value')
+                .eq('organization_id', organizationId)
+                .eq('key', 'organization')
+                .maybeSingle();
+            
+            if (settingData?.value) {
+                const val = settingData.value as any;
+                orgTheme = {
+                    theme_primary: val.primary_color || undefined,
+                    theme_accent: val.secondary_color || undefined
+                };
+            }
+        } catch (orgError) {
             console.warn('Error fetching organization theme:', orgError);
         }
 
@@ -89,11 +103,13 @@ export async function POST(request: Request) {
             editableTexts,
             config,
             aiSummary,
+            objectives,
+            simplifiedProductNames,
             softwareHighlights,
             benefitTiles,
             distributors,
-            themePrimary: org?.theme_primary,
-            themeAccent: org?.theme_accent,
+            themePrimary: orgTheme.theme_primary || undefined,
+            themeAccent: orgTheme.theme_accent || undefined,
         });
         const pdfBuffer = await renderToBuffer(element as any);
 
@@ -130,6 +146,8 @@ export async function POST(request: Request) {
                 editableTexts,
                 config,
                 aiSummary,
+                objectives,
+                simplifiedProductNames,
                 softwareHighlights,
                 benefitTiles,
             },

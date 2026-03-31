@@ -13,6 +13,7 @@ import { FunnelWidget } from '@/components/dashboard/FunnelWidget';
 import { HealthWidget } from '@/components/dashboard/HealthWidget';
 import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { ContactSuggestionsWidget } from '@/components/email/ContactSuggestionsWidget';
+import { AiActionsWidget } from '@/components/dashboard/AiActionsWidget';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 interface DashboardWidget {
@@ -24,7 +25,8 @@ interface DashboardWidget {
 const DEFAULT_LAYOUT: DashboardWidget[] = [
     { id: 'ai_suggestions', isVisible: true, colSpan: 'lg:col-span-3' },
     { id: 'stats', isVisible: true, colSpan: 'lg:col-span-3' },
-    { id: 'chart', isVisible: true, colSpan: 'lg:col-span-2' },
+    { id: 'ai_actions', isVisible: true, colSpan: 'lg:col-span-2' },
+    { id: 'chart', isVisible: true, colSpan: 'lg:col-span-1' },
     { id: 'tasks', isVisible: true, colSpan: 'lg:col-span-1' },
     { id: 'recent_deals', isVisible: true, colSpan: 'lg:col-span-1' },
     { id: 'performers', isVisible: true, colSpan: 'lg:col-span-1' },
@@ -155,6 +157,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
     const renderWidget = (id: string) => {
         switch (id) {
             case 'ai_suggestions': return <ContactSuggestionsWidget />;
+            case 'ai_actions': return <AiActionsWidget />;
             case 'stats': return <StatsWidget metrics={filteredMetrics} />;
             case 'chart': return <SalesChartWidget data={filteredMetrics.monthlyRevenue || []} />;
             case 'recent_deals': return <RecentDealsWidget deals={recentDeals} />;
@@ -168,7 +171,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
     const getWidgetLabel = (id: string) => {
         const labels: Record<string, string> = {
-            ai_suggestions: 'Sugestões de IA',
+            ai_suggestions: 'Sugestões de Contatos',
+            ai_actions: 'Ações Sugeridas (IA)',
             stats: 'Estatísticas Principais',
             chart: 'Gráfico de Desempenho',
             recent_deals: 'Deals Recentes',
@@ -181,7 +185,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
     };
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header Section */}
             <PageHeader
                 title="Visão Geral"
@@ -189,7 +193,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
             >
                 <div className="flex items-center gap-2">
                     {/* Year + Quarter Pill Selector — same as Pipeline */}
-                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-2xl border border-border h-auto sm:h-11 items-center overflow-x-auto no-scrollbar">
+                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
                         {/* Year Selector */}
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <CalendarDays className="h-3.5 w-3.5 text-primary opacity-50" />
@@ -209,7 +213,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                className={`px-4 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -233,7 +237,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                     : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`relative px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${isSelected
+                                        className={`relative px-4 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
                                             ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                             : hasSelectionsInOtherYears
                                                 ? 'bg-primary/10 text-primary hover:bg-primary/20'
@@ -306,7 +310,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div
                             {...provided.droppableProps}
                             ref={provided.innerRef}
-                            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                            className="grid grid-cols-1 lg:grid-cols-3 gap-4"
                         >
                             {widgets.map((widget, index) => (
                                 widget.isVisible && (

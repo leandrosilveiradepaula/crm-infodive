@@ -27,79 +27,77 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('idle'); // idle, analyzing_ai, capturing_pages, done
     const [aiSummary, setAiSummary] = useState('');
+    const [objectives, setObjectives] = useState<any[]>([]);
     const [softwareHighlights, setSoftwareHighlights] = useState<any[]>([]);
     const [benefitTiles, setBenefitTiles] = useState<any[]>([]);
     const [proposalNumber, setProposalNumber] = useState<string>('');
+    const [simplifiedProductNames, setSimplifiedProductNames] = useState<Record<string, string>>({});
 
-    const handleGenerate = async () => {
+    const handleAnalyzeAI = async () => {
         setLoading(true);
         setStatus('analyzing_ai');
 
         try {
-            // 1. AI Summary & Highlights Generation
-            let fetchedSummary = '';
-            let fetchedHighlights = [];
-            let fetchedTiles = [];
+            const aiRes = await fetch('/api/gemini/proposal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dealTitle: deal.title,
+                    proposalTitle: config.customTitle,
+                    company: deal.company,
+                    dealValue: deal.value,
+                    dealStage: deal.stage,
+                    probability: deal.probability,
+                    products: deal.deal_products || []
+                })
+            });
 
-            if (config.includeAISummary) {
-                const aiRes = await fetch('/api/gemini/proposal', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        dealTitle: deal.title,
-                        proposalTitle: config.customTitle,
-                        company: deal.company,
-                        dealValue: deal.value,
-                        dealStage: deal.stage,
-                        probability: deal.probability,
-                        products: deal.deal_products || []
-                    })
-                });
-
-                if (!aiRes.ok) {
-                    const errData = await aiRes.json().catch(() => ({}));
-                    console.warn("AI Generation failed:", errData);
-                    throw new Error(`Falha ao gerar conteúdo com IA: ${errData.error || aiRes.statusText}. Verifique sua Chave do Gemini.`);
-                } else {
-                    const { summary, softwareHighlights: highlights, benefitTiles: tiles } = await aiRes.json();
-                    fetchedSummary = summary;
-                    fetchedHighlights = highlights || [];
-                    fetchedTiles = tiles || [];
-                }
+            if (!aiRes.ok) {
+                const errData = await aiRes.json().catch(() => ({}));
+                throw new Error(`Falha ao gerar conteúdo com IA: ${errData.error || aiRes.statusText}`);
             }
 
-            setStatus('capturing_pages');
+            const data = await aiRes.json();
+            setAiSummary(data.summary || '');
+            setObjectives(data.objectives || []);
+            setSoftwareHighlights(data.softwareHighlights || []);
+            setBenefitTiles(data.benefitTiles || []);
+            setSimplifiedProductNames(data.simplifiedProductNames || {});
 
-            // 1b. Generate proposal number BEFORE capture so it appears on the cover
-            let generatedNumber = '';
+            // Also pre-generate proposal number
             try {
                 const numRes = await fetch('/api/proposals/generate-number');
                 if (numRes.ok) {
                     const { number } = await numRes.json();
-                    generatedNumber = number || '';
+                    setProposalNumber(number || '');
                 }
             } catch (numErr) {
                 console.warn('Could not generate proposal number:', numErr);
             }
 
-            // FORCE synchronous DOM update before taking screenshots
+            setStatus('idle');
+            return true;
+        } catch (error) {
+            console.error('❌ AI Analysis error:', error);
+            toast.error(error instanceof Error ? error.message : 'Erro na análise da IA');
+            setStatus('idle');
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGeneratePdf = async (customContent?: { aiSummary?: string; objectives?: any[] }) => {
+        setLoading(true);
+        setStatus('capturing_pages');
+
+        try {
+            // Apply custom/edited content if provided
+            if (customContent?.aiSummary) setAiSummary(customContent.aiSummary);
+            if (customContent?.objectives) setObjectives(customContent.objectives);
+
+            // FORCE synchronous DOM update
             flushSync(() => {
-                if (fetchedSummary) {
-                    console.log('📝 Setting AI summary in state for capture');
-                    setAiSummary(fetchedSummary);
-                }
-                if (fetchedHighlights.length > 0) {
-                    console.log('✨ Setting Software Highlights in state');
-                    setSoftwareHighlights(fetchedHighlights);
-                }
-                if (fetchedTiles.length > 0) {
-                    console.log('💎 Setting Benefit Tiles in state');
-                    setBenefitTiles(fetchedTiles);
-                }
-                if (generatedNumber) {
-                    console.log('🔢 Setting Proposal Number in state:', generatedNumber);
-                    setProposalNumber(generatedNumber);
-                }
                 setStatus('capturing_pages');
             });
 
@@ -192,11 +190,12 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
                 status: 'draft',
                 account_id: deal.account_id,
                 company_name: deal.company,
-                number: generatedNumber || undefined, // already generated before capture; DB RPC as fallback
+                number: proposalNumber || undefined, // already generated before capture; DB RPC as fallback
                 products_json: deal.deal_products,
                 version: 1,
                 content_json: {
-                    aiSummary: fetchedSummary || aiSummary,
+                    aiSummary: customContent?.aiSummary || aiSummary,
+                    objectives: customContent?.objectives || objectives,
                     config,
                     generatedAt: new Date().toISOString(),
                     products: deal.deal_products,
@@ -206,7 +205,7 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
 
             console.log('✅ Proposal saved successfully:', proposalResult.id, 'number:', proposalResult.number);
             // Sync number from DB result in case it was generated server-side as fallback
-            if (proposalResult.number && !generatedNumber) {
+            if (proposalResult.number && !proposalNumber) {
                 setProposalNumber(proposalResult.number);
             }
             toast.success('Proposta gerada e salva com sucesso!');
@@ -215,8 +214,8 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
 
             return true;
         } catch (error) {
-            console.error('❌ Error during proposal generation:', error);
-            toast.error('Erro ao gerar proposta: ' + (error instanceof Error ? error.message : String(error)));
+            console.error('❌ PDF Generation error:', error);
+            toast.error(error instanceof Error ? error.message : 'Erro ao gerar PDF');
             setStatus('idle');
             return false;
         } finally {
@@ -225,16 +224,20 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
     };
 
     return {
-        handleGenerate,
+        handleAnalyzeAI,
+        handleGeneratePdf,
         loading,
         status,
         setStatus,
         aiSummary,
         setAiSummary,
+        objectives,
+        setObjectives,
         softwareHighlights,
         setSoftwareHighlights,
         benefitTiles,
         setBenefitTiles,
+        simplifiedProductNames,
         proposalNumber,
         setProposalNumber
     };

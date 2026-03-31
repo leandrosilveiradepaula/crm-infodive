@@ -43,11 +43,12 @@ export class ProductService {
 
             return { success: true, data };
         } catch (error: any) {
-            console.error('Error creating product:', error);
-            if (error.code === '23505' || error.message?.includes('products_sku_key')) {
+            const err = error as { code?: string; message?: string };
+            console.error('Error creating product:', err);
+            if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Este SKU já está cadastrado.' };
             }
-            return { success: false, error: error.message };
+            return { success: false, error: err.message || 'Erro desconhecido' };
         }
     }
 
@@ -70,12 +71,13 @@ export class ProductService {
             if (error) throw error;
 
             return { success: true };
-        } catch (error: any) {
-            console.error('Error updating product:', error);
-            if (error.code === '23505' || error.message?.includes('products_sku_key')) {
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
+            console.error('Error updating product:', err);
+            if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Este SKU já está cadastrado.' };
             }
-            return { success: false, error: error.message };
+            return { success: false, error: err.message || 'Erro desconhecido' };
         }
     }
 
@@ -92,9 +94,10 @@ export class ProductService {
             if (error) throw error;
 
             return { success: true };
-        } catch (error: any) {
-            console.error('Error deleting product:', error);
-            return { success: false, error: error.message };
+        } catch (error: unknown) {
+            const err = error as { message?: string };
+            console.error('Error deleting product:', err);
+            return { success: false, error: err.message || 'Erro desconhecido' };
         }
     }
 
@@ -136,12 +139,13 @@ export class ProductService {
             if (insertError) throw insertError;
 
             return { success: true, data };
-        } catch (error: any) {
-            console.error('Error duplicating product:', error);
-            if (error.code === '23505' || error.message?.includes('products_sku_key')) {
+        } catch (error: unknown) {
+            const err = error as { code?: string; message?: string };
+            console.error('Error duplicating product:', err);
+            if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Erro ao gerar SKU único para a cópia. Tente novamente.' };
             }
-            return { success: false, error: error.message };
+            return { success: false, error: err.message || 'Erro desconhecido' };
         }
     }
 }

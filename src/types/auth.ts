@@ -1,17 +1,6 @@
-export type Role = 'admin' | 'manager' | 'vendedor' | 'support';
+import { Profile } from './profile';
 
-export interface Profile {
-    id: string;
-    full_name: string;
-    avatar_url?: string;
-    email?: string;
-    role: Role;
-    monthly_goal?: number;
-    yearly_goal?: number;
-    quarterly_goals?: { q1: number; q2: number; q3: number; q4: number };
-    commission_rules?: any;
-    status?: 'active' | 'inactive';
-}
+export type Role = 'admin' | 'manager' | 'vendedor' | 'support';
 
 export type Permission =
     | 'leads:view_all'

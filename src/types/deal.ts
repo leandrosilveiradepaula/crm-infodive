@@ -1,3 +1,7 @@
+import { Profile } from './profile';
+import { Account } from './account';
+import { Activity } from './activity';
+
 export interface ProductTechDetail {
     id: string;
     sku?: string;
@@ -16,6 +20,7 @@ export interface DealProduct {
     deal_id: string;
     product_id?: string;
     name: string;
+    display_name?: string | null; // Customer-friendly name for proposals; falls back to `name` if null
     sku?: string;
     description?: string;
     quantity: number;
@@ -60,11 +65,11 @@ export interface Deal {
     lost_at?: string;
     loss_reason?: string;
     owner_id?: string;
-    owner_profile?: any;
+    owner_profile?: Profile | null;
     expected_close_date?: string;
     deal_products?: DealProduct[];
-    deal_activities?: any[];
-    account?: any;
+    deal_activities?: Activity[];
+    account?: Account | null;
     account_id?: string;
     contact_name?: string;
     contact_email?: string;
@@ -73,13 +78,14 @@ export interface Deal {
     health_score?: number;
     health_trend?: 'stable' | 'improving' | 'declining';
     billing_type?: 'direct' | 'indirect';
-    distributor_id?: string;
-    distributor_contact_id?: string;
-    manufacturer_contact_id?: string;
-    supplier_id?: string;
-    client_contact_id?: string;
+    distributor_id?: string | null;
+    distributor_contact_id?: string | null;
+    manufacturer_contact_id?: string | null;
+    supplier_id?: string | null;
+    client_contact_id?: string | null;
     lead_source?: string;
     next_step?: string;
     commission_deduction?: number;
+    is_new_client?: boolean;
     custom_fields?: Record<string, any>;
 }

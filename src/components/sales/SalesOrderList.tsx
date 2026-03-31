@@ -43,7 +43,7 @@ export const SalesOrderList: React.FC = () => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'nf_emitida': return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-            case 'entregue': return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
+            case 'entregue': return 'bg-teal-500/20 text-teal-400 border-teal-500/50';
             case 'cliente_pagou': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
             case 'distribuidor_pagou': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
             case 'comissao_paga': return 'bg-gray-500/20 text-muted-foreground border-gray-500/50';
@@ -83,44 +83,44 @@ export const SalesOrderList: React.FC = () => {
     });
 
     return (
-        <div className="h-full flex flex-col bg-background text-foreground p-6 overflow-hidden">
-            <div className="flex justify-between items-center mb-8">
+        <div className="h-full flex flex-col bg-background text-foreground p-5 overflow-hidden">
+            <div className="flex justify-between items-center mb-5">
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">
+                    <h1 className="text-2xl font-bold text-foreground">
                         Pedidos de Venda
                     </h1>
-                    <p className="text-muted-foreground mt-1">Gestão de entregas e faturamento</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Gestão de entregas e faturamento</p>
                 </div>
-                <div className="flex gap-3">
-                    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Clock className="h-5 w-5 text-primary" />
+                <div className="flex gap-2">
+                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-primary/10 rounded-lg">
+                            <Clock className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground uppercase">Pendentes</p>
-                            <p className="text-lg font-bold">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
+                            <p className="text-base font-black leading-tight">
                                 {orders.filter(o => o.status === 'pedido_gerado').length}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/20 rounded-lg">
-                            <DollarSign className="h-5 w-5 text-emerald-500" />
+                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-emerald-500/20 rounded-lg">
+                            <DollarSign className="h-4 w-4 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground uppercase">Faturados</p>
-                            <p className="text-lg font-bold">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
+                            <p className="text-base font-black leading-tight">
                                 {orders.filter(o => o.status === 'nf_emitida').length}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
-                        <div className="p-2 bg-purple-500/20 rounded-lg">
-                            <Truck className="h-5 w-5 text-purple-500" />
+                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-teal-500/20 rounded-lg">
+                            <Truck className="h-4 w-4 text-teal-500" />
                         </div>
                         <div>
-                            <p className="text-xs text-muted-foreground uppercase">Entregues</p>
-                            <p className="text-lg font-bold">
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
+                            <p className="text-base font-black leading-tight">
                                 {orders.filter(o => o.status === 'entregue').length}
                             </p>
                         </div>
@@ -128,23 +128,23 @@ export const SalesOrderList: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-3 mb-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Buscar por cliente, deal ou ID..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
+                        className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
                     />
                 </div>
-                <div className="relative min-w-[200px]">
-                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <div className="relative min-w-[180px]">
+                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none font-medium text-muted-foreground"
+                        className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none font-medium text-muted-foreground"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="pedido_gerado">Pedido Gerado</option>
@@ -154,8 +154,8 @@ export const SalesOrderList: React.FC = () => {
                         <option value="distribuidor_pagou">Distr. Pagou</option>
                         <option value="comissao_paga">Comissão Paga</option>
                     </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <svg className="h-3 w-3 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
@@ -176,12 +176,12 @@ export const SalesOrderList: React.FC = () => {
                     <table className="w-full">
                         <thead className="bg-muted sticky top-0 z-10">
                             <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID / Data</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cliente / Deal</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Valor Total</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">NF-e</th>
-                                <th className="px-6 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ações</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">ID / Data</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Cliente / Deal</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor Total</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">NF-e</th>
+                                <th className="px-4 py-3 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -191,32 +191,32 @@ export const SalesOrderList: React.FC = () => {
                                     className="hover:bg-muted/50 transition-colors cursor-pointer group"
                                     onClick={() => setSelectedOrder(order)}
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-foreground">#{order.id.slice(0, 8)}</div>
-                                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                    <td className="px-4 py-3 whitespace-nowrap border-r border-border/10">
+                                        <div className="text-[13px] font-black text-foreground leading-none">#{order.id.slice(0, 8)}</div>
+                                        <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 font-bold">
                                             <Calendar className="h-3 w-3" />
                                             {new Date(order.created_at).toLocaleDateString('pt-BR')}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors">
+                                    <td className="px-4 py-3">
+                                        <div className="text-[13px] font-bold text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors leading-none">
                                             {order.deal?.customer?.name || 'Cliente N/A'}
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate max-w-[250px]">
+                                        <div className="text-[11px] text-muted-foreground mt-1 truncate max-w-[250px] font-medium opacity-80">
                                             {order.deal?.title}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-bold text-emerald-500">
+                                    <td className="px-4 py-3 whitespace-nowrap">
+                                        <div className="text-[14px] font-black text-emerald-500 tracking-tighter">
                                             {formatCurrency(Number(order.total_value))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
+                                    <td className="px-4 py-3 whitespace-nowrap">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                                             {getStatusLabel(order.status)}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap">
                                         {order.invoice_url ? (
                                             <button
                                                 onClick={async (e) => {
@@ -231,19 +231,19 @@ export const SalesOrderList: React.FC = () => {
                                                         toast.error(err.message || 'Erro ao abrir arquivo');
                                                     }
                                                 }}
-                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-sm transition-colors focus:outline-none"
+                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider transition-colors focus:outline-none"
                                             >
-                                                <FileText className="h-4 w-4" />
+                                                <FileText className="h-3.5 w-3.5" />
                                                 Visualizar
                                             </button>
                                         ) : (
-                                            <span className="text-xs text-muted-foreground italic">Pendente</span>
+                                            <span className="text-[11px] text-muted-foreground italic font-medium">Pendente</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <button className="text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted rounded-lg">
-                                            <ChevronRight className="h-5 w-5" />
-                                        </button>
+                                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                                        <div className="text-muted-foreground group-hover:text-primary transition-all p-1 group-hover:translate-x-1">
+                                            <ChevronRight className="h-4 w-4" />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

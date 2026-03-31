@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
         // Parse and enrich product list including bundle details and optional flag
         const enrichedProductList = products.map((p: any) => {
-            let productInfo = `📦 **${p.name}** (Qtd: ${p.quantity})${p.is_optional ? ' [ITEM OPCIONAL / ALTERNATIVA]' : ''}`;
+            const productInfo = `📦 **${p.name}** (Qtd: ${p.quantity})${p.is_optional ? ' [ITEM OPCIONAL / ALTERNATIVA]' : ''}`;
 
             // Try to parse description
             if (p.description) {
@@ -47,10 +47,12 @@ LISTA DE PRODUTOS E CONFIGURAÇÕES:
 ${enrichedProductList}
 
 TAREFA:
-1. Escreva um resumo executivo profissional e persuasivo de 2-3 parágrafos.
-2. Identifique o software principal da proposta (ex: IBM Spectrum Control, Windows Server, VMware) e gere:
-   - 2 "Destaques Técnicos" (Highlights) para o corpo do componente.
-   - 3 "Tiles de Benefícios" (Benefit Tiles) para os cartões inferiores (ícone/valor + descrição curta).
+1. Escreva um resumo executivo profissional, persuasivo e CONCISO de até 800 caracteres.
+2. Gere 4 "Objetivos do Projeto" estratégicos e personalizados para este cliente e solução.
+3. Identifique o software principal e gere:
+   - 2 "Destaques Técnicos" (Highlights).
+   - 3 "Tiles de Benefícios" (Benefit Tiles).
+4. Simplifique os nomes dos produtos listados (Hardware e Software) para que sejam amigáveis e compreensíveis por um cliente não técnico (ex: Traduzir "9846-AF8" ou codigos complexos para "IBM FlashSystem 5200" ou similar).
 
 DIRETRIZES PARA OS DESTAQUES TÉCNICOS:
 - Devem ser curtos e focados em valor técnico.
@@ -65,10 +67,18 @@ SAÍDA DESEJADA (JSON):
 Retorne APENAS um objeto JSON com esta estrutura:
 {
   "summary": "Texto do resumo executivo aqui...",
-  "softwareHighlights": [
-    { "title": "Título do Destaque 1", "value": "Descrição curta 1" },
-    { "title": "Título do Destaque 2", "value": "Descrição curta 2" }
-  ]
+  "objectives": [
+    { "number": "01", "title": "Título Curto", "description": "Descrição de uma frase" },
+    { "number": "02", "title": "Título Curto", "description": "Descrição de uma frase" },
+    { "number": "03", "title": "Título Curto", "description": "Descrição de uma frase" },
+    { "number": "04", "title": "Título Curto", "description": "Descrição de uma frase" }
+  ],
+  "softwareHighlights": [ ... ],
+  "benefitTiles": [ ... ],
+  "simplifiedProductNames": {
+    "Nome Original Exato do Produto 1": "Nome Simplificado Amigável 1",
+    "Nome Original Exato do Produto 2": "Nome Simplificado Amigável 2"
+  }
 }
 
 IMPORTANTE:
@@ -134,8 +144,10 @@ IMPORTANTE:
 
         return NextResponse.json({
             summary: parsedContent.summary,
+            objectives: parsedContent.objectives,
             softwareHighlights: parsedContent.softwareHighlights,
-            benefitTiles: parsedContent.benefitTiles
+            benefitTiles: parsedContent.benefitTiles,
+            simplifiedProductNames: parsedContent.simplifiedProductNames || {}
         });
 
     } catch (error: any) {

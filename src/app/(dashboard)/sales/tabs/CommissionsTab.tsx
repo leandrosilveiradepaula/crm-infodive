@@ -37,6 +37,8 @@ interface CommissionItem {
     customerName: string;
     dealTitle?: string;
     userName: string;
+    seller_commission: number;
+    seller_rate: number;
 }
 
 interface CommissionsTabProps {
@@ -49,13 +51,33 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
     const [searchTerm, setSearchTerm] = useState('');
 
     const allCommissions = useMemo(() => {
-        return orders.flatMap(order => (order.commissions || []).map(comm => ({
-            ...comm,
-            orderId: order.id,
-            customerName: order.deal?.customer?.name || 'Cliente Desconhecido',
-            dealTitle: order.deal?.title,
-            userName: order.user?.name || 'Vendedor'
-        })));
+        return orders.map(order => {
+            const deductionRate = (order.deal as any)?.commission_deduction || 18; // Default to 18 se não encontrar
+            // Margem da Empresa
+            const companyMargin = order.total_value * (deductionRate / 100);
+
+            // Comissão do Vendedor
+            const rules = order.user?.commission_rules;
+            let sellerRate = 0;
+            if (rules) {
+                sellerRate = Number(rules?.hardware?.base || rules?.software?.base || rules?.services?.base || 0);
+            }
+            const sellerCommission = companyMargin * (sellerRate / 100);
+
+            return {
+                id: order.id,
+                amount: companyMargin, // A "amount" principal vira a Margem da Empresa para os KPIs
+                seller_commission: sellerCommission,
+                seller_rate: sellerRate,
+                due_date: order.updated_at || order.created_at,
+                // Assume pago se marcado ou se o pedido concluiu
+                status: order.commission_status === 'paid' || order.status === 'comissao_paga' ? 'paid' : 'pending',
+                orderId: order.id,
+                customerName: order.deal?.customer?.name || 'Cliente Desconhecido',
+                dealTitle: order.deal?.title || 'Pedido Vazio',
+                userName: order.user?.name || 'Vendedor'
+            };
+        });
     }, [orders]);
 
     const filtered = useMemo(() => {
@@ -81,21 +103,21 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-primary/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-primary/10 group-hover:scale-110 transition-transform"><TrendingUp className="w-4 h-4 text-primary" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Gerado</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Margem (Empresa)</span>
                     </div>
                     <div className="text-2xl font-black text-foreground">{formatCurrency(totalInvoiced)}</div>
                 </div>
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-amber-500/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-amber-500/10 group-hover:scale-110 transition-transform"><Clock className="w-4 h-4 text-amber-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aguardando Pagto</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aguardando (Distribuidor)</span>
                     </div>
                     <div className="text-2xl font-black text-foreground">{formatCurrency(totalPending)}</div>
                 </div>
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-emerald-500/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-emerald-500/10 group-hover:scale-110 transition-transform"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pago ao Vendedor</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recebido (Empresa)</span>
                     </div>
                     <div className="text-2xl font-black text-emerald-500">{formatCurrency(totalPaid)}</div>
                 </div>
@@ -137,7 +159,8 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                             <TableHead className="py-5">Status</TableHead>
                             <TableHead className="py-5">Vendedor</TableHead>
                             <TableHead className="py-5">Cliente / Negócio</TableHead>
-                            <TableHead className="py-5 text-right">Valor</TableHead>
+                            <TableHead className="py-5 text-right">Margem (Empresa)</TableHead>
+                            <TableHead className="py-5 text-right">Comissão (Vendedor)</TableHead>
                             <TableHead className="py-5">Previsão</TableHead>
                             <TableHead className="py-5 text-right">Ações</TableHead>
                         </TableRow>
@@ -145,7 +168,7 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                     <TableBody>
                         {filtered.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="py-20">
+                                <TableCell colSpan={7} className="py-20">
                                     <PremiumEmptyState
                                         icon={DollarSign}
                                         title="Nenhuma comissão encontrada"
@@ -186,7 +209,15 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5 text-right">
-                                        <span className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.amount)}</span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.amount)}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-5 text-right">
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-sm font-black text-emerald-600 tracking-tighter">{formatCurrency(c.seller_commission)}</span>
+                                            {c.seller_rate > 0 && <span className="text-[9px] text-muted-foreground font-black opacity-80 mt-0.5 uppercase">Aprox {c.seller_rate.toFixed(1)}%</span>}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="py-5">
                                         <div className="flex items-center gap-2 text-[10px] font-black tracking-tighter uppercase text-muted-foreground">

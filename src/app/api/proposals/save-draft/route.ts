@@ -13,6 +13,8 @@ export async function POST(request: Request) {
             editableTexts,
             config,
             aiSummary,
+            objectives,
+            simplifiedProductNames,
             softwareHighlights,
             benefitTiles,
         } = body;
@@ -70,6 +72,8 @@ export async function POST(request: Request) {
                 editableTexts,
                 config,
                 aiSummary,
+                objectives,
+                simplifiedProductNames,
                 softwareHighlights,
                 benefitTiles,
             },

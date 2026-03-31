@@ -47,7 +47,7 @@ export default async function DebugPage() {
 
             {/* DB Test */}
             <div className="border border-white/20 p-4 rounded">
-                <h2 className="text-xl font-bold text-purple-400 mb-2">3. Database Connection</h2>
+                <h2 className="text-xl font-bold text-teal-400 mb-2">3. Database Connection</h2>
 
                 <h3 className="font-bold mt-2">Accounts Table (Organization Filtered):</h3>
                 {dbError ? (

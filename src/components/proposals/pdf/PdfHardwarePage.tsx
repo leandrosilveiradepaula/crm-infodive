@@ -7,11 +7,12 @@ import { getSmartProductDescription } from '@/utils/formatProductDescription';
 
 interface PdfHardwarePageProps {
     products: any[];
+    simplifiedProductNames?: Record<string, string>;
     pdfColors: PdfColors;
     pdfStyles: any;
 }
 
-export function PdfHardwarePage({ products, pdfColors, pdfStyles }: PdfHardwarePageProps) {
+export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColors, pdfStyles }: PdfHardwarePageProps) {
     const hardwareProducts = products.filter(p =>
         (isHardware(p) || isSupport(p) || isService(p)) && p.is_visible_on_proposal !== false
     );
@@ -122,7 +123,7 @@ export function PdfHardwarePage({ products, pdfColors, pdfStyles }: PdfHardwareP
                         {/* Name and Specs */}
                         <View style={{ flex: 1, paddingRight: 10 }}>
                             <Text style={{ fontSize: 11, fontWeight: 'semibold', color: pdfColors.text, marginBottom: 2 }}>
-                                {product.name}
+                                {simplifiedProductNames[product.name] || product.display_name || product.name}
                             </Text>
                             {product.duration && product.duration_unit && (
                                 <Text style={{ fontSize: 9, color: pdfColors.green, fontStyle: 'italic', fontWeight: 'bold', marginBottom: 2 }}>

@@ -13,11 +13,11 @@ export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
             label: 'Administrador',
             description: 'Acesso total a todas as configurações e dados.',
             icon: Shield,
-            color: 'text-purple-400',
-            bg: 'bg-purple-500/10',
-            border: 'border-purple-500/20',
-            activeBorder: 'border-purple-500',
-            ring: 'ring-purple-500'
+            color: 'text-teal-400',
+            bg: 'bg-teal-500/10',
+            border: 'border-teal-500/20',
+            activeBorder: 'border-teal-500',
+            ring: 'ring-teal-500'
         },
         {
             id: 'manager',

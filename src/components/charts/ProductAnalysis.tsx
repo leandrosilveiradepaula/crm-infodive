@@ -24,7 +24,7 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
 
             {/* Top Product */}
             {topProduct && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl border border-blue-200">
                     <div className="flex items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
                             <Package className="h-6 w-6 text-white" />

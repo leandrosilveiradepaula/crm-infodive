@@ -33,7 +33,7 @@ function getFileIcon(mimeType: string) {
         return <FileSpreadsheet className="w-5 h-5 text-emerald-500" />;
     if (mimeType.includes('presentation') || mimeType.includes('powerpoint'))
         return <Presentation className="w-5 h-5 text-orange-500" />;
-    if (mimeType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-purple-500" />;
+    if (mimeType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-teal-500" />;
     if (mimeType.includes('word')) return <FileText className="w-5 h-5 text-blue-500" />;
     if (mimeType.includes('zip') || mimeType.includes('rar'))
         return <FileArchive className="w-5 h-5 text-yellow-600" />;
@@ -43,10 +43,10 @@ function getFileIcon(mimeType: string) {
 function getCategoryBadge(category: DocumentCategory, entityType: EntityType) {
     const map: Record<string, { bg: string; text: string }> = {
         contrato: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
-        contrato_social: { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300' },
+        contrato_social: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
         financeiro: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300' },
         fiscal: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300' },
-        certificado: { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-700 dark:text-violet-300' },
+        certificado: { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-700 dark:text-cyan-300' },
         ata: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
         nf: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
         tecnico: { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-700 dark:text-cyan-300' },
@@ -328,7 +328,7 @@ export const DocumentsTab = ({
                                             {doc.name}
                                         </p>
                                         {doc.source_name && (
-                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 shrink-0">
+                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
                                                 {doc.source_name}
                                             </span>
                                         )}

@@ -34,14 +34,16 @@ export default function Error({
                 <Button
                     onClick={() => reset()}
                     variant="default"
-                    className="bg-primary hover:bg-primary font-bold"
+                    className="bg-primary hover:bg-primary font-bold min-h-[44px]"
+                    aria-label="Tentar novamente"
                 >
                     Tentar Novamente
                 </Button>
                 <Button
                     onClick={() => window.location.reload()}
                     variant="outline"
-                    className="border-white/10 hover:bg-card/5"
+                    className="border-white/10 hover:bg-card/5 min-h-[44px]"
+                    aria-label="Recarregar página"
                 >
                     Recarregar Página
                 </Button>

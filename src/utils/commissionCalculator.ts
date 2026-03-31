@@ -1,37 +1,36 @@
+import type { Deal } from '@/types/deal';
+import type { Profile } from '@/types/profile';
+
 export interface CommissionResult {
     commission: number;
     netMargin: number;
     appliedRate?: number;
-    debug?: any;
+    debug?: {
+        deduction: number;
+        productsCount: number;
+        hasRules: boolean;
+    };
 }
 
 export function calculateDealCommission(
-    deal: {
-        commission_deduction?: number;
-        is_new_client?: boolean;
-        deal_products?: Array<{
-            unit_price: number;
-            cost?: number;
-            quantity: number;
-            category?: string;
-            name?: string;
-        }>;
-    },
-    ownerRules: any,
+    deal: Partial<Deal>,
+    ownerRules: Profile['commission_rules'] | string | null,
     legacyRate: number = 0
 ): CommissionResult {
     const deduction = (deal.commission_deduction ?? 21) / 100;
     const products = deal.deal_products || [];
 
-    let rules = ownerRules as any;
+    let rules: Profile['commission_rules'] = undefined;
 
-    if (typeof rules === 'string') {
+    if (typeof ownerRules === 'string') {
         try {
-            rules = JSON.parse(rules);
+            rules = JSON.parse(ownerRules);
         } catch (e) {
             console.error('Error parsing commission rules:', e);
-            rules = {};
+            rules = undefined;
         }
+    } else {
+        rules = ownerRules || undefined;
     }
 
     let lastAppliedRate = 0;
@@ -56,16 +55,17 @@ export function calculateDealCommission(
         let rate = 0;
 
         // 1. Try specific category rule
-        if (rules && rules[ruleKey]) {
+        if (rules && rules[ruleKey as keyof NonNullable<Profile['commission_rules']>]) {
+            const rule = rules[ruleKey as keyof NonNullable<Profile['commission_rules']>];
             const ruleValue = deal.is_new_client
-                ? Number(rules[ruleKey].new)
-                : Number(rules[ruleKey].base);
+                ? Number(rule.new)
+                : Number(rule.base);
 
             if (!isNaN(ruleValue) && ruleValue > 0) {
                 rate = ruleValue;
-            } else if (!isNaN(Number(rules[ruleKey].base)) && Number(rules[ruleKey].base) > 0) {
+            } else if (!isNaN(Number(rule.base)) && Number(rule.base) > 0) {
                 // Fallback to base if 'new' is not set or 0
-                rate = Number(rules[ruleKey].base);
+                rate = Number(rule.base);
             }
         }
 

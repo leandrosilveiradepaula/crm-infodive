@@ -1,9 +1,10 @@
-export function sortProductsHierarchically(products: any[]) {
-    if (!products || products.length === 0) return [];
+import type { DealProduct } from '@/types/deal';
+
+export function sortProductsHierarchically(products: DealProduct[]) {
 
     // 1. Group by parent_id
-    const childrenMap = new Map<string, any[]>();
-    const rootProducts: any[] = [];
+    const childrenMap = new Map<string, DealProduct[]>();
+    const rootProducts: DealProduct[] = [];
 
     for (const p of products) {
         if (p.parent_id) {
@@ -17,17 +18,17 @@ export function sortProductsHierarchically(products: any[]) {
     }
 
     // 2. Sort siblings by display_order
-    const sortByOrder = (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0);
+    const sortByOrder = (a: DealProduct, b: DealProduct) => (a.display_order || 0) - (b.display_order || 0);
     rootProducts.sort(sortByOrder);
     for (const children of childrenMap.values()) {
         children.sort(sortByOrder);
     }
 
     // 3. Flatten tree
-    const result: any[] = [];
+    const result: DealProduct[] = [];
 
     // Recursive function to add product and its children
-    const addProductAndChildren = (product: any) => {
+    const addProductAndChildren = (product: DealProduct) => {
         result.push(product);
         const children = childrenMap.get(product.id);
         if (children) {

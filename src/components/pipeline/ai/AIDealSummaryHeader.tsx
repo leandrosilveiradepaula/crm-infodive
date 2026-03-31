@@ -76,13 +76,13 @@ export const AIDealSummaryHeader = ({ deal }: AIDealSummaryHeaderProps) => {
                     transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     className="mb-6 overflow-hidden"
                 >
-                    <div className="relative bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 border border-purple-500/20 rounded-2xl p-5 backdrop-blur-md shadow-2xl">
+                    <div className="relative bg-gradient-to-r from-teal-500/10 via-blue-500/10 to-cyan-500/10 border border-teal-500/20 rounded-2xl p-5 backdrop-blur-md shadow-2xl">
                         {/* Animated Gradient Border Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 via-blue-500/20 to-cyan-500/20 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                         <div className="relative z-10 flex items-start gap-4">
                             {/* Icon */}
-                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg shadow-purple-500/30 shrink-0">
+                            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-teal-500 to-blue-500 flex items-center justify-center shadow-lg shadow-teal-500/30 shrink-0">
                                 {isLoading ? (
                                     <Loader2 className="h-6 w-6 text-white animate-spin" />
                                 ) : (
@@ -93,8 +93,8 @@ export const AIDealSummaryHeader = ({ deal }: AIDealSummaryHeaderProps) => {
                             {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1.5">
-                                    <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-                                    <h3 className="text-[10px] font-black text-purple-300 uppercase tracking-widest">Análise Inteligente</h3>
+                                    <Sparkles className="h-3.5 w-3.5 text-teal-400" />
+                                    <h3 className="text-[10px] font-black text-teal-300 uppercase tracking-widest">Análise Inteligente</h3>
                                 </div>
 
                                 {isLoading ? (
@@ -159,7 +159,7 @@ export const AIDealSummaryHeader = ({ deal }: AIDealSummaryHeaderProps) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={() => setCollapsed(false)}
-            className="mb-4 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 rounded-full text-xs font-bold text-purple-300 hover:bg-purple-500/30 transition-all shadow-lg flex items-center gap-2"
+            className="mb-4 px-4 py-2 bg-gradient-to-r from-teal-500/20 to-blue-500/20 border border-teal-500/30 rounded-full text-xs font-bold text-teal-300 hover:bg-teal-500/30 transition-all shadow-lg flex items-center gap-2"
         >
             <Bot className="h-3.5 w-3.5" />
             Ver Análise AI

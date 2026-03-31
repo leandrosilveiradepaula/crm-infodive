@@ -47,10 +47,10 @@ import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 const STATUS_CONFIG = {
     pedido_gerado: { label: 'Pedido Gerado', color: 'bg-blue-500/10 text-blue-500', icon: FileText },
-    nf_emitida: { label: 'NF Emitida', color: 'bg-purple-500/10 text-purple-500', icon: FileCheck },
+    nf_emitida: { label: 'NF Emitida', color: 'bg-teal-500/10 text-teal-500', icon: FileCheck },
     entregue: { label: 'Entregue', color: 'bg-orange-500/10 text-orange-500', icon: Truck },
     cliente_pagou: { label: 'Cliente Pagou', color: 'bg-emerald-500/10 text-emerald-500', icon: CreditCard },
-    distribuidor_pagou: { label: 'Distr. Pagou', color: 'bg-indigo-500/10 text-indigo-500', icon: DollarSign },
+    distribuidor_pagou: { label: 'Distr. Pagou', color: 'bg-blue-500/10 text-blue-500', icon: DollarSign },
     comissao_paga: { label: 'Comissão Paga', color: 'bg-green-500/10 text-green-500', icon: CheckCircle2 },
 };
 
@@ -300,11 +300,18 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
 
                             return (
                                 <React.Fragment key={order.id}>
-                                    <tr className={`hover:bg-muted/30 transition-colors group ${expandedOrderId === order.id ? 'bg-muted/20' : ''}`}>
-                                        <td className="px-6 py-4 cursor-pointer" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
+                                    <tr 
+                                        className={`hover:bg-muted/30 transition-colors group cursor-pointer ${expandedOrderId === order.id ? 'bg-muted/20' : ''}`}
+                                        onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}
+                                    >
+                                        <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
-                                                    <ChevronRight className={`w-4 h-4 transition-transform ${expandedOrderId === order.id ? 'rotate-90' : ''}`} />
+                                                    {expandedOrderId === order.id ? (
+                                                        <ChevronRight className="w-4 h-4 transition-transform rotate-90 text-primary" />
+                                                    ) : (
+                                                        <ChevronRight className="w-4 h-4 transition-transform text-muted-foreground" />
+                                                    )}
                                                     {order.deal?.title || 'Pedido S/ N'}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 ml-6">
@@ -314,7 +321,11 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <Badge variant="outline" className={`capitalize font-normal ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary' : 'border-muted-foreground/30'}`}>
+                                            <Badge 
+                                                variant="outline" 
+                                                onClick={(e) => e.stopPropagation()}
+                                                className={`capitalize font-normal ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary' : 'border-muted-foreground/30'}`}
+                                            >
                                                 {order.billing_entity === 'infodive' ? 'Infodive' : 'Distribuidor'}
                                             </Badge>
                                         </td>
@@ -332,7 +343,8 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
                                                         if (nextStatus === 'nf_emitida') {
                                                             setSelectedOrderId(order.id);
                                                             setIsUploadModalOpen(true);
@@ -351,14 +363,14 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-1 lg:group-hover:translate-x-0">
-                                                <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
+                                                <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={(e) => { e.stopPropagation(); setExpandedOrderId(prev => prev === order.id ? null : order.id); }}>
                                                     <Eye className="w-4 h-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" title="Upload de NF" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl" onClick={() => { setSelectedOrderId(order.id); setIsUploadModalOpen(true); }}>
+                                                <Button variant="ghost" size="icon" title="Upload de NF" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl" onClick={(e) => { e.stopPropagation(); setSelectedOrderId(order.id); setIsUploadModalOpen(true); }}>
                                                     <FileCheck className="w-4 h-4" />
                                                 </Button>
                                                 <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
+                                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-xl">
                                                             <MoreVertical className="w-4 h-4" />
                                                         </Button>

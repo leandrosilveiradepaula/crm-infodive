@@ -15,7 +15,7 @@ export const formatProductDescription = (description: string | null | undefined)
         if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].sku || parsed[0].description)) {
             return {
                 isStructured: true,
-                items: parsed.filter((item: any) => item.is_visible_on_proposal === true || item.is_visible_on_proposal === 'true')
+                items: (parsed as ProductTechDetail[]).filter((item) => item.is_visible_on_proposal === true || String(item.is_visible_on_proposal) === 'true')
             };
         }
     } catch {
@@ -54,7 +54,7 @@ export const getSmartProductDescription = (
             grid_label: item.grid_label
         }));
 
-    let curatedSpecs = [...specsLines];
+    const curatedSpecs = [...specsLines];
 
 
 

@@ -8,9 +8,10 @@ import {
 } from 'lucide-react';
 import type { Activity, ActivityType, ActivityStatus, ActivityPriority } from '@/types/activity';
 // import { useActivities } from '../hooks/useActivities'; // Replaced by inline logic
-import { getActivities, createActivity, updateActivity, deleteActivity } from './actions';
+import { getActivities, createActivity, updateActivity, deleteActivity, evaluateInactiveDeals } from './actions';
 import { CalendarView } from './components/CalendarView';
 import { ActivityModal } from './components/ActivityModal';
+import { AiSuggestionsPanel } from '@/components/activities/AiSuggestionsPanel';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { PageHeader } from '@/components/layout/PageHeader';
 
@@ -45,6 +46,8 @@ export function ActivitiesClientPage() {
 
     useEffect(() => {
         fetchData();
+        // Evaluate inactive deals on module load
+        evaluateInactiveDeals().catch(console.error);
     }, []);
 
     // Wrappers for actions
@@ -213,6 +216,9 @@ export function ActivitiesClientPage() {
                     Nova Atividade
                 </button>
             </PageHeader>
+
+            {/* AI Suggestions Panel */}
+            <AiSuggestionsPanel onAccepted={fetchData} />
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

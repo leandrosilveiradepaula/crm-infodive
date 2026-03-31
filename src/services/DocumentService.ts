@@ -76,7 +76,7 @@ export class DocumentService {
                 .eq('account_id', entityId)
                 .eq('organization_id', organizationId);
             
-            let dealDocs: any[] = [];
+            let dealDocs: EntityDocument[] = [];
             const dealIds = deals ? deals.map(d => d.id) : [];
             const dealMap = new Map((deals || []).map(d => [d.id, d.title]));
 
@@ -88,7 +88,7 @@ export class DocumentService {
                     .eq('organization_id', organizationId)
                     .eq('entity_type', 'deal')
                     .in('entity_id', dealIds);
-                if (dDocs) dealDocs = dDocs;
+                if (dDocs) dealDocs = dDocs as EntityDocument[];
             }
             
             // Merge and sort desc

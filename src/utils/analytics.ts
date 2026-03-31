@@ -34,8 +34,10 @@ export interface ProductMetrics {
     avgPrice: number;
 }
 
+import type { Deal } from '@/types/deal';
+
 // Funções de cálculo de métricas
-export const calculateDealMetrics = (deals: any[]): DealMetrics => {
+export const calculateDealMetrics = (deals: Deal[]): DealMetrics => {
     const openDeals = deals.filter(d => !['won', 'lost'].includes(d.stage));
     const closedWonDeals = deals.filter(d => d.stage === 'won');
 
@@ -84,7 +86,7 @@ export const calculateDealMetrics = (deals: any[]): DealMetrics => {
     };
 };
 
-export const calculateConversionFunnel = (deals: any[]): ConversionFunnelData[] => {
+export const calculateConversionFunnel = (deals: Deal[]): ConversionFunnelData[] => {
     const stages = ['qualification', 'proposal', 'negotiation', 'won'];
     const stageNames: Record<string, string> = {
         'qualification': 'Qualificação',
@@ -124,7 +126,7 @@ export const calculateConversionFunnel = (deals: any[]): ConversionFunnelData[] 
     return funnelData;
 };
 
-export const calculateLossReasonMetrics = (deals: any[]) => {
+export const calculateLossReasonMetrics = (deals: Deal[]) => {
     const lostDeals = deals.filter(d => d.stage === 'lost' && d.loss_reason);
     const reasonMap = new Map<string, number>();
 
@@ -138,7 +140,7 @@ export const calculateLossReasonMetrics = (deals: any[]) => {
         .sort((a, b) => b.value - a.value);
 };
 
-export const calculateSalesPerformance = (deals: any[]): SalesPerformance[] => {
+export const calculateSalesPerformance = (deals: Deal[]): SalesPerformance[] => {
     const sellers = Array.from(new Set(deals.map(d => d.owner)));
 
     return sellers.map(seller => {
@@ -168,13 +170,13 @@ export const calculateSalesPerformance = (deals: any[]): SalesPerformance[] => {
     }).sort((a, b) => b.totalRevenue - a.totalRevenue);
 };
 
-export const calculateProductMetrics = (deals: any[]): ProductMetrics[] => {
+export const calculateProductMetrics = (deals: Deal[]): ProductMetrics[] => {
     const productMap = new Map<string, { name: string; quantity: number; revenue: number }>();
     const wonDeals = deals.filter(d => d.stage === 'won');
 
     wonDeals.forEach(deal => {
-        if (deal.products && deal.products.length > 0) {
-            deal.products.forEach((product: any) => {
+        if (deal.deal_products && deal.deal_products.length > 0) {
+            deal.deal_products.forEach((product) => {
                 const existing = productMap.get(product.id) || {
                     name: product.name,
                     quantity: 0,
@@ -182,7 +184,7 @@ export const calculateProductMetrics = (deals: any[]): ProductMetrics[] => {
                 };
 
                 existing.quantity += product.quantity;
-                existing.revenue += product.quantity * product.unitPrice;
+                existing.revenue += product.quantity * product.unit_price;
 
                 productMap.set(product.id, existing);
             });
@@ -201,7 +203,7 @@ export const calculateProductMetrics = (deals: any[]): ProductMetrics[] => {
         .slice(0, 5); // Top 5
 };
 
-export const calculateRevenueForecast = (deals: any[], months: number = 3): number[] => {
+export const calculateRevenueForecast = (deals: Deal[], months: number = 3): number[] => {
     const currentMonthRevenue = deals
         .filter(d => d.stage === 'won')
         .reduce((sum, d) => sum + d.value, 0);

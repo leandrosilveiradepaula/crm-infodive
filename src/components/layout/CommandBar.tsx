@@ -140,7 +140,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                 }}
                                 className="command-item"
                             >
-                                <Sparkles className="command-icon text-purple-400" />
+                                <Sparkles className="command-icon text-teal-400" />
                                 <div className="flex-1">
                                     <div className="font-semibold text-white">Perguntar ao Watson...</div>
                                     <div className="text-xs text-muted-foreground">"{search}"</div>
@@ -182,7 +182,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                                     onSelect={() => handleSelect(() => router.push(`/customers?id=${client.id}`))}
                                                     className="command-item"
                                                 >
-                                                    <Users className="command-icon text-purple-500" />
+                                                    <Users className="command-icon text-teal-500" />
                                                     <div className="flex-1">
                                                         <div className="font-semibold text-white">{client.name}</div>
                                                         <div className="text-xs text-muted-foreground">{client.segment}</div>

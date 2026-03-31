@@ -35,7 +35,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
             {/* Ambient Glow */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
             
-            <CardContent className="p-5 relative z-10">
+            <CardContent className="p-4 relative z-10">
                 <div className="absolute top-4 right-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -44,7 +44,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-purple-500/10 hover:text-purple-400 cursor-pointer text-xs font-bold uppercase tracking-wide py-2 text-purple-400">
+                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-teal-500/10 hover:text-teal-400 cursor-pointer text-xs font-bold uppercase tracking-wide py-2 text-teal-400">
                                 <Sparkles className="h-3.5 w-3.5 mr-2" /> Enriquecer (AI)
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onEdit(lead)} className="hover:bg-muted hover:text-foreground cursor-pointer text-xs font-bold uppercase tracking-wide py-2">
@@ -57,14 +57,14 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                     </DropdownMenu>
                 </div>
 
-                <div className="flex items-start gap-4 mb-4">
-                    <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-lg shadow-primary/10">
+                <div className="flex items-start gap-4 mb-3">
+                    <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-lg shadow-primary/10">
                         <AvatarFallback className="bg-primary/10 text-primary text-sm font-black">
                             {lead.contact_name ? lead.contact_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'L'}
                         </AvatarFallback>
                     </Avatar>
                     <div className="pr-8">
-                        <h3 className="text-foreground font-bold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors">{lead.contact_name}</h3>
+                        <h3 className="text-foreground font-bold text-base leading-tight line-clamp-1 group-hover:text-primary transition-colors">{lead.contact_name}</h3>
                         <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest flex items-center gap-1 mt-1 opacity-80">
                             <Building className="h-3.5 w-3.5" />
                             {lead.company}
@@ -72,7 +72,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                     </div>
                 </div>
 
-                <div className="space-y-3 mb-5">
+                <div className="space-y-2.5 mb-4">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground relative px-1">
                         <Mail className="h-3.5 w-3.5 shrink-0 text-primary/60" />
                         <span className="truncate">{lead.email}</span>
@@ -89,7 +89,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-border">
+                <div className="flex items-center justify-between pt-3 border-t border-border">
                     <Badge variant="outline" className={`${statusColors[lead.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground'} border uppercase text-[9px] font-black tracking-widest px-2 py-0.5 rounded-lg`}>
                         {lead.status}
                     </Badge>

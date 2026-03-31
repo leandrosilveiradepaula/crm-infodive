@@ -39,30 +39,30 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
     const Icon = iconMap[product.icon || 'Server'] || Package;
 
     return (
-        <div className="bg-card p-6 rounded-3xl border border-border hover:border-primary/30 transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl flex flex-col h-full relative overflow-hidden">
+        <div className="bg-card p-4 rounded-3xl border border-border hover:border-primary/30 transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl flex flex-col h-full relative overflow-hidden">
             {/* Ambient Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
 
-            <div className="flex justify-between items-start mb-6 relative z-10">
-                <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center text-primary border border-border group-hover:border-primary/30 group-hover:text-primary transition-all shadow-inner group-hover:scale-110 duration-300">
-                    <Icon className="h-7 w-7" />
+            <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-primary border border-border group-hover:border-primary/30 group-hover:text-primary transition-all shadow-inner group-hover:scale-110 duration-300">
+                    <Icon className="h-5 w-5" />
                 </div>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full">
-                            <MoreHorizontal className="h-5 w-5" />
+                        <Button variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full outline-none">
+                            <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                        <DropdownMenuItem onClick={() => onEdit(product)} className="hover:bg-muted cursor-pointer text-xs font-bold uppercase tracking-wide py-2">
-                            <Edit className="mr-2 h-3.5 w-3.5" /> Editar
+                        <DropdownMenuItem onClick={() => onEdit(product)} className="hover:bg-muted cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5 transition-colors focus:bg-muted outline-none">
+                            <Edit className="mr-2 h-3 w-3" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDuplicate(product)} className="hover:bg-muted cursor-pointer text-xs font-bold uppercase tracking-wide py-2">
-                            <Copy className="mr-2 h-3.5 w-3.5" /> Duplicar
+                        <DropdownMenuItem onClick={() => onDuplicate(product)} className="hover:bg-muted cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <Copy className="mr-2 h-3 w-3" /> Duplicar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDelete(product.id)} className="text-destructive hover:bg-destructive/10 cursor-pointer text-xs font-bold uppercase tracking-wide py-2">
-                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Excluir
+                        <DropdownMenuItem onClick={() => onDelete(product.id)} className="text-destructive hover:bg-destructive/10 cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <Trash2 className="mr-2 h-3 w-3" /> Excluir
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -70,22 +70,22 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
 
             <div className="flex-1 relative z-10">
                 <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5">
+                    <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-[8px] font-bold uppercase tracking-wider px-1.5 py-0">
                         {product.brand}
                     </Badge>
                 </div>
-                <h3 className="font-bold text-foreground text-lg mb-1 truncate tracking-tight group-hover:text-primary transition-colors">{product.name}</h3>
-                <p className="text-[10px] text-primary font-mono mb-4 font-bold tracking-wider">{product.sku}</p>
+                <h3 className="font-bold text-foreground text-sm mb-0.5 truncate tracking-tight group-hover:text-primary transition-colors">{product.name}</h3>
+                <p className="text-[9px] text-primary font-mono mb-2 font-bold tracking-wider">{product.sku}</p>
 
-                <p className="text-xs text-muted-foreground line-clamp-2 min-h-[36px] leading-relaxed font-medium">{product.description}</p>
+                <p className="text-[11px] text-muted-foreground line-clamp-2 min-h-[32px] leading-relaxed font-medium">{product.description}</p>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2 relative z-10">
-                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
+            <div className="mt-4 flex flex-wrap gap-1.5 relative z-10">
+                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0">
                     {product.category}
                 </Badge>
                 {product.subcategory && (
-                    <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">
+                    <Badge variant="outline" className="bg-muted text-muted-foreground border-border text-[8px] font-bold uppercase tracking-wider px-1.5 py-0">
                         {product.subcategory}
                     </Badge>
                 )}

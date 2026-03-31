@@ -18,30 +18,30 @@ interface StatCardProps {
 const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, change, onClick }: StatCardProps) => (
     <div
         onClick={onClick}
-        className="glass-card p-6 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-white/20 h-full"
+        className="glass-card p-4 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-white/20 h-full"
     >
-        <div className="absolute -right-4 -top-4 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
-            <Icon className="h-32 w-32" />
+        <div className="absolute -right-3 -top-3 p-3 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
+            <Icon className="h-24 w-24" />
         </div>
 
         <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClass} bg-opacity-10 shadow-inner`}>
-                    <Icon className={`h-6 w-6 ${colorClass.replace('bg-', 'text-')}`} />
+            <div className="flex items-center justify-between mb-2">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colorClass} bg-opacity-10 shadow-inner group-hover:scale-110 transition-transform`}>
+                    <Icon className={`h-4.5 w-4.5 ${colorClass.replace('bg-', 'text-')}`} />
                 </div>
                 {change && (
-                    <span className={`text-[10px] font-black px-2 py-1 rounded-full ${trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'} uppercase tracking-widest`}>
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'} uppercase tracking-widest`}>
                         {change}
                     </span>
                 )}
             </div>
 
-            <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">{title}</p>
-            <h3 className="text-3xl font-black text-foreground mt-1">{value}</h3>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 leading-none">{title}</p>
+            <h3 className="text-2xl font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
 
             {subtitle && (
-                <p className="text-xs text-muted-foreground mt-2 font-medium flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground"></span>
+                <p className="text-[10px] text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight opacity-70">
+                    <span className="w-1 h-1 rounded-full bg-primary/40"></span>
                     {subtitle}
                 </p>
             )}
@@ -93,7 +93,7 @@ export const StatsWidget = ({ metrics }: StatsWidgetProps) => {
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
             {stats.map((stat, i) => (
                 <StatCard key={i} {...stat} />
             ))}

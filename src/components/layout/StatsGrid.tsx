@@ -28,27 +28,27 @@ export function StatsGrid({ items }: StatsGridProps) {
                     <div 
                         key={index} 
                         onClick={stat.onClick}
-                        className={`bg-gradient-to-br ${stat.gradient} dark:bg-card p-6 rounded-[2rem] border ${stat.border} shadow-sm group hover:shadow-md transition-all relative overflow-hidden ${isClickable ? 'cursor-pointer active:scale-95' : ''}`}
+                        className={`bg-gradient-to-br ${stat.gradient} dark:bg-card p-3 lg:p-4 rounded-2xl border ${stat.border} shadow-sm group hover:shadow-md transition-all relative overflow-hidden ${isClickable ? 'cursor-pointer active:scale-95' : ''}`}
                     >
                         {/* Background Floating Icon */}
-                        <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                            <Icon className={`w-32 h-32 ${stat.color}`} />
+                        <div className="absolute right-0 top-0 p-12 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2 text-muted-foreground">
+                            <Icon className={`w-24 h-24 ${stat.color}`} />
                         </div>
 
                         {/* Content */}
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                            <h3 className={`text-[10px] font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
+                        <div className="flex items-center justify-between mb-3 relative z-10">
+                            <h3 className={`text-[9px] font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
                                 {stat.label}
                             </h3>
-                            <div className={`p-2.5 rounded-xl bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
-                                <Icon className={`h-4 w-4 ${stat.color}`} />
+                            <div className={`p-1.5 rounded-xl bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
+                                <Icon className={`h-3.5 w-3.5 ${stat.color}`} />
                             </div>
                         </div>
                         <div className="relative z-10">
-                            <p className="text-3xl font-black text-foreground tracking-tighter truncate">
+                            <p className="text-xl font-black text-foreground tracking-tighter truncate">
                                 {stat.value}
                             </p>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">
+                            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
                                 {stat.description}
                             </p>
                         </div>

@@ -8,38 +8,51 @@ import { ProposalService } from '@/services/ProposalService';
 import { AccountService } from '@/services/AccountService';
 import { ContactService } from '@/services/ContactService';
 import { ProductService } from '@/services/ProductService';
+import { ActivityAiService } from '@/services/ActivityAiService';
 import { DocumentService } from '@/services/DocumentService';
 import type { DocumentCategory } from '@/types/document';
+import { Deal } from '@/types/deal';
+import { Account } from '@/types/account';
+import { Contact } from '@/types/contact';
+import { Proposal } from '@/types/proposal';
+import { PipelineData } from '@/services/DealService';
 
-export async function getPipelineData() {
+export async function getPipelineData(): Promise<PipelineData> {
     const { userId, organizationId } = await requireSessionContext();
     return await DealService.getPipelineData(userId, organizationId);
 }
 
-export async function getAccountContacts(accountId?: string | null) {
+export async function getAccountContacts(accountId?: string | null): Promise<Contact[]> {
     const { userId, organizationId } = await requireSessionContext();
-    return await ContactService.getAccountContacts(userId, organizationId, accountId);
+    return await ContactService.getAccountContacts(userId, organizationId, accountId) as unknown as Contact[];
 }
 
-export async function updateDealStage(dealId: string, newStage: string, probability?: number) {
+export async function updateDealStage(dealId: string, newStage: string, probability?: number, dealTitle?: string) {
     const { userId, organizationId } = await requireSessionContext();
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
+    // Trigger automation on stage change
+    if (dealTitle) {
+        ActivityAiService.onStageChange(userId, organizationId, dealId, newStage, dealTitle).catch(console.error);
+    }
     revalidatePath('/pipeline');
 }
 
-export async function createDeal(deal: any) {
+export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
     const { userId, organizationId } = await requireSessionContext();
-    await DealService.createDeal(userId, organizationId, deal);
+    const result = await DealService.createDeal(userId, organizationId, deal);
+    // Trigger automation on deal creation
+    ActivityAiService.onDealCreated(userId, organizationId, result.id, result.title).catch(console.error);
     revalidatePath('/pipeline');
+    return result;
 }
 
-export async function getDealDetails(dealId: string) {
+export async function getDealDetails(dealId: string): Promise<Deal | null> {
     const { userId, organizationId } = await requireSessionContext();
     revalidatePath('/pipeline');
     return await DealService.getDealDetails(userId, dealId, organizationId);
 }
 
-export async function updateDeal(dealId: string, updates: any) {
+export async function updateDeal(dealId: string, updates: Partial<Deal>): Promise<boolean> {
     const { userId, organizationId } = await requireSessionContext();
     await DealService.updateDeal(userId, dealId, organizationId, updates);
     revalidatePath('/pipeline');
@@ -125,17 +138,7 @@ export async function createProposal(payload: any) {
     return data;
 }
 
-export async function updateProposal(proposalId: string, updates: Partial<{
-    status: string;
-    sent_at: string;
-    sentAt: string;
-    viewed_at: string;
-    viewedAt: string;
-    signed_at: string;
-    signedAt: string;
-    public_token: string;
-    allow_signature: boolean;
-}>) {
+export async function updateProposal(proposalId: string, updates: Partial<Proposal>) {
     const { userId, organizationId } = await requireSessionContext();
     const data = await ProposalService.updateProposal(userId, proposalId, organizationId, updates);
     revalidatePath('/pipeline');

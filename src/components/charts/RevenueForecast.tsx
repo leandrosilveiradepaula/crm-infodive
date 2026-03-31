@@ -36,7 +36,7 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                     <p className="text-2xl font-bold text-green-600">{formatCurrency(totalForecast, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl border border-blue-200">
                     <div className="flex items-center gap-2 mb-2">
                         <Calendar className="h-4 w-4 text-primary" />
                         <p className="text-xs text-muted-foreground font-bold uppercase">Média Mensal</p>
@@ -44,12 +44,12 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                     <p className="text-2xl font-bold text-primary">{formatCurrency(avgMonthly, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                <div className="p-4 bg-gradient-to-br from-teal-50 to-pink-50 rounded-xl border border-teal-200">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-4 w-4 text-purple-600" />
+                        <TrendingUp className="h-4 w-4 text-teal-600" />
                         <p className="text-xs text-muted-foreground font-bold uppercase">Crescimento</p>
                     </div>
-                    <p className="text-2xl font-bold text-purple-600">+10%</p>
+                    <p className="text-2xl font-bold text-teal-600">+10%</p>
                 </div>
             </div>
 

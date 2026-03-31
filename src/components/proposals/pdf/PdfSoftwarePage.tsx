@@ -7,13 +7,14 @@ import { getSmartProductDescription } from '@/utils/formatProductDescription';
 
 interface PdfSoftwarePageProps {
     products: any[];
+    simplifiedProductNames?: Record<string, string>;
     softwareHighlights?: Array<{ title: string; value: string }>;
     benefitTiles?: Array<{ value: string; label: string }>;
     pdfColors: PdfColors;
     pdfStyles: any;
 }
 
-export function PdfSoftwarePage({ products, softwareHighlights, benefitTiles, pdfColors, pdfStyles }: PdfSoftwarePageProps) {
+export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwareHighlights, benefitTiles, pdfColors, pdfStyles }: PdfSoftwarePageProps) {
     const rawSoftware = products.filter(p => isSoftware(p) && p.is_visible_on_proposal !== false);
     const softwareProducts = rawSoftware.filter((p, i, self) =>
         i === self.findIndex(t => t.name === p.name)
@@ -95,7 +96,7 @@ export function PdfSoftwarePage({ products, softwareHighlights, benefitTiles, pd
                         color: '#ffffff',
                         marginBottom: 16,
                     }}>
-                        {mainSoftware.name}
+                        {simplifiedProductNames[mainSoftware.name] || mainSoftware.display_name || mainSoftware.name}
                     </Text>
 
                     {/* Two-column highlights */}
@@ -249,7 +250,7 @@ export function PdfSoftwarePage({ products, softwareHighlights, benefitTiles, pd
                                 alignItems: 'flex-start',
                             }}>
                                 <View style={{ flex: 1, paddingRight: 10 }}>
-                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#374151', marginBottom: 2 }}>{p.name}</Text>
+                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#374151', marginBottom: 2 }}>{simplifiedProductNames[p.name] || p.display_name || p.name}</Text>
 
                                     {/* Render Product Specs */}
                                     {(() => {

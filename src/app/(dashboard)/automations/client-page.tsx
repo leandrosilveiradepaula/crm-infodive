@@ -59,7 +59,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
         { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
         { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
         { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
     ];
@@ -68,7 +68,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         const p = prompt.toLowerCase();
         let trigger: any = { type: 'deal_created', config: {} };
         let actions: any[] = [{ type: 'send_notification', config: { title: 'AI Automation', description: prompt } }];
-        let name = prompt.charAt(0).toUpperCase() + prompt.slice(1);
+        const name = prompt.charAt(0).toUpperCase() + prompt.slice(1);
         let category: any = 'custom';
 
         if (p.includes('estagnar') || p.includes('parado') || p.includes('parada') || p.includes('dias')) {
@@ -214,7 +214,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     };
 
     return (
-        <div className="space-y-8 pb-10 animate-in fade-in duration-700">
+        <div className="space-y-6 pb-10 animate-in fade-in duration-700">
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
@@ -234,8 +234,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             </PageHeader>
 
             {/* AI Builder Quick Input */}
-            <div className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent p-1 rounded-[2rem] border border-primary/10 shadow-2xl">
-                <div className="bg-card/40 backdrop-blur-xl p-6 rounded-[1.8rem] flex flex-col md:flex-row items-center gap-6">
+            <div className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent p-1 rounded-2xl border border-primary/10 shadow-2xl">
+                <div className="bg-card/40 backdrop-blur-xl p-4 rounded-xl flex flex-col md:flex-row items-center gap-6">
                     <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 animate-pulse">
                         <Zap className="h-7 w-7 text-white" />
                     </div>
@@ -247,13 +247,13 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
                             placeholder="Descreva sua automação e a IA fará o resto..."
-                            className="pl-11 pr-24 w-full h-14 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium"
+                            className="pl-11 pr-24 w-full h-[48px] bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                         />
                         <button
                             onClick={handleAIBuilder}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all"
                         >
                             Gerar com IA
                         </button>
@@ -280,10 +280,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <button
                             key={idx}
                             onClick={() => handleUseRecipe(recipe)}
-                            className="min-w-[280px] bg-card border border-border p-6 rounded-3xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex flex-col justify-between group"
+                            className="min-w-[240px] bg-card border border-border p-4 rounded-2xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex flex-col justify-between group"
                         >
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className={`p-4 rounded-2xl ${recipe.bg}`}>
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className={`p-3 rounded-xl ${recipe.bg}`}>
                                     <recipe.icon className={`h-6 w-6 ${recipe.color}`} />
                                 </div>
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
@@ -334,14 +334,14 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         {filteredAutomations.map(automation => (
                             <div
                                 key={automation.id}
-                                className={`group relative bg-card p-8 rounded-[2.5rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 ${automation.enabled
+                                className={`group relative bg-card p-5 rounded-2xl border transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 ${automation.enabled
                                     ? 'border-border hover:border-primary/30'
                                     : 'border-border opacity-60 grayscale-[0.8]'
                                     }`}
                             >
-                                <div className="flex justify-between items-start mb-8">
-                                    <div className="flex items-center gap-5">
-                                        <div className={`p-4 rounded-2xl transition-all duration-500 ${automation.enabled
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-3 rounded-xl transition-all duration-500 ${automation.enabled
                                             ? 'bg-primary/10 group-hover:bg-primary/20'
                                             : 'bg-gray-800'
                                             }`}>
@@ -405,16 +405,16 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-6 mb-8">
-                                    <div className="bg-muted/30 p-5 rounded-2xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Gatilho</p>
-                                        <p className="text-sm font-bold text-foreground flex items-center gap-3">
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
+                                        <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
-                                    <div className="bg-muted/30 p-5 rounded-2xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Ações</p>
+                                    <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
+                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
@@ -428,7 +428,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-6 border-t border-border">
+                                <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>

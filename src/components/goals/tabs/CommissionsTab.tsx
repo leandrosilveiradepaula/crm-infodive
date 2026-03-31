@@ -49,7 +49,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
     const getIconColor = (color: string) => {
         const colors: any = {
             blue: 'text-blue-500 bg-blue-500/10',
-            violet: 'text-violet-500 bg-violet-500/10',
+            violet: 'text-cyan-500 bg-cyan-500/10',
             amber: 'text-amber-500 bg-amber-500/10',
         };
         return colors[color] || colors.blue;

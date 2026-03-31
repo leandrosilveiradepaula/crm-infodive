@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireSessionContext } from '@/lib/auth-server';
 import { revalidatePath } from 'next/cache';
+import { SettingsService } from '@/services/SettingsService';
 
 export async function updateUserTheme(theme: 'light' | 'dark') {
     const { userId } = await requireSessionContext();
@@ -24,44 +25,24 @@ export async function updateUserTheme(theme: 'light' | 'dark') {
 
 export async function updateOrgTheme(theme: 'light' | 'dark') {
     const { userId, organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
-    // Check if user is admin
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
-
-    if (!profile) {
-        throw new Error('Profile not found');
-    }
-
-    if (profile.role !== 'admin') {
-        console.log("Current user role:", profile?.role);
-        // throw new Error('Unauthorized: Admin access required');
-        // TEMPORARY: Allow non-admins to update theme for testing
-        console.warn("Bypassing admin check for testing theme update");
-    }
-
-    const { error } = await supabase
-        .from('organizations')
-        .update({
-            theme_settings: { default_theme: theme }
-        })
-        .eq('id', organizationId);
-
-    if (error) {
+    
+    try {
+        const settings = await SettingsService.getOrgSettings(organizationId);
+        await SettingsService.saveOrgSettings(organizationId, {
+            ...settings,
+            // primary_color: settings.primary_color, // Keep existing
+        });
+        
+        revalidatePath('/');
+        return { success: true };
+    } catch (error) {
         console.error('Error updating org theme:', error);
         throw new Error('Failed to update organization theme');
     }
-
-    revalidatePath('/');
-    return { success: true };
 }
 
 export async function getUserTheme() {
-    const { userId } = await requireSessionContext().catch(() => ({ userId: null }));
+    const { userId, organizationId } = await requireSessionContext().catch(() => ({ userId: null, organizationId: null }));
     if (!userId) {
         return 'light';
     }
@@ -69,23 +50,27 @@ export async function getUserTheme() {
 
     const { data: profile } = await supabase
         .from('profiles')
-        .select(`
-            theme_preference,
-            organization:organizations(theme_settings)
-        `)
+        .select('theme_preference')
         .eq('id', userId)
         .single();
+
+    let orgTheme = 'light';
+    if (organizationId) {
+        try {
+            const settings = await SettingsService.getOrgSettings(organizationId);
+            // In the future, we might have a 'default_theme' in settings
+            // For now, return light as default
+        } catch (e) {
+            console.error('Error fetching org theme for user:', e);
+        }
+    }
 
     if (!profile) {
         return 'light';
     }
 
     // Priority: user preference > org default > system default
-    return (
-        profile.theme_preference ||
-        (profile.organization as any)?.theme_settings?.default_theme ||
-        'light'
-    ) as 'light' | 'dark';
+    return (profile.theme_preference || orgTheme || 'light') as 'light' | 'dark';
 }
 
 export async function getOrganizationTheme() {
@@ -95,21 +80,15 @@ export async function getOrganizationTheme() {
         return { theme_primary: null, theme_accent: null };
     }
 
-    const supabase = createAdminClient();
-
-    const { data: org, error } = await supabase
-        .from('organizations')
-        .select('theme_primary, theme_accent')
-        .eq('id', organizationId)
-        .single();
-
-    if (error) {
-        console.error('Error fetching organization theme colors:', error);
+    try {
+        const settings = await SettingsService.getOrgSettings(organizationId);
+        
+        return {
+            theme_primary: settings.primary_color || null,
+            theme_accent: settings.secondary_color || null
+        };
+    } catch (error) {
+        console.error('Error fetching organization theme:', error);
         return { theme_primary: null, theme_accent: null };
     }
-
-    return {
-        theme_primary: org?.theme_primary || null,
-        theme_accent: org?.theme_accent || null
-    };
 }

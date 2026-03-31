@@ -3,17 +3,19 @@ import React, { useState } from 'react';
 import { Building2, User, Globe, Mail, Phone, ExternalLink, ChevronDown } from 'lucide-react';
 import { updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import { Deal } from '@/types/deal';
+import { Account } from '@/types/account';
+import { Contact } from '@/types/contact';
 import { toast } from 'sonner';
 
 interface PartnersTabProps {
     deal: Deal;
     isEditing: boolean;
-    /** Distributor accounts from server — each has account_contacts[] embedded */
-    distributors?: any[];
-    /** ALL accounts from server (for manufacturer matching) — each has account_contacts[] */
-    allAccounts?: any[];
+    /** Distributor accounts from server — each has contacts[] embedded */
+    distributors?: Account[];
+    /** ALL accounts from server (for manufacturer matching) — each has contacts[] */
+    allAccounts?: Account[];
     /** ALL contacts from server (getAccountContacts) */
-    allContacts?: any[];
+    allContacts?: Contact[];
 }
 
 export const PartnersTab = ({
@@ -30,14 +32,14 @@ export const PartnersTab = ({
     // Distributors: prefer prop list (server), fall back to filtering allAccounts
     const distributors = propDistributors.length > 0
         ? propDistributors
-        : allAccounts.filter((a: any) => a.relationship_type === 'Distribuidor');
+        : allAccounts.filter((a) => a.relationship_type === 'Distribuidor');
 
-    const selectedDistributorObj = distributors.find((d: any) => d.id === selectedDistributor);
+    const selectedDistributorObj = distributors.find((d) => d.id === selectedDistributor);
 
-    // Contacts for the selected distributor — prefer embedded account_contacts, fall back to allContacts filter
-    const distributorContacts: any[] = selectedDistributorObj?.account_contacts?.length
-        ? selectedDistributorObj.account_contacts
-        : allContacts.filter((c: any) => c.account_id === selectedDistributor);
+    // Contacts for the selected distributor — prefer embedded contacts, fall back to allContacts filter
+    const distributorContacts: Contact[] = selectedDistributorObj?.contacts?.length
+        ? selectedDistributorObj.contacts
+        : allContacts.filter((c) => c.account_id === selectedDistributor);
 
     // Auto-detect manufacturers from deal products
     const dealManufacturers = React.useMemo(() => {
@@ -58,13 +60,13 @@ export const PartnersTab = ({
         if (detectedNames.size === 0) return [];
 
         // Match against ALL accounts (not just Fabricante type, since name might be "IBM BRASIL...")
-        const matched = allAccounts.filter((a: any) =>
+        const matched = allAccounts.filter((a) =>
             Array.from(detectedNames).some(name =>
                 a.name.toUpperCase().includes(name) || name.includes(a.name.toUpperCase())
             )
         );
         const matchedNames = new Set<string>(
-            matched.flatMap((a: any) =>
+            matched.flatMap((a) =>
                 Array.from(detectedNames).filter((name: string) =>
                     a.name.toUpperCase().includes(name) || name.includes(a.name.toUpperCase())
                 )
@@ -72,18 +74,18 @@ export const PartnersTab = ({
         );
         const virtual = Array.from(detectedNames)
             .filter(name => !matchedNames.has(name))
-            .map(name => ({ id: `virtual-${name}`, name, logo_url: null, account_contacts: [] }));
+            .map(name => ({ id: `virtual-${name}`, name, logo_url: null, contacts: [] } as unknown as Account));
 
         return [...matched, ...virtual];
     }, [deal.deal_products, allAccounts]);
 
-    const firstRealManufacturer = dealManufacturers.find((m: any) => !m.id.startsWith('virtual-'));
+    const firstRealManufacturer = dealManufacturers.find((m) => !m.id.startsWith('virtual-'));
 
-    // Contacts for a manufacturer account (embedded in account_contacts, or filtered from allContacts)
-    const getManufacturerContacts = (mfr: any) => {
+    // Contacts for a manufacturer account (embedded in contacts, or filtered from allContacts)
+    const getManufacturerContacts = (mfr: Account) => {
         if (mfr.id.startsWith('virtual-')) return [];
-        if (mfr.account_contacts?.length) return mfr.account_contacts;
-        return allContacts.filter((c: any) => c.account_id === mfr.id);
+        if (mfr.contacts?.length) return mfr.contacts;
+        return (allContacts || []).filter((c) => c.account_id === mfr.id);
     };
 
     const handleDistributorChange = async (id: string) => {
@@ -111,8 +113,8 @@ export const PartnersTab = ({
         } catch { toast.error('Erro ao atualizar contato'); }
     };
 
-    const ContactCard = ({ contactId, contacts }: { contactId: string; contacts: any[] }) => {
-        const c = contacts.find((x: any) => x.id === contactId);
+    const ContactCard = ({ contactId, contacts }: { contactId: string; contacts: Contact[] }) => {
+        const c = contacts.find((x) => x.id === contactId);
         if (!c) return null;
         return (
             <div className="mt-3 pt-3 border-t border-border/30 space-y-1.5">
@@ -153,7 +155,7 @@ export const PartnersTab = ({
     return (
         <div className="h-full flex flex-col p-8 space-y-8 overflow-y-auto">
             <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-indigo-500/10 rounded-lg"><Globe className="h-6 w-6 text-indigo-400" /></div>
+                <div className="p-2 bg-blue-500/10 rounded-lg"><Globe className="h-6 w-6 text-blue-400" /></div>
                 <div>
                     <h3 className="text-lg font-bold text-foreground">Ecosistema de Parceiros</h3>
                     <p className="text-sm text-muted-foreground">Gerencie os fabricantes e distribuidores envolvidos.</p>

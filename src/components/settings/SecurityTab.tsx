@@ -132,8 +132,8 @@ export const SecurityTab = () => {
             {/* Active Sessions */}
             <div className="bg-card p-8 rounded-[2.5rem] border border-border/50 shadow-2xl relative overflow-hidden backdrop-blur-sm">
                 <div className="flex gap-6 mb-8 relative z-10">
-                    <div className="bg-purple-500/10 p-5 rounded-[1.5rem] h-fit border border-purple-500/20 shadow-lg shadow-purple-500/5">
-                        <Smartphone className="h-8 w-8 text-purple-400" />
+                    <div className="bg-teal-500/10 p-5 rounded-[1.5rem] h-fit border border-teal-500/20 shadow-lg shadow-teal-500/5">
+                        <Smartphone className="h-8 w-8 text-teal-400" />
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Sessões Ativas</h3>

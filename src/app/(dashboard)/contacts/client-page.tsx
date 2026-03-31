@@ -61,7 +61,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
     };
 
     return (
-        <div className="flex-1 space-y-8 pb-10">
+        <div className="flex-1 space-y-6 pb-10">
             <PageHeader 
                 title="Contatos" 
                 description="Gerencie todos os contatos da sua base."
@@ -75,7 +75,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Total Contacts */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-6 rounded-3xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <Users className="w-32 h-32 text-primary" />
                     </div>
@@ -92,14 +92,14 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 </div>
 
                 {/* Primary Contacts */}
-                <div className="bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-card p-6 rounded-3xl border border-purple-100 dark:border-purple-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-card p-4 rounded-2xl border border-teal-100 dark:border-teal-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <UserCheck className="w-32 h-32 text-purple-600" />
+                        <UserCheck className="w-32 h-32 text-teal-600" />
                     </div>
                     <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-purple-600/70 dark:text-purple-400 uppercase tracking-[0.2em]">Contatos Principais</h3>
-                        <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <UserCheck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-[10px] font-black text-teal-600/70 dark:text-teal-400 uppercase tracking-[0.2em]">Contatos Principais</h3>
+                        <div className="p-2.5 bg-teal-100 dark:bg-teal-900/30 rounded-xl group-hover:scale-110 transition-transform">
+                            <UserCheck className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                         </div>
                     </div>
                     <div className="relative z-10">
@@ -109,7 +109,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 </div>
 
                 {/* Linked Contacts */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <Building2 className="w-32 h-32 text-emerald-600" />
                     </div>
@@ -126,7 +126,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 </div>
 
                 {/* New Contacts */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-6 rounded-3xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <Sparkles className="w-32 h-32 text-amber-600" />
                     </div>
@@ -150,12 +150,12 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
             </div>
 
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-3xl border border-border shadow-sm animate-in fade-in duration-500">
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, email ou empresa..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -164,7 +164,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterAccount}
                         onChange={e => setFilterAccount(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all">Empresa: Todas</option>
                         {uniqueAccounts.map(acc => (
@@ -175,7 +175,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterRole}
                         onChange={e => setFilterRole(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all">Cargo: Todos</option>
                         {uniqueRoles.map(role => (

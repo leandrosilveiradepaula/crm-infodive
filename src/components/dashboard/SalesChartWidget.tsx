@@ -18,10 +18,10 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
     }));
 
     return (
-        <div className="bg-card rounded-2xl p-6 h-full flex flex-col border border-border">
-            <div className="flex items-center justify-between mb-6 shrink-0">
+        <div className="bg-card rounded-2xl p-4 h-full flex flex-col border border-border">
+            <div className="flex items-center justify-between mb-4 shrink-0">
                 <div>
-                    <h2 className="text-lg font-bold text-foreground">Performance de Vendas</h2>
+                    <h2 className="text-base font-bold text-foreground">Performance de Vendas</h2>
                     <div className="flex items-center space-x-4 mt-1 text-sm">
                         <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-primary mr-2 shadow-lg shadow-primary/40"></div>Vendas</span>
                         <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-primary/20 mr-2"></div>Projeção</span>

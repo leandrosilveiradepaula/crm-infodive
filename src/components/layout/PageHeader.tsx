@@ -8,11 +8,11 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
     return (
-        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md -mx-4 px-4 lg:-mx-6 lg:px-6 mb-10 gap-4 flex flex-col md:flex-row md:items-center md:justify-between pt-4 pb-4 border-b border-transparent transition-all">
-            <div className="space-y-1.5">
-                <h1 className="text-3xl font-black text-foreground tracking-tighter">{title}</h1>
+        <div className="sticky top-0 z-20 bg-background -mx-2 px-2 lg:-mx-4 lg:px-4 mb-6 gap-4 flex flex-col md:flex-row md:items-center md:justify-between pt-3 pb-3 border-b border-border transition-all">
+            <div className="space-y-1">
+                <h1 className="text-2xl font-black text-foreground tracking-tighter">{title}</h1>
                 {description && (
-                    <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                    <p className="text-[13px] font-medium text-muted-foreground leading-tight">
                         {description}
                     </p>
                 )}

@@ -1,10 +1,12 @@
 import React from 'react';
+import type { DealProduct } from '@/types/deal';
 import { formatProductDescription } from '@/utils/formatProductDescription';
 
 interface ProposalSoftwareMainHighlightProps {
     softwareName: string;
     softwareHighlights?: Array<{ title: string; value: string }>;
-    mainProduct?: any;
+    mainProduct?: DealProduct | null;
+    simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
@@ -121,12 +123,13 @@ export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights
 }
 
 interface ProposalSoftwareAdditionalProps {
-    softwareProducts: any[];
+    softwareProducts: (DealProduct | null)[];
+    simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalSoftwareAdditional({ softwareProducts, themePrimary, themeAccent }: ProposalSoftwareAdditionalProps) {
+export function ProposalSoftwareAdditional({ softwareProducts, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalSoftwareAdditionalProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     if (softwareProducts.length <= 1) return null;
@@ -177,7 +180,7 @@ export function ProposalSoftwareAdditional({ softwareProducts, themePrimary, the
                                 ✓
                             </span>
                             <div style={{ fontWeight: '700', color: primaryColor, marginBottom: techDetails.length > 0 ? '8px' : '0' }}>
-                                {product?.name}
+                                {(product && simplifiedProductNames[product.name]) || product?.name}
                             </div>
 
                             {techDetails.length > 0 && (

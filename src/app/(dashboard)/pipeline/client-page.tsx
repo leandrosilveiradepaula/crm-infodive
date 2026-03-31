@@ -18,24 +18,27 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DollarSign, Sparkles } from 'lucide-react';
+import { Deal } from '@/types/deal';
+import { Profile } from '@/types/profile';
+import { Account } from '@/types/account';
 
 interface PipelineClientPageProps {
-    initialDeals: any[];
-    userProfile: any;
-    distributors: any[];
-    allAccounts: any[];
+    initialDeals: Deal[];
+    userProfile: Profile | null;
+    distributors: Account[];
+    allAccounts: Account[];
 }
 
 const DEFAULT_STAGES = [
     { id: 'qualification', title: 'Qualificação', color: 'border-info', bg: 'bg-info/5', probability: 30 },
-    { id: 'proposal', title: 'Proposta', color: 'border-purple-500', bg: 'bg-purple-500/5', probability: 50 },
+    { id: 'proposal', title: 'Proposta', color: 'border-teal-500', bg: 'bg-teal-500/5', probability: 50 },
     { id: 'negotiation', title: 'Negociação', color: 'border-warning', bg: 'bg-warning/5', probability: 75 },
     { id: 'won', title: 'Ganho', color: 'border-success', bg: 'bg-success/5', probability: 100 },
     { id: 'lost', title: 'Perdido', color: 'border-destructive', bg: 'bg-destructive/5', probability: 0 }
 ];
 
 export const PipelineClientPage = ({ initialDeals, userProfile, distributors, allAccounts }: PipelineClientPageProps) => {
-    const [deals, setDeals] = useState(initialDeals);
+    const [deals, setDeals] = useState<Deal[]>(initialDeals);
     const [isBrowser, setIsBrowser] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [ownerFilter, setOwnerFilter] = useState('Todos');
@@ -44,7 +47,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
     const [showNewDealModal, setShowNewDealModal] = useState(false);
 
     // View Modal State
-    const [viewingDeal, setViewingDeal] = useState<any>(null);
+    const [viewingDeal, setViewingDeal] = useState<Deal | null>(null);
 
     const router = useRouter();
     const { duplicateDeal } = useDeals();
@@ -89,7 +92,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         return deals.filter(d => {
             const matchesSearch = d.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (d.company || '').toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesOwner = ownerFilter === 'Todos' || d.owner_name === ownerFilter; // Simplified
+            const matchesOwner = ownerFilter === 'Todos' || d.owner === ownerFilter; // Simplified
 
             let matchesQuarter = true;
             if (selectedQuarters.length > 0) {
@@ -111,7 +114,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
 
     // Group by Stage
     const columns = useMemo(() => {
-        const cols: Record<string, any[]> = {};
+        const cols: Record<string, Deal[]> = {};
         DEFAULT_STAGES.forEach(s => cols[s.id] = []);
 
         filteredDeals.forEach(deal => {
@@ -248,14 +251,14 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             value: formatCompact(metrics.projected),
             description: "Baseada em probabilidade",
             icon: TrendingUp,
-            color: "text-purple-600 dark:text-purple-400",
-            gradient: "from-purple-50 to-white dark:from-purple-950/20",
-            border: "border-purple-100 dark:border-purple-900/50"
+            color: "text-teal-600 dark:text-teal-400",
+            gradient: "from-teal-50 to-white dark:from-teal-950/20",
+            border: "border-teal-100 dark:border-teal-900/50"
         }
     ];
 
     return (
-        <div className="h-full flex flex-col relative space-y-8 pb-10 overflow-hidden">
+        <div className="min-h-full flex flex-col relative space-y-6 pb-20">
             {/* Header */}
             <PageHeader 
                 title="Funil de Vendas" 
@@ -263,7 +266,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             >
                 <button
                     onClick={() => setShowNewDealModal(true)}
-                    className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold h-11 px-6 rounded-2xl flex items-center gap-2"
+                    className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold h-[38px] px-5 rounded-xl flex items-center gap-2 transition-all active:scale-95"
                 >
                     <Plus className="h-4 w-4" /> Nova Oportunidade
                 </button>
@@ -276,21 +279,23 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar deals por nome ou empresa..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        aria-label="Buscar oportunidades"
+                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
-                <div className="flex flex-col sm:flex-row gap-2 bg-muted/20 p-1 rounded-2xl border border-border w-full sm:w-auto h-auto sm:h-11 items-center">
+                <div className="flex flex-col sm:flex-row gap-2 bg-muted/20 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
                     {/* View Year Selector */}
                     <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
-                        <CalendarDays className="h-3.5 w-3.5 text-primary opacity-50" />
+                        <CalendarDays className="h-4 w-4 text-primary opacity-50" />
                         <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4"
+                            aria-label="Selecionar ano"
+                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -302,7 +307,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <div className="flex gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedQuarters([])}
-                            className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Tempo Todo
                         </button>
@@ -317,6 +322,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             return (
                                 <button
                                     key={tab.id}
+                                    aria-label={`Filtrar por ${tab.label}`}
                                     onClick={() => {
                                         setSelectedQuarters(prev =>
                                             prev.includes(val)
@@ -324,7 +330,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                                 : [...prev, val].sort()
                                         );
                                     }}
-                                    className={`relative px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${isSelected
+                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
                                         ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                         }`}
@@ -340,13 +346,13 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             {/* Kanban Board */}
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-x-auto pb-4">
-                    <div className="flex space-x-6 h-full min-w-max">
+                    <div className="flex space-x-4 h-full min-w-max">
                         {DEFAULT_STAGES.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <div key={stage.id} className="w-80 flex flex-col h-full">
+                                <div key={stage.id} className="w-72 flex flex-col h-full">
                                     <div className={`p-4 rounded-t-2xl border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
@@ -362,7 +368,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-1 rounded-2xl px-2 py-2 space-y-3 overflow-y-auto transition-colors custom-scrollbar ${snapshot.isDraggingOver ? 'bg-accent/50' : ''}`}
+                                                className={`flex-1 rounded-2xl px-2 py-2 space-y-3 transition-colors ${snapshot.isDraggingOver ? 'bg-accent/50' : ''}`}
                                                 style={{ minHeight: '200px' }}
                                             >
                                                 {stageDeals.map((deal, index) => (

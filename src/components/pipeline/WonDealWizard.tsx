@@ -594,7 +594,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     {/* SEÇÃO 4: GRADE DE PRODUTOS */}
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-indigo-600">
+                                            <div className="flex items-center gap-2 text-blue-600">
                                                 <Truck className="w-4 h-4" />
                                                 <h4 className="text-[11px] font-black uppercase tracking-widest">Grade de Produtos</h4>
                                             </div>

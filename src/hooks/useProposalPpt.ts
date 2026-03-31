@@ -16,6 +16,7 @@ export function useProposalPpt() {
             investmentRef: React.RefObject<HTMLDivElement | null>;
             differentialsRef: React.RefObject<HTMLDivElement | null>;
             confidentialityRef: React.RefObject<HTMLDivElement | null>;
+            customNotesRef: React.RefObject<HTMLDivElement | null>;
         }
     ) => {
         if (!proposal.content) {
@@ -27,7 +28,7 @@ export function useProposalPpt() {
         const toastId = toast.loading('Gerando PowerPoint da proposta...');
 
         try {
-            await new Promise(r => setTimeout(r, 1000)); // Wait for render
+            await new Promise(r => setTimeout(r, 2000)); // Wait for render
 
             const pptx = new pptxgen();
             
@@ -42,7 +43,7 @@ export function useProposalPpt() {
                 if (activeSections.length > 0) return activeSections.includes(id);
                 return !!legacyFlag;
             };
-            const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef } = refs;
+            const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef, customNotesRef } = refs;
 
             const processSlide = async (ref: React.RefObject<HTMLDivElement | null>, name: string, addOverlays?: (slide: pptxgen.Slide) => void) => {
                 if (!ref.current) return;
@@ -50,7 +51,9 @@ export function useProposalPpt() {
                 try {
                     const imgData = await domToPng(ref.current, {
                         scale: 2,
-                        backgroundColor: '#ffffff'
+                        backgroundColor: '#ffffff',
+                        width: 1280,
+                        height: 720
                     });
 
                     if (!imgData || !imgData.startsWith('data:image/png;base64,')) {
@@ -85,7 +88,7 @@ export function useProposalPpt() {
             if (isSectionActive('cover', config.includeCover) && coverRef.current) {
                 await processSlide(coverRef, 'cover', (slide) => {
                     // Main Title Overlay (approximate position for Cover)
-                    slide.addText(editableTexts.proposalTitle || "Proposta de Solução", {
+                    slide.addText(config.customTitle || proposal.title || "Proposta de Solução", {
                         x: 0.44,
                         y: 1.35,
                         w: 6.0,
@@ -106,7 +109,7 @@ export function useProposalPpt() {
                     slide.addText(proposal.company_name || 'Cliente', { x: 2.15, y: 3.38, w: 6, ...metadataStyle });
                     
                     // Date (Row 4)
-                    slide.addText(new Date(proposal.createdAt).toLocaleDateString('pt-BR'), { x: 2.15, y: 4.06, w: 6, ...metadataStyle });
+                    slide.addText(new Date().toLocaleDateString('pt-BR'), { x: 2.15, y: 4.06, w: 6, ...metadataStyle });
 
                     // Proposal Number (Row 5 - Optional)
                     if (proposal.number) {
@@ -121,6 +124,7 @@ export function useProposalPpt() {
             if (isSectionActive('differentials', config.includeDifferentials) && differentialsRef.current) await processSlide(differentialsRef, 'differentials');
             if (isSectionActive('hardware', config.includeHardware) && hardwareRef.current) await processSlide(hardwareRef, 'hardware');
             if (isSectionActive('software', config.includeSoftware) && softwareRef.current) await processSlide(softwareRef, 'software');
+            if (isSectionActive('custom_notes') && customNotesRef.current) await processSlide(customNotesRef, 'custom_notes');
             if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processSlide(investmentRef, 'investment');
 
             const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pptx`;

@@ -67,9 +67,9 @@ export function StatementTab({ deals, users }: StatementTabProps) {
     return (
         <div>
             {/* Filters */}
-            <div className="flex gap-4 mb-6 sticky top-0 bg-background p-4 z-10 border-b border-border">
+            <div className="flex gap-4 mb-6 sticky top-0 bg-background p-2.5 px-4 z-10 border-b border-border transition-all">
                 <ThemeSelect
-                    className="bg-background border border-border rounded-xl px-3 h-10 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
+                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
                     value={selectedUserId}
                     onChange={e => setSelectedUserId(e.target.value)}
                 >
@@ -80,7 +80,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                 </ThemeSelect>
 
                 <ThemeSelect
-                    className="bg-background border border-border rounded-xl px-3 h-10 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
+                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
                     value={filterStatus}
                     onChange={e => setFilterStatus(e.target.value as any)}
                 >
@@ -91,7 +91,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
 
                 <ThemeInput
                     type="month"
-                    className="bg-background border border-border rounded-xl px-3 h-10 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
+                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
                     value={filterMonth}
                     onChange={e => setFilterMonth(e.target.value)}
                 />

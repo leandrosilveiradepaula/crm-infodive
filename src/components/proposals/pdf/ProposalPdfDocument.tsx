@@ -8,6 +8,7 @@ import { PdfHardwarePage } from './PdfHardwarePage';
 import { PdfSoftwarePage } from './PdfSoftwarePage';
 import { PdfInvestmentPage } from './PdfInvestmentPage';
 import { PdfDifferentialsPage } from './PdfDifferentialsPage';
+import { PdfCustomNotesPage } from './PdfCustomNotesPage';
 import { sortProductsHierarchically } from '@/utils/productSorting';
 import { getPdfColors, getPdfStyles } from './pdfStyles';
 
@@ -23,6 +24,8 @@ interface ProposalPdfDocumentProps {
     editableTexts: EditableTexts;
     config: EditorConfig;
     aiSummary?: string;
+    objectives?: any[];
+    simplifiedProductNames?: Record<string, string>;
 
     // AI content
     softwareHighlights?: Array<{ title: string; value: string }>;
@@ -58,6 +61,8 @@ export function ProposalPdfDocument({
     distributors,
     themePrimary,
     themeAccent,
+    objectives,
+    simplifiedProductNames,
 }: ProposalPdfDocumentProps) {
     const today = new Date().toLocaleDateString('pt-BR', {
         day: '2-digit', month: 'long', year: 'numeric',
@@ -92,6 +97,7 @@ export function ProposalPdfDocument({
             <PdfOverviewPage
                 dealTitle={dealTitle}
                 aiSummary={config.includeAISummary ? aiSummary : undefined}
+                objectives={objectives}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
             />
@@ -99,6 +105,7 @@ export function ProposalPdfDocument({
         hardware: (
             <PdfHardwarePage 
                 products={sortedProducts}
+                simplifiedProductNames={simplifiedProductNames}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
             />
@@ -106,6 +113,7 @@ export function ProposalPdfDocument({
         software: (
             <PdfSoftwarePage
                 products={sortedProducts}
+                simplifiedProductNames={simplifiedProductNames}
                 softwareHighlights={softwareHighlights}
                 benefitTiles={benefitTiles}
                 pdfColors={pdfColors}
@@ -115,6 +123,7 @@ export function ProposalPdfDocument({
         investment: (
             <PdfInvestmentPage
                 products={sortedProducts}
+                simplifiedProductNames={simplifiedProductNames}
                 showBillingInfo={config.showBillingInfo}
                 isPriceStudy={config.isPriceStudy}
                 priceStudyValidity={editableTexts.priceStudyValidity}
@@ -128,6 +137,14 @@ export function ProposalPdfDocument({
         differentials: (
             <PdfDifferentialsPage
                 differentials={editableTexts.differentials}
+                pdfColors={pdfColors}
+                pdfStyles={pdfStyles}
+            />
+        ),
+        custom_notes: (
+            <PdfCustomNotesPage
+                title={editableTexts.customNotesTitle}
+                content={editableTexts.customNotesContent}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
             />

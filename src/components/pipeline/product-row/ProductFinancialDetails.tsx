@@ -526,7 +526,7 @@ export function ProductFinancialDetails({
                         <div className="space-y-4">
                             <div className="flex items-center justify-between h-6 mb-2">
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-purple-500 rounded-full"></span>
+                                    <span className="w-1 h-1 bg-teal-500 rounded-full"></span>
                                     Registros e Controle
                                 </p>
                             </div>

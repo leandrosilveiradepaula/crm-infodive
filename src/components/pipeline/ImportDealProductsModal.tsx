@@ -70,15 +70,24 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             setFile(selectedFile);
 
             // Parse file
+            const isImage = selectedFile.type.startsWith('image/');
+            const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
+
             let parsedRows: any[][] = [];
+            
             if (selectedFile.name.endsWith('.csv')) {
                 parsedRows = await parseCSV(selectedFile);
             } else if (selectedFile.name.match(/\.(xlsx|xls)$/)) {
                 parsedRows = await parseExcel(selectedFile);
-            } else if (selectedFile.type.startsWith('image/') || selectedFile.type === 'application/pdf') {
+            } else if (isImage || isPdf) {
                 setStep('processing');
                 // Process image/pdf with Gemini
-                const products = await extractProductsFromImage(selectedFile);
+                
+                // Fallback for mime type
+                const fileType = isPdf ? 'application/pdf' : selectedFile.type;
+                const fileToProcess = new File([selectedFile], selectedFile.name, { type: fileType });
+                
+                const products = await extractProductsFromImage(fileToProcess);
 
                 // Artificial headers for mapping
                 const artificialHeaders = ['sku', 'name', 'quantity', 'unit_price', 'total'];
@@ -161,8 +170,8 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
 
             setStep('mapping');
         } catch (err: any) {
-            console.error('Error selecting file:', err);
-            setError(err.message);
+            console.error('Error selecting file:', err instanceof Error ? err.stack : err);
+            setError(err instanceof Error ? err.message : String(err));
             setStep('upload'); // Go back to upload step on error
         }
     };

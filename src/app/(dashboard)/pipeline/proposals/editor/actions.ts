@@ -22,6 +22,18 @@ export async function fetchDealForEditor(dealId: string) {
         throw new Error('Deal not found or access denied');
     }
 
+    // Busca o nome do responsável para exibir na capa da proposta
+    if (deal.owner_id) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', deal.owner_id)
+            .single();
+        if (profile) {
+            deal.owner = profile.full_name;
+        }
+    }
+
     return deal;
 }
 
@@ -34,13 +46,17 @@ export async function fetchDistributorsForEditor() {
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('accounts')
-        .select('id, name, cnpj, payment_terms, logo_url, account_branches(id, name, cnpj), account_contacts(id, name, email, mobile_phone, landline_phone, role)')
+        .select(`
+            id, name, cnpj, payment_terms, logo_url, 
+            account_branches(id, name, cnpj), 
+            account_contacts(id, name, email, mobile_phone, landline_phone, role)
+        `)
         .eq('organization_id', organizationId)
         .eq('relationship_type', 'Distribuidor')
         .order('name');
 
     if (error) {
-        console.error('Error fetching distributors:', error);
+        console.error('Error fetching distributors:', JSON.stringify(error, null, 2));
         return [];
     }
 

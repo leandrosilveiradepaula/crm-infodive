@@ -74,7 +74,7 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
                         </Tooltip>
                     </TooltipProvider>
                     <Separator orientation="vertical" className="h-6 mx-2" />
-                    <Button variant="outline" size="sm" className="gap-2 text-purple-600 border-purple-200 bg-purple-50 hover:bg-purple-100">
+                    <Button variant="outline" size="sm" className="gap-2 text-teal-600 border-teal-200 bg-teal-50 hover:bg-teal-100">
                         <Sparkles className="h-4 w-4" />
                         Gerar Resposta IA
                     </Button>

@@ -81,13 +81,19 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                     {monthNames[currentMonth]} <span className="text-muted-foreground">{currentYear}</span>
                 </h2>
                 <div className="flex gap-2">
-                    <button className="p-2 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border">
+                    <button 
+                        className="p-3 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Mês anterior"
+                    >
                         <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-xl text-xs font-black uppercase tracking-widest transition-colors text-foreground border border-border">
+                    <button className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-xl text-xs font-black uppercase tracking-widest transition-colors text-foreground border border-border min-h-[44px]">
                         Hoje
                     </button>
-                    <button className="p-2 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border">
+                    <button 
+                        className="p-3 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        aria-label="Próximo mês"
+                    >
                         <ChevronRight className="h-5 w-5" />
                     </button>
                 </div>
@@ -113,6 +119,9 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                     return (
                         <div
                             key={index}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Dia ${date.getDate()} de ${monthNames[date.getMonth()]}, ${dayActivities.length} atividades`}
                             className={`
                                 min-h-24 p-2 rounded-lg border transition-all cursor-pointer
                                 ${isCurrentDay ? 'bg-primary/10 border-primary ring-1 ring-primary/50' : 'border-border hover:border-primary/20 hover:bg-muted/50'}
@@ -128,10 +137,21 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                 {dayActivities.slice(0, 3).map(activity => (
                                     <div
                                         key={activity.id}
-                                        onClick={() => onActivityClick(activity)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onActivityClick(activity);
+                                        }}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                onActivityClick(activity);
+                                            }
+                                        }}
                                         className={`
                                             text-[10px] px-1.5 py-1 rounded-md truncate font-medium cursor-pointer border
-                                            ${activity.type === 'meeting' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20 hover:bg-purple-500/20' : ''}
+                                            ${activity.type === 'meeting' ? 'bg-teal-500/10 text-teal-500 border-teal-500/20 hover:bg-teal-500/20' : ''}
                                             ${activity.type === 'call' ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20' : ''}
                                             ${activity.type === 'task' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20' : ''}
                                             ${activity.type === 'email' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' : ''}
@@ -157,7 +177,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
             {/* Legenda */}
             <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-border">
                 <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-purple-500/20 border border-purple-500/30"></div>
+                    <div className="w-3 h-3 rounded bg-teal-500/20 border border-teal-500/30"></div>
                     <span className="text-muted-foreground">Reunião</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">

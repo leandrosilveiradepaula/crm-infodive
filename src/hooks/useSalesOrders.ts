@@ -31,6 +31,7 @@ export interface SalesOrder {
     };
     user?: {
         name: string;
+        commission_rules?: any;
     };
 }
 

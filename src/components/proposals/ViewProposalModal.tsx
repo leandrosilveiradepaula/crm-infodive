@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 
-import { Download, Send, Trash2, Calendar, User, ShieldCheck, ExternalLink, FileText, TrendingUp, Loader2, History } from 'lucide-react';
+import { Trash2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
@@ -20,11 +20,14 @@ import { ProposalVersionHistory } from './ProposalVersionHistory';
 
 import { useProposalPdf } from '@/hooks/useProposalPdf';
 import { useProposalPpt } from '@/hooks/useProposalPpt';
+import { useProposalDocx } from '@/hooks/useProposalDocx';
 import { formatCurrency } from '@/utils/analytics';
 import { PROPOSAL_STATUS } from '@/lib/constants';
 import { getOrganizationTheme } from '@/app/actions/theme-actions';
+import { Zap, ShieldCheck, Download, Send, History, ExternalLink, FileText, TrendingUp, Loader2, User, Calendar } from 'lucide-react';
 import type { Proposal } from '@/types/proposal';
 import type { Deal } from '@/types/deal';
+import type { Account } from '@/types/account';
 
 interface ViewProposalModalProps {
     proposal: Proposal;
@@ -32,7 +35,7 @@ interface ViewProposalModalProps {
     onClose: () => void;
     onDelete: (id: string) => void;
     onUpdateStatus: (id: string, updates: Partial<Proposal> & Record<string, unknown>) => void;
-    distributors?: Array<{ id: string; name: string;[key: string]: unknown }>;
+    distributors?: Account[];
 }
 
 export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
@@ -94,9 +97,10 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
     const { generatingPdf, handleDownload } = useProposalPdf();
     const { generatingPpt, handleDownloadPpt } = useProposalPpt();
+    const { generatingDocx, handleDownloadDocx } = useProposalDocx();
 
-    const onDownloadClick = () => {
-        handleDownload(proposal, {
+    const onDownloadClick = async () => {
+        await handleDownload(proposal, {
             coverRef,
             overviewRef,
             hardwareRef,
@@ -107,8 +111,9 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
         });
     };
 
-    const onDownloadPptClick = () => {
-        handleDownloadPpt(proposal, {
+    const onDownloadPptClick = async () => {
+        if (!proposal) return;
+        await handleDownloadPpt(proposal, {
             coverRef,
             overviewRef,
             hardwareRef,
@@ -117,6 +122,11 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
             differentialsRef,
             confidentialityRef
         });
+    };
+
+    const onDownloadDocxClick = async () => {
+        if (!proposal) return;
+        await handleDownloadDocx(proposal);
     };
 
     const handleCopyLink = () => {
@@ -347,8 +357,8 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     </div>
 
                                     {/* Download Actions */}
-                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm flex flex-col items-center gap-6 justify-between">
-                                        <div className="flex items-center gap-4 w-full">
+                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
+                                        <div className="flex items-center gap-4 mb-6">
                                             <div className="h-10 w-10 shrink-0 rounded-xl bg-stage-proposal/10 text-stage-proposal flex items-center justify-center">
                                                 <Download className="h-5 w-5" />
                                             </div>
@@ -358,30 +368,43 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                             </div>
                                         </div>
                                         
-                                        <div className="flex flex-col md:flex-row gap-3 w-full">
+                                        <div className="flex flex-col md:flex-row gap-2 w-full">
                                             <Button
                                                 onClick={onDownloadClick}
-                                                disabled={generatingPdf || generatingPpt}
+                                                disabled={generatingPdf || generatingPpt || generatingDocx}
                                                 variant="outline"
-                                                className="flex-1 border-primary/20 text-primary hover:bg-primary/5 font-bold tracking-wide h-12 rounded-xl"
+                                                className="flex-1 border-primary/20 text-primary hover:bg-primary/5 font-bold tracking-wide h-10 rounded-xl text-xs"
                                             >
                                                 {generatingPdf ? (
-                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando PDF...</>
+                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> PDF...</>
                                                 ) : (
-                                                    <><Download className="mr-2 h-4 w-4" /> Baixar PDF</>
+                                                    <><Download className="mr-2 h-4 w-4" /> PDF</>
+                                                )}
+                                            </Button>
+
+                                            <Button
+                                                onClick={onDownloadDocxClick}
+                                                disabled={generatingPdf || generatingPpt || generatingDocx}
+                                                variant="outline"
+                                                className="flex-1 border-blue-500/20 text-blue-500 hover:bg-blue-500/5 font-bold tracking-wide h-10 rounded-xl text-xs"
+                                            >
+                                                {generatingDocx ? (
+                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> DOCX...</>
+                                                ) : (
+                                                    <><FileText className="mr-2 h-4 w-4" /> DOCX</>
                                                 )}
                                             </Button>
 
                                             <Button
                                                 onClick={onDownloadPptClick}
-                                                disabled={generatingPdf || generatingPpt}
+                                                disabled={generatingPdf || generatingPpt || generatingDocx}
                                                 variant="outline"
-                                                className="flex-1 border-stage-proposal/20 text-stage-proposal hover:bg-stage-proposal/5 font-bold tracking-wide h-12 rounded-xl"
+                                                className="flex-1 border-stage-proposal/20 text-stage-proposal hover:bg-stage-proposal/5 font-bold tracking-wide h-10 rounded-xl text-xs"
                                             >
                                                 {generatingPpt ? (
-                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Gerando PPT...</>
+                                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> PPT...</>
                                                 ) : (
-                                                    <><FileText className="mr-2 h-4 w-4" /> Baixar PPT (Híbrido)</>
+                                                    <><Zap className="mr-2 h-4 w-4" /> PPT</>
                                                 )}
                                             </Button>
                                         </div>
@@ -451,9 +474,8 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                 </div>
 
                 {/* Hidden Render Container for PDF / PPT */}
-                {
-                    (generatingPdf || generatingPpt) && (
-                        <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
+                {(generatingPdf || generatingPpt) && (
+                    <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '210mm', pointerEvents: 'none' }}>
                             <div ref={coverRef}>
                                 <ProposalCoverPage
                                     dealTitle={pseudoDeal.title}

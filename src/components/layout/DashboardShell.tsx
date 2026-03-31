@@ -14,11 +14,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 isMobileMenuOpen={isMobileMenuOpen}
                 setIsMobileMenuOpen={setIsMobileMenuOpen}
                 isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={setIsSidebarCollapsed}
             />
 
             <main className="flex-1 flex flex-col overflow-hidden w-full relative">
-                <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-                <div className="flex-1 overflow-auto p-4 lg:p-6 w-full">
+                <Header 
+                    onMenuClick={() => setIsMobileMenuOpen(true)} 
+                    isSidebarCollapsed={isSidebarCollapsed}
+                    onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                />
+                <div className="flex-1 overflow-auto px-2 lg:px-4 pb-2 lg:pb-4 w-full">
                     {children}
                 </div>
             </main>

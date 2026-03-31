@@ -10,6 +10,7 @@ interface PdfCoverPageProps {
     proposalTitle: string;
     proposalNumber?: string;
     clientLogo?: string;
+    sellerName?: string;
     pdfColors: PdfColors;
     pdfStyles: any;
 }
@@ -21,6 +22,7 @@ export function PdfCoverPage({
     proposalTitle,
     proposalNumber,
     clientLogo,
+    sellerName,
     pdfColors,
     pdfStyles,
 }: PdfCoverPageProps) {
@@ -72,7 +74,7 @@ export function PdfCoverPage({
                         {[
                             { label: 'Projeto', value: dealTitle },
                             { label: 'Cliente', value: companyName },
-                            { label: 'Responsável', value: 'Infodive IT' },
+                            { label: 'Responsável', value: sellerName ? `${sellerName} (Infodive IT)` : 'Infodive IT' },
                             { label: 'Data', value: date },
                             ...(proposalNumber ? [{ label: 'Nº Proposta', value: proposalNumber, isAccent: true }] : []),
                         ].map((row, i) => (

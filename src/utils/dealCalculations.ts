@@ -1,15 +1,12 @@
-/**
- * Shared logic for calculating the total value of a deal based on its products.
- */
+import type { DealProduct } from '@/types/deal';
 
-export interface ProductPriceItem {
+export interface ProductPriceItem extends Partial<DealProduct> {
+    id: string;
     unit_price: number;
     quantity: number;
     is_optional?: boolean;
     cost?: number;
-    parent_id?: string | null; // Added as it's used in the logic
-    custom_label?: string | null;
-    [key: string]: any;
+    parent_id?: string | null;
 }
 
 /**
@@ -32,7 +29,7 @@ export const calculateDealValue = (products: ProductPriceItem[]): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
 
-        const val = (Number(item[valueField]) || 0) * (item.quantity || 0);
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
         const children = products.filter(p => p.parent_id === productId);
 
         const childrenSum = children.reduce((sum, child) => {
@@ -64,7 +61,7 @@ export const calculateDealValue = (products: ProductPriceItem[]): number => {
 
     const scenarioValues = rootOptions.map(p => {
         const val = getTreeValue(p.id, 'unit_price');
-        console.log(`[calculateDealValue] Scenario for ${p.name || p.id}:`, val);
+        console.log(`[calculateDealValue] Scenario for ${p.id}:`, val);
         return val;
     });
     const maxScenario = Math.max(...scenarioValues);
@@ -85,7 +82,7 @@ export const calculateDealTotalCost = (products: ProductPriceItem[]): number => 
     const getTreeValue = (productId: string, valueField: 'unit_price' | 'cost'): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
-        const val = (Number(item[valueField]) || 0) * (item.quantity || 0);
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
         const children = products.filter(p => p.parent_id === productId);
         return val + children.reduce((sum, child) => sum + getTreeValue(child.id, valueField), 0);
     };

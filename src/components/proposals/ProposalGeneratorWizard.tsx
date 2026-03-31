@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-import { CheckCircle2, ChevronRight, FileText, Loader2, Sparkles, Zap, Globe, TrendingUp, Shield, Coins, ArrowLeft, FileSignature, CreditCard } from 'lucide-react';
+import { CheckCircle2, ChevronRight, FileText, Loader2, Sparkles, Zap, Globe, TrendingUp, Shield, Coins, ArrowLeft, FileSignature, CreditCard, Target } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 import { ProposalCoverPage } from './ProposalCoverPage';
 import { ProposalOverviewPage } from './ProposalOverviewPage';
@@ -21,6 +22,8 @@ import { ProposalTemplateSelector } from './ProposalTemplateSelector';
 
 import { useProposalIntelligence } from '@/hooks/useProposalIntelligence';
 import { useProposalGenerator } from '@/hooks/useProposalGenerator';
+import { useProposalPpt } from '@/hooks/useProposalPpt';
+import { useProposalDocx } from '@/hooks/useProposalDocx';
 import { getOrganizationTheme } from '@/app/actions/theme-actions';
 import type { Deal } from '@/types/deal';
 
@@ -39,10 +42,11 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
         selectTemplate,
         updateConfig,
         reset,
+        autoConfigure,
     } = useProposalIntelligence();
 
     // Track last deal ID to know when to force reset
-    const lastDealIdRef = useRef(deal.id);
+    const lastDealIdRef = useRef<string | null>(null);
 
     // Map wizard steps: 1=Template, 2=Config, 3=Generate/Success
     const [wizardStep, setWizardStep] = useState(1);
@@ -71,16 +75,20 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
     }, []);
 
     const {
-        handleGenerate,
+        handleAnalyzeAI,
+        handleGeneratePdf,
         loading,
         status,
         setStatus,
         aiSummary,
         setAiSummary,
+        objectives,
+        setObjectives,
         softwareHighlights,
         setSoftwareHighlights,
         benefitTiles,
         setBenefitTiles,
+        simplifiedProductNames,
         proposalNumber,
         setProposalNumber
     } = useProposalGenerator({
@@ -99,34 +107,42 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
         }
     });
 
+    const { handleDownloadPpt, generatingPpt } = useProposalPpt();
+    const { handleDownloadDocx, generatingDocx } = useProposalDocx();
+
     // Reset wizard only when a DIFFERENT deal is opened
     useEffect(() => {
         if (open) {
             if (lastDealIdRef.current !== deal.id) {
-                console.log('🔄 New deal detected, resetting wizard state');
                 setWizardStep(1);
                 reset();
-                updateConfig({ customTitle: `Proposta: ${deal.title}` });
+                autoConfigure(deal.title, deal.deal_products || [], deal.value);
                 lastDealIdRef.current = deal.id;
                 setAiSummary('');
                 setSoftwareHighlights([]);
                 setBenefitTiles([]);
                 setProposalNumber('');
-            } else if (wizardStep === 3) {
-                // Same deal but was "Success" screen, reset to step 1 for new proposal
-                // but we DON'T call reset() here to preserve the previous summary/highlights 
-                // if the user wants to generate another version of the same proposal
+            } else if (wizardStep === 4) {
+                // Was on success screen, reset to step 1 for new attempt
                 setWizardStep(1);
             }
-            // If it's the same deal, we keep the previous state (summary, title, etc)
             setStatus('idle');
         }
-    }, [open, deal.id, deal.title, reset, updateConfig, setAiSummary, setStatus, wizardStep]);
+    }, [open, deal.id, deal.title, deal.value, reset, autoConfigure, setAiSummary, setStatus, wizardStep]);
+
+    const handleNextFromConfig = async () => {
+        if (config.includeAISummary || config.includeOverview) {
+            const success = await handleAnalyzeAI();
+            if (success) setWizardStep(3);
+        } else {
+            setWizardStep(3);
+        }
+    };
 
     const handleGenerateClick = async () => {
-        const success = await handleGenerate();
+        const success = await handleGeneratePdf({ aiSummary, objectives });
         if (success) {
-            setWizardStep(3);
+            setWizardStep(4);
         }
     };
 
@@ -144,7 +160,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                             <DialogTitle className="text-xl font-bold text-foreground">Gerador de Propostas IA</DialogTitle>
                             <div className="flex items-center gap-2">
                                 <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Configuração Estratégica: {deal.company}</p>
-                                {status === 'analyzing_ai' && <Badge variant="secondary" className="bg-purple-500/10 text-purple-400 border-purple-500/20 animate-pulse"><Sparkles className="h-3 w-3 mr-1" /> Analisando Deal...</Badge>}
+                                {status === 'analyzing_ai' && <Badge variant="secondary" className="bg-teal-500/10 text-teal-400 border-teal-500/20 animate-pulse"><Sparkles className="h-3 w-3 mr-1" /> Analisando Deal...</Badge>}
                                 {status === 'capturing_pages' && <Badge variant="secondary" className="bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Renderizando Páginas...</Badge>}
                             </div>
                         </div>
@@ -189,14 +205,13 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* AI Summary Toggle */}
                                 <ConfigToggle
                                     label="Resumo Executivo IA"
                                     description="Análise automática do deal pelo Gemini"
                                     icon={Sparkles}
                                     checked={config.includeAISummary}
                                     onChange={(c: boolean) => updateConfig({ includeAISummary: c })}
-                                    color="text-purple-400"
+                                    color="text-teal-400"
                                 />
                                 <ConfigToggle
                                     label="Overview do Projeto"
@@ -274,8 +289,77 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                         </div>
                     )}
 
-                    {/* Step 3: Success */}
+                    {/* Step 3: Content Review & Edit */}
                     {wizardStep === 3 && (
+                        <div className="space-y-8 animate-in slide-in-from-right-8 max-w-4xl mx-auto">
+                            <div className="text-center space-y-4">
+                                <h3 className="text-2xl font-bold">Revisar Conteúdo Estratégico</h3>
+                                <p className="text-muted-foreground text-sm">A IA sugeriu o conteúdo abaixo. Você pode ajustar os textos antes de gerar o arquivo final.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+                                {/* Executive Summary */}
+                                <div className="p-6 bg-card border border-border rounded-2xl space-y-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-teal-500/10 text-teal-500 rounded-lg">
+                                            <Sparkles className="h-5 w-5" />
+                                        </div>
+                                        <p className="font-bold text-sm">Resumo Executivo (IA)</p>
+                                    </div>
+                                    <textarea
+                                        value={aiSummary}
+                                        onChange={(e) => setAiSummary(e.target.value)}
+                                        rows={6}
+                                        className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all resize-none"
+                                        placeholder="O resumo aparecerá aqui..."
+                                    />
+                                </div>
+
+                                {/* Objectives Grid Edit */}
+                                {objectives.length > 0 && (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-3 px-2">
+                                            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                                                <Target className="h-4 w-4" />
+                                            </div>
+                                            <p className="font-bold text-sm">Objetivos Estratégicos</p>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {objectives.map((obj, i) => (
+                                                <div key={i} className="p-4 bg-card border border-border rounded-xl space-y-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-black bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center">{obj.number}</span>
+                                                        <input
+                                                            value={obj.title}
+                                                            onChange={(e) => {
+                                                                const newObjs = [...objectives];
+                                                                newObjs[i].title = e.target.value;
+                                                                setObjectives(newObjs);
+                                                            }}
+                                                            className="flex-1 bg-transparent border-none p-0 text-xs font-bold focus:ring-0"
+                                                        />
+                                                    </div>
+                                                    <textarea
+                                                        value={obj.description}
+                                                        onChange={(e) => {
+                                                            const newObjs = [...objectives];
+                                                            newObjs[i].description = e.target.value;
+                                                            setObjectives(newObjs);
+                                                        }}
+                                                        rows={2}
+                                                        className="w-full bg-muted/30 border-none rounded-lg p-2 text-[11px] focus:ring-0 resize-none"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Success */}
+                    {wizardStep === 4 && (
                         <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in zoom-in-95">
                             <div className="h-24 w-24 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
                                 <CheckCircle2 className="h-12 w-12 text-emerald-500" />
@@ -290,25 +374,63 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                 </div>
 
                 {/* Footer Navigation */}
-                {wizardStep < 3 && (
+                {wizardStep < 4 && (
                     <div className="p-8 border-t border-border flex justify-between items-center bg-card/80 backdrop-blur-md">
                         <Button variant="ghost" onClick={() => wizardStep > 1 ? setWizardStep(s => s - 1) : onOpenChange(false)} className="font-bold text-xs uppercase tracking-widest px-6">
                             {wizardStep === 1 ? 'Cancelar' : <><ArrowLeft className="h-3.5 w-3.5 mr-2" /> Voltar</>}
                         </Button>
 
-                        {wizardStep === 1 ? (
+                        {wizardStep === 1 && (
                             <Button onClick={() => setWizardStep(2)} className="bg-primary hover:bg-primary/90">
                                 Configurar <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
-                        ) : (
-                            <Button
-                                onClick={handleGenerateClick}
-                                disabled={loading}
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0"
-                            >
+                        )}
+
+                        {wizardStep === 2 && (
+                            <Button onClick={handleNextFromConfig} disabled={loading} className="bg-primary hover:bg-primary/90">
                                 {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                                {loading ? 'Gerando Documento...' : 'Gerar Proposta PDF'}
+                                {loading ? 'Analisando...' : 'Analisar e Revisar'} <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
+                        )}
+
+                        {wizardStep === 3 && (
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handleGeneratePdf({ aiSummary, objectives })}
+                                    disabled={loading}
+                                    className="border-primary/20 hover:bg-primary/5"
+                                >
+                                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
+                                    Gerar PDF
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handleDownloadDocx(deal, { aiSummary, objectives, customTitle: config.customTitle, proposalNumber })}
+                                    disabled={loading || generatingDocx}
+                                    className="border-blue-500/20 hover:bg-blue-500/5 text-blue-500"
+                                >
+                                    {generatingDocx ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
+                                    Gerar DOCX
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handleDownloadPpt({ id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives } }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef })}
+                                    disabled={loading || generatingPpt}
+                                    className="border-orange-500/20 hover:bg-orange-500/5 text-orange-500"
+                                >
+                                    {generatingPpt ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
+                                    Gerar PPT
+                                </Button>
+                                <Button
+                                    onClick={handleGenerateClick}
+                                    disabled={loading}
+                                    className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 border-0"
+                                >
+                                    {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                                    {loading ? 'Finalizando...' : 'Concluir & Baixar'}
+                                </Button>
+                            </div>
                         )}
                     </div>
                 )}
@@ -340,6 +462,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                         <ProposalOverviewPage
                             dealTitle={deal.title}
                             aiSummary={aiSummary}
+                            objectives={objectives}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
                         />
@@ -348,6 +471,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                     <div ref={hardwareRef}>
                         <ProposalHardwarePage
                             deal={deal}
+                            simplifiedProductNames={simplifiedProductNames}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
                         />
@@ -358,6 +482,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                             deal={deal}
                             softwareHighlights={softwareHighlights}
                             benefitTiles={benefitTiles}
+                            simplifiedProductNames={simplifiedProductNames}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
                         />
@@ -366,8 +491,9 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                     <div ref={investmentRef}>
                         <ProposalInvestmentPage
                             deal={deal}
-                            distributors={distributors}
+                            distributors={distributors as any}
                             config={config}
+                            simplifiedProductNames={simplifiedProductNames}
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
                         />

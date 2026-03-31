@@ -254,9 +254,9 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
             value: activeOrdersCount.toString(),
             description: 'Ciclo em andamento',
             icon: ShoppingBag,
-            color: "text-purple-600 dark:text-purple-400",
-            gradient: "from-purple-50 to-white dark:from-purple-950/20",
-            border: "border-purple-100 dark:border-purple-900/50",
+            color: "text-teal-600 dark:text-teal-400",
+            gradient: "from-teal-50 to-white dark:from-teal-950/20",
+            border: "border-teal-100 dark:border-teal-900/50",
             onClick: () => onNavigateToOrders('active'),
         },
         {

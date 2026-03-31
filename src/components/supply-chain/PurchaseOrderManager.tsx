@@ -78,7 +78,7 @@ export const PurchaseOrderManager: React.FC = () => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'sent': return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-            case 'confirmed': return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
+            case 'confirmed': return 'bg-teal-500/20 text-teal-400 border-teal-500/50';
             case ORDER_STATUS.DELIVERED: return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
             case ORDER_STATUS.CANCELLED: return 'bg-red-500/20 text-red-400 border-red-500/50';
             default: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
@@ -99,7 +99,7 @@ export const PurchaseOrderManager: React.FC = () => {
         <div className="h-full flex flex-col bg-background text-foreground p-6 overflow-hidden">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-pink-400">
                         Supply Chain Control Tower
                     </h1>
                     <p className="text-muted-foreground mt-1">Gestão inteligente de compras e entregas</p>
@@ -108,7 +108,7 @@ export const PurchaseOrderManager: React.FC = () => {
                     onClick={() => setShowDashboard(!showDashboard)}
                     className="px-4 py-2 bg-card border border-border rounded-xl hover:bg-muted/50 transition-colors flex items-center gap-2"
                 >
-                    <TrendingUp className="h-4 w-4 text-purple-500" />
+                    <TrendingUp className="h-4 w-4 text-teal-500" />
                     {showDashboard ? 'Ocultar KPIs' : 'Ver KPIs'}
                 </button>
             </div>
@@ -118,19 +118,19 @@ export const PurchaseOrderManager: React.FC = () => {
                     {/* KPI 1: Total Backlog Value */}
                     <div className="bg-card border border-border p-6 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <DollarSign className="h-24 w-24 text-purple-500" />
+                            <DollarSign className="h-24 w-24 text-teal-500" />
                         </div>
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="p-2 bg-purple-500/20 rounded-lg">
-                                    <ShoppingBag className="h-5 w-5 text-purple-500" />
+                                <div className="p-2 bg-teal-500/20 rounded-lg">
+                                    <ShoppingBag className="h-5 w-5 text-teal-500" />
                                 </div>
                                 <span className="text-sm font-medium text-muted-foreground">Valor em Backlog</span>
                             </div>
                             <h3 className="text-2xl font-bold text-foreground tracking-tight">
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(backlogValue)}
                             </h3>
-                            <p className="text-xs text-purple-500 mt-1 font-medium">
+                            <p className="text-xs text-teal-500 mt-1 font-medium">
                                 {backlogOrders.length} pedidos pendentes
                             </p>
                         </div>
@@ -205,7 +205,7 @@ export const PurchaseOrderManager: React.FC = () => {
                         placeholder="Buscar por distribuidor, deal, SKU ou ID..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
+                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
                     />
                 </div>
                 <div className="relative min-w-[200px]">
@@ -213,7 +213,7 @@ export const PurchaseOrderManager: React.FC = () => {
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all appearance-none font-medium text-muted-foreground"
+                        className="w-full bg-card border border-border rounded-xl pl-10 pr-4 py-3 text-foreground focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all appearance-none font-medium text-muted-foreground"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="draft">Rascunho</option>
@@ -228,7 +228,7 @@ export const PurchaseOrderManager: React.FC = () => {
             <div className="flex-1 overflow-auto bg-card border border-border rounded-2xl shadow-xl">
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
@@ -303,7 +303,7 @@ export const PurchaseOrderManager: React.FC = () => {
                                                 {order.status === 'sent' && (
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); handleStatusChange(order.id, 'confirmed'); }}
-                                                        className="p-1 px-2 bg-purple-500/10 text-purple-500 rounded text-xs hover:bg-purple-500/20"
+                                                        className="p-1 px-2 bg-teal-500/10 text-teal-500 rounded text-xs hover:bg-teal-500/20"
                                                     >
                                                         Confirmar
                                                     </button>

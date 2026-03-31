@@ -1,8 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
+import type { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
+import type { DealProduct } from '@/types/deal';
 
 export class SalesService {
-    static async getSalesOrders(organizationId: string, dealId?: string) {
+    static async getSalesOrders(organizationId: string, dealId?: string): Promise<SalesOrder[]> {
         const supabase = createAdminClient();
         let query = supabase
             .from('sales_orders')
@@ -10,7 +11,7 @@ export class SalesService {
                 *,
                 items:sales_order_items(*),
                 installments:sales_order_installments(*),
-                deal:deals(title, customer:accounts!deals_account_id_fkey(name))
+                deal:deals(title, commission_deduction, owner_id, customer:accounts!deals_account_id_fkey(name))
             `)
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
@@ -21,7 +22,46 @@ export class SalesService {
 
         const { data, error } = await query;
         if (error) throw error;
-        return data as SalesOrder[];
+
+        // Fetch profiles for the users (either via created_by or deal's owner_id)
+        let profilesMap: Record<string, { full_name: string; commission_rules: any }> = {};
+        if (data && data.length > 0) {
+            const userIds = new Set<string>();
+            data.forEach(order => {
+                if (order.created_by) userIds.add(order.created_by);
+                if (order.deal?.owner_id) userIds.add(order.deal.owner_id);
+            });
+
+            if (userIds.size > 0) {
+                const { data: profiles } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, commission_rules')
+                    .in('id', Array.from(userIds));
+                
+                if (profiles) {
+                    profilesMap = (profiles as any[]).reduce((acc, p) => {
+                        acc[p.id] = p;
+                        return acc;
+                    }, {} as Record<string, any>);
+                }
+            }
+        }
+
+        // Map the user into the order
+        const mappedData = (data || []).map(order => {
+            const userId = order.created_by || order.deal?.owner_id;
+            const profile = userId ? profilesMap[userId] : null;
+            
+            return {
+                ...order,
+                user: {
+                    name: profile?.full_name || 'Vendedor',
+                    commission_rules: profile?.commission_rules || null
+                }
+            };
+        });
+
+        return mappedData as SalesOrder[];
     }
 
     static async createSalesOrder(organizationId: string, order: Partial<SalesOrder>, items: Partial<SalesOrderItem>[]) {
@@ -105,8 +145,8 @@ export class SalesService {
         if (products.length === 0) return { success: true, message: 'No products to convert' };
 
         // 2. Group products by distributor_id
-        const groups: Record<string, any[]> = {};
-        products.forEach((p: any) => {
+        const groups: Record<string, DealProduct[]> = {};
+        products.forEach((p: DealProduct) => {
             const distId = p.distributor_id || 'none';
             if (!groups[distId]) groups[distId] = [];
             groups[distId].push(p);

@@ -130,7 +130,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
                 let extractedTotal = 0;
                 let extractedDate = new Date().toLocaleDateString('pt-BR');
                 let extractedIssuer = extractedCNPJ ? `CNPJ Emitente: ${extractedCNPJ}` : 'Desconhecido';
-                let extractedBoletos: { dueDate: string, amount: number }[] = [];
+                const extractedBoletos: { dueDate: string, amount: number }[] = [];
 
                 try {
                     const pdfParse = require('pdf-parse');

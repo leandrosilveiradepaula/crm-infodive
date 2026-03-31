@@ -40,7 +40,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
 
     return (
         <div className="space-y-6">
-            <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden">
+            <Card className="bg-card border-border rounded-2xl overflow-hidden shadow-xl">
                 <CardHeader className="bg-muted/30 pb-8">
                     <div className="flex items-center gap-3">
                         <div className="p-3 bg-primary/10 rounded-2xl">
@@ -140,7 +140,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
     return (
         <div className="space-y-6">
-            <Card className="bg-card border-border rounded-[2.5rem] overflow-hidden shadow-xl">
+            <Card className="bg-card border-border rounded-2xl overflow-hidden shadow-xl">
                 <CardHeader className="bg-muted/30 pb-8">
                     <div className="flex items-center gap-3">
                         <div className="p-3 bg-primary/10 rounded-2xl">
@@ -277,7 +277,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             </Card>
 
             {/* Application Preferences */}
-            <Card className="bg-card border-border rounded-[2.5rem] mt-10 overflow-hidden border-dashed">
+            <Card className="bg-card border-border rounded-2xl mt-10 overflow-hidden border-dashed">
                 <CardHeader>
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-muted rounded-lg border border-border">
@@ -318,26 +318,26 @@ export function SettingsClientPage({ initialOrgSettings, initialStages }: { init
             />
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="bg-muted/50 p-1.5 rounded-2xl border border-border mb-8 h-14 gap-2">
-                    <TabsTrigger value="general" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                <TabsList className="mb-8 w-full justify-start overflow-x-auto no-scrollbar">
+                    <TabsTrigger value="general">
                         <Building2 className="h-4 w-4" /> Geral
                     </TabsTrigger>
-                    <TabsTrigger value="branding" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="branding">
                         <Palette className="h-4 w-4" /> Aparência
                     </TabsTrigger>
-                    <TabsTrigger value="profile" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="profile">
                         <Settings className="h-4 w-4" /> Perfil
                     </TabsTrigger>
-                    <TabsTrigger value="pipeline" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="pipeline">
                         <Kanban className="h-4 w-4" /> Funil
                     </TabsTrigger>
-                    <TabsTrigger value="users" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="users">
                         <Users className="h-4 w-4" /> Equipe
                     </TabsTrigger>
-                    <TabsTrigger value="security" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="security">
                         <Shield className="h-4 w-4" /> Segurança
                     </TabsTrigger>
-                    <TabsTrigger value="audit" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white font-black uppercase text-[10px] tracking-[0.15em] px-6 h-full transition-all flex items-center gap-2">
+                    <TabsTrigger value="audit">
                         <Database className="h-4 w-4" /> Auditoria
                     </TabsTrigger>
                 </TabsList>

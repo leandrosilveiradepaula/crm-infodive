@@ -27,7 +27,7 @@ export function useProposalPdf() {
         const toastId = toast.loading('Gerando PDF da proposta...');
 
         try {
-            await new Promise(r => setTimeout(r, 1000)); // Wait for render
+            await new Promise(r => setTimeout(r, 2000)); // Wait for render
 
             const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
             const width = pdf.internal.pageSize.getWidth();
@@ -49,6 +49,8 @@ export function useProposalPdf() {
                     const imgData = await domToPng(ref.current, {
                         scale: 2,
                         backgroundColor: '#ffffff',
+                        width: 794,
+                        height: 1123,
                         style: { width: '210mm', height: '297mm' }
                     });
 

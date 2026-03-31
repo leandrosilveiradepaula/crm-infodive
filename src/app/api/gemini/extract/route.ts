@@ -28,10 +28,15 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { imageData, mimeType } = await request.json();
+        const payload = await request.json();
+        const { imageData, mimeType } = payload;
+
+        console.log(`📦 Payload recebido: chaves = ${Object.keys(payload).join(', ')}`);
+        console.log(`- mimeType: ${mimeType}`);
+        console.log(`- imageData size: ${(imageData?.length || 0)} bytes`);
 
         if (!imageData || !mimeType) {
-            return NextResponse.json({ error: "Os campos 'imageData' e 'mimeType' são obrigatórios" }, { status: 400 });
+            return NextResponse.json({ error: `Os campos 'imageData' e 'mimeType' são obrigatórios. (Recebido: mimeType=${mimeType}, imageData length=${imageData?.length || 0})` }, { status: 400 });
         }
 
         console.log(`📸 Processando arquivo (${mimeType})...`);

@@ -60,7 +60,7 @@ export class DistributorOrderService {
 
         const workbook = new ExcelJS.Workbook();
         const fileBuffer = fs.readFileSync(templatePath);
-        await workbook.xlsx.load(fileBuffer as any);
+        await workbook.xlsx.load(fileBuffer as unknown as any);
 
         const worksheet = workbook.getWorksheet("Pedido HW");
         if (!worksheet) throw new Error('Sheet "Pedido HW" not found in template');
@@ -86,7 +86,7 @@ export class DistributorOrderService {
         worksheet.getCell('E19').value = `Estado: ${extraData?.userState || deal.account?.state || ''}`;
 
         // Contato info
-        const primaryContact = deal.account?.contacts?.find((c: any) => c.is_primary) || deal.account?.contacts?.[0];
+        const primaryContact = deal.account?.contacts?.find((c) => c.is_primary) || deal.account?.contacts?.[0];
         worksheet.getCell('B20').value = extraData?.userContact || primaryContact?.name || '';
         worksheet.getCell('B21').value = extraData?.userPhone || primaryContact?.mobile_phone || primaryContact?.landline_phone || '';
         worksheet.getCell('B22').value = extraData?.userEmail || primaryContact?.email || '';
@@ -114,7 +114,7 @@ export class DistributorOrderService {
         }
 
         // 7. Fill Products (Grid starts at row 39)
-        const productsToFill = extraData?.products || (deal.deal_products || []).map((p: any) => ({
+        const productsToFill = extraData?.products || (deal.deal_products || []).map((p) => ({
             sku: p.sku || p.name,
             quantity: p.quantity || 1,
             unitPrice: p.unit_price || 0
@@ -126,24 +126,24 @@ export class DistributorOrderService {
         for (let r = 39; r <= 46; r++) {
             ['B', 'C', 'D', 'E'].forEach(col => {
                 const cell = worksheet.getCell(`${col}${r}`);
-                const cellAny = cell as any;
+                const internalCell = cell as any;
 
                 // Set to null while force-clearing all internal formula properties
                 cell.value = null;
 
-                if (cellAny._formula) cellAny._formula = undefined;
-                if (cellAny._sharedFormula) cellAny._sharedFormula = undefined;
+                if (internalCell._formula) internalCell._formula = undefined;
+                if (internalCell._sharedFormula) internalCell._sharedFormula = undefined;
 
-                if (cellAny._value && cellAny._value.model) {
-                    cellAny._value.model.formula = undefined;
-                    cellAny._value.model.sharedFormula = undefined;
-                    cellAny._value.model.result = undefined;
+                if (internalCell._value && internalCell._value.model) {
+                    internalCell._value.model.formula = undefined;
+                    internalCell._value.model.sharedFormula = undefined;
+                    internalCell._value.model.result = undefined;
                 }
             });
         }
 
         // --- DATA INJECTION ---
-        productsToFill.forEach((product: any, index: number) => {
+        productsToFill.forEach((product, index: number) => {
             const row = 39 + index;
             if (row > 46) return;
 
@@ -160,7 +160,7 @@ export class DistributorOrderService {
         });
 
         // 8. Export to Buffer
-        const buffer = await workbook.xlsx.writeBuffer() as any as Buffer;
+        const buffer = await workbook.xlsx.writeBuffer() as unknown as Buffer;
 
         // 9. Generate Descriptive Filename
         const accountName = deal.account?.name?.replace(/[^a-zA-Z0-9]/g, '_') || 'Cliente';

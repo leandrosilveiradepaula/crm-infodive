@@ -75,7 +75,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             <div className="col-span-6">
                 <input
                     type="text"
-                    className={`bg-background border rounded-xl px-4 py-2.5 text-sm font-bold text-foreground outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'
+                    className={`bg-background border rounded-xl px-4 h-[38px] text-sm font-bold text-foreground outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'
                         }`}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -84,7 +84,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             <div className="col-span-1">
                 <input
                     type="number"
-                    className={`bg-background border rounded-xl px-3 py-2.5 text-center text-sm font-bold text-blue-500 outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'
+                    className={`bg-background border rounded-xl px-3 h-[38px] text-center text-sm font-bold text-blue-500 outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'
                         }`}
                     value={percent}
                     onChange={(e) => setPercent(e.target.value === '' ? '' : Number(e.target.value))}
@@ -93,7 +93,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             </div>
             <div className="col-span-2">
                 <ThemeCurrencyInput
-                    className={`w-full bg-background border rounded-xl px-2 py-2.5 h-auto text-left text-sm font-bold text-emerald-500 outline-none transition-all pl-8 ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'}`}
+                    className={`w-full bg-background border rounded-xl px-2 h-[38px] text-left text-sm font-bold text-emerald-500 outline-none transition-all pl-8 ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-2 focus:ring-primary'}`}
                     value={absolute || 0}
                     onChange={(e) => setAbsolute(Number(e.target.value))}
                 />
@@ -193,7 +193,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                         <input
                             type="text"
                             placeholder="Nome da campanha (ex: Black Friday)"
-                            className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-foreground placeholder-muted-foreground font-medium"
+                            className="w-full px-4 h-[38px] bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-foreground placeholder-muted-foreground font-medium"
                             value={newCampaignName}
                             onChange={(e) => setNewCampaignName(e.target.value)}
                             onKeyDown={(e) => {
@@ -210,7 +210,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                             min="0"
                             max="100"
                             step="0.1"
-                            className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-foreground font-bold"
+                            className="w-full px-4 h-[38px] bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-foreground font-bold"
                             value={newCampaignPercent}
                             onChange={(e) => setNewCampaignPercent(e.target.value === '' ? '' : Number(e.target.value))}
                             onFocus={(e) => e.target.select()}
@@ -221,7 +221,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                             Valor Fixo (R$)
                         </label>
                         <ThemeCurrencyInput
-                            className="w-full h-auto px-4 py-2.5 bg-background border border-border rounded-xl pl-8 text-left focus:ring-2 focus:ring-primary outline-none transition-all text-foreground font-bold"
+                            className="w-full h-[38px] px-4 bg-background border border-border rounded-xl pl-8 text-left focus:ring-2 focus:ring-primary outline-none transition-all text-foreground font-bold"
                             value={newCampaignAbsolute || 0}
                             onChange={(e) => setNewCampaignAbsolute(Number(e.target.value))}
                         />
@@ -230,7 +230,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                         <button
                             onClick={handleCreate}
                             disabled={!newCampaignName.trim() || isCreating}
-                            className="w-full h-[46px] mt-6 bg-primary text-white font-black rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+                            className="w-full h-[38px] bg-primary text-white font-black rounded-xl hover:bg-primary transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
                         >
                             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                             {isCreating ? 'CRIANDO...' : 'CRIAR'}

@@ -92,12 +92,12 @@ export function ReportsClientPage() {
             />
 
             {/* Nova Barra de Filtros (Padrão Pipeline) */}
-            <div className="flex flex-col lg:flex-row gap-4 items-center bg-card p-4 rounded-3xl border border-border shadow-sm animate-in fade-in duration-500">
+            <div className="flex flex-col lg:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por oportunidade, empresa, produto, vendedor ou status..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -105,7 +105,7 @@ export function ReportsClientPage() {
 
                 <div className="flex flex-wrap gap-3 w-full lg:w-auto items-center">
                     {/* Advanced Multi-Year Pill Selector */}
-                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-2xl border border-border w-full sm:w-auto h-auto sm:h-11 items-center overflow-x-auto no-scrollbar">
+                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <Calendar className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
@@ -123,7 +123,7 @@ export function ReportsClientPage() {
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -138,7 +138,7 @@ export function ReportsClientPage() {
                                                 prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                        className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                                     >
                                         {q}
                                     </button>
@@ -181,20 +181,6 @@ export function ReportsClientPage() {
                         </select>
                     </div>
 
-                    {/* Origem Pill */}
-                    <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Origem:</span>
-                        <select
-                            value={sourceFilter}
-                            onChange={(e) => setSourceFilter(e.target.value)}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
-                        >
-                            <option value="all">Todas</option>
-                            {allSources.map(src => (
-                                <option key={src} value={src}>{src}</option>
-                            ))}
-                        </select>
-                    </div>
 
                     {/* Seller Select */}
                     <div className="w-full sm:w-[150px]">
@@ -223,11 +209,11 @@ export function ReportsClientPage() {
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/0 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-6 rounded-3xl bg-card border border-border hover:border-primary/40 transition-all">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-primary/10 rounded-xl">
-                                <DollarSign className="h-5 w-5 text-primary" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="p-1.5 bg-primary/10 rounded-lg">
+                                <DollarSign className="h-4 w-4 text-primary" />
                             </div>
                             <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
                                 +12.5%
@@ -241,11 +227,11 @@ export function ReportsClientPage() {
                 </div>
 
                 <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/30 to-purple-500/0 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-6 rounded-3xl bg-card border border-border hover:border-purple-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-purple-500/10 rounded-xl">
-                                <Target className="h-5 w-5 text-purple-500" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/30 to-teal-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-teal-500/40 transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="p-1.5 bg-teal-500/10 rounded-lg">
+                                <Target className="h-4 w-4 text-teal-500" />
                             </div>
                             <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
                                 +2.1%
@@ -259,11 +245,11 @@ export function ReportsClientPage() {
                 </div>
 
                 <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/30 to-orange-500/0 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-6 rounded-3xl bg-card border border-border hover:border-orange-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-orange-500/10 rounded-xl">
-                                <Calendar className="h-5 w-5 text-orange-500" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/30 to-orange-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-orange-500/40 transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="p-1.5 bg-orange-500/10 rounded-lg">
+                                <Calendar className="h-4 w-4 text-orange-500" />
                             </div>
                             <span className="bg-red-500/10 text-red-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-red-500/20">
                                 +3d
@@ -277,11 +263,11 @@ export function ReportsClientPage() {
                 </div>
 
                 <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 to-cyan-500/0 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-6 rounded-3xl bg-card border border-border hover:border-cyan-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-2 bg-cyan-500/10 rounded-xl">
-                                <TrendingUp className="h-5 w-5 text-cyan-500" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 to-cyan-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-cyan-500/40 transition-all">
+                        <div className="flex justify-between items-start mb-3">
+                            <div className="p-1.5 bg-cyan-500/10 rounded-lg">
+                                <TrendingUp className="h-4 w-4 text-cyan-500" />
                             </div>
                             <span className="text-[10px] text-muted-foreground font-bold">Ponderado: {formatCompact(stats.dealMetrics.weightedValue)}</span>
                         </div>
@@ -296,8 +282,8 @@ export function ReportsClientPage() {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Funnel */}
-                <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm hover:border-primary/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2">
+                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-primary/20 transition-all">
+                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Filter className="h-4 w-4 text-primary" />
                         Funil de Conversão
                     </h3>
@@ -310,8 +296,8 @@ export function ReportsClientPage() {
                 </div>
 
                 {/* Sales Performance */}
-                <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm hover:border-emerald-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2">
+                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-emerald-500/20 transition-all">
+                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Users className="h-4 w-4 text-emerald-400" />
                         Performance por Vendedor
                     </h3>
@@ -324,17 +310,17 @@ export function ReportsClientPage() {
                 </div>
 
                 {/* Revenue Forecast */}
-                <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm hover:border-purple-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-purple-400" />
+                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-teal-500/20 transition-all">
+                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-teal-400" />
                         Previsão de Receita (3 Meses)
                     </h3>
                     <RevenueForecast forecast={stats.revenueForecast} />
                 </div>
 
                 {/* Loss Reasons */}
-                <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm hover:border-red-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-8 flex items-center gap-2">
+                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-red-500/20 transition-all">
+                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
                         <Target className="h-4 w-4 text-red-400" />
                         Motivos de Perda
                     </h3>
@@ -346,13 +332,13 @@ export function ReportsClientPage() {
             </div>
 
             {/* Product Analysis (Full Width) */}
-            <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm">
+            <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm">
                 <ProductAnalysis data={stats.productMetrics} />
             </div>
 
             {/* Drill-down Table: Oportunidades Relacionadas */}
-            <div className="glass-card p-8 rounded-3xl bg-card border border-border shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <div className="flex justify-between items-center mb-8">
+            <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <div className="flex justify-between items-center mb-6">
                     <div>
                         <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-1">
                             <Target className="h-4 w-4 text-primary" />
@@ -378,7 +364,7 @@ export function ReportsClientPage() {
                         <tbody className="divide-y divide-border">
                             {mappedDeals.map((deal: any) => (
                                 <tr key={deal.id} className="group hover:bg-muted/30 transition-colors">
-                                    <td className="py-4">
+                                    <td className="py-2.5">
                                         <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
                                         <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter opacity-70">
                                             {new Date(deal.created_at).toLocaleDateString()}

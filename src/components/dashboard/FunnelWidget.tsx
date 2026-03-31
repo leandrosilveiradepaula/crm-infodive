@@ -14,9 +14,9 @@ export const FunnelWidget = ({ data }: FunnelWidgetProps) => {
     const isDark = theme === 'dark';
 
     return (
-        <div className="bg-card rounded-2xl p-6 border border-border flex flex-col h-full">
-            <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2 shrink-0">
-                <Activity className="h-5 w-5 text-primary" />
+        <div className="bg-card rounded-2xl p-4 border border-border flex flex-col h-full">
+            <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-2 shrink-0">
+                <Activity className="h-4 w-4 text-primary" />
                 Funil de Vendas
             </h2>
             <div className="flex-1" style={{ minHeight: 300 }}>

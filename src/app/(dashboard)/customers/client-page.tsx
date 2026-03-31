@@ -108,7 +108,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     }, [initialAccounts]);
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <PageHeader 
                 title="Minhas Empresas" 
@@ -129,7 +129,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             {/* KPIs Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Total Active Clients */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-6 rounded-3xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <Building className="w-32 h-32 text-primary" />
                     </div>
@@ -146,14 +146,14 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 </div>
 
                 {/* Top Segment */}
-                <div className="bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-card p-6 rounded-3xl border border-purple-100 dark:border-purple-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-card p-4 rounded-2xl border border-teal-100 dark:border-teal-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Briefcase className="w-32 h-32 text-purple-600" />
+                        <Briefcase className="w-32 h-32 text-teal-600" />
                     </div>
                     <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-purple-600/70 dark:text-purple-400 uppercase tracking-[0.2em]">Segmento Principal</h3>
-                        <div className="p-2.5 bg-purple-100 dark:bg-purple-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Briefcase className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        <h3 className="text-[10px] font-black text-teal-600/70 dark:text-teal-400 uppercase tracking-[0.2em]">Segmento Principal</h3>
+                        <div className="p-2.5 bg-teal-100 dark:bg-teal-900/30 rounded-xl group-hover:scale-110 transition-transform">
+                            <Briefcase className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                         </div>
                     </div>
                     <div className="relative z-10">
@@ -163,7 +163,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 </div>
 
                 {/* Top City */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <MapPin className="w-32 h-32 text-emerald-600" />
                     </div>
@@ -182,7 +182,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 </div>
 
                 {/* Contacts Total */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-6 rounded-3xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
+                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
                         <User className="w-32 h-32 text-amber-600" />
                     </div>
@@ -204,19 +204,19 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-3xl border border-border shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm">
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, cidade ou segmento..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex items-center gap-3 px-2 w-full md:w-auto overflow-x-auto no-scrollbar">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-[38px] rounded-xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -263,7 +263,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
 
             {/* Grid / Table */}
             {view === 'cards' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredAccounts.map(account => (
                         <CustomerCard
                             key={account.id}

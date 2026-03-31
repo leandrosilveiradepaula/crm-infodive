@@ -1,11 +1,12 @@
 import React from 'react';
-import type { Deal } from '@/types/deal';
+import type { Deal, DealProduct } from '@/types/deal';
 import { ProposalHardwareProduct } from './ProposalHardwareProduct';
 import { isSoftware, isHardware, isSupport, isService, getClassificationLabel } from '@/utils/productClassification';
 
 interface ProposalHardwarePageProps {
     deal: Deal;
     aiSpecs?: Array<{ label: string; value: string }>;
+    simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
@@ -77,9 +78,9 @@ function TechnicalSummaryGrid({ specs, primaryColor }: { specs: Array<{ label: s
     );
 }
 
-type RenderItem = { type: 'header'; label: string } | { type: 'product'; product: any } | { type: 'grid'; specs: Array<{ label: string; value: string }> };
+type RenderItem = { type: 'header'; label: string } | { type: 'product'; product: DealProduct } | { type: 'grid'; specs: Array<{ label: string; value: string }> };
 
-export function ProposalHardwarePage({ deal, themePrimary, themeAccent, layout = 'portrait' }: ProposalHardwarePageProps & { layout?: 'portrait' | 'landscape' }) {
+export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalHardwarePageProps & { layout?: 'portrait' | 'landscape' }) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     
@@ -279,7 +280,7 @@ export function ProposalHardwarePage({ deal, themePrimary, themeAccent, layout =
                             if (item.type === 'grid') {
                                 return <TechnicalSummaryGrid key={`grid-${idx}`} specs={item.specs} primaryColor={primaryColor} />;
                             }
-                            return <ProposalHardwareProduct key={`prod-${idx}`} product={item.product} />;
+                            return <ProposalHardwareProduct key={`prod-${idx}`} product={item.product} simplifiedName={simplifiedProductNames[item.product.name]} />;
                         })}
                     </div>
 

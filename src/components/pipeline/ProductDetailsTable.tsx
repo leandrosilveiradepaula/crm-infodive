@@ -319,7 +319,10 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                 </div>
                             </th>
                             <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40">SKU/PartNumber</th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Descrição</th>
+                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                Descrição
+                                <span className="ml-1 text-primary/60 normal-case font-normal text-[10px]">(+ nome na proposta)</span>
+                            </th>
                             <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Qtd</th>
 
                             {/* Dynamic Columns based on Mode */}
@@ -395,17 +398,49 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                     </td>
                                     <td className="px-4 py-3">
                                         {isRowEditing ? (
-                                            <input
-                                                type="text"
-                                                className="w-full bg-background border border-input rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
-                                                placeholder="Descrição"
-                                                value={detail.description || ''}
-                                                onChange={e => {
-                                                    const updated = [...details];
-                                                    updated[idx] = { ...updated[idx], description: e.target.value };
-                                                    onUpdate(updated);
-                                                }}
-                                            />
+                                            <div className="space-y-2">
+                                                {/* IBM/Catalog name - read-only reference */}
+                                                <div>
+                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Nome Técnico (IBM)</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-muted/30 border border-input rounded-md px-3 py-1.5 text-xs text-muted-foreground outline-none font-mono cursor-not-allowed"
+                                                        value={detail.name || ''}
+                                                        readOnly
+                                                        title="Nome original do catálogo — não editável aqui"
+                                                    />
+                                                </div>
+                                                {/* Friendly display name for proposal */}
+                                                <div>
+                                                    <label className="text-[9px] font-bold text-primary uppercase tracking-wider block mb-1">📄 Nome na Proposta</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-background border border-primary/30 rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/50"
+                                                        placeholder={`${detail.name || 'Nome para o cliente...'}`}
+                                                        value={detail.display_name || ''}
+                                                        onChange={e => {
+                                                            const updated = [...details];
+                                                            updated[idx] = { ...updated[idx], display_name: e.target.value || null };
+                                                            onUpdate(updated);
+                                                        }}
+                                                    />
+                                                </div>
+                                                {/* Original description field */}
+                                                <div>
+                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Descrição Interna</label>
+                                                    <input
+                                                        type="text"
+                                                        className="w-full bg-background border border-input rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
+                                                        placeholder="Descrição"
+                                                        value={detail.description || ''}
+                                                        onChange={e => {
+                                                            const updated = [...details];
+                                                            updated[idx] = { ...updated[idx], description: e.target.value };
+                                                            onUpdate(updated);
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div className="py-1">
                                                 {detail.description?.trim().startsWith('[') ? (
@@ -429,7 +464,16 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                         }}
                                                     />
                                                 ) : (
-                                                    <p className="text-sm text-muted-foreground">{detail.description || '---'}</p>
+                                                    <div className="space-y-0.5">
+                                                        {detail.display_name ? (
+                                                            <>
+                                                                <p className="text-sm font-semibold text-foreground">{detail.display_name}</p>
+                                                                <p className="text-[10px] text-muted-foreground/60 font-mono truncate" title={detail.name}>{detail.name}</p>
+                                                            </>
+                                                        ) : (
+                                                            <p className="text-sm text-muted-foreground">{detail.description || detail.name || '---'}</p>
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                         )}

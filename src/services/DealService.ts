@@ -1,6 +1,17 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sortProductsHierarchically } from '@/utils/productSorting';
 import { normalizeCasing } from '@/lib/string-utils';
+import { Deal, DealProduct } from '@/types/deal';
+import { Profile } from '@/types/profile';
+import { Account } from '@/types/account';
+import { Activity } from '@/types/activity';
+
+export interface PipelineData {
+    deals: Deal[];
+    profile: Profile | null;
+    distributors: Account[];
+    allAccounts: Account[];
+}
 
 /**
  * DealService handles all business logic and database interactions for Deals and Pipeline.
@@ -8,7 +19,7 @@ import { normalizeCasing } from '@/lib/string-utils';
  */
 export class DealService {
 
-    static async getPipelineData(userId: string, organizationId: string) {
+    static async getPipelineData(userId: string, organizationId: string): Promise<PipelineData> {
         const supabase = createAdminClient();
 
         // 1. Fetch Deals
@@ -32,23 +43,23 @@ export class DealService {
             .from('profiles')
             .select('id, full_name, avatar_url, commission_rules');
 
-        const profilesMap = (allProfiles || []).reduce((acc: any, p: any) => {
-            acc[p.id] = p;
+        const profilesMap = (allProfiles || []).reduce((acc: Record<string, Profile>, p) => {
+            acc[p.id] = p as Profile;
             return acc;
-        }, {});
+        }, {} as Record<string, Profile>);
 
         const profile = profilesMap[userId] || null;
 
         // 3. Map Data
-        const finalDeals = (deals || []).map((d: any) => {
+        const finalDeals: Deal[] = (deals || []).map((d) => {
             const ownerProfile = profilesMap[d.owner_id] || null;
             return {
                 ...d,
                 owner_profile: ownerProfile,
                 owner: ownerProfile?.full_name || d.owner || 'Desconhecido',
-                company: d.account_data?.name || d.company || 'Cliente',
+                company: (d as any).account_data?.name || d.company || 'Cliente',
                 deal_products: sortProductsHierarchically(d.deal_products || [])
-            };
+            } as Deal;
         });
 
         // 4. Fetch Distributors
@@ -70,13 +81,13 @@ export class DealService {
 
         return {
             deals: finalDeals,
-            profile,
-            distributors: distributors || [],
-            allAccounts: allAccounts || []
+            profile: profile as Profile | null,
+            distributors: (distributors || []) as unknown as Account[],
+            allAccounts: (allAccounts || []) as unknown as Account[]
         };
     }
 
-    static async getDealDetails(userId: string, dealId: string, organizationId: string) {
+    static async getDealDetails(userId: string, dealId: string, organizationId: string): Promise<Deal | null> {
         const supabase = createAdminClient();
 
         const { data: deal, error } = await supabase
@@ -105,7 +116,7 @@ export class DealService {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        let account = null;
+        let account: Account | null = null;
         if (deal.account_id) {
             const { data: acc } = await supabase
                 .from('accounts')
@@ -119,11 +130,11 @@ export class DealService {
                     .select('*')
                     .eq('account_id', acc.id)
                     .eq('organization_id', organizationId);
-                account = { ...acc, contacts: contacts || [] };
+                account = { ...(acc as any as Account), contacts: (contacts || []) as any };
             }
         }
 
-        let owner_profile = null;
+        let owner_profile: Profile | null = null;
         if (deal.owner_id) {
             const { data: profile } = await supabase
                 .from('profiles')
@@ -131,32 +142,28 @@ export class DealService {
                 .eq('id', deal.owner_id)
                 .single();
             if (profile) {
-                owner_profile = profile;
-            } else {
-                console.log("❌ Profile not found for owner_id:", deal.owner_id);
+                owner_profile = profile as Profile;
             }
-        } else {
-            console.log("❌ Deal has no owner_id:", deal.id);
         }
 
         return {
             ...deal,
             owner_profile,
-            deal_products: products ? sortProductsHierarchically(products) : [],
-            activities: activities || [],
+            deal_products: products ? sortProductsHierarchically(products as DealProduct[]) : [],
+            deal_activities: (activities || []) as Activity[],
             account: account
-        };
+        } as Deal;
     }
 
-    static async createDeal(userId: string, organizationId: string, dealData: any) {
+    static async createDeal(userId: string, organizationId: string, dealData: Partial<Deal>): Promise<Deal> {
         const supabase = createAdminClient();
 
-        const payload: any = {
-            title: normalizeCasing(dealData.title, 'title'),
+        const payload = {
+            title: normalizeCasing(dealData.title || '', 'title'),
             account_id: dealData.account_id || null,
             owner_id: userId,
             owner: dealData.owner || 'Me',
-            company: normalizeCasing(dealData.company, 'name') || null,
+            company: normalizeCasing(dealData.company || '', 'name') || null,
             value: dealData.value || 0,
             stage: dealData.stage || 'qualification',
             probability: dealData.probability || 20,
@@ -167,10 +174,10 @@ export class DealService {
 
         const { data, error } = await supabase.from('deals').insert([payload]).select().single();
         if (error) throw new Error(error.message);
-        return data;
+        return data as Deal;
     }
 
-    static async updateDeal(userId: string, dealId: string, organizationId: string, updates: any) {
+    static async updateDeal(userId: string, dealId: string, organizationId: string, updates: Partial<Deal>): Promise<Deal | null> {
         const supabase = createAdminClient();
 
         // Valid columns for the 'deals' table
@@ -206,7 +213,7 @@ export class DealService {
             .single();
 
         if (error) throw new Error(error.message);
-        return data;
+        return data as Deal;
     }
 
     static async updateDealStage(userId: string, dealId: string, organizationId: string, newStage: string, probability?: number) {
@@ -228,7 +235,7 @@ export class DealService {
         return data;
     }
 
-    static async duplicateDeal(userId: string, dealId: string, organizationId: string) {
+    static async duplicateDeal(userId: string, dealId: string, organizationId: string): Promise<Deal> {
         const supabase = createAdminClient();
 
         // 1. Fetch original deal
@@ -300,10 +307,10 @@ export class DealService {
             }
         }
 
-        return newDeal;
+        return newDeal as Deal;
     }
 
-    static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: any) {
+    static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
 
         const payload = {
@@ -311,7 +318,7 @@ export class DealService {
             organization_id: organizationId,
             product_id: productData.product_id || productData.id,
             name: productData.name,
-            unit_price: productData.unit_price || productData.price || 0,
+            unit_price: productData.unit_price || 0,
             quantity: typeof productData.quantity === 'number' ? productData.quantity : 1,
             cost: productData.cost || 0,
             sku: productData.sku || '',
@@ -331,10 +338,10 @@ export class DealService {
 
         const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
         if (error) throw new Error(error.message);
-        return data;
+        return data as DealProduct;
     }
 
-    static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: any) {
+    static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('deal_products')
@@ -344,7 +351,7 @@ export class DealService {
             .select()
             .single();
         if (error) throw new Error(error.message);
-        return data;
+        return data as DealProduct;
     }
 
     static async removeDealProduct(userId: string, itemId: string, organizationId: string) {
@@ -385,7 +392,7 @@ export class DealService {
         }
     }
 
-    static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]) {
+    static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]): Promise<DealProduct[]> {
         const supabase = createAdminClient();
 
         const isValidUUID = (id: any) =>
@@ -439,10 +446,10 @@ export class DealService {
 
         const { data, error } = await supabase.from('deal_products').insert(payload).select();
         if (error) throw new Error(`Database Error: ${error.message}`);
-        return data;
+        return (data || []) as DealProduct[];
     }
 
-    static async getOrCreateRoom(userId: string, dealId: string, organizationId: string) {
+    static async getOrCreateRoom(userId: string, dealId: string, organizationId: string): Promise<{ room?: any, error?: string }> {
         const supabase = createAdminClient();
 
         // 1. Double check the deal belongs to the organization first (security)

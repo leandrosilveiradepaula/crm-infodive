@@ -110,29 +110,29 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-card border border-border rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-primary/10 rounded-xl">
-                            <Package className="h-6 w-6 text-primary" />
+                <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-primary/10 rounded-xl">
+                            <Package className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h2>
-                            <p className="text-sm text-muted-foreground">
+                            <h2 className="text-lg font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h2>
+                            <p className="text-xs text-muted-foreground">
                                 {order.deal?.customer?.name} • {new Date(order.created_at).toLocaleDateString()}
                             </p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
-                        <X className="h-6 w-6" />
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 <div className="flex-1 overflow-hidden flex">
                     {/* Left Column: Details */}
-                    <div className="flex-1 overflow-y-auto p-8 border-r border-border">
-                        <div className="mb-8">
-                            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                                <DollarSign className="h-5 w-5 text-emerald-500" />
+                    <div className="flex-1 overflow-y-auto p-5 border-r border-border">
+                        <div className="mb-6">
+                            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-emerald-500" />
                                 Itens do Pedido
                             </h3>
                             <div className="bg-muted/10 rounded-xl border border-border overflow-hidden">
@@ -171,11 +171,11 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                         </div>
 
                         <div>
-                            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-primary" />
+                            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+                                <FileText className="h-4 w-4 text-primary" />
                                 Nota Fiscal e Documentos
                             </h3>
-                            <div className="bg-muted/10 rounded-xl border border-border p-6">
+                            <div className="bg-muted/10 rounded-xl border border-border p-4">
                                 <div className="space-y-4">
                                     <label className="block text-sm font-medium text-muted-foreground">URL da Nota Fiscal (NF-e)</label>
                                     <div className="flex gap-2">
@@ -228,8 +228,8 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                     </div>
 
                     {/* Right Column: Timeline & Actions */}
-                    <div className="w-[400px] bg-muted/30 border-l border-border p-8 flex flex-col">
-                        <h3 className="text-lg font-semibold text-foreground mb-6">Status do Pedido</h3>
+                    <div className="w-[350px] bg-muted/30 border-l border-border p-5 flex flex-col">
+                        <h3 className="text-base font-semibold text-foreground mb-4">Status do Pedido</h3>
 
                         <div className="space-y-8 relative">
                             {/* Vertical Line */}

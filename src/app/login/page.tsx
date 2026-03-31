@@ -50,7 +50,7 @@ function LoginForm() {
     return (
         <Card className="w-full max-w-md bg-card border-border text-foreground relative z-10 shadow-2xl">
             <CardHeader className="text-center space-y-4 pt-8">
-                <div className="h-16 w-16 bg-gradient-to-br from-primary to-purple-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30">
+                <div className="h-16 w-16 bg-gradient-to-br from-primary to-teal-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30">
                     <User className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div className="space-y-1">
@@ -125,7 +125,7 @@ function LoginForm() {
                     </div>
 
                     <Button
-                        className="w-full bg-gradient-to-r from-primary to-purple-600 hover:shadow-lg hover:shadow-primary/25 text-primary-foreground font-bold py-6 rounded-xl"
+                        className="w-full bg-gradient-to-r from-primary to-teal-600 hover:shadow-lg hover:shadow-primary/25 text-primary-foreground font-bold py-6 rounded-xl"
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
@@ -155,7 +155,7 @@ export default function LoginPage() {
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
                 <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[100px]" />
-                <div className="absolute top-[40%] right-[10%] w-[30%] h-[30%] bg-purple-600/20 rounded-full blur-[100px]" />
+                <div className="absolute top-[40%] right-[10%] w-[30%] h-[30%] bg-teal-600/20 rounded-full blur-[100px]" />
             </div>
 
             <Suspense fallback={<div className="text-white">Carregando...</div>}>

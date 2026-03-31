@@ -12,6 +12,12 @@ export interface ProductExtraction {
  * Extrai produtos de uma imagem usando a API interna do Gemini
  */
 export const extractProductsFromImage = async (file: File): Promise<ProductExtraction[]> => {
+    console.log(`🚀 Preparando envio para o Gemini. Arquivo: ${file.name}, Tipo: ${file.type}, Tamanho: ${file.size} bytes`);
+    
+    if (!file || file.size === 0) {
+        throw new Error(`Arquivo vazio ou corrompido (tamanho = 0 bytes). Verifique se o arquivo não está corrompido.`);
+    }
+
     // Converter arquivo para base64
     const base64Data = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -22,16 +28,19 @@ export const extractProductsFromImage = async (file: File): Promise<ProductExtra
 
     const imageData = base64Data.split(',')[1]; // Remove prefixo data:image/...
 
+    console.log(`- Base64 length total: ${base64Data.length}`);
+    console.log(`- imageData length: ${imageData ? imageData.length : 'UNDEFINED'}`);
+
     try {
+        const payload = {
+            imageData: imageData || "",
+            mimeType: file.type || 'application/pdf'
+        };
+
         const response = await fetch('/api/gemini/extract', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                imageData,
-                mimeType: file.type
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) {

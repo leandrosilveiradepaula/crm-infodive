@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { USER_ROLES } from '@/lib/constants';
+import type { Profile } from '@/types/profile';
 
 export class UserService {
     static async getUserProfile(userId: string, organizationId: string) {
@@ -15,7 +16,7 @@ export class UserService {
         return { success: true, data };
     }
 
-    static async getUsers(organizationId: string) {
+    static async getUsers(organizationId: string): Promise<{ users: any[], error: string | null }> {
         const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('profiles')
@@ -32,12 +33,12 @@ export class UserService {
             return USER_ROLES.SALES;
         };
 
-        const users = data.map((item: any) => ({
+        const users = (data as Profile[]).map((item) => ({
             id: item.id,
             name: item.full_name || 'Usuário Sem Nome',
             email: item.email || '',
             phone: item.phone || '',
-            role: mapRole(item.role),
+            role: mapRole(item.role || ''),
             lastLogin: item.updated_at ? new Date(item.updated_at).toLocaleDateString('pt-BR') : 'N/A',
             avatar: item.full_name
                 ? item.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
@@ -63,15 +64,10 @@ export class UserService {
         return { success: true };
     }
 
-    static async updateUserProfile(userId: string, organizationId: string, updates: {
-        name?: string;
-        phone?: string;
-        email?: string;
-        role?: string;
-    }) {
+    static async updateUserProfile(userId: string, organizationId: string, updates: Partial<Profile>) {
         const supabase = createAdminClient();
         const dbUpdates: any = { updated_at: new Date().toISOString() };
-        if (updates.name !== undefined) dbUpdates.full_name = updates.name;
+        if (updates.full_name !== undefined) dbUpdates.full_name = updates.full_name;
         if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
         if (updates.email !== undefined) dbUpdates.email = updates.email;
         if (updates.role !== undefined) {

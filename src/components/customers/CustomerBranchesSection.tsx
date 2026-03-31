@@ -92,6 +92,15 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
                                     onChange={(e) => onUpdateBranch(branch.id, 'ie', e.target.value)}
                                     className="h-[30px] text-xs"
                                 />
+                                <div className="col-span-2 mt-1">
+                                    <textarea
+                                        placeholder="Condições e Prazos de Pagamento (Específicos da filial)"
+                                        value={branch.payment_terms || ''}
+                                        onChange={(e) => onUpdateBranch(branch.id, 'payment_terms', e.target.value)}
+                                        rows={2}
+                                        className="w-full text-xs px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground/50 hover:border-muted-foreground/30 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all resize-none"
+                                    />
+                                </div>
                             </div>
                             <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-lg mt-1" onClick={() => onRemoveBranch(branch.id)}>
                                 <X className="h-3.5 w-3.5" />

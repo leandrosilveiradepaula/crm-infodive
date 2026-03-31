@@ -6,18 +6,18 @@ import { LOGO_BASE64} from './pdfAssetsBase64';
 interface PdfOverviewPageProps {
     dealTitle: string;
     aiSummary?: string;
+    objectives?: any[];
     pdfColors: PdfColors;
     pdfStyles: any;
 }
 
-const defaultObjectives = [
-    { number: '01', title: 'Modernização de Infraestrutura', description: 'Atualização do parque tecnológico com soluções de última geração, garantindo performance e escalabilidade.' },
-    { number: '02', title: 'Segurança & Compliance', description: 'Implementação de políticas de segurança robustas e conformidade com regulamentações do setor.' },
-    { number: '03', title: 'Otimização de Custos', description: 'Redução do TCO através de consolidação, virtualização e licenciamento estratégico.' },
-    { number: '04', title: 'Continuidade de Nºegócios', description: 'Garantia de alta disponibilidade e planos de disaster recovery para operações críticas.' },
-];
-
-export function PdfOverviewPage({ dealTitle, aiSummary, pdfColors, pdfStyles }: PdfOverviewPageProps) {
+export function PdfOverviewPage({ 
+    dealTitle, 
+    aiSummary, 
+    objectives = [], 
+    pdfColors, 
+    pdfStyles 
+}: PdfOverviewPageProps) {
     return (
         <Page size="A4" style={pdfStyles.page} wrap>
             {/* Top gradient bar */}
@@ -27,7 +27,7 @@ export function PdfOverviewPage({ dealTitle, aiSummary, pdfColors, pdfStyles }: 
             {/* Main Content */}
             <View>
                 {/* Header */}
-                <View style={{ marginBottom: 25 }}>
+                <View style={{ marginBottom: 20 }}>
                     <View style={pdfStyles.logoRow}>
                         <Image src={LOGO_BASE64} style={pdfStyles.logo} />
                     </View>
@@ -49,55 +49,57 @@ export function PdfOverviewPage({ dealTitle, aiSummary, pdfColors, pdfStyles }: 
                     </Text>
                 </View>
 
-                {/* AI Summary or Objectives */}
-                {aiSummary ? (
-                    <View style={{
-                        backgroundColor: pdfColors.bgLight, padding: '25px 30px',
-                        borderRadius: 16, borderWidth: 1, borderColor: pdfColors.border,
-                        marginBottom: 20,
-                    }}>
-                        <Text style={{
-                            color: pdfColors.primary, fontSize: 15, lineHeight: 1.6,
-                            textAlign: 'justify',
+                {/* Content Area - Stacked */}
+                <View style={{ gap: 12 }}>
+                    {/* AI Summary Section */}
+                    {aiSummary && (
+                        <View style={{
+                            backgroundColor: pdfColors.bgLight, padding: '12px 16px',
+                            borderRadius: 12, borderWidth: 1, borderColor: pdfColors.border,
                         }}>
-                            {aiSummary}
-                        </Text>
-                    </View>
-                ) : (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15, marginTop: 10 }}>
-                        {defaultObjectives.map((obj, i) => (
-                            <View key={i} style={{
-                                width: '47%', backgroundColor: pdfColors.bgLight,
-                                padding: 15, borderRadius: 12, borderWidth: 2,
-                                borderColor: pdfColors.border, position: 'relative',
+                            <Text style={{
+                                color: pdfColors.primary, fontSize: 11.5, lineHeight: 1.45,
+                                textAlign: 'justify',
                             }}>
-                                {/* Number badge */}
-                                <View style={{
-                                    position: 'absolute', top: -12, left: 20,
-                                    width: 40, height: 40, backgroundColor: pdfColors.accent,
-                                    borderRadius: 20, alignItems: 'center', justifyContent: 'center',
-                                }}>
-                                    <Text style={{ fontSize: 16, fontWeight: 'bold', color: pdfColors.white }}>
-                                        {obj.number}
-                                    </Text>
-                                </View>
+                                {aiSummary}
+                            </Text>
+                        </View>
+                    )}
 
-                                <View style={{ marginTop: 20 }}>
+                    {/* Objectives Grid */}
+                    {objectives.length > 0 && (
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                            {objectives.map((obj, i) => (
+                                <View key={i} style={{
+                                    width: '48.5%', backgroundColor: '#ffffff',
+                                    padding: 12, borderRadius: 10, borderWidth: 1,
+                                    borderColor: pdfColors.border, minHeight: 80,
+                                }}>
+                                    {/* Number badge (Inlined for density) */}
+                                    <View style={{
+                                        width: 22, height: 22, backgroundColor: pdfColors.accent,
+                                        borderRadius: 6, alignItems: 'center', justifyContent: 'center',
+                                        marginBottom: 6,
+                                    }}>
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.white }}>
+                                            {obj.number || `0${i+1}`}
+                                        </Text>
+                                    </View>
+
                                     <Text style={{
-                                        fontSize: 15, fontWeight: 'bold', color: pdfColors.primary,
-                                        marginBottom: 8, lineHeight: 1.2,
+                                        fontSize: 13, fontWeight: 'bold', color: pdfColors.primary,
+                                        marginBottom: 3, lineHeight: 1.2,
                                     }}>
                                         {obj.title}
                                     </Text>
-                                    <Text style={{ fontSize: 11, color: '#4b5563', lineHeight: 1.4 }}>
+                                    <Text style={{ fontSize: 10, color: '#64748b', lineHeight: 1.35 }}>
                                         {obj.description}
                                     </Text>
                                 </View>
-                            </View>
-                        ))}
-                    </View>
-                )}
-
+                            ))}
+                        </View>
+                    )}
+                </View>
             </View>
 
             {/* Fixed Footer */}

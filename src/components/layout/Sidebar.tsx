@@ -37,9 +37,10 @@ interface SidebarProps {
     isMobileMenuOpen: boolean;
     setIsMobileMenuOpen: (open: boolean) => void;
     isCollapsed: boolean;
+    setIsCollapsed: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: SidebarProps) {
+export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
     const pathname = usePathname();
     // const { profile } = useAuth(); // TODO: Implement Auth Hook
     const profile = { full_name: 'Leandro Silveira', role: 'Admin', avatar_url: '' }; // Mock for now
@@ -108,7 +109,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
             {/* Footer / User Profile */}
             <div className="p-4 border-t border-sidebar-border space-y-4">
                 <Button
-                    className={cn("w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0", isCollapsed && "px-0")}
+                    className={cn("w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white border-0", isCollapsed && "px-0")}
                     onClick={() => { }} // Open AI
                 >
                     <Sparkles className="h-5 w-5 mr-0" />

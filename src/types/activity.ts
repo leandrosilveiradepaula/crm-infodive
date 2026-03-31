@@ -33,6 +33,9 @@ export interface Activity {
     // Resultado
     outcome?: string;
     nextSteps?: string;
+
+    // Origem
+    source?: 'manual' | 'automation' | 'ai_suggestion';
 }
 
 export interface ActivityFilter {

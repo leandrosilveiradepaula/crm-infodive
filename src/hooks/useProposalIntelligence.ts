@@ -41,6 +41,41 @@ const DEFAULT_CONFIG: ProposalConfig = {
     customTitle: '',
 };
 
+export const getTemplateConfig = (t: TemplateType) => {
+    switch (t) {
+        case 'executivo':
+            return {
+                includeAISummary: true,
+                includeProductDetails: false,
+                includeTechnicalSpecs: false,
+                includeROIAnalysis: true,
+            };
+        case 'tecnico':
+            return {
+                includeAISummary: true,
+                includeProductDetails: true,
+                includeTechnicalSpecs: true,
+                includeROIAnalysis: false,
+            };
+        case 'detalhado':
+            return {
+                includeAISummary: true,
+                includeProductDetails: true,
+                includeTechnicalSpecs: true,
+                includeROIAnalysis: true,
+            };
+        case 'rapido':
+            return {
+                includeAISummary: false,
+                includeProductDetails: false,
+                includeTechnicalSpecs: false,
+                includeROIAnalysis: false,
+            };
+        default:
+            return {};
+    }
+};
+
 export const useProposalIntelligence = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>('executivo');
@@ -61,42 +96,6 @@ export const useProposalIntelligence = () => {
     const selectTemplate = useCallback((template: TemplateType) => {
         setSelectedTemplate(template);
 
-        // Auto-configure based on template but preserve customTitle
-        const getTemplateConfig = (t: TemplateType) => {
-            switch (t) {
-                case 'executivo':
-                    return {
-                        includeAISummary: true,
-                        includeProductDetails: false,
-                        includeTechnicalSpecs: false,
-                        includeROIAnalysis: true,
-                    };
-                case 'tecnico':
-                    return {
-                        includeAISummary: true,
-                        includeProductDetails: true,
-                        includeTechnicalSpecs: true,
-                        includeROIAnalysis: false,
-                    };
-                case 'detalhado':
-                    return {
-                        includeAISummary: true,
-                        includeProductDetails: true,
-                        includeTechnicalSpecs: true,
-                        includeROIAnalysis: true,
-                    };
-                case 'rapido':
-                    return {
-                        includeAISummary: false,
-                        includeProductDetails: false,
-                        includeTechnicalSpecs: false,
-                        includeROIAnalysis: false,
-                    };
-                default:
-                    return {};
-            }
-        };
-
         setConfig(prev => ({
             ...prev,
             ...getTemplateConfig(template),
@@ -112,6 +111,56 @@ export const useProposalIntelligence = () => {
         setCurrentStep(1);
         setSelectedTemplate('executivo');
         setConfig(DEFAULT_CONFIG);
+    }, []);
+
+    const autoConfigure = useCallback((dealTitle: string, products: any[] = [], dealValue: number = 0) => {
+        let template: TemplateType = 'executivo';
+        const hasHardware = products.some(p => 
+            p.category?.toLowerCase() === 'hardware' || 
+            p.name?.toLowerCase().includes('server') || 
+            p.name?.toLowerCase().includes('storage')
+        );
+        const hasSoftware = products.some(p => 
+            p.category?.toLowerCase() === 'software' || 
+            p.name?.toLowerCase().includes('licença') || 
+            p.name?.toLowerCase().includes('ibm')
+        );
+        const hasIBM = products.some(p => 
+            p.brand?.toLowerCase() === 'ibm' || 
+            p.name?.toLowerCase().includes('ibm') ||
+            p.sku?.startsWith('9846') // Common IBM prefix patterns
+        );
+
+        // 1. Template Selection
+        if (hasIBM) template = 'executivo'; // Current best for IBM
+        else if (dealValue < 10000) template = 'rapido';
+        else if (hasHardware && hasSoftware) template = 'detalhado';
+
+        // 2. Section Toggles
+        const updates: Partial<ProposalConfig> = {
+            template,
+            includeHardware: hasHardware,
+            includeSoftware: hasSoftware,
+            includeROIAnalysis: dealValue > 50000,
+            includeDifferentials: true,
+            includeOverview: true
+        };
+
+        // 3. Smart Title
+        if (dealTitle) {
+            if (hasIBM && hasHardware) {
+                updates.customTitle = `Solução de Infraestrutura IBM: ${dealTitle}`;
+            } else if (hasSoftware && !hasHardware) {
+                updates.customTitle = `Licenciamento e Subscrição: ${dealTitle}`;
+            }
+        }
+
+        setConfig(prev => ({
+            ...prev,
+            ...updates,
+            ...getTemplateConfig(template)
+        }));
+        setSelectedTemplate(template);
     }, []);
 
     const canProceed = () => {
@@ -136,6 +185,7 @@ export const useProposalIntelligence = () => {
         selectTemplate,
         updateConfig,
         reset,
+        autoConfigure,
         canProceed,
     };
 };

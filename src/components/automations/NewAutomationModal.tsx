@@ -47,7 +47,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         { id: 'followup', label: 'Follow-up', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
         { id: 'alert', label: 'Alerta', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
         { id: 'welcome', label: 'Boas-vindas', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { id: 'custom', label: 'Personalizada', icon: Settings, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+        { id: 'custom', label: 'Personalizada', icon: Settings, color: 'text-teal-400', bg: 'bg-teal-400/10' },
     ];
 
     const triggerTypes: { id: TriggerType; label: string; desc: string }[] = [
@@ -88,9 +88,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-card w-full max-w-2xl rounded-[2.5rem] border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-card w-full max-w-2xl rounded-2xl border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="p-8 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
+                <div className="p-4 px-6 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
                     <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                             <Zap className="h-6 w-6 text-primary-foreground" />
@@ -116,7 +116,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {step === 1 && (
                         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
                             <div>
@@ -124,13 +124,13 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                 <input
                                     type="text"
                                     placeholder="Nome da Automação (ex: Follow-up 3 dias)"
-                                    className="w-full bg-muted/50 border-none rounded-2xl px-6 py-4 text-foreground text-lg placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
+                                    className="w-full bg-muted/50 border-none rounded-xl px-4 py-3 text-foreground text-base placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                                 <textarea
                                     placeholder="Descreva o que este fluxo faz..."
-                                    className="w-full bg-muted/50 border-none rounded-2xl px-6 py-4 text-foreground mt-4 h-32 resize-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
+                                    className="w-full bg-muted/50 border-none rounded-xl px-4 py-3 text-foreground mt-4 h-28 resize-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
@@ -143,7 +143,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                         <button
                                             key={cat.id}
                                             onClick={() => setFormData({ ...formData, category: cat.id as any })}
-                                            className={`flex items-center gap-4 p-5 rounded-3xl border transition-all duration-300 ${formData.category === cat.id
+                                            className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-300 ${formData.category === cat.id
                                                 ? 'bg-primary/10 border-primary/40 shadow-xl shadow-primary/5'
                                                 : 'bg-muted/50 border-transparent hover:border-border'
                                                 }`}
@@ -173,7 +173,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                                 ...formData,
                                                 trigger: { type: type.id, config: {} }
                                             })}
-                                            className={`w-full flex items-start text-left gap-5 p-6 rounded-3xl border transition-all duration-300 ${formData.trigger?.type === type.id
+                                            className={`w-full flex items-start text-left gap-4 p-4 rounded-xl border transition-all duration-300 ${formData.trigger?.type === type.id
                                                 ? 'bg-primary/10 border-primary/40'
                                                 : 'bg-muted/50 border-transparent hover:border-border'
                                                 }`}
@@ -224,7 +224,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                 </div>
 
                                 {formData.actions?.map((action, idx) => (
-                                    <div key={idx} className="bg-muted/30 p-8 rounded-[2rem] border border-border relative group hover:border-primary/20 transition-all">
+                                    <div key={idx} className="bg-muted/30 p-5 rounded-xl border border-border relative group hover:border-primary/20 transition-all">
                                         <button 
                                             onClick={() => {
                                                 const newActions = [...(formData.actions || [])];
@@ -306,7 +306,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-8 border-t border-border bg-card flex items-center justify-between">
+                <div className="p-4 px-6 border-t border-border bg-card flex items-center justify-between">
                     <button
                         onClick={step === 1 ? onClose : handleBack}
                         className="px-8 py-3.5 rounded-2xl font-bold bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all flex items-center gap-2"

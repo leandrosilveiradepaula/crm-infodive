@@ -1,9 +1,11 @@
+import type { DealProduct } from '@/types/deal';
+
 /**
  * Centralized logic for product classification
  * Used to determine which proposal pages a product should appear on
  */
 
-export const isSoftware = (p: any) => {
+export const isSoftware = (p: Partial<DealProduct>) => {
     if (!p) return false;
 
     const cat = (p.category || '').toLowerCase();
@@ -26,7 +28,7 @@ export const isSoftware = (p: any) => {
     );
 };
 
-export const isService = (p: any) => {
+export const isService = (p: Partial<DealProduct>) => {
     if (!p) return false;
 
     const cat = (p.category || '').toLowerCase();
@@ -42,7 +44,7 @@ export const isService = (p: any) => {
     return matchesService(cat) || matchesService(subcat);
 };
 
-export const isSupport = (p: any) => {
+export const isSupport = (p: Partial<DealProduct>) => {
     if (!p) return false;
 
     const cat = (p.category || '').toLowerCase();
@@ -60,7 +62,7 @@ export const isSupport = (p: any) => {
     );
 };
 
-export const isHardware = (p: any) => {
+export const isHardware = (p: Partial<DealProduct>) => {
     if (!p) return false;
 
     const cat = (p.category || '').toLowerCase();
@@ -94,7 +96,7 @@ export const isHardware = (p: any) => {
 /**
  * Returns a human-readable label for the product category based on classification
  */
-export const getClassificationLabel = (p: any): string => {
+export const getClassificationLabel = (p: Partial<DealProduct>): string => {
     if (isSoftware(p)) return 'Software & Licenças';
     if (isService(p)) return 'Serviços';
     if (isSupport(p)) return 'Suporte & Garantia';

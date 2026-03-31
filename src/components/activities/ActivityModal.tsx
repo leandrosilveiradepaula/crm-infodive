@@ -76,7 +76,7 @@ export function ActivityModal({ isOpen, onClose, onSave, onDelete, activity }: A
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent showCloseButton={false} className="sm:max-w-2xl bg-card border-border text-foreground p-0 gap-0 overflow-hidden">
                 {/* Header with Gradient */}
-                <div className="bg-gradient-to-r from-primary to-purple-600 px-8 py-6 flex items-center justify-between border-b border-white/10">
+                <div className="bg-gradient-to-r from-primary to-teal-600 px-8 py-6 flex items-center justify-between border-b border-white/10">
                     <div>
                         <h2 className="text-2xl font-black text-white tracking-tight">
                             {activity ? 'Editar Atividade' : 'Nova Atividade'}

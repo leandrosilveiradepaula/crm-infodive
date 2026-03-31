@@ -57,7 +57,7 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
 
     const productTypes = [
         { key: 'hardware', label: 'Hardware', color: 'text-blue-500 bg-blue-500/10 border-blue-500/20' },
-        { key: 'software', label: 'Software', color: 'text-violet-500 bg-violet-500/10 border-violet-500/20' },
+        { key: 'software', label: 'Software', color: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20' },
         { key: 'services', label: 'Serviços', color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' },
     ];
 

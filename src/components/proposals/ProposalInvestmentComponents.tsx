@@ -1,18 +1,19 @@
 import React from 'react';
-
+import type { DealProduct } from '@/types/deal';
 import { isSoftware, isService, isSupport, getClassificationLabel } from '@/utils/productClassification';
 
 interface ProposalInvestmentTableProps {
-    mainProducts: any[];
+    mainProducts: DealProduct[];
     formatCurrency: (value: number) => string;
     totalMainValue: number;
     title?: string;
     isSubtotal?: boolean;
+    simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMainValue, title, isSubtotal, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
+export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMainValue, title, isSubtotal, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     return (
@@ -73,7 +74,7 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                                 {categoryLabel}
                             </div>
                             <div style={{ color: '#374151', fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span>{product.name}</span>
+                                <span>{simplifiedProductNames[product.name] || product.display_name || product.name}</span>
                                 {product.duration && product.duration_unit && (
                                     <span style={{ fontSize: '9px', color: '#059669', fontStyle: 'italic', fontWeight: 'bold' }}>
                                         (Válido por {product.duration} {product.duration_unit})
@@ -135,14 +136,15 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
 }
 
 interface ProposalInvestmentOptionalsProps {
-    optionalProducts: any[];
-    rootProducts?: any[];
+    optionalProducts: DealProduct[];
+    rootProducts?: DealProduct[];
     formatCurrency: (value: number) => string;
+    simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, formatCurrency, themePrimary, themeAccent }: ProposalInvestmentOptionalsProps) {
+export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, formatCurrency, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentOptionalsProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     const visibleOptionalProducts = optionalProducts.filter(p => p.is_visible_on_proposal !== false);
@@ -206,7 +208,7 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
 
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{child.name}</div>
+                                            <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{simplifiedProductNames[child.name] || child.name}</div>
                                             {isSoftware(child) && (
                                                 <span style={{
                                                     fontSize: '9px',
@@ -273,7 +275,7 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                             }}>
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <div style={{ fontWeight: '700', color: primaryColor, fontSize: '13px' }}>{parent.name}</div>
+                                        <div style={{ fontWeight: '700', color: primaryColor, fontSize: '13px' }}>{simplifiedProductNames[parent.name] || parent.name}</div>
                                         {parent.custom_label && (
                                             <span style={{
                                                 fontSize: '10px',

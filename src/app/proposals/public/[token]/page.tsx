@@ -64,7 +64,7 @@ export default function PublicProposalPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
                 <div className="text-center">
                     <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-muted-foreground">Carregando proposta...</p>
@@ -75,7 +75,7 @@ export default function PublicProposalPage() {
 
     if (error || !proposal) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
                 <div className="text-center max-w-md">
                     <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                     <h1 className="text-2xl font-bold mb-2">Proposta Não Encontrada</h1>
@@ -91,7 +91,7 @@ export default function PublicProposalPage() {
         const configs = {
             draft: { label: 'Rascunho', color: 'bg-muted/50 text-foreground' },
             sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-800' },
-            viewed: { label: 'Visualizada', color: 'bg-purple-100 text-purple-800' },
+            viewed: { label: 'Visualizada', color: 'bg-teal-100 text-teal-800' },
             signed: { label: 'Assinada', color: 'bg-green-100 text-green-800' },
             rejected: { label: 'Rejeitada', color: 'bg-red-100 text-red-800' },
         };
@@ -110,7 +110,7 @@ export default function PublicProposalPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header Card */}
                     <div className="bg-card rounded-xl shadow-lg p-8 mb-6">

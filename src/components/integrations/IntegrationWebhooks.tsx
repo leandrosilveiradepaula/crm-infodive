@@ -65,7 +65,7 @@ export const IntegrationWebhooks = () => {
                 {webhooks.map(hook => (
                     <div key={hook.id} className="bg-card p-5 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-primary/30 hover:shadow-md transition-all group">
                         <div className="flex items-start gap-4 flex-1 min-w-0">
-                            <div className={`p-3 rounded-xl shrink-0 ${hook.status === 'active' ? 'bg-purple-50 text-purple-600' : 'bg-muted/50 text-muted-foreground'}`}>
+                            <div className={`p-3 rounded-xl shrink-0 ${hook.status === 'active' ? 'bg-teal-50 text-teal-600' : 'bg-muted/50 text-muted-foreground'}`}>
                                 <Globe className="h-6 w-6" />
                             </div>
                             <div className="min-w-0 flex-1">

@@ -8,7 +8,7 @@ interface FilterBarProps {
 
 export function FilterBar({ children }: FilterBarProps) {
     return (
-        <div className="flex flex-col md:flex-row gap-4 items-center bg-card/50 backdrop-blur-sm p-4 rounded-[2rem] border border-border shadow-sm animate-in fade-in duration-500">
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-card/50 backdrop-blur-sm p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
             {children}
         </div>
     );

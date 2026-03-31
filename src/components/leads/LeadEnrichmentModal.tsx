@@ -73,7 +73,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                                 <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mt-0.5">Powered by Gemini 2.1</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-purple-100 dark:hover:bg-card/5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-teal-100 dark:hover:bg-card/5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
                             <X className="h-5 w-5" />
                         </button>
                     </div>

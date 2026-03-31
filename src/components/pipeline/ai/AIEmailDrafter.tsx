@@ -38,7 +38,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[70] p-4">
             <div className="bg-card rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.5)] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="p-8 border-b border-border flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600">
+                <div className="p-8 border-b border-border flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-600">
                     <div className="flex items-center gap-5">
                         <div className="w-14 h-14 rounded-2xl bg-card/20 flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-2xl">
                             <Sparkles className="h-7 w-7 text-white animate-pulse" />
@@ -62,7 +62,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                         <div className="flex flex-col items-center justify-center h-full text-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="relative mb-10">
                                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-                                <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center relative z-10 shadow-2xl">
+                                <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center relative z-10 shadow-2xl">
                                     <Mail className="h-10 w-10 text-white" />
                                 </div>
                             </div>

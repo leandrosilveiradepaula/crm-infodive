@@ -39,11 +39,11 @@ export function ProductsTable({ products, onEdit, onDelete, onDuplicate }: Produ
                         >
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
+                                    <div className="h-8 w-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center shrink-0">
                                         {product.icon ? (
                                             <span className="text-base">{product.icon}</span>
                                         ) : (
-                                            <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                            <Package className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                                         )}
                                     </div>
                                     <div>

@@ -81,92 +81,88 @@ export function ProposalOverviewPage({
                 </div>
             </div>
 
-            {/* AI Summary or Objectives */}
-            {aiSummary ? (
-                <div style={{
-                    backgroundColor: '#f8f9fa',
-                    padding: '30px 35px',
-                    borderRadius: '16px',
-                    border: '1px solid #e5e7eb',
-                    marginTop: '10px',
-                    flex: '1',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center' // Center text if short
-                }}>
+            {/* Content Area */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, minHeight: 0 }}>
+                {/* AI Summary Section */}
+                {aiSummary && (
                     <div style={{
-                        color: '#1e3a5f',
-                        fontSize: '15px',
-                        lineHeight: '1.6',
-                        whiteSpace: 'pre-wrap',
-                        textAlign: 'justify',
-                        fontWeight: '400'
+                        backgroundColor: '#f8f9fa',
+                        padding: '20px 25px',
+                        borderRadius: '12px',
+                        border: '1px solid #e5e7eb',
+                        flex: objectives.length > 0 ? '0 1 auto' : '1'
                     }}>
-                        {aiSummary}
+                        <div style={{
+                            color: '#1e3a5f',
+                            fontSize: '13.5px', // Reduced for better density
+                            lineHeight: '1.45',
+                            whiteSpace: 'pre-wrap',
+                            textAlign: 'justify',
+                            fontWeight: '400'
+                        }}>
+                            {aiSummary}
+                        </div>
                     </div>
-                </div>
-            ) : (
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: '30px',
-                    marginTop: '20px'
-                }}>
-                    {objectives.map((objective, index) => (
-                        <div
-                            key={index}
-                            style={{
-                                backgroundColor: '#f8f9fa',
-                                padding: '30px',
-                                borderRadius: '12px',
-                                border: '2px solid #e5e7eb',
-                                position: 'relative'
-                            }}
-                        >
-                            {/* Number Badge */}
-                            <div style={{
-                                position: 'absolute',
-                                top: '-15px',
-                                left: '30px',
-                                width: '50px',
-                                height: '50px',
-                                backgroundColor: accentColor,
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '20px',
-                                fontWeight: '700',
-                                color: '#ffffff',
-                                boxShadow: `0 4px 6px rgba(${parseInt(accentColor.slice(1, 3), 16)}, ${parseInt(accentColor.slice(3, 5), 16)}, ${parseInt(accentColor.slice(5, 7), 16)}, 0.3)`
-                            }}>
-                                {objective.number}
-                            </div>
+                )}
 
-                            {/* Content */}
-                            <div style={{ marginTop: '25px' }}>
+                {/* Objectives Grid */}
+                {objectives.length > 0 && (
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '16px',
+                        flex: aiSummary ? '0 1 auto' : '1'
+                    }}>
+                        {objectives.map((objective, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    backgroundColor: '#ffffff',
+                                    padding: '16px 20px',
+                                    borderRadius: '10px',
+                                    border: '1px solid #e5e7eb',
+                                    position: 'relative'
+                                }}
+                            >
+                                {/* Mini Number Badge */}
+                                <div style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    backgroundColor: accentColor,
+                                    borderRadius: '6px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '11px',
+                                    fontWeight: '800',
+                                    color: '#ffffff',
+                                    marginBottom: '8px'
+                                }}>
+                                    {objective.number}
+                                </div>
+
                                 <h3 style={{
-                                    fontSize: '18px',
+                                    fontSize: '14px',
                                     fontWeight: '700',
                                     color: primaryColor,
-                                    marginBottom: '12px',
-                                    lineHeight: '1.3'
+                                    marginBottom: '4px',
+                                    lineHeight: '1.2'
                                 }}>
                                     {objective.title}
                                 </h3>
 
                                 <p style={{
-                                    fontSize: '14px',
-                                    color: '#4b5563',
-                                    lineHeight: '1.6'
+                                    fontSize: '11.5px',
+                                    color: '#64748b',
+                                    lineHeight: '1.4'
                                 }}>
                                     {objective.description}
                                 </p>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                        ))}
+                    </div>
+                )}
+            </div>
 
             {/* Standardized Footer */}
             <div style={{
