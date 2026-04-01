@@ -3,6 +3,7 @@ import { requireSessionContext } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
+import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -75,21 +76,43 @@ export async function GET(request: NextRequest) {
     try {
 
         // Fetch emails from Microsoft Graph API (Requesting full body for signature extraction)
-        const response = await fetch(`${CONFIG.API.MS_GRAPH}/me/messages?$top=20&$select=sender,subject,bodyPreview,body,receivedDateTime,isRead,categories&$orderby=receivedDateTime DESC`, {
+        const fetchUrl = `${CONFIG.API.MS_GRAPH}/me/messages?$top=20&$select=sender,subject,bodyPreview,body,receivedDateTime,isRead,categories&$orderby=receivedDateTime DESC`;
+        
+        let response = await fetch(fetchUrl, {
             headers: {
                 'Authorization': `Bearer ${providerToken}`,
                 'Content-Type': 'application/json'
             }
         });
 
+        let newTokens = null;
+
+        // Auto-refresh if token is expired (401)
+        if (response.status === 401) {
+            const refreshToken = request.cookies.get('crm_refresh_token')?.value;
+            if (refreshToken) {
+                console.log('🔄 Microsoft token expired. Attempting refresh...');
+                try {
+                    newTokens = await refreshMicrosoftToken(refreshToken);
+                    // Retry with new token
+                    response = await fetch(fetchUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${newTokens.accessToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (refreshErr) {
+                    console.error('❌ Failed to refresh Microsoft token:', refreshErr);
+                    return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
+                }
+            } else {
+                return NextResponse.json({ error: 'Microsoft API token expired and no refresh token available.' }, { status: 401 });
+            }
+        }
+
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Graph API Error:', errorText);
-
-            if (response.status === 401) {
-                return NextResponse.json({ error: 'Microsoft API token expired or invalid.' }, { status: 401 });
-            }
-
             throw new Error(`Graph API returned ${response.status}: ${errorText}`);
         }
 
@@ -231,7 +254,29 @@ export async function GET(request: NextRequest) {
             return rest;
         });
 
-        return NextResponse.json({ emails: frontEndEmails });
+        const finalResponse = NextResponse.json({ emails: frontEndEmails });
+
+        // Update cookies if we got new tokens
+        if (newTokens) {
+            finalResponse.cookies.set('crm_provider_token', newTokens.accessToken, {
+                path: '/',
+                maxAge: 3600,
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+            });
+            if (newTokens.refreshToken) {
+                finalResponse.cookies.set('crm_refresh_token', newTokens.refreshToken, {
+                    path: '/',
+                    maxAge: 60 * 60 * 24 * 30,
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'lax',
+                });
+            }
+        }
+
+        return finalResponse;
 
     } catch (error: any) {
         console.error('Error syncing emails:', error);

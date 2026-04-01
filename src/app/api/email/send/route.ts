@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
+import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 
 export async function POST(request: NextRequest) {
     // Auth guard (iron-session)
@@ -37,7 +38,9 @@ export async function POST(request: NextRequest) {
             saveToSentItems: "true"
         };
 
-        const response = await fetch('https://graph.microsoft.com/v1.0/me/sendMail', {
+        const sendMailUrl = 'https://graph.microsoft.com/v1.0/me/sendMail';
+
+        let response = await fetch(sendMailUrl, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${providerToken}`,
@@ -46,14 +49,58 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify(sendMail)
         });
 
+        let newTokens = null;
+
+        if (response.status === 401) {
+            const refreshToken = request.cookies.get('crm_refresh_token')?.value;
+            if (refreshToken) {
+                console.log('🔄 Microsoft token expired (send). Attempting refresh...');
+                try {
+                    newTokens = await refreshMicrosoftToken(refreshToken);
+                    response = await fetch(sendMailUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${newTokens.accessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(sendMail)
+                    });
+                } catch (refreshErr) {
+                    console.error('❌ Failed to refresh Microsoft token:', refreshErr);
+                    return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
+                }
+            }
+        }
+
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Graph API Error (Send):', errorText);
             throw new Error(`Graph API returned ${response.status}: ${errorText}`);
         }
 
-        // Graph API returns 202 Accepted on success with no body
-        return NextResponse.json({ success: true });
+        const finalResponse = NextResponse.json({ success: true });
+
+        // Update cookies if refreshed
+        if (newTokens) {
+            finalResponse.cookies.set('crm_provider_token', newTokens.accessToken, {
+                path: '/',
+                maxAge: 3600,
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+            });
+            if (newTokens.refreshToken) {
+                finalResponse.cookies.set('crm_refresh_token', newTokens.refreshToken, {
+                    path: '/',
+                    maxAge: 60 * 60 * 24 * 30,
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'lax',
+                });
+            }
+        }
+
+        return finalResponse;
 
     } catch (error: any) {
         console.error('Error sending email:', error);

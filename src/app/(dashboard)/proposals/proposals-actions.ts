@@ -16,30 +16,30 @@ export async function createProposalAction(proposalData: Partial<Proposal>) {
 
     try {
         const data = await ProposalService.createProposal(userId, organizationId, {
-            deal_id: proposalData.dealId,
-            account_id: proposalData.accountId,
-            lead_id: proposalData.leadId,
-            customer_id: proposalData.customerId || proposalData.accountId || proposalData.leadId,
+            dealId: proposalData.dealId,
+            accountId: proposalData.accountId,
+            leadId: proposalData.leadId,
+            customerId: proposalData.customerId || proposalData.accountId || proposalData.leadId,
             title: proposalData.title,
             company_name: proposalData.customerName || 'Cliente',
-            template_id: proposalData.template || 'commercial',
+            template: proposalData.template || 'commercial',
             status: PROPOSAL_STATUS.DRAFT,
-            content_json: { sections: proposalData.sections },
-            products_json: proposalData.products,
+            content: { sections: proposalData.sections },
+            products: proposalData.products,
             terms: proposalData.terms,
             subtotal: proposalData.subtotal,
             discount: proposalData.discount,
             total: proposalData.total,
-            valid_until: proposalData.validUntil
+            validUntil: proposalData.validUntil
         });
 
-        const p = data;
+        const p = data as any;
         const mapped: Proposal = {
             id: p.id,
             deal_id: p.deal_id,
             number: p.number,
             title: p.title,
-            content: p.content_json || {},
+            content: p.content || p.content_json || {},
             dealId: p.deal_id,
             accountId: p.account_id,
             leadId: p.lead_id,
@@ -47,10 +47,10 @@ export async function createProposalAction(proposalData: Partial<Proposal>) {
             customerName: p.company_name || 'Cliente',
             customerEmail: p.customer_email || '',
             status: p.status as ProposalStatus,
-            template: (p.template_id as any) || 'commercial',
+            template: p.template_id || p.template || 'commercial',
             version: p.version,
-            sections: (p.content_json as any)?.sections || [],
-            products: p.products_json || [],
+            sections: (p.content || p.content_json)?.sections || [],
+            products: p.products || p.products_json || [],
             terms: p.terms || '',
             subtotal: Number(p.subtotal) || 0,
             discount: Number(p.discount) || 0,
@@ -58,10 +58,10 @@ export async function createProposalAction(proposalData: Partial<Proposal>) {
             tax: 0,
             taxPercentage: 0,
             total: Number(p.total) || 0,
-            validUntil: p.valid_until,
-            createdBy: p.created_by,
-            createdAt: p.created_at,
-            updatedAt: p.updated_at,
+            validUntil: p.valid_until || p.validUntil,
+            createdBy: p.created_by || p.createdBy,
+            createdAt: p.created_at || p.createdAt,
+            updatedAt: p.updated_at || p.updatedAt,
             versions: [],
             includeTerms: true,
             includeLogo: true,
@@ -81,9 +81,9 @@ export async function updateProposalAction(id: string, updates: Partial<Proposal
     try {
         await ProposalService.updateProposal(userId, id, organizationId, {
             status: updates.status,
-            sent_at: updates.sentAt,
-            viewed_at: updates.viewedAt,
-            signed_at: updates.signedAt,
+            sentAt: updates.sentAt,
+            viewedAt: updates.viewedAt,
+            signedAt: updates.signedAt,
         });
 
         revalidatePath(`/pipeline/${updates.dealId}`);

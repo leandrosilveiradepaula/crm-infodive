@@ -79,9 +79,30 @@ export class ProposalService {
 
     static async createProposal(userId: string, organizationId: string, payload: Partial<Proposal>): Promise<Proposal> {
         const supabase = createAdminClient();
-        const insertData: any = { ...payload, organization_id: organizationId };
-
-        insertData.created_by = userId;
+        
+        // Map frontend camelCase to snake_case database columns
+        const insertData: any = {
+            organization_id: organizationId,
+            created_by: userId,
+            title: payload.title,
+            status: payload.status,
+            number: payload.number,
+            deal_id: payload.dealId || payload.deal_id,
+            account_id: payload.accountId,
+            lead_id: payload.leadId,
+            customer_id: payload.customerId,
+            company_name: (payload as any).company_name || payload.customerName,
+            template_id: (payload as any).template_id || payload.template,
+            content_json: (payload as any).content_json || payload.content,
+            products_json: (payload as any).products_json || payload.products,
+            terms: payload.terms,
+            subtotal: payload.subtotal,
+            discount: payload.discount,
+            total: payload.total,
+            valid_until: payload.validUntil,
+            public_token: payload.public_token,
+            allow_signature: payload.allow_signature
+        };
 
         // Auto-increment version for the deal
         if (insertData.deal_id) {
