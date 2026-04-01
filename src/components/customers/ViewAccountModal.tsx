@@ -48,7 +48,7 @@ export function ViewAccountModal({ open, onOpenChange, account, onEdit }: ViewAc
 
     if (!account) return null;
 
-    const primaryContact = account.contacts?.find(c => c.isPrimary) || account.contacts?.[0];
+    const primaryContact = account.contacts?.find(c => c.is_primary) || account.contacts?.[0];
 
     const tabs = [
         { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
@@ -285,7 +285,7 @@ function ContactCard({ contact }: { contact: AccountContact }) {
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{contact.role || 'Contato'}</p>
                     </div>
                 </div>
-                {contact.isPrimary && (
+                {contact.is_primary && (
                     <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[9px] font-black uppercase">
                         Principal
                     </Badge>
@@ -298,16 +298,16 @@ function ContactCard({ contact }: { contact: AccountContact }) {
                         <span className="truncate">{contact.email}</span>
                     </div>
                 )}
-                {contact.mobile && (
+                {contact.mobile_phone && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Phone className="w-3.5 h-3.5 shrink-0" />
-                        <span>{contact.mobile}</span>
+                        <span>{contact.mobile_phone}</span>
                     </div>
                 )}
-                {contact.landline && (
+                {contact.landline_phone && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Phone className="w-3.5 h-3.5 shrink-0" />
-                        <span>{contact.landline}</span>
+                        <span>{contact.landline_phone}</span>
                     </div>
                 )}
             </div>

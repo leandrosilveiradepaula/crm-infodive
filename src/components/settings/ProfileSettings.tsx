@@ -65,7 +65,7 @@ export function ProfileSettings() {
                     <div className="flex flex-col md:flex-row items-center gap-8 p-6 bg-muted/10 rounded-3xl border border-border/50">
                         <div className="relative group">
                             <Avatar className="h-32 w-32 border-4 border-background shadow-2xl ring-1 ring-border group-hover:ring-primary/50 transition-all">
-                                <AvatarImage src={profile.avatar_url} />
+                                <AvatarImage src={profile.avatar_url || undefined} />
                                 <AvatarFallback className="bg-gradient-to-br from-primary via-primary/80 to-primary/60 text-white text-3xl font-black">
                                     {initials}
                                 </AvatarFallback>

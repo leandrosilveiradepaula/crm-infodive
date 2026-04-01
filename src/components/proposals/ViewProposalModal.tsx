@@ -81,6 +81,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
     const investmentRef = useRef<HTMLDivElement>(null);
     const differentialsRef = useRef<HTMLDivElement>(null);
     const confidentialityRef = useRef<HTMLDivElement>(null);
+    const customNotesRef = useRef<HTMLDivElement>(null);
 
     const [orgTheme, setOrgTheme] = useState<{ theme_primary: string | null; theme_accent: string | null }>({
         theme_primary: null,
@@ -107,7 +108,8 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
             softwareRef,
             investmentRef,
             differentialsRef,
-            confidentialityRef
+            confidentialityRef,
+            customNotesRef
         });
     };
 
@@ -120,7 +122,8 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
             softwareRef,
             investmentRef,
             differentialsRef,
-            confidentialityRef
+            confidentialityRef,
+            customNotesRef
         });
     };
 
@@ -446,7 +449,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                             proposal.status === PROPOSAL_STATUS.REJECTED ? 'bg-destructive' :
                                                                 proposal.status === PROPOSAL_STATUS.SENT ? 'bg-primary' :
                                                                     'bg-gray-400'
-                                                            }`} />
+                                                        }`} />
                                                         <SelectValue placeholder="Selecione o Status" />
                                                     </div>
                                                 </SelectTrigger>
@@ -542,6 +545,12 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     themeAccent={orgTheme.theme_accent || undefined}
                                     layout={generatingPpt ? 'landscape' : 'portrait'}
                                 />
+                            </div>
+
+                            <div ref={customNotesRef}>
+                                {/* Placeholder for custom notes, 
+                                    currently used as ref by hooks */}
+                                <div className="bg-white p-20 min-h-[1123px] w-[794px]" />
                             </div>
                         </div>
                     )

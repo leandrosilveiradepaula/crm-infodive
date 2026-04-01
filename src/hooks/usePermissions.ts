@@ -31,7 +31,7 @@ export const usePermissions = () => {
 
     const can = (permission: Permission): boolean => {
         if (!profile) return false;
-        const permissions = ROLE_PERMISSIONS[profile.role] || [];
+        const permissions = (profile.role ? ROLE_PERMISSIONS[profile.role] : []) || [];
         return permissions.includes(permission);
     };
 

@@ -94,10 +94,10 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                     id: Math.random().toString(36).substr(2, 9),
                     name: 'Contato Principal',
                     email: data.email || '',
-                    mobile: data.phone || '',
-                    landline: '',
+                    mobile_phone: data.phone || '',
+                    landline_phone: '',
                     role: 'Administrativo',
-                    isPrimary: true
+                    is_primary: true
                 }] : prev.contacts
             }));
         }
@@ -179,10 +179,10 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
             id: Math.random().toString(36).substr(2, 9),
             name: '',
             email: '',
-            mobile: '',
-            landline: '',
+            mobile_phone: '',
+            landline_phone: '',
             role: 'Colaborador',
-            isPrimary: formData.contacts?.length === 0
+            is_primary: formData.contacts?.length === 0
         };
         setFormData(prev => ({ ...prev, contacts: [...(prev.contacts || []), newContact] }));
     };
@@ -475,7 +475,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                         onSetPrimary={(id) => {
                             setFormData(prev => ({
                                 ...prev,
-                                contacts: prev.contacts?.map(c => ({ ...c, isPrimary: c.id === id }))
+                                contacts: prev.contacts?.map(c => ({ ...c, is_primary: c.id === id }))
                             }));
                         }}
                     />

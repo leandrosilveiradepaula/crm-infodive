@@ -5,7 +5,7 @@ import { type Account } from '@/types/account';
 import { CustomerCard } from '@/components/customers/CustomerCard';
 import { CustomersTable } from '@/components/customers/CustomersTable';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Download, Building, Briefcase, MapPin, User, X } from 'lucide-react';
+import { Plus, Search, Download, Building, Briefcase, MapPin, User, X, FileSpreadsheet } from 'lucide-react';
 import { deleteAccount } from '@/app/(dashboard)/customers/actions';
 import { useRouter } from 'next/navigation';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
@@ -15,6 +15,7 @@ import { ViewAccountModal } from '@/components/customers/ViewAccountModal';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
 
 interface CustomersClientPageProps {
     initialAccounts: Account[];
@@ -32,6 +33,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
     const [viewingAccount, setViewingAccount] = useState<Account | null>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     // Get unique segments for filter
     const uniqueSegments = useMemo(() => {
@@ -115,6 +117,10 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 description="Base de empresas, parceiros e fornecedores."
             >
                 <div className="flex gap-3">
+                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => setIsImportModalOpen(true)}>
+                        <FileSpreadsheet className="h-4 w-4 mr-2" />
+                        Importar Planilha
+                    </Button>
                     <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted" onClick={handleExportCSV}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar CSV
@@ -301,6 +307,11 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 onOpenChange={setIsViewModalOpen}
                 account={viewingAccount}
                 onEdit={handleEdit}
+            />
+
+            <ImportCustomersModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
             />
         </div>
     );

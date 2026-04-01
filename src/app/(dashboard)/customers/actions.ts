@@ -30,3 +30,10 @@ export async function deleteAccount(id: string) {
     if (result.success) revalidatePath('/customers');
     return result;
 }
+
+export async function bulkCreateAccounts(accounts: any[]) {
+    const { userId, organizationId } = await requireSessionContext();
+    const result = await AccountService.bulkCreateAccounts(userId, organizationId, accounts);
+    revalidatePath('/customers');
+    return result;
+}

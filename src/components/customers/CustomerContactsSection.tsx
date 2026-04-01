@@ -45,18 +45,18 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                         <div className="col-span-3">
                             <ThemeInput
                                 placeholder="Telefone"
-                                value={contact.mobile || ''}
-                                onChange={(e) => onUpdateContact(contact.id, 'mobile', e.target.value)}
+                                value={contact.mobile_phone || ''}
+                                onChange={(e) => onUpdateContact(contact.id, 'mobile_phone', e.target.value)}
                                 className="h-[30px] text-xs bg-transparent border-transparent focus:bg-muted/50 focus:border-border"
                             />
                         </div>
                         <div className="col-span-2 flex items-center gap-2 justify-center">
                             <Badge
-                                variant={contact.isPrimary ? "default" : "outline"}
-                                className={`cursor-pointer text-[9px] h-[24px] px-2 uppercase tracking-wide border ${contact.isPrimary ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground/30'}`}
+                                variant={contact.is_primary ? "default" : "outline"}
+                                className={`cursor-pointer text-[9px] h-[24px] px-2 uppercase tracking-wide border ${contact.is_primary ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground/30'}`}
                                 onClick={() => onSetPrimary(contact.id)}
                             >
-                                {contact.isPrimary ? 'Principal' : 'Secundário'}
+                                {contact.is_primary ? 'Principal' : 'Secundário'}
                             </Badge>
                         </div>
                         <div className="col-span-1 flex justify-end">

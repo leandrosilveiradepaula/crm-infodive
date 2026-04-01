@@ -60,6 +60,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
     const investmentRef = useRef<HTMLDivElement>(null);
     const differentialsRef = useRef<HTMLDivElement>(null);
     const confidentialityRef = useRef<HTMLDivElement>(null);
+    const customNotesRef = useRef<HTMLDivElement>(null);
 
     const [orgTheme, setOrgTheme] = useState<{ theme_primary: string | null; theme_accent: string | null }>({
         theme_primary: null,
@@ -103,7 +104,8 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
             softwareRef,
             investmentRef,
             differentialsRef,
-            confidentialityRef
+            confidentialityRef,
+            customNotesRef
         }
     });
 
@@ -406,7 +408,20 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => handleDownloadDocx(deal, { aiSummary, objectives, customTitle: config.customTitle, proposalNumber })}
+                                    onClick={() => handleDownloadDocx({
+                                        ...deal,
+                                        company_name: deal.company,
+                                        products_json: deal.deal_products,
+                                        number: proposalNumber,
+                                        content: {
+                                            aiSummary,
+                                            objectives,
+                                            config,
+                                            editableTexts: {
+                                                proposalTitle: config.customTitle
+                                            }
+                                        }
+                                    })}
                                     disabled={loading || generatingDocx}
                                     className="border-blue-500/20 hover:bg-blue-500/5 text-blue-500"
                                 >
@@ -415,7 +430,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => handleDownloadPpt({ id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives } }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef })}
+                                    onClick={() => handleDownloadPpt({ id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives } }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef, customNotesRef })}
                                     disabled={loading || generatingPpt}
                                     className="border-orange-500/20 hover:bg-orange-500/5 text-orange-500"
                                 >
@@ -504,6 +519,12 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                             themePrimary={orgTheme.theme_primary || undefined}
                             themeAccent={orgTheme.theme_accent || undefined}
                         />
+                    </div>
+
+                    <div ref={customNotesRef}>
+                        {/* Placeholder for custom notes if needed in the future, 
+                            currently used as ref by hooks */}
+                        <div className="bg-white p-20 min-h-[1123px] w-[794px]" />
                     </div>
 
                     {/* NOTE: If we want to support the legacy contentRef / single page summary, we could add it back here conditionally */}

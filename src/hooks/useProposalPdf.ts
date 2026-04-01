@@ -16,6 +16,7 @@ export function useProposalPdf() {
             investmentRef: React.RefObject<HTMLDivElement | null>;
             differentialsRef: React.RefObject<HTMLDivElement | null>;
             confidentialityRef: React.RefObject<HTMLDivElement | null>;
+            customNotesRef: React.RefObject<HTMLDivElement | null>;
         }
     ) => {
         if (!proposal.content) {
@@ -73,7 +74,7 @@ export function useProposalPdf() {
                 }
             };
 
-            const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef } = refs;
+            const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef, customNotesRef } = refs;
 
             if (isSectionActive('cover', config.includeCover) && coverRef.current) await processPage(coverRef, 'cover');
             if (isSectionActive('confidentiality', config.includeConfidentiality) && confidentialityRef.current) await processPage(confidentialityRef, 'confidentiality');
@@ -82,6 +83,7 @@ export function useProposalPdf() {
             if (isSectionActive('hardware', config.includeHardware) && hardwareRef.current) await processPage(hardwareRef, 'hardware');
             if (isSectionActive('software', config.includeSoftware) && softwareRef.current) await processPage(softwareRef, 'software');
             if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processPage(investmentRef, 'investment');
+            if (isSectionActive('custom_notes') && customNotesRef.current) await processPage(customNotesRef, 'custom_notes');
 
             const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
             pdf.save(filename);

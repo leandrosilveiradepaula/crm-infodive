@@ -1,5 +1,7 @@
 import { Profile } from './profile';
 
+export type { Profile };
+
 export type Role = 'admin' | 'manager' | 'vendedor' | 'support';
 
 export type Permission =

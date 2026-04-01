@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Building2, User, Globe, Mail, Phone, ExternalLink, ChevronDown } from 'lucide-react';
 import { updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import { Deal } from '@/types/deal';
-import { Account } from '@/types/account';
+import { Account, AccountContact } from '@/types/account';
 import { Contact } from '@/types/contact';
 import { toast } from 'sonner';
 
@@ -38,7 +38,7 @@ export const PartnersTab = ({
 
     // Contacts for the selected distributor — prefer embedded contacts, fall back to allContacts filter
     const distributorContacts: Contact[] = selectedDistributorObj?.contacts?.length
-        ? selectedDistributorObj.contacts
+        ? selectedDistributorObj.contacts as Contact[]
         : allContacts.filter((c) => c.account_id === selectedDistributor);
 
     // Auto-detect manufacturers from deal products
@@ -82,10 +82,10 @@ export const PartnersTab = ({
     const firstRealManufacturer = dealManufacturers.find((m) => !m.id.startsWith('virtual-'));
 
     // Contacts for a manufacturer account (embedded in contacts, or filtered from allContacts)
-    const getManufacturerContacts = (mfr: Account) => {
+    const getManufacturerContacts = (mfr: Account): (Contact | AccountContact)[] => {
         if (mfr.id.startsWith('virtual-')) return [];
         if (mfr.contacts?.length) return mfr.contacts;
-        return (allContacts || []).filter((c) => c.account_id === mfr.id);
+        return (allContacts || []) as (Contact | AccountContact)[];
     };
 
     const handleDistributorChange = async (id: string) => {
@@ -113,7 +113,7 @@ export const PartnersTab = ({
         } catch { toast.error('Erro ao atualizar contato'); }
     };
 
-    const ContactCard = ({ contactId, contacts }: { contactId: string; contacts: Contact[] }) => {
+    const ContactCard = ({ contactId, contacts }: { contactId: string; contacts: (Contact | AccountContact)[] }) => {
         const c = contacts.find((x) => x.id === contactId);
         if (!c) return null;
         return (

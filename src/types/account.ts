@@ -3,10 +3,10 @@ import { Contact } from './contact';
 export interface AccountContact extends Partial<Contact> {
     id: string;
     name: string;
-    email: string;
-    mobile_phone: string;
-    landline_phone: string;
-    role: string;
+    email?: string;
+    mobile_phone?: string;
+    landline_phone?: string;
+    role?: string;
     is_primary: boolean;
 }
 
@@ -40,7 +40,7 @@ export interface Account {
     neighborhood: string;
     city: string;
     state: string;
-    contacts: Contact[];
+    contacts: (Contact | AccountContact)[];
     branches: AccountBranch[];
     tags?: string[];
     relationship_type?: string;

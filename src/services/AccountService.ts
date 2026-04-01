@@ -26,10 +26,10 @@ export class AccountService {
                 id: c.id,
                 name: c.name,
                 email: c.email,
-                mobile: c.mobile_phone,
-                landline: c.landline_phone,
+                mobile_phone: c.mobile_phone,
+                landline_phone: c.landline_phone,
                 role: c.role,
-                isPrimary: c.is_primary
+                is_primary: c.is_primary
             })),
             tags: acc.tags || []
         }));
@@ -107,10 +107,10 @@ export class AccountService {
                     organization_id: organizationId,
                     name: c.name,
                     email: c.email,
-                    mobile_phone: c.mobile,
-                    landline_phone: c.landline,
+                    mobile_phone: c.mobile_phone,
+                    landline_phone: c.landline_phone,
                     role: c.role,
-                    is_primary: c.isPrimary
+                    is_primary: c.is_primary
                 }));
                 await supabase.from('account_contacts').insert(contactsToInsert);
             }
@@ -183,10 +183,10 @@ export class AccountService {
                         organization_id: organizationId,
                         name: c.name,
                         email: c.email,
-                        mobile_phone: c.mobile,
-                        landline_phone: c.landline,
+                        mobile_phone: c.mobile_phone,
+                        landline_phone: c.landline_phone,
                         role: c.role,
-                        is_primary: c.isPrimary
+                        is_primary: c.is_primary
                     }));
                     await supabase.from('account_contacts').insert(contactsToInsert);
                 }
@@ -226,19 +226,91 @@ export class AccountService {
         }
     }
 
-    static async deleteAccount(userId: string, organizationId: string, id: string) {
+    static async deleteAccount(userId: string, organization_id: string, id: string) {
         const supabase = createAdminClient();
         try {
             const { error } = await supabase
                 .from('accounts')
                 .delete()
                 .eq('id', id)
-                .eq('organization_id', organizationId);
+                .eq('organization_id', organization_id);
             if (error) throw error;
             return { success: true };
         } catch (error: any) {
             console.error('Error deleting account:', error);
             return { success: false, error: error.message };
         }
+    }
+
+    static async bulkCreateAccounts(userId: string, organizationId: string, accounts: any[]) {
+        const supabase = createAdminClient();
+        const results = {
+            created: 0,
+            updated: 0,
+            failed: 0,
+            errors: [] as string[]
+        };
+
+        for (const account of accounts) {
+            try {
+                // 1. Upsert Account by CNPJ
+                const { data: accData, error: accError } = await supabase
+                    .from('accounts')
+                    .upsert({
+                        organization_id: organizationId,
+                        name: normalizeCasing(account.name, 'name'),
+                        cnpj: normalizeTaxId(account.cnpj),
+                        ie: account.ie || null,
+                        segment: normalizeCasing(account.segment, 'name') || 'Outros',
+                        status: account.status || 'Ativo',
+                        zip: normalizeZip(account.zip) || null,
+                        street: normalizeCasing(account.street, 'address') || null,
+                        number: account.number || null,
+                        complement: account.complement || null,
+                        neighborhood: normalizeCasing(account.neighborhood, 'address') || null,
+                        city: normalizeCasing(account.city, 'address') || null,
+                        state: normalizeCasing(account.state, 'address') || null,
+                        relationship_type: account.relationship_type || 'Cliente'
+                    }, { onConflict: 'cnpj, organization_id' })
+                    .select()
+                    .single();
+
+                if (accError) throw accError;
+
+                const accId = accData.id;
+                
+                // Determine if it was an update or create (simplified check)
+                if (accData.created_at === accData.updated_at) results.created++;
+                else results.updated++;
+
+                // 2. Handle Contacts
+                if (account.contacts && account.contacts.length > 0) {
+                    for (const contact of account.contacts) {
+                        // Upsert Contact by Email (if exists) or just insert
+                        const contactPayload = {
+                            account_id: accId,
+                            organization_id: organizationId,
+                            name: contact.name,
+                            email: contact.email || null,
+                            mobile_phone: contact.mobile_phone || null,
+                            landline_phone: contact.landline_phone || null,
+                            role: contact.role || null,
+                            is_primary: !!contact.is_primary
+                        };
+
+                        if (contact.email) {
+                            await supabase.from('account_contacts').upsert(contactPayload, { onConflict: 'email, organization_id' });
+                        } else {
+                            await supabase.from('account_contacts').insert(contactPayload);
+                        }
+                    }
+                }
+            } catch (err: any) {
+                results.failed++;
+                results.errors.push(`Erro ao importar ${account.name}: ${err.message}`);
+            }
+        }
+
+        return results;
     }
 }

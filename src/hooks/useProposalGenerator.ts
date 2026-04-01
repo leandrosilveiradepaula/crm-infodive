@@ -20,6 +20,7 @@ interface UseProposalGeneratorProps {
         investmentRef: React.RefObject<HTMLDivElement | null>;
         differentialsRef: React.RefObject<HTMLDivElement | null>;
         confidentialityRef: React.RefObject<HTMLDivElement | null>;
+        customNotesRef: React.RefObject<HTMLDivElement | null>;
     };
 }
 
@@ -165,7 +166,7 @@ export function useProposalGenerator({ deal, config, selectedTemplate, onSuccess
                 }
             };
 
-            const { coverRef, confidentialityRef, differentialsRef, overviewRef, hardwareRef, softwareRef, investmentRef } = refs;
+            const { coverRef, confidentialityRef, differentialsRef, overviewRef, hardwareRef, softwareRef, investmentRef, customNotesRef } = refs;
 
             if (config.includeCover && coverRef.current) await captureComponent(coverRef, 'cover');
             if (config.includeConfidentiality && confidentialityRef.current) await captureComponent(confidentialityRef, 'confidentiality');
