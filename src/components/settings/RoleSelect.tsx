@@ -2,8 +2,8 @@ import React from 'react';
 import { Shield, Briefcase, User, Headphones } from 'lucide-react';
 
 interface RoleSelectProps {
-    value: string;
-    onChange: (role: string) => void;
+    value: string[];
+    onChange: (roles: string[]) => void;
 }
 
 export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
@@ -57,12 +57,18 @@ export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {roles.map((role) => {
-                const isSelected = value === role.id;
+                const isSelected = value.includes(role.id);
                 return (
                     <button
                         key={role.id}
                         type="button"
-                        onClick={() => onChange(role.id)}
+                        onClick={() => {
+                            if (isSelected) {
+                                onChange(value.filter(v => v !== role.id));
+                            } else {
+                                onChange([...value, role.id]);
+                            }
+                        }}
                         className={`
                             relative p-4 rounded-xl border text-left transition-all duration-200 group
                             ${isSelected

@@ -37,30 +37,28 @@ export async function requireSessionContext(): Promise<{ userId: string; organiz
         return { userId: session.userId, organizationId: session.organizationId };
     }
 
-    // Fallback: look up organizationId from Supabase (for sessions created before this fix)
+    // Fallback: look up organizationId and status from Supabase
     const adminClient = createAdminClient();
 
-    // 1. Try auth.users metadata first (most authoritative)
-    const { data: authUser } = await adminClient.auth.admin.getUserById(session.userId);
-    let organizationId: string | undefined = authUser?.user?.user_metadata?.organization_id;
-
-    // 2. Fallback: try profiles table
-    if (!organizationId) {
-        const { data: profile } = await adminClient
-            .from('profiles')
-            .select('organization_id')
-            .eq('id', session.userId)
-            .single();
-        organizationId = profile?.organization_id;
+    const { data: profile, error: profileError } = await adminClient
+        .from('profiles')
+        .select('organization_id, status')
+        .eq('id', session.userId)
+        .single();
+    
+    if (profileError || !profile) {
+        throw new Error('Unauthorized: Profile not found or database error.');
     }
+
+    if (profile.status === 'inactive') {
+        throw new Error('Unauthorized: This account has been deactivated. Contact your administrator.');
+    }
+
+    const organizationId = profile.organization_id;
 
     if (!organizationId) {
         throw new Error('Unauthorized: Could not determine organization for this user. Contact support.');
     }
 
-    // Note: we don't call session.save() here because this function may be called
-    // from Server Component context where cookies are read-only.
-    // The DB lookup runs per-request until the user logs in fresh and gets a
-    // new session with organizationId already stored.
     return { userId: session.userId, organizationId };
 }

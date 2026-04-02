@@ -1,19 +1,23 @@
 import { NextResponse } from 'next/server'
-// The client you created from the Server-Side Auth instructions
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
-    // if "next" is in param, use it as the redirect URL
     const next = searchParams.get('next') ?? '/'
+
 
     if (code) {
         const supabase = await createClient()
         const { error, data } = await supabase.auth.exchangeCodeForSession(code)
 
+        if (error) {
+            console.error('❌ Supabase Auth Callback Error:', error.message, error.status);
+        }
+
         if (!error && data?.session) {
-            const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
+
+            const forwardedHost = request.headers.get('x-forwarded-host')
             const isLocalEnv = process.env.NODE_ENV === 'development'
             
             let redirectUrl: string;
@@ -34,9 +38,9 @@ export async function GET(request: Request) {
             if (providerToken) {
                 response.cookies.set('crm_provider_token', providerToken, {
                     path: '/',
-                    maxAge: 3600, // 1 hour (default Access Token expiration for MS Graph)
+                    maxAge: 3600,
                     httpOnly: true,
-                    secure: true,
+                    secure: process.env.NODE_ENV !== 'development',
                     sameSite: 'lax',
                 });
             }
@@ -44,9 +48,9 @@ export async function GET(request: Request) {
             if (refreshToken) {
                 response.cookies.set('crm_refresh_token', refreshToken, {
                     path: '/',
-                    maxAge: 60 * 60 * 24 * 30, // 30 days
+                    maxAge: 60 * 60 * 24 * 30,
                     httpOnly: true,
-                    secure: true,
+                    secure: process.env.NODE_ENV !== 'development',
                     sameSite: 'lax',
                 });
             }
@@ -55,6 +59,5 @@ export async function GET(request: Request) {
         }
     }
 
-    // return the user to an error page with instructions
     return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
 }

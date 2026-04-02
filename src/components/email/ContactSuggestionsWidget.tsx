@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X, UserPlus, Building2, Phone, Sparkles, Ban } from 'lucide-react';
+import { Check, X, UserPlus, Building2, Phone, Sparkles, Ban, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Dialog,
@@ -38,6 +37,7 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
     const [loading, setLoading] = useState(true);
+    const [expanded, setExpanded] = useState(false);
     const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
     const [selectedAccountId, setSelectedAccountId] = useState<string>('');
     const [isCreatingNewAccount, setIsCreatingNewAccount] = useState(false);
@@ -71,7 +71,7 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             await rejectContactSuggestion(id);
             setSuggestions(s => s.filter(item => item.id !== id));
             toast.success('Sugestão descartada');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao descartar sugestão');
         }
     };
@@ -81,13 +81,11 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             toast.error('O contato não possui e-mail para ser ignorado');
             return;
         }
-
         try {
             await ignoreContactForever(suggestion.id, suggestion.email);
             setSuggestions(s => s.filter(item => item.id !== suggestion.id));
             toast.success(`${suggestion.email} foi adicionado à Blocklist`);
-        } catch (error: any) {
-            console.error(error);
+        } catch {
             toast.error('Falha ao adicionar à Blocklist');
         }
     };
@@ -101,13 +99,10 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
 
         let accountMatched = false;
 
-        // 1. Try matching by AI suggested company name (two-way match)
         if (suggestion.company_name && accounts.length > 0) {
             const aiName = suggestion.company_name.toLowerCase();
             const match = accounts.find(a => {
                 const dbName = a.name.toLowerCase();
-                // Check if suggestion contains DB name (e.g., "Infodive IT" contains "Infodive")
-                // OR check if DB name contains suggestion (e.g., "Empresa Legal" contains "Legal")
                 return dbName.includes(aiName) || aiName.includes(dbName);
             });
             if (match) {
@@ -116,16 +111,13 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             }
         }
 
-        // 2. Fallback: try inferring company name from email domain if no match yet
         if (!accountMatched && suggestion.email && accounts.length > 0) {
             const domain = suggestion.email.split('@')[1];
-            // ignore common public domains
             const publicDomains = ['gmail.com', 'hotmail.com', 'yahoo.com', 'outlook.com', 'uol.com.br', 'bol.com.br', 'icloud.com', 'terra.com.br'];
-            
+
             if (domain && !publicDomains.includes(domain.toLowerCase())) {
-                const inferredCompanyName = domain.split('.')[0]; // e.g. sicredi.com.br -> sicredi
-                
-                // If AI didn't find a company name, pre-fill the name we inferred
+                const inferredCompanyName = domain.split('.')[0];
+
                 if (!suggestion.company_name) {
                     const formattedInferred = inferredCompanyName.charAt(0).toUpperCase() + inferredCompanyName.slice(1);
                     setNewAccountName(formattedInferred);
@@ -174,70 +166,73 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             setSuggestions(s => s.filter(item => item.id !== selectedSuggestion.id));
             setSelectedSuggestion(null);
             toast.success('Contato aprovado e vinculado com sucesso!');
-
         } catch (error: any) {
-            console.error(error);
             toast.error('Falha ao aprovar: ' + error.message);
         }
     };
 
-    if (loading) return null;
-
-    // if (suggestions.length === 0) {
-    //    return null; // Esconde o widget se não tiver sugestão
-    // }
+    if (loading || suggestions.length === 0) return null;
 
     return (
-        <Card className="border-primary/20 bg-primary/5 dark:bg-primary/10 mb-6">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center text-primary dark:text-blue-400">
-                    <Sparkles className="h-5 w-5 mr-2" />
-                    Sugestões da IA (Inbox de Contatos)
-                </CardTitle>
-                <CardDescription>
-                    Nossa inteligência leu seus e-mails e encontrou {suggestions.length} novo(s) contato(s). Escolha a qual empresa eles pertencem.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-3">
+        <>
+            {/* Compact banner */}
+            <button
+                onClick={() => setExpanded(!expanded)}
+                className="w-full flex items-center justify-between px-3 py-2 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-sm hover:bg-primary/10 transition-colors"
+            >
+                <span className="flex items-center gap-2 text-primary dark:text-blue-400 font-medium">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>{suggestions.length} sugestão(ões) de contato</span>
+                </span>
+                {expanded ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+            </button>
+
+            {/* Expandable list */}
+            {expanded && (
+                <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
                     {suggestions.map((suggestion) => (
-                        <div key={suggestion.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-background rounded-lg border border-border">
-                            <div className="space-y-1 mb-3 sm:mb-0">
-                                <p className="font-medium text-sm text-foreground flex items-center">
-                                    <UserPlus className="h-4 w-4 mr-2 text-muted-foreground" />
-                                    {suggestion.name || 'Sem nome'} <span className="text-muted-foreground font-normal ml-2">({suggestion.email})</span>
+                        <div key={suggestion.id} className="flex items-center justify-between p-2.5 bg-background rounded-lg border border-border text-sm">
+                            <div className="min-w-0 flex-1">
+                                <p className="font-medium text-foreground truncate flex items-center gap-1.5">
+                                    <UserPlus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                    <span className="truncate">{suggestion.name || 'Sem nome'}</span>
                                 </p>
-                                <div className="flex flex-wrap gap-3 text-xs text-muted-foreground ml-6">
-                                    {suggestion.role && <span>{suggestion.role}</span>}
+                                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5 ml-5">
+                                    {suggestion.email && <span className="truncate">{suggestion.email}</span>}
                                     {suggestion.company_name && (
                                         <span className="flex items-center text-amber-600 dark:text-amber-400">
-                                            <Building2 className="h-3 w-3 mr-1" />
+                                            <Building2 className="h-3 w-3 mr-0.5" />
                                             {suggestion.company_name}
                                         </span>
                                     )}
                                     {suggestion.phone && (
                                         <span className="flex items-center">
-                                            <Phone className="h-3 w-3 mr-1" />
+                                            <Phone className="h-3 w-3 mr-0.5" />
                                             {suggestion.phone}
                                         </span>
                                     )}
                                 </div>
                             </div>
-                            <div className="flex gap-2 ml-6 sm:ml-0 flex-wrap sm:flex-nowrap justify-end mt-2 sm:mt-0">
-                                <Button size="sm" variant="ghost" className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => handleIgnoreForever(suggestion)} title="Nunca mais extrair contatos deste Email">
-                                    <Ban className="h-4 w-4 mr-1" /> Block
+                            <div className="flex gap-1 ml-2 shrink-0">
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => handleIgnoreForever(suggestion)} title="Blocklist">
+                                    <Ban className="h-3.5 w-3.5" />
                                 </Button>
-                                <Button size="sm" variant="outline" className="text-destructive border-destructive/20 hover:bg-destructive/10" onClick={() => handleReject(suggestion.id)} title="Apenas ignorar esta extração">
-                                    <X className="h-4 w-4 mr-1" /> Descartar
+                                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleReject(suggestion.id)} title="Descartar">
+                                    <X className="h-3.5 w-3.5" />
                                 </Button>
-                                <Button size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto" onClick={() => handleApproveClick(suggestion)}>
-                                    <Check className="h-4 w-4 mr-1" /> Aprovar
+                                <Button size="sm" className="h-7 px-2.5 text-xs bg-primary hover:bg-primary/90" onClick={() => handleApproveClick(suggestion)}>
+                                    <Check className="h-3.5 w-3.5 mr-1" />
+                                    Aprovar
                                 </Button>
                             </div>
                         </div>
                     ))}
                 </div>
-            </CardContent>
+            )}
 
             {/* Modal de Vinculação */}
             <Dialog open={!!selectedSuggestion} onOpenChange={(open) => !open && setSelectedSuggestion(null)}>
@@ -316,6 +311,6 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </Card>
+        </>
     );
 }

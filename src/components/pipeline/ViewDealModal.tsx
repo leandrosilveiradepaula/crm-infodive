@@ -583,10 +583,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     </div >
 
                     {/* Sidebar Command Center */}
-                    < div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased" >
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-10">
+                    <div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                             {/* Financial Cockpit Section */}
-                            <section className="bg-gradient-to-br from-blue-50 to-white border border-border rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                            <section className="bg-gradient-to-br from-blue-50 to-white border border-border rounded-xl p-4 shadow-sm relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-blue-400 pointer-events-none" />
                                 <div className="flex items-center gap-2 mb-6 relative z-10">
                                     <div className="p-1.5 bg-blue-100 rounded-lg border border-blue-200">
@@ -597,7 +597,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 {/* Stats Container */}
                                 <div className="space-y-3 relative z-10">
                                     {/* Value Display */}
-                                    <div className="bg-card p-4 rounded-xl border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
+                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
                                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-[10px] font-bold text-primary">R$</span>
@@ -608,7 +608,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     </div>
 
                                     {/* Probability Gauge */}
-                                    <div className="bg-card p-4 rounded-xl border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
+                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
                                         <div className="flex justify-between items-center mb-3">
                                             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
                                             <span className={`text-[10px] font-black uppercase ${formData.probability > 70 ? 'text-emerald-600' : 'text-primary'}`}>
@@ -633,7 +633,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                                     {/* Expected Close Date */}
                                     <div
-                                        className="bg-card p-4 rounded-xl border border-border group-hover:border-blue-300 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
+                                        className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
                                         onClick={() => !isEditing && setIsEditing(true)}
                                     >
                                         <div className="flex items-center justify-between">
@@ -702,7 +702,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             </div>
 
                             {/* Client Portal Card */}
-                            <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-6 rounded-2xl border border-blue-200 relative overflow-hidden group">
+                            <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-4 rounded-xl border border-blue-200 relative overflow-hidden group">
                                 <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <Globe className="h-24 w-24 text-primary" />
                                 </div>

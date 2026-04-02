@@ -75,17 +75,17 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
             {/* 1. Metrics Row */}
             <div className="grid grid-cols-4 gap-4">
                 {/* Metric: Value & Forecast */}
-                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-blue-500/30 transition-all shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-blue-500/10 rounded-lg">
-                            <Target className="h-4 w-4 text-blue-500" />
+                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-blue-500/30 transition-all shadow-sm min-h-[90px]">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1 bg-blue-500/10 rounded-md">
+                            <Target className="h-3.5 w-3.5 text-blue-500" />
                         </div>
-                        <Badge variant="outline" className="text-[9px] uppercase font-black text-blue-500 border-blue-500/20">Forecast</Badge>
+                        <Badge variant="outline" className="text-[8px] uppercase font-black text-blue-500 border-blue-500/20 px-1.5 py-0">Forecast</Badge>
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Valor Estimado</p>
-                        <h4 className="text-xl font-black text-foreground tracking-tight">{formatCurrency(deal.value)}</h4>
-                        <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
+                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
+                        <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Calendar className="h-3 w-3" />
                             {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString('pt-BR') : 'Não definido'}
                         </p>
@@ -93,77 +93,77 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 </div>
 
                 {/* Metric: Health Score */}
-                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-emerald-500/30 transition-all shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <Zap className="h-4 w-4 text-emerald-500" />
+                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-emerald-500/30 transition-all shadow-sm min-h-[90px]">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1 bg-emerald-500/10 rounded-md">
+                            <Zap className="h-3.5 w-3.5 text-emerald-500" />
                         </div>
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
+                        <div className="flex items-center gap-1">
+                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
                             {getTrendIcon(deal.health_trend)}
                         </div>
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Saúde do Negócio</p>
-                        <Progress value={deal.health_score || 0} className="h-1.5 bg-muted" />
-                        <p className="text-[10px] text-muted-foreground mt-2">Score baseado em atividade e estágio</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
+                        <Progress value={deal.health_score || 0} className="h-1 bg-muted" />
+                        <p className="text-[9px] text-muted-foreground mt-1">Baseado em atividade</p>
                     </div>
                 </div>
 
                 {/* Metric: Momentum */}
-                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-teal-500/30 transition-all shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-teal-500/10 rounded-lg">
-                            <Clock className="h-4 w-4 text-teal-500" />
+                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-teal-500/30 transition-all shadow-sm min-h-[90px]">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1 bg-teal-500/10 rounded-md">
+                            <Clock className="h-3.5 w-3.5 text-teal-500" />
                         </div>
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Momentum</p>
-                        <h4 className="text-xl font-black text-foreground tracking-tight">{deal.days_in_stage || 0} Dias</h4>
-                        <p className="text-[10px] text-muted-foreground mt-1">no estágio de {deal.stage}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
+                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
+                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
                     </div>
                 </div>
 
                 {/* Metric: Stakeholders */}
-                <div className="bg-card border border-border p-5 rounded-2xl flex flex-col justify-between group hover:border-amber-500/30 transition-all shadow-sm">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-2 bg-amber-500/10 rounded-lg">
-                            <Users className="h-4 w-4 text-amber-500" />
+                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-amber-500/30 transition-all shadow-sm min-h-[90px]">
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="p-1 bg-amber-500/10 rounded-md">
+                            <Users className="h-3.5 w-3.5 text-amber-500" />
                         </div>
-                        <Badge variant="outline" className="text-[10px] uppercase font-black text-amber-500 border-amber-500/20">
+                        <Badge variant="outline" className="text-[8px] uppercase font-black text-amber-500 border-amber-500/20 px-1.5 py-0">
                             {deal.custom_fields?.stakeholders?.length || 1} Total
                         </Badge>
                     </div>
                     <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Contato Principal</p>
-                        <h4 className="text-sm font-bold text-foreground truncate">{deal.contact_name || 'Não definido'}</h4>
-                        <p className="text-[10px] text-muted-foreground mt-1 truncate">{deal.contact_email || 'Sem email'}</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
+                        <h4 className="text-[13px] font-bold text-foreground truncate leading-tight">{deal.contact_name || 'Não definido'}</h4>
+                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
                     </div>
                 </div>
             </div>
 
             {/* 2. AI Next Best Action spotlight */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-teal-600/5 border border-blue-500/20 rounded-3xl p-8 backdrop-blur-sm group">
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-teal-600/5 border border-blue-500/20 rounded-xl p-4 backdrop-blur-sm group">
                 <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
-                <div className="relative z-10 flex items-center justify-between gap-8">
-                    <div className="flex gap-6 items-start max-w-2xl">
-                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-xl shadow-blue-500/20 shrink-0">
-                            <Bot className="h-7 w-7 text-white" />
+                <div className="relative z-10 flex items-center justify-between gap-6">
+                    <div className="flex gap-4 items-center max-w-2xl">
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
+                            <Bot className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Sparkles className="h-3.5 w-3.5 text-blue-500" />
-                                <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
+                            <div className="flex items-center gap-1.5 mb-1">
+                                <Sparkles className="h-3 w-3 text-blue-500" />
+                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
                             </div>
-                            <h3 className="text-xl font-black text-foreground mb-2">{nextAction.title}</h3>
-                            <p className="text-muted-foreground leading-relaxed">{nextAction.description}</p>
+                            <h3 className="text-base font-black text-foreground mb-0.5">{nextAction.title}</h3>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{nextAction.description}</p>
                         </div>
                     </div>
                     <Button
                         onClick={nextAction.onClick}
-                        className="bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-primary/20 gap-2 shrink-0 transition-all hover:scale-105"
+                        className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-5 text-sm rounded-lg shadow-lg shadow-primary/20 gap-2 shrink-0 transition-all hover:scale-105"
                     >
-                        <nextAction.icon className="h-4 w-4" />
+                        <nextAction.icon className="h-3.5 w-3.5" />
                         {nextAction.action}
                     </Button>
                 </div>
@@ -197,7 +197,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                 `}>
                                     {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-white" /> : <ActivityIcon className="h-2.5 w-2.5 text-white" />}
                                 </div>
-                                <div className="bg-card border border-border p-4 rounded-2xl hover:border-blue-500/20 transition-all shadow-sm">
+                                <div className="bg-card border border-border p-3.5 rounded-xl hover:border-blue-500/20 transition-all shadow-sm">
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className="text-sm font-bold text-foreground">{item.title}</h4>
                                         <span className="text-[10px] text-muted-foreground font-medium uppercase">
@@ -224,7 +224,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                             <Package className="h-4 w-4 text-blue-500" />
                             Mix de Produtos
                         </h3>
-                        <div className="bg-card border border-border rounded-2xl p-6 space-y-4 shadow-sm">
+                        <div className="bg-card border border-border rounded-xl p-5 space-y-4 shadow-sm">
                             {(deal.deal_products || []).length > 0 ? (
                                 <>
                                     <div className="space-y-3">
@@ -255,7 +255,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                             <Users className="h-4 w-4 text-blue-500" />
                             Stakeholders
                         </h3>
-                        <div className="bg-card border border-border rounded-2xl p-6 space-y-5 shadow-sm">
+                        <div className="bg-card border border-border rounded-xl p-5 space-y-5 shadow-sm">
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-3">
                                     <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">

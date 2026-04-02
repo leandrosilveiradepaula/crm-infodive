@@ -234,27 +234,28 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             </PageHeader>
 
             {/* AI Builder Quick Input */}
-            <div className="bg-gradient-to-r from-primary/20 via-primary/5 to-transparent p-1 rounded-2xl border border-primary/10 shadow-2xl">
-                <div className="bg-card/40 backdrop-blur-xl p-4 rounded-xl flex flex-col md:flex-row items-center gap-6">
-                    <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 animate-pulse">
-                        <Zap className="h-7 w-7 text-white" />
+            <div className="bg-card border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl shadow-sm mb-6">
+                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                        <Zap className="h-5 w-5 text-white animate-pulse" />
                     </div>
-                    <div className="flex-1 space-y-1 text-center md:text-left">
-                        <h3 className="text-lg font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
-                        <p className="text-sm text-muted-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
+                    <div className="flex-1 space-y-0.5 text-center md:text-left">
+                        <h3 className="text-sm font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
+                        <p className="text-xs text-muted-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
                     </div>
-                    <div className="w-full md:w-[400px] relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <div className="w-full md:w-[450px] relative group">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
                             placeholder="Descreva sua automação e a IA fará o resto..."
-                            className="pl-11 pr-24 w-full h-[48px] bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium"
+                            className="pl-10 pr-28 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                         />
                         <button
                             onClick={handleAIBuilder}
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-[36px] px-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all flex items-center gap-1.5"
                         >
+                            <Zap className="h-3 w-3 fill-current" />
                             Gerar com IA
                         </button>
                     </div>

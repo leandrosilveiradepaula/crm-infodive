@@ -12,8 +12,11 @@ import { getActivities, createActivity, updateActivity, deleteActivity, evaluate
 import { CalendarView } from './components/CalendarView';
 import { ActivityModal } from './components/ActivityModal';
 import { AiSuggestionsPanel } from '@/components/activities/AiSuggestionsPanel';
-import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
+import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { FilterBar } from '@/components/layout/FilterBar';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
+import { Button } from '@/components/ui/button';
 
 type ViewMode = 'list' | 'calendar';
 
@@ -205,94 +208,63 @@ export function ActivitiesClientPage() {
                 title="Gestão de Atividades" 
                 description="Gerencie tarefas, reuniões e follow-ups"
             >
-                <button
+                <Button 
                     onClick={() => {
                         setEditingActivity(null);
                         setShowNewModal(true);
                     }}
-                    className="h-12 px-8 bg-primary text-white font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center gap-2 uppercase text-[11px] tracking-widest group"
+                    className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2"
                 >
-                    <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+                    <Plus className="h-5 w-5" />
                     Nova Atividade
-                </button>
+                </Button>
             </PageHeader>
 
             {/* AI Suggestions Panel */}
             <AiSuggestionsPanel onAccepted={fetchData} />
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Total Activities */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-6 rounded-3xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <ActivityIcon className="w-32 h-32 text-primary" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-primary/70 uppercase tracking-[0.2em]">Total Geral</h3>
-                        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <ActivityIcon className="h-4 w-4 text-primary" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{stats.total}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Atividades na base</p>
-                    </div>
-                </div>
-
-                {/* Pending */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-6 rounded-3xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Clock3 className="w-32 h-32 text-amber-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-amber-600/70 dark:text-amber-400 uppercase tracking-[0.2em]">Pendentes</h3>
-                        <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Clock3 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter text-amber-600 dark:text-amber-400">{stats.pending}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Aguardando execução</p>
-                    </div>
-                </div>
-
-                {/* Overdue */}
-                <div className="bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-card p-6 rounded-3xl border border-red-100 dark:border-red-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <AlertTriangle className="w-32 h-32 text-red-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-red-600/70 dark:text-red-400 uppercase tracking-[0.2em]">Atrasadas</h3>
-                        <div className="p-2.5 bg-red-100 dark:bg-red-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter text-red-600 dark:text-red-400">{stats.overdue}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Atenção requerida</p>
-                    </div>
-                </div>
-
-                {/* Today */}
-                <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-card p-6 rounded-3xl border border-blue-100 dark:border-blue-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <CalendarCheck className="w-32 h-32 text-primary" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-primary/70 dark:text-blue-400 uppercase tracking-[0.2em]">Hoje</h3>
-                        <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <CalendarCheck className="h-4 w-4 text-primary dark:text-blue-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter text-primary dark:text-blue-400">{stats.today}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Programadas p/ agora</p>
-                    </div>
-                </div>
-            </div>
+            <StatsGrid items={[
+                {
+                    label: "Total Geral",
+                    value: stats.total,
+                    description: "Atividades na base",
+                    icon: ActivityIcon,
+                    color: "text-primary",
+                    gradient: "from-primary/5 to-white dark:from-primary/10",
+                    border: "border-primary/10"
+                },
+                {
+                    label: "Pendentes",
+                    value: stats.pending,
+                    description: "Aguardando execução",
+                    icon: Clock3,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
+                },
+                {
+                    label: "Atrasadas",
+                    value: stats.overdue,
+                    description: "Atenção requerida",
+                    icon: AlertTriangle,
+                    color: "text-red-600 dark:text-red-400",
+                    gradient: "from-red-50 to-white dark:from-red-950/20",
+                    border: "border-red-100 dark:border-red-900/50"
+                },
+                {
+                    label: "Hoje",
+                    value: stats.today,
+                    description: "Programadas p/ agora",
+                    icon: CalendarCheck,
+                    color: "text-primary dark:text-blue-400",
+                    gradient: "from-blue-50 to-white dark:from-blue-950/20",
+                    border: "border-blue-100 dark:border-blue-900/50"
+                }
+            ]} />
 
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-4 rounded-3xl border border-border shadow-sm animate-in fade-in duration-500">
+            <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
@@ -303,59 +275,55 @@ export function ActivitiesClientPage() {
                     />
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    <div className="flex items-center bg-muted/30 border border-border px-4 h-11 rounded-2xl transition-colors hover:bg-muted/50">
-                        <select
-                            className="text-[10px] font-black uppercase tracking-widest border-none bg-transparent text-muted-foreground focus:ring-0 cursor-pointer min-w-[140px] w-full outline-none"
-                            value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value as ActivityStatus | 'all')}
-                        >
-                            <option value="all" className="bg-popover text-popover-foreground">Todos Status</option>
-                            <option value="pending" className="bg-popover text-popover-foreground">Pendente</option>
-                            <option value="in_progress" className="bg-popover text-popover-foreground">Em Progresso</option>
-                            <option value="completed" className="bg-popover text-popover-foreground">Concluída</option>
-                            <option value="cancelled" className="bg-popover text-popover-foreground">Cancelada</option>
-                        </select>
-                    </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <ThemeSelect
+                        value={filterStatus}
+                        onChange={e => setFilterStatus(e.target.value as ActivityStatus | 'all')}
+                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                    >
+                        <option value="all">Todos Status</option>
+                        <option value="pending">Pendente</option>
+                        <option value="in_progress">Em Progresso</option>
+                        <option value="completed">Concluída</option>
+                        <option value="cancelled">Cancelada</option>
+                    </ThemeSelect>
 
-                    <div className="flex items-center bg-muted/30 border border-border px-4 h-11 rounded-2xl transition-colors hover:bg-muted/50">
-                        <select
-                            className="text-[10px] font-black uppercase tracking-widest border-none bg-transparent text-muted-foreground focus:ring-0 cursor-pointer min-w-[140px] w-full outline-none"
-                            value={filterType}
-                            onChange={e => setFilterType(e.target.value as ActivityType | 'all')}
-                        >
-                            <option value="all" className="bg-popover text-popover-foreground">Todos Tipos</option>
-                            <option value="task" className="bg-popover text-popover-foreground">Tarefa</option>
-                            <option value="meeting" className="bg-popover text-popover-foreground">Reunião</option>
-                            <option value="call" className="bg-popover text-popover-foreground">Ligação</option>
-                            <option value="email" className="bg-popover text-popover-foreground">Email</option>
-                            <option value="note" className="bg-popover text-popover-foreground">Nota</option>
-                        </select>
-                    </div>
+                    <ThemeSelect
+                        value={filterType}
+                        onChange={e => setFilterType(e.target.value as ActivityType | 'all')}
+                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                    >
+                        <option value="all">Todos Tipos</option>
+                        <option value="task">Tarefa</option>
+                        <option value="meeting">Reunião</option>
+                        <option value="call">Ligação</option>
+                        <option value="email">Email</option>
+                        <option value="note">Nota</option>
+                    </ThemeSelect>
 
                     {/* View Toggle */}
-                    <div className="flex gap-1 bg-muted/30 p-1 rounded-2xl border border-border h-11 items-center">
+                    <div className="flex gap-1 bg-muted/30 p-1 rounded-full border border-border h-11 items-center">
                         <button
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-xl transition-all ${viewMode === 'list'
-                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            className={`p-2 rounded-full transition-all ${viewMode === 'list'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
                             <List className="h-4 w-4" />
                         </button>
                         <button
                             onClick={() => setViewMode('calendar')}
-                            className={`p-2 rounded-xl transition-all ${viewMode === 'calendar'
-                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            className={`p-2 rounded-full transition-all ${viewMode === 'calendar'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
                             <CalendarIcon className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
-            </div>
+            </FilterBar>
 
             {/* Activities List */}
             {viewMode === 'list' && (

@@ -4,6 +4,8 @@ import { getUsers, updateUserProfile } from '@/app/(dashboard)/settings/actions'
 import type { UserProfile } from '../../hooks/useUsers';
 import { InviteUserModal } from './InviteUserModal';
 import { EditUserModal } from './EditUserModal';
+import { ArchiveUserModal } from './ArchiveUserModal';
+import { UserMinus } from 'lucide-react';
 
 export const UsersTab = () => {
     const [users, setUsers] = useState<UserProfile[]>([]);
@@ -12,6 +14,7 @@ export const UsersTab = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+    const [archivingUser, setArchivingUser] = useState<UserProfile | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -116,10 +119,14 @@ export const UsersTab = () => {
                                         </div>
                                     </td>
                                     <td className="py-3 px-6">
-                                        <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black border capitalize flex items-center w-fit gap-1.5 tracking-wider shadow-sm ${getRoleBadge(user.role)}`}>
-                                            <ShieldAlert className="h-2.5 w-2.5" />
-                                            {user.role}
-                                        </span>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role, idx) => (
+                                                <span key={idx} className={`px-2 py-0.5 rounded-lg text-[9px] font-black border capitalize flex items-center w-fit gap-1.5 tracking-wider shadow-sm ${getRoleBadge(role)}`}>
+                                                    <ShieldAlert className="h-2.5 w-2.5" />
+                                                    {role}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </td>
                                     <td className="py-3 px-6">
                                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold border ${user.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
@@ -128,13 +135,22 @@ export const UsersTab = () => {
                                         </span>
                                     </td>
                                     <td className="py-3 px-6 text-right">
-                                        <button
-                                            onClick={() => setEditingUser(user)}
-                                            className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-all"
-                                            title="Editar Usuário"
-                                        >
-                                            <Edit2 className="h-3.5 w-3.5" />
-                                        </button>
+                                        <div className="flex items-center justify-end gap-1">
+                                            <button
+                                                onClick={() => setEditingUser(user)}
+                                                className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition-all focus:outline-none"
+                                                title="Editar Usuário"
+                                            >
+                                                <Edit2 className="h-3.5 w-3.5" />
+                                            </button>
+                                            <button
+                                                onClick={() => setArchivingUser(user)}
+                                                className="text-muted-foreground hover:text-red-500 p-1.5 rounded-lg hover:bg-red-500/10 transition-all focus:outline-none"
+                                                title="Arquivar Usuário"
+                                            >
+                                                <UserMinus className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -164,6 +180,16 @@ export const UsersTab = () => {
                 onClose={() => setEditingUser(null)}
                 user={editingUser}
                 onSave={handleUpdateUser}
+            />
+
+            <ArchiveUserModal
+                isOpen={!!archivingUser}
+                onClose={() => setArchivingUser(null)}
+                user={archivingUser}
+                otherUsers={users}
+                onSuccess={() => {
+                    getUsers().then(({ users: data }) => setUsers(data as unknown as UserProfile[]));
+                }}
             />
         </div>
     );

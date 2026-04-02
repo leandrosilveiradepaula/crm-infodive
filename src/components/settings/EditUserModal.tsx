@@ -19,8 +19,9 @@ export const EditUserModal = ({ isOpen, onClose, user, onSave }: EditUserModalPr
         if (user) {
             setFormData({
                 name: user.name,
-                phone: user.phone, // Pre-fill phone
+                phone: user.phone,
                 role: user.role,
+                roles: user.roles || (user.role ? [user.role] : []),
                 monthly_goal: user.monthly_goal,
                 commission_rate: user.commission_rate
             });
@@ -96,10 +97,10 @@ export const EditUserModal = ({ isOpen, onClose, user, onSave }: EditUserModalPr
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-muted-foreground mb-2">Função (Role)</label>
+                        <label className="block text-sm font-bold text-muted-foreground mb-2">Funções de Acesso (Roles)</label>
                         <RoleSelect
-                            value={formData.role || 'sales'}
-                            onChange={(role) => setFormData({ ...formData, role: role as any })}
+                            value={formData.roles || []}
+                            onChange={(roles) => setFormData({ ...formData, roles: roles as any })}
                         />
                     </div>
 

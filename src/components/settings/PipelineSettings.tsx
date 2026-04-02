@@ -1,16 +1,18 @@
 'use client';
 
+'use client';
+
 import { useState, useEffect } from 'react';
 import { getPipelineStages, savePipelineStages } from '@/app/(dashboard)/settings/actions';
 import type { PipelineStage } from '@/services/SettingsService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, Trash2, GripVertical, Check, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Check, Loader2, RefreshCw, Kanban } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function PipelineSettings({ initialStages = [] }: { initialStages?: PipelineStage[] }) {
-    const [stages, setStages] = useState<PipelineStage[]>(initialStages);
+export function PipelineSettings() {
+    const [stages, setStages] = useState<PipelineStage[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
@@ -24,6 +26,10 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
         }
     };
 
+    useEffect(() => {
+        fetchStages();
+    }, []);
+
     const handleSave = async () => {
         if (stages.some(s => !s.name.trim())) {
             toast.error('Todas as etapas precisam ter um nome.');
@@ -34,7 +40,7 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
         setSaving(false);
         if (result.success) {
             toast.success('Etapas do pipeline salvas com sucesso!');
-            fetchStages(); // reload with real IDs
+            fetchStages();
         } else {
             toast.error('Erro ao salvar: ' + result.error);
         }
@@ -53,29 +59,35 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
         setStages(stages.map(s => s.id === id ? { ...s, [field]: value } : s));
 
     return (
-        <Card className="bg-card border-border">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="text-foreground">Estágios do Pipeline</CardTitle>
-                    <CardDescription className="text-muted-foreground">Personalize as etapas do seu processo de vendas.</CardDescription>
+        <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                        <Kanban className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-foreground tracking-tight">Estágios do Pipeline</h3>
+                        <p className="text-xs text-muted-foreground font-medium">Personalize as etapas do seu processo de vendas.</p>
+                    </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={fetchStages} disabled={loading} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={fetchStages} disabled={loading} className="text-muted-foreground hover:bg-muted h-9 w-9 rounded-xl">
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            </div>
+            
+            <div className="space-y-6">
                 {loading ? (
-                    <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+                    <div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {stages.map((stage, index) => (
-                            <div key={stage.id} className="flex items-center gap-3 bg-muted/30 p-3 rounded-xl border border-border group hover:border-primary/30 transition-colors">
-                                <GripVertical className="h-5 w-5 text-muted-foreground/50 cursor-move flex-shrink-0" />
+                            <div key={stage.id} className="flex items-center gap-4 bg-muted/20 p-4 rounded-xl border border-border group hover:border-primary/30 transition-colors">
+                                <GripVertical className="h-5 w-5 text-muted-foreground/30 cursor-move flex-shrink-0" />
 
                                 {/* Color swatch + picker */}
                                 <div className="relative flex-shrink-0">
                                     <div
-                                        className="h-8 w-8 rounded-lg border-2 border-border shadow-sm cursor-pointer"
+                                        className="h-8 w-8 rounded-lg border border-border shadow-sm cursor-pointer"
                                         style={{ backgroundColor: stage.color }}
                                         title="Clique para mudar a cor"
                                     />
@@ -90,7 +102,7 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
                                 <Input
                                     value={stage.name}
                                     onChange={e => updateStage(stage.id, 'name', e.target.value)}
-                                    className="flex-1 bg-transparent border-none text-foreground font-semibold focus-visible:ring-0 p-0 h-auto"
+                                    className="flex-1 bg-transparent border-none text-foreground font-bold focus-visible:ring-0 p-0 h-auto"
                                     placeholder="Nome da etapa"
                                 />
 
@@ -101,7 +113,7 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
                                 <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                    className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
                                     onClick={() => removeStage(stage.id)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -111,17 +123,19 @@ export function PipelineSettings({ initialStages = [] }: { initialStages?: Pipel
                     </div>
                 )}
 
-                <Button onClick={addStage} variant="outline" className="w-full border-dashed border-border hover:bg-muted text-muted-foreground hover:text-foreground">
-                    <Plus className="h-4 w-4 mr-2" /> Adicionar Etapa
-                </Button>
-
-                <div className="flex justify-end pt-4 border-t border-border">
-                    <Button onClick={handleSave} disabled={saving || loading} className="bg-primary hover:bg-primary/90 font-bold text-white">
-                        {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
-                        Salvar Etapas
+                <div className="flex flex-col gap-4">
+                    <Button onClick={addStage} variant="outline" className="w-full border-dashed border-border hover:bg-muted text-muted-foreground hover:text-foreground h-12 rounded-xl">
+                        <Plus className="h-4 w-4 mr-2" /> Adicionar Etapa
                     </Button>
+
+                    <div className="flex justify-end pt-4 border-t border-border">
+                        <Button onClick={handleSave} disabled={saving || loading} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/10">
+                            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
+                            Salvar Etapas
+                        </Button>
+                    </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

@@ -5,6 +5,7 @@ export interface Profile {
     email?: string;
     phone?: string;
     role?: string;
+    roles?: string[];
     organization_id?: string;
     monthly_goal?: number;
     yearly_goal?: number;

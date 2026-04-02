@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface ContactsClientPageProps {
@@ -66,8 +67,8 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 title="Contatos" 
                 description="Gerencie todos os contatos da sua base."
             >
-                <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-primary/90 font-bold text-white shadow-lg shadow-primary/20">
-                    <Plus className="h-5 w-5 mr-2" />
+                <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2">
+                    <Plus className="h-5 w-5" />
                     Novo Contato
                 </Button>
             </PageHeader>
@@ -150,12 +151,12 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
             </div>
 
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
+            <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, email ou empresa..."
-                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
+                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -164,7 +165,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterAccount}
                         onChange={e => setFilterAccount(e.target.value)}
-                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
+                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all">Empresa: Todas</option>
                         {uniqueAccounts.map(acc => (
@@ -175,7 +176,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterRole}
                         onChange={e => setFilterRole(e.target.value)}
-                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
+                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all">Cargo: Todos</option>
                         {uniqueRoles.map(role => (
@@ -185,10 +186,10 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
 
                     <ViewToggle view={view} onViewChange={setView} />
                 </div>
-            </div>
+            </FilterBar>
 
             {view === 'cards' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     {filteredContacts.map(contact => (
                         <ContactCard
                             key={contact.id}

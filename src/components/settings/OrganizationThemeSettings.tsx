@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { updateOrgTheme } from '@/app/actions/theme-actions';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, Palette } from 'lucide-react';
 import { useTheme } from '@/components/providers/ThemeProvider';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 export function OrganizationThemeSettings() {
     const [loading, setLoading] = useState(false);
@@ -33,55 +33,64 @@ export function OrganizationThemeSettings() {
     };
 
     return (
-        <Card className="bg-card border-border">
-            <CardHeader>
-                <div className="flex items-center gap-2">
-                    <Palette className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-foreground">Aparência da Organização</CardTitle>
-                </div>
-                <CardDescription className="text-muted-foreground">
-                    Defina o tema padrão para todos os novos usuários desta organização.
-                </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <div className="space-y-4">
-                    <Label className="text-foreground">Tema Padrão</Label>
-                    <RadioGroup
-                        defaultValue="light"
-                        value={selectedTheme}
-                        onValueChange={(v) => setSelectedTheme(v as 'light' | 'dark')}
-                        className="grid grid-cols-2 gap-4"
+        <div className="space-y-6">
+            <div className="flex flex-col gap-1">
+                <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] ml-1">Tema Padrão da Organização</Label>
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide ml-1 opacity-60">
+                    Defina a experiência visual para novos membros da equipe.
+                </p>
+            </div>
+
+            <RadioGroup
+                value={selectedTheme}
+                onValueChange={(v) => setSelectedTheme(v as 'light' | 'dark')}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            >
+                {/* Light Theme Option */}
+                <div className="relative">
+                    <RadioGroupItem value="light" id="org-light" className="peer sr-only" />
+                    <Label
+                        htmlFor="org-light"
+                        className="flex flex-col gap-4 p-4 rounded-2xl border-2 border-muted bg-card hover:bg-accent transition-all cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
                     >
-                        <div>
-                            <RadioGroupItem value="light" id="org-light" className="peer sr-only" />
-                            <Label
-                                htmlFor="org-light"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                            >
-                                <div className="mb-3 h-20 w-full rounded-lg bg-background border border-border shadow-sm" />
-                                <span className="block w-full text-center font-bold">Claro</span>
-                            </Label>
+                        <div className="h-24 w-full rounded-xl bg-white border border-border shadow-inner relative overflow-hidden">
+                            <div className="absolute inset-4 space-y-2">
+                                <div className="h-2 w-2/3 bg-slate-100 rounded-full" />
+                                <div className="h-1.5 w-full bg-slate-50 rounded-full" />
+                            </div>
                         </div>
-                        <div>
-                            <RadioGroupItem value="dark" id="org-dark" className="peer sr-only" />
-                            <Label
-                                htmlFor="org-dark"
-                                className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                            >
-                                <div className="mb-3 h-20 w-full rounded-lg bg-[#0f111a] border border-border shadow-sm" />
-                                <span className="block w-full text-center font-bold">Escuro</span>
-                            </Label>
-                        </div>
-                    </RadioGroup>
+                        <span className="text-xs font-bold uppercase tracking-widest text-center">Interface Clara</span>
+                    </Label>
                 </div>
 
-                <div className="flex justify-end pt-2">
-                    <Button onClick={handleSave} disabled={loading} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Salvar Padrão
-                    </Button>
+                {/* Dark Theme Option */}
+                <div className="relative">
+                    <RadioGroupItem value="dark" id="org-dark" className="peer sr-only" />
+                    <Label
+                        htmlFor="org-dark"
+                        className="flex flex-col gap-4 p-4 rounded-2xl border-2 border-muted bg-card hover:bg-accent transition-all cursor-pointer peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
+                    >
+                        <div className="h-24 w-full rounded-xl bg-[#0f111a] border border-white/5 shadow-inner relative overflow-hidden">
+                            <div className="absolute inset-4 space-y-2">
+                                <div className="h-2 w-2/3 bg-slate-800/50 rounded-full" />
+                                <div className="h-1.5 w-full bg-slate-900/50 rounded-full" />
+                            </div>
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest text-center">Interface Escura</span>
+                    </Label>
                 </div>
-            </CardContent>
-        </Card>
+            </RadioGroup>
+
+            <div className="flex justify-end pt-4">
+                <Button 
+                    onClick={handleSave} 
+                    disabled={loading} 
+                    className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl transition-all"
+                >
+                    {loading ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Palette className="mr-3 h-4 w-4" />}
+                    Salvar Tema Padrão
+                </Button>
+            </div>
+        </div>
     );
 }

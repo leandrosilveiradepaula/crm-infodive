@@ -21,7 +21,8 @@ export interface UserProfile {
     name: string;
     email: string;
     phone?: string; // Added phone
-    role: 'admin' | 'manager' | 'sales' | 'support';
+    role: 'admin' | 'manager' | 'sales' | 'support'; // Legacy single role
+    roles: ('admin' | 'manager' | 'sales' | 'support')[]; // New multi-role
     status: 'active' | 'inactive';
     lastLogin: string;
     avatar: string;

@@ -89,7 +89,6 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                 <NavItem href="/customers" icon={Building2} label="Empresas" isActive={pathname === '/customers'} collapsed={isCollapsed} />
                 <NavItem href="/contacts" icon={Users} label="Contatos" isActive={pathname === '/contacts'} collapsed={isCollapsed} />
                 <NavItem href="/activities" icon={Calendar} label="Atividades" isActive={pathname === '/activities'} collapsed={isCollapsed} />
-                <NavItem href="/proposals" icon={FileText} label="Propostas" isActive={pathname === '/proposals'} collapsed={isCollapsed} />
                 <NavItem href="/contracts" icon={Scroll} label="Contratos" isActive={pathname === '/contracts'} collapsed={isCollapsed} />
                 <NavItem href="/sales" icon={Truck} label="Vendas" isActive={pathname === '/sales'} collapsed={isCollapsed} />
                 <NavItem href="/inbox" icon={Inbox} label="Inbox" isActive={pathname === '/inbox'} collapsed={isCollapsed} />
@@ -147,7 +146,7 @@ function NavItem({ href, icon: Icon, label, isActive, collapsed }: { href: strin
             href={href}
             title={collapsed ? label : ''}
             className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                "flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 group",
                 isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-blue-900/20" : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",
                 collapsed ? "justify-center" : ""
             )}

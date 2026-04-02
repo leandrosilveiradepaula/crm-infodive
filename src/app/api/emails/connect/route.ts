@@ -1,5 +1,4 @@
 import { requireSessionContext } from '@/lib/auth-server';
-import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -10,25 +9,28 @@ export async function GET() {
     }
 
     try {
-        // Note: OAuth connect flow requires the anon/public Supabase client
-        // because it generates a browser-redirect URL for the user.
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!supabaseUrl || !supabaseAnonKey) {
+            return NextResponse.json({ error: 'Supabase configuration missing.' }, { status: 500 });
+        }
+
         const { createClient } = await import('@supabase/supabase-js');
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            { auth: { persistSession: false } }
-        );
+        const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+            auth: { persistSession: false },
+        });
 
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'azure',
             options: {
                 scopes: 'Mail.Read Mail.Send User.Read offline_access',
                 redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
+                queryParams: { response_mode: 'query' },
             },
         });
 
         if (error) {
-            console.error('Email API Auth Error:', error);
             return NextResponse.json({ error: error.message }, { status: 400 });
         }
 

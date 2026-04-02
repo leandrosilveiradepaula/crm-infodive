@@ -15,11 +15,11 @@ export const SecurityTab = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* 2FA Section */}
-            <div className="bg-card p-8 rounded-[2.5rem] border border-border shadow-xl relative overflow-hidden">
+            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
                 <div className="flex items-start justify-between relative z-10">
                     <div className="flex gap-6">
-                        <div className="bg-primary/10 p-4 rounded-2xl h-fit border border-primary/20 shadow-lg shadow-primary/10">
-                            <Shield className="h-8 w-8 text-primary" />
+                        <div className="bg-primary/10 p-3 rounded-xl h-fit">
+                            <Shield className="h-6 w-6 text-primary" />
                         </div>
                         <div>
                             <h3 className="text-xl font-black text-foreground tracking-tight">Autenticação de Dois Fatores (2FA)</h3>
@@ -49,10 +49,10 @@ export const SecurityTab = () => {
             </div>
 
             {/* Password Change Section */}
-            <div className="bg-card p-8 rounded-[2.5rem] border border-border shadow-xl relative overflow-hidden">
-                <div className="flex gap-6 mb-8 relative z-10">
-                    <div className="bg-orange-500/10 p-4 rounded-2xl h-fit border border-orange-500/20 shadow-lg shadow-orange-500/10">
-                        <Key className="h-8 w-8 text-orange-500" />
+            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
+                <div className="flex gap-5 mb-6">
+                    <div className="bg-orange-500/10 p-3 rounded-xl h-fit">
+                        <Key className="h-6 w-6 text-orange-500" />
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-foreground tracking-tight">Alterar Senha</h3>
@@ -130,10 +130,10 @@ export const SecurityTab = () => {
             </div>
 
             {/* Active Sessions */}
-            <div className="bg-card p-8 rounded-[2.5rem] border border-border/50 shadow-2xl relative overflow-hidden backdrop-blur-sm">
-                <div className="flex gap-6 mb-8 relative z-10">
-                    <div className="bg-teal-500/10 p-5 rounded-[1.5rem] h-fit border border-teal-500/20 shadow-lg shadow-teal-500/5">
-                        <Smartphone className="h-8 w-8 text-teal-400" />
+            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
+                <div className="flex gap-5 mb-6">
+                    <div className="bg-teal-500/10 p-3 rounded-xl h-fit">
+                        <Smartphone className="h-6 w-6 text-teal-400" />
                     </div>
                     <div>
                         <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Sessões Ativas</h3>
@@ -143,10 +143,10 @@ export const SecurityTab = () => {
                     </div>
                 </div>
 
-                <div className="space-y-4 relative z-10">
-                    <div className="flex items-center justify-between p-6 bg-muted/20 rounded-3xl border border-border/50 hover:border-primary/30 transition-all group backdrop-blur-sm">
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border hover:border-primary/30 transition-all group">
                         <div className="flex items-center gap-6">
-                            <div className="h-14 w-14 bg-background/50 rounded-2xl flex items-center justify-center border border-border group-hover:bg-primary/10 group-hover:text-primary transition-colors shadow-inner">
+                            <div className="h-10 w-10 bg-background rounded-xl flex items-center justify-center border border-border group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                 <span className="text-2xl">💻</span>
                             </div>
                             <div>
@@ -162,9 +162,9 @@ export const SecurityTab = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-6 bg-muted/10 rounded-3xl border border-border/30 opacity-70 hover:opacity-100 transition-all hover:border-border/50 group backdrop-blur-sm">
-                        <div className="flex items-center gap-6">
-                            <div className="h-14 w-14 bg-background/50 rounded-2xl flex items-center justify-center border border-border/50">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border opacity-70 hover:opacity-100 transition-all hover:border-border group">
+                        <div className="flex items-center gap-4">
+                            <div className="h-10 w-10 bg-background rounded-xl flex items-center justify-center border border-border">
                                 <span className="text-2xl">📱</span>
                             </div>
                             <div>
@@ -172,7 +172,7 @@ export const SecurityTab = () => {
                                 <p className="text-[10px] text-muted-foreground font-black mt-1 uppercase tracking-widest">Último acesso: 2h atrás</p>
                             </div>
                         </div>
-                        <button className="text-red-500 hover:text-white p-3.5 hover:bg-red-500 rounded-2xl transition-all border border-border/50 hover:border-red-400 group-hover:shadow-lg" title="Encerrar Sessão">
+                        <button className="text-red-500 hover:text-white p-2.5 hover:bg-red-500 rounded-xl transition-all border border-border hover:border-red-400" title="Encerrar Sessão">
                             <LogOut className="h-5 w-5" />
                         </button>
                     </div>

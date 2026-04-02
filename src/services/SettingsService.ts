@@ -73,24 +73,46 @@ export class SettingsService {
         return data as PipelineStage[];
     }
 
-    static async savePipelineStages(organizationId: string, stages: Omit<PipelineStage, 'id' | 'order_index'>[] & { id?: string }[]) {
+    static async savePipelineStages(organizationId: string, stages: PipelineStage[]) {
         const supabase = createAdminClient();
 
-        // Delete all existing and re-insert ordered list
-        await supabase
+        // 1. Encontrar estágios atuais para saber quais deletar
+        const { data: existingData } = await supabase
             .from('pipeline_stages')
-            .delete()
+            .select('id')
             .eq('organization_id', organizationId);
 
-        const toInsert = stages.map((s, idx) => ({
+        const existingIds = (existingData || []).map(r => r.id);
+        const currentIds = stages.map(s => s.id);
+        const toDeleteIds = existingIds.filter(id => !currentIds.includes(id));
+
+        // 2. Tentar deletar os que foram removidos
+        if (toDeleteIds.length > 0) {
+            const { error: deleteError } = await supabase
+                .from('pipeline_stages')
+                .delete()
+                .in('id', toDeleteIds);
+            
+            if (deleteError) {
+                return { 
+                    success: false, 
+                    error: `Não foi possível remover algumas etapas pois elas já possuem negócios vinculados. (${deleteError.message})` 
+                };
+            }
+        }
+
+        // 3. Fazer o UPSERT dos estágios que ficaram
+        const toUpsert = stages.map((s, idx) => ({
+            id: s.id, // O ID deve ser mantido se já existir ou criado se for UUID novo
             name: s.name,
             color: s.color,
             order_index: idx,
             organization_id: organizationId
         }));
 
-        const { error } = await supabase.from('pipeline_stages').insert(toInsert);
-        if (error) return { success: false, error: error.message };
+        const { error: upsertError } = await supabase.from('pipeline_stages').upsert(toUpsert);
+        
+        if (upsertError) return { success: false, error: upsertError.message };
         return { success: true };
     }
 }

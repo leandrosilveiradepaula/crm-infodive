@@ -15,6 +15,7 @@ import { ViewAccountModal } from '@/components/customers/ViewAccountModal';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { FilterBar } from '@/components/layout/FilterBar';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
 
 interface CustomersClientPageProps {
@@ -117,16 +118,16 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 description="Base de empresas, parceiros e fornecedores."
             >
                 <div className="flex gap-3">
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted" onClick={() => setIsImportModalOpen(true)}>
+                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={() => setIsImportModalOpen(true)}>
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
                         Importar Planilha
                     </Button>
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted" onClick={handleExportCSV}>
+                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={handleExportCSV}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar CSV
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-bold" onClick={handleCreate}>
-                        <Plus className="h-4 w-4 mr-2" />
+                    <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2" onClick={handleCreate}>
+                        <Plus className="h-5 w-5" />
                         Novo Cadastro
                     </Button>
                 </div>
@@ -210,19 +211,19 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm">
+            <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, cidade ou segmento..."
-                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
+                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex items-center gap-3 px-2 w-full md:w-auto overflow-x-auto no-scrollbar">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-[38px] rounded-xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -265,11 +266,11 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     )}
                     <ViewToggle view={view} onViewChange={setView} />
                 </div>
-            </div>
+            </FilterBar>
 
             {/* Grid / Table */}
             {view === 'cards' ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     {filteredAccounts.map(account => (
                         <CustomerCard
                             key={account.id}

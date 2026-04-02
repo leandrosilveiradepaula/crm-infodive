@@ -24,7 +24,13 @@ export async function login(formData: FormData) {
     });
 
     if (error || !data.user || !data.session) {
-        return { error: 'Email ou senha incorretos.' };
+        if (error?.message === 'Email not confirmed') {
+            return { error: 'Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.' };
+        }
+        if (error?.message?.includes('Invalid login credentials')) {
+            return { error: 'Email ou senha incorretos.' };
+        }
+        return { error: error?.message || 'Email ou senha incorretos.' };
     }
 
     // Get organizationId from user metadata (set at signup)
@@ -104,6 +110,27 @@ export async function signup(formData: FormData) {
 
     if (error) {
         return { error: error.message };
+    }
+
+    if (data.user) {
+        // Create the profile in public.profiles
+        const adminClient = createAdminClient();
+        const { error: profileError } = await adminClient
+            .from('profiles')
+            .upsert({
+                id: data.user.id,
+                full_name: name,
+                role: role,
+                organization_id: organization_id,
+                status: 'active',
+                updated_at: new Date().toISOString()
+            });
+
+        if (profileError) {
+            console.error('Error creating profile during signup:', profileError);
+            // We don't return an error here because the user is already created in auth,
+            // they can be fixed later or they might work with reduced functionality for a moment.
+        }
     }
 
     return { success: 'Conta criada! Verifique seu email ou faça login.' };

@@ -102,14 +102,14 @@ export function EmailClient() {
                     </div>
                 ) : null}
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    {/* Inject IA Suggestions Widget specifically for Inbox */}
-                    {selectedFolder === 'inbox' && !loading && (
-                        <div className="p-4 pb-0">
-                            <ContactSuggestionsWidget />
-                        </div>
-                    )}
+                {/* IA Suggestions - compact banner above email list */}
+                {selectedFolder === 'inbox' && !loading && (
+                    <div className="px-3 pt-3">
+                        <ContactSuggestionsWidget />
+                    </div>
+                )}
 
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
                     <EmailList
                         emails={filteredEmails}
                         selectedEmailId={selectedEmailId}

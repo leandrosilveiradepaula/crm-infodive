@@ -33,12 +33,14 @@ export class UserService {
             return USER_ROLES.SALES;
         };
 
-        const users = (data as Profile[]).map((item) => ({
+        const users = (data as any[]).map((item) => ({
             id: item.id,
             name: item.full_name || 'Usuário Sem Nome',
             email: item.email || '',
             phone: item.phone || '',
             role: mapRole(item.role || ''),
+            roles: item.roles || [],
+            status: item.status || 'active',
             lastLogin: item.updated_at ? new Date(item.updated_at).toLocaleDateString('pt-BR') : 'N/A',
             avatar: item.full_name
                 ? item.full_name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
@@ -73,6 +75,13 @@ export class UserService {
         if (updates.role !== undefined) {
             dbUpdates.role = updates.role === USER_ROLES.SALES ? USER_ROLES.VENDEDOR : updates.role;
         }
+        if (updates.roles !== undefined) {
+            dbUpdates.roles = updates.roles;
+            // Sincronizar compatibilidade caso o array venha primeiro
+            if (updates.roles.length > 0) {
+                dbUpdates.role = updates.roles[0] === USER_ROLES.SALES ? USER_ROLES.VENDEDOR : updates.roles[0];
+            }
+        }
         const { error } = await supabase
             .from('profiles')
             .update(dbUpdates)
@@ -93,5 +102,35 @@ export class UserService {
 
         if (error) return { success: false, error: error.message };
         return { success: true };
+    }
+
+    static async archiveUser(userId: string, organizationId: string, newOwnerId?: string) {
+        const supabase = createAdminClient();
+
+        try {
+            // 1. Transfer deals if requested
+            if (newOwnerId && newOwnerId !== 'none') {
+                const { error: transferError } = await supabase
+                    .from('deals')
+                    .update({ owner_id: newOwnerId })
+                    .eq('owner_id', userId)
+                    .eq('organization_id', organizationId);
+                
+                if (transferError) throw transferError;
+            }
+
+            // 2. Archive user
+            const { error: archiveError } = await supabase
+                .from('profiles')
+                .update({ status: 'inactive', updated_at: new Date().toISOString() })
+                .eq('id', userId)
+                .eq('organization_id', organizationId);
+
+            if (archiveError) throw archiveError;
+
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error.message };
+        }
     }
 }

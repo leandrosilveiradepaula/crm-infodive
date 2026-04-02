@@ -19,11 +19,19 @@ export async function updateUserRole(userId: string, role: string) {
     return result;
 }
 
+export async function archiveUserAction(userId: string, newOwnerId?: string) {
+    const { organizationId } = await requireSessionContext();
+    const result = await UserService.archiveUser(userId, organizationId, newOwnerId);
+    if (result.success) revalidatePath('/settings');
+    return result;
+}
+
 export async function updateUserProfile(userId: string, updates: {
     name?: string;
     phone?: string;
     email?: string;
     role?: string;
+    roles?: string[];
 }) {
     const { organizationId } = await requireSessionContext();
     const result = await UserService.updateUserProfile(userId, organizationId, updates);
@@ -62,7 +70,7 @@ export async function getPipelineStages(): Promise<PipelineStage[]> {
     return await SettingsService.getPipelineStages(organizationId);
 }
 
-export async function savePipelineStages(stages: Omit<PipelineStage, 'id' | 'order_index'>[] & { id?: string }[]) {
+export async function savePipelineStages(stages: PipelineStage[]) {
     const { organizationId } = await requireSessionContext();
     const result = await SettingsService.savePipelineStages(organizationId, stages);
     if (result.success) {
