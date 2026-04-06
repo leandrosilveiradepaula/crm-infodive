@@ -117,7 +117,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                             </div>
                             <button
                                 onClick={() => setIsSimulatorOpen(true)}
-                                className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 hover:from-emerald-500/20 hover:to-emerald-600/20 text-emerald-500 rounded-xl transition-all font-bold text-xs uppercase tracking-wider border-2 border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/20 hover:scale-105"
+                                className="flex items-center gap-2 h-11 px-6 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10"
                             >
                                 <Calculator className="h-4 w-4" />
                                 Simular Ganhos
@@ -158,7 +158,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"
-                                                                className="w-full px-4 py-3 pr-8 bg-muted/30 border-2 border-border rounded-xl text-center focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-base font-bold text-foreground hover:bg-muted/50 focus:scale-105"
+                                                                className="w-full h-11 px-4 pr-8 bg-muted/30 border border-border rounded-2xl text-center focus:ring-1 focus:ring-primary outline-none transition-all text-sm font-bold text-foreground"
                                                                 defaultValue={(selectedUser.commission_rules as any)?.[product.key]?.base ?? 0}
                                                                 onBlur={(e) => {
                                                                     const val = Number(e.target.value);
@@ -170,15 +170,15 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                     handleUpdateRules(newRules);
                                                                 }}
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">%</span>
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
                                                         </div>
                                                     </div>
 
                                                     {/* New Client */}
-                                                    <div className="space-y-2">
-                                                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider block">
+                                                    <div className="space-y-1.5 flex-1">
+                                                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
                                                             Cliente Novo
-                                                            <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded text-[9px] font-black">BÔNUS</span>
+                                                            <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-lg text-[8px] font-black">BÔNUS</span>
                                                         </label>
                                                         <div className="relative">
                                                             <input
@@ -186,7 +186,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"
-                                                                className="w-full px-4 py-3 pr-8 bg-emerald-500/5 border-2 border-emerald-500/20 rounded-xl text-center focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all text-base font-bold text-emerald-600 hover:bg-emerald-500/10 focus:scale-105"
+                                                                className="w-full h-11 px-4 pr-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl text-center focus:ring-1 focus:ring-emerald-500 outline-none transition-all text-sm font-bold text-emerald-600"
                                                                 defaultValue={(selectedUser.commission_rules as any)?.[product.key]?.new ?? 0}
                                                                 onBlur={(e) => {
                                                                     const val = Number(e.target.value);
@@ -198,7 +198,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                     handleUpdateRules(newRules);
                                                                 }}
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-600">%</span>
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-emerald-600 uppercase opacity-50">%</span>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -87,20 +87,19 @@ export function DistributionModal({
 
             <div className="relative bg-card border border-border rounded-3xl shadow-2xl w-full max-w-lg animate-in fade-in zoom-in-95 duration-200">
                 {/* Header */}
-                <div className="flex items-start justify-between p-6 border-b border-border">
+                <div className="flex items-start justify-between p-8 border-b border-border/50 bg-muted/10">
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                                <Target className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                            <div className="h-9 w-9 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-sm shadow-primary/5">
+                                <Target className="h-4.5 w-4.5 text-primary" />
                             </div>
-                            <h2 className="text-lg font-black text-foreground">Distribuir Metas</h2>
+                            <h2 className="text-base font-black text-foreground uppercase tracking-tight">Distribuir Metas</h2>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                            Cenário: <span className="font-bold text-foreground">{scenarioName}</span> &mdash; Meta mensal:{' '}
-                            <span className="font-bold text-primary">{formatCurrency(revenueGoal)}</span>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none">
+                            Cenário: <span className="text-primary">{scenarioName}</span> &mdash; Meta: {formatCurrency(revenueGoal)}
                         </p>
                     </div>
-                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-muted">
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-all p-2 rounded-2xl hover:bg-muted font-black">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
@@ -152,13 +151,13 @@ export function DistributionModal({
                     {/* Case: Multiple users */}
                     {users.length > 1 && (
                         <>
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                                    <Users className="h-3 w-3" /> Vendedores
+                            <div className="flex items-center justify-between mb-4 px-1">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                    <Users className="h-3.5 w-3.5 text-primary opacity-70" /> Vendedores do Time
                                 </p>
                                 <button
                                     onClick={handleEqualDistribution}
-                                    className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1"
+                                    className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 transition-all active:scale-95"
                                 >
                                     <Zap className="h-3 w-3" /> Distribuição Igual
                                 </button>
@@ -206,15 +205,15 @@ export function DistributionModal({
                             </div>
 
                             {/* Total indicator */}
-                            <div className={`flex items-center justify-between rounded-xl p-3 text-sm font-bold border transition-colors ${isValid
-                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'
-                                : 'bg-red-500/10 border-red-500/30 text-red-500'
+                            <div className={`flex items-center justify-between rounded-2xl p-4 text-[10px] font-black uppercase tracking-widest border-2 transition-all shadow-sm ${isValid
+                                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
+                                : 'bg-red-500/10 border-red-500/20 text-red-500'
                                 }`}>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2.5">
                                     {isValid ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
-                                    <span>{isValid ? 'Total correto (100%)' : `Soma: ${totalWeight}% — ajuste para 100%`}</span>
+                                    <span>{isValid ? 'Total da Distribuição Correto' : `Soma: ${totalWeight}% — Ajuste para 100%`}</span>
                                 </div>
-                                <span className="text-lg">{totalWeight}%</span>
+                                <span className="text-sm font-black">{totalWeight}%</span>
                             </div>
                         </>
                     )}
@@ -222,19 +221,19 @@ export function DistributionModal({
 
                 {/* Footer */}
                 {users.length > 0 && (
-                    <div className="flex gap-3 p-6 pt-0">
+                    <div className="flex gap-4 p-8 pt-0">
                         <button
                             onClick={onClose}
-                            className="flex-1 py-2.5 rounded-xl border border-border text-sm font-bold text-muted-foreground hover:bg-muted transition-colors"
+                            className="flex-1 h-12 rounded-2xl border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 shadow-sm"
                         >
                             Cancelar
                         </button>
                         <button
                             onClick={handleConfirm}
                             disabled={users.length > 1 && !isValid}
-                            className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-bold transition-colors shadow-lg shadow-primary/20"
+                            className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:scale-100 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                         >
-                            {users.length === 1 ? 'Aplicar Meta' : 'Confirmar e Aplicar'}
+                            {users.length === 1 ? 'Aplicar Meta' : <><Zap className="h-3.5 w-3.5" /> Confirmar Distribuição</>}
                         </button>
                     </div>
                 )}

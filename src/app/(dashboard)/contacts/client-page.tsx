@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
@@ -74,81 +75,48 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
             </PageHeader>
             
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Total Contacts */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Users className="w-32 h-32 text-primary" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-primary/70 uppercase tracking-[0.2em]">Total de Contatos</h3>
-                        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <Users className="h-4 w-4 text-primary" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{contacts.length}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Contatos na base</p>
-                    </div>
-                </div>
-
-                {/* Primary Contacts */}
-                <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-card p-4 rounded-2xl border border-teal-100 dark:border-teal-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <UserCheck className="w-32 h-32 text-teal-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-teal-600/70 dark:text-teal-400 uppercase tracking-[0.2em]">Contatos Principais</h3>
-                        <div className="p-2.5 bg-teal-100 dark:bg-teal-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <UserCheck className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{contacts.filter(c => c.is_primary).length}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Interlocutores chave</p>
-                    </div>
-                </div>
-
-                {/* Linked Contacts */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Building2 className="w-32 h-32 text-emerald-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400 uppercase tracking-[0.2em]">Com Empresa</h3>
-                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Building2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{contacts.filter(c => c.account_id).length}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Contatos vinculados</p>
-                    </div>
-                </div>
-
-                {/* New Contacts */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Sparkles className="w-32 h-32 text-amber-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-amber-600/70 dark:text-amber-400 uppercase tracking-[0.2em]">Novos (Mês)</h3>
-                        <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">
-                            {contacts.filter(c => {
-                                const d = new Date(c.created_at);
-                                const now = new Date();
-                                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-                            }).length}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Adicionados recentemente</p>
-                    </div>
-                </div>
-            </div>
+            <StatsGrid items={[
+                {
+                    label: "Total de Contatos",
+                    value: contacts.length,
+                    description: "Contatos na base",
+                    icon: Users,
+                    color: "text-primary",
+                    gradient: "from-primary/5 to-white dark:from-primary/10",
+                    border: "border-primary/10"
+                },
+                {
+                    label: "Contatos Principais",
+                    value: contacts.filter(c => c.is_primary).length,
+                    description: "Interlocutores chave",
+                    icon: UserCheck,
+                    color: "text-teal-600 dark:text-teal-400",
+                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
+                    border: "border-teal-100 dark:border-teal-900/50"
+                },
+                {
+                    label: "Com Empresa",
+                    value: contacts.filter(c => c.account_id).length,
+                    description: "Contatos vinculados",
+                    icon: Building2,
+                    color: "text-emerald-600 dark:text-emerald-400",
+                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
+                    border: "border-emerald-100 dark:border-emerald-900/50"
+                },
+                {
+                    label: "Novos (Mês)",
+                    value: contacts.filter(c => {
+                        const d = new Date(c.created_at);
+                        const now = new Date();
+                        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                    }).length,
+                    description: "Adicionados recentemente",
+                    icon: Sparkles,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
+                }
+            ]} />
 
             {/* Filter Bar */}
             <FilterBar>

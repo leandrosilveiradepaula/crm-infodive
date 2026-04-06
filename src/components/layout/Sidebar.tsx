@@ -31,7 +31,7 @@ import {
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// import { useAuth } from '@/hooks/useAuth'; // We will implement this later
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProps {
     isMobileMenuOpen: boolean;
@@ -42,21 +42,19 @@ interface SidebarProps {
 
 export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
     const pathname = usePathname();
-    // const { profile } = useAuth(); // TODO: Implement Auth Hook
-    const profile = { full_name: 'Leandro Silveira', role: 'Admin', avatar_url: '' }; // Mock for now
-
+    const { profile, signOut } = useAuth();
     const router = useRouter();
 
     const handleLogout = async () => {
         try {
-            await fetch('/api/auth/logout', { method: 'POST' });
-            // Hard redirect to clear all React state and client cache
-            window.location.href = '/login';
+            await signOut();
         } catch (err) {
             console.error('Logout falhou:', err);
             window.location.href = '/login';
         }
     };
+
+    const userProfile = profile || { full_name: 'Carregando...', role: '...', avatar_url: '' };
 
     return (
         <aside className={cn(
@@ -118,13 +116,13 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                 <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "justify-center" : "")}>
                     <div className="flex items-center gap-3">
                         <Avatar>
-                            <AvatarImage src={profile.avatar_url} />
-                            <AvatarFallback>LS</AvatarFallback>
+                            <AvatarImage src={userProfile.avatar_url || ''} />
+                            <AvatarFallback>{userProfile.full_name?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
                         {!isCollapsed && (
                             <div className="overflow-hidden">
-                                <p className="text-sm font-bold text-sidebar-foreground leading-none truncate">{profile.full_name}</p>
-                                <p className="text-xs text-sidebar-foreground/70 mt-1 truncate capitalize">{profile.role}</p>
+                                <p className="text-sm font-bold text-sidebar-foreground leading-none truncate">{userProfile.full_name}</p>
+                                <p className="text-xs text-sidebar-foreground/70 mt-1 truncate capitalize">{userProfile.role}</p>
                             </div>
                         )}
                     </div>

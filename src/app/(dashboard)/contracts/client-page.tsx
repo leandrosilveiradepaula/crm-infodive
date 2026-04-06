@@ -14,6 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
+import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface ContractsClientPageProps {
@@ -122,100 +124,62 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 <Button
                     onClick={handleCreateContract}
                     disabled={isCreating}
-                    className="bg-primary hover:bg-primary/90 font-bold text-white shadow-lg shadow-primary/20"
+                    className="bg-primary hover:bg-primary/90 font-bold text-white h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
                 >
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4" />
                     {isCreating ? 'Criando...' : 'Novo Contrato'}
                 </Button>
             </PageHeader>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Total Contracts */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <FileText className="w-32 h-32 text-primary" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-primary/70 uppercase tracking-[0.2em]">Total de Contratos</h3>
-                        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <FileText className="h-4 w-4 text-primary" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{contracts.length}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Documentos totais</p>
-                    </div>
-                </div>
+            <StatsGrid items={[
+                {
+                    label: "Total de Contratos",
+                    value: contracts.length,
+                    description: "Documentos totais",
+                    icon: FileText,
+                    color: "text-primary",
+                    gradient: "from-primary/5 to-white dark:from-primary/10",
+                    border: "border-primary/10"
+                },
+                {
+                    label: "Aguardando",
+                    value: contracts.filter(c => ['sent', 'viewed'].includes(c.status)).length,
+                    description: "Pendente de assinatura",
+                    icon: Clock,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
+                },
+                {
+                    label: "Assinados",
+                    value: contracts.filter(c => c.status === 'signed').length,
+                    description: "Concluídos",
+                    icon: CheckCircle2,
+                    color: "text-emerald-600 dark:text-emerald-400",
+                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
+                    border: "border-emerald-100 dark:border-emerald-900/50"
+                },
+                {
+                    label: "Valor Total",
+                    value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(
+                        contracts.reduce((acc, c) => acc + (c.value || 0), 0)
+                    ),
+                    description: "Volume financeiro",
+                    icon: TrendingUp,
+                    color: "text-blue-600 dark:text-blue-400",
+                    gradient: "from-blue-50 to-white dark:from-blue-950/20",
+                    border: "border-blue-100 dark:border-blue-900/50"
+                }
+            ]} />
 
-                {/* Pending Contracts */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Clock className="w-32 h-32 text-amber-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-amber-600/70 dark:text-amber-400 uppercase tracking-[0.2em]">Aguardando</h3>
-                        <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">
-                            {contracts.filter(c => ['sent', 'viewed'].includes(c.status)).length}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Pendente de assinatura</p>
-                    </div>
-                </div>
-
-                {/* Signed Contracts */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <CheckCircle2 className="w-32 h-32 text-emerald-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400 uppercase tracking-[0.2em]">Assinados</h3>
-                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">
-                            {contracts.filter(c => c.status === 'signed').length}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Concluídos</p>
-                    </div>
-                </div>
-
-                {/* Total Value */}
-                <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/20 dark:to-card p-4 rounded-2xl border border-blue-100 dark:border-blue-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <TrendingUp className="w-32 h-32 text-blue-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-blue-600/70 dark:text-blue-400 uppercase tracking-[0.2em]">Valor Total</h3>
-                        <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <TrendingUp className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-2xl font-black text-foreground tracking-tighter">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(
-                                contracts.reduce((acc, c) => acc + (c.value || 0), 0)
-                            )}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Volume financeiro</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Filters */}
             {/* Filter Bar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
+            <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar contratos por título ou empresa..."
-                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
+                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -224,7 +188,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <ThemeSelect
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="h-[38px] rounded-xl bg-muted/30 border-border transition-all"
+                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
                     >
                         <option value="all" className="bg-popover text-popover-foreground">Status: Todos</option>
                         <option value="draft" className="bg-popover text-popover-foreground">Rascunho</option>
@@ -233,7 +197,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         <option value="signed" className="bg-popover text-popover-foreground">Assinado</option>
                     </ThemeSelect>
                 </div>
-            </div>
+            </FilterBar>
 
             {/* Contracts List */}
             <div className="bg-card rounded-3xl shadow-xl border border-border overflow-hidden">

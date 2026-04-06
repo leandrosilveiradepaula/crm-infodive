@@ -7,9 +7,10 @@ import { ProfitabilityChart } from '../ProfitabilityChart';
 import { SeasonalityChart } from '../SeasonalityChart';
 import { FinancialSummaryCard } from '../FinancialSummaryCard';
 import { DistributionModal } from '../DistributionModal';
-import { Save, Trash2, FolderOpen, Plus, X, Users, Target, ArrowRight, Upload, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react';
+import { Save, Trash2, FolderOpen, Plus, X, Users, Target, ArrowRight, Upload, TrendingUp, ChevronDown, ChevronUp, Calculator } from 'lucide-react';
 import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 import { toast } from 'sonner';
+import { FilterBar } from '@/components/layout/FilterBar';
 
 interface PlanningTabProps {
     scenarios: Scenario[];
@@ -248,35 +249,32 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
             />
 
             {/* --- TOP ACTIONS BAR --- */}
-            <div className="col-span-12 flex flex-col md:flex-row justify-between items-start md:items-center bg-card p-3 px-5 rounded-2xl border border-border shadow-sm mb-[-1rem] relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
-                    <TrendingUp className="h-24 w-24" />
-                </div>
-                <div className="relative z-10 w-full flex flex-col md:flex-row justify-between items-start md:items-center">
+            <FilterBar>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
                     <div>
-                        <h2 className="text-xl font-black text-foreground flex items-center gap-2">
+                        <h2 className="text-base font-black text-foreground uppercase tracking-tight">
                             Planejamento de Cenários Financeiros
                         </h2>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Simule equipe, custos e sazonalidade para prever sua rentabilidade.
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">
+                            Simule equipe, custos e rentabilidade do negócio
                         </p>
                     </div>
-                    <div className="flex gap-3 mt-4 md:mt-0">
+                    <div className="flex gap-2">
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-muted hover:bg-muted/80 text-foreground px-4 h-[38px] rounded-lg text-xs font-bold transition-colors flex items-center gap-2 border border-border"
+                            className="bg-muted/40 hover:bg-muted/60 text-foreground px-5 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-border flex items-center gap-2 shadow-sm"
                         >
-                            <FolderOpen className="h-4 w-4 text-primary" /> Meus Cenários ({scenarios.length})
+                            <FolderOpen className="h-3.5 w-3.5 text-primary" /> Meus Cenários ({scenarios.length})
                         </button>
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-primary hover:bg-primary text-white px-4 h-[38px] rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
+                            className="bg-primary hover:bg-primary/90 text-white px-5 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
                         >
-                            <Save className="h-4 w-4" /> Salvar Configuração Atual
+                            <Save className="h-3.5 w-3.5" /> Salvar Cenário
                         </button>
                     </div>
                 </div>
-            </div>
+            </FilterBar>
 
             {/* --- LEFT COLUMN: INPUTS (Accordion Style) --- */}
             <div className="col-span-12 lg:col-span-5 space-y-4">
@@ -285,13 +283,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                     <button
                         onClick={() => setExpandedSection(expandedSection === 'goals' ? 'goals' : 'goals')}
-                        className={`w-full flex justify-between items-center p-5 focus:outline-none transition-colors ${expandedSection === 'goals' ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
+                        className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'goals' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Target className="h-4 w-4 text-primary" />
+                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                            <Target className="h-4 w-4 text-primary opacity-80" />
                             1. Metas e Sazonalidade
                         </h3>
-                        {expandedSection === 'goals' ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        {expandedSection === 'goals' ? <ChevronUp className="h-4 w-4 text-muted-foreground/50" /> : <ChevronDown className="h-4 w-4 text-muted-foreground/50" />}
                     </button>
 
                     {expandedSection === 'goals' && (
@@ -299,40 +297,42 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                             {/* Metas & Conversão */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 md:col-span-1">
-                                    <label className="text-[10px] uppercase font-bold text-muted-foreground block mb-1">
+                                <div className="col-span-2 md:col-span-1">
+                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         Definir Meta Por:
                                     </label>
-                                    <div className="flex bg-muted/30 p-1 rounded-lg border border-border">
+                                    <div className="flex bg-muted/30 p-1 rounded-2xl border border-border h-11 items-center">
                                         <button
                                             onClick={() => setGoalMode('revenue')}
-                                            className={`flex-1 text-[10px] font-bold py-1.5 rounded-md transition-all ${goalMode === 'revenue' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'revenue' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                         >
                                             Faturamento
                                         </button>
                                         <button
                                             onClick={() => setGoalMode('profit_absolute')}
-                                            className={`flex-1 text-[10px] font-bold py-1.5 rounded-md transition-all ${goalMode === 'profit_absolute' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_absolute' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Lucro Absoluto (R$)"
                                         >
                                             Lucro (R$)
                                         </button>
                                         <button
                                             onClick={() => setGoalMode('profit_percent')}
-                                            className={`flex-1 text-[10px] font-bold py-1.5 rounded-md transition-all ${goalMode === 'profit_percent' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_percent' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Margem de Lucro (%)"
                                         >
                                             Margem (%)
                                         </button>
                                     </div>
                                 </div>
+                                </div>
                                 <div className="col-span-2 md:col-span-1">
-                                    <label className="text-[10px] uppercase font-bold text-muted-foreground block mb-1">
-                                        {goalMode === 'revenue' ? 'Meta Mensal Faturamento (R$)' : goalMode === 'profit_absolute' ? 'Lucro Mensal Desejado (R$)' : 'Margem de Lucro Desejada (%)'}
+                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
+                                        {goalMode === 'revenue' ? 'Meta Faturamento (Mensal)' : goalMode === 'profit_absolute' ? 'Lucro Desejado (Mensal)' : 'Margem Alvo'}
                                     </label>
-                                    <div className="relative">
+                                    <div className="relative group">
                                         {goalMode !== 'profit_percent' ? (
                                             <ThemeCurrencyInput
-                                                className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[38px] pl-8 text-left"
+                                                className="w-full bg-muted/30 border border-border rounded-2xl text-sm font-black text-foreground focus:ring-1 focus:ring-primary outline-none h-11 pl-9 text-left transition-all"
                                                 value={goalValue || 0}
                                                 onChange={(e) => setGoalValue(e.target.value)}
                                             />
@@ -340,33 +340,33 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             <>
                                                 <input
                                                     type="number"
-                                                    className="w-full bg-background border border-border rounded-lg text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none px-3 h-[38px]"
+                                                    className="w-full bg-muted/30 border border-border rounded-2xl text-sm font-black text-foreground focus:ring-1 focus:ring-primary outline-none px-4 h-11 transition-all text-center"
                                                     value={goalValue}
                                                     onChange={(e) => setGoalValue(e.target.value)}
                                                 />
-                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">%</span>
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
                                             </>
                                         )}
                                     </div>
                                 </div>
                                 <div className="col-span-1">
-                                    <label className="text-[10px] uppercase font-bold text-muted-foreground block mb-1">Ticket Médio Projetado</label>
+                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Ticket Médio</label>
                                     <ThemeCurrencyInput
-                                        className="w-full bg-background border border-border rounded-lg pl-8 pr-3 h-[38px] text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none text-left"
+                                        className="w-full bg-muted/30 border border-border rounded-2xl pl-9 pr-4 h-11 text-sm font-black text-foreground focus:ring-1 focus:ring-primary outline-none text-left transition-all"
                                         value={avgTicket || 0}
                                         onChange={(e) => setAvgTicket(e.target.value)}
                                     />
                                 </div>
                                 <div className="col-span-1">
-                                    <label className="text-[10px] uppercase font-bold text-muted-foreground block mb-1">Conversão (Oport. → Venda)</label>
-                                    <div className="relative">
+                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Conversão (Conv.)</label>
+                                    <div className="relative group">
                                         <input
                                             type="number"
-                                            className="w-full bg-background border border-border rounded-lg px-3 h-[38px] text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none"
+                                            className="w-full bg-muted/30 border border-border rounded-2xl px-4 h-11 text-sm font-black text-foreground focus:ring-1 focus:ring-primary outline-none transition-all text-center"
                                             value={conversionRate}
                                             onChange={(e) => setConversionRate(e.target.value)}
                                         />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">%</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
                                     </div>
                                 </div>
                             </div>
@@ -412,13 +412,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                     <button
                         onClick={() => setExpandedSection(expandedSection === 'staff' ? 'staff' : 'staff')}
-                        className={`w-full flex justify-between items-center p-5 focus:outline-none transition-colors ${expandedSection === 'staff' ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
+                        className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'staff' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Users className="h-4 w-4 text-emerald-500" />
+                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                            <Users className="h-4 w-4 text-emerald-500 opacity-80" />
                             2. Equipe & Folha de Pagamento
                         </h3>
-                        {expandedSection === 'staff' ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        {expandedSection === 'staff' ? <ChevronUp className="h-4 w-4 text-muted-foreground/50" /> : <ChevronDown className="h-4 w-4 text-muted-foreground/50" />}
                     </button>
 
                     {expandedSection === 'staff' && (
@@ -441,46 +441,47 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                 </button>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                                 {staff.map((item) => (
-                                    <div key={item.id} className="grid grid-cols-12 gap-2 items-center group">
-                                        <div className="col-span-4">
+                                    <div key={item.id} className="grid grid-cols-12 gap-3 items-center group bg-muted/10 p-3 rounded-2xl border border-border/40 hover:border-border transition-all">
+                                        <div className="col-span-4 translate-y-[2px]">
                                             <input
-                                                className="w-full bg-transparent border-b border-border text-xs font-medium text-foreground focus:border-primary outline-none py-1"
+                                                className="w-full bg-transparent border-none text-sm font-black text-foreground focus:ring-0 outline-none pb-1"
                                                 value={item.role}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'role', e.target.value)}
                                                 placeholder="Cargo"
                                             />
+                                            <div className="h-[1px] w-full bg-border group-focus-within:bg-primary transition-colors"></div>
                                         </div>
                                         <div className="col-span-3">
                                             <ThemeCurrencyInput
-                                                className="w-full bg-transparent border-t-0 border-r-0 border-l-0 border-b border-border rounded-none text-right text-xs font-medium text-foreground focus:ring-0 focus:border-primary outline-none py-1 h-auto pl-8"
+                                                className="w-full bg-muted/40 border border-border rounded-xl px-3 h-9 text-right text-xs font-black text-foreground focus:ring-1 focus:ring-primary outline-none pl-7 transition-all"
                                                 value={item.salary}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'salary', Number(e.target.value))}
                                             />
                                         </div>
-                                        <div className="col-span-2 flex items-center gap-1">
-                                            <span className="text-xs text-muted-foreground">x</span>
+                                        <div className="col-span-2 flex items-center gap-2">
+                                            <span className="text-[10px] font-black text-muted-foreground uppercase">x</span>
                                             <input
                                                 type="number"
-                                                className="w-full bg-transparent border-b border-border text-center text-xs font-bold text-foreground focus:border-primary outline-none py-1"
+                                                className="w-full bg-muted/40 border border-border rounded-xl h-9 text-center text-xs font-black text-foreground focus:ring-1 focus:ring-primary outline-none transition-all"
                                                 value={item.count}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'count', Number(e.target.value))}
                                             />
                                         </div>
-                                        <div className="col-span-2 relative group-focus-within:border-primary border-b border-border flex items-center">
-                                            <span className="text-[10px] text-muted-foreground mr-1">Ramp:</span>
+                                        <div className="col-span-2 relative">
                                             <input
                                                 type="number"
-                                                className="w-full bg-transparent text-center text-xs font-bold text-orange-500 focus:outline-none"
+                                                className="w-full bg-orange-500/10 border border-orange-500/20 rounded-xl h-9 text-center text-xs font-black text-orange-600 focus:ring-1 focus:ring-orange-500 outline-none transition-all pr-4"
                                                 value={item.rampUp || 0}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'rampUp', Number(e.target.value))}
-                                                title="Meses de Ramp-up (Aceleração)"
+                                                title="Meses de Ramp-up"
                                             />
+                                            <span className="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-black text-orange-600/50 uppercase">M</span>
                                         </div>
                                         <div className="col-span-1 flex justify-end">
-                                            <button onClick={() => handleRemoveStaff(item.id)} className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Trash2 className="h-3 w-3" />
+                                            <button onClick={() => handleRemoveStaff(item.id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                                                <Trash2 className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -500,13 +501,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                     <button
                         onClick={() => setExpandedSection(expandedSection === 'costs' ? 'costs' : 'costs')}
-                        className={`w-full flex justify-between items-center p-5 focus:outline-none transition-colors ${expandedSection === 'costs' ? 'bg-muted/30' : 'hover:bg-muted/30'}`}
+                        className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'costs' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Target className="h-4 w-4 text-orange-500" />
+                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                            <Target className="h-4 w-4 text-orange-500 opacity-80" />
                             3. Custos Operacionais (Fixos/Var)
                         </h3>
-                        {expandedSection === 'costs' ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        {expandedSection === 'costs' ? <ChevronUp className="h-4 w-4 text-muted-foreground/50" /> : <ChevronDown className="h-4 w-4 text-muted-foreground/50" />}
                     </button>
 
                     {expandedSection === 'costs' && (
@@ -672,16 +673,16 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
 
                 {/* 3. Charts Area (Tabs) */}
                 <div className="bg-card p-4 rounded-2xl border border-border shadow-sm">
-                    <div className="flex bg-muted/30 p-1 rounded-lg border border-border mb-4">
+                    <div className="flex bg-muted/40 p-1 rounded-2xl border border-border mb-6 h-12 items-center">
                         <button
                             onClick={() => setActiveChartTab('profitability')}
-                            className={`flex-1 text-xs font-bold py-2 rounded-md transition-all ${activeChartTab === 'profitability' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'profitability' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Ponto de Equilíbrio (P&L)
                         </button>
                         <button
                             onClick={() => setActiveChartTab('seasonality')}
-                            className={`flex-1 text-xs font-bold py-2 rounded-md transition-all ${activeChartTab === 'seasonality' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'seasonality' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Curva de Sazonalidade
                         </button>

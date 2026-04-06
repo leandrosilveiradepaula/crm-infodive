@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Menu, Search, Moon, Sun, Bell, Bot } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,10 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
     const { theme, toggleTheme } = useTheme();
+    const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
+    
+    const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
 
     return (
         <header className="bg-card dark:bg-gray-950/50 dark:backdrop-blur-md border-b border-border dark:border-border px-4 lg:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
@@ -36,7 +40,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
                 </div>
-                <h2 className="text-lg lg:text-xl font-bold text-foreground dark:text-white truncate">Bem-vindo, Leandro 👋</h2>
+                <h2 className="text-lg lg:text-xl font-bold text-foreground dark:text-white truncate">Bem-vindo, {firstName} 👋</h2>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">

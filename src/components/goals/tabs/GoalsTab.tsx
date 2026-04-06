@@ -8,8 +8,8 @@ import { GoalInput } from '../GoalInput';
 import { StatsCard } from '../StatsCard';
 import { EnhancedProgressBar } from '../EnhancedProgressBar';
 import { PerformanceBadge } from '../PerformanceBadge';
-import { Target, TrendingUp, Award, Calendar, DollarSign, Filter, ChevronRight, Calculator, FileText } from 'lucide-react';
-import { ThemeSelect, ThemeLabel } from '@/components/ui/theme/ThemeComponents';
+import { Target, TrendingUp, Award, Calendar, DollarSign, Filter, ChevronRight, Calculator, FileText, CalendarDays } from 'lucide-react';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface GoalsTabProps {
@@ -117,114 +117,128 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header / Filters */}
+            {/* Header / Standardized Navigation Filter */}
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                    <h2 className="text-lg font-bold text-foreground">Visão Geral de Metas</h2>
-                    <p className="text-xs text-muted-foreground">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
+                    <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Visão Geral de Metas</h2>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        <Filter className="h-4 w-4 text-muted-foreground ml-2" />
-                        <ThemeSelect
-                            className="bg-card w-[180px] h-[34px] border-border text-xs focus:ring-1 focus:ring-blue-500 rounded-xl"
-                            value={selectedPeriod}
-                            onChange={(e) => setSelectedPeriod(e.target.value as any)}
-                        >
-                            <option value="all">Ano Completo</option>
-                            <option value="q1">1º Trimestre (Jan-Mar)</option>
-                            <option value="q2">2º Trimestre (Abr-Jun)</option>
-                            <option value="q3">3º Trimestre (Jul-Set)</option>
-                            <option value="q4">4º Trimestre (Out-Dez)</option>
-                        </ThemeSelect>
-                    </div>
-
-                    {/* Year Selector */}
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground ml-2" />
-                        <ThemeSelect
-                            className="bg-card w-[100px] h-[34px] border-border text-xs focus:ring-1 focus:ring-blue-500 rounded-xl"
+                
+                {/* Advanced Multi-Year Pill Selector */}
+                <div className="flex flex-col sm:flex-row gap-2 bg-muted/20 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
+                    {/* View Year Selector */}
+                    <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
+                        <CalendarDays className="h-4 w-4 text-primary opacity-50" />
+                        <select
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            aria-label="Selecionar ano"
+                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
                         >
-                            <option value={2024}>2024</option>
-                            <option value={2025}>2025</option>
-                            <option value={2026}>2026</option>
-                        </ThemeSelect>
+                            {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                        <svg className="h-3 w-3 text-muted-foreground -ml-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <div className="flex gap-1 items-center px-1">
+                        <button
+                            onClick={() => setSelectedPeriod('all')}
+                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                        >
+                            Tempo Todo
+                        </button>
+                        {[
+                            { id: 'q1', label: 'Q1' },
+                            { id: 'q2', label: 'Q2' },
+                            { id: 'q3', label: 'Q3' },
+                            { id: 'q4', label: 'Q4' },
+                        ].map((tab) => {
+                            const isSelected = selectedPeriod === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    aria-label={`Filtrar por ${tab.label}`}
+                                    onClick={() => setSelectedPeriod(tab.id as any)}
+                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                        }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
             {/* Stats Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <StatsCard
-                    title={`Meta (${getPeriodLabel()})`}
-                    value={formatCurrency(stats.totalGoal)}
-                    icon={Target}
-                    color="blue"
-                    subtitle={`${users.length} vendedores`}
-                />
-                <StatsCard
-                    title="Realizado Total"
-                    value={formatCurrency(stats.totalSoldAll)}
-                    icon={TrendingUp}
-                    color="emerald"
-                    trend={{ value: stats.avgProgress, isPositive: true }}
-                    subtitle={`${stats.avgProgress.toFixed(1)}% da meta`}
-                />
-                <StatsCard
-                    title="Top Performer"
-                    value={stats.topPerformer?.name || 'N/A'}
-                    icon={Award}
-                    color="violet"
-                    subtitle={`${formatCurrency(stats.topPerformer?.totalSold || 0)} vendido`}
-                />
-                {/* Mini Chart Card */}
-                <div className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden group hover:border-primary/30 transition-all">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest z-10">Meta vs Realizado</h3>
-                        <div className="flex gap-2">
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-muted"></div><span className="text-[9px] font-bold text-muted-foreground uppercase">Meta</span></div>
-                            <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-primary"></div><span className="text-[9px] font-bold text-primary uppercase">Fatura</span></div>
-                        </div>
-                    </div>
-                    <div className="h-24 mt-1 z-10 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={[{ name: 'Total', Meta: stats.totalGoal, Realizado: stats.totalSoldAll }]} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                                <XAxis type="category" dataKey="name" hide />
-                                <YAxis type="number" hide />
-                                <Bar dataKey="Meta" fill="var(--muted)" radius={[4, 4, 4, 4]} barSize={24} />
-                                <Bar dataKey="Realizado" fill="var(--primary)" radius={[4, 4, 4, 4]} barSize={24} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
+            <StatsGrid items={[
+                {
+                    label: `Meta (${getPeriodLabel()})`,
+                    value: formatCurrency(stats.totalGoal),
+                    description: `${users.length} vendedores`,
+                    icon: Target,
+                    color: "text-blue-600 dark:text-blue-400",
+                    gradient: "from-blue-50 to-white dark:from-blue-950/20",
+                    border: "border-blue-100 dark:border-blue-900/50"
+                },
+                {
+                    label: "Realizado Total",
+                    value: formatCurrency(stats.totalSoldAll),
+                    description: `${stats.avgProgress.toFixed(1)}% da meta`,
+                    icon: TrendingUp,
+                    color: "text-emerald-600 dark:text-emerald-400",
+                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
+                    border: "border-emerald-100 dark:border-emerald-900/50"
+                },
+                {
+                    label: "Top Performer",
+                    value: (stats.topPerformer?.name || 'N/A').split(' ')[0],
+                    description: `${formatCurrency(stats.topPerformer?.totalSold || 0)} vendido`,
+                    icon: Award,
+                    color: "text-violet-600 dark:text-violet-400",
+                    gradient: "from-violet-50 to-white dark:from-violet-950/20",
+                    border: "border-violet-100 dark:border-violet-900/50"
+                },
+                {
+                    label: "Faturamento vs Meta",
+                    value: `${stats.avgProgress.toFixed(1)}%`,
+                    description: "Progresso global do time",
+                    icon: Calculator,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
+                }
+            ]} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Enhanced Table */}
-                <div className="lg:col-span-2 overflow-x-auto rounded-2xl border border-border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <table className="w-full">
-                        <thead className="bg-muted/10 border-b border-border">
-                            <tr>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
-                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
-                                    {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
-                                </th>
-                                <th className="text-center py-4 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
-                                    Realizado
-                                </th>
-                                <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
-                                {selectedPeriod === 'all' && (
-                                    <>
-                                        <th className="text-center py-5 px-2 text-[9px] font-bold text-muted-foreground">Q1</th>
-                                        <th className="text-center py-5 px-2 text-[9px] font-bold text-muted-foreground">Q2</th>
-                                        <th className="text-center py-5 px-2 text-[9px] font-bold text-muted-foreground">Q3</th>
-                                        <th className="text-center py-5 px-2 text-[9px] font-bold text-muted-foreground">Q4</th>
-                                    </>
-                                )}
-                            </tr>
-                        </thead>
+                <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700 h-fit">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-muted/10 border-b border-border">
+                                <tr>
+                                    <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
+                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
+                                        {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
+                                    </th>
+                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
+                                        Realizado
+                                    </th>
+                                    <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
+                                    {selectedPeriod === 'all' && (
+                                        <>
+                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q1</th>
+                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q2</th>
+                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q3</th>
+                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q4</th>
+                                        </>
+                                    )}
+                                </tr>
+                            </thead>
                         <tbody className="divide-y divide-border">
                             {stats.userPerformance.map((user, index) => {
                                 const quarterlyTotal = (user.quarterly_goals?.q1 || 0) + (user.quarterly_goals?.q2 || 0) + (user.quarterly_goals?.q3 || 0) + (user.quarterly_goals?.q4 || 0);
@@ -304,6 +318,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                         </tbody>
                     </table>
                 </div>
+            </div>
 
                 {/* Main Comparison Chart */}
                 <div className="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">

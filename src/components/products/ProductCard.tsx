@@ -39,7 +39,7 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
     const Icon = iconMap[product.icon || 'Server'] || Package;
 
     return (
-        <div className="bg-card p-4 rounded-3xl border border-border hover:border-primary/30 transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl flex flex-col h-full relative overflow-hidden">
+        <div className="bg-card p-3 rounded-2xl border border-border hover:border-primary/30 transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl flex flex-col h-full relative overflow-hidden">
             {/* Ambient Glow */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
 

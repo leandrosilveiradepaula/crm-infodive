@@ -43,16 +43,16 @@ export const FinancialSummaryCard = ({
                     <FileText className="h-3.5 w-3.5" />
                     Demonstrativo de Resultado (DRE)
                 </h3>
-                <div className="flex bg-muted/30 p-1 rounded-lg border border-border">
+                <div className="flex bg-muted/40 p-1 rounded-2xl border border-border h-9 items-center translate-y-[-2px]">
                     <button
                         onClick={() => setIsAnnual(false)}
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-all ${!isAnnual ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all h-full flex items-center justify-center ${!isAnnual ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Mensal
                     </button>
                     <button
                         onClick={() => setIsAnnual(true)}
-                        className={`text-[9px] font-bold px-2 py-0.5 rounded-md transition-all ${isAnnual ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl transition-all h-full flex items-center justify-center ${isAnnual ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Anual
                     </button>
@@ -94,10 +94,10 @@ export const FinancialSummaryCard = ({
                         </span>
                     </div>
 
-                    <div className="pl-10 flex justify-between items-center bg-muted/10 p-2 rounded-xl border border-border/10">
+                    <div className="pl-10 flex justify-between items-center bg-muted/20 p-2.5 rounded-2xl border border-border/10">
                         <div>
-                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">= Faturamento Projetado</p>
-                            <p className="text-sm font-black text-foreground">{formatValue(projectedGrossRevenue)}</p>
+                            <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-1">= Faturamento Projetado</p>
+                            <p className="text-sm font-black text-foreground ml-1">{formatValue(projectedGrossRevenue)}</p>
                         </div>
                     </div>
                 </>
@@ -122,12 +122,12 @@ export const FinancialSummaryCard = ({
             </div>
 
             {/* Gross Margin */}
-            <div className="pl-12 flex justify-between items-center bg-muted/10 p-2 rounded-xl border border-border/10">
+            <div className="pl-12 flex justify-between items-center bg-muted/20 p-2.5 rounded-2xl border border-border/10">
                 <div>
-                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">= Margem de Contribuição</p>
-                    <p className="text-sm font-black text-foreground">{formatValue(grossMargin)}</p>
+                    <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest ml-1">= Margem de Contribuição</p>
+                    <p className="text-sm font-black text-foreground ml-1">{formatValue(grossMargin)}</p>
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground">
+                <span className="text-[10px] font-bold text-muted-foreground mr-1">
                     {formatPercent((grossMargin / grossRevenue) * 100 || 0)}
                 </span>
             </div>

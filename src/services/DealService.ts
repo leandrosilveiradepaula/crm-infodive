@@ -22,23 +22,40 @@ export class DealService {
     static async getPipelineData(userId: string, organizationId: string): Promise<PipelineData> {
         const supabase = createAdminClient();
 
-        // 1. Fetch Deals
-        const { data: deals, error } = await supabase
+        // 1. Fetch current user profile to check role
+        const { data: currentUserProfile } = await supabase
+            .from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
+            .single();
+
+        const isAdminOrManager = currentUserProfile?.role === 'admin' || 
+                               currentUserProfile?.role === 'manager' ||
+                               (currentUserProfile?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+
+        // 2. Fetch Deals with conditional filtering
+        let query = supabase
             .from('deals')
             .select(`
                 *,
                 deal_products(*),
                 account_data:accounts!deals_account_id_fkey(id, name)
             `)
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+            .eq('organization_id', organizationId);
+
+        // Apply ownership filter for sales/vendors
+        if (!isAdminOrManager) {
+            query = query.eq('owner_id', userId);
+        }
+
+        const { data: deals, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             console.error('❌ Error pipeline data fetch: ', JSON.stringify(error, null, 2));
             return { deals: [], profile: null, distributors: [], allAccounts: [] };
         }
 
-        // 2. Fetch Profiles for mapping
+        // 3. Fetch Profiles for mapping
         const { data: allProfiles } = await supabase
             .from('profiles')
             .select('id, full_name, avatar_url, commission_rules');
@@ -90,12 +107,24 @@ export class DealService {
     static async getDealDetails(userId: string, dealId: string, organizationId: string): Promise<Deal | null> {
         const supabase = createAdminClient();
 
-        const { data: deal, error } = await supabase
+        // 1. Get user role
+        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
+        const isAdminOrManager = profile_role?.role === 'admin' || 
+                               profile_role?.role === 'manager' ||
+                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+
+        // 2. Fetch deal with role-based restriction
+        let query = supabase
             .from('deals')
             .select('*')
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
+            .eq('organization_id', organizationId);
+        
+        if (!isAdminOrManager) {
+            query = query.eq('owner_id', userId);
+        }
+
+        const { data: deal, error } = await query.single();
 
         if (error) {
             console.error('❌ Error fetching deal details:', error);
@@ -204,13 +233,22 @@ export class DealService {
             return null;
         }
 
-        const { data, error } = await supabase
+        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
+        const isAdminOrManager = profile_role?.role === 'admin' || 
+                               profile_role?.role === 'manager' ||
+                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+
+        let query = supabase
             .from('deals')
             .update(sanitizedUpdates)
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
+            .eq('organization_id', organizationId);
+            
+        if (!isAdminOrManager) {
+            query = query.eq('owner_id', userId);
+        }
+
+        const { data, error } = await query.select().single();
 
         if (error) throw new Error(error.message);
         return data as Deal;
@@ -224,13 +262,22 @@ export class DealService {
         if (newStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
         else if (newStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
 
-        const { data, error } = await supabase
+        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
+        const isAdminOrManager = profile_role?.role === 'admin' || 
+                               profile_role?.role === 'manager' ||
+                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+
+        let query = supabase
             .from('deals')
             .update(updates)
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
+            .eq('organization_id', organizationId);
+
+        if (!isAdminOrManager) {
+            query = query.eq('owner_id', userId);
+        }
+
+        const { data, error } = await query.select().single();
         if (error) throw new Error(error.message);
         return data;
     }

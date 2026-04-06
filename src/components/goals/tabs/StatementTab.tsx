@@ -5,9 +5,10 @@ import { UserGoalData } from '@/types/goal';
 import { Deal } from '@/types/deal';
 import { calculateDealCommission } from '@/utils/commissionCalculator';
 import { updateDealCommissionStatus } from '@/app/(dashboard)/goals-commissions/actions';
-import { Clock, CheckCircle2 } from 'lucide-react';
+import { Clock, CheckCircle2, User, Filter, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ThemeSelect, ThemeInput } from '@/components/ui/theme/ThemeComponents';
+import { FilterBar } from '@/components/layout/FilterBar';
 
 interface StatementTabProps {
     deals: Deal[];
@@ -65,51 +66,63 @@ export function StatementTab({ deals, users }: StatementTabProps) {
     }, [deals, selectedUserId, filterStatus, filterMonth]);
 
     return (
-        <div>
-            {/* Filters */}
-            <div className="flex gap-4 mb-6 sticky top-0 bg-background p-2.5 px-4 z-10 border-b border-border transition-all">
-                <ThemeSelect
-                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
-                    value={selectedUserId}
-                    onChange={e => setSelectedUserId(e.target.value)}
-                >
-                    <option value="all">Todos os Vendedores</option>
-                    {users.map(u => (
-                        <option key={u.user_id} value={u.user_id}>{(u as any).name}</option>
-                    ))}
-                </ThemeSelect>
+        <div className="space-y-6">
+            {/* Standardized Filters */}
+            <FilterBar>
+                <div className="flex flex-wrap gap-3 flex-1">
+                    <div className="relative group">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <ThemeSelect
+                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[200px]"
+                            value={selectedUserId}
+                            onChange={e => setSelectedUserId(e.target.value)}
+                        >
+                            <option value="all">Todos os Vendedores</option>
+                            {users.map(u => (
+                                <option key={u.user_id} value={u.user_id}>{(u as any).name}</option>
+                            ))}
+                        </ThemeSelect>
+                    </div>
 
-                <ThemeSelect
-                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[150px]"
-                    value={filterStatus}
-                    onChange={e => setFilterStatus(e.target.value as any)}
-                >
-                    <option value="all">Todos os Status</option>
-                    <option value="pending">Pendente</option>
-                    <option value="paid">Pago</option>
-                </ThemeSelect>
+                    <div className="relative group">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <ThemeSelect
+                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
+                            value={filterStatus}
+                            onChange={e => setFilterStatus(e.target.value as any)}
+                        >
+                            <option value="all">Todos os Status</option>
+                            <option value="pending">Pendente</option>
+                            <option value="paid">Pago</option>
+                        </ThemeSelect>
+                    </div>
 
-                <ThemeInput
-                    type="month"
-                    className="bg-background border border-border rounded-xl px-3 h-[38px] text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
-                    value={filterMonth}
-                    onChange={e => setFilterMonth(e.target.value)}
-                />
-            </div>
+                    <div className="relative group">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <ThemeInput
+                            type="month"
+                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
+                            value={filterMonth}
+                            onChange={e => setFilterMonth(e.target.value)}
+                        />
+                    </div>
+                </div>
+            </FilterBar>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border">
-                            <th className="p-4">Oportunidade</th>
-                            <th className="p-4">Vendedor</th>
-                            <th className="p-4">Data Fechamento</th>
-                            <th className="p-4 text-right">Base Líquida</th>
-                            <th className="p-4 text-right">Comissão</th>
-                            <th className="p-4 text-center">Status Pagto</th>
-                            <th className="p-4 text-center">Ações</th>
-                        </tr>
-                    </thead>
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
+                                <th className="px-5 py-3">Oportunidade</th>
+                                <th className="px-5 py-3">Vendedor</th>
+                                <th className="px-5 py-3">Data Fechamento</th>
+                                <th className="px-5 py-3 text-right">Base Líquida</th>
+                                <th className="px-5 py-3 text-right">Comissão</th>
+                                <th className="px-5 py-3 text-center">Status Pagto</th>
+                                <th className="px-5 py-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
                     <tbody className="divide-y divide-border">
                         {filteredDeals.length === 0 ? (
                             <tr>
@@ -135,43 +148,43 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                 const displayNetMargin = dynamicCalc.netMargin;
 
                                 return (
-                                    <tr key={deal.id} className="hover:bg-muted/50 transition-colors group">
-                                        <td className="p-4">
-                                            <p className="font-bold text-foreground text-sm">{deal.title}</p>
-                                            <p className="text-xs text-muted-foreground">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
+                                    <tr key={deal.id} className="hover:bg-muted/30 transition-colors group">
+                                        <td className="px-5 py-3">
+                                            <p className="font-black text-foreground text-sm tracking-tight">{deal.title}</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
                                         </td>
-                                        <td className="p-4">
+                                        <td className="px-5 py-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">
+                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-md">
                                                     {(dealOwner as any)?.avatar || (dealOwner as any)?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <span className="text-sm text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
+                                                <span className="text-sm font-bold text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
                                             </div>
                                         </td>
-                                        <td className="p-4 text-sm text-muted-foreground">
+                                        <td className="px-5 py-3 text-[11px] font-bold text-muted-foreground">
                                             {deal.won_at ? new Date(deal.won_at).toLocaleDateString() : '-'}
                                         </td>
-                                        <td className="p-4 text-right font-medium text-muted-foreground">
+                                        <td className="px-5 py-3 text-right font-bold text-muted-foreground text-sm tabular-nums tracking-tighter">
                                             {displayNetMargin.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                         </td>
-                                        <td className="p-4 text-right">
-                                            <span className="font-black text-emerald-400 text-sm">
+                                        <td className="px-5 py-3 text-right">
+                                            <span className="font-black text-emerald-500 text-sm tabular-nums tracking-tighter">
                                                 {displayCommission.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-center">
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${commissionStatus === 'paid'
-                                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                                                : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                                        <td className="px-5 py-3 text-center">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${commissionStatus === 'paid'
+                                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                                : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                                 }`}>
                                                 {commissionStatus === 'paid' ? 'Pago' : 'Pendente'}
                                             </span>
                                         </td>
-                                        <td className="p-4 text-center">
+                                        <td className="px-5 py-3 text-center">
                                             <button
                                                 onClick={() => handleTogglePayment(deal)}
-                                                className={`p-2 rounded-lg transition-all ${commissionStatus === 'paid'
-                                                    ? 'text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10'
+                                                className={`p-2 rounded-xl transition-all ${commissionStatus === 'paid'
+                                                    ? 'text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10'
                                                     : 'text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10'
                                                     }`}
                                                 title={commissionStatus === 'paid' ? "Marcar como Pendente" : "Marcar como Pago"}
@@ -187,5 +200,6 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                 </table>
             </div>
         </div>
+    </div>
     );
 }

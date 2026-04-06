@@ -15,6 +15,7 @@ import { ViewAccountModal } from '@/components/customers/ViewAccountModal';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
 
@@ -134,81 +135,44 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             </PageHeader>
 
             {/* KPIs Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Total Active Clients */}
-                <div className="bg-gradient-to-br from-primary/5 to-white dark:from-primary/10 dark:to-card p-4 rounded-2xl border border-primary/10 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Building className="w-32 h-32 text-primary" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-primary/70 uppercase tracking-[0.2em]">Empresas Ativas</h3>
-                        <div className="p-2.5 bg-primary/10 rounded-xl group-hover:scale-110 transition-transform">
-                            <Building className="h-4 w-4 text-primary" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">{initialAccounts.filter(c => c.status === 'Ativo').length}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">de {initialAccounts.length} total</p>
-                    </div>
-                </div>
-
-                {/* Top Segment */}
-                <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-950/20 dark:to-card p-4 rounded-2xl border border-teal-100 dark:border-teal-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <Briefcase className="w-32 h-32 text-teal-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-teal-600/70 dark:text-teal-400 uppercase tracking-[0.2em]">Segmento Principal</h3>
-                        <div className="p-2.5 bg-teal-100 dark:bg-teal-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <Briefcase className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-xl font-black text-foreground truncate tracking-tight">{topSegment}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">{uniqueSegments.length} segmentos</p>
-                    </div>
-                </div>
-
-                {/* Top City */}
-                <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-card p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <MapPin className="w-32 h-32 text-emerald-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-emerald-600/70 dark:text-emerald-400 uppercase tracking-[0.2em]">Cidade Principal</h3>
-                        <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-xl font-black text-foreground truncate tracking-tight">{topCity}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">
-                            {Array.from(new Set(initialAccounts.map(c => c.city).filter(Boolean))).length} cidades
-                        </p>
-                    </div>
-                </div>
-
-                {/* Contacts Total */}
-                <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-card p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-16 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2">
-                        <User className="w-32 h-32 text-amber-600" />
-                    </div>
-                    <div className="flex items-center justify-between mb-4 relative z-10">
-                        <h3 className="text-[10px] font-black text-amber-600/70 dark:text-amber-400 uppercase tracking-[0.2em]">Total de Contatos</h3>
-                        <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl group-hover:scale-110 transition-transform">
-                            <User className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                        </div>
-                    </div>
-                    <div className="relative z-10">
-                        <p className="text-3xl font-black text-foreground tracking-tighter">
-                            {initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0)}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">
-                            Média {(initialAccounts.length > 0 ? (initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0) / initialAccounts.length).toFixed(1) : 0)} por empresa
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <StatsGrid items={[
+                {
+                    label: "Empresas Ativas",
+                    value: initialAccounts.filter(c => c.status === 'Ativo').length,
+                    description: `de ${initialAccounts.length} total`,
+                    icon: Building,
+                    color: "text-primary",
+                    gradient: "from-primary/5 to-white dark:from-primary/10",
+                    border: "border-primary/10"
+                },
+                {
+                    label: "Segmento Principal",
+                    value: topSegment || 'N/A',
+                    description: `${uniqueSegments.length} segmentos`,
+                    icon: Briefcase,
+                    color: "text-teal-600 dark:text-teal-400",
+                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
+                    border: "border-teal-100 dark:border-teal-900/50"
+                },
+                {
+                    label: "Cidade Principal",
+                    value: topCity || 'N/A',
+                    description: `${Array.from(new Set(initialAccounts.map(c => c.city).filter(Boolean))).length} cidades`,
+                    icon: MapPin,
+                    color: "text-emerald-600 dark:text-emerald-400",
+                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
+                    border: "border-emerald-100 dark:border-emerald-900/50"
+                },
+                {
+                    label: "Total de Contatos",
+                    value: initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0),
+                    description: `Média ${(initialAccounts.length > 0 ? (initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0) / initialAccounts.length).toFixed(1) : 0)} por empresa`,
+                    icon: User,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
+                }
+            ]} />
 
             {/* Filters */}
             <FilterBar>

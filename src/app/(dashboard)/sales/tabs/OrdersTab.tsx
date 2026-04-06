@@ -218,39 +218,30 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
     return (
         <div className="space-y-6">
             {/* Status Lifecycle Filter Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 {Object.entries(STATUS_CONFIG).map(([key, config]) => {
                     const isSelected = filterStatus === key;
                     const count = orders.filter(o => o.status === key).length;
 
                     return (
-                        <Card
+                        <div
                             key={key}
-                            className={`border transition-all duration-300 cursor-pointer overflow-hidden group ${isSelected
-                                ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-lg shadow-primary/5 scale-[1.02]'
-                                : 'border-transparent bg-card/50 backdrop-blur-sm hover:border-primary/30 hover:bg-card/80'
+                            className={`border transition-all duration-300 cursor-pointer overflow-hidden group rounded-2xl p-3 flex flex-col items-center justify-center space-y-1.5 text-center relative ${isSelected
+                                ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-lg shadow-primary/5'
+                                : 'border-border bg-card hover:border-primary/30 hover:bg-muted/30 shadow-sm'
                                 }`}
                             onClick={() => setFilterStatus(isSelected ? null : key as any)}
                         >
-                            <CardContent className="p-4 flex flex-col items-center justify-center space-y-2 text-center relative">
-                                {isSelected && (
-                                    <div className="absolute top-1 right-1">
-                                        <div className="bg-primary text-white p-0.5 rounded-full ring-2 ring-background">
-                                            <Check className="w-2 h-2" />
-                                        </div>
-                                    </div>
-                                )}
-                                <div className={`p-2 rounded-xl transition-colors ${isSelected ? 'bg-primary text-white' : config.color + ' group-hover:scale-110'}`}>
-                                    <config.icon className="w-4 h-4" />
-                                </div>
-                                <div className={`text-2xl font-black transition-colors ${isSelected ? 'text-primary' : 'text-foreground'}`}>
-                                    {count}
-                                </div>
-                                <div className={`text-[9px] uppercase font-black tracking-widest ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                    {config.label}
-                                </div>
-                            </CardContent>
-                        </Card>
+                            <div className={`p-1.5 rounded-xl transition-all ${isSelected ? 'bg-primary text-white scale-110' : config.color + ' group-hover:scale-110'}`}>
+                                <config.icon className="w-3.5 h-3.5" />
+                            </div>
+                            <div className={`text-lg font-black tracking-tighter transition-colors ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                                {count}
+                            </div>
+                            <div className={`text-[8px] uppercase font-black tracking-[0.15em] leading-none ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                                {config.label}
+                            </div>
+                        </div>
                     );
                 })}
             </div>
@@ -260,7 +251,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por pedido ou cliente..."
-                        className="pl-11 bg-background/50 border-border focus:bg-background transition-all"
+                        className="pl-11 h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -272,12 +263,12 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="bg-muted/50 text-muted-foreground text-left">
-                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-[10px]">Pedido / Deal</th>
-                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-[10px]">Responsável NF</th>
-                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-[10px]">Valor</th>
-                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-[10px]">Status Atual</th>
-                            <th className="px-6 py-4 font-medium uppercase tracking-wider text-[10px]">Próxima Etapa</th>
-                            <th className="px-6 py-4"></th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Pedido / Deal</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Responsável NF</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Valor</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Status Atual</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Próxima Etapa</th>
+                            <th className="px-5 py-3"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -301,44 +292,44 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                             return (
                                 <React.Fragment key={order.id}>
                                     <tr 
-                                        className={`hover:bg-muted/30 transition-colors group cursor-pointer ${expandedOrderId === order.id ? 'bg-muted/20' : ''}`}
+                                        className={`hover:bg-muted/30 transition-colors group cursor-pointer border-l-2 border-l-transparent hover:border-l-primary ${expandedOrderId === order.id ? 'bg-muted/20 border-l-primary' : ''}`}
                                         onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}
                                     >
-                                        <td className="px-6 py-4">
+                                        <td className="px-5 py-3">
                                             <div className="flex flex-col">
-                                                <span className="font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                                                <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                                                     {expandedOrderId === order.id ? (
-                                                        <ChevronRight className="w-4 h-4 transition-transform rotate-90 text-primary" />
+                                                        <ChevronRight className="w-3.5 h-3.5 transition-transform rotate-90 text-primary" />
                                                     ) : (
-                                                        <ChevronRight className="w-4 h-4 transition-transform text-muted-foreground" />
+                                                        <ChevronRight className="w-3.5 h-3.5 transition-transform text-muted-foreground" />
                                                     )}
                                                     {order.deal?.title || 'Pedido S/ N'}
                                                 </span>
-                                                <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 ml-6">
+                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
                                                     <User className="w-3 h-3" />
                                                     {order.deal?.customer?.name || 'Cliente final'}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-5 py-3">
                                             <Badge 
                                                 variant="outline" 
                                                 onClick={(e) => e.stopPropagation()}
-                                                className={`capitalize font-normal ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary' : 'border-muted-foreground/30'}`}
+                                                className={`text-[9px] uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
                                             >
                                                 {order.billing_entity === 'infodive' ? 'Infodive' : 'Distribuidor'}
                                             </Badge>
                                         </td>
-                                        <td className="px-6 py-4 font-medium">
+                                        <td className="px-5 py-3 font-black text-sm tracking-tight">
                                             {formatCurrency(order.total_value)}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
+                                        <td className="px-5 py-3">
+                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white/5 shadow-sm ${config.color}`}>
                                                 <config.icon className="w-3 h-3" />
                                                 {config.label}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-5 py-3">
                                             {nextStatus ? (
                                                 <Button
                                                     variant="ghost"
@@ -352,16 +343,16 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             onStatusUpdate(order.id, nextStatus);
                                                         }
                                                     }}
-                                                    className="text-[10px] h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-bold tracking-tighter gap-1.5"
+                                                    className="text-[9px] h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-black tracking-widest gap-1.5 rounded-xl border border-primary/10"
                                                 >
                                                     Mudar para {STATUS_CONFIG[nextStatus].label}
                                                     <ChevronRight className="w-3 h-3" />
                                                 </Button>
                                             ) : (
-                                                <span className="text-[10px] text-muted-foreground uppercase font-bold opacity-30">Finalizado</span>
+                                                <span className="text-[9px] text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-5 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-1 lg:group-hover:translate-x-0">
                                                 <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={(e) => { e.stopPropagation(); setExpandedOrderId(prev => prev === order.id ? null : order.id); }}>
                                                     <Eye className="w-4 h-4" />

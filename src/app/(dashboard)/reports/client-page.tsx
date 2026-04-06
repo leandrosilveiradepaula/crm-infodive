@@ -12,6 +12,8 @@ import {
 import { formatCompact, formatCurrency, formatPercentage } from '@/utils/analytics';
 import { ThemeSelect, ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
+import { FilterBar } from '@/components/layout/FilterBar';
 
 export function ReportsClientPage() {
     const {
@@ -92,7 +94,7 @@ export function ReportsClientPage() {
             />
 
             {/* Nova Barra de Filtros (Padrão Pipeline) */}
-            <div className="flex flex-col lg:flex-row gap-4 items-center bg-card p-2.5 px-4 rounded-2xl border border-border shadow-sm animate-in fade-in duration-500">
+            <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
@@ -204,80 +206,47 @@ export function ReportsClientPage() {
                         <span className="text-[10px] font-black uppercase tracking-widest">CSV</span>
                     </button>
                 </div>
-            </div>
+            </FilterBar>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-primary/40 transition-all">
-                        <div className="flex justify-between items-start mb-3">
-                            <div className="p-1.5 bg-primary/10 rounded-lg">
-                                <DollarSign className="h-4 w-4 text-primary" />
-                            </div>
-                            <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
-                                +12.5%
-                            </span>
-                        </div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-70">Vendas Totais</p>
-                        <h3 className="text-3xl font-black text-foreground tracking-tighter">
-                            {formatCompact(stats.dealMetrics.totalValue)}
-                        </h3>
-                    </div>
-                </div>
-
-                <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-500/30 to-teal-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-teal-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-3">
-                            <div className="p-1.5 bg-teal-500/10 rounded-lg">
-                                <Target className="h-4 w-4 text-teal-500" />
-                            </div>
-                            <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
-                                +2.1%
-                            </span>
-                        </div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-70">Taxa de Conversão</p>
-                        <h3 className="text-3xl font-black text-foreground tracking-tighter">
-                            {formatPercentage(stats.dealMetrics.conversionRate)}
-                        </h3>
-                    </div>
-                </div>
-
-                <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/30 to-orange-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-orange-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-3">
-                            <div className="p-1.5 bg-orange-500/10 rounded-lg">
-                                <Calendar className="h-4 w-4 text-orange-500" />
-                            </div>
-                            <span className="bg-red-500/10 text-red-500 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border border-red-500/20">
-                                +3d
-                            </span>
-                        </div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-70">Ciclo Médio</p>
-                        <h3 className="text-3xl font-black text-foreground tracking-tighter">
-                            {Math.round(stats.dealMetrics.avgCycleTime)}<span className="text-sm ml-1 text-muted-foreground">dias</span>
-                        </h3>
-                    </div>
-                </div>
-
-                <div className="group relative">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 to-cyan-500/0 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-                    <div className="relative glass-card p-4 rounded-2xl bg-card border border-border hover:border-cyan-500/40 transition-all">
-                        <div className="flex justify-between items-start mb-3">
-                            <div className="p-1.5 bg-cyan-500/10 rounded-lg">
-                                <TrendingUp className="h-4 w-4 text-cyan-500" />
-                            </div>
-                            <span className="text-[10px] text-muted-foreground font-bold">Ponderado: {formatCompact(stats.dealMetrics.weightedValue)}</span>
-                        </div>
-                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 opacity-70">Pipeline Ativo</p>
-                        <h3 className="text-3xl font-black text-foreground tracking-tighter">
-                            {formatCompact(stats.dealMetrics.pipelineValue)}
-                        </h3>
-                    </div>
-                </div>
-            </div>
+            <StatsGrid items={[
+                {
+                    label: "Vendas Totais",
+                    value: formatCompact(stats.dealMetrics.totalValue),
+                    description: "+12.5%",
+                    icon: DollarSign,
+                    color: "text-primary",
+                    gradient: "from-primary/5 to-white dark:from-primary/10",
+                    border: "border-primary/10"
+                },
+                {
+                    label: "Taxa de Conversão",
+                    value: formatPercentage(stats.dealMetrics.conversionRate),
+                    description: "+2.1%",
+                    icon: Target,
+                    color: "text-teal-600 dark:text-teal-400",
+                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
+                    border: "border-teal-100 dark:border-teal-900/50"
+                },
+                {
+                    label: "Ciclo Médio",
+                    value: `${Math.round(stats.dealMetrics.avgCycleTime)}d`,
+                    description: "+3 dias",
+                    icon: Calendar,
+                    color: "text-orange-600 dark:text-orange-400",
+                    gradient: "from-orange-50 to-white dark:from-orange-950/20",
+                    border: "border-orange-100 dark:border-orange-900/50"
+                },
+                {
+                    label: "Pipeline Ativo",
+                    value: formatCompact(stats.dealMetrics.pipelineValue),
+                    description: `Ponderado: ${formatCompact(stats.dealMetrics.weightedValue)}`,
+                    icon: TrendingUp,
+                    color: "text-cyan-600 dark:text-cyan-400",
+                    gradient: "from-cyan-50 to-white dark:from-cyan-950/20",
+                    border: "border-cyan-100 dark:border-cyan-900/50"
+                }
+            ]} />
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
