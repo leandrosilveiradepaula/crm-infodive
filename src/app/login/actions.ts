@@ -6,6 +6,7 @@ import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+import { UserService } from '@/services/UserService';
 
 export async function login(formData: FormData) {
     const email = formData.get('email') as string;
@@ -77,12 +78,28 @@ export async function login(formData: FormData) {
     redirect('/');
 }
 
+export async function validateInviteAction(token: string) {
+    if (!token) return { success: false, error: 'Token não fornecido.' };
+    return await UserService.validateInvitation(token);
+}
+
 export async function signup(formData: FormData) {
-    const email = formData.get('email') as string;
+    const invite_token = formData.get('invite_token') as string;
     const password = formData.get('password') as string;
     const name = formData.get('name') as string;
-    const role = formData.get('role') as string || 'vendedor';
-    const organization_id = formData.get('organization_id') as string | null;
+
+    if (!invite_token) {
+        return { error: 'Este sistema é exclusivo para convidados. Utilize um link de convite válido.' };
+    }
+
+    // 1. Validate the invite token securely on the server
+    const inviteRes = await validateInviteAction(invite_token);
+    
+    if (!inviteRes.success || !('data' in inviteRes) || !inviteRes.data) {
+        return { error: inviteRes.error || 'Convite inválido' };
+    }
+
+    const { email, role, organization_id } = inviteRes.data as any;
 
     const supabase = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -90,16 +107,14 @@ export async function signup(formData: FormData) {
         { auth: { persistSession: false } }
     );
 
-    // Prepare user metadata
+    // Prepare user metadata with securely derived information
     const userMetadata: any = {
         full_name: name,
         role: role,
+        organization_id: organization_id,
     };
-    if (organization_id) {
-        userMetadata.organization_id = organization_id;
-    }
 
-    // Create user
+    // 2. Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -113,7 +128,7 @@ export async function signup(formData: FormData) {
     }
 
     if (data.user) {
-        // Create the profile in public.profiles
+        // 3. Create the profile in public.profiles using admin privileges
         const adminClient = createAdminClient();
         const { error: profileError } = await adminClient
             .from('profiles')
@@ -128,10 +143,29 @@ export async function signup(formData: FormData) {
 
         if (profileError) {
             console.error('Error creating profile during signup:', profileError);
-            // We don't return an error here because the user is already created in auth,
-            // they can be fixed later or they might work with reduced functionality for a moment.
+        } else {
+            // 4. Mark invite as accepted only if profile is created successfully
+            await UserService.acceptInvitation(invite_token);
         }
     }
 
     return { success: 'Conta criada! Verifique seu email ou faça login.' };
+}
+
+export async function logout() {
+    const session = await getSession();
+    session.destroy();
+    
+    const cookieStore = await cookies();
+    cookieStore.delete('crm_access_token');
+    
+    revalidatePath('/', 'layout');
+}
+
+export async function getSessionData() {
+    const session = await getSession();
+    return {
+        isLoggedIn: !!session.isLoggedIn,
+        userId: session.userId,
+    };
 }

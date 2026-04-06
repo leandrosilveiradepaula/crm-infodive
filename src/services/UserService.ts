@@ -133,4 +133,71 @@ export class UserService {
             return { success: false, error: error.message };
         }
     }
+
+    static async createInvitation(email: string, role: string, organizationId: string, invitedBy: string) {
+        const supabase = createAdminClient();
+        
+        // Check if user already exists
+        const { data: existingUser } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', email)
+            .single();
+            
+        if (existingUser) {
+            return { success: false, error: 'Usuário já cadastrado no sistema.' };
+        }
+
+        // Set expiration to 7 days from now
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        const { data, error } = await supabase
+            .from('invitations')
+            .insert({
+                email,
+                role,
+                organization_id: organizationId,
+                invited_by: invitedBy,
+                expires_at: expiresAt.toISOString(),
+            })
+            .select('id')
+            .single();
+
+        if (error) return { success: false, error: error.message };
+        return { success: true, inviteId: data.id };
+    }
+
+    static async validateInvitation(inviteId: string) {
+        const supabase = createAdminClient();
+        
+        const { data, error } = await supabase
+            .from('invitations')
+            .select('*')
+            .eq('id', inviteId)
+            .eq('status', 'pending')
+            .single();
+
+        if (error || !data) {
+            return { success: false, error: 'Convite inválido ou não encontrado.' };
+        }
+
+        if (new Date(data.expires_at) < new Date()) {
+            return { success: false, error: 'Este convite expirou.' };
+        }
+
+        return { success: true, data };
+    }
+
+    static async acceptInvitation(inviteId: string) {
+        const supabase = createAdminClient();
+        
+        const { error } = await supabase
+            .from('invitations')
+            .update({ status: 'accepted', updated_at: new Date().toISOString() })
+            .eq('id', inviteId);
+
+        if (error) return { success: false, error: error.message };
+        return { success: true };
+    }
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useState } from 'react';
-import { login, signup } from './actions';
+import { useRouter } from 'next/navigation';
+import { login, signup, logout, getSessionData } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,16 +13,41 @@ import { useSearchParams } from 'next/navigation';
 
 function LoginForm() {
     const searchParams = useSearchParams();
+    const router = useRouter();
 
-    const initRegister = searchParams.get('register') === 'true';
-    const defaultEmail = searchParams.get('email') || '';
-    const paramRole = searchParams.get('role') || 'vendedor';
-    const paramOrg = searchParams.get('org') || '';
-
-    const [isLogin, setIsLogin] = useState(!initRegister);
+    const inviteToken = searchParams.get('invite_token');
+    
+    // Se tiver um token de convite, força a tela de registro
+    const [isLogin, setIsLogin] = useState(!inviteToken);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const [checkingSession, setCheckingSession] = useState(true);
+
+    useEffect(() => {
+        async function checkSession() {
+            try {
+                const session = await getSessionData();
+                
+                if (session.isLoggedIn) {
+                    if (inviteToken) {
+                        // If it's a registration invite but user is logged in, force logout
+                        await logout();
+                        setCheckingSession(false);
+                    } else {
+                        // If it's a normal login but user is already logged in, go to dashboard
+                        router.push('/dashboard');
+                    }
+                } else {
+                    setCheckingSession(false);
+                }
+            } catch (err) {
+                console.error('Session check failed:', err);
+                setCheckingSession(false);
+            }
+        }
+        checkSession();
+    }, [inviteToken, router]);
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -47,77 +73,88 @@ function LoginForm() {
         }
     }
 
+    if (checkingSession) {
+        return (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground text-sm font-medium animate-pulse uppercase tracking-widest">Validando acesso...</p>
+            </div>
+        );
+    }
+
     return (
-        <Card className="w-full max-w-md bg-card border-border text-foreground relative z-10 shadow-2xl">
+        <Card className="w-full max-w-md bg-card border-border text-foreground relative z-10 shadow-2xl animate-in fade-in zoom-in duration-300">
             <CardHeader className="text-center space-y-4 pt-8">
                 <div className="h-16 w-16 bg-gradient-to-br from-primary to-teal-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-primary/30">
                     <User className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div className="space-y-1">
-                    <CardTitle className="text-2xl font-bold tracking-tight">
+                    <CardTitle className="text-2xl font-black tracking-tight">
                         {isLogin ? 'Bem-vindo de volta' : 'Criar nova conta'}
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                        {isLogin ? 'Acesse o CRM Next Gen para continuar' : 'Preencha seus dados para começar'}
+                    <CardDescription className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        {isLogin ? 'Acesse o CRM Premium para continuar' : 'Preencha seus dados para começar'}
                     </CardDescription>
                 </div>
             </CardHeader>
             <CardContent>
                 <form action={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg flex items-center gap-3 text-destructive text-sm">
+                        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3 text-red-500 text-[10px] font-black uppercase">
                             <AlertCircle className="h-4 w-4 flex-shrink-0" />
                             {error}
                         </div>
                     )}
                     {success && (
-                        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-3 text-green-500 text-sm">
+                        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3 text-green-500 text-[10px] font-black uppercase">
                             <AlertCircle className="h-4 w-4 flex-shrink-0" />
                             {success}
                         </div>
                     )}
 
                     {!isLogin && (
+                        <>
+                            <div className="space-y-2">
+                                <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Nome Completo</Label>
+                                <div className="relative group">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                    <Input
+                                        name="name"
+                                        placeholder="Seu nome"
+                                        className="pl-10 h-11 bg-muted/20 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary rounded-xl font-bold"
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <input type="hidden" name="invite_token" value={inviteToken || ''} />
+                        </>
+                    )}
+
+                    {isLogin && (
                         <div className="space-y-2">
-                            <Label className="text-muted-foreground">Nome Completo</Label>
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Email Corporativo</Label>
+                            <div className="relative group">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <Input
-                                    name="name"
-                                    placeholder="Seu nome"
-                                    className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                                    name="email"
+                                    type="email"
+                                    placeholder="seu@email.com"
+                                    className="pl-10 h-11 bg-muted/20 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary rounded-xl font-bold"
                                     required
                                 />
                             </div>
-                            <input type="hidden" name="role" value={paramRole} />
-                            {paramOrg && <input type="hidden" name="organization_id" value={paramOrg} />}
                         </div>
                     )}
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground">Email Corporativo</Label>
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                name="email"
-                                type="email"
-                                defaultValue={defaultEmail}
-                                placeholder="seu@email.com"
-                                className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label className="text-muted-foreground">Senha</Label>
-                        <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Senha</Label>
+                        <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 name="password"
                                 type="password"
                                 placeholder="••••••••"
-                                className="pl-10 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                                className="pl-10 h-11 bg-muted/20 border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary rounded-xl font-bold"
                                 required
                                 minLength={6}
                             />
@@ -125,7 +162,7 @@ function LoginForm() {
                     </div>
 
                     <Button
-                        className="w-full bg-gradient-to-r from-primary to-teal-600 hover:shadow-lg hover:shadow-primary/25 text-primary-foreground font-bold py-6 rounded-xl"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-6 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-[0.2em] text-[11px]"
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
@@ -137,13 +174,20 @@ function LoginForm() {
                     </Button>
                 </form>
             </CardContent>
-            <CardFooter className="justify-center border-t border-border pt-6">
-                <button
-                    onClick={() => setIsLogin(!isLogin)}
-                    className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
-                >
-                    {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
-                </button>
+            <CardFooter className="justify-center border-t border-border pt-6 flex-col space-y-4 pb-8">
+                {inviteToken ? (
+                    <button
+                        type="button"
+                        onClick={() => router.push('/login')}
+                        className="text-[10px] text-muted-foreground hover:text-primary font-black uppercase tracking-widest transition-colors"
+                    >
+                        Já tem uma conta? Voltar para o Login
+                    </button>
+                ) : (
+                    <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest cursor-default">
+                        O cadastro no sistema é feito exclusivamente por convite
+                    </p>
+                )}
             </CardFooter>
         </Card>
     );
@@ -151,16 +195,30 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-                <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[100px]" />
-                <div className="absolute top-[40%] right-[10%] w-[30%] h-[30%] bg-teal-600/20 rounded-full blur-[100px]" />
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            {/* Logo area */}
+            <div className="mb-12 relative z-10 flex flex-col items-center">
+                <div className="text-4xl font-black text-foreground tracking-tighter flex items-center gap-2">
+                    <div className="w-10 h-10 bg-primary rounded-xl" />
+                    INFODIVE<span className="text-primary">CRM</span>
+                </div>
+                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Next Gen Business Intelligence</div>
             </div>
 
-            <Suspense fallback={<div className="text-white">Carregando...</div>}>
+            {/* Background Effects */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+                <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" />
+                <div className="absolute top-[40%] right-[10%] w-[40%] h-[40%] bg-teal-600/10 rounded-full blur-[120px]" />
+                <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
+            </div>
+
+            <Suspense fallback={<div className="text-muted-foreground animate-pulse font-black uppercase text-[10px] tracking-widest">Carregando ambiente...</div>}>
                 <LoginForm />
             </Suspense>
+
+            <div className="mt-12 text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-30 select-none">
+                © 2026 INFODIVE S.A. | Todos os direitos reservados
+            </div>
         </div>
     );
 }

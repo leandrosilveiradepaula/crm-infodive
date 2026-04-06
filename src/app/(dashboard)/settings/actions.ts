@@ -39,6 +39,11 @@ export async function updateUserProfile(userId: string, updates: {
     return result;
 }
 
+export async function createInvitationAction(email: string, role: string) {
+    const { organizationId, userId } = await requireSessionContext();
+    return await UserService.createInvitation(email, role, organizationId, userId);
+}
+
 
 // ─── MY PROFILE ─────────────────────────────────────────────────────────────
 

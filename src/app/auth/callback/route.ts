@@ -6,17 +6,16 @@ export async function GET(request: Request) {
     const code = searchParams.get('code')
     const next = searchParams.get('next') ?? '/'
 
-
     if (code) {
         const supabase = await createClient()
         const { error, data } = await supabase.auth.exchangeCodeForSession(code)
 
         if (error) {
             console.error('❌ Supabase Auth Callback Error:', error.message, error.status);
+            return NextResponse.redirect(`${origin}/login?error=auth-code-error`)
         }
 
-        if (!error && data?.session) {
-
+        if (data?.session) {
             const forwardedHost = request.headers.get('x-forwarded-host')
             const isLocalEnv = process.env.NODE_ENV === 'development'
             
@@ -40,7 +39,7 @@ export async function GET(request: Request) {
                     path: '/',
                     maxAge: 3600,
                     httpOnly: true,
-                    secure: process.env.NODE_ENV !== 'development',
+                    secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
                 });
             }
@@ -50,7 +49,7 @@ export async function GET(request: Request) {
                     path: '/',
                     maxAge: 60 * 60 * 24 * 30,
                     httpOnly: true,
-                    secure: process.env.NODE_ENV !== 'development',
+                    secure: process.env.NODE_ENV === 'production',
                     sameSite: 'lax',
                 });
             }

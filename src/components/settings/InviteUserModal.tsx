@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Mail, UserPlus } from 'lucide-react';
+import { X, Copy, Check, Mail, UserPlus, Loader2 } from 'lucide-react';
 import { RoleSelect } from './RoleSelect';
+import { createInvitationAction } from '@/app/(dashboard)/settings/actions';
+import { toast } from 'sonner';
 
 interface InviteUserModalProps {
     isOpen: boolean;
@@ -8,17 +10,39 @@ interface InviteUserModalProps {
     inviterOrgId?: string | null;
 }
 
-export const InviteUserModal = ({ isOpen, onClose, inviterOrgId }: InviteUserModalProps) => {
+export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
     const [email, setEmail] = useState('');
     const [roles, setRoles] = useState<string[]>(['sales']);
     const [copied, setCopied] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [inviteLink, setInviteLink] = useState('');
 
     if (!isOpen) return null;
 
-    // Generate link based on current origin
-    const inviteLink = typeof window !== 'undefined'
-        ? `${window.location.origin}/login?register=true&email=${encodeURIComponent(email)}&roles=${roles.join(',')}${inviterOrgId ? `&org=${inviterOrgId}` : ''}`
-        : '';
+    const handleGenerateLink = async () => {
+        if (!email) {
+            toast.error('Preencha o email do colaborador.');
+            return;
+        }
+        
+        setLoading(true);
+        try {
+            const role = roles.length > 0 ? roles[0] : 'sales';
+            const res = await createInvitationAction(email, role);
+            
+            if (res.success && res.inviteId) {
+                const link = `${window.location.origin}/login?invite_token=${res.inviteId}`;
+                setInviteLink(link);
+                toast.success('Convite gerado com segurança!');
+            } else {
+                toast.error(res.error || 'Erro ao gerar convite.');
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Erro inesperado ao gerar convite.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(inviteLink);
@@ -50,7 +74,10 @@ export const InviteUserModal = ({ isOpen, onClose, inviterOrgId }: InviteUserMod
                                 <input
                                     type="email"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        setInviteLink(''); // reset link if email changes
+                                    }}
                                     placeholder="colaborador@empresa.com"
                                     className="w-full pl-10 pr-4 h-11 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all"
                                 />
@@ -61,13 +88,26 @@ export const InviteUserModal = ({ isOpen, onClose, inviterOrgId }: InviteUserMod
                             <label className="text-sm font-bold text-muted-foreground">Função / Permissões</label>
                             <RoleSelect
                                 value={roles}
-                                onChange={setRoles}
+                                onChange={(newRoles) => {
+                                    setRoles(newRoles);
+                                    setInviteLink(''); // reset link if role changes
+                                }}
                             />
                         </div>
+
+                        {!inviteLink && (
+                            <button
+                                onClick={handleGenerateLink}
+                                disabled={loading || !email}
+                                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center hover:bg-primary/90 transition-all disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Gerar Convite Seguro'}
+                            </button>
+                        )}
                     </div>
 
                     {/* Invite Link Section */}
-                    {email && (
+                    {inviteLink && (
                         <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 animate-in slide-in-from-top-4 duration-300">
                             <label className="block text-xs font-bold text-primary mb-2">Link Único de Convite</label>
                             <div className="flex gap-2">
@@ -83,7 +123,7 @@ export const InviteUserModal = ({ isOpen, onClose, inviterOrgId }: InviteUserMod
                                 </button>
                             </div>
                             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                                Compartilhe este link com o coloborador. Ele configurará sua senha para acessar a conta imediatamente.
+                                Compartilhe este link com o colaborador. Ele expirará em 7 dias automaticamente.
                             </p>
                         </div>
                     )}
