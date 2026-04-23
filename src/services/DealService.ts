@@ -39,6 +39,7 @@ export class DealService {
             .select(`
                 *,
                 deal_products(*),
+                deal_quotes(*),
                 account_data:accounts!deals_account_id_fkey(id, name)
             `)
             .eq('organization_id', organizationId);
@@ -138,6 +139,13 @@ export class DealService {
             .eq('organization_id', organizationId)
             .order('display_order', { ascending: true });
 
+        const { data: quotes } = await supabase
+            .from('deal_quotes')
+            .select('*')
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: true });
+
         const { data: activities } = await supabase
             .from('activities')
             .select('*')
@@ -178,6 +186,7 @@ export class DealService {
         return {
             ...deal,
             owner_profile,
+            deal_quotes: quotes || [],
             deal_products: products ? sortProductsHierarchically(products as DealProduct[]) : [],
             deal_activities: (activities || []) as Activity[],
             account: account
@@ -363,6 +372,7 @@ export class DealService {
         const payload = {
             deal_id: dealId,
             organization_id: organizationId,
+            quote_id: productData.quote_id || null,
             product_id: productData.product_id || productData.id,
             name: productData.name,
             unit_price: productData.unit_price || 0,
@@ -469,6 +479,7 @@ export class DealService {
             return {
                 deal_id: dealId,
                 organization_id: organizationId,
+                quote_id: p.quote_id || null,
                 product_id: finalProductId,
                 external_id: finalExternalId,
                 name: p.name || 'Produto Sem Nome',
@@ -539,5 +550,173 @@ export class DealService {
         }
 
         return { room: newRoom };
+    }
+
+    // =========================================================================
+    // DEAL QUOTES
+    // =========================================================================
+
+    static async createDealQuote(userId: string, dealId: string, organizationId: string, title: string) {
+        const supabase = createAdminClient();
+        
+        // 1. Verify if this is the first quote for this deal
+        const { count } = await supabase
+            .from('deal_quotes')
+            .select('*', { count: 'exact', head: true })
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId);
+            
+        const isPrimary = count === 0;
+
+        const { data, error } = await supabase
+            .from('deal_quotes')
+            .insert([{
+                deal_id: dealId,
+                organization_id: organizationId,
+                title,
+                is_primary: isPrimary
+            }])
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async deleteDealQuote(userId: string, quoteId: string, organizationId: string) {
+        const supabase = createAdminClient();
+        const { error } = await supabase
+            .from('deal_quotes')
+            .delete()
+            .eq('id', quoteId)
+            .eq('organization_id', organizationId);
+            
+        if (error) throw new Error(error.message);
+        return true;
+    }
+
+    static async setPrimaryDealQuote(userId: string, dealId: string, quoteId: string, organizationId: string) {
+        const supabase = createAdminClient();
+        
+        // Disable primary on all quotes for this deal
+        await supabase
+            .from('deal_quotes')
+            .update({ is_primary: false })
+            .eq('deal_id', dealId)
+            .eq('organization_id', organizationId);
+            
+        // Enable primary on the chosen quote
+        const { data, error } = await supabase
+            .from('deal_quotes')
+            .update({ is_primary: true })
+            .eq('id', quoteId)
+            .eq('organization_id', organizationId)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    static async updateDealQuote(userId: string, quoteId: string, organizationId: string, updates: any) {
+        const supabase = createAdminClient();
+        const { data, error } = await supabase
+            .from('deal_quotes')
+            .update(updates)
+            .eq('id', quoteId)
+            .eq('organization_id', organizationId)
+            .select()
+            .single();
+            
+        if (error) throw new Error(error.message);
+        return data;
+    }
+    static async duplicateDealQuote(userId: string, dealId: string, quoteId: string, organizationId: string) {
+        const supabase = createAdminClient();
+
+        // 1. Fetch original quote
+        const { data: originalQuote, error: quoteError } = await supabase
+            .from('deal_quotes')
+            .select('*')
+            .eq('id', quoteId)
+            .eq('organization_id', organizationId)
+            .single();
+
+        if (quoteError) throw new Error(quoteError.message);
+
+        // Extract numbers from title to figure out copy number
+        const titleMatch = originalQuote.title.match(/(.+) \(Cópia (\d+)\)$/);
+        let newTitle = `${originalQuote.title} (Cópia 1)`;
+        if (titleMatch) {
+            newTitle = `${titleMatch[1]} (Cópia ${parseInt(titleMatch[2]) + 1})`;
+        } else if (originalQuote.title.endsWith('(Cópia)')) {
+            newTitle = `${originalQuote.title} 1`;
+        } else {
+             newTitle = `${originalQuote.title} (Cópia)`;
+        }
+
+        // 2. Create new quote
+        const { data: newQuote, error: newQuoteError } = await supabase
+            .from('deal_quotes')
+            .insert([{
+                deal_id: dealId,
+                organization_id: organizationId,
+                title: newTitle,
+                is_primary: false
+            }])
+            .select()
+            .single();
+
+        if (newQuoteError) throw new Error(newQuoteError.message);
+
+        // 3. Fetch products linked to original quote
+        const { data: products, error: productsError } = await supabase
+            .from('deal_products')
+            .select('*')
+            .eq('quote_id', quoteId)
+            .eq('organization_id', organizationId);
+
+        if (productsError) throw new Error(productsError.message);
+
+        // 4. Duplicate products (handling self-referential parent_ids for bundles)
+        if (products && products.length > 0) {
+            const parentMap = new Map<string, string>(); // oldId -> newId
+            const parentProducts = products.filter(p => !p.parent_id);
+            const childProducts = products.filter(p => !!p.parent_id);
+
+            // Insert parents
+            if (parentProducts.length > 0) {
+                 const parentPayloads = parentProducts.map(p => {
+                    const { id, created_at, updated_at, parent_id, quote_id, ...rest } = p;
+                    return { ...rest, quote_id: newQuote.id };
+                 });
+                 const { data: insertedParents, error: parentInsertError } = await supabase
+                    .from('deal_products')
+                    .insert(parentPayloads)
+                    .select();
+
+                 if (parentInsertError) throw new Error(parentInsertError.message);
+                 
+                 // Map old to new
+                 insertedParents.forEach((newP, index) => {
+                     parentMap.set(parentProducts[index].id, newP.id);
+                 });
+            }
+
+            // Insert children
+            if (childProducts.length > 0) {
+                 const childPayloads = childProducts.map(p => {
+                    const { id, created_at, updated_at, quote_id, ...rest } = p;
+                    return { ...rest, quote_id: newQuote.id, parent_id: parentMap.get(p.parent_id) || null };
+                 });
+                 const { error: childInsertError } = await supabase
+                    .from('deal_products')
+                    .insert(childPayloads);
+
+                 if (childInsertError) throw new Error(childInsertError.message);
+            }
+        }
+        
+        return newQuote;
     }
 }

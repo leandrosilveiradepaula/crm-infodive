@@ -2,6 +2,17 @@ import { Profile } from './profile';
 import { Account } from './account';
 import { Activity } from './activity';
 
+export interface DealQuote {
+    id: string;
+    organization_id: string;
+    deal_id: string;
+    title: string;
+    is_primary: boolean;
+    created_at: string;
+    updated_at?: string;
+    products?: DealProduct[];
+}
+
 export interface ProductTechDetail {
     id: string;
     sku?: string;
@@ -18,6 +29,7 @@ export interface DealProduct {
     id: string;
     organization_id: string;
     deal_id: string;
+    quote_id?: string | null;
     product_id?: string;
     name: string;
     display_name?: string | null; // Customer-friendly name for proposals; falls back to `name` if null
@@ -68,6 +80,7 @@ export interface Deal {
     owner_profile?: Profile | null;
     expected_close_date?: string;
     deal_products?: DealProduct[];
+    deal_quotes?: DealQuote[];
     deal_activities?: Activity[];
     account?: Account | null;
     account_id?: string;

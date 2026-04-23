@@ -430,7 +430,11 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    onClick={() => handleDownloadPpt({ id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives } }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef, customNotesRef })}
+                                    onClick={() => handleDownloadPpt({ 
+                                        proposal: { id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives, simplifiedProductNames } },
+                                        deal,
+                                        distributors: distributors as any
+                                    })}
                                     disabled={loading || generatingPpt}
                                     className="border-orange-500/20 hover:bg-orange-500/5 text-orange-500"
                                 >

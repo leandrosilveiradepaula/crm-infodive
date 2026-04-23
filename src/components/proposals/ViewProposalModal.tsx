@@ -115,15 +115,10 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
     const onDownloadPptClick = async () => {
         if (!proposal) return;
-        await handleDownloadPpt(proposal, {
-            coverRef,
-            overviewRef,
-            hardwareRef,
-            softwareRef,
-            investmentRef,
-            differentialsRef,
-            confidentialityRef,
-            customNotesRef
+        await handleDownloadPpt({
+            proposal,
+            deal: pseudoDeal,
+            distributors,
         });
     };
 
@@ -477,7 +472,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                 </div>
 
                 {/* Hidden Render Container for PDF / PPT */}
-                {(generatingPdf || generatingPpt) && (
+                {generatingPdf && (
                     <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '210mm', pointerEvents: 'none' }}>
                             <div ref={coverRef}>
                                 <ProposalCoverPage

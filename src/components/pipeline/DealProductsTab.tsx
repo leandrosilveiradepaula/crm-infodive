@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import {
-    Package, Plus, Trash2, FileSpreadsheet, X, Zap, Calendar
+    Package, Plus, Trash2, FileSpreadsheet, X, Zap, Calendar, Star, Tag, Copy
 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -12,8 +12,12 @@ import { toast } from 'sonner';
 import { formatCurrency } from '@/utils/format';
 import { ProductSearch } from './ProductSearch';
 import { SortableProductRow } from './SortableProductRow';
-import { Deal } from '@/types/deal';
-import { updateDeal, reorderDealProducts, removeDealProduct, updateDealProduct, bulkAddDealProducts } from '@/app/(dashboard)/pipeline/actions';
+import { Deal, DealQuote } from '@/types/deal';
+import { 
+    updateDeal, reorderDealProducts, removeDealProduct, updateDealProduct, 
+    bulkAddDealProducts, createDealQuote, setPrimaryDealQuote, deleteDealQuote,
+    duplicateDealQuote, getDealDetails
+} from '@/app/(dashboard)/pipeline/actions';
 import { ImportDealProductsModal } from './ImportDealProductsModal';
 import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculations';
 import { sortProductsHierarchically } from '@/utils/productSorting';
@@ -36,6 +40,25 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     const [newProductQuantity, setNewProductQuantity] = useState(1);
     const [showImportModal, setShowImportModal] = useState(false);
     const [targetImportProductId, setTargetImportProductId] = useState<string | null>(null);
+
+    // Quotes Management
+    const defaultQuoteId = deal.deal_quotes?.find(q => q.is_primary)?.id || deal.deal_quotes?.[0]?.id || null;
+    const [activeQuoteId, setActiveQuoteId] = useState<string | null>(defaultQuoteId);
+    const [isCreatingQuote, setIsCreatingQuote] = useState(false);
+    const [newQuoteTitle, setNewQuoteTitle] = useState('');
+
+    // Active Quote Derived State
+    const activeQuote = deal.deal_quotes?.find(q => q.id === activeQuoteId) || null;
+    const hasQuotes = (deal.deal_quotes || []).length > 0;
+    const activeProducts = hasQuotes
+        ? (deal.deal_products || []).filter(p => !p.quote_id || p.quote_id === activeQuoteId)
+        : (deal.deal_products || []);
+
+    // Helper: full recalculation for UI (only primary quote affects pipeline)
+    const primaryQuoteProducts = (deal.deal_products || []).filter(p => {
+        const quote = deal.deal_quotes?.find(q => q.id === p.quote_id);
+        return quote?.is_primary;
+    });
 
     // Dnd Sensors
     const sensors = useSensors(
@@ -96,16 +119,19 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     const handleRemoveProduct = async (id: string) => {
         if (confirm('Tem certeza que deseja remover este produto?')) {
             const newProducts = (deal.deal_products || []).filter(p => p.id !== id);
-            const newTotalValue = calculateDealValue(newProducts);
-
-            setDeal(prev => ({
-                ...prev,
-                deal_products: newProducts,
-                value: newTotalValue
-            }));
+            const isPrimaryQuote = activeQuote?.is_primary;
+            let newTotalValue = deal.value;
+            
+            if (isPrimaryQuote) {
+                const primaryProductsNow = newProducts.filter(p => p.quote_id === activeQuoteId);
+                newTotalValue = calculateDealValue(primaryProductsNow);
+                setDeal(prev => ({ ...prev, deal_products: newProducts, value: newTotalValue }));
+            } else {
+                setDeal(prev => ({ ...prev, deal_products: newProducts }));
+            }
 
             await removeDealProduct(id);
-            await updateDeal(deal.id, { value: newTotalValue });
+            if (isPrimaryQuote) await updateDeal(deal.id, { value: newTotalValue });
             toast.success('Produto removido');
         }
     };
@@ -114,21 +140,23 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         if (!confirm(`Excluir ${selectedProducts.size} produtos selecionados?`)) return;
 
         const keeping = (deal.deal_products || []).filter(p => !selectedProducts.has(p.id));
-        const newTotalValue = calculateDealValue(keeping);
-
-        setDeal(prev => ({
-            ...prev,
-            deal_products: keeping,
-            value: newTotalValue
-        }));
+        const isPrimaryQuote = activeQuote?.is_primary;
+        let newTotalValue = deal.value;
+        
+        if (isPrimaryQuote) {
+            const primaryProductsNow = keeping.filter(p => p.quote_id === activeQuoteId);
+            newTotalValue = calculateDealValue(primaryProductsNow);
+            setDeal(prev => ({ ...prev, deal_products: keeping, value: newTotalValue }));
+        } else {
+            setDeal(prev => ({ ...prev, deal_products: keeping }));
+        }
 
         // Note: bulkRemoveDealProducts needs to be imported if available, or loop removeDealProduct
-        // Assuming implementation exists or using loop for now as per likely codebase state
         for (const id of selectedProducts) {
             await removeDealProduct(id);
         }
 
-        await updateDeal(deal.id, { value: newTotalValue });
+        if (isPrimaryQuote) await updateDeal(deal.id, { value: newTotalValue });
         setSelectedProducts(new Set());
         toast.success('Produtos excluídos com sucesso');
     };
@@ -157,7 +185,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             duration: selectedCatalogProduct.duration,
             duration_unit: selectedCatalogProduct.duration_unit,
             show_sku_on_proposal: selectedCatalogProduct.show_sku_on_proposal,
-            display_order: (deal.deal_products?.length || 0)
+            display_order: (activeProducts.length || 0),
+            quote_id: activeQuoteId
         };
 
         try {
@@ -174,14 +203,24 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 const added = result[0];
                 const currentProducts = deal.deal_products || [];
                 const updatedProducts = [...currentProducts, added];
-                const newTotal = calculateDealValue(updatedProducts);
-
-                setDeal(prev => ({
-                    ...prev,
-                    deal_products: updatedProducts,
-                    value: newTotal
-                }));
-                await updateDeal(deal.id, { value: newTotal });
+                
+                const isPrimaryQuote = activeQuote?.is_primary;
+                
+                if (isPrimaryQuote) {
+                    const primaryProductsNow = updatedProducts.filter(p => p.quote_id === activeQuoteId);
+                    const newTotal = calculateDealValue(primaryProductsNow);
+                    setDeal(prev => ({
+                        ...prev,
+                        deal_products: updatedProducts,
+                        value: newTotal
+                    }));
+                    await updateDeal(deal.id, { value: newTotal });
+                } else {
+                    setDeal(prev => ({
+                        ...prev,
+                        deal_products: updatedProducts
+                    }));
+                }
 
                 toast.success('Produto adicionado!');
                 setShowProductSearch(false);
@@ -282,9 +321,18 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             return p;
         });
 
-        const newTotalValue = calculateDealValue(updatedProducts);
-        console.log('[DealProductsTab] Recalculated Deal Value:', newTotalValue);
-        setDeal(prev => ({ ...prev, deal_products: updatedProducts, value: newTotalValue }));
+        // Split products for calculation
+        const isPrimaryQuote = activeQuote?.is_primary;
+        
+        let newTotalValue = deal.value; // default to current deal value
+
+        if (isPrimaryQuote) {
+            const primaryProductsNow = updatedProducts.filter(p => p.quote_id === activeQuoteId);
+            newTotalValue = calculateDealValue(primaryProductsNow);
+            setDeal(prev => ({ ...prev, deal_products: updatedProducts, value: newTotalValue }));
+        } else {
+            setDeal(prev => ({ ...prev, deal_products: updatedProducts }));
+        }
 
         try {
             const productToUpdate = updatedProducts.find(p => p.id === id);
@@ -302,7 +350,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     payload.exchange_rate = productToUpdate.exchange_rate;
                 }
                 await updateDealProduct(id, payload);
-                await updateDeal(deal.id, { value: newTotalValue });
+                if (isPrimaryQuote) {
+                    await updateDeal(deal.id, { value: newTotalValue });
+                }
             }
         } catch (error) {
             console.error('Error updating product:', error);
@@ -315,16 +365,20 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             p.id === childId ? { ...p, parent_id: parentId } : p
         );
         const sortedProducts = sortProductsHierarchically(updatedProducts);
-        const newTotalValue = calculateDealValue(sortedProducts);
-
-        setDeal(prev => ({
-            ...prev,
-            deal_products: sortedProducts,
-            value: newTotalValue
-        }));
+        
+        const isPrimaryQuote = activeQuote?.is_primary;
+        let newTotalValue = deal.value;
+        
+        if (isPrimaryQuote) {
+            const primaryProductsNow = sortedProducts.filter(p => p.quote_id === activeQuoteId);
+            newTotalValue = calculateDealValue(primaryProductsNow);
+            setDeal(prev => ({ ...prev, deal_products: sortedProducts, value: newTotalValue }));
+        } else {
+            setDeal(prev => ({ ...prev, deal_products: sortedProducts }));
+        }
 
         await updateDealProduct(childId, { parent_id: parentId });
-        await updateDeal(deal.id, { value: newTotalValue });
+        if (isPrimaryQuote) await updateDeal(deal.id, { value: newTotalValue });
         toast.success('Item vinculado com sucesso');
     };
 
@@ -333,27 +387,197 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             p.id === childId ? { ...p, parent_id: null } : p
         );
         const sortedProducts = sortProductsHierarchically(updatedProducts);
-        const newTotalValue = calculateDealValue(sortedProducts);
-
-        setDeal(prev => ({
-            ...prev,
-            deal_products: sortedProducts,
-            value: newTotalValue
-        }));
+        
+        const isPrimaryQuote = activeQuote?.is_primary;
+        let newTotalValue = deal.value;
+        
+        if (isPrimaryQuote) {
+            const primaryProductsNow = sortedProducts.filter(p => p.quote_id === activeQuoteId);
+            newTotalValue = calculateDealValue(primaryProductsNow);
+            setDeal(prev => ({ ...prev, deal_products: sortedProducts, value: newTotalValue }));
+        } else {
+            setDeal(prev => ({ ...prev, deal_products: sortedProducts }));
+        }
 
         await updateDealProduct(childId, { parent_id: null });
-        await updateDeal(deal.id, { value: newTotalValue });
+        if (isPrimaryQuote) await updateDeal(deal.id, { value: newTotalValue });
         toast.success('Item desvinculado');
     };
 
+    const handleCreateQuote = async () => {
+        if (!newQuoteTitle.trim()) return;
+        try {
+            const newQuote = await createDealQuote(deal.id, newQuoteTitle);
+            setDeal(prev => ({
+                ...prev,
+                deal_quotes: [...(prev.deal_quotes || []), newQuote]
+            }));
+            setActiveQuoteId(newQuote.id);
+            setNewQuoteTitle('');
+            setIsCreatingQuote(false);
+            toast.success('Cotação criada com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao criar cotação');
+        }
+    };
+
+    const handleSetPrimaryQuote = async () => {
+        if (!activeQuoteId) return;
+        try {
+            await setPrimaryDealQuote(deal.id, activeQuoteId);
+            
+            // Recalculate pipeline value based on this quote's products
+            const newTotalValue = calculateDealValue(activeProducts);
+
+            setDeal(prev => ({
+                ...prev,
+                value: newTotalValue,
+                deal_quotes: (prev.deal_quotes || []).map(q => ({
+                    ...q,
+                    is_primary: q.id === activeQuoteId
+                }))
+            }));
+            await updateDeal(deal.id, { value: newTotalValue });
+            toast.success('Cotação definida como principal! Valor do deal atualizado.');
+        } catch (error) {
+            toast.error('Erro ao definir cotação principal');
+        }
+    };
+
+    const handleDeleteQuote = async () => {
+        if (!activeQuoteId || activeQuote?.is_primary) return;
+        if (!confirm('Tem certeza que deseja excluir esta cotação? Todos os produtos vinculados a ela serão perdidos.')) return;
+        try {
+            await deleteDealQuote(activeQuoteId);
+            
+            const remainingQuotes = (deal.deal_quotes || []).filter(q => q.id !== activeQuoteId);
+            const remainingProducts = (deal.deal_products || []).filter(p => p.quote_id !== activeQuoteId);
+            
+            setDeal(prev => ({
+                ...prev,
+                deal_quotes: remainingQuotes,
+                deal_products: remainingProducts
+            }));
+            
+            const newActiveId = remainingQuotes.find(q => q.is_primary)?.id || remainingQuotes[0]?.id || null;
+            setActiveQuoteId(newActiveId);
+            
+            toast.success('Cotação excluída!');
+        } catch (error) {
+            toast.error('Erro ao excluir cotação');
+        }
+    };
+
+    const handleDuplicateQuote = async () => {
+        if (!activeQuoteId) return;
+        try {
+            const toastId = toast.loading('Duplicando cotação...');
+            const newQuote = await duplicateDealQuote(deal.id, activeQuoteId);
+            
+            // Reload all deal details to get the new quote AND products correctly synced.
+            const freshDeal = await getDealDetails(deal.id);
+            if (freshDeal) {
+                setDeal(prev => ({
+                    ...prev,
+                    deal_quotes: freshDeal.deal_quotes || [],
+                    deal_products: freshDeal.deal_products || []
+                }));
+                setActiveQuoteId(newQuote.id); // Switch to the new quote
+            }
+
+            toast.success('Cotação duplicada!', { id: toastId });
+        } catch (error) {
+            toast.error('Erro ao duplicar cotação');
+        }
+    };
 
     return (
-        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden p-8">
-            <div className="flex justify-between items-center mb-6">
+        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden px-8 pt-4 pb-8">
+            <div className="flex justify-between items-center mb-4">
                 <div className="flex-1">
-                    <h2 className="text-xl font-bold text-foreground">Produtos & Serviços</h2>
-                    <p className="text-sm text-muted-foreground">Gerencie o escopo desta oportunidade</p>
+                    <h2 className="text-xl font-bold text-foreground">Produtos & Cotações</h2>
+                    <p className="text-sm text-muted-foreground">Gerencie múltiplas opções comerciais e escopos</p>
                 </div>
+            </div>
+
+            {/* QUOTES NAVIGATION BAR */}
+            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border overflow-x-auto custom-scrollbar">
+                {(deal.deal_quotes || []).map(quote => (
+                    <button
+                        key={quote.id}
+                        onClick={() => setActiveQuoteId(quote.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border shrink-0 ${
+                            activeQuoteId === quote.id 
+                            ? 'bg-primary/10 text-primary border-primary shadow-sm' 
+                            : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:border-border'
+                        }`}
+                    >
+                        {quote.is_primary && <Star className="h-4 w-4 fill-primary text-primary" />}
+                        {!quote.is_primary && <Tag className="h-4 w-4" />}
+                        {quote.title}
+                    </button>
+                ))}
+
+                {isEditing && (
+                    <div className="flex items-center gap-2 shrink-0 ml-2 border-l border-border pl-4">
+                        {isCreatingQuote ? (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <Input 
+                                    className="h-9 w-48 bg-background border-primary/50 text-xs" 
+                                    placeholder="Nome da Cotação..." 
+                                    autoFocus
+                                    value={newQuoteTitle}
+                                    onChange={e => setNewQuoteTitle(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && handleCreateQuote()}
+                                />
+                                <Button size="sm" onClick={handleCreateQuote} className="h-9">Salvar</Button>
+                                <Button size="icon" variant="ghost" className="h-9 w-9 text-muted-foreground" onClick={() => setIsCreatingQuote(false)}><X className="h-4 w-4" /></Button>
+                            </div>
+                        ) : (
+                            <Button variant="outline" size="sm" onClick={() => setIsCreatingQuote(true)} className="h-9 border-dashed border-2 text-muted-foreground hover:text-foreground">
+                                <Plus className="h-4 w-4 mr-1" />
+                                Adicionar Opção
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* QUOTE ACTION BAR */}
+            <div className="flex justify-between items-center mb-4 min-h-[44px]">
+                <div className="flex items-center gap-3">
+                    {activeQuote && (
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-lg font-black text-foreground">{activeQuote.title}</h3>
+                            <div className="flex items-center gap-2">
+                                {activeQuote.is_primary ? (
+                                    <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase font-black px-2 py-1 rounded">
+                                        Valor no Funil ⭐
+                                    </span>
+                                ) : (
+                                    isEditing && (
+                                        <Button variant="outline" size="sm" onClick={handleSetPrimaryQuote} className="h-7 text-xs font-bold gap-1.5 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
+                                            <Star className="h-3.5 w-3.5" /> Tornar Principal
+                                        </Button>
+                                    )
+                                )}
+                                {isEditing && (
+                                    <div className="flex items-center ml-2 border border-border rounded-md overflow-hidden bg-background">
+                                        <Button variant="ghost" size="sm" onClick={handleDuplicateQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors border-r border-border" title="Duplicar Cotação">
+                                            <Copy className="h-3.5 w-3.5" />
+                                        </Button>
+                                        {!activeQuote.is_primary && (
+                                            <Button variant="ghost" size="sm" onClick={handleDeleteQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Excluir Cotação">
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+                
                 <div className="flex gap-3 items-center">
                     {selectedProducts.size > 0 && (
                         <Button
@@ -468,25 +692,25 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         </thead>
                         <tbody className="divide-y divide-border">
                             <SortableContext
-                                items={(deal.deal_products || []).map(p => p.id)}
+                                items={activeProducts.map(p => p.id)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {(deal.deal_products?.length === 0) ? (
+                                {(activeProducts.length === 0) ? (
                                     <tr>
                                         <td colSpan={7} className="px-6 py-12 text-center">
                                             <div className="flex flex-col items-center justify-center space-y-4">
                                                 <Package className="h-10 w-10 text-muted-foreground/50" />
-                                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Nenhum produto adicionado</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : (deal.deal_products || []).map((product, index) => (
-                                    <SortableProductRow
-                                        key={product.id}
-                                        product={product}
-                                        isEditing={isEditing}
-                                        isFirst={index === 0}
-                                        isLast={index === (deal.deal_products?.length || 0) - 1}
+                                        <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Nenhum produto nesta cotação</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : activeProducts.map((product, index) => (
+                            <SortableProductRow
+                                key={product.id}
+                                product={product}
+                                isEditing={isEditing}
+                                isFirst={index === 0}
+                                isLast={index === activeProducts.length - 1}
                                         selectedProducts={selectedProducts}
                                         toggleSelectProduct={toggleSelectProduct}
                                         toggleProductExpansion={toggleProductExpansion}
@@ -520,26 +744,28 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 </td>
                                 <td colSpan={3} className="px-6 py-6 align-top">
                                     <div className="flex items-start justify-end gap-20">
-                                        <div className="flex flex-col items-end gap-1">
+                                        <div className="flex flex-col items-end gap-1 opacity-60 hover:opacity-100 transition-opacity">
                                             <span className="text-sm font-black text-muted-foreground">
-                                                {formatCurrency(calculateDealTotalCost(deal.deal_products || []))}
+                                                {formatCurrency(calculateDealTotalCost(activeProducts))}
                                             </span>
-                                            <p className="text-[9px] text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total</p>
+                                            <p className="text-[9px] text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total (Desta Cotação)</p>
                                         </div>
 
                                         <div className="flex flex-col items-end gap-2">
                                             <div className="flex flex-col items-end">
                                                 <span className="text-2xl font-black text-primary tracking-tight whitespace-nowrap">
-                                                    {formatCurrency(calculateDealValue(deal.deal_products || []))}
+                                                    {formatCurrency(calculateDealValue(activeProducts))}
                                                 </span>
-                                                <p className="text-[9px] text-primary font-bold uppercase tracking-wide">Valor de Venda</p>
+                                                <p className="text-[9px] text-primary font-bold uppercase tracking-wide">
+                                                    {activeQuote?.is_primary ? 'Valor no Funil ⭐' : 'Subtotal Desta Cotação'}
+                                                </p>
                                             </div>
 
                                             <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
                                                 <span className="text-[10px] font-bold text-emerald-500">
                                                     {(() => {
-                                                        const totalCost = calculateDealTotalCost(deal.deal_products || []);
-                                                        const totalSales = calculateDealValue(deal.deal_products || []);
+                                                        const totalCost = calculateDealTotalCost(activeProducts);
+                                                        const totalSales = calculateDealValue(activeProducts);
                                                         if (totalSales === 0) return '0.0%';
                                                         const margin = ((totalSales - totalCost) / totalSales) * 100;
                                                         return `${margin.toFixed(1)} % `;
@@ -563,6 +789,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         setTargetImportProductId(null);
                     }}
                     targetProduct={deal.deal_products?.find(p => p.id === targetImportProductId)}
+                    dealProducts={activeProducts as any}
                     onImport={async (products: any[]) => {
                         try {
                             if (targetImportProductId && products.length > 0) {
@@ -595,22 +822,30 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 setShowImportModal(false);
                                 setTargetImportProductId(null);
                             } else {
-                                const addedProducts = await bulkAddDealProducts(deal.id, products);
+                                const addedProducts = await bulkAddDealProducts(deal.id, products.map(p => ({...p, quote_id: activeQuoteId})));
 
                                 if (addedProducts && addedProducts.length > 0) {
                                     toast.success(`${addedProducts.length} produtos importados!`);
 
                                     const currentProducts = deal.deal_products || [];
                                     const allProducts = [...currentProducts, ...addedProducts];
-                                    const newTotalValue = calculateDealValue(allProducts);
+                                    
+                                    // Recalculate pipeline total ONLY if we are actively on the primary quote
+                                    if (activeQuote?.is_primary) {
+                                        const newTotalValue = calculateDealValue(allProducts.filter(p => p.quote_id === activeQuoteId));
+                                        await updateDeal(deal.id, { value: newTotalValue });
+                                        setDeal(prev => ({
+                                            ...prev,
+                                            deal_products: allProducts,
+                                            value: newTotalValue
+                                        }));
+                                    } else {
+                                        setDeal(prev => ({
+                                            ...prev,
+                                            deal_products: allProducts
+                                        }));
+                                    }
 
-                                    setDeal(prev => ({
-                                        ...prev,
-                                        deal_products: allProducts,
-                                        value: newTotalValue
-                                    }));
-
-                                    await updateDeal(deal.id, { value: newTotalValue });
                                     setShowImportModal(false);
                                     setTargetImportProductId(null);
                                 } else {

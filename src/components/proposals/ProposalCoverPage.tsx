@@ -62,7 +62,8 @@ export function ProposalCoverPage({
                 width: '65%',
                 padding: isLandscape ? '40px 50px' : '60px 50px',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                justifyContent: 'flex-start'
             }}>
                 {/* Logos */}
                 <div style={{ marginBottom: isLandscape ? '40px' : '80px', display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -108,95 +109,53 @@ export function ProposalCoverPage({
                 <div style={{
                     fontSize: '16px',
                     color: accentColor,
-                    fontWeight: '600'
+                    fontWeight: '600',
+                    marginBottom: isLandscape ? '40px' : '80px'
                 }}>
                     Infodive IT - Soluções Inteligentes
                 </div>
-            </div>
 
-            {/* Metadata Table (Absolutely Positioned to prevent layout drift) */}
-            <div style={{
-                position: 'absolute',
-                top: isLandscape ? '330px' : '520px',
-                left: '50px',
-                width: 'calc(65% - 100px)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0',
-                zIndex: 20
-            }}>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '140px 1fr',
-                        padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
-                    }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
-                            Projeto
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
-                            {dealTitle}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '140px 1fr',
-                        padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
-                    }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
-                            Cliente
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
-                            {companyName}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '140px 1fr',
-                        padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
-                    }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
-                            Responsável
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#64748b' }}>
-                            {sellerName ? `${sellerName} (Infodive IT)` : 'Infodive IT'}
-                        </div>
-                    </div>
-
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '140px 1fr',
-                        padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
-                    }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
-                            Data
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
-                            {date}
-                        </div>
-                    </div>
-
-                    {proposalNumber && (
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: '140px 1fr',
-                            padding: '12px 0',
-                            borderBottom: '1px solid #e5e7eb'
+                {/* Metadata Table */}
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {[
+                        { label: 'Projeto', value: dealTitle, hide: hideValues },
+                        { label: 'Cliente', value: companyName, hide: hideValues },
+                        { label: 'Responsável', value: sellerName ? `${sellerName} (Infodive IT)` : 'Infodive IT', hide: false },
+                        { label: 'Data', value: date, hide: hideValues },
+                        ...(proposalNumber ? [{ label: 'Nº Proposta', value: proposalNumber, hide: hideValues, accent: true }] : [])
+                    ].map((row, i) => (
+                        <div key={i} style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'baseline',
+                            borderBottom: '1px solid #e5e7eb',
+                            padding: '12px 0'
                         }}>
-                            <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
-                                Nº Proposta
-                            </div>
-                            <div style={{ fontSize: '14px', color: accentColor, fontWeight: '700', opacity: hideValues ? 0 : 1 }}>
-                                {proposalNumber}
-                            </div>
+                            <span style={{
+                                display: 'inline-block',
+                                width: '130px',
+                                minWidth: '130px',
+                                flexShrink: 0,
+                                fontSize: '14px',
+                                color: '#1e293b',
+                                fontWeight: 600
+                            }}>
+                                {row.label}
+                            </span>
+                            <span style={{
+                                display: 'inline-block',
+                                flex: 1,
+                                fontSize: '14px',
+                                color: (row as any).accent ? accentColor : '#64748b',
+                                fontWeight: (row as any).accent ? 700 : 400,
+                                opacity: row.hide ? 0 : 1
+                            }}>
+                                {row.value}
+                            </span>
                         </div>
-                    )}
+                    ))}
                 </div>
+            </div>
 
             {/* Right Side - Data Center Image */}
             <div style={{

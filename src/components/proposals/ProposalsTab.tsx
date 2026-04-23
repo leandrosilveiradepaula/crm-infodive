@@ -60,7 +60,7 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
     ];
 
     return (
-        <div className="flex flex-col h-full w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col h-full w-full px-8 pt-4 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header / Actions */}
             <div className="flex justify-between items-center mb-6">
                 <div>

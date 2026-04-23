@@ -334,7 +334,11 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             const freshDeal = await getDealDetails(deal.id);
             if (freshDeal) {
                 const freshProducts = freshDeal.deal_products || [];
-                const newTotalValue = calculateDealValue(freshProducts);
+                const primaryQuote = (freshDeal.deal_quotes || []).find(q => q.is_primary);
+                const primaryProducts = primaryQuote
+                    ? freshProducts.filter(p => p.quote_id === primaryQuote.id)
+                    : freshProducts;
+                const newTotalValue = calculateDealValue(primaryProducts);
 
                 // Safeguard: If the loaded value differs from the actual product sum, sync it
                 if (Math.abs((freshDeal.value || 0) - newTotalValue) > 0.01) {
@@ -511,7 +515,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             </div>
                             <div className="flex-1 overflow-hidden relative">
                                 <div className="absolute inset-0 flex flex-col">
-                                    <TabsContent value="overview" className="mt-0 overflow-y-auto custom-scrollbar p-8 pb-20 flex-1 h-full w-full">
+                                    <TabsContent value="overview" className="mt-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 flex-1 h-full w-full">
                                         <OverviewTab
                                             deal={deal}
                                             onViewStakeholders={() => setActiveTab('stakeholders')}
@@ -546,7 +550,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         isLoading={isProductsLoading}
                                     />
 
-                                    <TabsContent value="partners" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="partners" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 h-full">
                                         <PartnersTab
                                             deal={deal}
                                             isEditing={isEditing}
@@ -557,11 +561,11 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     </TabsContent>
 
 
-                                    <TabsContent value="omnichannel" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="omnichannel" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 h-full">
                                         <SmartTimeline dealId={deal.id} />
                                     </TabsContent>
 
-                                    <TabsContent value="stakeholders" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="stakeholders" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 h-full">
                                         <StakeholdersTab
                                             deal={isEditing ? { ...deal, account_id: formData.account_id } : deal}
                                             setDeal={setDeal}
@@ -574,7 +578,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <FilesTab deal={deal} />
                                     </TabsContent>
 
-                                    <TabsContent value="history" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="history" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 h-full">
                                         <HistoryTab deal={deal} />
                                     </TabsContent>
                                 </div>
@@ -602,7 +606,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <div className="flex items-baseline gap-1">
                                             <span className="text-[10px] font-bold text-primary">R$</span>
                                             <span className="text-2xl font-black text-foreground tracking-tight">
-                                                {formatCurrency(calculateDealValue(deal.deal_products || [])).replace('R$', '').trim()}
+                                                {(() => {
+                                                    const primaryQuote = (deal.deal_quotes || []).find(q => q.is_primary);
+                                                    const products = primaryQuote
+                                                        ? (deal.deal_products || []).filter(p => p.quote_id === primaryQuote.id)
+                                                        : (deal.deal_products || []);
+                                                    return formatCurrency(calculateDealValue(products)).replace('R$', '').trim();
+                                                })()}
                                             </span>
                                         </div>
                                     </div>

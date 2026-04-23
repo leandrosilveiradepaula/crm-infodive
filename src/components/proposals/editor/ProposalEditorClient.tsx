@@ -280,19 +280,24 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
     // ── PPT Generation ────────────────────────────────────────────────
     const handleGeneratePpt = useCallback(async () => {
         handleDownloadPpt({
-            id: 'draft',
-            title: state.editableTexts.proposalTitle,
-            company_name: deal.company,
-            createdAt: new Date().toISOString(),
-            content: {
-                config: state.config,
-                editableTexts: state.editableTexts,
-                aiSummary: state.aiSummary,
-                objectives: state.objectives,
-            activeSections: activeSections.map(s => s.id),
-        },
-    }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef, customNotesRef });
-}, [deal.company, state, activeSections, handleDownloadPpt]);
+            proposal: {
+                id: 'draft',
+                title: state.editableTexts.proposalTitle,
+                company_name: deal.company,
+                createdAt: new Date().toISOString(),
+                content: {
+                    config: state.config,
+                    editableTexts: state.editableTexts,
+                    aiSummary: state.aiSummary,
+                    objectives: state.objectives,
+                    simplifiedProductNames: state.simplifiedProductNames,
+                    activeSections: activeSections.map(s => s.id),
+                },
+            },
+            deal: deal as any,
+            distributors: distributors as any,
+        });
+    }, [deal, distributors, state, activeSections, handleDownloadPpt]);
 
     // ── DOCX Generation ───────────────────────────────────────────────
     const handleGenerateDocx = useCallback(async () => {
@@ -568,51 +573,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 </aside>
             </div>
 
-            {/* ── Hidden PPT render ────────────────────────────────────── */}
-            {generatingPpt && (
-                <div style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-                    <div ref={coverRef}>
-                        <ProposalCoverPage
-                            dealTitle={previewDeal.title} companyName={previewDeal.company}
-                            date={new Date().toLocaleDateString('pt-BR')} clientLogo={state.config.clientLogo}
-                            themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined}
-                            layout="landscape" hideValues={true} sellerName={previewDeal.owner}
-                        />
-                    </div>
-                    <div ref={confidentialityRef}>
-                        <ProposalConfidentialityPage themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={overviewRef}>
-                        <ProposalOverviewPage dealTitle={previewDeal.title} aiSummary={state.aiSummary} objectives={state.objectives}
-                            themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={hardwareRef}>
-                        <ProposalHardwarePage deal={previewDeal} simplifiedProductNames={state.simplifiedProductNames}
-                            themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={softwareRef}>
-                        <ProposalSoftwarePage deal={previewDeal} simplifiedProductNames={state.simplifiedProductNames}
-                            themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={investmentRef}>
-                        <ProposalInvestmentPage deal={previewDeal} distributors={distributors as any} config={state.config as any}
-                            simplifiedProductNames={state.simplifiedProductNames}
-                            themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={differentialsRef}>
-                        <ProposalDifferentialsPage themePrimary={orgTheme.theme_primary || undefined} themeAccent={orgTheme.theme_accent || undefined} layout="landscape" />
-                    </div>
-                    <div ref={customNotesRef}>
-                        <ProposalCustomNotesPage 
-                            title={state.editableTexts.customNotesTitle} 
-                            content={state.editableTexts.customNotesContent} 
-                            themePrimary={orgTheme.theme_primary || undefined} 
-                            themeAccent={orgTheme.theme_accent || undefined} 
-                            layout="landscape" 
-                        />
-                    </div>
-                </div>
-            )}
+
         </div>
     );
 }

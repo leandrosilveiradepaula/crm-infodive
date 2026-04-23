@@ -199,3 +199,42 @@ export async function deleteDealDocument(documentId: string) {
     revalidatePath('/pipeline');
     return true;
 }
+
+// ============================================================
+// Deal Quotes
+// ============================================================
+
+export async function createDealQuote(dealId: string, title: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    const data = await DealService.createDealQuote(userId, dealId, organizationId, title);
+    revalidatePath('/pipeline');
+    return data;
+}
+
+export async function deleteDealQuote(quoteId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    await DealService.deleteDealQuote(userId, quoteId, organizationId);
+    revalidatePath('/pipeline');
+    return true;
+}
+
+export async function setPrimaryDealQuote(dealId: string, quoteId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    const data = await DealService.setPrimaryDealQuote(userId, dealId, quoteId, organizationId);
+    revalidatePath('/pipeline');
+    return data;
+}
+
+export async function updateDealQuote(quoteId: string, updates: any) {
+    const { userId, organizationId } = await requireSessionContext();
+    const data = await DealService.updateDealQuote(userId, quoteId, organizationId, updates);
+    revalidatePath('/pipeline');
+    return data;
+}
+
+export async function duplicateDealQuote(dealId: string, quoteId: string) {
+    const { userId, organizationId } = await requireSessionContext();
+    const data = await DealService.duplicateDealQuote(userId, dealId, quoteId, organizationId);
+    revalidatePath('/pipeline');
+    return data;
+}

@@ -32,6 +32,7 @@ interface ImportDealProductsModalProps {
     onClose: () => void;
     onImport: (products: ProductItem[]) => void;
     targetProduct?: ProductItem; // Optional target product for context-aware import
+    dealProducts?: ProductItem[]; // Existing products in the deal/quote for bundle selection
 }
 
 type Step = 'upload' | 'mapping' | 'preview' | 'processing';
@@ -54,7 +55,7 @@ const safeParseFloat = (value: any): number => {
     return 0;
 };
 
-export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = ({ onClose, onImport, targetProduct }) => {
+export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = ({ onClose, onImport, targetProduct, dealProducts = [] }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [step, setStep] = useState<Step>('upload');
@@ -424,7 +425,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                         </div>
 
                         {isBundle && (
-                            <div className="animate-in fade-in slide-in-from-top-2 duration-200 pl-7">
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200 pl-7 space-y-3">
                                 {selectedBundleProduct ? (
                                     <div className="bg-card border border-border rounded-xl p-3 flex items-center justify-between group hover:border-primary/50 transition-colors">
                                         <div>
@@ -436,7 +437,36 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                                         </button>
                                     </div>
                                 ) : (
-                                    <ProductSearch onSelect={(product) => setSelectedBundleProduct(product)} />
+                                    <div className="space-y-3">
+                                        {/* Existing deal products as quick-select options */}
+                                        {dealProducts.length > 0 && (
+                                            <div>
+                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Produtos já na cotação:</p>
+                                                <div className="space-y-1.5 max-h-[140px] overflow-y-auto custom-scrollbar">
+                                                    {dealProducts.filter(p => !p.parent_id).map(p => (
+                                                        <button
+                                                            key={p.id}
+                                                            onClick={() => setSelectedBundleProduct({ id: p.id, name: p.name, sku: p.sku || '', margin: p.margin } as any)}
+                                                            className="w-full text-left bg-card border border-border rounded-xl px-3 py-2.5 flex items-center gap-3 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                                                        >
+                                                            <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary font-black text-xs shrink-0">
+                                                                {p.name.charAt(0)}
+                                                            </div>
+                                                            <div className="min-w-0 flex-1">
+                                                                <h4 className="text-xs font-bold text-foreground truncate">{p.name}</h4>
+                                                                {p.sku && <p className="text-[10px] text-muted-foreground font-mono truncate">{p.sku}</p>}
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                <div className="relative my-3">
+                                                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border"></div></div>
+                                                    <div className="relative flex justify-center"><span className="bg-muted/30 px-2 text-[10px] font-bold text-muted-foreground uppercase">ou buscar no catálogo</span></div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <ProductSearch onSelect={(product) => setSelectedBundleProduct(product)} />
+                                    </div>
                                 )}
                             </div>
                         )}

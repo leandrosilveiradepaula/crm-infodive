@@ -29,6 +29,10 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 - Choose database/ORM based on CONTEXT
 - Don't default to PostgreSQL for everything
 
+### 🔴 REGRAS DO PROJETO ATUAL (CRM-NEXT)
+- **NUNCA crie chaves estrangeiras (REFERENCES)** para uma tabela chamada `public.organizations`.
+- Neste sistema, o campo `organization_id UUID NOT NULL` é usado puramente para Tenant Isolation (via RLS e Auth JWT `user_metadata`), **a tabela `public.organizations` NÃO EXISTE**. Associar Foreign Keys a ela sempre quebrará as *migrations*.
+
 ---
 
 ## Decision Checklist
@@ -50,3 +54,4 @@ Before designing schema:
 ❌ Use SELECT * in production
 ❌ Store JSON when structured data is better
 ❌ Ignore N+1 queries
+❌ Utilizar `REFERENCES public.organizations(id)` em migrations do CRM.
