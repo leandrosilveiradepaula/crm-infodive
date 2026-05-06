@@ -49,6 +49,7 @@ export interface EditorConfig {
     isPriceStudy: boolean;
     allowSignature: boolean;
     includeAISummary: boolean;
+    quoteDisplayMode: 'consolidated' | 'options';
     clientLogo?: string;
     billingOverrides: Record<string, BillingOverride>;
 }
@@ -306,6 +307,7 @@ function createInitialState(deal: Deal): ProposalEditorState {
             isPriceStudy: false,
             allowSignature: false,
             includeAISummary: true,
+            quoteDisplayMode: 'consolidated',
             billingOverrides: {},
         },
         selectedSectionId: firstEnabled?.id || null,

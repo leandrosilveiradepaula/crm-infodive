@@ -13,7 +13,7 @@ export async function fetchDealForEditor(dealId: string) {
     const supabase = createAdminClient();
     const { data: deal, error } = await supabase
         .from('deals')
-        .select('*, deal_products(*)')
+        .select('*, deal_products(*), deal_quotes(*)')
         .eq('id', dealId)
         .eq('organization_id', organizationId)
         .single();

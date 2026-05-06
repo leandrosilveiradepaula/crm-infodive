@@ -465,7 +465,6 @@ export function useProposalDocx() {
             // 5. Investment
             if (isSectionActive('investment')) {
                 const mainProducts = products.filter((p: any) => !p.is_optional && p.is_visible_on_proposal !== false);
-                const total = mainProducts.reduce((acc: number, p: any) => acc + (p.unit_price || 0) * (p.quantity || 1), 0);
                 
                 children.push(
                     new Paragraph({
@@ -475,8 +474,13 @@ export function useProposalDocx() {
                             new TextRun({ text: "04. ", color: COLORS.accent, bold: true }),
                             new TextRun({ text: "Resumo do Investimento", color: COLORS.primary, bold: true })
                         ]
-                    }),
-                    new Table({
+                    })
+                );
+
+                // Helper: build investment table for a product set
+                const buildInvestmentTable = (prods: any[], totalLabel: string, pricingSuffix?: string, pricingModel?: string) => {
+                    const total = prods.reduce((acc: number, p: any) => acc + (p.unit_price || 0) * (p.quantity || 1), 0);
+                    return new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         margins: { top: 150, bottom: 150, left: 200, right: 200 },
                         borders: {
@@ -497,18 +501,35 @@ export function useProposalDocx() {
                                     }),
                                     new TableCell({ 
                                         shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
-                                        children: [new Paragraph({ children: [new TextRun({ text: "INVESTIMENTO", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })], 
+                                        children: [new Paragraph({ children: [new TextRun({ text: `INVESTIMENTO${pricingSuffix ? ` ${pricingSuffix.toUpperCase().trim()}` : ''}`, bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })], 
                                         width: { size: 30, type: WidthType.PERCENTAGE } 
                                     }),
                                 ],
                             }),
-                            ...mainProducts.map((p: any) => new TableRow({
+                            ...prods.map((p: any) => new TableRow({
                                 children: [
                                     new TableCell({ 
-                                        children: [new Paragraph({ 
-                                            spacing: { before: 100, after: 100 },
-                                            children: [new TextRun({ text: simplifiedProductNames[p.name] || p.display_name || p.name, size: 20 })]
-                                        })],
+                                        children: [
+                                            new Paragraph({ 
+                                                spacing: { before: 100, after: p.duration && p.duration_unit ? 0 : 100 },
+                                                children: [new TextRun({ text: simplifiedProductNames[p.name] || p.display_name || p.name, size: 20 })]
+                                            }),
+                                            ...(p.duration && p.duration_unit ? [
+                                                new Paragraph({
+                                                    spacing: { before: 0, after: 100 },
+                                                    children: [
+                                                        new TextRun({ 
+                                                            text: (pricingModel === 'monthly' || pricingModel === 'annual') 
+                                                                ? `(Contrato de ${p.duration} ${p.duration_unit})`
+                                                                : `(Válido por ${p.duration} ${p.duration_unit})`, 
+                                                            size: 16, 
+                                                            color: "10B981", 
+                                                            italics: true 
+                                                        })
+                                                    ]
+                                                })
+                                            ] : [])
+                                        ],
                                         margins: { left: 200 }
                                     }),
                                     new TableCell({ 
@@ -524,7 +545,7 @@ export function useProposalDocx() {
                                 children: [
                                     new TableCell({ 
                                         shading: { fill: COLORS.light, type: ShadingType.CLEAR },
-                                        children: [new Paragraph({ children: [new TextRun({ text: "INVESTIMENTO TOTAL ESTIMADO", bold: true, color: COLORS.primary, size: 22 })] })],
+                                        children: [new Paragraph({ children: [new TextRun({ text: totalLabel, bold: true, color: COLORS.primary, size: 22 })] })],
                                         margins: { left: 200 }
                                     }),
                                     new TableCell({ 
@@ -538,8 +559,87 @@ export function useProposalDocx() {
                                 ],
                             }),
                         ],
-                    })
-                );
+                    });
+                };
+
+                // Determine display mode
+                const dealQuotes = (proposal as any).deal_quotes || [];
+                const isMultiQuoteOptions = config?.quoteDisplayMode === 'options' && dealQuotes.length > 1;
+                const isSingleQuoteOptions = config?.quoteDisplayMode === 'options' && dealQuotes.length <= 1;
+
+                if (isMultiQuoteOptions) {
+                    dealQuotes
+                        .filter((q: any) => mainProducts.some((p: any) => p.quote_id === q.id))
+                        .forEach((quote: any, qIdx: number) => {
+                            const quoteProducts = mainProducts.filter((p: any) => p.quote_id === quote.id);
+                            const optionLetter = String.fromCharCode(65 + qIdx);
+                            children.push(
+                                new Paragraph({
+                                    spacing: { before: 300, after: 200 },
+                                    children: [
+                                        new TextRun({ text: `OPÇÃO ${optionLetter}  `, bold: true, color: COLORS.accent, size: 22 }),
+                                        new TextRun({ text: quote.title, bold: true, color: COLORS.primary, size: 22 }),
+                                    ]
+                                }),
+                                buildInvestmentTable(quoteProducts, `INVESTIMENTO OPÇÃO ${optionLetter}`)
+                            );
+                        });
+                } else if (isSingleQuoteOptions) {
+                    const rootProducts = mainProducts.filter((p: any) => !p.parent_id);
+                    rootProducts.forEach((rootProduct: any, pIdx: number) => {
+                        const childProducts = mainProducts.filter((p: any) => p.parent_id === rootProduct.id);
+                        const optionProducts = [rootProduct, ...childProducts];
+                        const optionLetter = String.fromCharCode(65 + pIdx);
+                        const displayName = simplifiedProductNames[rootProduct.name] || rootProduct.display_name || rootProduct.name;
+                        children.push(
+                            new Paragraph({
+                                spacing: { before: 300, after: 200 },
+                                children: [
+                                    new TextRun({ text: `OPÇÃO ${optionLetter}  `, bold: true, color: COLORS.accent, size: 22 }),
+                                    new TextRun({ text: displayName, bold: true, color: COLORS.primary, size: 22 }),
+                                ]
+                            }),
+                            buildInvestmentTable(optionProducts, `INVESTIMENTO OPÇÃO ${optionLetter}`)
+                        );
+                    });
+                } else {
+                    const oneTimeProducts = mainProducts.filter((p: any) => !p.pricing_model || p.pricing_model === 'one_time');
+                    const monthlyProducts = mainProducts.filter((p: any) => p.pricing_model === 'monthly');
+                    const annualProducts = mainProducts.filter((p: any) => p.pricing_model === 'annual');
+                    const hasRecurring = monthlyProducts.length > 0 || annualProducts.length > 0;
+
+                    if (!hasRecurring) {
+                        children.push(buildInvestmentTable(mainProducts, "INVESTIMENTO TOTAL ESTIMADO"));
+                    } else {
+                        if (oneTimeProducts.length > 0) {
+                            children.push(
+                                new Paragraph({
+                                    spacing: { before: 300, after: 100 },
+                                    children: [new TextRun({ text: "💰 INVESTIMENTO ÚNICO", bold: true, color: COLORS.primary, size: 22 })]
+                                }),
+                                buildInvestmentTable(oneTimeProducts, "INVESTIMENTO TOTAL ÚNICO", undefined, "one_time")
+                            );
+                        }
+                        if (monthlyProducts.length > 0) {
+                            children.push(
+                                new Paragraph({
+                                    spacing: { before: 300, after: 100 },
+                                    children: [new TextRun({ text: "🔄 INVESTIMENTO RECORRENTE MENSAL", bold: true, color: "0891b2", size: 22 })]
+                                }),
+                                buildInvestmentTable(monthlyProducts, "TOTAL / MÊS", "/mês", "monthly")
+                            );
+                        }
+                        if (annualProducts.length > 0) {
+                            children.push(
+                                new Paragraph({
+                                    spacing: { before: 300, after: 100 },
+                                    children: [new TextRun({ text: "📅 INVESTIMENTO RECORRENTE ANUAL", bold: true, color: "d97706", size: 22 })]
+                                }),
+                                buildInvestmentTable(annualProducts, "TOTAL / ANO", "/ano", "annual")
+                            );
+                        }
+                    }
+                }
 
                 // 5.1 Billing Info
                 const showBilling = config?.showBillingInfo !== false;

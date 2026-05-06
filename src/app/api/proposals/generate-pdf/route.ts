@@ -13,6 +13,7 @@ export async function POST(request: Request) {
         const body = await request.json();
         const {
             dealId,
+            selectedQuoteIds,
             activeSections,
             editableTexts,
             config,
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
             benefitTiles,
         } = body as {
             dealId: string;
+            selectedQuoteIds?: string[];
             activeSections: SectionId[];
             editableTexts: EditableTexts;
             config: EditorConfig;
@@ -42,13 +44,21 @@ export async function POST(request: Request) {
         const supabase = createAdminClient();
         const { data: deal, error: dealError } = await supabase
             .from('deals')
-            .select('*, deal_products(*)')
+            .select('*, deal_products(*), deal_quotes(*)')
             .eq('id', dealId)
             .eq('organization_id', organizationId)
             .single();
 
         if (dealError || !deal) {
             return NextResponse.json({ error: 'Deal not found or access denied' }, { status: 404 });
+        }
+
+        // Filter products by selected quotes if specified
+        if (selectedQuoteIds && selectedQuoteIds.length > 0) {
+            const quoteSet = new Set(selectedQuoteIds);
+            deal.deal_products = (deal.deal_products || []).filter(
+                (p: any) => !p.quote_id || quoteSet.has(p.quote_id)
+            );
         }
 
         // Fetch organization theme safely
@@ -98,6 +108,7 @@ export async function POST(request: Request) {
             dealTitle: deal.title,
             companyName: deal.company || 'Cliente',
             products: deal.deal_products || [],
+            dealQuotes: deal.deal_quotes || [],
             proposalNumber: proposalNumber ? String(proposalNumber) : undefined,
             activeSections,
             editableTexts,

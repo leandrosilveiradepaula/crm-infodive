@@ -131,28 +131,19 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-2xl animate-in zoom-in-95 duration-300">
-                <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border flex flex-row items-center justify-between relative">
-                    <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
-                    <div className="relative z-10">
-                        <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-3">
-                            <div className="p-2.5 bg-primary/20 rounded-xl">
-                                <User className="w-5 h-5 text-primary" />
-                            </div>
-                            {contact ? 'Editar Contato' : 'Novo Contato'}
-                        </DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2">
-                            Gerencie as informações do seu contato
-                        </DialogDescription>
-                    </div>
+            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300">
+                <DialogHeader className="px-6 py-4 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
+                    <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
+                        {contact ? 'Editar Contato' : 'Novo Contato'}
+                    </DialogTitle>
                     {!contact && (
                         <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setIsParserOpen(true)}
-                            className="relative z-10 bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 hover:text-teal-700 border-teal-200 dark:border-teal-500/30 rounded-xl font-bold px-4 h-10 shadow-sm"
+                            className="gap-2 text-primary border-primary/20 hover:bg-primary/10 hover:text-primary"
                         >
-                            <Sparkles className="mr-2 h-4 w-4" />
+                            <Sparkles className="h-4 w-4" />
                             Importar de Assinatura
                         </Button>
                     )}
@@ -164,7 +155,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     onDataParsed={handleSignatureData}
                 />
 
-                <form onSubmit={handleSubmit} className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-2 space-y-1">
                         <ThemeLabel>Empresa *</ThemeLabel>
                         <Select
@@ -266,18 +257,12 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                         </label>
                     </div>
 
-                    <DialogFooter className="col-span-2 border-t border-border pt-10 mt-4 flex items-center justify-end gap-3">
-                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
+                    <DialogFooter className="col-span-2 pt-2">
+                        <Button type="button" variant="ghost" onClick={onClose} className="text-muted-foreground">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
-                            {loading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                                <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                                    <User className="h-3 w-3" />
-                                </div>
-                            )}
+                        <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-bold min-w-[150px]">
+                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {contact ? 'Salvar Alterações' : 'Cadastrar Contato'}
                         </Button>
                     </DialogFooter>

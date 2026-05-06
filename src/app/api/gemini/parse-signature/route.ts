@@ -92,6 +92,14 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         console.error('Error parsing signature:', error);
+        
+        if (error.status === 429 || error.message?.includes('429 Too Many Requests') || error.message?.includes('Resource exhausted')) {
+            return NextResponse.json(
+                { error: 'A inteligência artificial está sobrecarregada no momento (limite excedido). Por favor, aguarde alguns instantes e tente novamente.' }, 
+                { status: 429 }
+            );
+        }
+        
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }

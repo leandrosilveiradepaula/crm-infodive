@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-    Package, Plus, Trash2, FileSpreadsheet, X, Zap, Calendar, Star, Tag, Copy
+    Package, Plus, Trash2, FileSpreadsheet, X, Zap, Calendar, Star, Tag, Copy, Pencil, Check, PackagePlus
 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -16,7 +16,7 @@ import { Deal, DealQuote } from '@/types/deal';
 import { 
     updateDeal, reorderDealProducts, removeDealProduct, updateDealProduct, 
     bulkAddDealProducts, createDealQuote, setPrimaryDealQuote, deleteDealQuote,
-    duplicateDealQuote, getDealDetails
+    duplicateDealQuote, getDealDetails, updateDealQuote
 } from '@/app/(dashboard)/pipeline/actions';
 import { ImportDealProductsModal } from './ImportDealProductsModal';
 import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculations';
@@ -41,11 +41,21 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     const [showImportModal, setShowImportModal] = useState(false);
     const [targetImportProductId, setTargetImportProductId] = useState<string | null>(null);
 
+    // Quick Add (Produto Avulso)
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [quickAddData, setQuickAddData] = useState({
+        name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: ''
+    });
+    const quickAddNameRef = useRef<HTMLInputElement>(null);
+
     // Quotes Management
     const defaultQuoteId = deal.deal_quotes?.find(q => q.is_primary)?.id || deal.deal_quotes?.[0]?.id || null;
     const [activeQuoteId, setActiveQuoteId] = useState<string | null>(defaultQuoteId);
     const [isCreatingQuote, setIsCreatingQuote] = useState(false);
     const [newQuoteTitle, setNewQuoteTitle] = useState('');
+    const [renamingQuoteId, setRenamingQuoteId] = useState<string | null>(null);
+    const [renameValue, setRenameValue] = useState('');
+    const renameInputRef = useRef<HTMLInputElement>(null);
 
     // Active Quote Derived State
     const activeQuote = deal.deal_quotes?.find(q => q.id === activeQuoteId) || null;
@@ -165,6 +175,66 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         setShowProductSearch(!showProductSearch);
         setSelectedCatalogProduct(null);
         setNewProductQuantity(1);
+        if (!showProductSearch) setShowQuickAdd(false);
+    };
+
+    const handleOpenQuickAdd = (prefillName = '') => {
+        setShowQuickAdd(true);
+        setShowProductSearch(false);
+        setSelectedCatalogProduct(null);
+        setQuickAddData({ name: prefillName, sku: '', quantity: 1, cost: 0, margin: 20, category: '' });
+        setTimeout(() => quickAddNameRef.current?.focus(), 100);
+    };
+
+    const handleQuickAddProduct = async () => {
+        if (!quickAddData.name.trim()) {
+            toast.error('Informe o nome do produto.');
+            return;
+        }
+
+        const marginDecimal = (quickAddData.margin || 0) / 100;
+        const unitPrice = marginDecimal < 1
+            ? parseFloat(((quickAddData.cost || 0) / (1 - marginDecimal)).toFixed(2))
+            : quickAddData.cost || 0;
+
+        const newProduct = {
+            deal_id: deal.id,
+            product_id: null,
+            name: quickAddData.name.trim(),
+            sku: quickAddData.sku.trim(),
+            quantity: quickAddData.quantity || 1,
+            cost: quickAddData.cost || 0,
+            unit_price: unitPrice,
+            margin: quickAddData.margin || 0,
+            category: quickAddData.category || '',
+            description: '',
+            display_order: (activeProducts.length || 0),
+            quote_id: activeQuoteId
+        };
+
+        try {
+            const result = await bulkAddDealProducts(deal.id, [newProduct]);
+            if (result && result.length > 0) {
+                const added = result[0];
+                const updatedProducts = [...(deal.deal_products || []), added];
+                const isPrimaryQuote = activeQuote?.is_primary;
+
+                if (isPrimaryQuote) {
+                    const primaryProductsNow = updatedProducts.filter(p => p.quote_id === activeQuoteId);
+                    const newTotal = calculateDealValue(primaryProductsNow);
+                    setDeal(prev => ({ ...prev, deal_products: updatedProducts, value: newTotal }));
+                    await updateDeal(deal.id, { value: newTotal });
+                } else {
+                    setDeal(prev => ({ ...prev, deal_products: updatedProducts }));
+                }
+
+                toast.success('Produto avulso adicionado!');
+                setShowQuickAdd(false);
+                setQuickAddData({ name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '' });
+            }
+        } catch (error) {
+            toast.error('Erro ao adicionar produto avulso');
+        }
     };
 
     const handleConfirmAddProduct = async () => {
@@ -491,9 +561,36 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         }
     };
 
+    const handleStartRename = (quoteId: string, currentTitle: string) => {
+        setRenamingQuoteId(quoteId);
+        setRenameValue(currentTitle);
+        setTimeout(() => renameInputRef.current?.focus(), 50);
+    };
+
+    const handleConfirmRename = async () => {
+        if (!renamingQuoteId || !renameValue.trim()) {
+            setRenamingQuoteId(null);
+            return;
+        }
+        try {
+            await updateDealQuote(renamingQuoteId, { title: renameValue.trim() });
+            setDeal(prev => ({
+                ...prev,
+                deal_quotes: (prev.deal_quotes || []).map(q =>
+                    q.id === renamingQuoteId ? { ...q, title: renameValue.trim() } : q
+                )
+            }));
+            toast.success('Cotação renomeada!');
+        } catch (error) {
+            toast.error('Erro ao renomear cotação');
+        } finally {
+            setRenamingQuoteId(null);
+        }
+    };
+
     return (
-        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden px-8 pt-4 pb-8">
-            <div className="flex justify-between items-center mb-4">
+        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden px-6 pt-2 pb-4">
+            <div className="flex justify-between items-center mb-2">
                 <div className="flex-1">
                     <h2 className="text-xl font-bold text-foreground">Produtos & Cotações</h2>
                     <p className="text-sm text-muted-foreground">Gerencie múltiplas opções comerciais e escopos</p>
@@ -501,7 +598,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             </div>
 
             {/* QUOTES NAVIGATION BAR */}
-            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border overflow-x-auto custom-scrollbar">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border overflow-x-auto custom-scrollbar">
                 {(deal.deal_quotes || []).map(quote => (
                     <button
                         key={quote.id}
@@ -544,11 +641,49 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             </div>
 
             {/* QUOTE ACTION BAR */}
-            <div className="flex justify-between items-center mb-4 min-h-[44px]">
+            <div className="flex justify-between items-center mb-2 min-h-[40px]">
                 <div className="flex items-center gap-3">
                     {activeQuote && (
                         <div className="flex items-center gap-4">
-                            <h3 className="text-lg font-black text-foreground">{activeQuote.title}</h3>
+                            {renamingQuoteId === activeQuote.id ? (
+                                <div className="flex items-center gap-2 animate-in fade-in duration-200">
+                                    <input
+                                        ref={renameInputRef}
+                                        value={renameValue}
+                                        onChange={e => setRenameValue(e.target.value)}
+                                        onKeyDown={e => {
+                                            if (e.key === 'Enter') handleConfirmRename();
+                                            if (e.key === 'Escape') setRenamingQuoteId(null);
+                                        }}
+                                        onBlur={handleConfirmRename}
+                                        className="text-lg font-black text-foreground bg-muted border border-primary/50 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-primary/30 w-56"
+                                    />
+                                    <Button size="icon" variant="ghost" className="h-7 w-7 text-primary" onClick={handleConfirmRename}>
+                                        <Check className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 group">
+                                    <h3
+                                        className="text-lg font-black text-foreground cursor-pointer hover:text-primary transition-colors"
+                                        onDoubleClick={() => isEditing && handleStartRename(activeQuote.id, activeQuote.title)}
+                                        title={isEditing ? 'Clique duplo para renomear' : ''}
+                                    >
+                                        {activeQuote.title}
+                                    </h3>
+                                    {isEditing && (
+                                        <Button
+                                            size="icon"
+                                            variant="ghost"
+                                            className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary"
+                                            onClick={() => handleStartRename(activeQuote.id, activeQuote.title)}
+                                            title="Renomear cotação"
+                                        >
+                                            <Pencil className="h-3 w-3" />
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                             <div className="flex items-center gap-2">
                                 {activeQuote.is_primary ? (
                                     <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase font-black px-2 py-1 rounded">
@@ -591,24 +726,38 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     )}
                     {showProductSearch && (
                         <div className="w-[450px] animate-in slide-in-from-right-4 duration-300">
-                            <ProductSearch onSelect={(p: any) => setSelectedCatalogProduct(p)} />
+                            <ProductSearch onSelect={(p: any) => setSelectedCatalogProduct(p)} onQuickAdd={handleOpenQuickAdd} />
                         </div>
                     )}
 
                     {isEditing && (
                         <>
                             {!showProductSearch && (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setTargetImportProductId(null);
-                                        setShowImportModal(true);
-                                    }}
-                                    className="border-input hover:bg-accent hover:text-accent-foreground h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
-                                >
-                                    <FileSpreadsheet className="w-4 h-4 mr-2 text-primary" />
-                                    Importar
-                                </Button>
+                                <>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setTargetImportProductId(null);
+                                            setShowImportModal(true);
+                                        }}
+                                        className="border-input hover:bg-accent hover:text-accent-foreground h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
+                                    >
+                                        <FileSpreadsheet className="w-4 h-4 mr-2 text-primary" />
+                                        Importar
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => handleOpenQuickAdd()}
+                                        className={`h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
+                                            showQuickAdd
+                                                ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20'
+                                                : 'border-input hover:bg-accent hover:text-accent-foreground hover:border-primary/30'
+                                        }`}
+                                    >
+                                        <PackagePlus className="w-4 h-4 mr-2" />
+                                        Avulso
+                                    </Button>
+                                </>
                             )}
 
                             <Button
@@ -630,8 +779,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             </div>
 
             {isEditing && selectedCatalogProduct && (
-                <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="bg-muted/50 border border-border rounded-xl p-4 flex items-center justify-between">
+                <div className="mb-2 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-muted/50 border border-border rounded-xl p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
                                 <Package className="h-6 w-6 text-primary" />
@@ -668,7 +817,82 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 </div>
             )}
 
-            <div className="bg-card rounded-[32px] border border-border shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            {/* QUICK ADD - PRODUTO AVULSO */}
+            {isEditing && showQuickAdd && (
+                <div className="mb-2 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                            <PackagePlus className="h-4 w-4 text-amber-600" />
+                            <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Produto Avulso</span>
+                            <span className="text-[10px] text-muted-foreground ml-1">— sem vínculo com o catálogo</span>
+                            <button onClick={() => setShowQuickAdd(false)} className="ml-auto p-1 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="flex items-end gap-3">
+                            <div className="flex-1 min-w-0">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Nome *</label>
+                                <Input
+                                    ref={quickAddNameRef}
+                                    value={quickAddData.name}
+                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, name: e.target.value }))}
+                                    onKeyDown={(e: any) => e.key === 'Enter' && handleQuickAddProduct()}
+                                    className="h-9 bg-background border-input text-foreground text-sm font-bold"
+                                    placeholder="Nome do produto..."
+                                />
+                            </div>
+                            <div className="w-32">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">SKU</label>
+                                <Input
+                                    value={quickAddData.sku}
+                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, sku: e.target.value }))}
+                                    className="h-9 bg-background border-input text-foreground text-xs font-mono"
+                                    placeholder="Opcional"
+                                />
+                            </div>
+                            <div className="w-20">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Qtd</label>
+                                <Input
+                                    type="number" min="1"
+                                    value={quickAddData.quantity}
+                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+                                    className="h-9 bg-background border-input text-center font-bold text-foreground"
+                                    onFocus={(e: any) => e.target.select()}
+                                />
+                            </div>
+                            <div className="w-28">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Custo (R$)</label>
+                                <Input
+                                    type="number" min="0" step="0.01"
+                                    value={quickAddData.cost || ''}
+                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, cost: parseFloat(e.target.value) || 0 }))}
+                                    className="h-9 bg-background border-input text-right font-bold text-foreground"
+                                    placeholder="0,00"
+                                    onFocus={(e: any) => e.target.select()}
+                                />
+                            </div>
+                            <div className="w-20">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Margem %</label>
+                                <Input
+                                    type="number" min="0" max="99"
+                                    value={quickAddData.margin}
+                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, margin: parseFloat(e.target.value) || 0 }))}
+                                    className="h-9 bg-background border-input text-center font-bold text-foreground"
+                                    onFocus={(e: any) => e.target.select()}
+                                />
+                            </div>
+                            <Button
+                                onClick={handleQuickAddProduct}
+                                className="bg-amber-600 text-white hover:bg-amber-700 font-black text-xs uppercase tracking-widest px-6 shadow-lg shadow-amber-600/20 rounded-xl h-9"
+                            >
+                                Incluir
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="bg-card rounded-xl border border-border shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -678,15 +902,15 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         <thead className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide bg-muted/30">
                             <tr>
                                 <th className="w-10"></th>
-                                <th className="pl-6 py-5 w-16 text-center">
+                                <th className="pl-6 py-3 w-16 text-center">
                                     <div className="flex flex-col items-center gap-1">
                                         {isEditing && <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
                                     </div>
                                 </th>
-                                <th className="px-4 py-5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
-                                <th className="px-4 py-5 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
-                                <th className="px-4 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
-                                <th className="px-6 py-5 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-32">Total</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
+                                <th className="px-4 py-3 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
+                                <th className="px-6 py-3 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-32">Total</th>
                                 <th className="w-10"></th>
                             </tr>
                         </thead>

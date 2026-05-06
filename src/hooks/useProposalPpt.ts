@@ -124,6 +124,8 @@ export function useProposalPpt() {
                     primaryColor,
                     accentColor,
                     showBillingInfo: config.showBillingInfo !== false,
+                    quoteDisplayMode: config.quoteDisplayMode,
+                    dealQuotes: deal.deal_quotes,
                 };
                 buildInvestmentSlides(pptx, invData);
             }

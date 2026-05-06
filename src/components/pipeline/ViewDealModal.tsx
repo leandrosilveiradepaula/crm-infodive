@@ -220,6 +220,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             const updatePayload = {
                 title: formData.title,
                 account_id: formData.account_id,
+                company: formData.company,
                 expected_close_date: formData.expected_close_date || undefined,
                 probability: formData.probability,
                 billing_type: formData.billing_type
@@ -391,7 +392,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 <Input
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="h-8 text-lg font-bold bg-muted/50 border-border w-[400px]"
+                                    className="h-8 text-xl md:text-xl font-bold tracking-tight text-foreground bg-muted/20 border-border/50 w-[400px] px-2 -ml-2"
                                 />
                             ) : (
                                 <div>
@@ -406,7 +407,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         value={formData.account_id || 'none'}
                                         onValueChange={handleAccountChange}
                                     >
-                                        <SelectTrigger className="h-7 py-0 px-2 text-xs border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors max-w-[250px] rounded-lg">
+                                        <SelectTrigger className="h-7 py-0 px-2 text-sm md:text-sm font-medium border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors max-w-[250px] rounded-md -ml-2">
                                             <SelectValue placeholder="Vincular Empresa..." />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-xl border-border/60 shadow-xl max-h-[300px]">

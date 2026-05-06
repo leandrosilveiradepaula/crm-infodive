@@ -112,7 +112,7 @@ export function ProductRowHeader({
                     />
                 )}
             </td>
-            <td className="px-4 py-5">
+            <td className="px-4 py-3">
                 <div className="flex gap-4 items-center">
                     {product.parent_id && (
                         <div className="w-8 flex items-center justify-center">
@@ -140,23 +140,20 @@ export function ProductRowHeader({
                                         <p className="font-bold text-foreground text-sm leading-tight uppercase tracking-tight truncate">{product.display_name}</p>
                                         <p className="text-[10px] text-muted-foreground/50 font-mono truncate leading-tight mt-0.5" title={product.name}>{product.name}</p>
                                     </div>
+                                ) : isEditing && !product.product_id ? (
+                                    <Input
+                                        value={product.name || ''}
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={(e) => handleUpdateProduct(product.id, 'name', e.target.value)}
+                                        onKeyDown={(e) => e.stopPropagation()}
+                                        className="h-7 py-0 px-2 text-sm font-bold uppercase tracking-tight bg-amber-500/5 border-amber-500/30 focus:border-amber-500 text-foreground"
+                                        placeholder="Nome do produto..."
+                                    />
                                 ) : (
                                     <p className="font-bold text-foreground text-sm leading-tight uppercase tracking-tight truncate shrink-0">{product.name}</p>
                                 )}
                             </div>
-                            {isEditing ? (
-                                <Input
-                                    placeholder="Comentário (ex: Cenário A)"
-                                    value={product.custom_label || ''}
-                                    onClick={(e) => e.stopPropagation()}
-                                    onChange={(e) => handleUpdateProduct(product.id, 'custom_label', e.target.value)}
-                                    className="h-7 py-0 px-2 text-[11px] w-48 bg-primary/5 border-primary/20 focus:border-primary/50 transition-all font-semibold"
-                                />
-                            ) : product.custom_label && (
-                                <Badge variant="outline" className="h-5 px-2 text-[10px] font-bold bg-primary/5 text-primary border-primary/20 uppercase tracking-wider">
-                                    {product.custom_label}
-                                </Badge>
-                            )}
+
                             {product.duration && product.duration_unit ? (
                                 <Badge variant="outline" className="h-5 px-2 text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20 uppercase tracking-wider">
                                     Válido por {product.duration} {product.duration_unit}
@@ -241,13 +238,13 @@ export function ProductRowHeader({
                     )}
                 </div>
             </td>
-            <td className="px-4 py-5 text-center">
+            <td className="px-4 py-3 text-center">
                 {isEditing ? (
                     <div className="flex items-center justify-center">
                         <Input
                             type="number"
                             min="1"
-                            className="w-16 text-center bg-background border-input rounded-xl h-9 text-sm font-black text-foreground focus:ring-primary"
+                            className="w-20 px-2 text-center bg-background border-input rounded-xl h-9 text-sm font-black text-foreground focus:ring-primary"
                             value={product.quantity ?? ''}
                             onClick={(e) => e.stopPropagation()}
                             onChange={(e) => handleUpdateProduct(product.id, 'quantity', e.target.value === '' ? undefined : parseInt(e.target.value))}
@@ -261,21 +258,21 @@ export function ProductRowHeader({
                     </div>
                 )}
             </td>
-            <td className="px-4 py-5 text-right">
+            <td className="px-4 py-3 text-right">
                 <div className="h-9 flex items-center justify-end">
                     <p className="text-sm font-bold text-muted-foreground">
                         {formatCurrency(product.unit_price || 0)}
                     </p>
                 </div>
             </td>
-            <td className="px-6 py-5 text-right">
+            <td className="px-6 py-3 text-right">
                 <div className="h-9 flex items-center justify-end">
                     <p className={`text-sm font-bold ${product.is_optional ? 'text-muted-foreground/50 line-through' : 'text-primary'}`}>
                         {formatCurrency((product.unit_price || 0) * (product.quantity || 0))}
                     </p>
                 </div>
             </td>
-            <td className="px-4 py-5 text-center">
+            <td className="px-4 py-3 text-center">
                 <div className="h-9 flex items-center justify-center">
                     {isEditing && (
                         <button 

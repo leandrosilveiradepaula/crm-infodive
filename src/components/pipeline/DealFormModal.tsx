@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createDeal, updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import { getAccounts } from '@/app/(dashboard)/pipeline/actions';
-import { Loader2, Target, Calendar, AlignLeft, ChevronRight, Building2 } from 'lucide-react';
+import { Loader2, Target, Calendar, AlignLeft, ChevronRight, Building2, AlertCircle } from 'lucide-react';
 import { type Deal } from '@/types/deal';
 import { useRouter } from 'next/navigation';
 import { ThemeInput, ThemeLabel, ThemeSectionHeader, ThemePanel, ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
@@ -21,6 +21,7 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
+    const [accountError, setAccountError] = useState(false);
 
     const [formData, setFormData] = useState<Partial<Deal>>({
         title: deal?.title || '',
@@ -57,6 +58,14 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validate required account selection
+        if (!formData.account_id) {
+            setAccountError(true);
+            return;
+        }
+
+        setAccountError(false);
         setLoading(true);
 
         try {
@@ -126,11 +135,12 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                                                     account_id: val,
                                                     company: selectedAccount ? selectedAccount.name : ''
                                                 });
+                                                setAccountError(false);
                                             }}
                                         >
-                                            <SelectTrigger className="bg-card w-full border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-blue-500 border">
+                                            <SelectTrigger className={`bg-card w-full text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 border ${accountError ? 'border-red-500 focus:ring-red-500' : 'border-border focus:ring-blue-500'}`}>
                                                 <div className="flex items-center gap-2 truncate">
-                                                    <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                                                    <Building2 className={`w-4 h-4 shrink-0 ${accountError ? 'text-red-500' : 'text-muted-foreground'}`} />
                                                     <SelectValue placeholder="Selecione um cliente..." />
                                                 </div>
                                             </SelectTrigger>
@@ -146,6 +156,12 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                                                 )}
                                             </SelectContent>
                                         </Select>
+                                        {accountError && (
+                                            <div className="flex items-center gap-1.5 mt-1.5 text-red-500 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                                <span className="text-[11px] font-semibold">Selecione um cliente para vincular à oportunidade.</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="space-y-1">

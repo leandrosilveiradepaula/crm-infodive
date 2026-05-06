@@ -253,24 +253,7 @@ export function ProductFinancialDetails({
                                         </span>
                                     )}
                                 </div>
-                                {/* Custom Label Input */}
-                                <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Etiqueta Personalizada</p>
-                                    {isEditing ? (
-                                        <Input
-                                            type="text"
-                                            className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
-                                            placeholder="Ex: Licença Anual"
-                                            value={product.custom_label || ''}
-                                            onChange={e => handleUpdateProduct(product.id, 'custom_label', e.target.value)}
-                                            onKeyDown={handleInputKeyDown}
-                                        />
-                                    ) : (
-                                        <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
-                                            {product.custom_label || '---'}
-                                        </div>
-                                    )}
-                                </div>
+
 
                                 {/* Distributor Selector */}
                                 <div>
@@ -370,20 +353,37 @@ export function ProductFinancialDetails({
                             </div>
 
                             <div className="space-y-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10 relative overflow-hidden">
-                                {/* USD Toggle */}
-                                <div className="flex items-center gap-2 mb-2">
-                                    <input
-                                        type="checkbox"
-                                        id={`usd-mode-${product.id}`}
-                                        checked={product.is_usd || false}
-                                        disabled={!isEditing}
-                                        onChange={e => handleUpdateProduct(product.id, 'is_usd', e.target.checked)}
-                                        className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
-                                    />
-                                    <label htmlFor={`usd-mode-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
-                                        Custo em Dólar (USD)
-                                        <DollarSign className="h-3 w-3" />
-                                    </label>
+                                <div className="flex flex-col gap-2 mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id={`usd-mode-${product.id}`}
+                                            checked={product.is_usd || false}
+                                            disabled={!isEditing}
+                                            onChange={e => handleUpdateProduct(product.id, 'is_usd', e.target.checked)}
+                                            className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
+                                        />
+                                        <label htmlFor={`usd-mode-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
+                                            Custo em Dólar (USD)
+                                            <DollarSign className="h-3 w-3" />
+                                        </label>
+                                    </div>
+                                    
+                                    {product.is_usd && (
+                                        <div className="flex items-center gap-2 pl-5 animate-in fade-in slide-in-from-top-1">
+                                            <input
+                                                type="checkbox"
+                                                id={`present-usd-${product.id}`}
+                                                checked={product.present_in_usd || false}
+                                                disabled={!isEditing}
+                                                onChange={e => handleUpdateProduct(product.id, 'present_in_usd', e.target.checked)}
+                                                className="h-3 w-3 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
+                                            />
+                                            <label htmlFor={`present-usd-${product.id}`} className="text-[9px] font-bold text-emerald-600/70 uppercase tracking-wide cursor-pointer flex items-center select-none">
+                                                Apresentar este produto em Dólar na Proposta (PDF)
+                                            </label>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* USD Inputs */}
@@ -475,8 +475,42 @@ export function ProductFinancialDetails({
                                 <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 space-y-3">
                                     <div className="flex items-center gap-2 mb-1">
                                         <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
-                                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Duração do Contrato</p>
+                                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Modelo de Precificação</p>
                                     </div>
+
+                                    {/* Pricing Model Selector */}
+                                    <div>
+                                        <label className="text-[9px] font-bold text-amber-600/70 uppercase block mb-1">Tipo de Cobrança</label>
+                                        {isEditing ? (
+                                            <select
+                                                className="w-full bg-background border-amber-500/20 rounded-xl px-2 py-0 text-xs font-bold text-foreground focus:ring-1 focus:ring-amber-500 outline-none h-8"
+                                                value={product.pricing_model || 'one_time'}
+                                                onChange={(e: any) => {
+                                                    const model = e.target.value;
+                                                    handleUpdateProduct(product.id, 'pricing_model', model);
+                                                    if (model === 'monthly' && !product.duration_unit) {
+                                                        handleUpdateProduct(product.id, 'duration_unit', 'meses');
+                                                    } else if (model === 'annual' && !product.duration_unit) {
+                                                        handleUpdateProduct(product.id, 'duration_unit', 'anos');
+                                                    }
+                                                }}
+                                            >
+                                                <option value="one_time">💰 Pagamento Único</option>
+                                                <option value="monthly">🔄 Mensal (SaaS)</option>
+                                                <option value="annual">📅 Anual (Subscrição)</option>
+                                            </select>
+                                        ) : (
+                                            <div className="w-full bg-background border-amber-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                                {product.pricing_model === 'monthly' ? '🔄 Mensal (SaaS)' :
+                                                 product.pricing_model === 'annual' ? '📅 Anual (Subscrição)' :
+                                                 '💰 Pagamento Único'}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Duration fields - only relevant for recurring */}
+                                    {(product.pricing_model === 'monthly' || product.pricing_model === 'annual' || product.duration) && (
+                                        <>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <label className="text-[9px] font-bold text-amber-600/70 uppercase block mb-1">Duração (Qtd)</label>
@@ -487,7 +521,7 @@ export function ProductFinancialDetails({
                                                     value={product.duration ?? ''}
                                                     onChange={(e: any) => handleUpdateProduct(product.id, 'duration', e.target.value === '' ? null : Number(e.target.value))}
                                                     onKeyDown={handleInputKeyDown}
-                                                    placeholder="Ex: 3"
+                                                    placeholder="Ex: 36"
                                                 />
                                             ) : (
                                                 <div className="w-full bg-background border-amber-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
@@ -515,7 +549,9 @@ export function ProductFinancialDetails({
                                         </div>
                                     </div>
                                     {isEditing && !product.duration && (
-                                        <p className="text-[9px] text-amber-600/60 italic font-medium">Preencha aqui para exibir a validade na proposta.</p>
+                                        <p className="text-[9px] text-amber-600/60 italic font-medium">Preencha a duração do contrato para exibir na proposta.</p>
+                                    )}
+                                        </>
                                     )}
                                 </div>
                             </div>

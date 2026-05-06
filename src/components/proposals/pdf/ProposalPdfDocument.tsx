@@ -17,6 +17,7 @@ interface ProposalPdfDocumentProps {
     dealTitle: string;
     companyName: string;
     products: any[];
+    dealQuotes?: any[];
     proposalNumber?: string;
 
     // Editor state
@@ -51,6 +52,7 @@ export function ProposalPdfDocument({
     dealTitle,
     companyName,
     products,
+    dealQuotes,
     proposalNumber,
     activeSections,
     editableTexts,
@@ -123,6 +125,7 @@ export function ProposalPdfDocument({
         investment: (
             <PdfInvestmentPage
                 products={sortedProducts}
+                dealQuotes={dealQuotes}
                 simplifiedProductNames={simplifiedProductNames}
                 showBillingInfo={config.showBillingInfo}
                 isPriceStudy={config.isPriceStudy}
@@ -130,6 +133,7 @@ export function ProposalPdfDocument({
                 formatCurrency={formatCurrency}
                 distributors={distributors}
                 billingOverrides={config.billingOverrides || {}}
+                quoteDisplayMode={config.quoteDisplayMode}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
             />

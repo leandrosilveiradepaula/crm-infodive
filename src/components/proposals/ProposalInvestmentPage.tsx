@@ -139,15 +139,247 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                 </div>
 
-                {/* Single unified investment table with ALL products */}
-                <ProposalInvestmentTable
-                    mainProducts={mainProducts}
-                    formatCurrency={formatCurrency}
-                    totalMainValue={totalConsolidatedValue}
-                    simplifiedProductNames={simplifiedProductNames}
-                    themePrimary={primaryColor}
-                    themeAccent={accentColor}
-                />
+                {/* Investment Tables */}
+                {(() => {
+                    // Derive quote info: prefer deal_quotes, fallback to unique quote_ids from products
+                    const quotes = deal.deal_quotes && deal.deal_quotes.length > 0
+                        ? deal.deal_quotes
+                        : (() => {
+                            const uniqueIds = [...new Set(mainProducts.map(p => p.quote_id).filter(Boolean))] as string[];
+                            return uniqueIds.map(id => ({ id, title: `Cotação`, is_primary: false }));
+                        })();
+                    const isMultiQuoteOptions = config?.quoteDisplayMode === 'options' && quotes.length > 1;
+                    const isSingleQuoteOptions = config?.quoteDisplayMode === 'options' && quotes.length <= 1;
+
+                    // Multi-quote options: each quote = 1 option (existing behavior)
+                    if (isMultiQuoteOptions) {
+                        return (
+                            <div>
+                                {quotes
+                                    .filter(q => mainProducts.some(p => p.quote_id === q.id))
+                                    .map((quote, qIdx) => {
+                                        const quoteProducts = mainProducts.filter(p => p.quote_id === quote.id);
+                                        const optionLabel = String.fromCharCode(65 + qIdx);
+                                        return (
+                                            <div key={quote.id} style={{ marginBottom: '28px' }}>
+                                                <div style={{
+                                                    padding: '0 80px',
+                                                    marginBottom: '12px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '10px',
+                                                }}>
+                                                    <div style={{
+                                                        backgroundColor: accentColor,
+                                                        color: '#ffffff',
+                                                        fontSize: '11px',
+                                                        fontWeight: '900',
+                                                        padding: '4px 10px',
+                                                        borderRadius: '6px',
+                                                        letterSpacing: '0.5px',
+                                                    }}>
+                                                        OPÇÃO {optionLabel}
+                                                    </div>
+                                                    <span style={{
+                                                        fontSize: '14px',
+                                                        fontWeight: '700',
+                                                        color: primaryColor,
+                                                    }}>
+                                                        {quote.title}
+                                                    </span>
+                                                </div>
+                                                <ProposalInvestmentTable
+                                                    mainProducts={quoteProducts}
+                                                    formatCurrency={formatCurrency}
+                                                    simplifiedProductNames={simplifiedProductNames}
+                                                    themePrimary={primaryColor}
+                                                    themeAccent={accentColor}
+                                                    optionLabel={`Opção ${optionLabel}`}
+                                                />
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+                        );
+                    }
+
+                    // Single-quote options: each root product (+ children) = 1 option
+                    if (isSingleQuoteOptions) {
+                        const rootProducts = mainProducts.filter(p => !p.parent_id);
+                        return (
+                            <div>
+                                {rootProducts.map((rootProduct, pIdx) => {
+                                    const children = mainProducts.filter(p => p.parent_id === rootProduct.id);
+                                    const optionProducts = [rootProduct, ...children];
+                                    const optionLabel = String.fromCharCode(65 + pIdx);
+                                    const displayName = simplifiedProductNames[rootProduct.name] || rootProduct.display_name || rootProduct.name;
+                                    return (
+                                        <div key={rootProduct.id} style={{ marginBottom: '28px' }}>
+                                            <div style={{
+                                                padding: '0 80px',
+                                                marginBottom: '12px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                            }}>
+                                                <div style={{
+                                                    backgroundColor: accentColor,
+                                                    color: '#ffffff',
+                                                    fontSize: '11px',
+                                                    fontWeight: '900',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '6px',
+                                                    letterSpacing: '0.5px',
+                                                }}>
+                                                    OPÇÃO {optionLabel}
+                                                </div>
+                                                <span style={{
+                                                    fontSize: '14px',
+                                                    fontWeight: '700',
+                                                    color: primaryColor,
+                                                }}>
+                                                    {displayName}
+                                                </span>
+                                            </div>
+                                            <ProposalInvestmentTable
+                                                mainProducts={optionProducts}
+                                                formatCurrency={formatCurrency}
+                                                simplifiedProductNames={simplifiedProductNames}
+                                                themePrimary={primaryColor}
+                                                themeAccent={accentColor}
+                                                optionLabel={`Opção ${optionLabel}`}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    }
+
+                    // Consolidated view with pricing model grouping
+                    const oneTimeProducts = mainProducts.filter(p => !p.pricing_model || p.pricing_model === 'one_time');
+                    const monthlyProducts = mainProducts.filter(p => p.pricing_model === 'monthly');
+                    const annualProducts = mainProducts.filter(p => p.pricing_model === 'annual');
+                    const hasRecurring = monthlyProducts.length > 0 || annualProducts.length > 0;
+
+                    if (!hasRecurring) {
+                        // All one-time: render as before
+                        return (
+                            <ProposalInvestmentTable
+                                mainProducts={mainProducts}
+                                formatCurrency={formatCurrency}
+                                simplifiedProductNames={simplifiedProductNames}
+                                themePrimary={primaryColor}
+                                themeAccent={accentColor}
+                            />
+                        );
+                    }
+
+                    return (
+                        <div>
+                            {/* One-time products */}
+                            {oneTimeProducts.length > 0 && (
+                                <div style={{ marginBottom: '24px' }}>
+                                    <div style={{
+                                        padding: '0 80px',
+                                        marginBottom: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                    }}>
+                                        <div style={{
+                                            backgroundColor: primaryColor,
+                                            color: '#ffffff',
+                                            fontSize: '10px',
+                                            fontWeight: '900',
+                                            padding: '3px 10px',
+                                            borderRadius: '6px',
+                                            letterSpacing: '0.5px',
+                                        }}>
+                                            💰 INVESTIMENTO ÚNICO
+                                        </div>
+                                    </div>
+                                    <ProposalInvestmentTable
+                                        mainProducts={oneTimeProducts}
+                                        formatCurrency={formatCurrency}
+                                        simplifiedProductNames={simplifiedProductNames}
+                                        themePrimary={primaryColor}
+                                        themeAccent={accentColor}
+                                        pricingModel="one_time"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Monthly products */}
+                            {monthlyProducts.length > 0 && (
+                                <div style={{ marginBottom: '24px' }}>
+                                    <div style={{
+                                        padding: '0 80px',
+                                        marginBottom: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                    }}>
+                                        <div style={{
+                                            backgroundColor: '#0891b2',
+                                            color: '#ffffff',
+                                            fontSize: '10px',
+                                            fontWeight: '900',
+                                            padding: '3px 10px',
+                                            borderRadius: '6px',
+                                            letterSpacing: '0.5px',
+                                        }}>
+                                            🔄 INVESTIMENTO RECORRENTE MENSAL
+                                        </div>
+                                    </div>
+                                    <ProposalInvestmentTable
+                                        mainProducts={monthlyProducts}
+                                        formatCurrency={formatCurrency}
+                                        simplifiedProductNames={simplifiedProductNames}
+                                        themePrimary={primaryColor}
+                                        themeAccent={accentColor}
+                                        pricingSuffix="/mês"
+                                        pricingModel="monthly"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Annual products */}
+                            {annualProducts.length > 0 && (
+                                <div style={{ marginBottom: '24px' }}>
+                                    <div style={{
+                                        padding: '0 80px',
+                                        marginBottom: '8px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '10px',
+                                    }}>
+                                        <div style={{
+                                            backgroundColor: '#d97706',
+                                            color: '#ffffff',
+                                            fontSize: '10px',
+                                            fontWeight: '900',
+                                            padding: '3px 10px',
+                                            borderRadius: '6px',
+                                            letterSpacing: '0.5px',
+                                        }}>
+                                            📅 INVESTIMENTO RECORRENTE ANUAL
+                                        </div>
+                                    </div>
+                                    <ProposalInvestmentTable
+                                        mainProducts={annualProducts}
+                                        formatCurrency={formatCurrency}
+                                        simplifiedProductNames={simplifiedProductNames}
+                                        themePrimary={primaryColor}
+                                        themeAccent={accentColor}
+                                        pricingSuffix="/ano"
+                                        pricingModel="annual"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })()}
 
                 {/* Separate billing info section */}
                 {showBilling && !config?.isPriceStudy && groups.some(g => g.distributor || g.type === 'reseller') && (

@@ -89,9 +89,9 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
 
             setParsedData(resData.data);
             toast.success('Assinatura processada com sucesso!');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('Erro ao processar assinatura.');
+            toast.error(error.message || 'Erro ao processar assinatura.');
         } finally {
             setLoading(false);
         }

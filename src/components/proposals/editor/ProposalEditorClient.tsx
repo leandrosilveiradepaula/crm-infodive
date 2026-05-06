@@ -7,6 +7,7 @@ import {
     Shield, Cpu, Monitor, DollarSign, Award,
     Sparkles, Save, ChevronLeft, ChevronRight,
     GripVertical, ImageIcon, Settings2, Type, Wand2,
+    Star, CheckSquare, Square, Layers,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,6 +98,37 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
     const [isMounted, setIsMounted] = useState(false);
     useEffect(() => { setIsMounted(true); }, []);
 
+    // ── Quote Selection (Option B: pre-select primary only) ───────────
+    const quotes = deal.deal_quotes || [];
+    const hasMultipleQuotes = quotes.length > 1;
+    const [selectedQuoteIds, setSelectedQuoteIds] = useState<Set<string>>(() => {
+        const primary = quotes.find(q => q.is_primary);
+        if (primary) return new Set([primary.id]);
+        if (quotes.length > 0) return new Set([quotes[0].id]);
+        return new Set<string>();
+    });
+
+    const toggleQuote = useCallback((quoteId: string) => {
+        setSelectedQuoteIds(prev => {
+            const next = new Set(prev);
+            if (next.has(quoteId)) {
+                if (next.size > 1) next.delete(quoteId);
+            } else {
+                next.add(quoteId);
+            }
+            return next;
+        });
+    }, []);
+
+    // ── Filtered Deal (products scoped to selected quotes) ────────────
+    const proposalDeal = useMemo(() => {
+        if (!hasMultipleQuotes) return deal;
+        const filtered = (deal.deal_products || []).filter(
+            p => !p.quote_id || selectedQuoteIds.has(p.quote_id)
+        );
+        return { ...deal, deal_products: filtered };
+    }, [deal, selectedQuoteIds, hasMultipleQuotes]);
+
     // ── Org Theme ─────────────────────────────────────────────────────
     const [orgTheme, setOrgTheme] = useState<{ theme_primary: string | null; theme_accent: string | null }>({
         theme_primary: null, theme_accent: null,
@@ -130,7 +162,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
     // ── Init billing overrides ────────────────────────────────────────
     useEffect(() => {
         if (distributors.length === 0) return;
-        const products = deal.deal_products || [];
+        const products = proposalDeal.deal_products || [];
         const usedDistIds = [...new Set(products.map(p => p.distributor_id).filter(Boolean))] as string[];
         const overrides: Record<string, BillingOverride> = {};
         usedDistIds.forEach(dId => {
@@ -180,17 +212,25 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
         }
     };
 
+    // ── Filtered total value ──────────────────────────────────────────
+    const filteredTotalValue = useMemo(() => {
+        const products = proposalDeal.deal_products || [];
+        return products
+            .filter(p => !p.is_optional)
+            .reduce((acc, p) => acc + (p.unit_price || 0) * (p.quantity || 1), 0);
+    }, [proposalDeal.deal_products]);
+
     // ── AI Summary ────────────────────────────────────────────────────
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
     const generateAISummary = useCallback(async () => {
         setIsGeneratingAI(true);
         try {
-            const products = deal.deal_products || [];
+            const products = proposalDeal.deal_products || [];
             const response = await fetch('/api/gemini/proposal', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    deal: { title: deal.title, company: deal.company, value: totalValue },
+                    deal: { title: deal.title, company: deal.company, value: filteredTotalValue },
                     products: products.map((p: any) => ({
                         name: p.name, category: p.category, quantity: p.quantity, unit_price: p.unit_price,
                     })),
@@ -205,15 +245,19 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 });
                 if (data.softwareHighlights) setSoftwareHighlights(data.softwareHighlights);
                 if (data.benefitTiles) setBenefitTiles(data.benefitTiles);
+                if (data.benefitTiles) setBenefitTiles(data.benefitTiles);
                 toast.success('Conteúdo IA gerado com sucesso!');
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Erro desconhecido na API');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error generating AI summary:', error);
-            toast.error('Erro ao gerar conteúdo IA');
+            toast.error(error.message || 'Erro ao gerar conteúdo IA');
         } finally {
             setIsGeneratingAI(false);
         }
-    }, [deal, totalValue, setAiData, setSoftwareHighlights, setBenefitTiles]);
+    }, [deal, proposalDeal, filteredTotalValue, setAiData, setSoftwareHighlights, setBenefitTiles]);
 
     // ── Save Draft ────────────────────────────────────────────────────
     const [isSaving, setIsSaving] = useState(false);
@@ -252,6 +296,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     dealId: deal.id,
+                    selectedQuoteIds: hasMultipleQuotes ? [...selectedQuoteIds] : undefined,
                     activeSections: activeSections.map(s => s.id),
                     editableTexts: state.editableTexts,
                     config: state.config,
@@ -275,7 +320,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
         } finally {
             setGenerating(false);
         }
-    }, [deal.id, activeSections, state, setGenerating, router]);
+    }, [deal.id, activeSections, state, setGenerating, router, hasMultipleQuotes, selectedQuoteIds]);
 
     // ── PPT Generation ────────────────────────────────────────────────
     const handleGeneratePpt = useCallback(async () => {
@@ -294,10 +339,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     activeSections: activeSections.map(s => s.id),
                 },
             },
-            deal: deal as any,
+            deal: proposalDeal as any,
             distributors: distributors as any,
         });
-    }, [deal, distributors, state, activeSections, handleDownloadPpt]);
+    }, [proposalDeal, distributors, state, activeSections, handleDownloadPpt]);
 
     // ── DOCX Generation ───────────────────────────────────────────────
     const handleGenerateDocx = useCallback(async () => {
@@ -306,7 +351,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
             title: state.editableTexts.proposalTitle,
             company_name: deal.company,
             createdAt: new Date().toISOString(),
-            products_json: deal.deal_products || [],
+            products_json: proposalDeal.deal_products || [],
+            deal_quotes: deal.deal_quotes || [],
             content: {
                 config: state.config,
                 editableTexts: state.editableTexts,
@@ -316,9 +362,9 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 activeSections: activeSections.map(s => s.id),
             },
         });
-    }, [deal, state, activeSections, handleDownloadDocx]);
+    }, [proposalDeal, deal.company, deal.deal_quotes, state, activeSections, handleDownloadDocx]);
 
-    const previewDeal = { ...deal, title: state.editableTexts.proposalTitle } as Deal;
+    const previewDeal = { ...proposalDeal, title: state.editableTexts.proposalTitle } as Deal;
     const isExporting = state.isGenerating || generatingPpt || generatingDocx;
 
     // ═══════════════════════════════════════════════════════════════════
@@ -419,6 +465,71 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     <div className="p-3 border-b border-border">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
                     </div>
+
+                    {/* ── Quote Selector (only when multiple quotes exist) ── */}
+                    {hasMultipleQuotes && (
+                        <div className="px-3 pt-3 pb-2 border-b border-border space-y-1.5">
+                            <div className="flex items-center gap-1.5 mb-2">
+                                <Layers className="w-3 h-3 text-primary" />
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Cotações na Proposta</p>
+                            </div>
+                            {quotes.map(q => {
+                                const isSelected = selectedQuoteIds.has(q.id);
+                                const productCount = (deal.deal_products || []).filter(p => p.quote_id === q.id).length;
+                                return (
+                                    <button
+                                        key={q.id}
+                                        onClick={() => toggleQuote(q.id)}
+                                        className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all ${
+                                            isSelected
+                                                ? 'bg-primary/8 border border-primary/30'
+                                                : 'bg-muted/20 border border-transparent hover:bg-muted/40'
+                                        }`}
+                                    >
+                                        {isSelected
+                                            ? <CheckSquare className="w-3.5 h-3.5 text-primary shrink-0" />
+                                            : <Square className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                        }
+                                        <span className={`text-[11px] flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/70'}`}>
+                                            {q.title}
+                                        </span>
+                                        {q.is_primary && <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />}
+                                        <span className="text-[9px] text-muted-foreground font-mono">{productCount}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* ── Display Mode Toggle (when 2+ quotes selected OR 2+ root products) ── */}
+                    {(() => {
+                        const mainRootProducts = (proposalDeal.deal_products || []).filter(p => !p.is_optional && !p.parent_id);
+                        const showToggle = (hasMultipleQuotes && selectedQuoteIds.size >= 2) || mainRootProducts.length >= 2;
+                        if (!showToggle) return null;
+                        return (
+                            <div className="px-3 py-2 border-b border-border">
+                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Modo de exibição</p>
+                                <div className="flex rounded-lg border border-border overflow-hidden">
+                                    {([
+                                        { key: 'consolidated' as const, label: 'Consolidado' },
+                                        { key: 'options' as const, label: 'Opções' },
+                                    ]).map(mode => (
+                                        <button
+                                            key={mode.key}
+                                            onClick={() => updateConfig({ quoteDisplayMode: mode.key })}
+                                            className={`flex-1 px-2 py-1.5 text-[10px] font-bold transition-all ${
+                                                state.config.quoteDisplayMode === mode.key
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                                            }`}
+                                        >
+                                            {mode.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })()}
                     <div className="flex-1 overflow-y-auto p-2">
                         {isMounted ? (
                             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -502,8 +613,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         )}
                         <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
                             <span>{activeSections.length} páginas</span>
-                            <span>{deal.deal_products?.length || 0} produtos</span>
-                            <span className="font-bold text-primary">{formatCurrency(totalValue)}</span>
+                            <span>{proposalDeal.deal_products?.length || 0} produtos</span>
+                            <span className="font-bold text-primary">{formatCurrency(filteredTotalValue)}</span>
                         </div>
                     </div>
 
@@ -530,6 +641,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                             editableTexts={state.editableTexts}
                                             distributors={distributors}
                                             billingOverrides={state.config.billingOverrides}
+                                            config={state.config}
                                         />
                                     </div>
                                 </motion.div>
@@ -865,7 +977,7 @@ function FieldGroup({ label, children }: { label: string; children: React.ReactN
 // ═════════════════════════════════════════════════════════════════════
 function PagePreview({
     sectionId, deal, aiSummary, objectives, simplifiedProductNames,
-    editableTexts, distributors, billingOverrides,
+    editableTexts, distributors, billingOverrides, config,
 }: {
     sectionId: SectionId;
     deal: Deal;
@@ -875,6 +987,7 @@ function PagePreview({
     editableTexts: any;
     distributors: any[];
     billingOverrides: Record<string, any>;
+    config?: any;
 }) {
     const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
@@ -890,7 +1003,7 @@ function PagePreview({
         case 'software':
             return <ProposalSoftwarePage deal={deal} simplifiedProductNames={simplifiedProductNames} />;
         case 'investment':
-            return <ProposalInvestmentPage deal={deal} distributors={distributors} billingOverrides={billingOverrides} simplifiedProductNames={simplifiedProductNames} />;
+            return <ProposalInvestmentPage deal={deal} distributors={distributors} billingOverrides={billingOverrides} simplifiedProductNames={simplifiedProductNames} config={config} />;
         case 'differentials':
             return <ProposalDifferentialsPage />;
         case 'custom_notes':

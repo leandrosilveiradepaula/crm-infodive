@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { createProduct, updateProduct } from '@/app/(dashboard)/products/actions';
 import { Loader2, Package, Server, Laptop, Cloud, Shield, Database, Layout, HardDrive, Cpu, DatabaseBackup, Archive, Network, Smartphone } from 'lucide-react';
 import { ThemeInput, ThemeLabel, ThemeSectionHeader, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
-import { Switch } from '@/components/ui/switch';
+
 import { type Product } from '@/types/product';
 import { useRouter } from 'next/navigation';
 import { invalidateProductsCache } from '@/hooks/useProducts';
@@ -49,22 +49,22 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    // Merge brands from products with manufacturers from Accounts
-    const allAvailableBrands = Array.from(new Set([
-        ...existingBrands,
-        ...registeredManufacturers.map(m => m.name)
-    ])).sort();
-
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
-        name: '', category: 'Hardware', subcategory: '', brand: '', description: '', sku: '', icon: 'Server',
-        show_sku_on_proposal: true
+        name: '', category: 'Hardware', subcategory: '', brand: '', description: '', sku: '', icon: 'Server'
     });
 
     // Custom Input States
     const [isCustomBrand, setIsCustomBrand] = useState(false);
     const [isCustomCategory, setIsCustomCategory] = useState(false);
     const [isCustomSubcategory, setIsCustomSubcategory] = useState(false);
+
+    // Merge brands from products with manufacturers from Accounts + current custom value
+    const allAvailableBrands = Array.from(new Set([
+        ...existingBrands,
+        ...registeredManufacturers.map(m => m.name),
+        ...(formData.brand ? [formData.brand] : [])
+    ])).sort();
 
     useEffect(() => {
         if (product) {
@@ -79,8 +79,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
             // Check subcategory logic strictly if needed, usually just relying on category match
         } else {
             setFormData({
-                name: '', category: 'Hardware', subcategory: '', brand: '', description: '', sku: '', icon: 'Server',
-                show_sku_on_proposal: true
+                name: '', category: 'Hardware', subcategory: '', brand: '', description: '', sku: '', icon: 'Server'
             });
             setIsCustomBrand(false);
             setIsCustomCategory(false);
@@ -157,16 +156,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border border-border/50">
-                            <div className="space-y-0.5">
-                                <ThemeLabel className="mb-0">Exibir SKU na Proposta</ThemeLabel>
-                                <p className="text-[10px] text-muted-foreground">O SKU/Partnumber será visível na tabela de investimentos da proposta PDF e no portal.</p>
-                            </div>
-                            <Switch
-                                checked={formData.show_sku_on_proposal !== false}
-                                onCheckedChange={(checked) => setFormData({ ...formData, show_sku_on_proposal: checked })}
-                            />
-                        </div>
+
                     </div>
 
                     <div className="space-y-4 pt-2">

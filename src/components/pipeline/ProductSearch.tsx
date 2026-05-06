@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import {
-    Search, Loader2, X, Filter, Package, Database, AlertCircle, CheckCircle2, Inbox,
+    Search, Loader2, X, Filter, Package, Database, AlertCircle, CheckCircle2, Inbox, Plus,
     Server, HardDrive, Cpu, Cloud, Network, Wifi, Monitor, Laptop, Smartphone, Tablet,
     Cable, Router, Shield, FileKey, FileCode, MemoryStick, Disc, Keyboard, Mouse, DatabaseBackup, Archive
 } from 'lucide-react';
@@ -17,9 +17,10 @@ const iconMap: Record<string, any> = {
 
 interface ProductSearchProps {
     onSelect: (product: Product) => void;
+    onQuickAdd?: (searchTerm: string) => void;
 }
 
-export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
+export const ProductSearch = ({ onSelect, onQuickAdd }: ProductSearchProps) => {
     const { products, loading, error } = useProducts();
     const [searchTerm, setSearchTerm] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -347,20 +348,34 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                             </ul>
                         </div>
                     ) : (
-                        <div className="px-8 py-16 text-center">
+                        <div className="px-8 py-12 text-center">
                             <div className="h-16 w-16 bg-muted/50 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-border">
                                 <Search className="h-8 w-8 text-muted-foreground" />
                             </div>
                             <h4 className="text-lg font-black text-foreground mb-1">Sem resultados</h4>
-                            <p className="text-xs text-muted-foreground font-bold mb-6">Tente ajustar seus termos de busca ou filtros.</p>
-                            {hasActiveFilters && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="px-6 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                >
-                                    Limpar todos os filtros
-                                </button>
-                            )}
+                            <p className="text-xs text-muted-foreground font-bold mb-5">Nenhum produto encontrado no catálogo.</p>
+                            <div className="flex flex-col items-center gap-3">
+                                {onQuickAdd && debouncedSearch.trim() && (
+                                    <button
+                                        onClick={() => {
+                                            onQuickAdd(debouncedSearch.trim());
+                                            setShowDropdown(false);
+                                        }}
+                                        className="flex items-center gap-2 px-6 py-3 bg-primary text-white hover:bg-primary/90 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Criar &ldquo;{debouncedSearch.trim()}&rdquo; como avulso
+                                    </button>
+                                )}
+                                {hasActiveFilters && (
+                                    <button
+                                        onClick={handleClearSearch}
+                                        className="px-6 py-3 bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                    >
+                                        Limpar filtros
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

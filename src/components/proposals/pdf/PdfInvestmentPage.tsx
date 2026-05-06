@@ -7,6 +7,7 @@ import type { BillingOverride } from '@/hooks/useProposalEditorState';
 
 interface PdfInvestmentPageProps {
     products: any[];
+    dealQuotes?: any[];
     simplifiedProductNames?: Record<string, string>;
     showBillingInfo: boolean;
     isPriceStudy: boolean;
@@ -14,12 +15,14 @@ interface PdfInvestmentPageProps {
     formatCurrency: (value: number) => string;
     distributors?: any[];
     billingOverrides?: Record<string, BillingOverride>;
+    quoteDisplayMode?: 'consolidated' | 'options';
     pdfColors: PdfColors;
     pdfStyles: any;
 }
 
 export function PdfInvestmentPage({
     products,
+    dealQuotes = [],
     simplifiedProductNames = {},
     showBillingInfo,
     isPriceStudy,
@@ -27,6 +30,7 @@ export function PdfInvestmentPage({
     formatCurrency,
     distributors = [],
     billingOverrides = {},
+    quoteDisplayMode,
     pdfColors,
     pdfStyles,
 }: PdfInvestmentPageProps) {
@@ -35,9 +39,16 @@ export function PdfInvestmentPage({
     const optionalProducts = products.filter(p => p.is_optional && p.is_visible_on_proposal !== false);
 
     // Calculate total
-    const totalMainValue = mainProducts.reduce(
-        (acc, p) => acc + (p.unit_price || 0) * (p.quantity || 1), 0
-    );
+    const totalMainBRL = mainProducts.reduce((acc, p) => {
+        if (p.present_in_usd) return acc;
+        return acc + (p.unit_price || 0) * (p.quantity || 1);
+    }, 0);
+
+    const totalMainUSD = mainProducts.reduce((acc, p) => {
+        if (!p.present_in_usd) return acc;
+        const usdPrice = (p.unit_price || 0) / (p.exchange_rate || 1);
+        return acc + (usdPrice * (p.quantity || 1));
+    }, 0);
 
     const showSkuColumn = mainProducts.some(p => p.show_sku_on_proposal !== false && !!p.sku);
 
@@ -75,118 +86,284 @@ export function PdfInvestmentPage({
                     </View>
                     <View style={pdfStyles.titleUnderline} />
                 </View>
+                {/* ── Investment Tables (Options or Consolidated) ── */}
+                {(() => {
+                    // Derive quotes: prefer dealQuotes, fallback to unique quote_ids
+                    const quotes = dealQuotes.length > 0
+                        ? dealQuotes
+                        : [...new Set(mainProducts.map(p => p.quote_id).filter(Boolean))].map(id => ({ id, title: 'Cotação', is_primary: false }));
+                    const isMultiQuoteOptions = quoteDisplayMode === 'options' && quotes.length > 1;
+                    const isSingleQuoteOptions = quoteDisplayMode === 'options' && quotes.length <= 1;
 
-                {/* Main Products Table */}
-                <View style={{
-                    borderTopWidth: 3, borderTopColor: pdfColors.primary,
-                    borderBottomWidth: 3, borderBottomColor: pdfColors.primary,
-                    backgroundColor: pdfColors.white,
-                }}>
-                    {/* Table Header */}
-                    <View style={{
-                        flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 12,
-                        backgroundColor: pdfColors.bgLighter, borderBottomWidth: 1, borderBottomColor: pdfColors.border,
-                    }}>
-                        <View style={{ width: 100 }}>
-                            <Text style={pdfStyles.tableHeaderText}>Categoria</Text>
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={pdfStyles.tableHeaderText}>Descrição</Text>
-                        </View>
-                        {showSkuColumn && (
-                            <View style={{ width: 70 }}>
-                                <Text style={pdfStyles.tableHeaderText}>SKU</Text>
-                            </View>
-                        )}
-                        <View style={{ width: 35, alignItems: 'center' }}>
-                            <Text style={pdfStyles.tableHeaderText}>Qtd</Text>
-                        </View>
-                        <View style={{ width: 70, alignItems: 'flex-end' }}>
-                            <Text style={pdfStyles.tableHeaderText}>Unitário</Text>
-                        </View>
-                        <View style={{ width: 95, alignItems: 'flex-end' }}>
-                            <Text style={pdfStyles.tableHeaderText}>Investimento</Text>
-                        </View>
-                    </View>
-
-                    {/* Table Rows */}
-                    {mainProducts.map((product, idx) => {
-                        const productTotal = (product.unit_price || 0) * (product.quantity || 1);
-                        let categoryLabel = product.category || getClassificationLabel(product);
-                        if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
-                            categoryLabel += ` - ${product.subcategory}`;
-                        }
+                    // Helper: render a product table block for a given set of products
+                    const renderProductTable = (prods: any[], label?: string, pricingSuffix?: string, pricingModel?: string) => {
+                        const tableTotalBRL = prods.reduce((acc: number, p: any) => {
+                            if (p.present_in_usd) return acc;
+                            return acc + (p.unit_price || 0) * (p.quantity || 1);
+                        }, 0);
+                        const tableTotalUSD = prods.reduce((acc: number, p: any) => {
+                            if (!p.present_in_usd) return acc;
+                            const usdPrice = (p.unit_price || 0) / (p.exchange_rate || 1);
+                            return acc + (usdPrice * (p.quantity || 1));
+                        }, 0);
 
                         return (
-                            <View key={idx} wrap={false} style={{
-                                flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12,
-                                borderBottomWidth: 1, borderBottomColor: pdfColors.border,
-                                alignItems: 'flex-start',
-                                backgroundColor: idx % 2 === 0 ? pdfColors.white : '#fafbfc',
-                            }}>
-                                <View style={{ width: 100 }}>
-                                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.primary }}>
-                                        {categoryLabel}
-                                    </Text>
-                                </View>
-                                <View style={{ flex: 1 }}>
-                                    <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.text }}>
-                                        {simplifiedProductNames[product.name] || product.display_name || product.name}
-                                    </Text>
-                                    {product.duration && product.duration_unit && (
-                                        <Text style={{ fontSize: 8, color: pdfColors.green, fontFamily: 'Helvetica-Oblique' }}>
-                                            (Válido por {product.duration} {product.duration_unit})
-                                        </Text>
+                            <View>
+                                <View style={{
+                                    borderTopWidth: 3, borderTopColor: pdfColors.primary,
+                                    borderBottomWidth: 3, borderBottomColor: pdfColors.primary,
+                                    backgroundColor: pdfColors.white,
+                                }}>
+                                    {/* Table Header */}
+                                    <View style={{
+                                        flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 12,
+                                        backgroundColor: pdfColors.bgLighter, borderBottomWidth: 1, borderBottomColor: pdfColors.border,
+                                    }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={pdfStyles.tableHeaderText}>Descrição</Text>
+                                        </View>
+                                        {showSkuColumn && (
+                                            <View style={{ width: 110 }}>
+                                                <Text style={pdfStyles.tableHeaderText}>SKU</Text>
+                                            </View>
+                                        )}
+                                        <View style={{ width: 35, alignItems: 'center' }}>
+                                            <Text style={pdfStyles.tableHeaderText}>Qtd</Text>
+                                        </View>
+                                        <View style={{ width: 75, alignItems: 'flex-end' }}>
+                                            <Text style={pdfStyles.tableHeaderText}>Unitário{pricingSuffix ? ` ${pricingSuffix}` : ''}</Text>
+                                        </View>
+                                        <View style={{ width: 95, alignItems: 'flex-end' }}>
+                                            <Text style={pdfStyles.tableHeaderText}>Investimento{pricingSuffix ? ` ${pricingSuffix}` : ''}</Text>
+                                        </View>
+                                    </View>
+
+                                    {/* Table Rows Grouped by Category */}
+                                    {(() => {
+                                        const groupedProducts = prods.reduce((acc: Record<string, any[]>, product: any) => {
+                                            let categoryLabel = product.category || getClassificationLabel(product);
+                                            if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
+                                                categoryLabel += ` - ${product.subcategory}`;
+                                            }
+                                            if (!acc[categoryLabel]) acc[categoryLabel] = [];
+                                            acc[categoryLabel].push(product);
+                                            return acc;
+                                        }, {} as Record<string, any[]>);
+
+                                        return Object.entries(groupedProducts).map(([category, productsInCategory]: [string, any[]], groupIdx: number) => (
+                                            <React.Fragment key={`group-${groupIdx}`}>
+                                                <View wrap={false} style={{
+                                                    flexDirection: 'row', paddingVertical: 6, paddingHorizontal: 12,
+                                                    backgroundColor: '#f1f5f9', borderBottomWidth: 1, borderBottomColor: pdfColors.border
+                                                }}>
+                                                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.primary, textTransform: 'uppercase' }}>
+                                                        {category}
+                                                    </Text>
+                                                </View>
+                                                {productsInCategory.map((product: any, idx: number) => {
+                                                    const isUSD = product.present_in_usd;
+                                                    const unitPrice = isUSD ? ((product.unit_price || 0) / (product.exchange_rate || 1)) : (product.unit_price || 0);
+                                                    const productTotal = unitPrice * (product.quantity || 1);
+                                                    const formatValue = (val: number) => isUSD
+                                                        ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
+                                                        : formatCurrency(val);
+                                                    return (
+                                                        <View key={`prod-${idx}`} wrap={false} style={{
+                                                            flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12,
+                                                            borderBottomWidth: 1, borderBottomColor: pdfColors.border,
+                                                            alignItems: 'flex-start',
+                                                            backgroundColor: idx % 2 === 0 ? pdfColors.white : '#fafbfc',
+                                                        }}>
+                                                            <View style={{ flex: 1 }}>
+                                                                <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.text }}>
+                                                                    {simplifiedProductNames[product.name] || product.display_name || product.name}
+                                                                </Text>
+                                                                {product.duration && product.duration_unit && (
+                                                                    <Text style={{ fontSize: 8, color: pdfColors.green, fontFamily: 'Helvetica-Oblique' }}>
+                                                                        {pricingModel === 'monthly' || pricingModel === 'annual'
+                                                                            ? `(Contrato de ${product.duration} ${product.duration_unit})`
+                                                                            : `(Válido por ${product.duration} ${product.duration_unit})`}
+                                                                    </Text>
+                                                                )}
+                                                            </View>
+                                                            {showSkuColumn && (
+                                                                <View style={{ width: 110 }}>
+                                                                    <Text style={{ fontSize: 9, color: pdfColors.textLight }}>
+                                                                        {product.show_sku_on_proposal !== false ? (product.sku || '-') : ''}
+                                                                    </Text>
+                                                                </View>
+                                                            )}
+                                                            <View style={{ width: 35, alignItems: 'center' }}>
+                                                                <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.text }}>
+                                                                    {product.quantity || 1}
+                                                                </Text>
+                                                            </View>
+                                                            <View style={{ width: 75, alignItems: 'flex-end' }}>
+                                                                <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.textLight }}>
+                                                                    {formatValue(unitPrice)}
+                                                                </Text>
+                                                            </View>
+                                                            <View style={{ width: 95, alignItems: 'flex-end' }}>
+                                                                <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.black }}>
+                                                                    {formatValue(productTotal)}
+                                                                </Text>
+                                                            </View>
+                                                        </View>
+                                                    );
+                                                })}
+                                            </React.Fragment>
+                                        ));
+                                    })()}
+
+                                    {prods.length === 0 && (
+                                        <View style={{ padding: 24, alignItems: 'center' }}>
+                                            <Text style={{ color: pdfColors.textMuted }}>Consulte as opções alternativas abaixo.</Text>
+                                        </View>
                                     )}
                                 </View>
-                                {showSkuColumn && (
-                                    <View style={{ width: 70 }}>
-                                        <Text style={{ fontSize: 9, color: pdfColors.textLight }}>
-                                            {product.show_sku_on_proposal !== false ? (product.sku || '-') : ''}
-                                        </Text>
-                                    </View>
-                                )}
-                                <View style={{ width: 35, alignItems: 'center' }}>
-                                    <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.text }}>
-                                        {product.quantity || 1}
-                                    </Text>
-                                </View>
-                                <View style={{ width: 70, alignItems: 'flex-end' }}>
-                                    <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.textLight }}>
-                                        {formatCurrency(product.unit_price || 0)}
-                                    </Text>
-                                </View>
-                                <View style={{ width: 95, alignItems: 'flex-end' }}>
-                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.black }}>
-                                        {formatCurrency(productTotal)}
-                                    </Text>
+
+                                {/* Total */}
+                                <View wrap={false} style={{
+                                    flexDirection: 'column', marginTop: 16, paddingHorizontal: 12,
+                                    alignItems: 'flex-end', justifyContent: 'flex-end', gap: 6
+                                }}>
+                                    {tableTotalBRL > 0 && (
+                                        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                                            <Text style={{
+                                                fontSize: 13, fontWeight: 'bold', color: '#4b5563',
+                                                textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                                            }}>
+                                                {label ? `Investimento ${label}` : pricingSuffix ? `Total ${pricingSuffix}` : 'Investimento Consolidado'} {tableTotalUSD > 0 ? '(BRL)' : ''}
+                                            </Text>
+                                            <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
+                                                {formatCurrency(tableTotalBRL)}
+                                            </Text>
+                                        </View>
+                                    )}
+                                    {tableTotalUSD > 0 && (
+                                        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                                            <Text style={{
+                                                fontSize: 13, fontWeight: 'bold', color: '#4b5563',
+                                                textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                                            }}>
+                                                {label ? `Investimento ${label}` : 'Investimento Consolidado'} (USD)
+                                            </Text>
+                                            <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
+                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(tableTotalUSD)}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                         );
-                    })}
+                    };
 
-                    {mainProducts.length === 0 && (
-                        <View style={{ padding: 24, alignItems: 'center' }}>
-                            <Text style={{ color: pdfColors.textMuted }}>Consulte as opções alternativas abaixo.</Text>
+                    // Multi-quote options: each quote = 1 option
+                    if (isMultiQuoteOptions) {
+                        return quotes
+                            .filter((q: any) => mainProducts.some(p => p.quote_id === q.id))
+                            .map((quote: any, qIdx: number) => {
+                                const quoteProducts = mainProducts.filter(p => p.quote_id === quote.id);
+                                const optionLetter = String.fromCharCode(65 + qIdx);
+                                return (
+                                    <View key={quote.id} style={{ marginBottom: 20 }}>
+                                        <View wrap={false} style={{
+                                            flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10,
+                                        }}>
+                                            <View style={{
+                                                backgroundColor: pdfColors.accent, paddingVertical: 3, paddingHorizontal: 8,
+                                                borderRadius: 4,
+                                            }}>
+                                                <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>
+                                                    OPÇÃO {optionLetter}
+                                                </Text>
+                                            </View>
+                                            <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.primary }}>
+                                                {quote.title}
+                                            </Text>
+                                        </View>
+                                        {renderProductTable(quoteProducts, `Opção ${optionLetter}`)}
+                                    </View>
+                                );
+                            });
+                    }
+
+                    // Single-quote options: each root product (+ children) = 1 option
+                    if (isSingleQuoteOptions) {
+                        const rootProducts = mainProducts.filter(p => !p.parent_id);
+                        return rootProducts.map((rootProduct, pIdx) => {
+                            const children = mainProducts.filter(p => p.parent_id === rootProduct.id);
+                            const optionProducts = [rootProduct, ...children];
+                            const optionLetter = String.fromCharCode(65 + pIdx);
+                            const displayName = simplifiedProductNames[rootProduct.name] || rootProduct.display_name || rootProduct.name;
+                            return (
+                                <View key={rootProduct.id} style={{ marginBottom: 20 }}>
+                                    <View wrap={false} style={{
+                                        flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10,
+                                    }}>
+                                        <View style={{
+                                            backgroundColor: pdfColors.accent, paddingVertical: 3, paddingHorizontal: 8,
+                                            borderRadius: 4,
+                                        }}>
+                                            <Text style={{ fontSize: 9, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>
+                                                OPÇÃO {optionLetter}
+                                            </Text>
+                                        </View>
+                                        <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.primary }}>
+                                            {displayName}
+                                        </Text>
+                                    </View>
+                                    {renderProductTable(optionProducts, `Opção ${optionLetter}`)}
+                                </View>
+                            );
+                        });
+                    }
+
+                    // Consolidated mode with pricing model grouping
+                    const oneTimeProducts = mainProducts.filter(p => !p.pricing_model || p.pricing_model === 'one_time');
+                    const monthlyProducts = mainProducts.filter(p => p.pricing_model === 'monthly');
+                    const annualProducts = mainProducts.filter(p => p.pricing_model === 'annual');
+                    const hasRecurring = monthlyProducts.length > 0 || annualProducts.length > 0;
+
+                    if (!hasRecurring) {
+                        return renderProductTable(mainProducts);
+                    }
+
+                    return (
+                        <View>
+                            {oneTimeProducts.length > 0 && (
+                                <View style={{ marginBottom: 18 }}>
+                                    <View wrap={false} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                        <View style={{ backgroundColor: pdfColors.primary, paddingVertical: 2, paddingHorizontal: 8, borderRadius: 4 }}>
+                                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>INVESTIMENTO ÚNICO</Text>
+                                        </View>
+                                    </View>
+                                    {renderProductTable(oneTimeProducts, undefined, undefined, 'one_time')}
+                                </View>
+                            )}
+                            {monthlyProducts.length > 0 && (
+                                <View style={{ marginBottom: 18 }}>
+                                    <View wrap={false} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                        <View style={{ backgroundColor: '#0891b2', paddingVertical: 2, paddingHorizontal: 8, borderRadius: 4 }}>
+                                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>INVESTIMENTO RECORRENTE MENSAL</Text>
+                                        </View>
+                                    </View>
+                                    {renderProductTable(monthlyProducts, undefined, '/mês', 'monthly')}
+                                </View>
+                            )}
+                            {annualProducts.length > 0 && (
+                                <View style={{ marginBottom: 18 }}>
+                                    <View wrap={false} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                        <View style={{ backgroundColor: '#d97706', paddingVertical: 2, paddingHorizontal: 8, borderRadius: 4 }}>
+                                            <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#ffffff', letterSpacing: 0.5 }}>INVESTIMENTO RECORRENTE ANUAL</Text>
+                                        </View>
+                                    </View>
+                                    {renderProductTable(annualProducts, undefined, '/ano', 'annual')}
+                                </View>
+                            )}
                         </View>
-                    )}
-                </View>
-
-                {/* Total — keep together */}
-                <View wrap={false} style={{
-                    flexDirection: 'row', marginTop: 16, paddingHorizontal: 12,
-                    alignItems: 'baseline', justifyContent: 'flex-end',
-                }}>
-                    <Text style={{
-                        fontSize: 13, fontWeight: 'bold', color: '#4b5563',
-                        textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
-                    }}>
-                        Investimento Consolidado
-                    </Text>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
-                        {formatCurrency(totalMainValue)}
-                    </Text>
-                </View>
+                    );
+                })()}
 
                 {/* Optional Products */}
                 {optionalProducts.length > 0 && (
@@ -203,7 +380,14 @@ export function PdfInvestmentPage({
                             </Text>
                         </View>
                         {optionalProducts.map((product, idx) => {
-                            const productTotal = (product.unit_price || 0) * (product.quantity || 1);
+                            const isUSD = product.present_in_usd;
+                            const unitPrice = isUSD ? ((product.unit_price || 0) / (product.exchange_rate || 1)) : (product.unit_price || 0);
+                            const productTotal = unitPrice * (product.quantity || 1);
+                            
+                            const formatValue = (val: number) => isUSD 
+                                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
+                                : formatCurrency(val);
+                                
                             return (
                                 <View key={idx} wrap={false} style={{
                                     flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 16,
@@ -220,7 +404,7 @@ export function PdfInvestmentPage({
                                     </View>
                                     <View style={{ width: 120, alignItems: 'flex-end' }}>
                                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.text }}>
-                                            {formatCurrency(productTotal)}
+                                            {formatValue(productTotal)}
                                         </Text>
                                     </View>
                                 </View>

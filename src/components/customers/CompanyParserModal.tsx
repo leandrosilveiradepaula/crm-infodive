@@ -75,9 +75,9 @@ export function CompanyParserModal({ isOpen, onClose, onDataParsed }: CompanyPar
 
             setParsedData(resData.data);
             toast.success('Dados da empresa extraídos com sucesso!');
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error('Erro ao processar dados da empresa.');
+            toast.error(error.message || 'Erro ao processar dados da empresa.');
         } finally {
             setLoading(false);
         }
