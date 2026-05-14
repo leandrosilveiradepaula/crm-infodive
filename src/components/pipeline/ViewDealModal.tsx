@@ -109,6 +109,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     // State for forcing refresh of proposals list
     const [proposalsRefreshKey, setProposalsRefreshKey] = useState(0);
     const [prevDealId, setPrevDealId] = useState(initialDeal.id);
+    const lastSavedTitle = React.useRef(initialDeal.title);
 
     useEffect(() => {
         // Robust Sync: If the parent props change (e.g. after revalidatePath), 
@@ -121,10 +122,15 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
         } else if (!isEditing) {
             // Sync from server when NOT editing.
             setDeal(prev => {
+                // Safeguard: If initialDeal.title is different from our local state, 
+                // but matches the title we HAD before the last save, it's likely a stale prop 
+                // from Next.js revalidation. We should ignore it.
+                const isStaleTitle = initialDeal.title !== prev.title && initialDeal.title === lastSavedTitle.current;
+
                 // Avoid unnecessary updates if products are the same
                 if (JSON.stringify(prev.deal_products) === JSON.stringify(initialDeal.deal_products) &&
                     prev.value === initialDeal.value &&
-                    prev.title === initialDeal.title) {
+                    (prev.title === initialDeal.title || isStaleTitle)) {
                     return prev;
                 }
                 return {
@@ -244,6 +250,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             }) as Deal);
 
             toast.success('Oportunidade atualizada com sucesso!');
+            lastSavedTitle.current = formData.title;
             setIsEditing(false);
         } catch (error) {
             toast.error('Erro ao atualizar oportunidade');
@@ -337,7 +344,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                 const freshProducts = freshDeal.deal_products || [];
                 const primaryQuote = (freshDeal.deal_quotes || []).find(q => q.is_primary);
                 const primaryProducts = primaryQuote
-                    ? freshProducts.filter(p => p.quote_id === primaryQuote.id)
+                    ? freshProducts.filter(p => !p.quote_id || p.quote_id === primaryQuote.id)
                     : freshProducts;
                 const newTotalValue = calculateDealValue(primaryProducts);
 
@@ -610,7 +617,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                 {(() => {
                                                     const primaryQuote = (deal.deal_quotes || []).find(q => q.is_primary);
                                                     const products = primaryQuote
-                                                        ? (deal.deal_products || []).filter(p => p.quote_id === primaryQuote.id)
+                                                        ? (deal.deal_products || []).filter(p => !p.quote_id || p.quote_id === primaryQuote.id)
                                                         : (deal.deal_products || []);
                                                     return formatCurrency(calculateDealValue(products)).replace('R$', '').trim();
                                                 })()}

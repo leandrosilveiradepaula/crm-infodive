@@ -1,12 +1,13 @@
 import pptxgen from 'pptxgenjs';
 import { LOGO_BASE64, DATACENTER_BASE64, HANDSHAKE_BASE64 } from '@/components/proposals/pdf/pdfAssetsBase64';
 import type { Deal, DealProduct } from '@/types/deal';
+import type { Account } from '@/types/account';
 import { isSoftware, isHardware, isSupport, isService } from '@/utils/productClassification';
 
 // ─── Theme & Layout Constants ───────────────────────────────────────────────
 const SLIDE_W = 10;
 const SLIDE_H = 5.625;
-const FONT = 'Arial';
+const FONT = 'Inter';
 
 interface PptColors {
     primary: string;
@@ -228,17 +229,18 @@ export function buildDifferentialsSlide(pptx: pptxgen, primaryColor?: string, ac
     diffs.forEach((d, i) => {
         const y = 2.0 + i * 0.95;
         const color = d.borderColor;
+        const fontFace = 'Inter';
         slide.addShape('roundRect', { x: 0.5, y, w: 9, h: 0.85, fill: { color: d.bgColor }, line: { color, width: 1 }, rectRadius: 0.08 });
         slide.addText(d.icon, { x: 0.7, y, w: 0.6, h: 0.85, fontSize: 26, align: 'center', valign: 'middle' });
-        slide.addText(d.title, { x: 1.4, y: y + 0.08, w: 7.8, h: 0.3, fontSize: 13, bold: true, color, fontFace: FONT });
-        slide.addText(d.desc, { x: 1.4, y: y + 0.38, w: 7.8, h: 0.35, fontSize: 9, color: '4b5563', fontFace: FONT, lineSpacingMultiple: 1.2 });
+        slide.addText(d.title, { x: 1.4, y: y + 0.08, w: 7.8, h: 0.3, fontSize: 13, bold: true, color, fontFace });
+        slide.addText(d.desc, { x: 1.4, y: y + 0.38, w: 7.8, h: 0.35, fontSize: 9, color: '4b5563', fontFace, lineSpacingMultiple: 1.2 });
     });
 
     // Banner
     slide.addShape('roundRect', { x: 0.5, y: 4.95, w: 9, h: 0.4, fill: { color: c.primary }, rectRadius: 0.08 });
     slide.addText([
-        { text: 'Mais de 15 anos ', options: { fontSize: 10, bold: true, color: c.accent, fontFace: FONT } },
-        { text: 'transformando infraestruturas de TI em vantagens competitivas', options: { fontSize: 10, color: 'FFFFFF', fontFace: FONT } },
+        { text: 'Mais de 15 anos ', options: { fontSize: 10, bold: true, color: c.accent, fontFace: 'Inter' } },
+        { text: 'transformando infraestruturas de TI em vantagens competitivas', options: { fontSize: 10, color: 'FFFFFF', fontFace: 'Inter' } },
     ], { x: 0.5, y: 4.95, w: 9, h: 0.4, align: 'center', valign: 'middle' });
 
     return slide;
@@ -250,7 +252,7 @@ export function buildCustomNotesSlide(pptx: pptxgen, title: string, content: str
     const c = getColors(primaryColor, accentColor);
     const slide = pptx.addSlide();
     addStandardHeader(slide, c, title || 'Notas', 'Adicionais');
-    slide.addText(content, { x: 0.5, y: 1.7, w: 9, h: 3.5, fontSize: 10, color: '334155', fontFace: FONT, lineSpacingMultiple: 1.4, valign: 'top', paraSpaceAfter: 6 });
+    slide.addText(content, { x: 0.5, y: 1.7, w: 9, h: 3.5, fontSize: 10, color: '334155', fontFace: 'Inter', lineSpacingMultiple: 1.4, valign: 'top', paraSpaceAfter: 6 });
     addFooter(slide, c, 'Infodive IT Solutions');
     return slide;
 }
@@ -258,6 +260,8 @@ export function buildCustomNotesSlide(pptx: pptxgen, title: string, content: str
 // ─── Investment Slide(s) ────────────────────────────────────────────────────
 export interface InvestmentData {
     deal: Deal;
+    distributors?: Account[];
+    billingOverrides?: Record<string, any>;
     simplifiedProductNames?: Record<string, string>;
     primaryColor?: string;
     accentColor?: string;
@@ -273,8 +277,12 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
     const mainProducts = products.filter(p => !p.is_optional);
     const simplify = data.simplifiedProductNames || {};
 
-    const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', {
-        style: 'currency', currency: products[0]?.is_usd ? 'USD' : 'BRL'
+    const formatBRL = (v: number) => new Intl.NumberFormat('pt-BR', {
+        style: 'currency', currency: 'BRL'
+    }).format(v);
+
+    const formatUSD = (v: number) => new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD'
     }).format(v);
 
     const ROW_H = 0.28;
@@ -284,13 +292,13 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
     const MAX_Y = SLIDE_H - 0.5; // leave room for footer
 
     // Helper: build table rows for a product set
-    const buildTableRows = (prods: DealProduct[], label?: string, pricingSuffix?: string, pricingModel?: string) => {
+    const buildTableRows = (prods: DealProduct[], label?: string, pricingSuffix?: string, pricingModel?: string, hideTotal: boolean = false) => {
         const headerRow: pptxgen.TableRow = [
-            { text: '#', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, align: 'center' } },
-            { text: 'Produto / Serviço', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT } },
-            { text: 'Qtd', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, align: 'center' } },
-            { text: `Valor Unit.${pricingSuffix ? ` ${pricingSuffix}` : ''}`, options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, align: 'right' } },
-            { text: `Total${pricingSuffix ? ` ${pricingSuffix}` : ''}`, options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, align: 'right' } },
+            { text: '#', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', align: 'center' } },
+            { text: 'Produto / Serviço', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter' } },
+            { text: 'Qtd', options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', align: 'center' } },
+            { text: `Valor Unit.`, options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', align: 'right' } },
+            { text: `Total`, options: { fontSize: 8, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', align: 'right' } },
         ];
 
         const dataRows: pptxgen.TableRow[] = prods.map((p, i) => {
@@ -300,29 +308,47 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
                 name += `\n${isRecurring ? '(Contrato de ' : '(Válido por '}${p.duration} ${p.duration_unit})`;
             }
             const qty = p.quantity || 1;
-            const unit = p.unit_price || 0;
+            const isUSD = !!p.present_in_usd;
+            const unit = isUSD ? ((p.unit_price || 0) / (p.exchange_rate || 1)) : (p.unit_price || 0);
             const total = unit * qty;
             const bgColor = i % 2 === 0 ? 'f8fafc' : 'FFFFFF';
+            const formatter = isUSD ? formatUSD : formatBRL;
+
             return [
-                { text: String(i + 1), options: { fontSize: 8, color: c.textMuted, fontFace: FONT, align: 'center', fill: { color: bgColor } } },
-                { text: name, options: { fontSize: 8, color: c.textDark, fontFace: FONT, fill: { color: bgColor } } },
-                { text: String(qty), options: { fontSize: 8, color: c.textDark, fontFace: FONT, align: 'center', fill: { color: bgColor } } },
-                { text: formatCurrency(unit), options: { fontSize: 8, color: c.textDark, fontFace: FONT, align: 'right', fill: { color: bgColor } } },
-                { text: formatCurrency(total), options: { fontSize: 8, bold: true, color: c.textDark, fontFace: FONT, align: 'right', fill: { color: bgColor } } },
+                { text: String(i + 1), options: { fontSize: 8, color: c.textMuted, fontFace: 'Inter', align: 'center', fill: { color: bgColor } } },
+                { text: name, options: { fontSize: 8, color: c.textDark, fontFace: 'Inter', fill: { color: bgColor } } },
+                { text: String(qty), options: { fontSize: 8, color: c.textDark, fontFace: 'Inter', align: 'center', fill: { color: bgColor } } },
+                { text: formatter(unit), options: { fontSize: 8, color: c.textDark, fontFace: 'Inter', align: 'right', fill: { color: bgColor } } },
+                { text: formatter(total), options: { fontSize: 8, bold: true, color: c.textDark, fontFace: 'Inter', align: 'right', fill: { color: bgColor } } },
             ];
         });
 
-        const grandTotal = prods.reduce((s, p) => s + ((p.unit_price || 0) * (p.quantity || 1)), 0);
-        const totalLabel = label ? `TOTAL ${label.toUpperCase()}` : pricingSuffix ? `TOTAL ${pricingSuffix.toUpperCase().trim()}` : 'TOTAL CONSOLIDADO';
-        const totalRow: pptxgen.TableRow = [
-            { text: '', options: { fill: { color: c.primary } } },
-            { text: totalLabel, options: { fontSize: 9, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, colspan: 2 } },
-            { text: '', options: { fill: { color: c.primary } } },
-            { text: '', options: { fill: { color: c.primary } } },
-            { text: formatCurrency(grandTotal), options: { fontSize: 10, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: FONT, align: 'right' } },
-        ];
+        // Split totals if mixed currency
+        const totalBRL = prods.reduce((s, p) => p.present_in_usd ? s : s + ((p.unit_price || 0) * (p.quantity || 1)), 0);
+        const totalUSD = prods.reduce((s, p) => !p.present_in_usd ? s : s + (((p.unit_price || 0) / (p.exchange_rate || 1)) * (p.quantity || 1)), 0);
+        
+        const rows = [headerRow, ...dataRows];
+        
+        if (!hideTotal) {
+            if (totalBRL > 0) {
+                const labelBRL = label ? `TOTAL ${label.toUpperCase()}${totalUSD > 0 ? ' (BRL)' : ''}` : totalUSD > 0 ? 'TOTAL CONSOLIDADO (BRL)' : 'TOTAL CONSOLIDADO';
+                rows.push([
+                    { text: labelBRL, options: { fontSize: 9, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', colspan: 3, align: 'right' } },
+                    { text: '', options: { fill: { color: c.primary } } },
+                    { text: formatBRL(totalBRL), options: { fontSize: 10, bold: true, color: 'FFFFFF', fill: { color: c.primary }, fontFace: 'Inter', align: 'right' } },
+                ]);
+            }
+            if (totalUSD > 0) {
+                const labelUSD = label ? `TOTAL ${label.toUpperCase()} (USD)` : 'TOTAL CONSOLIDADO (USD)';
+                rows.push([
+                    { text: labelUSD, options: { fontSize: 9, bold: true, color: 'FFFFFF', fill: { color: '475569' }, fontFace: 'Inter', colspan: 3, align: 'right' } },
+                    { text: '', options: { fill: { color: '475569' } } },
+                    { text: formatUSD(totalUSD), options: { fontSize: 10, bold: true, color: 'FFFFFF', fill: { color: '475569' }, fontFace: 'Inter', align: 'right' } },
+                ]);
+            }
+        }
 
-        return { rows: [headerRow, ...dataRows, totalRow], height: (prods.length + 2) * ROW_H };
+        return { rows, height: rows.length * ROW_H };
     };
 
     // Determine display mode
@@ -365,7 +391,7 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
 
         optionBlocks.forEach((block) => {
             const labelH = 0.3;
-            const { rows, height: tableH } = buildTableRows(block.prods, block.label);
+            const { rows, height: tableH } = buildTableRows(block.prods, block.label, undefined, undefined, true);
             const blockH = labelH + tableH + 0.15; // label + table + gap
 
             // Check if we need a new slide
@@ -379,8 +405,8 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
 
             // Option label badge
             slide.addShape('roundRect', { x: TABLE_X, y: curY, w: 0.7, h: 0.22, fill: { color: c.accent }, rectRadius: 0.04 });
-            slide.addText(block.label.toUpperCase(), { x: TABLE_X, y: curY, w: 0.7, h: 0.22, fontSize: 7, bold: true, color: 'FFFFFF', fontFace: FONT, align: 'center', valign: 'middle' });
-            slide.addText(block.displayName, { x: TABLE_X + 0.8, y: curY, w: 8, h: 0.22, fontSize: 9, bold: true, color: c.primary, fontFace: FONT, valign: 'middle' });
+            slide.addText(block.label.toUpperCase(), { x: TABLE_X, y: curY, w: 0.7, h: 0.22, fontSize: 7, bold: true, color: 'FFFFFF', fontFace: 'Inter', align: 'center', valign: 'middle' });
+            slide.addText(block.displayName, { x: TABLE_X + 0.8, y: curY, w: 8, h: 0.22, fontSize: 9, bold: true, color: c.primary, fontFace: 'Inter', valign: 'middle' });
             curY += labelH;
 
             // Table
@@ -395,67 +421,95 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
 
         addFooter(slide, c, 'Infodive IT Solutions - Resumo de Investimento');
     } else {
-        // Consolidated view with pricing model grouping
-        const oneTimeProducts = mainProducts.filter(p => !p.pricing_model || p.pricing_model === 'one_time');
-        const monthlyProducts = mainProducts.filter(p => p.pricing_model === 'monthly');
-        const annualProducts = mainProducts.filter(p => p.pricing_model === 'annual');
-        const hasRecurring = monthlyProducts.length > 0 || annualProducts.length > 0;
+        // Consolidated view: follow strict linear order
+        const slide = pptx.addSlide();
+        slides.push(slide);
+        addStandardHeader(slide, c, 'Estrutura de', 'Investimento');
 
-        if (!hasRecurring) {
-            const slide = pptx.addSlide();
-            slides.push(slide);
-            addStandardHeader(slide, c, 'Estrutura de', 'Investimento');
+        const { rows } = buildTableRows(mainProducts);
+        slide.addTable(rows, {
+            x: TABLE_X, y: 1.7, w: TABLE_W,
+            colW: COL_W, rowH: ROW_H,
+            border: { type: 'solid', pt: 0.3, color: c.border },
+            margin: [2, 4, 2, 4],
+        });
 
-            const { rows } = buildTableRows(mainProducts);
-            slide.addTable(rows, {
-                x: TABLE_X, y: 1.7, w: TABLE_W,
-                colW: COL_W, rowH: ROW_H,
-                border: { type: 'solid', pt: 0.3, color: c.border },
-                margin: [2, 4, 2, 4],
+        addFooter(slide, c, 'Infodive IT Solutions - Resumo de Investimento');
+    }
+
+    // ── Billing Info Slide ─────────────────────────────────────────────
+    if (data.showBillingInfo !== false) {
+        const billingSlide = pptx.addSlide();
+        slides.push(billingSlide);
+        addStandardHeader(billingSlide, c, 'Condições de', 'Pagamento');
+
+        const products = data.deal.deal_products || [];
+        const mainProducts = products.filter(p => !p.is_optional);
+        const distributors = data.distributors || [];
+        const billingOverrides = data.billingOverrides || {};
+
+        const groups: any[] = [];
+        
+        // Reseller Group (Infodive)
+        const resellerProducts = mainProducts.filter(p => p.billing_type === 'direct' || !p.billing_type);
+        if (resellerProducts.length > 0) {
+            const override = billingOverrides['infodive'] || {};
+            const cnpjOverride = override.cnpj || resellerProducts.find(p => p.distributor_cnpj && p.distributor_cnpj.length > 5)?.distributor_cnpj;
+            const termsOverride = override.paymentTerms || 'Até 10 dias, após a conclusão do serviço';
+
+            groups.push({
+                title: 'Faturamento Direto (Infodive)',
+                name: override.selectedBranchName || 'Infodive Representações e Serviços Ltda',
+                cnpj: cnpjOverride || '05.613.186/0001-78',
+                terms: termsOverride,
+                type: 'reseller'
             });
-
-            addFooter(slide, c, 'Infodive IT Solutions - Resumo de Investimento');
-        } else {
-            // Grouped blocks
-            const blocks: { prods: DealProduct[], suffix?: string, model: string, titleColor: string, titleText: string }[] = [];
-            if (oneTimeProducts.length > 0) blocks.push({ prods: oneTimeProducts, model: 'one_time', titleColor: c.primary, titleText: 'INVESTIMENTO ÚNICO' });
-            if (monthlyProducts.length > 0) blocks.push({ prods: monthlyProducts, suffix: '/mês', model: 'monthly', titleColor: '0891b2', titleText: 'INVESTIMENTO RECORRENTE MENSAL' });
-            if (annualProducts.length > 0) blocks.push({ prods: annualProducts, suffix: '/ano', model: 'annual', titleColor: 'd97706', titleText: 'INVESTIMENTO RECORRENTE ANUAL' });
-
-            let slide = pptx.addSlide();
-            slides.push(slide);
-            addStandardHeader(slide, c, 'Estrutura de', 'Investimento');
-
-            let curY = 1.7;
-
-            blocks.forEach((block) => {
-                const { rows, height: tableH } = buildTableRows(block.prods, undefined, block.suffix, block.model);
-                const labelH = 0.3;
-
-                // Overflow check
-                if (curY + labelH + tableH > MAX_Y) {
-                    slide = pptx.addSlide();
-                    slides.push(slide);
-                    addStandardHeader(slide, c, 'Estrutura de', 'Investimento', '(Continuação)');
-                    curY = 1.7;
-                }
-
-                // Badge
-                slide.addShape('roundRect', { x: TABLE_X, y: curY, w: 2.8, h: 0.22, fill: { color: block.titleColor }, rectRadius: 0.05 });
-                slide.addText(block.titleText, { x: TABLE_X + 0.05, y: curY, w: 2.7, h: 0.22, fontSize: 8, bold: true, color: 'FFFFFF', fontFace: FONT });
-                curY += labelH;
-
-                slide.addTable(rows, {
-                    x: TABLE_X, y: curY, w: TABLE_W,
-                    colW: COL_W, rowH: ROW_H,
-                    border: { type: 'solid', pt: 0.3, color: c.border },
-                    margin: [2, 4, 2, 4],
-                });
-                curY += tableH + 0.15;
-            });
-
-            addFooter(slide, c, 'Infodive IT Solutions - Resumo de Investimento');
         }
+
+        // Direct Groups
+        const directProducts = mainProducts.filter(p => p.billing_type === 'indirect');
+        const directKeys = Array.from(new Set(directProducts.map(p => `${p.distributor_id || 'no-dist'}|${p.distributor_cnpj || 'no-cnpj'}`)));
+        
+        directKeys.forEach(key => {
+            const [dId, dCnpj] = key.split('|');
+            const dist = dId !== 'no-dist' ? distributors.find(d => d.id === dId) : undefined;
+            if (dist) {
+                const override = billingOverrides[dist.id] || {};
+                const displayCnpj = override.cnpj || (dCnpj !== 'no-cnpj' ? dCnpj : undefined) || dist.cnpj;
+                const displayName = override.selectedBranchName || dist.name;
+                const displayTerms = override.paymentTerms ?? dist.payment_terms;
+
+                groups.push({
+                    title: `Faturamento Direto (${dist.name})`,
+                    name: displayName,
+                    cnpj: displayCnpj,
+                    terms: displayTerms,
+                    type: 'direct'
+                });
+            }
+        });
+
+        // Render groups
+        groups.forEach((group, idx) => {
+            const y = 1.7 + idx * 1.5;
+            const accent = group.type === 'reseller' ? '#64748b' : c.accent;
+            
+            billingSlide.addShape('roundRect', { x: 0.5, y, w: 9, h: 1.3, fill: { color: 'f8fafc' }, line: { color: c.border, width: 0.5 }, rectRadius: 0.05 });
+            billingSlide.addShape('rect', { x: 0.5, y, w: 0.06, h: 1.3, fill: { color: accent } });
+            
+            billingSlide.addText('FATURAMENTO DIRETO', { x: 0.7, y: y + 0.1, w: 5, h: 0.2, fontSize: 7, bold: true, color: accent, fontFace: 'Inter' });
+            billingSlide.addText(group.name, { x: 0.7, y: y + 0.3, w: 8.5, h: 0.3, fontSize: 11, bold: true, color: c.primary, fontFace: 'Inter' });
+            billingSlide.addText(`CNPJ: ${group.cnpj || '-'}`, { x: 0.7, y: y + 0.55, w: 4, h: 0.2, fontSize: 8, color: c.textMuted, fontFace: 'Inter' });
+
+            if (group.terms) {
+                const termsY = y + 0.8;
+                billingSlide.addShape('roundRect', { x: 0.7, y: termsY, w: 8.6, h: 0.4, fill: { color: 'fff1f2' }, line: { color: 'fecdd3', width: 0.5 }, rectRadius: 0.04 });
+                billingSlide.addText('CONDIÇÕES DE PAGAMENTO:', { x: 0.85, y: termsY + 0.05, w: 3, h: 0.15, fontSize: 6, bold: true, color: '#e31837', fontFace: FONT });
+                billingSlide.addText(group.terms.replace(/;/g, '  •  '), { x: 0.85, y: termsY + 0.18, w: 8.3, h: 0.2, fontSize: 8, color: '#9f1239', bold: true, fontFace: FONT });
+            }
+        });
+
+        addFooter(billingSlide, c, 'Infodive IT Solutions - Condições Comerciais');
     }
 
     return slides;

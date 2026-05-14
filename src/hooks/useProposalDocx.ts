@@ -52,7 +52,8 @@ export function useProposalDocx() {
                 aiSummary, 
                 objectives = [], 
                 simplifiedProductNames = {},
-                activeSections = []
+                activeSections = [],
+                softwarePillars = []
             } = proposal.content;
             
             const products = proposal.products_json || [];
@@ -458,6 +459,7 @@ export function useProposalDocx() {
                             spacing: { before: 200, after: 100 },
                         }))
                     );
+
                     children.push(new Paragraph({ children: [new PageBreak()] }));
                 }
             }
@@ -479,16 +481,23 @@ export function useProposalDocx() {
 
                 // Helper: build investment table for a product set
                 const buildInvestmentTable = (prods: any[], totalLabel: string, pricingSuffix?: string, pricingModel?: string) => {
-                    const total = prods.reduce((acc: number, p: any) => acc + (p.unit_price || 0) * (p.quantity || 1), 0);
+                    const sortedProds = [...prods].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+                    const hasMonthly = sortedProds.some(p => p.pricing_model === 'monthly');
+                    
+                    const total = sortedProds.reduce((acc: number, p: any) => {
+                        const val = (p.unit_price || 0) * (p.quantity || 1);
+                        return acc + (p.pricing_model === 'monthly' ? val * 12 : val);
+                    }, 0);
+
                     return new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
-                        margins: { top: 150, bottom: 150, left: 200, right: 200 },
+                        margins: { top: 100, bottom: 100, left: 150, right: 150 },
                         borders: {
-                            top: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
-                            bottom: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
-                            left: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
-                            right: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
-                            insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: COLORS.border },
+                            top: { style: BorderStyle.SINGLE, size: 2, color: COLORS.border },
+                            bottom: { style: BorderStyle.SINGLE, size: 4, color: COLORS.primary },
+                            left: { style: BorderStyle.SINGLE, size: 2, color: COLORS.border },
+                            right: { style: BorderStyle.SINGLE, size: 2, color: COLORS.border },
+                            insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: COLORS.border },
                             insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
                         },
                         rows: [
@@ -496,65 +505,100 @@ export function useProposalDocx() {
                                 tableHeader: true,
                                 children: [
                                     new TableCell({ 
-                                        shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
-                                        children: [new Paragraph({ children: [new TextRun({ text: "ITEM", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })] 
+                                        shading: { fill: "F9FAFB", type: ShadingType.CLEAR },
+                                        children: [new Paragraph({ children: [new TextRun({ text: "ITEM / DESCRIÇÃO", bold: true, color: COLORS.primary, size: 16 })], alignment: AlignmentType.LEFT })] 
                                     }),
                                     new TableCell({ 
-                                        shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
-                                        children: [new Paragraph({ children: [new TextRun({ text: `INVESTIMENTO${pricingSuffix ? ` ${pricingSuffix.toUpperCase().trim()}` : ''}`, bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })], 
-                                        width: { size: 30, type: WidthType.PERCENTAGE } 
+                                        shading: { fill: "F9FAFB", type: ShadingType.CLEAR },
+                                        children: [new Paragraph({ children: [new TextRun({ text: "QTD", bold: true, color: COLORS.primary, size: 16 })], alignment: AlignmentType.CENTER })], 
+                                        width: { size: 8, type: WidthType.PERCENTAGE } 
                                     }),
+                                    new TableCell({ 
+                                        shading: { fill: "F9FAFB", type: ShadingType.CLEAR },
+                                        children: [new Paragraph({ children: [new TextRun({ text: "UNITÁRIO", bold: true, color: COLORS.primary, size: 16 })], alignment: AlignmentType.RIGHT })], 
+                                        width: { size: 15, type: WidthType.PERCENTAGE } 
+                                    }),
+                                    new TableCell({ 
+                                        shading: { fill: "F9FAFB", type: ShadingType.CLEAR },
+                                        children: [new Paragraph({ children: [new TextRun({ text: hasMonthly ? "MENSAL" : "TOTAL", bold: true, color: COLORS.primary, size: 16 })], alignment: AlignmentType.RIGHT })], 
+                                        width: { size: 15, type: WidthType.PERCENTAGE } 
+                                    }),
+                                    ...(hasMonthly ? [
+                                        new TableCell({ 
+                                            shading: { fill: "F9FAFB", type: ShadingType.CLEAR },
+                                            children: [new Paragraph({ children: [new TextRun({ text: "ANUAL", bold: true, color: COLORS.primary, size: 16 })], alignment: AlignmentType.RIGHT })], 
+                                            width: { size: 15, type: WidthType.PERCENTAGE } 
+                                        })
+                                    ] : []),
                                 ],
                             }),
-                            ...prods.map((p: any) => new TableRow({
-                                children: [
-                                    new TableCell({ 
+                            ...sortedProds.flatMap((p: any, idx: number) => {
+                                const isMonthly = p.pricing_model === 'monthly';
+                                const unitPrice = p.unit_price || 0;
+                                const qty = p.quantity || 1;
+                                const rowTotal = unitPrice * qty;
+                                const annualTotal = isMonthly ? rowTotal * 12 : rowTotal;
+                                const bgColor = idx % 2 === 0 ? "FFFFFF" : "FCFDFF";
+
+                                const formatVal = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
+                                return [
+                                    new TableRow({
                                         children: [
-                                            new Paragraph({ 
-                                                spacing: { before: 100, after: p.duration && p.duration_unit ? 0 : 100 },
-                                                children: [new TextRun({ text: simplifiedProductNames[p.name] || p.display_name || p.name, size: 20 })]
+                                            new TableCell({ 
+                                                shading: { fill: bgColor, type: ShadingType.CLEAR },
+                                                children: [
+                                                    new Paragraph({ 
+                                                        spacing: { before: 80, after: 40 },
+                                                        children: [new TextRun({ text: simplifiedProductNames[p.name] || p.display_name || p.name, size: 18, bold: true, color: COLORS.primary })]
+                                                    }),
+                                                    new Paragraph({
+                                                        spacing: { before: 20, after: 80 },
+                                                        children: [
+                                                            ...(p.sku ? [new TextRun({ text: `[SKU: ${p.sku}] `, size: 14, color: COLORS.accent, bold: true })] : []),
+                                                            ...(p.description || p.catalog_description ? [new TextRun({ text: p.description || p.catalog_description, size: 16, color: "64748B" })] : [])
+                                                        ]
+                                                    })
+                                                ],
+                                                margins: { left: 100 }
                                             }),
-                                            ...(p.duration && p.duration_unit ? [
-                                                new Paragraph({
-                                                    spacing: { before: 0, after: 100 },
-                                                    children: [
-                                                        new TextRun({ 
-                                                            text: (pricingModel === 'monthly' || pricingModel === 'annual') 
-                                                                ? `(Contrato de ${p.duration} ${p.duration_unit})`
-                                                                : `(Válido por ${p.duration} ${p.duration_unit})`, 
-                                                            size: 16, 
-                                                            color: "10B981", 
-                                                            italics: true 
-                                                        })
-                                                    ]
+                                            new TableCell({ 
+                                                shading: { fill: bgColor, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(qty), size: 18, color: COLORS.text })], spacing: { before: 100 } })],
+                                            }),
+                                            new TableCell({ 
+                                                shading: { fill: bgColor, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: formatVal(unitPrice), size: 16, color: "64748B" })], spacing: { before: 100 } })],
+                                            }),
+                                            new TableCell({ 
+                                                shading: { fill: bgColor, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: formatVal(rowTotal), size: 18, bold: true, color: COLORS.primary })], spacing: { before: 100 } })],
+                                            }),
+                                            ...(hasMonthly ? [
+                                                new TableCell({ 
+                                                    shading: { fill: bgColor, type: ShadingType.CLEAR },
+                                                    children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: formatVal(annualTotal), size: 18, bold: true, color: isMonthly ? "059669" : COLORS.primary })], spacing: { before: 100 } })],
                                                 })
-                                            ] : [])
+                                            ] : []),
                                         ],
-                                        margins: { left: 200 }
-                                    }),
-                                    new TableCell({ 
-                                        children: [new Paragraph({ 
-                                            alignment: AlignmentType.RIGHT,
-                                            children: [new TextRun({ text: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((p.unit_price || 0) * (p.quantity || 1)), size: 20, bold: true })]
-                                        })],
-                                        margins: { right: 200 }
-                                    }),
-                                ],
-                            })),
+                                    })
+                                ];
+                            }),
                             new TableRow({
                                 children: [
                                     new TableCell({ 
                                         shading: { fill: COLORS.light, type: ShadingType.CLEAR },
-                                        children: [new Paragraph({ children: [new TextRun({ text: totalLabel, bold: true, color: COLORS.primary, size: 22 })] })],
-                                        margins: { left: 200 }
+                                        columnSpan: hasMonthly ? 4 : 3,
+                                        children: [new Paragraph({ children: [new TextRun({ text: totalLabel, bold: true, color: COLORS.primary, size: 18 })] })],
+                                        margins: { left: 100 }
                                     }),
                                     new TableCell({ 
                                         shading: { fill: COLORS.light, type: ShadingType.CLEAR },
                                         children: [new Paragraph({ 
                                             alignment: AlignmentType.RIGHT,
-                                            children: [new TextRun({ text: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total), bold: true, color: COLORS.accent, size: 24 })]
+                                            children: [new TextRun({ text: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total), bold: true, color: COLORS.accent, size: 22 })]
                                         })],
-                                        margins: { right: 200 }
+                                        margins: { right: 100 }
                                     }),
                                 ],
                             }),

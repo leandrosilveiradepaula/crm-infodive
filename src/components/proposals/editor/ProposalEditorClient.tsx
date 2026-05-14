@@ -38,6 +38,7 @@ import {
     arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { sortProductsHierarchically } from '@/utils/productSorting';
 import type { Deal } from '@/types/deal';
 import {
     useProposalEditorState,
@@ -122,11 +123,15 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
 
     // ── Filtered Deal (products scoped to selected quotes) ────────────
     const proposalDeal = useMemo(() => {
-        if (!hasMultipleQuotes) return deal;
-        const filtered = (deal.deal_products || []).filter(
-            p => !p.quote_id || selectedQuoteIds.has(p.quote_id)
-        );
-        return { ...deal, deal_products: filtered };
+        let products = deal.deal_products || [];
+        if (hasMultipleQuotes) {
+            products = products.filter(
+                p => !p.quote_id || selectedQuoteIds.has(p.quote_id)
+            );
+        }
+        // Always sort products by display_order/hierarchy
+        const sortedProducts = sortProductsHierarchically(products);
+        return { ...deal, deal_products: sortedProducts };
     }, [deal, selectedQuoteIds, hasMultipleQuotes]);
 
     // ── Org Theme ─────────────────────────────────────────────────────
@@ -230,7 +235,11 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    deal: { title: deal.title, company: deal.company, value: filteredTotalValue },
+                    dealTitle: deal.title,
+                    proposalTitle: state.editableTexts.proposalTitle,
+                    company: deal.company,
+                    dealValue: filteredTotalValue,
+                    context: state.config.aiContext,
                     products: products.map((p: any) => ({
                         name: p.name, category: p.category, quantity: p.quantity, unit_price: p.unit_price,
                     })),
@@ -257,7 +266,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
         } finally {
             setIsGeneratingAI(false);
         }
-    }, [deal, proposalDeal, filteredTotalValue, setAiData, setSoftwareHighlights, setBenefitTiles]);
+    }, [deal, proposalDeal, filteredTotalValue, state.config, setAiData, setSoftwareHighlights, setBenefitTiles]);
 
     // ── Save Draft ────────────────────────────────────────────────────
     const [isSaving, setIsSaving] = useState(false);
@@ -273,6 +282,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     editableTexts: state.editableTexts,
                     config: state.config,
                     aiSummary: state.aiSummary || undefined,
+                    objectives: state.objectives,
+                    simplifiedProductNames: state.simplifiedProductNames,
+                    softwareHighlights: state.softwareHighlights,
+                    benefitTiles: state.benefitTiles,
                 }),
             });
             if (!response.ok) {
@@ -674,6 +687,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                 updateDifferential={updateDifferential}
                                 updateConfig={updateConfig}
                                 updateBillingOverride={updateBillingOverride}
+                                setAiSummary={setAiSummary}
+                                setAiData={setAiData}
                             />
                         ) : (
                             <div className="text-center py-10 text-muted-foreground">
@@ -751,6 +766,7 @@ function SortableSectionItem({
 function InspectorPanel({
     sectionId, state, deal, distributors,
     updateText, updateDifferential, updateConfig, updateBillingOverride,
+    setAiSummary, setAiData,
 }: {
     sectionId: SectionId;
     state: any;
@@ -760,6 +776,8 @@ function InspectorPanel({
     updateDifferential: (index: number, field: any, value: string) => void;
     updateConfig: (updates: any) => void;
     updateBillingOverride: (distributorId: string, override: any) => void;
+    setAiSummary: (summary: string) => void;
+    setAiData: (data: any) => void;
 }) {
     switch (sectionId) {
         case 'cover':
@@ -796,27 +814,63 @@ function InspectorPanel({
         case 'overview':
             return (
                 <div className="space-y-4">
-                    {state.aiSummary ? (
-                        <FieldGroup label="Resumo do Projeto (IA)">
-                            <p className="text-xs text-muted-foreground leading-relaxed bg-muted/30 rounded-lg p-3 border border-border">
-                                {state.aiSummary.substring(0, 300)}...
-                            </p>
-                        </FieldGroup>
-                    ) : (
-                        <div className="text-center py-6 bg-muted/20 rounded-lg border border-dashed border-border">
-                            <Wand2 className="w-6 h-6 mx-auto mb-2 text-muted-foreground/50" />
-                            <p className="text-xs text-muted-foreground">
-                                Clique em "Gerar com IA" no header para criar o resumo
-                            </p>
-                        </div>
-                    )}
+                    <FieldGroup label="Contexto para IA (Prompt)">
+                        <textarea
+                            value={state.config.aiContext || ''}
+                            onChange={e => updateConfig({ aiContext: e.target.value })}
+                            rows={4}
+                            className="w-full text-xs p-3 rounded-lg bg-teal-50/30 border border-teal-200 text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-teal-500/20 leading-relaxed"
+                            placeholder="Descreva aqui os detalhes do projeto para que a IA gere a visão geral..."
+                        />
+                    </FieldGroup>
+
+                    <div className="h-px bg-border my-2" />
+
+                    <FieldGroup label="Resumo do Projeto (Gerado)">
+                        {state.aiSummary || state.aiSummary === '' ? (
+                            <textarea
+                                value={state.aiSummary}
+                                onChange={e => setAiSummary(e.target.value)}
+                                rows={10}
+                                className="w-full text-xs p-3 rounded-lg bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed"
+                                placeholder="Clique em 'Gerar com IA' ou digite o resumo aqui..."
+                            />
+                        ) : (
+                            <div className="text-center py-6 bg-muted/20 rounded-lg border border-dashed border-border">
+                                <Wand2 className="w-6 h-6 mx-auto mb-2 text-muted-foreground/50" />
+                                <p className="text-xs text-muted-foreground">
+                                    Clique em "Gerar com IA" no header para criar o resumo
+                                </p>
+                            </div>
+                        )}
+                    </FieldGroup>
+                    
                     {state.objectives?.length > 0 && (
                         <FieldGroup label={`Objetivos (${state.objectives.length})`}>
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 {state.objectives.map((obj: any, i: number) => (
-                                    <div key={i} className="text-xs p-2 bg-muted/20 rounded-lg border border-border">
-                                        <p className="font-bold text-foreground">{obj.title}</p>
-                                        <p className="text-muted-foreground mt-0.5 text-[10px]">{obj.description?.substring(0, 100)}</p>
+                                    <div key={i} className="p-3 bg-muted/20 rounded-lg border border-border space-y-2">
+                                        <Input
+                                            value={obj.title}
+                                            onChange={e => {
+                                                const newObjectives = [...state.objectives];
+                                                newObjectives[i] = { ...obj, title: e.target.value };
+                                                setAiData({ objectives: newObjectives });
+                                            }}
+                                            className="text-xs h-8 font-bold"
+                                            placeholder="Título do objetivo"
+                                        />
+                                        <textarea
+                                            value={obj.description}
+                                            onChange={e => {
+                                                const newObjectives = [...state.objectives];
+                                                newObjectives[i] = { ...obj, description: e.target.value };
+                                                setAiData({ objectives: newObjectives });
+                                            }}
+                                            rows={2}
+                                            className="w-full text-[11px] p-2 rounded-md bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
+                                            placeholder="Descrição do objetivo"
+                                        />
                                     </div>
                                 ))}
                             </div>

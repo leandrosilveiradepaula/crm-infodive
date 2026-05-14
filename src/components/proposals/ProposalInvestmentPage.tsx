@@ -24,7 +24,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
-            currency: deal.deal_products?.[0]?.is_usd ? 'USD' : 'BRL'
+            currency: 'BRL'
         }).format(value);
     };
 
@@ -170,20 +170,22 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                                                     gap: '10px',
                                                 }}>
                                                     <div style={{
-                                                        backgroundColor: accentColor,
-                                                        color: '#ffffff',
-                                                        fontSize: '11px',
-                                                        fontWeight: '900',
-                                                        padding: '4px 10px',
+                                                        border: `1.5px solid ${accentColor}`,
+                                                        color: accentColor,
+                                                        fontSize: '10px',
+                                                        fontWeight: '800',
+                                                        padding: '3px 10px',
                                                         borderRadius: '6px',
-                                                        letterSpacing: '0.5px',
+                                                        letterSpacing: '1px',
+                                                        backgroundColor: `${accentColor}08`
                                                     }}>
                                                         OPÇÃO {optionLabel}
                                                     </div>
                                                     <span style={{
-                                                        fontSize: '14px',
+                                                        fontSize: '15px',
                                                         fontWeight: '700',
                                                         color: primaryColor,
+                                                        letterSpacing: '-0.2px'
                                                     }}>
                                                         {quote.title}
                                                     </span>
@@ -256,128 +258,15 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         );
                     }
 
-                    // Consolidated view with pricing model grouping
-                    const oneTimeProducts = mainProducts.filter(p => !p.pricing_model || p.pricing_model === 'one_time');
-                    const monthlyProducts = mainProducts.filter(p => p.pricing_model === 'monthly');
-                    const annualProducts = mainProducts.filter(p => p.pricing_model === 'annual');
-                    const hasRecurring = monthlyProducts.length > 0 || annualProducts.length > 0;
-
-                    if (!hasRecurring) {
-                        // All one-time: render as before
-                        return (
-                            <ProposalInvestmentTable
-                                mainProducts={mainProducts}
-                                formatCurrency={formatCurrency}
-                                simplifiedProductNames={simplifiedProductNames}
-                                themePrimary={primaryColor}
-                                themeAccent={accentColor}
-                            />
-                        );
-                    }
-
+                    // Consolidated view: follow strict order from CRM
                     return (
-                        <div>
-                            {/* One-time products */}
-                            {oneTimeProducts.length > 0 && (
-                                <div style={{ marginBottom: '24px' }}>
-                                    <div style={{
-                                        padding: '0 80px',
-                                        marginBottom: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                    }}>
-                                        <div style={{
-                                            backgroundColor: primaryColor,
-                                            color: '#ffffff',
-                                            fontSize: '10px',
-                                            fontWeight: '900',
-                                            padding: '3px 10px',
-                                            borderRadius: '6px',
-                                            letterSpacing: '0.5px',
-                                        }}>
-                                            💰 INVESTIMENTO ÚNICO
-                                        </div>
-                                    </div>
-                                    <ProposalInvestmentTable
-                                        mainProducts={oneTimeProducts}
-                                        formatCurrency={formatCurrency}
-                                        simplifiedProductNames={simplifiedProductNames}
-                                        themePrimary={primaryColor}
-                                        themeAccent={accentColor}
-                                        pricingModel="one_time"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Monthly products */}
-                            {monthlyProducts.length > 0 && (
-                                <div style={{ marginBottom: '24px' }}>
-                                    <div style={{
-                                        padding: '0 80px',
-                                        marginBottom: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                    }}>
-                                        <div style={{
-                                            backgroundColor: '#0891b2',
-                                            color: '#ffffff',
-                                            fontSize: '10px',
-                                            fontWeight: '900',
-                                            padding: '3px 10px',
-                                            borderRadius: '6px',
-                                            letterSpacing: '0.5px',
-                                        }}>
-                                            🔄 INVESTIMENTO RECORRENTE MENSAL
-                                        </div>
-                                    </div>
-                                    <ProposalInvestmentTable
-                                        mainProducts={monthlyProducts}
-                                        formatCurrency={formatCurrency}
-                                        simplifiedProductNames={simplifiedProductNames}
-                                        themePrimary={primaryColor}
-                                        themeAccent={accentColor}
-                                        pricingSuffix="/mês"
-                                        pricingModel="monthly"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Annual products */}
-                            {annualProducts.length > 0 && (
-                                <div style={{ marginBottom: '24px' }}>
-                                    <div style={{
-                                        padding: '0 80px',
-                                        marginBottom: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '10px',
-                                    }}>
-                                        <div style={{
-                                            backgroundColor: '#d97706',
-                                            color: '#ffffff',
-                                            fontSize: '10px',
-                                            fontWeight: '900',
-                                            padding: '3px 10px',
-                                            borderRadius: '6px',
-                                            letterSpacing: '0.5px',
-                                        }}>
-                                            📅 INVESTIMENTO RECORRENTE ANUAL
-                                        </div>
-                                    </div>
-                                    <ProposalInvestmentTable
-                                        mainProducts={annualProducts}
-                                        formatCurrency={formatCurrency}
-                                        simplifiedProductNames={simplifiedProductNames}
-                                        themePrimary={primaryColor}
-                                        themeAccent={accentColor}
-                                        pricingSuffix="/ano"
-                                        pricingModel="annual"
-                                    />
-                                </div>
-                            )}
-                        </div>
+                        <ProposalInvestmentTable
+                            mainProducts={mainProducts}
+                            formatCurrency={formatCurrency}
+                            simplifiedProductNames={simplifiedProductNames}
+                            themePrimary={primaryColor}
+                            themeAccent={accentColor}
+                        />
                     );
                 })()}
 

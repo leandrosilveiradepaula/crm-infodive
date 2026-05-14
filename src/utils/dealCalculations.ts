@@ -7,6 +7,7 @@ export interface ProductPriceItem extends Partial<DealProduct> {
     is_optional?: boolean;
     cost?: number;
     parent_id?: string | null;
+    pricing_model?: 'one_time' | 'monthly' | 'annual';
 }
 
 /**
@@ -29,7 +30,12 @@ export const calculateDealValue = (products: ProductPriceItem[]): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
 
-        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
+        let multiplier = 1;
+        if (item.pricing_model === 'monthly') multiplier = 12;
+        // annual is 1 by default (per year)
+        // one_time is 1 by default
+
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0) * multiplier;
         const children = products.filter(p => p.parent_id === productId);
 
         const childrenSum = children.reduce((sum, child) => {
@@ -82,7 +88,11 @@ export const calculateDealTotalCost = (products: ProductPriceItem[]): number => 
     const getTreeValue = (productId: string, valueField: 'unit_price' | 'cost'): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
-        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
+        
+        let multiplier = 1;
+        if (item.pricing_model === 'monthly') multiplier = 12;
+        
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0) * multiplier;
         const children = products.filter(p => p.parent_id === productId);
         return val + children.reduce((sum, child) => sum + getTreeValue(child.id, valueField), 0);
     };

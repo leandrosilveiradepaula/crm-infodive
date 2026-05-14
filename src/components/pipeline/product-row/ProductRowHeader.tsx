@@ -236,6 +236,16 @@ export function ProductRowHeader({
                             Opcional
                         </Badge>
                     )}
+                    {product.pricing_model === 'monthly' && (
+                        <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 text-[9px] font-black uppercase border-cyan-500/20 tracking-widest">
+                            Mensal
+                        </Badge>
+                    )}
+                    {product.pricing_model === 'annual' && (
+                        <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 text-[9px] font-black uppercase border-orange-500/20 tracking-widest">
+                            Anual
+                        </Badge>
+                    )}
                 </div>
             </td>
             <td className="px-4 py-3 text-center">

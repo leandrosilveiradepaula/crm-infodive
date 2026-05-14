@@ -8,6 +8,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy, sortableKeyboa
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/utils/format';
 import { ProductSearch } from './ProductSearch';
@@ -44,7 +45,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     // Quick Add (Produto Avulso)
     const [showQuickAdd, setShowQuickAdd] = useState(false);
     const [quickAddData, setQuickAddData] = useState({
-        name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: ''
+        name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time' as 'one_time' | 'monthly' | 'annual'
     });
     const quickAddNameRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +67,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
 
     // Helper: full recalculation for UI (only primary quote affects pipeline)
     const primaryQuoteProducts = (deal.deal_products || []).filter(p => {
+        if (!p.quote_id) return true; // Treat unassigned as primary/shared
         const quote = deal.deal_quotes?.find(q => q.id === p.quote_id);
         return quote?.is_primary;
     });
@@ -182,7 +184,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         setShowQuickAdd(true);
         setShowProductSearch(false);
         setSelectedCatalogProduct(null);
-        setQuickAddData({ name: prefillName, sku: '', quantity: 1, cost: 0, margin: 20, category: '' });
+        setQuickAddData({ name: prefillName, sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time' });
         setTimeout(() => quickAddNameRef.current?.focus(), 100);
     };
 
@@ -209,7 +211,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             category: quickAddData.category || '',
             description: '',
             display_order: (activeProducts.length || 0),
-            quote_id: activeQuoteId
+            quote_id: activeQuoteId,
+            pricing_model: quickAddData.pricing_model
         };
 
         try {
@@ -230,7 +233,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
 
                 toast.success('Produto avulso adicionado!');
                 setShowQuickAdd(false);
-                setQuickAddData({ name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '' });
+                setQuickAddData({ name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time' });
             }
         } catch (error) {
             toast.error('Erro ao adicionar produto avulso');
@@ -256,7 +259,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             duration_unit: selectedCatalogProduct.duration_unit,
             show_sku_on_proposal: selectedCatalogProduct.show_sku_on_proposal,
             display_order: (activeProducts.length || 0),
-            quote_id: activeQuoteId
+            quote_id: activeQuoteId,
+            pricing_model: selectedCatalogProduct.pricing_model || 'one_time'
         };
 
         try {
@@ -412,7 +416,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     unit_price: productToUpdate.unit_price,
                     cost: productToUpdate.cost,
                     margin: productToUpdate.margin,
-                    is_optional: productToUpdate.is_optional
+                    is_optional: productToUpdate.is_optional,
+                    present_in_usd: productToUpdate.present_in_usd,
+                    pricing_model: productToUpdate.pricing_model
                 };
                 if (productToUpdate.is_usd) {
                     payload.is_usd = productToUpdate.is_usd;
@@ -602,12 +608,19 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 {(deal.deal_quotes || []).map(quote => (
                     <button
                         key={quote.id}
-                        onClick={() => setActiveQuoteId(quote.id)}
+                        onClick={() => {
+                            if (activeQuoteId === quote.id && isEditing) {
+                                handleStartRename(quote.id, quote.title);
+                            } else {
+                                setActiveQuoteId(quote.id);
+                            }
+                        }}
                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border shrink-0 ${
                             activeQuoteId === quote.id 
                             ? 'bg-primary/10 text-primary border-primary shadow-sm' 
                             : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted hover:border-border'
                         }`}
+                        title={isEditing && activeQuoteId === quote.id ? 'Clique para renomear' : ''}
                     >
                         {quote.is_primary && <Star className="h-4 w-4 fill-primary text-primary" />}
                         {!quote.is_primary && <Tag className="h-4 w-4" />}
@@ -666,8 +679,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <div className="flex items-center gap-2 group">
                                     <h3
                                         className="text-lg font-black text-foreground cursor-pointer hover:text-primary transition-colors"
-                                        onDoubleClick={() => isEditing && handleStartRename(activeQuote.id, activeQuote.title)}
-                                        title={isEditing ? 'Clique duplo para renomear' : ''}
+                                        onClick={() => isEditing && handleStartRename(activeQuote.id, activeQuote.title)}
+                                        title={isEditing ? 'Clique para renomear' : ''}
                                     >
                                         {activeQuote.title}
                                     </h3>
@@ -880,6 +893,22 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     className="h-9 bg-background border-input text-center font-bold text-foreground"
                                     onFocus={(e: any) => e.target.select()}
                                 />
+                            </div>
+                            <div className="w-32">
+                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Modelo</label>
+                                <Select
+                                    value={quickAddData.pricing_model}
+                                    onValueChange={(val: any) => setQuickAddData(prev => ({ ...prev, pricing_model: val }))}
+                                >
+                                    <SelectTrigger className="h-9 bg-background border-input text-xs font-bold text-foreground rounded-lg">
+                                        <SelectValue placeholder="Modelo" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-border shadow-xl">
+                                        <SelectItem value="one_time">Único</SelectItem>
+                                        <SelectItem value="monthly">Mensal</SelectItem>
+                                        <SelectItem value="annual">Anual</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <Button
                                 onClick={handleQuickAddProduct}

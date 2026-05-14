@@ -580,6 +580,17 @@ export class DealService {
             .single();
 
         if (error) throw new Error(error.message);
+
+        // If this is the first quote, migrate all unassigned products to it to prevent shared-state bugs
+        if (isPrimary) {
+            await supabase
+                .from('deal_products')
+                .update({ quote_id: data.id })
+                .eq('deal_id', dealId)
+                .is('quote_id', null)
+                .eq('organization_id', organizationId);
+        }
+
         return data;
     }
 
@@ -670,13 +681,29 @@ export class DealService {
         if (newQuoteError) throw new Error(newQuoteError.message);
 
         // 3. Fetch products linked to original quote
+        // Also fetch products with null quote_id as they are effectively part of the original quote's view
         const { data: products, error: productsError } = await supabase
             .from('deal_products')
             .select('*')
-            .eq('quote_id', quoteId)
+            .or(`quote_id.eq.${quoteId},quote_id.is.null`)
+            .eq('deal_id', dealId)
             .eq('organization_id', organizationId);
 
         if (productsError) throw new Error(productsError.message);
+
+        // Safety: If we found products with null quote_id, assign them to the ORIGINAL quote first
+        // to prevent them from remaining "shared" and causing issues when deleted from copies.
+        const sharedProducts = products.filter(p => !p.quote_id);
+        if (sharedProducts.length > 0) {
+            await supabase
+                .from('deal_products')
+                .update({ quote_id: quoteId })
+                .in('id', sharedProducts.map(p => p.id))
+                .eq('organization_id', organizationId);
+            
+            // Update the local list so the duplication logic uses the right IDs/state
+            sharedProducts.forEach(p => p.quote_id = quoteId);
+        }
 
         // 4. Duplicate products (handling self-referential parent_ids for bundles)
         if (products && products.length > 0) {

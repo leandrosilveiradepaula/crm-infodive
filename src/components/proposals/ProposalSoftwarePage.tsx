@@ -37,12 +37,8 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
     const sectionTitle = isSWOnly ? 'Soluções' : 'Software';
     const sectionAccent = isSWOnly ? 'Licenciamento' : 'Licenciamento';
 
-    // Main software (first or most expensive)
-    const mainSoftware = softwareProducts.length > 0
-        ? softwareProducts.reduce((prev, current) =>
-            ((current.unit_price || 0) > (prev.unit_price || 0)) ? current : prev
-        )
-        : null;
+    // Main software (pick the FIRST one to respect the user's intended order)
+    const mainSoftware = softwareProducts.length > 0 ? softwareProducts[0] : null;
 
     const softwareName = mainSoftware?.name || 'Licenciamento Corporativo';
 

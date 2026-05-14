@@ -35,6 +35,7 @@ export interface ProductItem {
     catalog_description?: string;
     show_description_on_proposal?: boolean;
     present_in_usd?: boolean;
+    pricing_model?: 'one_time' | 'monthly' | 'annual';
     [key: string]: any;
 }
 

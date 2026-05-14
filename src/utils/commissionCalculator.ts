@@ -35,8 +35,11 @@ export function calculateDealCommission(
 
     let lastAppliedRate = 0;
 
-    const totals = products.reduce((acc, p) => {
-        const grossMargin = ((p.unit_price || 0) - (p.cost || 0)) * (p.quantity || 0);
+    const totals = products.reduce((acc, p: any) => {
+        let multiplier = 1;
+        if (p.pricing_model === 'monthly') multiplier = 12;
+
+        const grossMargin = ((p.unit_price || 0) - (p.cost || 0)) * (p.quantity || 0) * multiplier;
         const netMargin = grossMargin * (1 - deduction);
 
         // Map Portuguese UI categories to English rule keys

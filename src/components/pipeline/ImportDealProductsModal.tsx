@@ -26,6 +26,7 @@ export interface ProductItem {
     exchange_rate?: number;
     category?: string;
     subcategory?: string;
+    parent_id?: string | null;
 }
 
 interface ImportDealProductsModalProps {

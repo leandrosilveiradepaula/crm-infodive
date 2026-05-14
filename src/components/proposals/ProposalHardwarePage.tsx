@@ -127,26 +127,28 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
         }
     });
 
-    // 4. Build linear items list to chunk
+    // 4. Build linear items list respecting the original sorted order
     const renderItems: RenderItem[] = [];
+    let lastSection = '';
 
-    if (hw.length > 0) {
-        renderItems.push({ type: 'header', label: 'Hardware & Infraestrutura' });
-        if (allHighlightedSpecs.length > 0) {
-            renderItems.push({ type: 'grid', specs: allHighlightedSpecs });
+    // Add highlighted specs grid only once at the beginning if there are any
+    if (allHighlightedSpecs.length > 0) {
+        renderItems.push({ type: 'grid', specs: allHighlightedSpecs });
+    }
+
+    deduplicated.forEach(product => {
+        const cat = getClassificationLabel(product);
+        let section = 'Geral';
+        if (isHardware(product)) section = 'Hardware & Infraestrutura';
+        else if (isSupport(product)) section = 'Suporte & Garantia';
+        else if (isService(product)) section = 'Serviços Profissionais';
+
+        if (section !== lastSection) {
+            renderItems.push({ type: 'header', label: section });
+            lastSection = section;
         }
-        hw.forEach(product => renderItems.push({ type: 'product', product }));
-    }
-
-    if (support.length > 0) {
-        renderItems.push({ type: 'header', label: 'Suporte & Garantia' });
-        support.forEach(product => renderItems.push({ type: 'product', product }));
-    }
-
-    if (services.length > 0) {
-        renderItems.push({ type: 'header', label: 'Serviços Profissionais' });
-        services.forEach(product => renderItems.push({ type: 'product', product }));
-    }
+        renderItems.push({ type: 'product', product });
+    });
 
     // 5. Chunk items into pages
     // We assign weights to items to know when to break the page
