@@ -8,7 +8,12 @@ export async function refreshMicrosoftToken(refreshToken: string) {
     const clientSecret = process.env.AZURE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-        console.error('❌ Microsoft Auth Error: AZURE_CLIENT_ID or AZURE_CLIENT_SECRET is missing.');
+        console.error('Microsoft auth configuration error', {
+            operation: 'microsoft.token.refresh',
+            provider: 'microsoft',
+            status: 'configuration_error',
+            errorCode: 'missing_azure_credentials',
+        });
         throw new Error('Server misconfiguration: Missing Azure credentials.');
     }
 
@@ -30,7 +35,12 @@ export async function refreshMicrosoftToken(refreshToken: string) {
 
     if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ Microsoft Token Refresh Error:', errorData);
+        console.error('Microsoft token refresh failed', {
+            operation: 'microsoft.token.refresh',
+            provider: 'microsoft',
+            status: response.status,
+            errorCode: errorData?.error || 'oauth_refresh_failed',
+        });
         throw new Error(`Failed to refresh Microsoft token: ${errorData.error_description || errorData.error}`);
     }
 

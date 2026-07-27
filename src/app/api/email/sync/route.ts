@@ -8,11 +8,54 @@ import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+type GraphMessage = {
+    id: string;
+    sender: {
+        emailAddress: {
+            name: string;
+            address: string;
+        };
+    };
+    subject: string;
+    bodyPreview: string;
+    body?: {
+        content?: string;
+    };
+    receivedDateTime: string;
+    isRead: boolean;
+    categories?: string[];
+};
+
+type EmailMessage = {
+    id: string;
+    sender: {
+        name: string;
+        email: string;
+        avatar: string;
+    };
+    subject: string;
+    preview: string;
+    body: string;
+    date: string;
+    read: boolean;
+    labels: string[];
+    folder: string;
+};
+
+type EmailRow = {
+    email: string;
+};
+
 // Direct Gemini SDK call — avoids internal HTTP fetch that gets blocked by middleware auth check
-async function parseSignatureWithGemini(emailBody: string): Promise<Record<string, any> | null> {
+async function parseSignatureWithGemini(emailBody: string): Promise<Record<string, unknown> | null> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        console.warn('🤖 Automagic: GEMINI_API_KEY não configurado.');
+        console.warn('Gemini signature parsing skipped', {
+            operation: 'email.signature.parse',
+            provider: 'gemini',
+            status: 'configuration_error',
+            errorCode: 'missing_gemini_api_key',
+        });
         return null;
     }
 
@@ -50,10 +93,10 @@ Retorne SOMENTE o JSON, sem markdown, sem código, sem texto adicional.`;
     // Gemini sometimes returns an array when the email has multiple signatures (thread).
     // Normalize: if array, return the first element (the most recent/relevant signer).
     if (Array.isArray(parsed)) {
-        return parsed.length > 0 ? parsed[0] : null;
+        return parsed.length > 0 ? parsed[0] as Record<string, unknown> : null;
     }
 
-    return parsed;
+    return parsed as Record<string, unknown>;
 }
 
 export async function GET(request: NextRequest) {
@@ -91,7 +134,11 @@ export async function GET(request: NextRequest) {
         if (response.status === 401) {
             const refreshToken = request.cookies.get('crm_refresh_token')?.value;
             if (refreshToken) {
-                console.log('🔄 Microsoft token expired. Attempting refresh...');
+                console.info('Microsoft token refresh started', {
+                    operation: 'email.sync.refresh',
+                    provider: 'microsoft',
+                    status: 'started',
+                });
                 try {
                     newTokens = await refreshMicrosoftToken(refreshToken);
                     // Retry with new token
@@ -101,8 +148,13 @@ export async function GET(request: NextRequest) {
                             'Content-Type': 'application/json'
                         }
                     });
-                } catch (refreshErr) {
-                    console.error('❌ Failed to refresh Microsoft token:', refreshErr);
+                } catch {
+                    console.error('Microsoft token refresh failed', {
+                        operation: 'email.sync.refresh',
+                        provider: 'microsoft',
+                        status: 'failed',
+                        errorCode: 'token_refresh_failed',
+                    });
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
@@ -112,12 +164,17 @@ export async function GET(request: NextRequest) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Graph API Error:', errorText);
+            console.error('Microsoft Graph sync failed', {
+                operation: 'email.sync.fetch',
+                provider: 'microsoft_graph',
+                status: response.status,
+                errorCode: 'graph_fetch_failed',
+            });
             throw new Error(`Graph API returned ${response.status}: ${errorText}`);
         }
 
         const data = await response.json();
-        const emails = data.value.map((msg: any) => ({
+        const emails: EmailMessage[] = data.value.map((msg: GraphMessage) => ({
             id: msg.id,
             sender: {
                 name: msg.sender.emailAddress.name,
@@ -139,7 +196,7 @@ export async function GET(request: NextRequest) {
 
         if (orgId && emails.length > 0) {
             // 1. Isolar remetentes únicos
-            const uniqueSenders = Array.from(new Set(emails.map((e: any) => e.sender.email).filter(Boolean)));
+            const uniqueSenders = Array.from(new Set(emails.map((e) => e.sender.email).filter(Boolean)));
 
             if (uniqueSenders.length > 0) {
                 // Dispara logica em background
@@ -160,13 +217,13 @@ export async function GET(request: NextRequest) {
                             .in('email', uniqueSenders);
 
                         const existingEmailsArray = [
-                            ...(existingContacts?.map((c: any) => c.email.toLowerCase()) || []),
-                            ...(blacklistedContacts?.map((c: any) => c.email.toLowerCase()) || [])
+                            ...((existingContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || []),
+                            ...((blacklistedContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || [])
                         ];
                         const existingEmails = new Set(existingEmailsArray);
 
                         // 3. Filtrar os emails que pertencem a Pessoas Não Cadastradas
-                        const unknownEmails = emails.filter((e: any) => !existingEmails.has(e.sender.email.toLowerCase()));
+                        const unknownEmails = emails.filter((e) => !existingEmails.has(e.sender.email.toLowerCase()));
 
                         // Mapa para não processar a mesma pessoa duas vezes se ela mandou 3 emails seguidos
                         const processedUnknowns = new Set();
@@ -178,8 +235,6 @@ export async function GET(request: NextRequest) {
                             if (!email.body || email.body.length < 20) {
                                 continue; // Evita emails vazios
                             }
-
-                            console.log(`🤖 Automagic: Analisando assinatura para ${email.sender.email}...`);
 
                             // 4. Chama o SDK do Gemini DIRETAMENTE (sem fetch interno)
                             // Fetch interno seria bloqueado pelo middleware de auth do Next.js
@@ -216,12 +271,22 @@ export async function GET(request: NextRequest) {
                                         .from('contact_suggestions')
                                         .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                                     if (insertError) {
-                                        console.error('🤖 Automagic: Falha ao inserir na tabela:', insertError);
+                                        console.error('Contact suggestion insert failed', {
+                                            operation: 'email.signature.suggestion.insert',
+                                            provider: 'supabase',
+                                            status: 'failed',
+                                            errorCode: insertError.code || 'contact_suggestion_insert_failed',
+                                        });
                                     }
                                     continue; // Extraiu com IA, vai pro próximo
                                 }
                             } catch (aiErr) {
-                                console.error(`🤖 Automagic: Falha no Gemini SDK para ${email.sender.email} (rate limit ou erro):`, (aiErr as Error).message);
+                                console.error('Gemini signature parsing failed', {
+                                    operation: 'email.signature.parse',
+                                    provider: 'gemini',
+                                    status: 'failed',
+                                    errorCode: (aiErr as { status?: number })?.status || 'signature_parse_failed',
+                                });
                             }
 
                             // 6. FALLBACK: Se falhou a IA ou ela retornou vazio, insere o basico que temos
@@ -236,12 +301,21 @@ export async function GET(request: NextRequest) {
                                 .from('contact_suggestions')
                                 .upsert([fallbackSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                             if (fallbackError) {
-                                console.error('🤖 Automagic: Falha ao inserir o fallback na tabela:', fallbackError);
+                                console.error('Fallback contact suggestion insert failed', {
+                                    operation: 'email.signature.suggestion.fallback_insert',
+                                    provider: 'supabase',
+                                    status: 'failed',
+                                    errorCode: fallbackError.code || 'contact_suggestion_fallback_insert_failed',
+                                });
                             }
                         }
 
-                    } catch (bgErr) {
-                        console.error('Falha no processo de extração de assinaturas em background:', bgErr);
+                    } catch {
+                        console.error('Background signature extraction failed', {
+                            operation: 'email.signature.background_extract',
+                            status: 'failed',
+                            errorCode: 'signature_background_extract_failed',
+                        });
                     }
                 });
             }
@@ -249,8 +323,9 @@ export async function GET(request: NextRequest) {
         // --- FIM DA AUTOMAÇÃO ---
 
         // Limpar body enorme antes de mandar pro front-end pra economizar RAM do navegador
-        const frontEndEmails = emails.map((e: any) => {
-            const { body, ...rest } = e;
+        const frontEndEmails = emails.map((e) => {
+            const rest: Partial<EmailMessage> = { ...e };
+            delete rest.body;
             return rest;
         });
 
@@ -278,8 +353,14 @@ export async function GET(request: NextRequest) {
 
         return finalResponse;
 
-    } catch (error: any) {
-        console.error('Error syncing emails:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        const syncError = error as { code?: string; name?: string; message?: string };
+        console.error('Email sync failed', {
+            operation: 'email.sync',
+            provider: 'microsoft_graph',
+            status: 'failed',
+            errorCode: syncError?.code || syncError?.name || 'email_sync_failed',
+        });
+        return NextResponse.json({ error: syncError.message }, { status: 500 });
     }
 }
