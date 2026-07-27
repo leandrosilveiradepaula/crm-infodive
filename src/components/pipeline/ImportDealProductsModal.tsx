@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { X, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader, FileCode, ImageIcon } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Upload, FileSpreadsheet, Loader, FileCode, ImageIcon } from 'lucide-react';
 import { parseExcel, parseCSV, detectColumns, applyMapping, type ColumnMapping, findHeaderRow } from '@/utils/excelParser';
 import { parseXML, extractNFeMetadata } from '@/utils/xmlParser';
 import { DealProductMapper } from './DealProductMapper';
 import { ProductSearch } from './ProductSearch';
 import { extractProductsFromImage } from '@/lib/gemini';
 import { type Product } from '@/types/product';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 
 // Simplified type for ProductItem since we don't have the full useDeals hook context
 export interface ProductItem {
@@ -362,27 +366,34 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-border rounded-3xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer group bg-muted/10"
-                onClick={() => fileInputRef.current?.click()}
+                className="relative border-2 border-dashed border-border rounded-3xl p-12 text-center hover:border-primary/50 transition-colors group bg-muted/10 block overflow-hidden"
             >
-                <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <Upload className="h-10 w-10 text-primary" />
-                </div>
-                <p className="text-lg font-black text-foreground mb-2">Arraste seus arquivos aqui</p>
-                <p className="text-sm text-muted-foreground font-bold mb-4">ou clique para selecionar</p>
-                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground font-mono">
-                    <span className="flex items-center gap-1"><FileSpreadsheet className="h-3 w-3" /> XLS/CSV</span>
-                    <span className="flex items-center gap-1"><FileCode className="h-3 w-3" /> XML</span>
-                    <span className="flex items-center gap-1"><ImageIcon className="h-3 w-3" /> IMG/PDF</span>
+                <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv,.xml,.png,.jpg,.jpeg,.webp,.pdf"
+                    onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                            handleFileSelect(e.target.files[0]);
+                            // Reset input value so the same file can be selected again if needed
+                            e.target.value = '';
+                        }
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50"
+                    title=""
+                />
+                <div className="relative z-10 pointer-events-none">
+                    <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <Upload className="h-10 w-10 text-primary" />
+                    </div>
+                    <p className="text-lg font-black text-foreground mb-2">Arraste seus arquivos aqui</p>
+                    <p className="text-sm text-muted-foreground font-bold mb-4">ou clique para selecionar</p>
+                    <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground font-mono">
+                        <span className="flex items-center gap-1"><FileSpreadsheet className="h-3 w-3" /> XLS/CSV</span>
+                        <span className="flex items-center gap-1"><FileCode className="h-3 w-3" /> XML</span>
+                        <span className="flex items-center gap-1"><ImageIcon className="h-3 w-3" /> IMG/PDF</span>
+                    </div>
                 </div>
             </div>
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv,.xml,.png,.jpg,.jpeg,.webp,.pdf"
-                onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                className="hidden"
-            />
         </div>
     );
 
@@ -412,17 +423,16 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             ) : (
                 <div className="space-y-3">
                     <div className="bg-muted/30 border border-border rounded-2xl p-4">
-                        <div className="flex items-center gap-3 mb-3">
-                            <input
-                                type="checkbox"
-                                id="isBundle"
-                                checked={isBundle}
-                                onChange={(e) => setIsBundle(e.target.checked)}
-                                className="rounded border-border bg-card text-primary focus:ring-primary"
-                            />
+                        <div className="flex items-center justify-between gap-3 mb-3">
                             <label htmlFor="isBundle" className="text-sm font-bold text-foreground cursor-pointer select-none">
                                 Agrupar itens em um único produto (Bundle)
                             </label>
+                            <Switch
+                                id="isBundle"
+                                checked={isBundle}
+                                onCheckedChange={setIsBundle}
+                                className="scale-[0.65]"
+                            />
                         </div>
 
                         {isBundle && (
@@ -477,30 +487,28 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
 
             {/* Import Options */}
             <div className="bg-muted/30 border border-border rounded-2xl p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        id="importPrices"
-                        checked={importPrices}
-                        onChange={(e) => setImportPrices(e.target.checked)}
-                        className="rounded border-border bg-card text-primary focus:ring-primary"
-                    />
+                <div className="flex items-center justify-between gap-3">
                     <label htmlFor="importPrices" className="text-sm font-bold text-foreground cursor-pointer">
                         Importar Custos/Preços da Origem
                     </label>
+                    <Switch
+                        id="importPrices"
+                        checked={importPrices}
+                        onCheckedChange={setImportPrices}
+                        className="scale-[0.65]"
+                    />
                 </div>
                 {!targetProduct && !isBundle && (
-                    <div className="flex items-center gap-3 pl-7">
-                        <input
-                            type="checkbox"
-                            id="importAsSingleUnit"
-                            checked={importAsSingleUnit}
-                            onChange={(e) => setImportAsSingleUnit(e.target.checked)}
-                            className="rounded border-border bg-card text-primary"
-                        />
+                    <div className="flex items-center justify-between gap-3 pl-7">
                         <label htmlFor="importAsSingleUnit" className="text-xs text-muted-foreground font-bold">
                             Consolidar quantidade em 1 unidade (Totalizar Custo)
                         </label>
+                        <Switch
+                            id="importAsSingleUnit"
+                            checked={importAsSingleUnit}
+                            onCheckedChange={setImportAsSingleUnit}
+                            className="scale-[0.65]"
+                        />
                     </div>
                 )}
             </div>
@@ -552,24 +560,27 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
         </div>
     );
 
+    if (typeof document === 'undefined') return null;
+
     return (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <div className="bg-card rounded-[32px] border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto text-foreground">
-                <div className="p-8 border-b border-border flex justify-between items-center">
-                    <div>
-                        <h2 className="text-2xl font-black text-foreground">Importar Itens</h2>
-                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Processamento multimodal (XLS, XML, Print, PDF)</p>
-                    </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-xl transition-colors"><X className="text-muted-foreground" /></button>
+        <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="max-w-2xl p-0 overflow-hidden bg-card border-border shadow-2xl">
+                <DialogHeader className="p-8 border-b border-border pb-6">
+                    <DialogTitle className="text-2xl font-black text-foreground">Importar Itens</DialogTitle>
+                    <DialogDescription className="text-xs font-bold uppercase tracking-widest mt-1">
+                        Processamento multimodal (XLS, XML, Print, PDF)
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div className="max-h-[80vh] overflow-y-auto pb-4">
+                    {error && <div className="mx-8 mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm">{error}</div>}
+
+                    {step === 'upload' && renderUploadStep()}
+                    {step === 'mapping' && renderMappingStep()}
+                    {step === 'preview' && renderPreviewStep()}
+                    {step === 'processing' && renderProcessingStep()}
                 </div>
-
-                {error && <div className="mx-8 mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm">{error}</div>}
-
-                {step === 'upload' && renderUploadStep()}
-                {step === 'mapping' && renderMappingStep()}
-                {step === 'preview' && renderPreviewStep()}
-                {step === 'processing' && renderProcessingStep()}
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };

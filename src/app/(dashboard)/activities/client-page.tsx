@@ -10,10 +10,10 @@ import type { Activity, ActivityType, ActivityStatus, ActivityPriority } from '@
 // import { useActivities } from '../hooks/useActivities'; // Replaced by inline logic
 import { getActivities, createActivity, updateActivity, deleteActivity, evaluateInactiveDeals } from './actions';
 import { CalendarView } from './components/CalendarView';
-import { ActivityModal } from './components/ActivityModal';
+import { ActivityDrawer } from './components/ActivityDrawer';
 import { AiSuggestionsPanel } from '@/components/activities/AiSuggestionsPanel';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { FilterBar } from '@/components/layout/FilterBar';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { Button } from '@/components/ui/button';
@@ -204,10 +204,7 @@ export function ActivitiesClientPage() {
                 </div>
             )}
 
-            <PageHeader 
-                title="Gestão de Atividades" 
-                description="Gerencie tarefas, reuniões e follow-ups"
-            >
+            <PageHeaderActions>
                 <Button 
                     onClick={() => {
                         setEditingActivity(null);
@@ -218,7 +215,7 @@ export function ActivitiesClientPage() {
                     <Plus className="h-5 w-5" />
                     Nova Atividade
                 </Button>
-            </PageHeader>
+            </PageHeaderActions>
 
             {/* AI Suggestions Panel */}
             <AiSuggestionsPanel onAccepted={fetchData} />
@@ -532,7 +529,7 @@ export function ActivitiesClientPage() {
             )}
 
             {/* Modal */}
-            <ActivityModal
+            <ActivityDrawer
                 isOpen={showNewModal || !!editingActivity}
                 onClose={() => {
                     setShowNewModal(false);

@@ -1,14 +1,16 @@
 import React from 'react';
 import { Page, View, Text } from '@react-pdf/renderer';
+import { getPageProps } from './pdfStyles';
 
 interface PdfCustomNotesPageProps {
     title: string;
     content: string;
     pdfColors: any;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
-export function PdfCustomNotesPage({ title, content, pdfColors, pdfStyles }: PdfCustomNotesPageProps) {
+export function PdfCustomNotesPage({ title, content, pdfColors, pdfStyles, layout = 'portrait' }: PdfCustomNotesPageProps) {
     if (!content?.trim()) {
         return null;
     }
@@ -17,7 +19,7 @@ export function PdfCustomNotesPage({ title, content, pdfColors, pdfStyles }: Pdf
     const paragraphs = content.split('\n');
 
     return (
-        <Page size="A4" style={[pdfStyles.page, { padding: '40 50' }]}>
+        <Page {...getPageProps(layout)} style={[pdfStyles.page, { padding: '40 50' }]}>
             {/* Header */}
             <View style={{ marginBottom: 30 }}>
                 <Text style={{ fontSize: 24, fontWeight: 'bold', color: pdfColors.primary, marginBottom: 8 }}>

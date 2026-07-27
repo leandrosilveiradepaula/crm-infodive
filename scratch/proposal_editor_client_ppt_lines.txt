@@ -1,0 +1,108 @@
+--- Line 156 ---
+152: const differentialsRef = React.useRef<HTMLDivElement>(null);
+153: const confidentialityRef = React.useRef<HTMLDivElement>(null);
+154: const customNotesRef = React.useRef<HTMLDivElement>(null);
+155: 
+156: const { generatingPpt, handleDownloadPpt } = useProposalPpt();
+157: const { generatingDocx, handleDownloadDocx } = useProposalDocx();
+158: 
+159: const {
+160: state, dispatch, activeSections, totalValue,
+161: toggleSection, updateText, updateDifferential, updateConfig,
+162: selectSection, setAiData, setAiSummary,
+163: setSoftwareHighlights, setBenefitTiles, setGenerating,
+164: updateBillingOverride, initBillingOverrides,
+165: } = useProposalEditorState(deal, initialData);
+166: 
+167: // ── Init billing overrides ────────────────────────────────────────
+168: useEffect(() => {
+169: if (distributors.length === 0) return;
+170: const products = proposalDeal.deal_products || [];
+171: const usedDistIds = [...new Set(products.map(p => p.distributor_id).filter(Boolean))] as string[];
+172: const overrides: Record<string, BillingOverride> = {};
+173: usedDistIds.forEach(dId => {
+174: if (state.config.billingOverrides[dId]) return;
+175: const dist = distributors.find(d => d.id === dId);
+176: if (dist) {
+177: overrides[dId] = {
+178: selectedCnpj: dist.cnpj || '',
+179: selectedBranchName: dist.name,
+180: paymentTerms: dist.payment_terms || '',
+181: };
+182: }
+183: });
+184: if (Object.keys(overrides).length > 0) initBillingOverrides(overrides);
+185: // eslint-disable-next-line react-hooks/exhaustive-deps
+186: }, [distributors]);
+--- Line 340 ---
+336: }, [deal.id, activeSections, state, setGenerating, router, hasMultipleQuotes, selectedQuoteIds]);
+337: 
+338: // ── PPT Generation ────────────────────────────────────────────────
+339: const handleGeneratePpt = useCallback(async () => {
+340: handleDownloadPpt({
+341: proposal: {
+342: id: 'draft',
+343: title: state.editableTexts.proposalTitle,
+344: company_name: deal.company,
+345: createdAt: new Date().toISOString(),
+346: content: {
+347: config: state.config,
+348: editableTexts: state.editableTexts,
+349: aiSummary: state.aiSummary,
+350: objectives: state.objectives,
+351: simplifiedProductNames: state.simplifiedProductNames,
+352: activeSections: activeSections.map(s => s.id),
+353: },
+354: },
+355: deal: proposalDeal as any,
+356: distributors: distributors as any,
+357: });
+358: }, [proposalDeal, distributors, state, activeSections, handleDownloadPpt]);
+359: 
+360: // ── DOCX Generation ───────────────────────────────────────────────
+361: const handleGenerateDocx = useCallback(async () => {
+362: handleDownloadDocx({
+363: id: 'draft',
+364: title: state.editableTexts.proposalTitle,
+365: company_name: deal.company,
+366: createdAt: new Date().toISOString(),
+367: products_json: proposalDeal.deal_products || [],
+368: deal_quotes: deal.deal_quotes || [],
+369: content: {
+370: config: state.config,
+--- Line 358 ---
+354: },
+355: deal: proposalDeal as any,
+356: distributors: distributors as any,
+357: });
+358: }, [proposalDeal, distributors, state, activeSections, handleDownloadPpt]);
+359: 
+360: // ── DOCX Generation ───────────────────────────────────────────────
+361: const handleGenerateDocx = useCallback(async () => {
+362: handleDownloadDocx({
+363: id: 'draft',
+364: title: state.editableTexts.proposalTitle,
+365: company_name: deal.company,
+366: createdAt: new Date().toISOString(),
+367: products_json: proposalDeal.deal_products || [],
+368: deal_quotes: deal.deal_quotes || [],
+369: content: {
+370: config: state.config,
+371: editableTexts: state.editableTexts,
+372: aiSummary: state.aiSummary,
+373: objectives: state.objectives,
+374: simplifiedProductNames: state.simplifiedProductNames,
+375: activeSections: activeSections.map(s => s.id),
+376: },
+377: });
+378: }, [proposalDeal, deal.company, deal.deal_quotes, state, activeSections, handleDownloadDocx]);
+379: 
+380: const previewDeal = { ...proposalDeal, title: state.editableTexts.proposalTitle } as Deal;
+381: const isExporting = state.isGenerating || generatingPpt || generatingDocx;
+382: 
+383: // ═══════════════════════════════════════════════════════════════════
+384: // RENDER
+385: // ═══════════════════════════════════════════════════════════════════
+386: return (
+387: <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-background">
+388: 

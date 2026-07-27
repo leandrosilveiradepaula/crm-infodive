@@ -7,6 +7,7 @@ import { useTheme } from '@/components/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AiAssistant } from '@/components/ai/AiAssistant';
+import { ThemeSelector } from '@/components/ui/theme/ThemeSelector';
 import { cn } from '@/lib/utils';
 
 interface HeaderProps {
@@ -62,6 +63,8 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                 >
                     <Bot className="h-5 w-5" />
                 </Button>
+
+                <ThemeSelector />
 
                 <Button
                     variant="ghost"

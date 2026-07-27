@@ -167,6 +167,7 @@ export async function uploadDealDocument(dealId: string, formData: FormData) {
 
     const category = (formData.get('category') as DocumentCategory) || 'outro';
     const description = (formData.get('description') as string) || '';
+    const quoteId = (formData.get('quote_id') as string) || null;
 
     const arrayBuffer = await file.arrayBuffer();
 
@@ -181,7 +182,7 @@ export async function uploadDealDocument(dealId: string, formData: FormData) {
             size: file.size,
             arrayBuffer,
         },
-        { category, description }
+        { category, description, quote_id: quoteId }
     );
 
     revalidatePath('/pipeline');

@@ -4,13 +4,14 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
     FileText, Download, Trash2, Upload, HardDrive, FileSpreadsheet,
     File as FileIcon, Image as ImageIcon, Loader2, FolderOpen,
-    FileArchive, Presentation
+    FileArchive, Presentation, History, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import type { EntityDocument, DocumentCategory, EntityType } from '@/types/document';
 import { getDocumentCategories } from '@/types/document';
 import { Button } from '@/components/ui/button';
+import { FilePreviewModal } from './FilePreviewModal';
 
 interface DocumentsTabProps {
     entityType: EntityType;
@@ -19,6 +20,7 @@ interface DocumentsTabProps {
     uploadDocument: (entityId: string, formData: FormData) => Promise<EntityDocument>;
     getSignedUrl: (documentId: string) => Promise<string>;
     deleteDocument: (documentId: string) => Promise<boolean>;
+    dealQuotes?: { id: string; title: string }[];
 }
 
 function formatFileSize(bytes: number): string {
@@ -50,6 +52,11 @@ function getCategoryBadge(category: DocumentCategory, entityType: EntityType) {
         ata: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
         nf: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
         tecnico: { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-700 dark:text-cyan-300' },
+        configuracao: { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-300' },
+        precos_aprovados: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
+        proposta: { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-700 dark:text-indigo-300' },
+        espelho_nf: { bg: 'bg-sky-100 dark:bg-sky-900/40', text: 'text-sky-700 dark:text-sky-300' },
+        pedido: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
         outro: { bg: 'bg-muted', text: 'text-muted-foreground' },
     };
     const categories = getDocumentCategories(entityType);
@@ -69,6 +76,7 @@ export const DocumentsTab = ({
     uploadDocument: uploadDocFn,
     getSignedUrl: getSignedUrlFn,
     deleteDocument: deleteDocFn,
+    dealQuotes,
 }: DocumentsTabProps) => {
     const [documents, setDocuments] = useState<EntityDocument[]>([]);
     const [loading, setLoading] = useState(true);
@@ -76,8 +84,14 @@ export const DocumentsTab = ({
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [filter, setFilter] = useState<DocumentCategory | 'all'>('all');
     const [selectedCategory, setSelectedCategory] = useState<DocumentCategory>('outro');
-    const [isDragging, setIsDragging] = useState(false);
+    const [isDraggingOverId, setIsDraggingOverId] = useState<string | 'general' | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Versioning and Preview states
+    const [expandedChains, setExpandedChains] = useState<Record<string, boolean>>({});
+    const [uploadingParentId, setUploadingParentId] = useState<string | null>(null);
+    const [uploadingQuoteId, setUploadingQuoteId] = useState<string | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<EntityDocument | null>(null);
 
     const categories = getDocumentCategories(entityType);
 
@@ -100,17 +114,29 @@ export const DocumentsTab = ({
     }, [loadDocuments]);
 
     // --- Upload ---
-    const handleUpload = async (files: FileList | File[]) => {
+    const handleUpload = async (files: FileList | File[], parentIdOverride?: string | null, quoteIdOverride?: string | null) => {
         if (!files || files.length === 0) return;
 
         setUploading(true);
         let successCount = 0;
+        const parentId = parentIdOverride !== undefined ? parentIdOverride : uploadingParentId;
+        const quoteId = quoteIdOverride !== undefined ? quoteIdOverride : uploadingQuoteId;
+
+        // Inherit parent category if uploading a version
+        const parentDoc = parentId ? documents.find(d => d.id === parentId) : null;
+        const categoryToUse = parentDoc ? parentDoc.category : selectedCategory;
 
         for (const file of Array.from(files)) {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('category', selectedCategory);
+                formData.append('category', categoryToUse);
+                if (parentId) {
+                    formData.append('parent_id', parentId);
+                }
+                if (quoteId) {
+                    formData.append('quote_id', quoteId);
+                }
 
                 await uploadDocFn(entityId, formData);
                 successCount++;
@@ -124,6 +150,8 @@ export const DocumentsTab = ({
             await loadDocuments();
         }
         setUploading(false);
+        setUploadingParentId(null);
+        setUploadingQuoteId(null);
     };
 
     // --- Download ---
@@ -151,27 +179,180 @@ export const DocumentsTab = ({
     };
 
     // --- Drag & Drop ---
-    const handleDragOver = (e: React.DragEvent) => {
+    const handleDragOver = (e: React.DragEvent, id: string | 'general') => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(true);
+        setIsDraggingOverId(id);
     };
     const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(false);
+        setIsDraggingOverId(null);
     };
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent, id: string | 'general') => {
         e.preventDefault();
         e.stopPropagation();
-        setIsDragging(false);
+        setIsDraggingOverId(null);
         if (e.dataTransfer.files.length > 0) {
-            handleUpload(e.dataTransfer.files);
+            handleUpload(e.dataTransfer.files, null, id === 'general' ? null : id);
         }
     };
 
-    // --- Filtered list ---
-    const filteredDocs = filter === 'all' ? documents : documents.filter((d) => d.category === filter);
+    // --- Version Grouping Logic ---
+    const chains: Record<string, EntityDocument[]> = {};
+    documents.forEach((doc) => {
+        const rootId = doc.parent_id || doc.id;
+        if (!chains[rootId]) chains[rootId] = [];
+        chains[rootId].push(doc);
+    });
+
+    const documentChains = Object.values(chains).map((chain) => {
+        const sorted = [...chain].sort((a, b) => b.version - a.version);
+        return {
+            latest: sorted[0],
+            history: sorted.slice(1),
+        };
+    });
+
+    const filteredChains = filter === 'all'
+        ? documentChains
+        : documentChains.filter((c) => c.latest.category === filter);
+
+    const toggleChain = (rootId: string) => {
+        setExpandedChains((prev) => ({ ...prev, [rootId]: !prev[rootId] }));
+    };
+
+    const handleUploadVersionClick = (doc: EntityDocument) => {
+        const rootId = doc.parent_id || doc.id;
+        setUploadingParentId(rootId);
+        fileInputRef.current?.click();
+    };
+
+    // Helper to count unique chains for categories
+    const countChainByCategory = (catValue: DocumentCategory) => {
+        return documentChains.filter(c => c.latest.category === catValue).length;
+    };
+
+    const renderDocumentRow = (doc: EntityDocument, isVersion = false, hasHistory = false, historyCount = 0, rootId = '') => {
+        return (
+            <div
+                className={`
+                    bg-card border border-border rounded-xl p-3 flex items-center justify-between transition-all group
+                    ${isVersion 
+                        ? 'bg-muted/10 dark:bg-muted/5 border-dashed border-l-2 ml-8 mt-1.5 pl-4 py-2 text-xs' 
+                        : 'hover:bg-muted/30 dark:hover:bg-muted/10'
+                    }
+                `}
+            >
+                <div 
+                    onClick={() => setPreviewDoc(doc)}
+                    className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer select-none"
+                >
+                    <div className={`
+                        ${isVersion ? 'h-8 w-8' : 'h-10 w-10'}
+                        bg-muted/50 dark:bg-muted/20 rounded-lg flex items-center justify-center shrink-0
+                    `}>
+                        {getFileIcon(doc.file_type)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <p className={`
+                                font-bold text-foreground truncate group-hover:text-primary transition-colors
+                                ${isVersion ? 'text-xs' : 'text-sm'}
+                            `}>
+                                {doc.name}
+                            </p>
+                            {doc.source_name && (
+                                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
+                                    {doc.source_name}
+                                </span>
+                            )}
+                            {!isVersion && getCategoryBadge(doc.category, entityType)}
+                            {isVersion && (
+                                <span className="px-1 py-0.2 rounded bg-muted text-[8px] font-mono font-bold text-muted-foreground uppercase">
+                                    Versão {doc.version}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
+                            <span>{formatFileSize(doc.file_size)}</span>
+                            <span className="opacity-40">•</span>
+                            <span>
+                                {new Date(doc.created_at).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-4">
+                    {/* Collapsible history activator */}
+                    {hasHistory && !isVersion && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 text-[10px] font-bold text-muted-foreground hover:bg-muted hover:text-foreground"
+                            onClick={() => toggleChain(rootId)}
+                            title="Ver histórico de versões"
+                        >
+                            <History className="w-3.5 h-3.5 mr-1" />
+                            v{doc.version} ({historyCount})
+                            {expandedChains[rootId] ? (
+                                <ChevronUp className="w-3 h-3 ml-1" />
+                            ) : (
+                                <ChevronDown className="w-3 h-3 ml-1" />
+                            )}
+                        </Button>
+                    )}
+
+                    {/* Upload new version */}
+                    {!isVersion && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                            onClick={() => handleUploadVersionClick(doc)}
+                            title="Subir nova versão"
+                        >
+                            <Upload className="w-4 h-4" />
+                        </Button>
+                    )}
+
+                    {/* Download */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                        onClick={() => handleDownload(doc)}
+                        title="Baixar"
+                    >
+                        <Download className="w-4 h-4" />
+                    </Button>
+
+                    {/* Delete */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+                        onClick={() => handleDelete(doc)}
+                        disabled={deletingId === doc.id}
+                        title="Excluir"
+                    >
+                        {deletingId === doc.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="w-4 h-4" />
+                        )}
+                    </Button>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="h-full flex flex-col p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar">
@@ -181,9 +362,9 @@ export const DocumentsTab = ({
                     <h3 className="text-lg font-bold text-foreground tracking-tight">Documentos</h3>
                     <p className="text-sm text-muted-foreground">
                         {entityType === 'account' ? 'Documentos da empresa' : 'Arquivos anexados à oportunidade'}
-                        {documents.length > 0 && (
+                        {documentChains.length > 0 && (
                             <span className="ml-1 text-xs font-bold text-muted-foreground/60">
-                                ({documents.length})
+                                ({documentChains.length} arquivos)
                             </span>
                         )}
                     </p>
@@ -202,21 +383,24 @@ export const DocumentsTab = ({
                     </select>
 
                     <Button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => {
+                            setUploadingParentId(null);
+                            setUploadingQuoteId(null);
+                            fileInputRef.current?.click();
+                        }}
                         disabled={uploading}
                         className="bg-primary hover:bg-primary/90 text-white font-bold text-xs tracking-wide shadow-sm"
                     >
-                        {uploading ? (
+                        {uploading && !uploadingParentId && !uploadingQuoteId ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         ) : (
                             <Upload className="w-4 h-4 mr-2" />
                         )}
-                        {uploading ? 'Enviando...' : 'Upload'}
+                        {uploading && !uploadingParentId && !uploadingQuoteId ? 'Enviando...' : 'Upload Geral'}
                     </Button>
                     <input
                         ref={fileInputRef}
                         type="file"
-                        multiple
                         className="hidden"
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.csv,.txt"
                         onChange={(e) => {
@@ -227,44 +411,8 @@ export const DocumentsTab = ({
                 </div>
             </div>
 
-            {/* Dropzone */}
-            <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => !uploading && fileInputRef.current?.click()}
-                className={`
-                    border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer
-                    transition-all duration-300 group
-                    ${isDragging
-                        ? 'border-primary bg-primary/10 scale-[1.01] shadow-lg'
-                        : 'border-border hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10'
-                    }
-                `}
-            >
-                <div className={`
-                    h-12 w-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300
-                    ${isDragging
-                        ? 'bg-primary/20 scale-110'
-                        : 'bg-muted group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:scale-110'
-                    }
-                `}>
-                    {uploading ? (
-                        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                    ) : (
-                        <HardDrive className={`w-6 h-6 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'}`} />
-                    )}
-                </div>
-                <p className="text-sm font-bold text-foreground">
-                    {isDragging ? 'Solte os arquivos aqui' : 'Clique ou arraste arquivos'}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                    PDF, Word, Excel, PowerPoint, Imagens (Máx. 25 MB)
-                </p>
-            </div>
-
             {/* Category Filter */}
-            {documents.length > 0 && (
+            {documentChains.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap">
                     <button
                         onClick={() => setFilter('all')}
@@ -273,10 +421,10 @@ export const DocumentsTab = ({
                                 : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                             }`}
                     >
-                        Todos ({documents.length})
+                        Todos ({documentChains.length})
                     </button>
                     {categories.map((cat) => {
-                        const count = documents.filter((d) => d.category === cat.value).length;
+                        const count = countChainByCategory(cat.value);
                         if (count === 0) return null;
                         return (
                             <button
@@ -294,89 +442,139 @@ export const DocumentsTab = ({
                 </div>
             )}
 
-            {/* File List */}
+            {/* Smart Folders */}
             {loading ? (
                 <div className="flex-1 flex items-center justify-center py-16">
                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
-            ) : filteredDocs.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                    <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-                        <FolderOpen className="w-8 h-8 text-muted-foreground/40" />
-                    </div>
-                    <p className="text-sm font-bold text-foreground">Nenhum documento encontrado</p>
-                    <p className="text-xs text-muted-foreground mt-1 max-w-xs">
-                        {filter !== 'all'
-                            ? 'Não há documentos nessa categoria. Tente "Todos".'
-                            : 'Arraste arquivos para a área acima ou clique em "Upload" para começar.'}
-                    </p>
-                </div>
             ) : (
-                <div className="space-y-2">
-                    {filteredDocs.map((doc) => (
-                        <div
-                            key={doc.id}
-                            className="bg-card border border-border rounded-xl p-3 flex items-center justify-between hover:bg-muted/30 dark:hover:bg-muted/10 transition-all group"
-                        >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="h-10 w-10 bg-muted/50 dark:bg-muted/20 rounded-lg flex items-center justify-center shrink-0">
-                                    {getFileIcon(doc.file_type)}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                                            {doc.name}
-                                        </p>
-                                        {doc.source_name && (
-                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
-                                                {doc.source_name}
-                                            </span>
-                                        )}
-                                        {getCategoryBadge(doc.category, entityType)}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
-                                        <span>{formatFileSize(doc.file_size)}</span>
-                                        <span className="opacity-40">•</span>
-                                        <span>
-                                            {new Date(doc.created_at).toLocaleDateString('pt-BR', {
-                                                day: '2-digit',
-                                                month: '2-digit',
-                                                year: 'numeric',
-                                            })}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                <div className="space-y-8 pb-8">
+                    {(() => {
+                        const folders = dealQuotes && dealQuotes.length > 0
+                            ? [
+                                { id: 'general', name: 'Arquivos Gerais', isGeneral: true },
+                                ...dealQuotes.map(q => ({ id: q.id, name: `Opção: ${q.title}`, isGeneral: false }))
+                            ]
+                            : [{ id: 'general', name: 'Documentos', isGeneral: true }];
 
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                                    onClick={() => handleDownload(doc)}
-                                    title="Baixar"
-                                >
-                                    <Download className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
-                                    onClick={() => handleDelete(doc)}
-                                    disabled={deletingId === doc.id}
-                                    title="Excluir"
-                                >
-                                    {deletingId === doc.id ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : (
-                                        <Trash2 className="w-4 h-4" />
+                        return folders.map(folder => {
+                            const folderChains = filteredChains.filter(c => 
+                                folder.isGeneral ? !c.latest.quote_id : c.latest.quote_id === folder.id
+                            );
+                            
+                            // Don't hide empty folders so users can drop files into them
+                            const isDraggingThis = isDraggingOverId === folder.id;
+
+                            return (
+                                <div key={folder.id} className="flex flex-col space-y-3" id={`folder-${folder.id}`}>
+                                    <div className="flex items-center justify-between border-b border-border pb-2">
+                                        <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                                            <FolderOpen className="w-4 h-4 text-muted-foreground" />
+                                            {folder.name}
+                                            <span className="text-xs font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                                {folderChains.length}
+                                            </span>
+                                        </h4>
+                                        {dealQuotes && dealQuotes.length > 0 && (
+                                            <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="h-8 text-xs font-bold text-muted-foreground hover:text-primary"
+                                                onClick={() => {
+                                                    setUploadingParentId(null);
+                                                    setUploadingQuoteId(folder.isGeneral ? null : folder.id);
+                                                    fileInputRef.current?.click();
+                                                }}
+                                            >
+                                                <Upload className="w-3.5 h-3.5 mr-1.5" /> Anexar
+                                            </Button>
+                                        )}
+                                    </div>
+
+                                    {/* Dropzone for this folder */}
+                                    <div
+                                        onDragOver={(e) => handleDragOver(e, folder.id)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, folder.id)}
+                                        onClick={() => {
+                                            if (!uploading) {
+                                                setUploadingParentId(null);
+                                                setUploadingQuoteId(folder.isGeneral ? null : folder.id);
+                                                fileInputRef.current?.click();
+                                            }
+                                        }}
+                                        className={`
+                                            border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300
+                                            ${isDraggingThis
+                                                ? 'border-primary bg-primary/10 py-6 scale-[1.01] shadow-sm'
+                                                : 'border-transparent hover:border-primary/40 hover:bg-muted/30 py-3'
+                                            }
+                                            ${folderChains.length === 0 && !isDraggingThis ? 'border-border/50 py-8 bg-muted/10' : ''}
+                                        `}
+                                    >
+                                        {folderChains.length === 0 || isDraggingThis ? (
+                                            <>
+                                                <HardDrive className={`w-5 h-5 mb-2 transition-colors ${isDraggingThis ? 'text-primary' : 'text-muted-foreground/60'}`} />
+                                                <p className="text-xs font-bold text-foreground">
+                                                    {isDraggingThis ? 'Solte os arquivos aqui' : 'Arraste arquivos ou clique para fazer upload'}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider">
+                                                Arraste novos arquivos aqui
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {/* File List for this folder */}
+                                    {folderChains.length > 0 && (
+                                        <div className="space-y-2">
+                                            {folderChains.map((chain) => {
+                                                const rootId = chain.latest.parent_id || chain.latest.id;
+                                                const hasHistory = chain.history.length > 0;
+                                                const isExpanded = !!expandedChains[rootId];
+
+                                                return (
+                                                    <div key={chain.latest.id} className="flex flex-col">
+                                                        {renderDocumentRow(
+                                                            chain.latest,
+                                                            false,
+                                                            hasHistory,
+                                                            chain.history.length,
+                                                            rootId
+                                                        )}
+                                                        
+                                                        {hasHistory && isExpanded && (
+                                                            <div className="flex flex-col space-y-1">
+                                                                {chain.history.map((histDoc) => 
+                                                                    renderDocumentRow(histDoc, true, false, 0, rootId)
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     )}
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
+                                </div>
+                            );
+                        });
+                    })()}
                 </div>
             )}
+
+            {/* Lightbox / Previewer Modal */}
+            <FilePreviewModal
+                isOpen={!!previewDoc}
+                onClose={() => setPreviewDoc(null)}
+                fileName={previewDoc?.name || ''}
+                fileType={previewDoc?.file_type || ''}
+                fileSizeStr={previewDoc ? formatFileSize(previewDoc.file_size) : ''}
+                signedUrlProvider={async () => {
+                    if (!previewDoc) return '';
+                    return await getSignedUrlFn(previewDoc.id);
+                }}
+            />
         </div>
     );
 };

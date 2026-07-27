@@ -218,17 +218,11 @@ export class DealService {
     static async updateDeal(userId: string, dealId: string, organizationId: string, updates: Partial<Deal>): Promise<Deal | null> {
         const supabase = createAdminClient();
 
-        // Valid columns for the 'deals' table
-        const allowedColumns = [
-            'title', 'account_id', 'owner_id', 'owner', 'company', 'value', 'stage',
-            'probability', 'expected_close_date', 'description', 'won_at', 'lost_at',
-            'loss_reason', 'health_score', 'health_trend', 'risk_factors', 'tags',
-            'billing_type', 'distributor_id', 'client_contact_id', 'lead_source',
-            'next_step', 'commission_deduction', 'custom_fields'
-        ];
+        // System/metadata columns that should never be updated directly via partial updates
+        const systemColumns = ['id', 'created_at', 'updated_at', 'organization_id'];
 
         const sanitizedUpdates = Object.entries(updates).reduce((acc, [key, value]) => {
-            if (allowedColumns.includes(key)) {
+            if (!systemColumns.includes(key)) {
                 let val = value === '' ? null : value;
                 if (key === 'title') val = normalizeCasing(val as string, 'title');
                 if (key === 'company') val = normalizeCasing(val as string, 'name');
@@ -344,22 +338,28 @@ export class DealService {
 
         // 4. Duplicate Products if any
         if (originalProducts && originalProducts.length > 0) {
-            const duplicatedProductsPayload = originalProducts.map(p => {
-                const { id, created_at, updated_at, ...baseProductData } = p;
-                return {
-                    ...baseProductData,
-                    deal_id: newDeal.id, // Link to the newly duplicated deal
-                    organization_id: organizationId // Explicit SaaS Multitenant attribution
-                };
-            });
+            try {
+                const duplicatedProductsPayload = originalProducts.map(p => {
+                    const { id, created_at, updated_at, ...baseProductData } = p;
+                    return {
+                        ...baseProductData,
+                        deal_id: newDeal.id, // Link to the newly duplicated deal
+                        organization_id: organizationId // Explicit SaaS Multitenant attribution
+                    };
+                });
 
-            const { error: insertProductsError } = await supabase
-                .from('deal_products')
-                .insert(duplicatedProductsPayload);
+                const { error: insertProductsError } = await supabase
+                    .from('deal_products')
+                    .insert(duplicatedProductsPayload);
 
-            if (insertProductsError) {
-                console.error('Failed to duplicate deal products:', insertProductsError);
-                // Return deal even if products fail to avoid complete block
+                if (insertProductsError) {
+                    throw insertProductsError;
+                }
+            } catch (err: any) {
+                console.error('Failed to duplicate deal products. Rolling back deal creation:', err);
+                // Rollback: delete the newly created deal to maintain transaction integrity
+                await supabase.from('deals').delete().eq('id', newDeal.id).eq('organization_id', organizationId);
+                throw new Error(`Failed to duplicate deal products: ${err.message || err}`);
             }
         }
 
@@ -680,68 +680,77 @@ export class DealService {
 
         if (newQuoteError) throw new Error(newQuoteError.message);
 
-        // 3. Fetch products linked to original quote
-        // Also fetch products with null quote_id as they are effectively part of the original quote's view
-        const { data: products, error: productsError } = await supabase
-            .from('deal_products')
-            .select('*')
-            .or(`quote_id.eq.${quoteId},quote_id.is.null`)
-            .eq('deal_id', dealId)
-            .eq('organization_id', organizationId);
-
-        if (productsError) throw new Error(productsError.message);
-
-        // Safety: If we found products with null quote_id, assign them to the ORIGINAL quote first
-        // to prevent them from remaining "shared" and causing issues when deleted from copies.
-        const sharedProducts = products.filter(p => !p.quote_id);
-        if (sharedProducts.length > 0) {
-            await supabase
+        try {
+            // 3. Fetch products linked to original quote
+            // Also fetch products with null quote_id as they are effectively part of the original quote's view
+            const { data: products, error: productsError } = await supabase
                 .from('deal_products')
-                .update({ quote_id: quoteId })
-                .in('id', sharedProducts.map(p => p.id))
+                .select('*')
+                .or(`quote_id.eq.${quoteId},quote_id.is.null`)
+                .eq('deal_id', dealId)
                 .eq('organization_id', organizationId);
-            
-            // Update the local list so the duplication logic uses the right IDs/state
-            sharedProducts.forEach(p => p.quote_id = quoteId);
-        }
 
-        // 4. Duplicate products (handling self-referential parent_ids for bundles)
-        if (products && products.length > 0) {
-            const parentMap = new Map<string, string>(); // oldId -> newId
-            const parentProducts = products.filter(p => !p.parent_id);
-            const childProducts = products.filter(p => !!p.parent_id);
+            if (productsError) throw new Error(productsError.message);
 
-            // Insert parents
-            if (parentProducts.length > 0) {
-                 const parentPayloads = parentProducts.map(p => {
-                    const { id, created_at, updated_at, parent_id, quote_id, ...rest } = p;
-                    return { ...rest, quote_id: newQuote.id };
-                 });
-                 const { data: insertedParents, error: parentInsertError } = await supabase
+            // Safety: If we found products with null quote_id, assign them to the ORIGINAL quote first
+            // to prevent them from remaining "shared" and causing issues when deleted from copies.
+            const sharedProducts = products.filter(p => !p.quote_id);
+            if (sharedProducts.length > 0) {
+                const { error: updateSharedError } = await supabase
                     .from('deal_products')
-                    .insert(parentPayloads)
-                    .select();
-
-                 if (parentInsertError) throw new Error(parentInsertError.message);
-                 
-                 // Map old to new
-                 insertedParents.forEach((newP, index) => {
-                     parentMap.set(parentProducts[index].id, newP.id);
-                 });
+                    .update({ quote_id: quoteId })
+                    .in('id', sharedProducts.map(p => p.id))
+                    .eq('organization_id', organizationId);
+                
+                if (updateSharedError) throw new Error(updateSharedError.message);
+                
+                // Update the local list so the duplication logic uses the right IDs/state
+                sharedProducts.forEach(p => p.quote_id = quoteId);
             }
 
-            // Insert children
-            if (childProducts.length > 0) {
-                 const childPayloads = childProducts.map(p => {
-                    const { id, created_at, updated_at, quote_id, ...rest } = p;
-                    return { ...rest, quote_id: newQuote.id, parent_id: parentMap.get(p.parent_id) || null };
-                 });
-                 const { error: childInsertError } = await supabase
-                    .from('deal_products')
-                    .insert(childPayloads);
+            // 4. Duplicate products (handling self-referential parent_ids for bundles)
+            if (products && products.length > 0) {
+                const parentMap = new Map<string, string>(); // oldId -> newId
+                const parentProducts = products.filter(p => !p.parent_id);
+                const childProducts = products.filter(p => !!p.parent_id);
 
-                 if (childInsertError) throw new Error(childInsertError.message);
+                // Insert parents
+                if (parentProducts.length > 0) {
+                     const parentPayloads = parentProducts.map(p => {
+                        const { id, created_at, updated_at, parent_id, quote_id, ...rest } = p;
+                        return { ...rest, quote_id: newQuote.id };
+                     });
+                     const { data: insertedParents, error: parentInsertError } = await supabase
+                        .from('deal_products')
+                        .insert(parentPayloads)
+                        .select();
+
+                     if (parentInsertError) throw new Error(parentInsertError.message);
+                     
+                     // Map old to new
+                     insertedParents.forEach((newP, index) => {
+                         parentMap.set(parentProducts[index].id, newP.id);
+                     });
+                }
+
+                // Insert children
+                if (childProducts.length > 0) {
+                     const childPayloads = childProducts.map(p => {
+                        const { id, created_at, updated_at, quote_id, ...rest } = p;
+                        return { ...rest, quote_id: newQuote.id, parent_id: parentMap.get(p.parent_id) || null };
+                     });
+                     const { error: childInsertError } = await supabase
+                        .from('deal_products')
+                        .insert(childPayloads);
+
+                     if (childInsertError) throw new Error(childInsertError.message);
+                }
             }
+        } catch (err: any) {
+            console.error('Failed to duplicate deal quote products. Rolling back quote creation:', err);
+            // Rollback: delete the newly created quote
+            await supabase.from('deal_quotes').delete().eq('id', newQuote.id).eq('organization_id', organizationId);
+            throw new Error(`Failed to duplicate quote products: ${err.message || err}`);
         }
         
         return newQuote;

@@ -9,10 +9,10 @@ import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { Plus, Search, Download, Package, Layers, Shield, Tag } from 'lucide-react';
 import { deleteProduct, duplicateProduct } from '@/app/(dashboard)/products/actions';
 import { useRouter } from 'next/navigation';
-import { ProductFormModal } from '@/components/products/ProductFormModal';
+import { ProductFormDrawer } from '@/components/products/ProductFormDrawer';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { invalidateProductsCache } from '@/hooks/useProducts';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
@@ -126,10 +126,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
     return (
         <div className="space-y-8 pb-10">
             {/* Header */}
-            <PageHeader 
-                title="Catálogo de Produtos" 
-                description="Gerencie o portfólio de hardware, software e serviços."
-            >
+            <PageHeaderActions>
                 <div className="flex gap-3">
                     <Button variant="outline" className="bg-card border-border text-muted-foreground hover:text-foreground h-11 px-6 rounded-2xl">
                         <Download className="h-4 w-4 mr-2" />
@@ -140,7 +137,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                         Novo Produto
                     </Button>
                 </div>
-            </PageHeader>
+            </PageHeaderActions>
             
             <StatsGrid items={stats} />
             
@@ -217,7 +214,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                 />
             )}
 
-            <ProductFormModal
+            <ProductFormDrawer
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 product={editingProduct}

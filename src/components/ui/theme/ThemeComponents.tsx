@@ -1,12 +1,11 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { DollarSign } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
 // --- Layout Primitives ---
 
 export const ThemePanel = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-card border border-border rounded-2xl p-4", className)}>
+    <div className={cn("bg-card border border-border rounded-md p-4", className)}>
         {children}
     </div>
 );
@@ -41,7 +40,7 @@ export const ThemeInput = React.forwardRef<HTMLInputElement, ThemeInputProps>(
             <input
                 ref={ref}
                 className={cn(
-                    "bg-card border border-border rounded-xl px-3 py-2 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px] placeholder:text-muted-foreground transition-all",
+                    "bg-card border border-border rounded-md px-3 py-2 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px] placeholder:text-muted-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-muted/10",
                     fullWidth && "w-full",
                     className
                 )}
@@ -63,7 +62,7 @@ export const ThemeSelect = React.forwardRef<HTMLSelectElement, ThemeSelectProps>
             <select
                 ref={ref}
                 className={cn(
-                    "bg-card border border-border rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px]",
+                    "bg-card border border-border rounded-md px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px]",
                     fullWidth && "w-full",
                     className
                 )}
@@ -80,7 +79,7 @@ ThemeSelect.displayName = "ThemeSelect";
 // --- Read-Only Displays ---
 
 export const ThemeReadOnlyField = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-muted border border-border rounded-xl px-3 py-2 text-xs font-bold text-muted-foreground h-[34px] flex items-center truncate", className)}>
+    <div className={cn("bg-muted border border-border rounded-md px-3 py-2 text-xs font-bold text-muted-foreground h-[34px] flex items-center truncate", className)}>
         {children || '---'}
     </div>
 );
@@ -88,7 +87,7 @@ export const ThemeReadOnlyField = ({ children, className }: { children: ReactNod
 
 // --- Specific Widgets ---
 
-import { formatCurrency, parseCurrencyValue } from '@/utils/format';
+import { formatCurrency } from '@/utils/format';
 
 export const ThemeCurrencyInput = React.forwardRef<HTMLInputElement, Omit<ThemeInputProps, 'value' | 'onChange'> & {
     value?: number | string,
@@ -144,11 +143,11 @@ export const ThemeCurrencyInput = React.forwardRef<HTMLInputElement, Omit<ThemeI
                         isFocused.current = true;
                         // Select all text on focus for easy replacement
                         e.target.select();
-                        if (props.onFocus) (props as any).onFocus(e);
+                        if (props.onFocus) props.onFocus(e);
                     }}
                     onBlur={(e) => {
                         isFocused.current = false;
-                        if (props.onBlur) (props as any).onBlur(e);
+                        if (props.onBlur) props.onBlur(e);
                     }}
                     className={cn("pl-8 text-right", className)}
                     {...props}

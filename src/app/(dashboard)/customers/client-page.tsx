@@ -10,11 +10,11 @@ import { deleteAccount } from '@/app/(dashboard)/customers/actions';
 import { useRouter } from 'next/navigation';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 
-import { CustomerFormModal } from '@/components/customers/CustomerFormModal';
-import { ViewAccountModal } from '@/components/customers/ViewAccountModal';
+import { CustomerFormDrawer } from '@/components/customers/CustomerFormDrawer';
+import { ViewAccountDrawer } from '@/components/customers/ViewAccountDrawer';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
@@ -114,25 +114,22 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     return (
         <div className="space-y-6 pb-10">
             {/* Header */}
-            <PageHeader 
-                title="Minhas Empresas" 
-                description="Base de empresas, parceiros e fornecedores."
-            >
+            <PageHeaderActions>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={() => setIsImportModalOpen(true)}>
+                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-md" onClick={() => setIsImportModalOpen(true)}>
                         <FileSpreadsheet className="h-4 w-4 mr-2" />
                         Importar Planilha
                     </Button>
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={handleExportCSV}>
+                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-md" onClick={handleExportCSV}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar CSV
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2" onClick={handleCreate}>
+                    <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-md shadow-xl shadow-primary/20 transition-all flex items-center gap-2" onClick={handleCreate}>
                         <Plus className="h-5 w-5" />
                         Novo Cadastro
                     </Button>
                 </div>
-            </PageHeader>
+            </PageHeaderActions>
 
             {/* KPIs Dashboard */}
             <StatsGrid items={[
@@ -180,14 +177,14 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, cidade ou segmento..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-md"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
                 <div className="flex items-center gap-3 px-2 w-full md:w-auto overflow-x-auto no-scrollbar">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-md text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -198,7 +195,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                        <SelectTrigger className="w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-md text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
                             <SelectValue placeholder="Segmento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -210,7 +207,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={relationshipFilter} onValueChange={setRelationshipFilter}>
-                        <SelectTrigger className="w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-md text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
                             <SelectValue placeholder="Relacionamento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -224,7 +221,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     {(searchTerm || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos') && (
-                        <Button variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors">
+                        <Button variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-md transition-colors">
                             <X className="h-5 w-5" />
                         </Button>
                     )}
@@ -255,19 +252,19 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             )}
 
             {filteredAccounts.length === 0 && (
-                <div className="text-center py-20 bg-muted/10 border-2 border-dashed border-border rounded-3xl">
+                <div className="text-center py-20 bg-muted/10 border-2 border-dashed border-border rounded-md">
                     <p className="text-muted-foreground font-medium">Nenhuma empresa encontrada com os filtros atuais.</p>
                     <Button variant="link" onClick={clearFilters} className="text-primary mt-2">Limpar Filtros</Button>
                 </div>
             )}
 
-            <CustomerFormModal
+            <CustomerFormDrawer
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 customer={editingAccount}
             />
 
-            <ViewAccountModal
+            <ViewAccountDrawer
                 open={isViewModalOpen}
                 onOpenChange={setIsViewModalOpen}
                 account={viewingAccount}

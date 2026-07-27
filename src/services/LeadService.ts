@@ -75,7 +75,7 @@ export class LeadService {
         return true;
     }
 
-    static async convertLeadToDeal(userId: string, organizationId: string, leadId: string, conversionData: Partial<Lead>) {
+    static async convertLeadToDeal(userId: string, organizationId: string, leadId: string, conversionData: Partial<Lead>, accountId?: string, contactId?: string) {
         const supabase = createAdminClient();
 
         // 1. Update Lead Status
@@ -87,54 +87,75 @@ export class LeadService {
 
         if (leadError) throw new Error(`Erro ao atualizar lead: ${leadError.message}`);
 
-        // 2. Create Account
-        const accountData = {
-            organization_id: organizationId,
-            name: normalizeCasing(conversionData.company, 'name'),
-            cnpj: normalizeTaxId(conversionData.cnpj),
-            ie: conversionData.ie,
-            zip: normalizeZip(conversionData.zip),
-            street: normalizeCasing(conversionData.street, 'address'),
-            number: conversionData.number,
-            complement: conversionData.complement,
-            neighborhood: normalizeCasing(conversionData.neighborhood, 'address'),
-            city: normalizeCasing(conversionData.city, 'address'),
-            state: normalizeCasing(conversionData.state, 'address'),
-            industry: normalizeCasing(conversionData.interest, 'name') || 'Novos Negócios',
-            status: 'Ativo'
-        };
+        let targetAccountId = accountId;
 
-        const { data: newAccount, error: accError } = await supabase
-            .from('accounts')
-            .insert([accountData])
-            .select()
-            .single();
+        if (!targetAccountId) {
+            // 2. Create Account
+            const accountData = {
+                organization_id: organizationId,
+                name: normalizeCasing(conversionData.company, 'name'),
+                cnpj: normalizeTaxId(conversionData.cnpj),
+                ie: conversionData.ie,
+                zip: normalizeZip(conversionData.zip),
+                street: normalizeCasing(conversionData.street, 'address'),
+                number: conversionData.number,
+                complement: conversionData.complement,
+                neighborhood: normalizeCasing(conversionData.neighborhood, 'address'),
+                city: normalizeCasing(conversionData.city, 'address'),
+                state: normalizeCasing(conversionData.state, 'address'),
+                industry: normalizeCasing(conversionData.interest, 'name') || 'Novos Negócios',
+                status: 'Ativo'
+            };
 
-        if (accError) throw new Error(`Erro ao criar conta: ${accError.message}`);
+            const { data: newAccount, error: accError } = await supabase
+                .from('accounts')
+                .insert([accountData])
+                .select()
+                .single();
 
-        // 3. Create Contact for Account
-        const contactData = {
-            organization_id: organizationId,
-            account_id: newAccount.id,
-            name: normalizeCasing(conversionData.contact_name, 'name'),
-            email: conversionData.email,
-            mobile_phone: normalizePhone(conversionData.phone),
-            role: 'Contato Comercial',
-            is_primary: true
-        };
+            if (accError) throw new Error(`Erro ao criar conta: ${accError.message}`);
+            targetAccountId = newAccount.id;
+        }
 
-        const { error: contactError } = await supabase.from('account_contacts').insert([contactData]);
-        if (contactError) console.error("Erro ao criar contato vinculado:", contactError);
+        let targetContactId = contactId;
+
+        if (!targetContactId) {
+            // 3. Create Contact for Account
+            const contactData = {
+                organization_id: organizationId,
+                account_id: targetAccountId,
+                name: normalizeCasing(conversionData.contact_name, 'name'),
+                email: conversionData.email,
+                mobile_phone: normalizePhone(conversionData.phone),
+                role: 'Contato Comercial',
+                is_primary: true
+            };
+
+            const { data: newContact, error: contactError } = await supabase
+                .from('account_contacts')
+                .insert([contactData])
+                .select('id')
+                .single();
+
+            if (contactError) {
+                console.error("Erro ao criar contato vinculado:", contactError);
+            } else if (newContact) {
+                targetContactId = newContact.id;
+            }
+        }
 
         // 4. Create Deal
         const dealData = {
             organization_id: organizationId,
             title: `Oportunidade: ${conversionData.interest || 'Novos Produtos'}`,
-            account_id: newAccount.id,
-            status: 'qualification',
+            account_id: targetAccountId,
+            client_contact_id: targetContactId || null,
+            company: conversionData.company || null,
+            stage: 'qualification',
             value: 10000,
             probability: 30,
-            close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            owner: 'Me',
+            expected_close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             owner_id: userId
         };
 

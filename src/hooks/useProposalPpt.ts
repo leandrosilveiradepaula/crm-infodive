@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import pptxgen from 'pptxgenjs';
 import type { Deal } from '@/types/deal';
 import type { Account } from '@/types/account';
+import { mapProposalToExportData, ExportProposalData } from '@/utils/proposalExportMapper';
 import {
     buildCoverSlide,
     buildConfidentialitySlide,
@@ -19,20 +20,10 @@ import {
     type InvestmentData,
 } from '@/utils/pptSlideBuilders';
 
-export interface PptProposalData {
-    proposal: any;
-    deal: Deal;
-    distributors?: Account[];
-    sellerName?: string;
-    clientLogo?: string;
-}
-
 export function useProposalPpt() {
     const [generatingPpt, setGeneratingPpt] = useState(false);
 
-    const handleDownloadPpt = async (data: PptProposalData) => {
-        const { proposal, deal, sellerName, clientLogo, distributors } = data;
-
+    const handleDownloadPpt = async ({ proposal, deal, distributors, sellerName, clientLogo }: ExportProposalData) => {
         if (!proposal.content) {
             toast.error('Conteúdo da proposta não disponível para geração de PPT.');
             return;
@@ -45,98 +36,87 @@ export function useProposalPpt() {
             const pptx = new pptxgen();
             pptx.layout = 'LAYOUT_16x9';
 
-            const config = proposal.content.config || {};
-            const editableTexts = proposal.content.editableTexts || {};
-            const activeSections = proposal.content.activeSections || [];
-            const simplifiedProductNames = proposal.content.simplifiedProductNames || {};
-            const primaryColor = config.themePrimary;
-            const accentColor = config.themeAccent;
-
-            const isSectionActive = (id: string, legacyFlag?: boolean) => {
-                if (activeSections.length > 0) return activeSections.includes(id);
-                return !!legacyFlag;
-            };
-
-            const date = new Date().toLocaleDateString('pt-BR');
+            const exportData = mapProposalToExportData(proposal, deal, distributors || [], sellerName, clientLogo);
 
             const defaultOrder = ['cover', 'confidentiality', 'differentials', 'overview', 'hardware', 'software', 'custom_notes', 'investment'];
             
-            const sectionsToRender = activeSections.length > 0 
-                ? activeSections 
-                : defaultOrder.filter(id => {
-                    if (id === 'cover') return config.includeCover !== false;
-                    if (id === 'confidentiality') return config.includeConfidentiality;
-                    if (id === 'differentials') return config.includeDifferentials;
-                    if (id === 'overview') return config.includeOverview;
-                    if (id === 'hardware') return config.includeHardware;
-                    if (id === 'software') return config.includeSoftware;
-                    if (id === 'investment') return config.includeInvestment;
-                    return false;
-                });
+            const sectionsToRender = exportData.activeSections.length > 0 
+                ? exportData.activeSections 
+                : defaultOrder.filter(id => exportData.isSectionActive(id));
 
             sectionsToRender.forEach((sectionId: string) => {
                 switch(sectionId) {
                     case 'cover':
                         const coverData: CoverData = {
-                            dealTitle: proposal.title || deal.title || '',
-                            companyName: proposal.company_name || '',
-                            date,
+                            dealTitle: exportData.title,
+                            companyName: exportData.companyName,
+                            date: exportData.date,
                             proposalTitle: proposal.title || 'Proposta de Solução',
-                            proposalNumber: proposal.number,
-                            sellerName: sellerName || '',
-                            clientLogo,
-                            primaryColor,
-                            accentColor,
+                            proposalNumber: exportData.proposalNumber,
+                            sellerName: exportData.sellerName,
+                            clientLogo: exportData.clientLogo || undefined,
+                            primaryColor: exportData.themePrimary,
+                            accentColor: exportData.themeAccent,
                         };
                         buildCoverSlide(pptx, coverData);
                         break;
                     case 'confidentiality':
-                        buildConfidentialitySlide(pptx, primaryColor, accentColor);
+                        buildConfidentialitySlide(pptx, exportData.themePrimary, exportData.themeAccent);
                         break;
                     case 'overview':
                         const overviewData: OverviewData = {
-                            dealTitle: proposal.title || deal.title || '',
-                            aiSummary: editableTexts.aiSummary || proposal.content.aiSummary,
-                            objectives: proposal.content.objectives,
-                            primaryColor,
-                            accentColor,
+                            dealTitle: exportData.title,
+                            aiSummary: exportData.aiSummary,
+                            objectives: exportData.objectives,
+                            primaryColor: exportData.themePrimary,
+                            accentColor: exportData.themeAccent,
                         };
                         buildOverviewSlide(pptx, overviewData);
                         break;
                     case 'differentials':
-                        buildDifferentialsSlide(pptx, primaryColor, accentColor);
+                        buildDifferentialsSlide(pptx, exportData.themePrimary, exportData.themeAccent);
                         break;
                     case 'hardware':
-                        const hwData: HardwareData = { deal, simplifiedProductNames, primaryColor, accentColor };
+                        const hwData: HardwareData = {
+                            deal: deal!,
+                            primaryColor: exportData.themePrimary,
+                            accentColor: exportData.themeAccent,
+                        };
                         buildHardwareSlides(pptx, hwData);
                         break;
                     case 'software':
-                        const swData: SoftwareData = { deal, simplifiedProductNames, primaryColor, accentColor };
+                        const swData: SoftwareData = {
+                            deal: deal!,
+                            primaryColor: exportData.themePrimary,
+                            accentColor: exportData.themeAccent,
+                        };
                         buildSoftwareSlides(pptx, swData);
                         break;
                     case 'custom_notes':
+                        const editableTexts = proposal.content.editableTexts || {};
                         const notesTitle = editableTexts.customNotesTitle || 'Notas Adicionais';
                         const notesContent = editableTexts.customNotesContent || '';
-                        buildCustomNotesSlide(pptx, notesTitle, notesContent, primaryColor, accentColor);
+                        buildCustomNotesSlide(pptx, notesTitle, notesContent, exportData.themePrimary, exportData.themeAccent);
                         break;
                     case 'investment':
                         const invData: InvestmentData = {
-                            deal,
-                            simplifiedProductNames,
-                            primaryColor,
-                            accentColor,
-                            showBillingInfo: config.showBillingInfo !== false,
-                            quoteDisplayMode: config.quoteDisplayMode,
-                            dealQuotes: deal.deal_quotes,
-                            distributors: distributors,
-                            billingOverrides: config.billingOverrides,
+                            deal: deal!,
+                            distributors: distributors || [],
+                            billingOverrides: proposal.content?.billingOverrides || {},
+                            primaryColor: exportData.themePrimary,
+                            accentColor: exportData.themeAccent,
+                            showBillingInfo: exportData.showBillingInfo,
+                            quoteDisplayMode: exportData.quoteDisplayMode,
                         };
                         buildInvestmentSlides(pptx, invData);
                         break;
                 }
             });
 
-            const filename = `Proposta-${(proposal.company_name || proposal.title || 'Proposta').replace(/[^a-zA-Z0-9]/g, '-')}.pptx`;
+            const cleanNumber = (exportData.proposalNumber || 'Rascunho').replace(/[^a-zA-Z0-9-]/g, '');
+            const cleanCompany = (exportData.companyName || 'Empresa').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            const cleanTitle = (exportData.title || 'Solucao').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            const filename = `Proposta_${cleanNumber}_${cleanCompany} - ${cleanTitle}.pptx`;
             await pptx.writeFile({ fileName: filename });
 
             toast.success('PowerPoint gerado com sucesso!', { id: toastId });

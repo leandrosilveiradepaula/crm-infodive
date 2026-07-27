@@ -409,18 +409,23 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 <Button
                                     variant="outline"
                                     onClick={() => handleDownloadDocx({
-                                        ...deal,
-                                        company_name: deal.company,
-                                        products_json: deal.deal_products,
-                                        number: proposalNumber,
-                                        content: {
-                                            aiSummary,
-                                            objectives,
-                                            config,
-                                            editableTexts: {
-                                                proposalTitle: config.customTitle
-                                            }
-                                        }
+                                        proposal: { 
+                                            id: deal.id, 
+                                            title: deal.title, 
+                                            company_name: deal.company, 
+                                            number: proposalNumber, 
+                                            content: {
+                                                aiSummary,
+                                                objectives,
+                                                config,
+                                                simplifiedProductNames,
+                                                editableTexts: {
+                                                    proposalTitle: config.customTitle
+                                                }
+                                            } 
+                                        },
+                                        deal,
+                                        distributors: distributors as any
                                     })}
                                     disabled={loading || generatingDocx}
                                     className="border-blue-500/20 hover:bg-blue-500/5 text-blue-500"

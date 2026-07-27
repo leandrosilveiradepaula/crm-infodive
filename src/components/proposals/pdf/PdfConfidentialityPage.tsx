@@ -1,19 +1,20 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64, DATACENTER_BASE64, HANDSHAKE_BASE64 } from './pdfAssetsBase64';
 
 interface PdfConfidentialityPageProps {
     confidentialityText?: string;
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
-export function PdfConfidentialityPage({ confidentialityText, pdfColors, pdfStyles }: PdfConfidentialityPageProps) {
+export function PdfConfidentialityPage({ confidentialityText, pdfColors, pdfStyles, layout = 'portrait' }: PdfConfidentialityPageProps) {
     const text = confidentialityText || 'O conteúdo deste documento destina-se exclusivamente à avaliação interna da organização destinatária. As informações aqui contidas são proprietárias e não devem ser compartilhadas com terceiros sem autorização prévia. Qualquer alteração nas premissas técnicas ou comerciais descritas implicará na necessidade de uma revisão formal das condições propostas.';
 
     return (
-        <Page size="A4" style={[pdfStyles.page, { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 }]}>
+        <Page {...getPageProps(layout)} style={[pdfStyles.page, { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 }]}>
             {/* Gradient bar */}
             <View style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: 6, backgroundColor: pdfColors.accent }} />
             <View style={{ position: 'absolute', top: 0, left: '50%', width: '50%', height: 6, backgroundColor: pdfColors.primary }} />

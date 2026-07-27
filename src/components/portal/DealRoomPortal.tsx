@@ -76,8 +76,8 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
 
                         {/* Hero Section / Summary Card */}
                         <section className="relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-[32px] -z-10 transition-all duration-500 group-hover:scale-105" />
-                            <div className="bg-card/40 backdrop-blur-md border border-border/50 p-10 rounded-[32px] shadow-sm">
+                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 rounded-md -z-10 transition-all duration-500 group-hover:scale-105" />
+                            <div className="bg-card/40 backdrop-blur-md border border-border/50 p-10 rounded-md shadow-sm">
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                     <div className="space-y-4">
                                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest">
@@ -122,7 +122,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                 </span>
                             </div>
 
-                            <div className="bg-card border border-border/60 rounded-[32px] overflow-hidden shadow-sm">
+                            <div className="bg-card border border-border/60 rounded-md overflow-hidden shadow-sm">
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
@@ -183,7 +183,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                     <div className="space-y-8">
 
                         {/* Status Card */}
-                        <div className="bg-card border border-border/60 p-8 rounded-[32px] space-y-6 shadow-sm">
+                        <div className="bg-card border border-border/60 p-8 rounded-md space-y-6 shadow-sm">
                             <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground border-b border-border pb-4">Próximos Passos</h4>
                             <div className="space-y-4">
                                 <div className="flex gap-4">
@@ -206,7 +206,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                         </div>
 
                         {/* Contact Card */}
-                        <div className="bg-primary/5 border border-primary/10 p-8 rounded-[32px] space-y-6 relative overflow-hidden">
+                        <div className="bg-primary/5 border border-primary/10 p-8 rounded-md space-y-6 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4 opacity-10">
                                 <TrendingUp className="w-20 h-20 -mr-6 -mt-6" />
                             </div>

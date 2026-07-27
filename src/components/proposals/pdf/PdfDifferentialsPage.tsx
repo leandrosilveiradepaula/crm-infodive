@@ -1,6 +1,6 @@
 import React from 'react';
 import { Page, View, Text, Image, Svg, Path, Circle, Polygon } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64 } from './pdfAssetsBase64';
 
 interface Differential {
@@ -13,6 +13,7 @@ interface PdfDifferentialsPageProps {
     differentials: Differential[];
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
 const getCardColors = (pdfColors: PdfColors) => [
@@ -56,10 +57,10 @@ const renderIcon = (iconText: string, color: string) => {
     );
 };
 
-export function PdfDifferentialsPage({ differentials, pdfColors, pdfStyles }: PdfDifferentialsPageProps) {
+export function PdfDifferentialsPage({ differentials, pdfColors, pdfStyles, layout = 'portrait' }: PdfDifferentialsPageProps) {
     const cardColors = getCardColors(pdfColors);
     return (
-        <Page size="A4" style={pdfStyles.page} wrap>
+        <Page {...getPageProps(layout)} style={pdfStyles.page} wrap>
             {/* Top gradient bar */}
             <View style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: 6, backgroundColor: pdfColors.accent }} />
             <View style={{ position: 'absolute', top: 0, left: '50%', width: '50%', height: 6, backgroundColor: pdfColors.primary }} />

@@ -14,7 +14,7 @@ import { HealthWidget } from '@/components/dashboard/HealthWidget';
 import { TasksWidget } from '@/components/dashboard/TasksWidget';
 import { ContactSuggestionsWidget } from '@/components/email/ContactSuggestionsWidget';
 import { AiActionsWidget } from '@/components/dashboard/AiActionsWidget';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 
 interface DashboardWidget {
     id: string;
@@ -187,10 +187,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
     return (
         <div className="space-y-6 pb-10">
             {/* Header Section */}
-            <PageHeader
-                title="Visão Geral"
-                description="Acompanhe o desempenho das suas vendas."
-            >
+            <PageHeaderActions>
                 <div className="flex items-center gap-2">
                     {/* Year + Quarter Pill Selector — same as Pipeline */}
                     <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
@@ -301,7 +298,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         </div>
                     )}
                 </div>
-            </PageHeader>
+            </PageHeaderActions>
 
             {/* Draggable Dashboard Grid */}
             <DragDropContext onDragEnd={onDragEnd}>

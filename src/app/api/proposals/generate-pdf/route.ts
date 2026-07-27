@@ -5,6 +5,7 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
 import { ProposalPdfDocument } from '@/components/proposals/pdf/ProposalPdfDocument';
 import type { SectionId, EditableTexts, EditorConfig } from '@/hooks/useProposalEditorState';
+import { mapProposalToExportData } from '@/utils/proposalExportMapper';
 
 export async function POST(request: Request) {
     try {
@@ -103,13 +104,7 @@ export async function POST(request: Request) {
             distributors = distData || [];
         }
 
-        // Render PDF using @react-pdf/renderer
-        const element = React.createElement(ProposalPdfDocument, {
-            dealTitle: deal.title,
-            companyName: deal.company || 'Cliente',
-            products: deal.deal_products || [],
-            dealQuotes: deal.deal_quotes || [],
-            proposalNumber: proposalNumber ? String(proposalNumber) : undefined,
+        const proposalContent = {
             activeSections,
             editableTexts,
             config,
@@ -118,9 +113,29 @@ export async function POST(request: Request) {
             simplifiedProductNames,
             softwareHighlights,
             benefitTiles,
+        };
+
+        const mockProposal = {
+            id: 'draft',
+            title: deal.title,
+            company_name: deal.company,
+            number: proposalNumber || '',
+            content_json: proposalContent,
+            content: proposalContent, // for legacy mappers
+            deal_quotes: deal.deal_quotes || [],
+        };
+
+        const exportData = mapProposalToExportData(
+            mockProposal,
+            deal,
             distributors,
-            themePrimary: orgTheme.theme_primary || undefined,
-            themeAccent: orgTheme.theme_accent || undefined,
+            '', // sellerName
+            config.clientLogo
+        );
+
+        // Render PDF using @react-pdf/renderer
+        const element = React.createElement(ProposalPdfDocument, {
+            exportData
         });
         const pdfBuffer = await renderToBuffer(element as any);
 
@@ -177,13 +192,18 @@ export async function POST(request: Request) {
             // Still return PDF even if save fails
         }
 
+        const cleanNumber = String(proposalNumber || 'Rascunho').replace(/[^a-zA-Z0-9-]/g, '');
+        const cleanCompany = (deal.company || 'Cliente').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+        const cleanTitle = (deal.title || 'Solucao').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+        const headerFilename = `Proposta_${cleanNumber}_${cleanCompany}_-_${cleanTitle}.pdf`.replace(/\s+/g, '_');
+
         // Return PDF as Uint8Array (compatible with NextResponse)
         const pdfUint8 = new Uint8Array(pdfBuffer);
         return new NextResponse(pdfUint8, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',
-                'Content-Disposition': `attachment; filename="proposta-${proposalNumber || 'draft'}.pdf"`,
+                'Content-Disposition': `attachment; filename="${headerFilename}"`,
                 'X-Proposal-Id': savedProposal?.id || '',
                 'X-Proposal-Number': String(proposalNumber || ''),
             },

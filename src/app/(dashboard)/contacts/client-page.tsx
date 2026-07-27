@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Contact } from '@/types/contact';
 import { ContactCard } from '@/components/contacts/ContactCard';
 import { ContactsTable } from '@/components/contacts/ContactsTable';
-import { ContactFormModal } from '@/components/contacts/ContactFormModal';
+import { ContactFormDrawer } from '@/components/contacts/ContactFormDrawer';
+import { ViewContactDrawer } from '@/components/contacts/ViewContactDrawer';
 import { deleteContact } from '@/app/(dashboard)/contacts/actions';
 import { Plus, Search, Users, UserCheck, Building2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
@@ -33,6 +34,8 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
     const [filterRole, setFilterRole] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
+    const [viewingContact, setViewingContact] = useState<Contact | null>(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
 
     const uniqueAccounts = Array.from(new Set(contacts.map(c => c.account?.name).filter(Boolean))).sort();
     const uniqueRoles = Array.from(new Set(contacts.map(c => c.role).filter(Boolean))).sort();
@@ -62,17 +65,19 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
         setSelectedContact(undefined);
     };
 
+    const handleView = (contact: Contact) => {
+        setViewingContact(contact);
+        setIsViewOpen(true);
+    };
+
     return (
         <div className="flex-1 space-y-6 pb-10">
-            <PageHeader 
-                title="Contatos" 
-                description="Gerencie todos os contatos da sua base."
-            >
+            <PageHeaderActions>
                 <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2">
                     <Plus className="h-5 w-5" />
                     Novo Contato
                 </Button>
-            </PageHeader>
+            </PageHeaderActions>
             
             {/* KPI Cards */}
             <StatsGrid items={[
@@ -164,6 +169,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                             contact={contact}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onView={handleView}
                         />
                     ))}
                 </div>
@@ -172,14 +178,22 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     contacts={filteredContacts}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onView={handleView}
                 />
             )}
 
-            <ContactFormModal
+            <ContactFormDrawer
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onSuccess={() => router.refresh()}
                 contact={selectedContact}
+            />
+
+            <ViewContactDrawer
+                open={isViewOpen}
+                onOpenChange={setIsViewOpen}
+                contact={viewingContact}
+                onEdit={handleEdit}
             />
         </div>
     );

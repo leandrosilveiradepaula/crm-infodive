@@ -9,9 +9,10 @@ interface ContactsTableProps {
     contacts: Contact[];
     onEdit: (contact: Contact) => void;
     onDelete: (id: string) => void;
+    onView?: (contact: Contact) => void;
 }
 
-export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps) {
+export function ContactsTable({ contacts, onEdit, onDelete, onView }: ContactsTableProps) {
     return (
         <div className="bg-card border border-border rounded-2xl overflow-hidden">
             <table className="w-full text-sm">
@@ -28,31 +29,36 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                 <tbody>
                     {contacts.map((contact, i) => {
                         const initials = contact.name
-                            .split(' ')
-                            .slice(0, 2)
-                            .map((n) => n[0])
-                            .join('')
-                            .toUpperCase();
+                             .split(' ')
+                             .slice(0, 2)
+                             .map((n) => n[0])
+                             .join('')
+                             .toUpperCase();
 
                         return (
                             <tr
                                 key={contact.id}
+                                onClick={() => onView?.(contact)}
                                 className={cn(
-                                    'border-b border-border/50 hover:bg-muted/20 transition-colors',
+                                    'border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer',
                                     i === contacts.length - 1 && 'border-b-0'
                                 )}
                             >
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-[10px] font-black text-white shadow-sm">
-                                            {initials}
-                                        </div>
-                                        <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{contact.name}</p>
-                                    </div>
+                                         <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-[10px] font-black text-white shadow-sm">
+                                             {initials}
+                                         </div>
+                                         <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{contact.name}</p>
+                                     </div>
                                 </td>
                                 <td className="px-4 py-3 hidden md:table-cell">
                                     {contact.email ? (
-                                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+                                        <a 
+                                            href={`mailto:${contact.email}`} 
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                        >
                                             <Mail className="h-3 w-3 shrink-0" />
                                             <span className="truncate max-w-[180px]">{contact.email}</span>
                                         </a>
@@ -60,7 +66,11 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                                 </td>
                                 <td className="px-4 py-3 hidden lg:table-cell">
                                     {contact.mobile_phone ? (
-                                        <a href={`tel:${contact.mobile_phone}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                                        <a 
+                                            href={`tel:${contact.mobile_phone}`} 
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                                        >
                                             <Phone className="h-3 w-3 shrink-0" />
                                             {contact.mobile_phone}
                                         </a>
@@ -74,10 +84,26 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-1 justify-end">
-                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => onEdit(contact)}>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7 text-muted-foreground hover:text-foreground" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onEdit(contact);
+                                            }}
+                                        >
                                             <Pencil className="h-3.5 w-3.5" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => onDelete(contact.id)}>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7 text-muted-foreground hover:text-red-500" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDelete(contact.id);
+                                            }}
+                                        >
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                     </div>

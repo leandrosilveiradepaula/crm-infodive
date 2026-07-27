@@ -7,13 +7,13 @@ import {
 } from 'lucide-react';
 import { type Contract } from '@/types/contract';
 import { updateContract, createContract } from '@/app/(dashboard)/contracts/actions';
-import { ContractViewer } from '@/components/contracts/ContractViewer';
+import { ContractViewerDrawer } from '@/components/contracts/ContractViewerDrawer';
 import { SignatureModal } from '@/components/contracts/SignatureModal';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
@@ -117,10 +117,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     return (
         <div className="flex-1 space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
-            <PageHeader 
-                title="Gestão de Contratos" 
-                description="Gerencie, envie e assine contratos digitalmente."
-            >
+            <PageHeaderActions>
                 <Button
                     onClick={handleCreateContract}
                     disabled={isCreating}
@@ -129,7 +126,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <Plus className="h-4 w-4" />
                     {isCreating ? 'Criando...' : 'Novo Contrato'}
                 </Button>
-            </PageHeader>
+            </PageHeaderActions>
 
             {/* KPI Cards */}
             <StatsGrid items={[
@@ -297,13 +294,11 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
 
             {selectedContract && (
                 <>
-                    <ContractViewer
+                    <ContractViewerDrawer
                         isOpen={isViewerOpen}
                         onClose={() => setIsViewerOpen(false)}
                         contract={selectedContract}
                         onSignClick={() => {
-                            // Close viewer, open signer
-                            // setIsViewerOpen(false); // Can keep open if we want overlay, but simpler to swap
                             setIsSignatureOpen(true);
                         }}
                     />

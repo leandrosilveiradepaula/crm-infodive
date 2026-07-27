@@ -24,7 +24,7 @@ import { saveOrgSettings } from '@/app/(dashboard)/settings/actions';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuth } from '@/hooks/useAuth';
 import type { PipelineStage, OrgSettings } from '@/services/SettingsService';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 
 function BrandingSettings({ initial }: { initial: OrgSettings }) {
     const [form, setForm] = useState<OrgSettings>(initial);
@@ -298,10 +298,7 @@ export function SettingsClientPage({ initialOrgSettings, initialStages }: { init
 
     return (
         <div className="space-y-6 pb-10 animate-in fade-in duration-500">
-            <PageHeader 
-                title="Configurações" 
-                description="Gestão organizacional, segurança e personalização." 
-            />
+            
 
             <Tabs defaultValue="general" className="w-full">
                 <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">

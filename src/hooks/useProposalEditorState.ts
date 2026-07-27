@@ -3,6 +3,7 @@
 import { useReducer, useMemo, useCallback } from 'react';
 import type { Deal } from '@/types/deal';
 import { isHardware, isSoftware, isSupport } from '@/utils/productClassification';
+import { calculateDealValue } from '@/utils/dealCalculations';
 
 // ── Section IDs ───────────────────────────────────────────────────────
 export type SectionId =
@@ -50,8 +51,10 @@ export interface EditorConfig {
     allowSignature: boolean;
     includeAISummary: boolean;
     quoteDisplayMode: 'consolidated' | 'options';
+    layout: 'portrait' | 'landscape';
     clientLogo?: string;
     billingOverrides: Record<string, BillingOverride>;
+    aiContext?: string;
 }
 
 // ── State ─────────────────────────────────────────────────────────────
@@ -308,7 +311,9 @@ function createInitialState(deal: Deal): ProposalEditorState {
             allowSignature: false,
             includeAISummary: true,
             quoteDisplayMode: 'consolidated',
+            layout: 'portrait',
             billingOverrides: {},
+            aiContext: '',
         },
         selectedSectionId: firstEnabled?.id || null,
         aiSummary: '',
@@ -379,10 +384,12 @@ export function useProposalEditorState(deal: Deal, initialData?: any) {
     );
 
     const totalValue = useMemo(() => {
-        const products = deal.deal_products || [];
-        return products
-            .filter(p => !p.is_optional)
-            .reduce((acc, p) => acc + (p.unit_price || 0) * (p.quantity || 1), 0);
+        const products = (deal.deal_products || []).map(p => ({
+            ...p,
+            unit_price: p.unit_price || 0,
+            quantity: p.quantity || 1
+        }));
+        return calculateDealValue(products);
     }, [deal.deal_products]);
 
     const toggleSection = useCallback((id: SectionId) => dispatch({ type: 'TOGGLE_SECTION', id }), []);

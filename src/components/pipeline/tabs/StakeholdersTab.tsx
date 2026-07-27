@@ -17,9 +17,11 @@ interface StakeholdersTabProps {
     isEditing: boolean;
     /** All contacts fetched server-side from getAccountContacts() */
     allContacts: any[];
+    formData?: any;
+    updateField?: (field: string, value: any) => void;
 }
 
-export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: StakeholdersTabProps) => {
+export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts, formData, updateField }: StakeholdersTabProps) => {
     // No more useContacts() — contacts come from the server via prop
     const loading = false;
     const error = null;
@@ -31,15 +33,20 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
     // 2. Filter contacts for this specific account
     // Using loose equality and String coercion to be safe with UUIDs from different sources
+    const currentAccountId = formData?.account_id || deal?.account_id;
     const availableContacts = React.useMemo(() => {
-        if (showAllContacts || !deal?.account_id) return allContacts;
-        return allContacts.filter(c => String(c.account_id) === String(deal.account_id));
-    }, [allContacts, deal.account_id, showAllContacts]);
+        if (showAllContacts || !currentAccountId) return allContacts;
+        return allContacts.filter(c => String(c.account_id) === String(currentAccountId));
+    }, [allContacts, currentAccountId, showAllContacts]);
+
+    // Read from formData (draft state)
+    const currentClientContactId = formData?.client_contact_id !== undefined ? formData.client_contact_id : deal.client_contact_id;
+    const currentCustomFields = formData?.custom_fields || deal?.custom_fields || {};
 
     // Safely extract secondary contacts array
     let secondaryContacts: Array<{ contact_id: string; role: string }> = [];
-    if (deal?.custom_fields?.secondary_contacts && Array.isArray(deal.custom_fields.secondary_contacts)) {
-        secondaryContacts = deal.custom_fields.secondary_contacts;
+    if (currentCustomFields.secondary_contacts && Array.isArray(currentCustomFields.secondary_contacts)) {
+        secondaryContacts = currentCustomFields.secondary_contacts;
     }
 
     // --- Unified Stakeholders List Logic ---
@@ -47,9 +54,9 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
         const list: Array<{ contact_id: string; role: string; isPrimary: boolean }> = [];
 
         // 1. Add Primary Client (if exists) at the top
-        if (deal.client_contact_id) {
+        if (currentClientContactId) {
             list.push({
-                contact_id: deal.client_contact_id,
+                contact_id: currentClientContactId,
                 role: 'Cliente Principal (Decisor)',
                 isPrimary: true
             });
@@ -57,7 +64,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
         // 2. Add Secondary Contacts
         secondaryContacts.forEach(sc => {
-            if (sc.contact_id !== deal.client_contact_id && !list.find(l => l.contact_id === sc.contact_id)) {
+            if (sc.contact_id !== currentClientContactId && !list.find(l => l.contact_id === sc.contact_id)) {
                 list.push({
                     contact_id: sc.contact_id,
                     role: sc.role,
@@ -66,14 +73,16 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
             }
         });
         return list;
-    }, [deal.client_contact_id, secondaryContacts]);
+    }, [currentClientContactId, secondaryContacts]);
 
     // Final list of selectable contacts (not already stakeholders)
     const selectableContacts = React.useMemo(() => {
         return availableContacts.filter(c => !allStakeholders.find(s => s.contact_id === c.id));
     }, [availableContacts, allStakeholders]);
 
-    const setPrimaryContact = async (contactId: string) => {
+    const setPrimaryStakeholder = (contactId: string) => {
+        if (!updateField) return;
+
         let newSecondary = [...secondaryContacts];
         const oldPrimaryId = deal.client_contact_id;
 
@@ -90,7 +99,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
         const newCustomFields = { ...(deal.custom_fields || {}), secondary_contacts: newSecondary };
 
         // Determine if we should also update account_id if it's missing but contact has one
-        let accountUpdate = {};
+        let accountUpdate: any = {};
         if (!deal.account_id) {
             const contact = allContacts.find(c => c.id === contactId);
             if (contact?.account_id) {
@@ -98,44 +107,29 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
             }
         }
 
-        const updates = {
-            ...accountUpdate,
-            client_contact_id: contactId,
-            custom_fields: newCustomFields
-        };
+        if (accountUpdate.hasOwnProperty('account_id')) {
+            updateField('account_id', accountUpdate.account_id);
+            updateField('company', accountUpdate.company);
+        }
+        updateField('client_contact_id', contactId);
+        updateField('custom_fields', newCustomFields);
+    };
 
-        // Optimistic update
-        setDeal(prev => ({ ...prev, ...updates }));
-
-        try {
-            await updateDeal(deal.id, updates);
-            toast.success('Cliente Principal atualizado com sucesso!');
-        } catch (error) {
-            toast.error('Erro ao atualizar Cliente Principal no banco de dados.');
-            console.error(error);
+    const removeStakeholder = (contactId: string, isPrimary: boolean) => {
+        if (!updateField) return;
+        
+        if (isPrimary) {
+            updateField('client_contact_id', null);
+        } else {
+            const newSecondary = secondaryContacts.filter(sc => sc.contact_id !== contactId);
+            const newCustomFields = { ...(deal.custom_fields || {}), secondary_contacts: newSecondary };
+            updateField('custom_fields', newCustomFields);
         }
     };
 
-    const removeStakeholder = async (contactId: string, isPrimary: boolean) => {
-        try {
-            if (isPrimary) {
-                setDeal(prev => ({ ...prev, client_contact_id: null as any }));
-                await updateDeal(deal.id, { client_contact_id: null });
-                toast.success('Cliente Principal removido.');
-            } else {
-                const newSecondary = secondaryContacts.filter(sc => sc.contact_id !== contactId);
-                const newCustomFields = { ...(deal.custom_fields || {}), secondary_contacts: newSecondary };
-                setDeal(prev => ({ ...prev, custom_fields: newCustomFields }));
-                await updateDeal(deal.id, { custom_fields: newCustomFields });
-                toast.success('Envolvido removido da oportunidade.');
-            }
-        } catch (error) {
-            toast.error('Erro ao remover envolvido no banco de dados.');
-            console.error(error);
-        }
-    };
-
-    const addStakeholder = async () => {
+    const addStakeholder = () => {
+        if (!updateField) return;
+        
         if (!newStakeholderId) {
             toast.warning('Selecione um contato na lista antes de adicionar!');
             return;
@@ -143,41 +137,26 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
         const contact = allContacts.find(c => c.id === newStakeholderId);
 
-        try {
-            let accountUpdate = {};
-            // If deal has no account, link it to the selected contact's account
-            if (!deal.account_id && contact?.account_id) {
-                accountUpdate = { account_id: contact.account_id, company: contact.account?.name || deal.company };
-            }
-
-            // If list is completely empty, default the first added person as Primary
-            if (!deal.client_contact_id && secondaryContacts.length === 0) {
-                const updates = {
-                    ...accountUpdate,
-                    client_contact_id: newStakeholderId
-                };
-                setDeal(prev => ({ ...prev, ...updates }));
-                await updateDeal(deal.id, updates);
-                toast.success('Adicionado como Cliente Principal automaticamente.');
-            } else {
-                const newSecondary = [...secondaryContacts, { contact_id: newStakeholderId, role: newStakeholderRole }];
-                const newCustomFields = { ...(deal.custom_fields || {}), secondary_contacts: newSecondary };
-                const updates = {
-                    ...accountUpdate,
-                    custom_fields: newCustomFields
-                };
-                setDeal(prev => ({ ...prev, ...updates }));
-                await updateDeal(deal.id, updates);
-                toast.success('Envolvido adicionado!');
-            }
-
-            setNewStakeholderId('');
-            setNewStakeholderRole('');
-            setShowAllContacts(false);
-        } catch (error) {
-            toast.error('Erro ao salvar stakeholder no banco de dados.');
-            console.error(error);
+        let accountUpdate = {};
+        if (!deal.account_id && contact?.account_id) {
+            accountUpdate = { account_id: contact.account_id, company: contact.account?.name || deal.company };
         }
+        if (accountUpdate.hasOwnProperty('account_id')) {
+            updateField('account_id', (accountUpdate as any).account_id);
+            updateField('company', (accountUpdate as any).company);
+        }
+
+        if (!deal.client_contact_id && secondaryContacts.length === 0) {
+            updateField('client_contact_id', newStakeholderId);
+        } else {
+            const newSecondary = [...secondaryContacts, { contact_id: newStakeholderId, role: newStakeholderRole }];
+            const newCustomFields = { ...(deal.custom_fields || {}), secondary_contacts: newSecondary };
+            updateField('custom_fields', newCustomFields);
+        }
+
+        setNewStakeholderId('');
+        setNewStakeholderRole('');
+        setShowAllContacts(false);
     };
 
     return (
@@ -356,7 +335,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-10 w-10 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 rounded-lg transition-all"
-                                                onClick={() => setPrimaryContact(stakeholder.contact_id)}
+                                                onClick={() => setPrimaryStakeholder(stakeholder.contact_id)}
                                                 title="Definir como Cliente Principal"
                                             >
                                                 <Star className="w-5 h-5" />

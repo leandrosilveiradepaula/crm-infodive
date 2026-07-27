@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { TrendingUp, Info } from 'lucide-react';
 import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
+import { Switch } from '@/components/ui/switch';
 
 interface SimulatorUser {
     id: string;
@@ -101,7 +102,8 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
                     </div>
 
                     {/* New Client Toggle */}
-                    <label className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${isNewClient
+                    <div className={`flex items-center justify-between p-3 rounded-2xl border transition-colors ${
+                        isNewClient
                         ? 'bg-emerald-500/10 border-emerald-500/20'
                         : 'bg-muted/30 border-transparent hover:bg-muted/50'
                         }`}>
@@ -109,16 +111,12 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
                             <span className={`text-xs font-bold ${isNewClient ? 'text-emerald-600' : 'text-muted-foreground'}`}>Cliente Novo?</span>
                             <span className="text-[10px] text-muted-foreground/80">Aplica bônus se configurado</span>
                         </div>
-                        <div className={`w-10 h-5 rounded-full relative transition-colors ${isNewClient ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`}>
-                            <input
-                                type="checkbox"
-                                className="hidden"
-                                checked={isNewClient}
-                                onChange={() => setIsNewClient(!isNewClient)}
-                            />
-                            <div className={`absolute top-1 w-3 h-3 rounded-full bg-background transition-all transform ${isNewClient ? 'left-6' : 'left-1'}`} />
-                        </div>
-                    </label>
+                        <Switch
+                            checked={isNewClient}
+                            onCheckedChange={setIsNewClient}
+                            className="scale-[0.65] data-[state=checked]:bg-emerald-500"
+                        />
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 space-y-2">

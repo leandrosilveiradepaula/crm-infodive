@@ -1,6 +1,6 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64, DATACENTER_BASE64, HANDSHAKE_BASE64 } from './pdfAssetsBase64';
 
 interface PdfCoverPageProps {
@@ -13,6 +13,7 @@ interface PdfCoverPageProps {
     sellerName?: string;
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
 export function PdfCoverPage({
@@ -25,9 +26,10 @@ export function PdfCoverPage({
     sellerName,
     pdfColors,
     pdfStyles,
+    layout = 'portrait',
 }: PdfCoverPageProps) {
     return (
-        <Page size="A4" style={[pdfStyles.page, { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 }]}>
+        <Page {...getPageProps(layout)} style={[pdfStyles.page, { paddingTop: 0, paddingBottom: 0, paddingLeft: 0, paddingRight: 0 }]}>
             {/* Top gradient bar (simulated with two halves) */}
             <View style={{
                 position: 'absolute', top: 0, left: 0, width: '50%', height: 6,

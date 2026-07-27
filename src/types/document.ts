@@ -7,12 +7,22 @@ export type DocumentCategory =
     | 'ata'
     | 'nf'
     | 'tecnico'
+    | 'configuracao'
+    | 'precos_aprovados'
+    | 'proposta'
+    | 'espelho_nf'
+    | 'pedido'
     | 'outro';
 
 export type EntityType = 'deal' | 'account' | 'contact';
 
 /** Categories for deal documents */
 export const DEAL_DOCUMENT_CATEGORIES: { value: DocumentCategory; label: string }[] = [
+    { value: 'configuracao', label: 'Configuração' },
+    { value: 'precos_aprovados', label: 'Preços Aprovados' },
+    { value: 'proposta', label: 'Proposta' },
+    { value: 'espelho_nf', label: 'Espelho de NF' },
+    { value: 'pedido', label: 'Pedido' },
     { value: 'contrato', label: 'Contrato' },
     { value: 'ata', label: 'Ata' },
     { value: 'nf', label: 'Nota Fiscal' },
@@ -52,6 +62,9 @@ export interface EntityDocument {
     file_type: string;
     file_size: number;
     category: DocumentCategory;
+    parent_id?: string | null;
+    version: number;
+    quote_id?: string | null;
     created_at: string;
     updated_at: string;
     source_name?: string;

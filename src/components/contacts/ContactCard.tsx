@@ -10,31 +10,51 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ContactCardProps {
     contact: Contact;
     onEdit: (contact: Contact) => void;
     onDelete: (id: string) => void;
+    onView?: (contact: Contact) => void;
 }
 
-export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
+export function ContactCard({ contact, onEdit, onDelete, onView }: ContactCardProps) {
     return (
-        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300 group relative overflow-hidden rounded-xl hover:-translate-y-0.5 hover:shadow-lg">
+        <Card 
+            onClick={() => onView?.(contact)}
+            className="card-interactive group bg-card border-border rounded-md"
+        >
             <CardContent className="p-3 relative z-10">
                 <div className="absolute top-2 right-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg">
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md"
+                                onClick={(e) => e.stopPropagation()}
+                            >
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                            <DropdownMenuItem onClick={() => onEdit(contact)} className="hover:bg-accent hover:text-accent-foreground cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(contact);
+                                }} 
+                                className="hover:bg-accent hover:text-accent-foreground cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5"
+                            >
                                 <Edit className="h-3 w-3 mr-2" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onDelete(contact.id)} className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(contact.id);
+                                }} 
+                                className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5"
+                            >
                                 <Trash2 className="h-3 w-3 mr-2" /> Remover
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -42,8 +62,8 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                 </div>
 
                 <div className="flex items-start gap-2.5 mb-2.5">
-                    <Avatar className={`h-10 w-10 border-2 ${contact.is_primary ? 'border-primary shadow-sm shadow-primary/20' : 'border-border'}`}>
-                        <AvatarFallback className={`text-sm font-bold ${contact.is_primary ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                    <Avatar className={`h-10 w-10 border-2 rounded-md ${contact.is_primary ? 'border-primary shadow-sm shadow-primary/20' : 'border-border'}`}>
+                        <AvatarFallback className={`text-sm font-bold rounded-md ${contact.is_primary ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
                             {contact.name?.charAt(0).toUpperCase() || 'C'}
                         </AvatarFallback>
                     </Avatar>
@@ -63,8 +83,11 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                         <Mail className="h-3 w-3 shrink-0" />
                         <span className="truncate">{contact.email}</span>
                         <button
-                            onClick={() => navigator.clipboard.writeText(contact.email)}
-                            className="opacity-0 group-hover/email:opacity-100 p-0.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-all absolute right-0 bg-card"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigator.clipboard.writeText(contact.email);
+                            }}
+                            className="opacity-0 group-hover/email:opacity-100 p-0.5 hover:bg-accent rounded-md text-muted-foreground hover:text-foreground transition-all absolute right-0 bg-card"
                             title="Copiar email"
                         >
                             <Copy className="h-3 w-3" />
@@ -83,8 +106,11 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full h-7 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border-[#0077b5]/20 text-[#0077b5] text-[9px] font-bold uppercase tracking-wider"
-                                onClick={() => window.open(contact.linkedin, '_blank')}
+                                className="w-full h-7 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border-[#0077b5]/20 text-[#0077b5] text-[9px] font-bold uppercase tracking-wider rounded-md"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(contact.linkedin, '_blank');
+                                }}
                             >
                                 <Linkedin className="h-3 w-3 mr-1.5" />
                                 Ver Perfil LinkedIn

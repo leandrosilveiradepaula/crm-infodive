@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ interface ServiceContractModalProps {
     onOpenChange: (open: boolean) => void;
     contract: ServiceContract | null;
     accountId: string;
-    onSave: (payload: Partial<ServiceContract>) => Promise<any>;
+    onSave: (payload: Partial<ServiceContract>) => Promise<unknown>;
 }
 
 export function ServiceContractModal({ open, onOpenChange, contract, accountId, onSave }: ServiceContractModalProps) {
@@ -74,126 +74,135 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
             await onSave(payload);
             toast.success(contract ? 'Contrato atualizado.' : 'Contrato cadastrado com sucesso!');
             onOpenChange(false);
-        } catch (error: any) {
-            toast.error(error.message || 'Erro ao salvar contrato.');
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar contrato.';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle>{contract ? 'Editar Contrato de Suporte' : 'Novo Contrato de Suporte'}</DialogTitle>
-                    <DialogDescription>
+        <Sheet open={open} onOpenChange={onOpenChange}>
+            <SheetContent side="right" className="w-full sm:max-w-[500px] flex flex-col p-0 gap-0 bg-background border-l border-border">
+                {/* Header */}
+                <div className="border-b border-border px-6 py-4 shrink-0">
+                    <SheetTitle className="text-lg font-bold text-foreground tracking-tight">
+                        {contract ? 'Editar Contrato de Suporte' : 'Novo Contrato de Suporte'}
+                    </SheetTitle>
+                    <SheetDescription className="text-xs text-muted-foreground mt-0.5">
                         Descreva as condições, escopo e validade do contrato assinado com este cliente.
-                    </DialogDescription>
-                </DialogHeader>
+                    </SheetDescription>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Título / Nome do Contrato *
-                        </label>
-                        <ThemeInput
-                            placeholder="Ex: SLA Ouro 24x7"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            required
-                        />
-                    </div>
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-6 space-y-6">
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                    Título / Nome do Contrato *
+                                </label>
+                                <ThemeInput
+                                    placeholder="Ex: SLA Ouro 24x7"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    required
+                                />
+                            </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                Tipo
-                            </label>
-                            <ThemeSelect
-                                value={type}
-                                onChange={(e) => setType(e.target.value as any)}
-                            >
-                                <option value="support">Suporte Técnico</option>
-                                <option value="warranty_extension">Extensão de Garantia</option>
-                                <option value="subscription">Assinatura / Licenciamento</option>
-                            </ThemeSelect>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        Tipo
+                                    </label>
+                                    <ThemeSelect
+                                        value={type}
+                                        onChange={(e) => setType(e.target.value as ServiceContract['type'])}
+                                    >
+                                        <option value="support">Suporte Técnico</option>
+                                        <option value="warranty_extension">Extensão de Garantia</option>
+                                        <option value="subscription">Assinatura / Licenciamento</option>
+                                    </ThemeSelect>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        Status
+                                    </label>
+                                    <ThemeSelect
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value as ServiceContract['status'])}
+                                    >
+                                        <option value="active">Ativo / Vigente</option>
+                                        <option value="pending_renewal">Pendente Renovação</option>
+                                        <option value="expired">Expirado</option>
+                                        <option value="canceled">Cancelado</option>
+                                    </ThemeSelect>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        Data de Início
+                                    </label>
+                                    <ThemeInput
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        Data de Fim (Expiração)
+                                    </label>
+                                    <ThemeInput
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                    Valor Mensal Recorrente (Opcional)
+                                </label>
+                                <ThemeInput
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0,00"
+                                    value={monthlyValue}
+                                    onChange={(e) => setMonthlyValue(Number(e.target.value))}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                    Escopo / Observações do SLA
+                                </label>
+                                <textarea
+                                    className="w-full h-24 p-3 bg-muted/30 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                                    placeholder="Descreva o tempo de atendimento, restrições e o que está coberto..."
+                                    value={coverageDetails}
+                                    onChange={(e) => setCoverageDetails(e.target.value)}
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                Status
-                            </label>
-                            <ThemeSelect
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value as any)}
-                            >
-                                <option value="active">Ativo / Vigente</option>
-                                <option value="pending_renewal">Pendente Renovação</option>
-                                <option value="expired">Expirado</option>
-                                <option value="canceled">Cancelado</option>
-                            </ThemeSelect>
-                        </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                Data de Início
-                            </label>
-                            <ThemeInput
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                                Data de Fim (Expiração)
-                            </label>
-                            <ThemeInput
-                                type="date"
-                                value={endDate}
-                                onChange={(e) => setEndDate(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Valor Mensal Recorrente (Opcional)
-                        </label>
-                        <ThemeInput
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0,00"
-                            value={monthlyValue}
-                            onChange={(e) => setMonthlyValue(Number(e.target.value))}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Escopo / Observações do SLA
-                        </label>
-                        <textarea
-                            className="w-full h-24 p-3 bg-muted/30 border border-border rounded-xl text-sm"
-                            placeholder="Descreva o tempo de atendimento, restrições e o que está coberto..."
-                            value={coverageDetails}
-                            onChange={(e) => setCoverageDetails(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                    {/* Footer */}
+                    <div className="border-t border-border px-6 py-4 bg-muted/10 shrink-0 flex items-center justify-end gap-3">
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             Cancelar
                         </Button>
-                        <Button type="submit" className="bg-primary text-white" disabled={loading}>
+                        <Button type="submit" className="bg-primary text-white font-bold" disabled={loading}>
                             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             Salvar
                         </Button>
                     </div>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </SheetContent>
+        </Sheet>
     );
 }

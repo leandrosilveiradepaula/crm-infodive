@@ -16,6 +16,8 @@ interface PartnersTabProps {
     allAccounts?: Account[];
     /** ALL contacts from server (getAccountContacts) */
     allContacts?: Contact[];
+    formData?: any;
+    updateField?: (field: string, value: any) => void;
 }
 
 export const PartnersTab = ({
@@ -24,10 +26,13 @@ export const PartnersTab = ({
     distributors: propDistributors = [],
     allAccounts = [],
     allContacts = [],
+    formData,
+    updateField,
 }: PartnersTabProps) => {
-    const [selectedDistributor, setSelectedDistributor] = useState<string>(deal.distributor_id || '');
-    const [selectedDistributorContact, setSelectedDistributorContact] = useState<string>(deal.distributor_contact_id || '');
-    const [selectedManufacturerContact, setSelectedManufacturerContact] = useState<string>(deal.manufacturer_contact_id || '');
+    // Read from formData (draft state)
+    const selectedDistributor = formData?.distributor_id || deal.distributor_id || '';
+    const selectedDistributorContact = formData?.distributor_contact_id || deal.distributor_contact_id || '';
+    const selectedManufacturerContact = formData?.manufacturer_contact_id || deal.manufacturer_contact_id || '';
 
     // Distributors: prefer prop list (server), fall back to filtering allAccounts
     const distributors = propDistributors.length > 0
@@ -88,29 +93,23 @@ export const PartnersTab = ({
         return (allContacts || []) as (Contact | AccountContact)[];
     };
 
-    const handleDistributorChange = async (id: string) => {
-        setSelectedDistributor(id);
-        setSelectedDistributorContact('');
-        try {
-            await updateDeal(deal.id, { distributor_id: id || null, distributor_contact_id: null });
-            toast.success('Distribuidor atualizado!');
-        } catch { toast.error('Erro ao atualizar distribuidor'); }
+    const handleDistributorChange = (id: string) => {
+        if (updateField) {
+            updateField('distributor_id', id || null);
+            updateField('distributor_contact_id', null);
+        }
     };
 
-    const handleDistributorContactChange = async (id: string) => {
-        setSelectedDistributorContact(id);
-        try {
-            await updateDeal(deal.id, { distributor_contact_id: id || null });
-            toast.success('Contato atualizado!');
-        } catch { toast.error('Erro ao atualizar contato'); }
+    const handleDistributorContactChange = (id: string) => {
+        if (updateField) {
+            updateField('distributor_contact_id', id || null);
+        }
     };
 
-    const handleManufacturerContactChange = async (id: string) => {
-        setSelectedManufacturerContact(id);
-        try {
-            await updateDeal(deal.id, { manufacturer_contact_id: id || null });
-            toast.success('Contato do fabricante atualizado!');
-        } catch { toast.error('Erro ao atualizar contato'); }
+    const handleManufacturerContactChange = (id: string) => {
+        if (updateField) {
+            updateField('manufacturer_contact_id', id || null);
+        }
     };
 
     const ContactCard = ({ contactId, contacts }: { contactId: string; contacts: (Contact | AccountContact)[] }) => {

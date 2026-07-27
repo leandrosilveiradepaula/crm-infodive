@@ -89,7 +89,7 @@ export const SignaturePad = ({ onSave, onCancel }: SignaturePadProps) => {
     };
 
     return (
-        <div className="bg-card p-8 rounded-[32px] border border-border shadow-2xl animate-in zoom-in-95 duration-500">
+        <div className="bg-card p-8 rounded-md border border-border shadow-2xl animate-in zoom-in-95 duration-500">
             <h4 className="text-[10px] font-black text-muted-foreground mb-6 uppercase tracking-[0.3em] flex items-center gap-3">
                 <div className="w-1 h-3 bg-primary rounded-full"></div>
                 Captura de Assinatura Digital

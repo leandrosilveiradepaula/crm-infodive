@@ -27,7 +27,7 @@ import { AutomationHistorySheet } from '@/components/automations/HistorySheet';
 import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation } from '@/app/(dashboard)/automations/actions';
 import { type Automation } from '@/types/automation';
 import { useRouter } from 'next/navigation';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { 
     DropdownMenu, 
@@ -216,10 +216,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     return (
         <div className="space-y-6 pb-10 animate-in fade-in duration-700">
             {/* Top Bar / Header */}
-            <PageHeader
-                title="Automações"
-                description="Otimize sua rotina com gatilhos e ações automáticas inteligentes."
-            >
+            <PageHeaderActions>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => {
@@ -231,7 +228,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <Plus className="h-5 w-5" /> Criar Fluxo
                     </button>
                 </div>
-            </PageHeader>
+            </PageHeaderActions>
 
             {/* AI Builder Quick Input */}
             <div className="bg-card border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl shadow-sm mb-6">

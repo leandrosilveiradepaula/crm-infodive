@@ -9,7 +9,7 @@ import { PlanningTab } from '@/components/goals/tabs/PlanningTab';
 import { StatementTab } from '@/components/goals/tabs/StatementTab';
 import { UserGoalData, Campaign, Scenario } from '@/types/goal';
 import { Deal } from '@/types/deal';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 interface GoalsClientPageProps {
@@ -30,10 +30,7 @@ export function GoalsCommissionsClientPage({
 
     return (
         <div className="animate-in fade-in duration-500 pb-10 space-y-8">
-            <PageHeader 
-                title="Metas e Comissões" 
-                description="Gerencie as metas mensais e regras de comissionamento da equipe." 
-            />
+            
 
             <Tabs defaultValue="goals">
                 <TabsList className="w-full overflow-x-auto no-scrollbar">

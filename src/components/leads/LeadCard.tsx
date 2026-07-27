@@ -31,12 +31,12 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
     };
 
     return (
-        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300 group relative overflow-hidden rounded-xl hover:-translate-y-0.5 hover:shadow-lg">
-            <CardContent className="p-3 relative z-10">
+        <Card className="card-interactive group">
+            <CardContent className="p-4 relative z-10">
                 <div className="absolute top-2 right-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md">
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
@@ -55,8 +55,8 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                 </div>
 
                 <div className="flex items-center gap-2.5 mb-2">
-                    <Avatar className="h-8 w-8 border border-primary/20 shadow-none">
-                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black">
+                    <Avatar className="h-8 w-8 border border-primary/20 shadow-none rounded-md">
+                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black rounded-md">
                             {lead.contact_name ? lead.contact_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'L'}
                         </AvatarFallback>
                     </Avatar>

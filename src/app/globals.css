@@ -108,6 +108,10 @@
   --stage-negotiation: oklch(0.704 0.140 70.08); /* Orange 500 */
   --stage-won: oklch(0.627 0.194 149.214); /* Emerald 500 */
   --stage-lost: oklch(0.577 0.245 27.325); /* Red 500 */
+  
+  /* Centralized Card Density */
+  --card-padding: 0.8rem;
+  --card-gap: 0.75rem;
 }
 
 .dark {
@@ -181,5 +185,14 @@
 @layer utilities {
   .glass-card {
     @apply bg-card/60 backdrop-blur-xl border border-border;
+  }
+
+  /* Interactive Card Hover Standard */
+  .card-interactive {
+    @apply transition-all duration-200 cursor-pointer overflow-hidden relative;
+  }
+  
+  .card-interactive:hover {
+    @apply border-primary/40 shadow-md -translate-y-0.5;
   }
 }

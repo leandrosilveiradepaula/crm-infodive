@@ -11,7 +11,7 @@ import {
 } from '@/components/charts/ReportsCharts';
 import { formatCompact, formatCurrency, formatPercentage } from '@/utils/analytics';
 import { ThemeSelect, ThemeInput } from '@/components/ui/theme/ThemeComponents';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 
@@ -88,10 +88,7 @@ export function ReportsClientPage() {
     return (
         <div className="space-y-6 pb-10">
             {/* Header */}
-            <PageHeader 
-                title="Relatórios & Insights" 
-                description="Análise detalhada de performance comercial"
-            />
+            
 
             {/* Nova Barra de Filtros (Padrão Pipeline) */}
             <FilterBar>

@@ -1,7 +1,7 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
-    Package, Plus, Trash2, FileSpreadsheet, X, Zap, Calendar, Star, Tag, Copy, Pencil, Check, PackagePlus
+    Package, Plus, Trash2, FileSpreadsheet, X, Star, Tag, Copy, Pencil, Check, PackagePlus, Paperclip, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent, useSensor, useSensors, PointerSensor, KeyboardSensor } from '@dnd-kit/core';
 import { arrayMove, SortableContext, verticalListSortingStrategy, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -12,40 +12,65 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { formatCurrency } from '@/utils/format';
 import { ProductSearch } from './ProductSearch';
-import { SortableProductRow } from './SortableProductRow';
-import { Deal, DealQuote } from '@/types/deal';
+import { SortableProductRow, type ProductItem } from './SortableProductRow';
+import { ProductDetailsDrawer, type Distributor } from './ProductDetailsDrawer';
+import { Deal, ProductTechDetail } from '@/types/deal';
+import type { Profile } from '@/types/profile';
 import { 
     updateDeal, reorderDealProducts, removeDealProduct, updateDealProduct, 
     bulkAddDealProducts, createDealQuote, setPrimaryDealQuote, deleteDealQuote,
-    duplicateDealQuote, getDealDetails, updateDealQuote
+    duplicateDealQuote, getDealDetails, updateDealQuote,
+    getDealDocuments, uploadDealDocument, getDealDocumentSignedUrl, deleteDealDocument
 } from '@/app/(dashboard)/pipeline/actions';
-import { ImportDealProductsModal } from './ImportDealProductsModal';
+import { DocumentsTab } from '@/components/shared/DocumentsTab';
+import { ImportDealProductsModal, type ProductItem as ImportProductItem } from './ImportDealProductsModal';
 import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculations';
 import { sortProductsHierarchically } from '@/utils/productSorting';
+import type { Product } from '@/types/product';
+import type { EntityDocument } from '@/types/document';
+
+interface CatalogProduct extends Product {
+    price?: number;
+    cost?: number;
+    duration?: number;
+    duration_unit?: string;
+    pricing_model?: 'one_time' | 'monthly' | 'annual';
+}
 
 interface DealProductsTabProps {
     deal: Deal;
     setDeal: React.Dispatch<React.SetStateAction<Deal>>;
     isEditing: boolean;
     setIsEditing: (value: boolean) => void;
-    distributors?: any[];
+    distributors?: Distributor[];
     isLoading?: boolean;
+    onNavigateToDocuments?: (quoteId: string) => void;
 }
 
-export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distributors = [], isLoading = false }: DealProductsTabProps) {
+export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distributors = [], onNavigateToDocuments }: DealProductsTabProps) {
     // Local State for Products Tab
     const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
-    const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
+    const [drawerProductId, setDrawerProductId] = useState<string | null>(null);
     const [showProductSearch, setShowProductSearch] = useState(false);
-    const [selectedCatalogProduct, setSelectedCatalogProduct] = useState<any>(null);
+    const [selectedCatalogProduct, setSelectedCatalogProduct] = useState<CatalogProduct | null>(null);
     const [newProductQuantity, setNewProductQuantity] = useState(1);
     const [showImportModal, setShowImportModal] = useState(false);
     const [targetImportProductId, setTargetImportProductId] = useState<string | null>(null);
 
     // Quick Add (Produto Avulso)
+    interface QuickAddProductData {
+        name: string;
+        sku: string;
+        quantity: number;
+        cost: number;
+        margin: number;
+        category: string;
+        pricing_model: 'one_time' | 'monthly' | 'annual';
+    }
+
     const [showQuickAdd, setShowQuickAdd] = useState(false);
-    const [quickAddData, setQuickAddData] = useState({
-        name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time' as 'one_time' | 'monthly' | 'annual'
+    const [quickAddData, setQuickAddData] = useState<QuickAddProductData>({
+        name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time'
     });
     const quickAddNameRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +82,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     const [renamingQuoteId, setRenamingQuoteId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
     const renameInputRef = useRef<HTMLInputElement>(null);
+    const [quoteDocsExpanded, setQuoteDocsExpanded] = useState(false);
 
     // Active Quote Derived State
     const activeQuote = deal.deal_quotes?.find(q => q.id === activeQuoteId) || null;
@@ -65,12 +91,19 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         ? (deal.deal_products || []).filter(p => !p.quote_id || p.quote_id === activeQuoteId)
         : (deal.deal_products || []);
 
-    // Helper: full recalculation for UI (only primary quote affects pipeline)
-    const primaryQuoteProducts = (deal.deal_products || []).filter(p => {
-        if (!p.quote_id) return true; // Treat unassigned as primary/shared
-        const quote = deal.deal_quotes?.find(q => q.id === p.quote_id);
-        return quote?.is_primary;
-    });
+    const fetchQuoteDocuments = React.useCallback(async (dealId: string) => {
+        const allDocs = await getDealDocuments(dealId);
+        return (allDocs || []).filter((doc: EntityDocument) => doc.quote_id === activeQuoteId);
+    }, [activeQuoteId]);
+
+    const uploadQuoteDocument = React.useCallback(async (dealId: string, formData: FormData) => {
+        if (activeQuoteId) {
+            formData.append('quote_id', activeQuoteId);
+        }
+        return await uploadDealDocument(dealId, formData);
+    }, [activeQuoteId]);
+
+
 
     // Dnd Sensors
     const sensors = useSensors(
@@ -84,12 +117,12 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         })
     );
 
-    // Handlers
     const toggleProductExpansion = (productId: string) => {
-        const newExpanded = new Set(expandedProducts);
-        if (newExpanded.has(productId)) newExpanded.delete(productId);
-        else newExpanded.add(productId);
-        setExpandedProducts(newExpanded);
+        setDrawerProductId(productId);
+    };
+
+    const handleDrawerNavigate = (productId: string) => {
+        setDrawerProductId(productId);
     };
 
     const toggleSelectProduct = (productId: string) => {
@@ -122,9 +155,35 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     id: p.id,
                     display_order: p.display_order
                 })));
-            } catch (error) {
+            } catch {
                 toast.error('Erro ao salvar nova ordem');
             }
+        }
+    };
+
+    const moveProduct = async (id: string, direction: 'up' | 'down') => {
+        const products = deal.deal_products || [];
+        const oldIndex = products.findIndex(p => p.id === id);
+        if (oldIndex === -1) return;
+        const newIndex = direction === 'up' ? oldIndex - 1 : oldIndex + 1;
+        if (newIndex < 0 || newIndex >= products.length) return;
+
+        const newProducts = arrayMove(products, oldIndex, newIndex).map((p, idx) => ({
+            ...p,
+            display_order: idx
+        }));
+
+        const sortedProducts = sortProductsHierarchically(newProducts);
+
+        setDeal(prev => ({ ...prev, deal_products: sortedProducts }));
+
+        try {
+            await reorderDealProducts(newProducts.map(p => ({
+                id: p.id,
+                display_order: p.display_order
+            })));
+        } catch {
+            toast.error('Erro ao salvar nova ordem');
         }
     };
 
@@ -235,7 +294,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 setShowQuickAdd(false);
                 setQuickAddData({ name: '', sku: '', quantity: 1, cost: 0, margin: 20, category: '', pricing_model: 'one_time' });
             }
-        } catch (error) {
+        } catch {
             toast.error('Erro ao adicionar produto avulso');
         }
     };
@@ -300,35 +359,12 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 setShowProductSearch(false);
                 setSelectedCatalogProduct(null);
             }
-        } catch (error) {
+        } catch {
             toast.error('Erro ao adicionar produto');
         }
     };
 
-    const moveProduct = async (id: string, direction: 'up' | 'down') => {
-        const sortedProducts = [...(deal.deal_products || [])];
-        const index = sortedProducts.findIndex(p => p.id === id);
-        if (index === -1) return;
-
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
-        if (targetIndex < 0 || targetIndex >= sortedProducts.length) return;
-
-        const [movedProduct] = sortedProducts.splice(index, 1);
-        sortedProducts.splice(targetIndex, 0, movedProduct);
-
-        const reordered = sortedProducts.map((p, idx) => ({ ...p, display_order: idx }));
-        setDeal(prev => ({ ...prev, deal_products: reordered }));
-
-        try {
-            await reorderDealProducts(reordered);
-        } catch (error) {
-            console.error('Error reordering products:', error);
-            toast.error('Erro ao reordenar produtos');
-            setDeal(prev => ({ ...prev, deal_products: deal.deal_products }));
-        }
-    };
-
-    const handleUpdateProduct = async (id: string, field: any, value: any) => {
+    const handleUpdateProduct = async (id: string, field: keyof ProductItem | string, value: unknown) => {
         const updatedProducts = (deal.deal_products || []).map(p => {
             if (p.id === id) {
                 const updated = { ...p };
@@ -336,11 +372,11 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 // Special Logic: If updating 'description' (Details Table), recalculate based on sum
                 if (field === 'description') {
                     try {
-                        const details: any[] = JSON.parse(String(value));
+                        const details = JSON.parse(String(value)) as ProductTechDetail[];
                         // Only recalculate if there's at least one item with a price defined
                         const hasPrices = details.some(item => (Number(item.unit_price) || 0) > 0);
-                        const totalSum = details.reduce((acc, item) => acc + ((Number(item.quantity) || 0) * (Number(item.unit_price) || 0)), 0);
-                        updated.description = value;
+                        const totalSum = details.reduce((acc: number, item) => acc + ((Number(item.quantity) || 0) * (Number(item.unit_price) || 0)), 0);
+                        updated.description = String(value);
 
                         if (hasPrices && totalSum > 0) {
                             if (updated.is_bid) {
@@ -353,11 +389,11 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 updated.unit_price = parseFloat(((updated.cost || 0) / (1 - (marginToUse / 100))).toFixed(2));
                             }
                         }
-                    } catch (e) {
-                        (updated as any)[field] = value;
+                    } catch {
+                        (updated as Record<string, unknown>)[field] = value;
                     }
                 } else {
-                    (updated as any)[field] = value;
+                    (updated as Record<string, unknown>)[field] = value;
                 }
 
                 // Math Engine
@@ -411,7 +447,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         try {
             const productToUpdate = updatedProducts.find(p => p.id === id);
             if (productToUpdate) {
-                const payload: any = {
+                const payload: Record<string, unknown> = {
                     [field]: value,
                     unit_price: productToUpdate.unit_price,
                     cost: productToUpdate.cost,
@@ -492,7 +528,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             setNewQuoteTitle('');
             setIsCreatingQuote(false);
             toast.success('Cotação criada com sucesso!');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao criar cotação');
         }
     };
@@ -515,7 +551,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             }));
             await updateDeal(deal.id, { value: newTotalValue });
             toast.success('Cotação definida como principal! Valor do deal atualizado.');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao definir cotação principal');
         }
     };
@@ -539,7 +575,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             setActiveQuoteId(newActiveId);
             
             toast.success('Cotação excluída!');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao excluir cotação');
         }
     };
@@ -562,7 +598,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             }
 
             toast.success('Cotação duplicada!', { id: toastId });
-        } catch (error) {
+        } catch {
             toast.error('Erro ao duplicar cotação');
         }
     };
@@ -587,7 +623,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 )
             }));
             toast.success('Cotação renomeada!');
-        } catch (error) {
+        } catch {
             toast.error('Erro ao renomear cotação');
         } finally {
             setRenamingQuoteId(null);
@@ -595,7 +631,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
     };
 
     return (
-        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden px-6 pt-2 pb-4">
+        <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-y-auto custom-scrollbar px-6 pt-2 pb-8">
             <div className="flex justify-between items-center mb-2">
                 <div className="flex-1">
                     <h2 className="text-xl font-bold text-foreground">Produtos & Cotações</h2>
@@ -604,7 +640,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             </div>
 
             {/* QUOTES NAVIGATION BAR */}
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border overflow-x-auto custom-scrollbar">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border overflow-x-auto custom-scrollbar min-h-[48px]">
                 {(deal.deal_quotes || []).map(quote => (
                     <button
                         key={quote.id}
@@ -654,7 +690,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             </div>
 
             {/* QUOTE ACTION BAR */}
-            <div className="flex justify-between items-center mb-2 min-h-[40px]">
+            <div className="flex justify-between items-center mb-2 min-h-[52px] bg-muted/20 p-2 rounded-xl border border-border">
                 <div className="flex items-center gap-3">
                     {activeQuote && (
                         <div className="flex items-center gap-4">
@@ -676,7 +712,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     </Button>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2 group">
+                                <div className="flex items-center gap-2 group pl-2">
                                     <h3
                                         className="text-lg font-black text-foreground cursor-pointer hover:text-primary transition-colors"
                                         onClick={() => isEditing && handleStartRename(activeQuote.id, activeQuote.title)}
@@ -684,17 +720,15 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     >
                                         {activeQuote.title}
                                     </h3>
-                                    {isEditing && (
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-primary"
-                                            onClick={() => handleStartRename(activeQuote.id, activeQuote.title)}
-                                            title="Renomear cotação"
-                                        >
-                                            <Pencil className="h-3 w-3" />
-                                        </Button>
-                                    )}
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        className={`h-6 w-6 text-muted-foreground transition-opacity hover:text-primary ${isEditing ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 pointer-events-none'}`}
+                                        onClick={() => handleStartRename(activeQuote.id, activeQuote.title)}
+                                        title="Renomear cotação"
+                                    >
+                                        <Pencil className="h-3 w-3" />
+                                    </Button>
                                 </div>
                             )}
                             <div className="flex items-center gap-2">
@@ -703,35 +737,36 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                         Valor no Funil ⭐
                                     </span>
                                 ) : (
-                                    isEditing && (
-                                        <Button variant="outline" size="sm" onClick={handleSetPrimaryQuote} className="h-7 text-xs font-bold gap-1.5 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors">
-                                            <Star className="h-3.5 w-3.5" /> Tornar Principal
-                                        </Button>
-                                    )
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleSetPrimaryQuote}
+                                        className={`h-7 text-xs font-bold gap-1.5 text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-200 ${!isEditing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                                    >
+                                        <Star className="h-3.5 w-3.5" /> Tornar Principal
+                                    </Button>
                                 )}
-                                {isEditing && (
-                                    <div className="flex items-center ml-2 border border-border rounded-md overflow-hidden bg-background">
-                                        <Button variant="ghost" size="sm" onClick={handleDuplicateQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors border-r border-border" title="Duplicar Cotação">
-                                            <Copy className="h-3.5 w-3.5" />
+                                <div className={`flex items-center ml-2 border border-border rounded-md overflow-hidden bg-background transition-opacity duration-200 ${!isEditing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                                    <Button variant="ghost" size="sm" onClick={handleDuplicateQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors border-r border-border" title="Duplicar Cotação">
+                                        <Copy className="h-3.5 w-3.5" />
+                                    </Button>
+                                    {!activeQuote.is_primary && (
+                                        <Button variant="ghost" size="sm" onClick={handleDeleteQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Excluir Cotação">
+                                            <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
-                                        {!activeQuote.is_primary && (
-                                            <Button variant="ghost" size="sm" onClick={handleDeleteQuote} className="h-7 w-8 p-0 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Excluir Cotação">
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
                 
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center pr-1">
                     {selectedProducts.size > 0 && (
                         <Button
                             variant="destructive"
                             onClick={handleBulkDelete}
-                            className="h-11 px-4 rounded-xl gap-2 animate-in fade-in"
+                            className="h-9 px-4 rounded-lg gap-2 animate-in fade-in"
                         >
                             <Trash2 className="w-4 h-4" />
                             <span className="hidden sm:inline">Excluir ({selectedProducts.size})</span>
@@ -739,55 +774,62 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     )}
                     {showProductSearch && (
                         <div className="w-[450px] animate-in slide-in-from-right-4 duration-300">
-                            <ProductSearch onSelect={(p: any) => setSelectedCatalogProduct(p)} onQuickAdd={handleOpenQuickAdd} />
+                            <ProductSearch onSelect={(p: Product) => setSelectedCatalogProduct(p as CatalogProduct)} onQuickAdd={handleOpenQuickAdd} />
                         </div>
                     )}
 
-                    {isEditing && (
-                        <>
-                            {!showProductSearch && (
-                                <>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                            setTargetImportProductId(null);
-                                            setShowImportModal(true);
-                                        }}
-                                        className="border-input hover:bg-accent hover:text-accent-foreground h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
-                                    >
-                                        <FileSpreadsheet className="w-4 h-4 mr-2 text-primary" />
-                                        Importar
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => handleOpenQuickAdd()}
-                                        className={`h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
-                                            showQuickAdd
-                                                ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20'
-                                                : 'border-input hover:bg-accent hover:text-accent-foreground hover:border-primary/30'
-                                        }`}
-                                    >
-                                        <PackagePlus className="w-4 h-4 mr-2" />
-                                        Avulso
-                                    </Button>
-                                </>
-                            )}
-
+                    {!showProductSearch && (
+                        <div className={`flex gap-2 items-center transition-opacity duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                             <Button
-                                className={`
-                                    h-11 px-8 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg
-                                    ${showProductSearch
-                                        ? "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20"
-                                        : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 hover:shadow-primary/40"
-                                    }
-                                `}
-                                onClick={handleAddProduct}
+                                variant="outline"
+                                onClick={() => {
+                                    setTargetImportProductId(null);
+                                    setShowImportModal(true);
+                                }}
+                                className="border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 rounded-lg font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
                             >
-                                {showProductSearch ? <X className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                                {showProductSearch ? 'Cancelar' : 'Adicionar Item'}
+                                <FileSpreadsheet className="w-4 h-4 mr-2 text-primary" />
+                                Importar
                             </Button>
-                        </>
+                            <Button
+                                variant="outline"
+                                onClick={() => handleOpenQuickAdd()}
+                                className={`h-9 px-4 rounded-lg font-bold text-xs uppercase tracking-widest transition-all bg-background ${
+                                    showQuickAdd
+                                        ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20'
+                                        : 'border-input hover:bg-accent hover:text-accent-foreground hover:border-primary/30'
+                                }`}
+                            >
+                                <PackagePlus className="w-4 h-4 mr-2" />
+                                Avulso
+                            </Button>
+                            {onNavigateToDocuments && activeQuoteId && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => onNavigateToDocuments(activeQuoteId)}
+                                    className="border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 rounded-lg font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
+                                    title="Ver anexos desta cotação na aba Documentos"
+                                >
+                                    <Paperclip className="w-4 h-4 mr-2 text-primary" />
+                                    Anexos
+                                </Button>
+                            )}
+                        </div>
                     )}
+
+                    <Button
+                        className={`h-9 px-6 rounded-lg font-bold text-xs uppercase tracking-widest transition-all duration-200 shadow-md ${
+                            !isEditing
+                                ? 'opacity-0 pointer-events-none bg-primary text-primary-foreground'
+                                : showProductSearch
+                                    ? 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 opacity-100'
+                                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 hover:shadow-primary/40 opacity-100'
+                        }`}
+                        onClick={handleAddProduct}
+                    >
+                        {showProductSearch ? <X className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                        {showProductSearch ? 'Cancelar' : 'Adicionar'}
+                    </Button>
                 </div>
             </div>
 
@@ -814,9 +856,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     type="number"
                                     min="1"
                                     value={newProductQuantity}
-                                    onChange={(e: any) => setNewProductQuantity(parseInt(e.target.value) || 1)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewProductQuantity(parseInt(e.target.value) || 1)}
                                     className="h-9 w-24 bg-background border-input text-center font-bold text-foreground focus:ring-primary"
-                                    onFocus={(e: any) => e.target.select()}
+                                    onFocus={(e: React.ChangeEvent<HTMLInputElement>) => e.target.select()}
                                 />
                             </div>
                             <Button
@@ -848,8 +890,8 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <Input
                                     ref={quickAddNameRef}
                                     value={quickAddData.name}
-                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, name: e.target.value }))}
-                                    onKeyDown={(e: any) => e.key === 'Enter' && handleQuickAddProduct()}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickAddData(prev => ({ ...prev, name: e.target.value }))}
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleQuickAddProduct()}
                                     className="h-9 bg-background border-input text-foreground text-sm font-bold"
                                     placeholder="Nome do produto..."
                                 />
@@ -858,7 +900,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">SKU</label>
                                 <Input
                                     value={quickAddData.sku}
-                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, sku: e.target.value }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickAddData(prev => ({ ...prev, sku: e.target.value }))}
                                     className="h-9 bg-background border-input text-foreground text-xs font-mono"
                                     placeholder="Opcional"
                                 />
@@ -868,9 +910,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <Input
                                     type="number" min="1"
                                     value={quickAddData.quantity}
-                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickAddData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
                                     className="h-9 bg-background border-input text-center font-bold text-foreground"
-                                    onFocus={(e: any) => e.target.select()}
+                                    onFocus={(e: React.ChangeEvent<HTMLInputElement>) => e.target.select()}
                                 />
                             </div>
                             <div className="w-28">
@@ -878,10 +920,10 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <Input
                                     type="number" min="0" step="0.01"
                                     value={quickAddData.cost || ''}
-                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, cost: parseFloat(e.target.value) || 0 }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickAddData(prev => ({ ...prev, cost: parseFloat(e.target.value) || 0 }))}
                                     className="h-9 bg-background border-input text-right font-bold text-foreground"
                                     placeholder="0,00"
-                                    onFocus={(e: any) => e.target.select()}
+                                    onFocus={(e: React.ChangeEvent<HTMLInputElement>) => e.target.select()}
                                 />
                             </div>
                             <div className="w-20">
@@ -889,16 +931,16 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <Input
                                     type="number" min="0" max="99"
                                     value={quickAddData.margin}
-                                    onChange={(e: any) => setQuickAddData(prev => ({ ...prev, margin: parseFloat(e.target.value) || 0 }))}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuickAddData(prev => ({ ...prev, margin: parseFloat(e.target.value) || 0 }))}
                                     className="h-9 bg-background border-input text-center font-bold text-foreground"
-                                    onFocus={(e: any) => e.target.select()}
+                                    onFocus={(e: React.ChangeEvent<HTMLInputElement>) => e.target.select()}
                                 />
                             </div>
                             <div className="w-32">
                                 <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Modelo</label>
                                 <Select
                                     value={quickAddData.pricing_model}
-                                    onValueChange={(val: any) => setQuickAddData(prev => ({ ...prev, pricing_model: val }))}
+                                    onValueChange={(val: 'one_time' | 'monthly' | 'annual') => setQuickAddData(prev => ({ ...prev, pricing_model: val }))}
                                 >
                                     <SelectTrigger className="h-9 bg-background border-input text-xs font-bold text-foreground rounded-lg">
                                         <SelectValue placeholder="Modelo" />
@@ -921,7 +963,46 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 </div>
             )}
 
-            <div className="bg-card rounded-xl border border-border shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            {/* Product Details Drawer */}
+            {drawerProductId && (() => {
+                const drawerProduct = (activeProducts.find(p => p.id === drawerProductId) as unknown as ProductItem) ?? null;
+                const drawerDetails = (() => {
+                    if (!drawerProduct) return [];
+                    let parsed: ProductTechDetail[] = [];
+                    if (drawerProduct.details && Array.isArray(drawerProduct.details)) {
+                        parsed = drawerProduct.details;
+                    } else if (drawerProduct.description && typeof drawerProduct.description === 'string') {
+                        const trimmed = drawerProduct.description.trim();
+                        if (trimmed.startsWith('[')) {
+                            try { parsed = JSON.parse(drawerProduct.description) as ProductTechDetail[]; } catch { /* noop */ }
+                        } else if (trimmed.length > 0) {
+                            parsed = [{ sku: drawerProduct.sku, description: drawerProduct.description, quantity: drawerProduct.quantity, unit_price: drawerProduct.unit_price || drawerProduct.cost } as ProductTechDetail];
+                        }
+                    }
+                    return parsed.map((item: ProductTechDetail, idx: number) => ({ ...item, id: item.id || `legacy-${drawerProduct.id}-${idx}` }));
+                })();
+                return (
+                    <ProductDetailsDrawer
+                        open={!!drawerProductId}
+                        onClose={() => setDrawerProductId(null)}
+                        product={drawerProduct}
+                        allProducts={activeProducts as unknown as ProductItem[]}
+                        onNavigate={handleDrawerNavigate}
+                        isEditing={isEditing}
+                        onEnableEdit={() => setIsEditing(true)}
+                        handleUpdateProduct={handleUpdateProduct}
+                        editedDeal={deal}
+                        setEditedDeal={setDeal}
+                        dealOwner={(deal.owner_profile || deal.owner) as (Profile & { commission_rate?: number }) | null}
+                        distributors={distributors as Distributor[]}
+                        setShowImportModal={setShowImportModal}
+                        setTargetImportProductId={setTargetImportProductId}
+                        details={drawerDetails}
+                    />
+                );
+            })()}
+
+            <div className="bg-card rounded-xl border border-border shadow-sm shrink-0">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -932,14 +1013,14 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                             <tr>
                                 <th className="w-10"></th>
                                 <th className="pl-6 py-3 w-16 text-center">
-                                    <div className="flex flex-col items-center gap-1">
-                                        {isEditing && <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
+                                    <div className={`flex flex-col items-center gap-1 transition-opacity duration-200 ${isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>
                                     </div>
                                 </th>
                                 <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
-                                <th className="px-4 py-3 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
-                                <th className="px-4 py-3 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
-                                <th className="px-6 py-3 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-32">Total</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Qtd</th>
+                                <th className="px-4 py-3 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-40">Preço Unit.</th>
+                                <th className="px-6 py-3 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-40">Total</th>
                                 <th className="w-10"></th>
                             </tr>
                         </thead>
@@ -957,33 +1038,22 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     </div>
                                 </td>
                             </tr>
-                        ) : activeProducts.map((product, index) => (
-                            <SortableProductRow
-                                key={product.id}
-                                product={product}
-                                isEditing={isEditing}
-                                isFirst={index === 0}
-                                isLast={index === activeProducts.length - 1}
+                                ) : activeProducts.map((product, index) => (
+                                    <SortableProductRow
+                                        key={product.id}
+                                        product={product}
+                                        isEditing={isEditing}
+                                        isFirst={index === 0}
+                                        isLast={index === activeProducts.length - 1}
                                         selectedProducts={selectedProducts}
                                         toggleSelectProduct={toggleSelectProduct}
                                         toggleProductExpansion={toggleProductExpansion}
-                                        expandedProducts={expandedProducts}
+                                        drawerProductId={drawerProductId}
                                         handleUpdateProduct={handleUpdateProduct}
                                         handleInputKeyDown={() => { }}
                                         handleRemoveProduct={handleRemoveProduct}
-                                        moveProduct={() => { }} // Implemented inside SortableProductRow mostly for up/down visual, but Logic is in parent?
-                                        // Wait, SortableProductRow calls moveProduct(id, 'up'|'down'). 
-                                        // I need to implement moveProduct logic if I want arrows to work.
-                                        // But for now, DnD is the main way.
-                                        // Let's pass a dummy or implement it if critical. 
-                                        dealOwner={deal.owner_profile || deal.owner}
-                                        editedDeal={deal}
-                                        setEditedDeal={setDeal}
-                                        setShowImportModal={setShowImportModal}
-                                        setTargetImportProductId={setTargetImportProductId}
-                                        onEnableEdit={() => setIsEditing(true)}
-                                        distributors={distributors}
-                                        previousProduct={index > 0 ? (deal.deal_products || [])[index - 1] as any : undefined}
+                                        moveProduct={moveProduct}
+                                        previousProduct={index > 0 ? (deal.deal_products || [])[index - 1] as ProductItem : undefined}
                                         onLink={handleLinkProduct}
                                         onUnlink={handleUnlinkProduct}
                                     />
@@ -992,41 +1062,37 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         </tbody>
                         <tfoot className="bg-muted/30 border-t border-border">
                             <tr className="bg-card/50">
-                                <td className="w-10"></td>
-                                <td colSpan={2} className="px-6 py-6 align-top">
-                                </td>
-                                <td colSpan={3} className="px-6 py-6 align-top">
-                                    <div className="flex items-start justify-end gap-20">
-                                        <div className="flex flex-col items-end gap-1 opacity-60 hover:opacity-100 transition-opacity">
+                                <td colSpan={5} className="px-6 py-6 align-top">
+                                    <div className="flex justify-end gap-12 mr-6">
+                                        <div className="flex flex-col items-end gap-1 opacity-60 hover:opacity-100 transition-opacity mt-1">
                                             <span className="text-sm font-black text-muted-foreground">
                                                 {formatCurrency(calculateDealTotalCost(activeProducts))}
                                             </span>
                                             <p className="text-[9px] text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total (Desta Cotação)</p>
                                         </div>
 
-                                        <div className="flex flex-col items-end gap-2">
-                                            <div className="flex flex-col items-end">
-                                                <span className="text-2xl font-black text-primary tracking-tight whitespace-nowrap">
-                                                    {formatCurrency(calculateDealValue(activeProducts))}
-                                                </span>
-                                                <p className="text-[9px] text-primary font-bold uppercase tracking-wide">
-                                                    {activeQuote?.is_primary ? 'Valor no Funil ⭐' : 'Subtotal Desta Cotação'}
-                                                </p>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                                                <span className="text-[10px] font-bold text-emerald-500">
-                                                    {(() => {
-                                                        const totalCost = calculateDealTotalCost(activeProducts);
-                                                        const totalSales = calculateDealValue(activeProducts);
-                                                        if (totalSales === 0) return '0.0%';
-                                                        const margin = ((totalSales - totalCost) / totalSales) * 100;
-                                                        return `${margin.toFixed(1)} % `;
-                                                    })()}
-                                                </span>
-                                                <span className="text-[9px] font-bold text-emerald-500/70 uppercase">Margem</span>
-                                            </div>
+                                        <div className="flex items-center gap-2 px-3 py-1.5 h-fit bg-emerald-500/10 rounded-lg border border-emerald-500/20 mt-1">
+                                            <span className="text-xs font-bold text-emerald-500">
+                                                {(() => {
+                                                    const totalCost = calculateDealTotalCost(activeProducts);
+                                                    const totalSales = calculateDealValue(activeProducts);
+                                                    if (totalSales === 0) return '0.0%';
+                                                    const margin = ((totalSales - totalCost) / totalSales) * 100;
+                                                    return `${margin.toFixed(1)}%`;
+                                                })()}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-emerald-500/70 uppercase">Margem</span>
                                         </div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-6 align-top text-right w-40">
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-xl font-black text-primary tracking-tight whitespace-nowrap">
+                                            {formatCurrency(calculateDealValue(activeProducts))}
+                                        </span>
+                                        <p className="text-[9px] text-primary font-bold uppercase tracking-wide">
+                                            {activeQuote?.is_primary ? 'Valor no Funil ⭐' : 'Subtotal Desta Cotação'}
+                                        </p>
                                     </div>
                                 </td>
                                 <td className="w-10"></td>
@@ -1041,9 +1107,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         setShowImportModal(false);
                         setTargetImportProductId(null);
                     }}
-                    targetProduct={deal.deal_products?.find(p => p.id === targetImportProductId)}
-                    dealProducts={activeProducts as any}
-                    onImport={async (products: any[]) => {
+                    targetProduct={deal.deal_products?.find(p => p.id === targetImportProductId) as ImportProductItem | undefined}
+                    dealProducts={activeProducts as unknown as ImportProductItem[]}
+                    onImport={async (products: ImportProductItem[]) => {
                         try {
                             if (targetImportProductId && products.length > 0) {
                                 const updatedProduct = products[0];
@@ -1107,12 +1173,47 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     setTargetImportProductId(null);
                                 }
                             }
-                        } catch (error: any) {
+                        } catch (error: unknown) {
                             console.error('❌ Import error:', error);
-                            toast.error(`Erro na importação: ${error.message || 'Desconhecido'}`);
+                            const errorMessage = error instanceof Error ? error.message : 'Desconhecido';
+                            toast.error(`Erro na importação: ${errorMessage}`);
                         }
                     }}
                 />
+            )}
+            {activeQuote && (
+                <div className="mt-6 border border-border rounded-xl bg-card/30 overflow-hidden shrink-0 flex flex-col">
+                    <button
+                        onClick={() => setQuoteDocsExpanded(prev => !prev)}
+                        className="px-6 py-3 bg-muted/20 flex items-center justify-between shrink-0 hover:bg-muted/40 transition-colors cursor-pointer w-full text-left"
+                    >
+                        <div className="flex items-center gap-2">
+                            <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-xs font-black text-foreground uppercase tracking-wider">Arquivos da Cotação:</span>
+                            <span className="text-xs text-muted-foreground font-semibold">"{activeQuote.title}"</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            {activeQuote.is_primary && (
+                                <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[9px] uppercase font-black px-2 py-0.5 rounded">
+                                    Valor no Funil (Obrigatório para Fechamento)
+                                </span>
+                            )}
+                            {quoteDocsExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                        </div>
+                    </button>
+                    {quoteDocsExpanded && (
+                        <div className="min-h-[280px] overflow-hidden relative border-t border-border">
+                            <DocumentsTab
+                                entityType="deal"
+                                entityId={deal.id}
+                                fetchDocuments={fetchQuoteDocuments}
+                                uploadDocument={uploadQuoteDocument}
+                                getSignedUrl={getDealDocumentSignedUrl}
+                                deleteDocument={deleteDealDocument}
+                            />
+                        </div>
+                    )}
+                </div>
             )}
         </TabsContent>
     );

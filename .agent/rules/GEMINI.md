@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 ---
 
 # GEMINI.md - Antigravity Kit
@@ -269,5 +269,21 @@ When user's prompt is NOT in English:
 - **Scanners**: `security_scan.py`, `dependency_analyzer.py`
 - **Audits**: `ux_audit.py`, `mobile_audit.py`, `lighthouse_audit.py`, `seo_checker.py`
 - **Test**: `playwright_runner.py`, `test_runner.py`
+
+---
+
+## 🎨 UI & LAYOUT GOVERNANCE (MANDATORY)
+
+> 🔴 **CRITICAL**: The Nexus CRM has a strict Centralized Layout architecture. DO NOT violate these rules.
+
+### 1. Interactive Cards
+- **Rule**: NEVER use raw Tailwind classes for hover effects on clickable cards (e.g. `hover:shadow-lg`, `hover:-translate-y-1`, `hover:border-primary/50`).
+- **Standard**: ALWAYS use the global CSS class `.card-interactive`.
+- **Usage**: `<Card className="card-interactive ...">`. If the inner elements need hover states, use `group` alongside it: `<Card className="card-interactive group ...">`.
+
+### 2. Layout Structure & Paddings
+- **Rule**: NEVER hardcode paddings (`p-3`, `px-4`) inside `CardContent` or page wrappers to adjust the layout density. Density is controlled globally via CSS variables (`--card-padding`, `--card-gap`) in `globals.css`.
+- **Standard**: `<CardContent>` should be used without padding overrides unless strictly necessary for a specific non-standard element.
+- **Routing**: All new pages MUST be registered in `src/config/layout.config.ts`. If you create a new feature/route (e.g., `/settings`), you must define its `LayoutConfig` entry.
 
 ---

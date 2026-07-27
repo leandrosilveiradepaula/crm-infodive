@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+testsprite_tests\tmp\config.json
+
+# Configuração MCP local
+.agent/mcp_config.json
+
+# Python cache
+__pycache__/
+*.py[cod]

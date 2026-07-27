@@ -1,6 +1,6 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64} from './pdfAssetsBase64';
 
 interface PdfOverviewPageProps {
@@ -9,6 +9,7 @@ interface PdfOverviewPageProps {
     objectives?: any[];
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
 export function PdfOverviewPage({ 
@@ -16,10 +17,11 @@ export function PdfOverviewPage({
     aiSummary, 
     objectives = [], 
     pdfColors, 
-    pdfStyles 
+    pdfStyles,
+    layout = 'portrait'
 }: PdfOverviewPageProps) {
     return (
-        <Page size="A4" style={pdfStyles.page} wrap>
+        <Page {...getPageProps(layout)} style={pdfStyles.page} wrap>
             {/* Top gradient bar */}
             <View style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: 6, backgroundColor: pdfColors.accent }} />
             <View style={{ position: 'absolute', top: 0, left: '50%', width: '50%', height: 6, backgroundColor: pdfColors.primary }} />

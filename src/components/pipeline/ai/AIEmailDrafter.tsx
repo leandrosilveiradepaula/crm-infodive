@@ -36,7 +36,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[70] p-4">
-            <div className="bg-card rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.5)] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-300">
+            <div className="bg-card rounded-md shadow-[0_0_100px_rgba(0,0,0,0.5)] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-300">
                 {/* Header */}
                 <div className="p-8 border-b border-border flex items-center justify-between bg-gradient-to-r from-blue-600 to-blue-600">
                     <div className="flex items-center gap-5">
@@ -62,7 +62,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                         <div className="flex flex-col items-center justify-center h-full text-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="relative mb-10">
                                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-                                <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center relative z-10 shadow-2xl">
+                                <div className="w-24 h-24 rounded-md bg-gradient-to-br from-blue-600 to-blue-600 flex items-center justify-center relative z-10 shadow-2xl">
                                     <Mail className="h-10 w-10 text-white" />
                                 </div>
                             </div>
@@ -72,7 +72,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                             </p>
                             <button
                                 onClick={handleGenerate}
-                                className="px-10 py-4 bg-foreground text-card rounded-[20px] font-black text-xs uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center gap-3 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-0"
+                                className="px-10 py-4 bg-foreground text-card rounded-md font-black text-xs uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center gap-3 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-0"
                             >
                                 <Sparkles className="h-4 w-4" />
                                 Iniciar Geração IA
@@ -92,7 +92,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                     )}
 
                     {error && (
-                        <div className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-[24px] text-rose-300 text-sm flex items-start gap-4 animate-in shake duration-500">
+                        <div className="p-6 bg-rose-500/10 border border-rose-500/20 rounded-md text-rose-300 text-sm flex items-start gap-4 animate-in shake duration-500">
                             <X className="h-5 w-5 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="font-black text-white uppercase tracking-tighter mb-1">Erro na Geração</p>
@@ -117,11 +117,11 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                                 </button>
                             </div>
                             <div className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-600/20 to-transparent rounded-[32px] blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
+                                <div className="absolute -inset-0.5 bg-gradient-to-br from-blue-600/20 to-transparent rounded-md blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                                 <textarea
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full h-[350px] p-8 bg-card border border-border rounded-[32px] focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none resize-none font-sans text-sm text-foreground leading-relaxed shadow-2xl relative z-10"
+                                    className="w-full h-[350px] p-8 bg-card border border-border rounded-md focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none resize-none font-sans text-sm text-foreground leading-relaxed shadow-2xl relative z-10"
                                     placeholder="O email gerado aparecerá aqui..."
                                 />
                             </div>

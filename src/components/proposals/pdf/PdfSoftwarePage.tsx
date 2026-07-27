@@ -1,21 +1,22 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64 } from './pdfAssetsBase64';
 import { isSoftware } from '@/utils/productClassification';
 import { getSmartProductDescription } from '@/utils/formatProductDescription';
+import { ExportProduct } from '@/utils/proposalExportMapper';
 
 interface PdfSoftwarePageProps {
-    products: any[];
-    simplifiedProductNames?: Record<string, string>;
+    products: ExportProduct[];
     softwareHighlights?: Array<{ title: string; value: string }>;
     benefitTiles?: Array<{ value: string; label: string }>;
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
-export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwareHighlights, benefitTiles, pdfColors, pdfStyles }: PdfSoftwarePageProps) {
-    const rawSoftware = products.filter(p => isSoftware(p) && p.is_visible_on_proposal !== false);
+export function PdfSoftwarePage({ products, softwareHighlights, benefitTiles, pdfColors, pdfStyles, layout = 'portrait' }: PdfSoftwarePageProps) {
+    const rawSoftware = products.filter(p => p.categoryLabel === 'Software & Licenças');
     const softwareProducts = rawSoftware.filter((p, i, self) =>
         i === self.findIndex(t => t.name === p.name)
     );
@@ -23,7 +24,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
     if (softwareProducts.length === 0) return null;
 
     const mainSoftware = softwareProducts.reduce((prev, cur) =>
-        (cur.unit_price || 0) > (prev.unit_price || 0) ? cur : prev
+        (cur.unitPrice || 0) > (prev.unitPrice || 0) ? cur : prev
     );
 
     const tiles = benefitTiles && benefitTiles.length > 0 ? benefitTiles : [
@@ -47,20 +48,15 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
 
     // Extract tech specs from main product description
     let techSpecs: Array<{ description: string; qty: number }> = [];
-    const sourceDetails = mainSoftware?.description || mainSoftware?.tech_details;
-    if (sourceDetails) {
-        try {
-            const parsed = typeof sourceDetails === 'string' ? JSON.parse(sourceDetails) : sourceDetails;
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                techSpecs = getSmartProductDescription(parsed, 1);
-            }
-        } catch {
-            // Not valid JSON, skip
-        }
+    if (mainSoftware?.techDetails && mainSoftware.techDetails.length > 0) {
+        techSpecs = getSmartProductDescription(mainSoftware.techDetails, 1);
+    } else if (mainSoftware?.description) {
+        const lines = mainSoftware.description.split('\n').filter(l => l.trim().length > 0).map((l, i) => ({ description: l, quantity: 1, is_visible_on_proposal: true, id: String(i), unit_price: 0 }));
+        techSpecs = getSmartProductDescription(lines, 1);
     }
 
     return (
-        <Page size="A4" style={pdfStyles.page} wrap>
+        <Page {...getPageProps(layout)} style={pdfStyles.page} wrap>
             {/* Top gradient bar */}
             <View style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: 6, backgroundColor: pdfColors.accent }} />
             <View style={{ position: 'absolute', top: 0, left: '50%', width: '50%', height: 6, backgroundColor: pdfColors.primary }} />
@@ -96,7 +92,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                         color: '#ffffff',
                         marginBottom: 16,
                     }}>
-                        {simplifiedProductNames[mainSoftware.name] || mainSoftware.display_name || mainSoftware.name}
+                        {mainSoftware.displayName}
                     </Text>
 
                     {/* Two-column highlights */}
@@ -250,19 +246,15 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                 alignItems: 'flex-start',
                             }}>
                                 <View style={{ flex: 1, paddingRight: 10 }}>
-                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#374151', marginBottom: 2 }}>{simplifiedProductNames[p.name] || p.display_name || p.name}</Text>
+                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#374151', marginBottom: 2 }}>{p.displayName}</Text>
 
                                     {/* Render Product Specs */}
                                     {(() => {
                                         let rawSpecs: any[] = [];
-                                        const sd = p.description || p.tech_details;
-                                        if (sd) {
-                                            try {
-                                                const parsed = typeof sd === 'string' ? JSON.parse(sd) : sd;
-                                                if (Array.isArray(parsed) && parsed.length > 0) rawSpecs = parsed;
-                                            } catch {
-                                                rawSpecs = (String(sd)).split('\n').filter((l: string) => l.trim().length > 0).map((l: string, i: number) => ({ description: l, quantity: 1, is_visible_on_proposal: true, id: i }));
-                                            }
+                                        if (p.techDetails && p.techDetails.length > 0) {
+                                            rawSpecs = p.techDetails;
+                                        } else if (p.description) {
+                                            rawSpecs = p.description.split('\n').filter((l: string) => l.trim().length > 0).map((l: string, i: number) => ({ description: l, quantity: 1, is_visible_on_proposal: true, id: i }));
                                         }
 
                                         if (rawSpecs.length > 0) {

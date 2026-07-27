@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+export const dynamic = 'force-dynamic';
 import { getPipelineData } from './actions';
 import { PipelineClientPage } from './client-page';
 

@@ -19,7 +19,7 @@ const statusColors: Record<string, string> = {
 
 export function CustomersTable({ accounts, onEdit, onDelete, onView }: CustomersTableProps) {
     return (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <div className="bg-card border border-border rounded-md overflow-hidden">
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
@@ -35,16 +35,16 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                 <tbody>
                     {accounts.map((account, i) => (
                         <tr
-                            key={account.id}
-                            onClick={() => onView?.(account)}
-                            className={cn(
-                                'border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer',
-                                i === accounts.length - 1 && 'border-b-0'
-                            )}
+                             key={account.id}
+                             onClick={() => onView?.(account)}
+                             className={cn(
+                                 'border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer',
+                                 i === accounts.length - 1 && 'border-b-0'
+                             )}
                         >
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                                    <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
                                         <Building2 className="h-4 w-4 text-primary" />
                                     </div>
                                     <div>
@@ -69,7 +69,7 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                             </td>
                             <td className="px-4 py-3">
                                 <span className={cn(
-                                    'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide',
+                                    'px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wide',
                                     statusColors[account.status || 'Ativo'] || 'bg-muted text-muted-foreground'
                                 )}>
                                     {account.status || 'Ativo'}

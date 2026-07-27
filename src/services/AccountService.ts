@@ -112,7 +112,11 @@ export class AccountService {
                     role: c.role,
                     is_primary: c.is_primary
                 }));
-                await supabase.from('account_contacts').insert(contactsToInsert);
+                const { error: contactsError } = await supabase.from('account_contacts').insert(contactsToInsert);
+                if (contactsError) {
+                    await supabase.from('accounts').delete().eq('id', newAccId).eq('organization_id', organizationId);
+                    throw contactsError;
+                }
             }
 
             if (account.branches && account.branches.length > 0) {
@@ -131,7 +135,11 @@ export class AccountService {
                     ie: b.ie,
                     payment_terms: b.payment_terms
                 }));
-                await supabase.from('account_branches').insert(branchesToInsert);
+                const { error: branchesError } = await supabase.from('account_branches').insert(branchesToInsert);
+                if (branchesError) {
+                    await supabase.from('accounts').delete().eq('id', newAccId).eq('organization_id', organizationId);
+                    throw branchesError;
+                }
             }
 
             return { success: true, data: accData };
@@ -145,6 +153,41 @@ export class AccountService {
         const supabase = createAdminClient();
 
         try {
+            // Fetch current state for potential rollback
+            const { data: originalAccount, error: fetchError } = await supabase
+                .from('accounts')
+                .select('*, contacts:account_contacts(*), branches:account_branches(*)')
+                .eq('id', id)
+                .eq('organization_id', organizationId)
+                .single();
+
+            if (fetchError) {
+                return { success: false, error: `Falha ao buscar conta original: ${fetchError.message}` };
+            }
+
+            const originalData = {
+                name: originalAccount.name,
+                cnpj: originalAccount.cnpj,
+                ie: originalAccount.ie,
+                segment: originalAccount.segment,
+                status: originalAccount.status,
+                zip: originalAccount.zip,
+                street: originalAccount.street,
+                number: originalAccount.number,
+                complement: originalAccount.complement,
+                neighborhood: originalAccount.neighborhood,
+                city: originalAccount.city,
+                state: originalAccount.state,
+                tags: originalAccount.tags,
+                relationship_type: originalAccount.relationship_type,
+                logo_url: originalAccount.logo_url,
+                payment_terms: originalAccount.payment_terms
+            };
+
+            const rollbackMainAccount = async () => {
+                await supabase.from('accounts').update(originalData).eq('id', id).eq('organization_id', organizationId);
+            };
+
             const { error: accError } = await supabase
                 .from('accounts')
                 .update({
@@ -171,11 +214,16 @@ export class AccountService {
             if (accError) throw accError;
 
             if (updates.contacts) {
-                await supabase
+                const { error: deleteContactsError } = await supabase
                     .from('account_contacts')
                     .delete()
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
+
+                if (deleteContactsError) {
+                    await rollbackMainAccount();
+                    throw deleteContactsError;
+                }
 
                 if (updates.contacts.length > 0) {
                     const contactsToInsert = updates.contacts.map(c => ({
@@ -188,16 +236,42 @@ export class AccountService {
                         role: c.role,
                         is_primary: c.is_primary
                     }));
-                    await supabase.from('account_contacts').insert(contactsToInsert);
+                    const { error: insertContactsError } = await supabase.from('account_contacts').insert(contactsToInsert);
+                    if (insertContactsError) {
+                        if (originalAccount.contacts && originalAccount.contacts.length > 0) {
+                            const restored = originalAccount.contacts.map((c: any) => {
+                                const { id: _, created_at: __, updated_at: ___, ...rest } = c;
+                                return rest;
+                            });
+                            await supabase.from('account_contacts').insert(restored);
+                        }
+                        await rollbackMainAccount();
+                        throw insertContactsError;
+                    }
                 }
             }
 
             if (updates.branches) {
-                await supabase
+                const { error: deleteBranchesError } = await supabase
                     .from('account_branches')
                     .delete()
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
+
+                if (deleteBranchesError) {
+                    if (updates.contacts) {
+                        await supabase.from('account_contacts').delete().eq('account_id', id).eq('organization_id', organizationId);
+                        if (originalAccount.contacts && originalAccount.contacts.length > 0) {
+                            const restored = originalAccount.contacts.map((c: any) => {
+                                const { id: _, created_at: __, updated_at: ___, ...rest } = c;
+                                return rest;
+                            });
+                            await supabase.from('account_contacts').insert(restored);
+                        }
+                    }
+                    await rollbackMainAccount();
+                    throw deleteBranchesError;
+                }
 
                 if (updates.branches.length > 0) {
                     const branchesToInsert = updates.branches.map(b => ({
@@ -215,7 +289,28 @@ export class AccountService {
                         ie: b.ie,
                         payment_terms: b.payment_terms
                     }));
-                    await supabase.from('account_branches').insert(branchesToInsert);
+                    const { error: insertBranchesError } = await supabase.from('account_branches').insert(branchesToInsert);
+                    if (insertBranchesError) {
+                        if (originalAccount.branches && originalAccount.branches.length > 0) {
+                            const restored = originalAccount.branches.map((b: any) => {
+                                const { id: _, created_at: __, updated_at: ___, ...rest } = b;
+                                return rest;
+                            });
+                            await supabase.from('account_branches').insert(restored);
+                        }
+                        if (updates.contacts) {
+                            await supabase.from('account_contacts').delete().eq('account_id', id).eq('organization_id', organizationId);
+                            if (originalAccount.contacts && originalAccount.contacts.length > 0) {
+                                const restored = originalAccount.contacts.map((c: any) => {
+                                    const { id: _, created_at: __, updated_at: ___, ...rest } = c;
+                                    return rest;
+                                });
+                                await supabase.from('account_contacts').insert(restored);
+                            }
+                        }
+                        await rollbackMainAccount();
+                        throw insertBranchesError;
+                    }
                 }
             }
 

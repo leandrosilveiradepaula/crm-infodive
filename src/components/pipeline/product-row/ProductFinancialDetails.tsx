@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TechnicalDetailsEditor } from '../TechnicalDetailsEditor';
 import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
+import { Switch } from '@/components/ui/switch';
 
 import { calculateDealCommission } from '@/utils/commissionCalculator';
 import { updateDeal } from '@/app/(dashboard)/pipeline/actions';
@@ -354,34 +355,32 @@ export function ProductFinancialDetails({
 
                             <div className="space-y-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10 relative overflow-hidden">
                                 <div className="flex flex-col gap-2 mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            id={`usd-mode-${product.id}`}
-                                            checked={product.is_usd || false}
-                                            disabled={!isEditing}
-                                            onChange={e => handleUpdateProduct(product.id, 'is_usd', e.target.checked)}
-                                            className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
-                                        />
+                                    <div className="flex items-center justify-between gap-2">
                                         <label htmlFor={`usd-mode-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
                                             Custo em Dólar (USD)
                                             <DollarSign className="h-3 w-3" />
                                         </label>
+                                        <Switch
+                                            id={`usd-mode-${product.id}`}
+                                            checked={product.is_usd || false}
+                                            disabled={!isEditing}
+                                            onCheckedChange={checked => handleUpdateProduct(product.id, 'is_usd', checked)}
+                                            className="scale-[0.65] data-[state=checked]:bg-emerald-500"
+                                        />
                                     </div>
                                     
                                     {product.is_usd && (
-                                        <div className="flex items-center gap-2 pl-5 animate-in fade-in slide-in-from-top-1">
-                                            <input
-                                                type="checkbox"
-                                                id={`present-usd-${product.id}`}
-                                                checked={product.present_in_usd || false}
-                                                disabled={!isEditing}
-                                                onChange={e => handleUpdateProduct(product.id, 'present_in_usd', e.target.checked)}
-                                                className="h-3 w-3 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
-                                            />
+                                        <div className="flex items-center justify-between gap-2 pl-5 animate-in fade-in slide-in-from-top-1">
                                             <label htmlFor={`present-usd-${product.id}`} className="text-[9px] font-bold text-emerald-600/70 uppercase tracking-wide cursor-pointer flex items-center select-none">
                                                 Apresentar este produto em Dólar na Proposta (PDF)
                                             </label>
+                                            <Switch
+                                                id={`present-usd-${product.id}`}
+                                                checked={product.present_in_usd || false}
+                                                disabled={!isEditing}
+                                                onCheckedChange={checked => handleUpdateProduct(product.id, 'present_in_usd', checked)}
+                                                className="scale-[0.65] data-[state=checked]:bg-emerald-500"
+                                            />
                                         </div>
                                     )}
                                 </div>
@@ -609,35 +608,18 @@ export function ProductFinancialDetails({
 
                                 {/* BID Options - Integrated */}
                                 <div className="space-y-3">
-                                    {/* Optional Toggle */}
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            id={`optional-mode-${product.id}`}
-                                            checked={product.is_optional || false}
-                                            disabled={!isEditing}
-                                            onChange={e => handleUpdateProduct(product.id, 'is_optional', e.target.checked)}
-                                            className="h-3.5 w-3.5 rounded text-amber-500 border-input bg-transparent focus:ring-offset-0 focus:ring-0"
-                                        />
-                                        <label htmlFor={`optional-mode-${product.id}`} className="text-[10px] font-bold text-amber-600 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
-                                            Item Opcional (Alternativa)
-                                        </label>
-                                    </div>
 
-                                    <Separator className="bg-border my-1" />
-
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <input
-                                            type="checkbox"
-                                            id={`bid-mode-${product.id}`}
-                                            checked={product.is_bid || false}
-                                            disabled={!isEditing}
-                                            onChange={e => handleUpdateProduct(product.id, 'is_bid', e.target.checked)}
-                                            className="h-3.5 w-3.5 rounded text-primary border-input bg-transparent focus:ring-offset-0 focus:ring-0"
-                                        />
+                                    <div className="flex items-center justify-between gap-2 mb-2">
                                         <label htmlFor={`bid-mode-${product.id}`} className="text-[10px] font-bold text-primary uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
                                             Modo BID (Preço Fixo)
                                         </label>
+                                        <Switch
+                                            id={`bid-mode-${product.id}`}
+                                            checked={product.is_bid || false}
+                                            disabled={!isEditing}
+                                            onCheckedChange={checked => handleUpdateProduct(product.id, 'is_bid', checked)}
+                                            className="scale-[0.65]"
+                                        />
                                     </div>
 
                                     {product.is_bid && (

@@ -3,15 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-    X, Save, Edit, History, Package, MessageSquare, Clock, Paperclip,
+import { X, Save, Edit, History, Package, MessageSquare, Clock, Paperclip,
     TrendingUp, DollarSign, User, Users, Calendar, Activity as ActivityIcon,
     Plus, Trash2, FileText, CheckCircle2, AlertTriangle, MoreHorizontal, AlertCircle,
     Bot, ShieldCheck, Mail, Building2, Phone, Edit2, Scroll, FileSpreadsheet,
     Briefcase, Zap, CreditCard, CheckSquare, Globe, Copy, ArrowRight, ExternalLink,
     LayoutDashboard, File as FileIcon, FolderOpen
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,8 +21,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-
+import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 import type { Deal } from '@/types/deal';
+import { useDraftForm, FloatingSaveBar, UnsavedChangesDialog } from '@/components/ui/floating-save-bar';
 import {
     updateDeal, updateDealStage, getDealDetails, getOrCreateRoom, fetchProposals,
     updateProposal,
@@ -48,7 +48,7 @@ import { WonDealWizard } from './WonDealWizard';
 import { TechnicalHandoverModal } from '../handover/TechnicalHandoverModal';
 // ProposalGeneratorWizard replaced by full-screen editor route
 import { ProposalsTab } from '../proposals/ProposalsTab';
-import { ViewProposalModal } from '../proposals/ViewProposalModal';
+import { ViewProposalDrawer } from '../proposals/ViewProposalDrawer';
 import type { Proposal } from '@/types/proposal';
 import { SmartTimeline } from '../omnichannel/SmartTimeline';
 import { formatCurrency } from '@/utils/format';
@@ -58,7 +58,7 @@ import { useDeals } from '@/hooks/useDeals';
 import { Account } from '@/types/account';
 import { Contact } from '@/types/contact';
 
-interface ViewDealModalProps {
+interface ViewDealDrawerProps {
     deal: Deal;
     isOpen: boolean;
     onClose: () => void;
@@ -67,12 +67,14 @@ interface ViewDealModalProps {
     initialTab?: string;
 }
 
-export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors = [], allAccounts = [], initialTab = 'overview' }: ViewDealModalProps) {
+export function ViewDealDrawer({ deal: initialDeal, isOpen, onClose, distributors = [], allAccounts = [], initialTab = 'overview' }: ViewDealDrawerProps) {
     const router = useRouter();
     const { duplicateDeal } = useDeals();
     const [deal, setDeal] = useState<Deal>(initialDeal);
     const [activeTab, setActiveTab] = useState(initialTab);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(true);
+    const [headerTitle, setHeaderTitle] = useState(initialDeal.title);
+    const titleInputRef = React.useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isProductsLoading, setIsProductsLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
@@ -91,19 +93,60 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     const [focusedProposal, setFocusedProposal] = useState<Proposal | null>(null);
     const [showViewProposalModal, setShowViewProposalModal] = useState(false);
 
-    // Form State
-    const [formData, setFormData] = useState({
-        title: initialDeal.title,
-        value: initialDeal.value,
-        company: initialDeal.company,
-        account_id: initialDeal.account_id,
-        client_contact_id: initialDeal.client_contact_id,
-        contact_name: initialDeal.contact_name,
-        contact_email: initialDeal.contact_email,
-        contact_phone: initialDeal.contact_phone,
-        expected_close_date: initialDeal.expected_close_date?.split('T')[0] || '',
-        probability: initialDeal.probability || 20,
-        billing_type: initialDeal.billing_type || 'direct'
+    // Form State with useDraftForm
+    const initialFormData = React.useMemo(() => ({
+        title: deal.title || '',
+        value: deal.value || 0,
+        company: deal.company || '',
+        account_id: deal.account_id || '',
+        client_contact_id: deal.client_contact_id || '',
+        contact_name: deal.contact_name || '',
+        contact_email: deal.contact_email || '',
+        contact_phone: deal.contact_phone || '',
+        expected_close_date: deal.expected_close_date?.split('T')[0] || '',
+        probability: deal.probability || 20,
+        billing_type: deal.billing_type || 'direct',
+        distributor_id: deal.distributor_id || '',
+        distributor_contact_id: deal.distributor_contact_id || '',
+        manufacturer_contact_id: deal.manufacturer_contact_id || '',
+        custom_fields: deal.custom_fields || {}
+    }), [deal]);
+
+    const {
+        formData,
+        setFormData,
+        updateField,
+        updateFormData,
+        isDirty,
+        changedCount,
+        isSaving,
+        saveChanges,
+        discardChanges,
+        safeExecute,
+        showUnsavedModal,
+        setShowUnsavedModal
+    } = useDraftForm({
+        initialData: initialFormData,
+        onSave: async (updated) => {
+            const updatePayload = {
+                title: updated.title,
+                account_id: updated.account_id || undefined,
+                client_contact_id: updated.client_contact_id || undefined,
+                company: updated.company,
+                value: updated.value,
+                expected_close_date: updated.expected_close_date ? `${updated.expected_close_date}T00:00:00.000Z` : undefined,
+                probability: updated.probability,
+                billing_type: updated.billing_type,
+                distributor_id: updated.distributor_id || null,
+                distributor_contact_id: updated.distributor_contact_id || null,
+                manufacturer_contact_id: updated.manufacturer_contact_id || null,
+                custom_fields: updated.custom_fields || undefined
+            };
+            await updateDeal(deal.id, updatePayload);
+            setDeal(prev => ({ ...prev, ...updatePayload }) as Deal);
+            setHeaderTitle(updated.title);
+            lastSavedTitle.current = updated.title;
+        }
     });
 
     // State for forcing refresh of proposals list
@@ -119,6 +162,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
         if (hasIdChanged) {
             setDeal(initialDeal);
             setPrevDealId(initialDeal.id);
+            setHeaderTitle(initialDeal.title);
         } else if (!isEditing) {
             // Sync from server when NOT editing.
             setDeal(prev => {
@@ -154,17 +198,21 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
         // Only sync formData if NOT editing or if switched to a completely different deal
         if (hasIdChanged || !isEditing) {
             setFormData({
-                title: initialDeal.title,
-                value: initialDeal.value,
-                company: initialDeal.company,
-                account_id: initialDeal.account_id,
-                client_contact_id: initialDeal.client_contact_id,
-                contact_name: initialDeal.contact_name,
-                contact_email: initialDeal.contact_email,
-                contact_phone: initialDeal.contact_phone,
+                title: initialDeal.title || '',
+                value: initialDeal.value || 0,
+                company: initialDeal.company || '',
+                account_id: initialDeal.account_id || '',
+                client_contact_id: initialDeal.client_contact_id || '',
+                contact_name: initialDeal.contact_name || '',
+                contact_email: initialDeal.contact_email || '',
+                contact_phone: initialDeal.contact_phone || '',
                 expected_close_date: initialDeal.expected_close_date?.split('T')[0] || '',
                 probability: initialDeal.probability || 20,
-                billing_type: initialDeal.billing_type || 'direct'
+                billing_type: initialDeal.billing_type || 'direct',
+                distributor_id: initialDeal.distributor_id || '',
+                distributor_contact_id: initialDeal.distributor_contact_id || '',
+                manufacturer_contact_id: initialDeal.manufacturer_contact_id || '',
+                custom_fields: initialDeal.custom_fields || {}
             });
         }
 
@@ -190,18 +238,17 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     useEffect(() => {
         setFormData(prev => ({
             ...prev,
-            value: deal.value,
-            account_id: deal.account_id,
-            client_contact_id: deal.client_contact_id,
-            custom_fields: deal.custom_fields
+            value: deal.value || 0,
+            account_id: deal.account_id || '',
+            client_contact_id: deal.client_contact_id || ''
         }));
-    }, [deal.value, deal.account_id, deal.client_contact_id, deal.custom_fields]);
+    }, [deal.value, deal.account_id, deal.client_contact_id]);
 
     const handleAccountChange = (accountId: string) => {
         const selectedAccount = accounts.find(a => a.id === accountId);
         setFormData(prev => ({
             ...prev,
-            account_id: accountId === 'none' ? undefined : accountId,
+            account_id: accountId === 'none' ? '' : accountId,
             company: selectedAccount ? selectedAccount.name : (accountId === 'none' ? 'Cliente' : prev.company)
         }));
 
@@ -211,6 +258,41 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             account_id: accountId === 'none' ? undefined : accountId,
             company: selectedAccount ? selectedAccount.name : (accountId === 'none' ? 'Cliente' : (prev.company || ''))
         }));
+    };
+
+    // Ghost Input: Update draft state on title change/blur
+    const handleTitleBlur = () => {
+        const newTitle = headerTitle.trim();
+        if (newTitle) {
+            updateField('title', newTitle);
+        }
+    };
+
+    const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            titleInputRef.current?.blur();
+        }
+        if (e.key === 'Escape') {
+            setHeaderTitle(formData.title);
+            titleInputRef.current?.blur();
+        }
+    };
+
+    // Ghost Select: Update draft state on company change
+    const handleGhostAccountChange = (accountId: string) => {
+        const selectedAccount = accounts.find(a => a.id === accountId);
+        const newAccountId = accountId === 'none' ? '' : accountId;
+        const newCompany = selectedAccount ? selectedAccount.name : (accountId === 'none' ? 'Cliente' : formData.company);
+        updateFormData({
+            account_id: newAccountId,
+            company: newCompany
+        });
+    };
+
+    // Generic Ghost Field Update for Cockpit Financeiro
+    const handleGhostFieldUpdate = (field: string, value: any) => {
+        updateField(field as any, value);
     };
 
     const handleSave = async () => {
@@ -227,6 +309,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                 title: formData.title,
                 account_id: formData.account_id,
                 company: formData.company,
+                value: formData.value,
                 expected_close_date: formData.expected_close_date || undefined,
                 probability: formData.probability,
                 billing_type: formData.billing_type
@@ -349,7 +432,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                 const newTotalValue = calculateDealValue(primaryProducts);
 
                 // Safeguard: If the loaded value differs from the actual product sum, sync it
-                if (Math.abs((freshDeal.value || 0) - newTotalValue) > 0.01) {
+                // ONLY if there are actually products in the deal, to avoid overwriting manual estimates on empty deals
+                if (primaryProducts.length > 0 && Math.abs((freshDeal.value || 0) - newTotalValue) > 0.01) {
                     await updateDeal(deal.id, { value: newTotalValue });
                 }
 
@@ -358,7 +442,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                         ...prev,
                         ...freshDeal,
                         deal_products: freshProducts,
-                        value: newTotalValue,
+                        value: primaryProducts.length > 0 ? newTotalValue : freshDeal.value,
                         account_id: freshDeal.account_id || prev.account_id,
                         client_contact_id: freshDeal.client_contact_id || prev.client_contact_id,
                         commission_deduction: prev.commission_deduction ?? freshDeal.commission_deduction,
@@ -383,38 +467,48 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     if (!isOpen) return null;
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent showCloseButton={false} className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col">
+        <Sheet open={isOpen} onOpenChange={(open) => !open && safeExecute(onClose)}>
+            <SheetContent
+                side="right"
+                showCloseButton={false}
+                className="w-full sm:max-w-[min(95vw,1200px)] h-full p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col"
+                onPointerDownOutside={(e) => {
+                    if (e.target instanceof Element && e.target.closest('.floating-save-bar')) {
+                        e.preventDefault();
+                    }
+                }}
+            >
 
                 {/* Header */}
                 <div className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
-                    <div className="flex items-center gap-6">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${deal.stage === 'won' ? 'bg-emerald-500/20 text-emerald-500' :
+                    <div className="flex items-center gap-6 flex-1 min-w-0">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner shrink-0 ${deal.stage === 'won' ? 'bg-emerald-500/20 text-emerald-500' :
                             deal.stage === 'lost' ? 'bg-rose-500/20 text-rose-500' : 'bg-primary/20 text-blue-500'
                             }`}>
                             <DollarSign className="w-6 h-6" />
                         </div>
-                        <div>
-                            {isEditing ? (
-                                <Input
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="h-8 text-xl md:text-xl font-bold tracking-tight text-foreground bg-muted/20 border-border/50 w-[400px] px-2 -ml-2"
+                        <div className="flex-1 min-w-0 pr-4 flex flex-col justify-center">
+                            <div className="h-8 flex items-center">
+                                <SheetTitle className="sr-only">{deal.title}</SheetTitle>
+                                <SheetDescription className="sr-only">Visualizar e editar detalhes da oportunidade</SheetDescription>
+                                <input
+                                    ref={titleInputRef}
+                                    value={headerTitle}
+                                    onChange={(e) => setHeaderTitle(e.target.value)}
+                                    onBlur={handleTitleBlur}
+                                    onKeyDown={handleTitleKeyDown}
+                                    className="text-xl font-bold tracking-tight text-foreground truncate w-full bg-transparent border-none outline-none p-0 m-0 h-8 leading-8 rounded-md hover:bg-muted/40 focus:bg-muted/30 focus:ring-1 focus:ring-primary/30 px-1.5 -mx-1.5 transition-colors cursor-text"
+                                    title={deal.title}
                                 />
-                            ) : (
-                                <div>
-                                    <DialogTitle className="text-xl font-bold tracking-tight text-foreground">{deal.title}</DialogTitle>
-                                    <DialogDescription className="sr-only">Visualizar e editar detalhes da oportunidade</DialogDescription>
-                                </div>
-                            )}
-                            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground w-full">
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground w-full">
                                 <Building2 className="w-3.5 h-3.5 text-blue-500/60 shrink-0" />
-                                {isEditing ? (
+                                <div className="h-6 flex items-center flex-1 min-w-0">
                                     <Select
                                         value={formData.account_id || 'none'}
-                                        onValueChange={handleAccountChange}
+                                        onValueChange={handleGhostAccountChange}
                                     >
-                                        <SelectTrigger className="h-7 py-0 px-2 text-sm md:text-sm font-medium border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors max-w-[250px] rounded-md -ml-2">
+                                        <SelectTrigger className="h-6 border-none bg-transparent shadow-none p-0 m-0 text-sm font-medium text-muted-foreground hover:bg-muted/40 focus:ring-1 focus:ring-primary/30 rounded-md px-1.5 -mx-1.5 transition-colors gap-1 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:opacity-0 [&:hover>svg]:opacity-60 w-auto max-w-full">
                                             <SelectValue placeholder="Vincular Empresa..." />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-xl border-border/60 shadow-xl max-h-[300px]">
@@ -426,27 +520,15 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                ) : (
-                                    <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
-                                )}
-                                <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
+                                </div>
+                                <span className="text-muted-foreground/30 px-1 shrink-0">|</span>
+                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground/50 shrink-0">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1 border border-border">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                                className="text-muted-foreground hover:text-foreground h-8 font-bold text-[10px] uppercase tracking-widest"
-                            >
-                                {isEditing ? <Save className="w-3.5 h-3.5 mr-2 text-emerald-500" /> : <Edit2 className="w-3.5 h-3.5 mr-2" />}
-                                {isEditing ? 'Salvar' : 'Editar'}
-                            </Button>
-                            <div className="w-px h-4 bg-border mx-1" />
                             {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map((stage) => {
                                 const stageLabels: Record<string, string> = {
                                     'qualification': 'Qualificação',
@@ -483,7 +565,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={onClose}
+                                onClick={() => safeExecute(onClose)}
                                 className="hover:bg-rose-100 dark:hover:bg-rose-900/20 hover:text-rose-600 rounded-full h-10 w-10 transition-colors"
                             >
                                 <X className="w-6 h-6 text-foreground/70" />
@@ -493,12 +575,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                 </div>
 
                 {/* Main Content Grid */}
-                <div className="flex-1 grid grid-cols-[1fr_400px] overflow-hidden">
+                <div className={`flex-1 grid ${activeTab === 'overview' ? 'grid-cols-[1fr_400px]' : 'grid-cols-1'} overflow-hidden`}>
 
                     {/* Main Tabs Area */}
 
                     <div className="flex flex-col bg-background h-full overflow-hidden border-r border-border">
-                        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                        <Tabs defaultValue="overview" value={activeTab} onValueChange={(tab) => safeExecute(() => setActiveTab(tab))} className="flex-1 flex flex-col">
                             <div className="px-4 py-3 border-b border-border/40 bg-background/95 backdrop-blur z-10 sticky top-0">
                                 <TabsList className="w-full justify-start gap-1 overflow-x-auto no-scrollbar">
                                     {[
@@ -526,6 +608,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <TabsContent value="overview" className="mt-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 flex-1 h-full w-full">
                                         <OverviewTab
                                             deal={deal}
+                                            formData={formData}
                                             onViewStakeholders={() => setActiveTab('stakeholders')}
                                             onViewProducts={() => setActiveTab('products')}
                                         />
@@ -556,6 +639,14 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         setIsEditing={setIsEditing}
                                         distributors={distributors}
                                         isLoading={isProductsLoading}
+                                        onNavigateToDocuments={(quoteId) => {
+                                            setActiveTab('documents');
+                                            // Scroll to the correct folder after tab switch
+                                            setTimeout(() => {
+                                                const el = document.getElementById(`folder-${quoteId}`);
+                                                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }, 150);
+                                        }}
                                     />
 
                                     <TabsContent value="partners" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar px-8 pt-4 pb-20 h-full">
@@ -565,6 +656,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             distributors={distributors}
                                             allAccounts={allAccounts}
                                             allContacts={allContacts}
+                                            formData={formData}
+                                            updateField={updateField as any}
                                         />
                                     </TabsContent>
 
@@ -579,6 +672,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             setDeal={setDeal}
                                             isEditing={isEditing}
                                             allContacts={allContacts}
+                                            formData={formData}
+                                            updateField={updateField as any}
                                         />
                                     </TabsContent>
 
@@ -595,8 +690,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     </div >
 
                     {/* Sidebar Command Center */}
-                    <div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+                    {activeTab === 'overview' && (
+                        <div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                             {/* Financial Cockpit Section */}
                             <section className="bg-gradient-to-br from-blue-50 to-white border border-border rounded-xl p-4 shadow-sm relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-blue-400 pointer-events-none" />
@@ -610,18 +706,44 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 <div className="space-y-3 relative z-10">
                                     {/* Value Display */}
                                     <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
-                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
+                                        <div className="flex justify-between items-start mb-1">
+                                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Valor Total (Forecast)</p>
+                                            {isEditing && (deal.deal_products?.length ?? 0) > 0 && (
+                                                <Badge variant="outline" className="text-[7px] px-1 py-0 h-4 bg-muted/30">Auto</Badge>
+                                            )}
+                                        </div>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-[10px] font-bold text-primary">R$</span>
-                                            <span className="text-2xl font-black text-foreground tracking-tight">
-                                                {(() => {
-                                                    const primaryQuote = (deal.deal_quotes || []).find(q => q.is_primary);
-                                                    const products = primaryQuote
-                                                        ? (deal.deal_products || []).filter(p => !p.quote_id || p.quote_id === primaryQuote.id)
-                                                        : (deal.deal_products || []);
-                                                    return formatCurrency(calculateDealValue(products)).replace('R$', '').trim();
-                                                })()}
-                                            </span>
+                                            {(() => {
+                                                const primaryQuote = (deal.deal_quotes || []).find(q => q.is_primary);
+                                                const products = primaryQuote
+                                                    ? (deal.deal_products || []).filter(p => !p.quote_id || p.quote_id === primaryQuote.id)
+                                                    : (deal.deal_products || []);
+                                                    
+                                                if (isEditing && products.length === 0) {
+                                                    return (
+                                                        <div className="w-full mt-1">
+                                                            <ThemeCurrencyInput
+                                                                id="edit-deal-value"
+                                                                value={formData.value || 0}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, value: Number(e.target.value) }))}
+                                                                onBlur={(e) => handleGhostFieldUpdate('value', Number(e.target.value))}
+                                                                placeholder="0,00"
+                                                                className="h-8 font-black w-full"
+                                                            />
+                                                        </div>
+                                                    );
+                                                }
+
+                                                const total = products.length > 0 ? calculateDealValue(products) : (deal.value || 0);
+                                                return (
+                                                    <>
+                                                        <span className="text-[10px] font-bold text-primary">R$</span>
+                                                        <span className="text-2xl font-black text-foreground tracking-tight">
+                                                            {formatCurrency(total).replace('R$', '').trim()}
+                                                        </span>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 
@@ -640,6 +762,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                     className="w-full h-full opacity-0 cursor-pointer absolute inset-0"
                                                     value={formData.probability}
                                                     onChange={e => setFormData({ ...formData, probability: Number(e.target.value) })}
+                                                    onMouseUp={e => handleGhostFieldUpdate('probability', Number((e.target as HTMLInputElement).value))}
+                                                    onTouchEnd={e => handleGhostFieldUpdate('probability', Number((e.target as HTMLInputElement).value))}
                                                 />
                                             ) : null}
                                             <div
@@ -652,7 +776,6 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     {/* Expected Close Date */}
                                     <div
                                         className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
-                                        onClick={() => !isEditing && setIsEditing(true)}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
@@ -663,7 +786,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                             type="date"
                                                             className="bg-transparent border-none focus:ring-0 p-0 w-full cursor-pointer font-bold text-foreground text-sm"
                                                             value={formData.expected_close_date || ''}
-                                                            onChange={e => setFormData({ ...formData, expected_close_date: e.target.value })}
+                                                            onChange={e => {
+                                                                setFormData({ ...formData, expected_close_date: e.target.value });
+                                                                handleGhostFieldUpdate('expected_close_date', e.target.value ? `${e.target.value}T00:00:00.000Z` : null);
+                                                            }}
                                                             onClick={(e) => e.stopPropagation()}
                                                         />
                                                     ) : (
@@ -700,7 +826,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     deal={deal}
                                     onClose={() => setShowDealDoctor(false)}
                                     onAnalysisComplete={(analysis) => {
-                                        console.log('[ViewDealModal-Sidebar] Analysis Completed:', analysis);
+                                        console.log('[ViewDealDrawer-Sidebar] Analysis Completed:', analysis);
                                         setDeal(prev => {
                                             const newDeal = {
                                                 ...prev,
@@ -708,7 +834,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                 health_trend: analysis.trend,
                                                 risk_factors: analysis.riskFactors
                                             };
-                                            console.log('[ViewDealModal-Sidebar] Updating Deal State:', newDeal);
+                                            console.log('[ViewDealDrawer-Sidebar] Updating Deal State:', newDeal);
                                             return newDeal;
                                         });
                                     }}
@@ -807,6 +933,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             )}
                         </div>
                     </div >
+                    )}
                 </div >
 
                 {/* Modals & Drawers */}
@@ -870,7 +997,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                 {
                     focusedProposal && (
-                        <ViewProposalModal
+                        <ViewProposalDrawer
                             proposal={focusedProposal}
                             distributors={distributors}
                             isOpen={showViewProposalModal}
@@ -893,7 +1020,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             }}
                             onUpdateStatus={async (id, updates) => {
                                 try {
-                                    console.log('🔄 [ViewDealModal] onUpdateStatus called:', { id, updates });
+                                    console.log('🔄 [ViewDealDrawer] onUpdateStatus called:', { id, updates });
 
                                     // Call server action to update in database
                                     await updateProposal(id, updates);
@@ -909,16 +1036,32 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     // Force refresh of proposals tab
                                     setProposalsRefreshKey((prev) => prev + 1);
 
-                                    console.log('✅ [ViewDealModal] Proposal updated successfully');
+                                    console.log('✅ [ViewDealDrawer] Proposal updated successfully');
                                 } catch (e) {
-                                    console.error('❌ [ViewDealModal] Error updating proposal:', e);
+                                    console.error('❌ [ViewDealDrawer] Error updating proposal:', e);
                                     toast.error('Erro ao atualizar proposta');
                                 }
                             }}
                         />
                     )
                 }
-            </DialogContent >
-        </Dialog >
+
+                <FloatingSaveBar
+                    isDirty={isDirty && !showUnsavedModal}
+                    changedCount={changedCount}
+                    isSaving={isSaving}
+                    onSave={saveChanges}
+                    onDiscard={discardChanges}
+                />
+
+                <UnsavedChangesDialog
+                    open={showUnsavedModal}
+                    onOpenChange={setShowUnsavedModal}
+                    onSave={saveChanges}
+                    onDiscard={discardChanges}
+                    isSaving={isSaving}
+                />
+            </SheetContent>
+        </Sheet>
     );
 }

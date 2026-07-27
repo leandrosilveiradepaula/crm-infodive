@@ -1,0 +1,16 @@
+src/components/proposals/ProposalGeneratorWizard.tsx: handleDownloadPpt({ 
+                                        proposal: { id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives, simplifiedProductNames } },
+                                        deal,
+                                        distributors: distributors as any
+                                    })
+src/components/proposals/ViewProposalModal.tsx: handleDownloadPpt({
+            proposal,
+            deal: pseudoDeal,
+            distributors,
+        })
+src/components/proposals/editor/ProposalEditorClient.tsx: handleDownloadPpt({
+            proposal: {
+                id: 'draft',
+                title: state.editableTexts.proposalTitle,
+                company_name: deal.company,
+                createdAt: new Date()

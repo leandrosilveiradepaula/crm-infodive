@@ -1,0 +1,2204 @@
+[
+  {
+    "id": "TC001",
+    "title": "Login with email and password",
+    "description": "A sales rep can sign in with valid credentials and reach the dashboard.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Move a deal to another pipeline stage",
+    "description": "A sales rep can move a deal across the pipeline and see it appear in the new stage.",
+    "category": "Pipeline Kanban Board",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the pipeline navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Move a deal card to a different stage"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the deal appears in the new stage"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Complete client proposal review and signature in the portal",
+    "description": "Verifies a client can open a shared proposal, review it, accept or reject it, and complete a digital signature.",
+    "category": "Proposal Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /portal"
+      },
+      {
+        "type": "action",
+        "description": "Open a shared proposal from the portal"
+      },
+      {
+        "type": "action",
+        "description": "Review the proposal details and line items"
+      },
+      {
+        "type": "action",
+        "description": "Choose to accept or reject the proposal"
+      },
+      {
+        "type": "action",
+        "description": "Provide a digital signature"
+      },
+      {
+        "type": "action",
+        "description": "Submit the portal response"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the proposal response is recorded"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the proposal shows a signed or rejected status"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Open the dashboard after login",
+    "description": "A signed-in sales rep can land on the dashboard and see the main performance overview.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify KPI cards are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the recent activity feed is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Review dashboard metrics and funnel",
+    "description": "A sales rep can review the dashboard summary, funnel visualization, and recent activity in one place.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify KPI cards are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sales funnel chart is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the recent activity feed is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Capture a digital signature on a contract",
+    "description": "Verifies a user can open a sent contract, sign it digitally, and see it marked as signed.",
+    "category": "Contract Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /contracts"
+      },
+      {
+        "type": "action",
+        "description": "Open a sent contract"
+      },
+      {
+        "type": "action",
+        "description": "Capture a digital signature"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the contract is marked as signed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Create a proposal with product line items",
+    "description": "Verifies a sales user can create a proposal, add products and terms, and save it successfully.",
+    "category": "Proposal Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proposals"
+      },
+      {
+        "type": "action",
+        "description": "Create a new proposal linked to a deal"
+      },
+      {
+        "type": "action",
+        "description": "Open the full-screen proposal editor"
+      },
+      {
+        "type": "action",
+        "description": "Add product line items"
+      },
+      {
+        "type": "action",
+        "description": "Configure discounts, taxes, and terms"
+      },
+      {
+        "type": "action",
+        "description": "Save the proposal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the proposal is saved and appears in the proposal list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Hide and reveal commission values",
+    "description": "Verifies that a user can toggle commission privacy and see the values change between hidden and visible.",
+    "category": "Goals and Commissions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /goals"
+      },
+      {
+        "type": "action",
+        "description": "Toggle commission privacy"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify commission values are hidden or revealed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Create a new deal from the pipeline",
+    "description": "A sales rep can create a deal and see it added to the pipeline board.",
+    "category": "Pipeline Kanban Board",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the pipeline navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Create a new deal"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the deal details with valid information"
+      },
+      {
+        "type": "action",
+        "description": "Save the deal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new deal is displayed on the board"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Convert a qualified lead into a deal",
+    "description": "A sales rep can convert a qualified lead and see a new deal created in the sales flow.",
+    "category": "Lead Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /leads"
+      },
+      {
+        "type": "action",
+        "description": "Select a qualified lead"
+      },
+      {
+        "type": "action",
+        "description": "Convert the lead to a deal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new deal is created"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Send a proposal to a client",
+    "description": "Verifies a user can send a proposal and see its status change to sent.",
+    "category": "Proposal Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proposals"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing proposal"
+      },
+      {
+        "type": "action",
+        "description": "Send the proposal to the client"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the proposal status changes to sent"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Create a contract and send it for signature",
+    "description": "Verifies a user can create a contract linked to a deal or proposal and send it for signature.",
+    "category": "Contract Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /contracts"
+      },
+      {
+        "type": "action",
+        "description": "Create a new contract linked to a deal or proposal"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the contract details"
+      },
+      {
+        "type": "action",
+        "description": "Save the contract"
+      },
+      {
+        "type": "action",
+        "description": "Open the saved contract"
+      },
+      {
+        "type": "action",
+        "description": "Send the contract for signature"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the contract status changes to sent"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Reject invalid login credentials",
+    "description": "A user sees an error when signing in with invalid credentials and remains on the login screen.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with invalid@example.com"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with invalid-password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a login error message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login screen is still displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Create a new lead",
+    "description": "A sales rep can create a lead with company, contact, and address details and see it appear in the leads list.",
+    "category": "Lead Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /leads"
+      },
+      {
+        "type": "action",
+        "description": "Create a new lead"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the company field with a unique company name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the contact name field with a unique contact name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the address details with valid information"
+      },
+      {
+        "type": "action",
+        "description": "Save the lead"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new lead appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Create sales goals for a seller",
+    "description": "Verifies that a manager can set yearly and monthly goals for a seller and save the goal configuration.",
+    "category": "Goals and Commissions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /goals"
+      },
+      {
+        "type": "action",
+        "description": "Select a seller"
+      },
+      {
+        "type": "action",
+        "description": "Set the yearly goal"
+      },
+      {
+        "type": "action",
+        "description": "Set the monthly goal"
+      },
+      {
+        "type": "action",
+        "description": "Save the goals"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the goal configuration is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "Create and review a new activity",
+    "description": "This verifies that a user can create a new activity and see it appear in the activities list.",
+    "category": "Activity Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /activities"
+      },
+      {
+        "type": "action",
+        "description": "Create a new activity"
+      },
+      {
+        "type": "action",
+        "description": "Choose a task activity type"
+      },
+      {
+        "type": "action",
+        "description": "Set a high priority"
+      },
+      {
+        "type": "action",
+        "description": "Assign the activity to a team member"
+      },
+      {
+        "type": "action",
+        "description": "Set a valid due date"
+      },
+      {
+        "type": "action",
+        "description": "Save the activity"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new activity appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Create a new user with a role",
+    "description": "This test verifies that an administrator can create a user, assign a role, save the record, and see the user listed.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Create a new user"
+      },
+      {
+        "type": "action",
+        "description": "Assign a role"
+      },
+      {
+        "type": "action",
+        "description": "Save the user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new user appears in the user list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Export a proposal in a supported format",
+    "description": "Verifies a user can export a proposal and receive a generated file for the selected format.",
+    "category": "Proposal Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proposals"
+      },
+      {
+        "type": "action",
+        "description": "Open an existing proposal"
+      },
+      {
+        "type": "action",
+        "description": "Export the proposal in one supported format"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the exported file is generated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "Update a lead status",
+    "description": "A sales rep can open an existing lead, update its details and status, and see the updated status in the table.",
+    "category": "Lead Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /leads"
+      },
+      {
+        "type": "action",
+        "description": "Open a lead"
+      },
+      {
+        "type": "action",
+        "description": "Update the lead details"
+      },
+      {
+        "type": "action",
+        "description": "Change the lead status to qualified"
+      },
+      {
+        "type": "action",
+        "description": "Save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated lead status is shown in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "Create a new product",
+    "description": "Verifies a sales user can add a new product and see it appear in the catalog.",
+    "category": "Product Catalog",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /products"
+      },
+      {
+        "type": "action",
+        "description": "Create a new product"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the product name, SKU, category, brand, and margin"
+      },
+      {
+        "type": "action",
+        "description": "Save the product"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new product appears in the catalog"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "Create a new price list",
+    "description": "Verifies that a user can create a price list and see it appear in the price list view.",
+    "category": "Price List Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /price-lists"
+      },
+      {
+        "type": "action",
+        "description": "Create a new price list"
+      },
+      {
+        "type": "action",
+        "description": "Enter the pricing details"
+      },
+      {
+        "type": "action",
+        "description": "Save the price list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new price list is displayed in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Toggle commission privacy on the dashboard",
+    "description": "A user can hide and reveal commission values on the dashboard to protect sensitive data.",
+    "category": "Dashboard Overview",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Toggle commission privacy"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify commission values are hidden"
+      },
+      {
+        "type": "action",
+        "description": "Toggle commission privacy again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify commission values are visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC023",
+    "title": "Create and review a sales order",
+    "description": "This verifies that a user can create a sales order with line items and see it in the order list.",
+    "category": "Sales Orders",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /sales-orders"
+      },
+      {
+        "type": "action",
+        "description": "Create a new sales order"
+      },
+      {
+        "type": "action",
+        "description": "Enter the order details and line items"
+      },
+      {
+        "type": "action",
+        "description": "Save the order"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new sales order appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC024",
+    "title": "Define commission rules by category",
+    "description": "Verifies that an admin can configure commission rules by product category and see the updated setup saved.",
+    "category": "Goals and Commissions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /goals"
+      },
+      {
+        "type": "action",
+        "description": "Define commission rules by product category"
+      },
+      {
+        "type": "action",
+        "description": "Save the rules"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the commission setup is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC025",
+    "title": "Update a user's permissions",
+    "description": "This test verifies that an administrator can open an existing user, change access settings, save them, and see the updated configuration.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Open a user record"
+      },
+      {
+        "type": "action",
+        "description": "Edit roles or permissions"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated access configuration is shown"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC026",
+    "title": "Open a deal and review its details",
+    "description": "A sales rep can open an existing deal and inspect its details and health information.",
+    "category": "Pipeline Kanban Board",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the pipeline navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Open a deal card"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify deal details are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify deal health information is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC027",
+    "title": "Create a new account",
+    "description": "A user can create a corporate account with company and address details and see it listed.",
+    "category": "Account Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /accounts"
+      },
+      {
+        "type": "action",
+        "description": "Create a new account"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the company field with a unique company name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the address details with valid information"
+      },
+      {
+        "type": "action",
+        "description": "Save the account"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new account appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC028",
+    "title": "Create and review a purchase order",
+    "description": "This verifies that a user can create a purchase order for a distributor and see it in the purchases list.",
+    "category": "Purchases",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /purchases"
+      },
+      {
+        "type": "action",
+        "description": "Create a purchase order for a distributor"
+      },
+      {
+        "type": "action",
+        "description": "Enter the order details"
+      },
+      {
+        "type": "action",
+        "description": "Save the purchase order"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new purchase order appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC029",
+    "title": "Create a new contact and link it to an account",
+    "description": "A user can create a contact with phone and role details, link it to an account, and see it in the contacts list.",
+    "category": "Contact Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /contacts"
+      },
+      {
+        "type": "action",
+        "description": "Create a new contact"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a unique contact name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email address"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the phone field with a valid phone number"
+      },
+      {
+        "type": "action",
+        "description": "Link the contact to an account"
+      },
+      {
+        "type": "action",
+        "description": "Save the contact"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new contact appears in the list"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC030",
+    "title": "Update an existing price list",
+    "description": "Verifies that a user can open a price list, change pricing and exchange rate settings, and see the updated values saved.",
+    "category": "Price List Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /price-lists"
+      },
+      {
+        "type": "action",
+        "description": "Open a price list"
+      },
+      {
+        "type": "action",
+        "description": "Update the pricing details"
+      },
+      {
+        "type": "action",
+        "description": "Update the exchange rate settings"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated price list values are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC031",
+    "title": "Update activity details",
+    "description": "This verifies that a user can open an activity, update its meeting details, and see the saved changes on the record.",
+    "category": "Activity Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /activities"
+      },
+      {
+        "type": "action",
+        "description": "Open an activity"
+      },
+      {
+        "type": "action",
+        "description": "Add meeting details"
+      },
+      {
+        "type": "action",
+        "description": "Record the outcome and next steps"
+      },
+      {
+        "type": "action",
+        "description": "Save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the activity record shows the updated details"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC032",
+    "title": "Configure pipeline stages",
+    "description": "This test verifies that an administrator can update pipeline stage configuration, save it, and see the updated pipeline setup.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Configure pipeline stages"
+      },
+      {
+        "type": "action",
+        "description": "Save the stage setup"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated pipeline configuration is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC033",
+    "title": "Filter the pipeline to matching deals",
+    "description": "A sales rep can filter the pipeline and see only deals that match the selected criteria.",
+    "category": "Pipeline Kanban Board",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the pipeline navigation item"
+      },
+      {
+        "type": "action",
+        "description": "Apply a pipeline filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the board updates to show matching deals"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC034",
+    "title": "Update an existing product",
+    "description": "Verifies a user can open a product, change its details, and see the updated record saved.",
+    "category": "Product Catalog",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /products"
+      },
+      {
+        "type": "action",
+        "description": "Open a product"
+      },
+      {
+        "type": "action",
+        "description": "Edit the product details"
+      },
+      {
+        "type": "action",
+        "description": "Save the changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated product record is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC035",
+    "title": "Complete an activity",
+    "description": "This verifies that a user can mark an activity as completed and see it move to completed status.",
+    "category": "Activity Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /activities"
+      },
+      {
+        "type": "action",
+        "description": "Open an activity"
+      },
+      {
+        "type": "action",
+        "description": "Mark the activity as completed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the activity is shown as completed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC036",
+    "title": "Review sales and pipeline analytics by date range",
+    "description": "Verifies that a user can view report charts, change the date range, and see updated analytics.",
+    "category": "Reports and Analytics",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /reports"
+      },
+      {
+        "type": "action",
+        "description": "Review the sales performance charts"
+      },
+      {
+        "type": "action",
+        "description": "Review the pipeline analytics"
+      },
+      {
+        "type": "action",
+        "description": "Change the date range"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the report charts update for the selected range"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC037",
+    "title": "Open a sales order and review its status",
+    "description": "This verifies that a user can open a sales order and review its details and fulfillment status.",
+    "category": "Sales Orders",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /sales-orders"
+      },
+      {
+        "type": "action",
+        "description": "Open a sales order"
+      },
+      {
+        "type": "action",
+        "description": "Review the line items and order details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the sales order status is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC038",
+    "title": "Deactivate a user account",
+    "description": "This test verifies that an administrator can deactivate a user, confirm the change, and see the user marked inactive.",
+    "category": "Settings",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /settings"
+      },
+      {
+        "type": "action",
+        "description": "Deactivate a user"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deactivation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user is marked inactive"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC039",
+    "title": "Update account details and tags",
+    "description": "A user can open an account, change its status or tags, and see the updated account summary.",
+    "category": "Account Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /accounts"
+      },
+      {
+        "type": "action",
+        "description": "Open an account"
+      },
+      {
+        "type": "action",
+        "description": "Change the account status"
+      },
+      {
+        "type": "action",
+        "description": "Add a tag"
+      },
+      {
+        "type": "action",
+        "description": "Save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated account summary is shown"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC040",
+    "title": "View connected integrations and status",
+    "description": "This test verifies that a user can review connected integrations and see their connection status on the integrations page.",
+    "category": "Integrations and API",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /integrations"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify connected integrations are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify integration connection statuses are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC041",
+    "title": "Update a contact record",
+    "description": "A user can open a contact, edit its details, and see the updated contact record.",
+    "category": "Contact Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /contacts"
+      },
+      {
+        "type": "action",
+        "description": "Open a contact"
+      },
+      {
+        "type": "action",
+        "description": "Edit the contact details"
+      },
+      {
+        "type": "action",
+        "description": "Save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated contact record is shown"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC042",
+    "title": "Open a purchase order and review its status",
+    "description": "This verifies that a user can open a purchase order and review its details and status.",
+    "category": "Purchases",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /purchases"
+      },
+      {
+        "type": "action",
+        "description": "Open a purchase order"
+      },
+      {
+        "type": "action",
+        "description": "Review the order details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the purchase order status is visible"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC043",
+    "title": "Delete a product from the catalog",
+    "description": "Verifies a user can remove an unneeded product and it no longer appears in the catalog.",
+    "category": "Product Catalog",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /products"
+      },
+      {
+        "type": "action",
+        "description": "Create a new product"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the product name, SKU, category, brand, and margin"
+      },
+      {
+        "type": "action",
+        "description": "Save the product"
+      },
+      {
+        "type": "action",
+        "description": "Select the newly created product"
+      },
+      {
+        "type": "action",
+        "description": "Delete the product"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product is removed from the catalog"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC044",
+    "title": "Search and filter leads",
+    "description": "A sales rep can search or filter leads and review only the matching results.",
+    "category": "Lead Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /leads"
+      },
+      {
+        "type": "action",
+        "description": "Search for a specific lead"
+      },
+      {
+        "type": "action",
+        "description": "Apply a lead filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only matching leads are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC045",
+    "title": "Create a new automation rule",
+    "description": "This test verifies that a user can create a workflow automation with a trigger, conditions, and actions, and see it appear in the rules list.",
+    "category": "Workflow Automations",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /automations"
+      },
+      {
+        "type": "action",
+        "description": "Create a new automation rule"
+      },
+      {
+        "type": "action",
+        "description": "Choose a trigger"
+      },
+      {
+        "type": "action",
+        "description": "Add a condition"
+      },
+      {
+        "type": "action",
+        "description": "Configure an action"
+      },
+      {
+        "type": "action",
+        "description": "Save the automation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new automation appears in the rules list"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC046",
+    "title": "Review a financial commission scenario",
+    "description": "Verifies that a user can create a financial scenario and review the calculated results.",
+    "category": "Goals and Commissions",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /goals-commissions"
+      },
+      {
+        "type": "action",
+        "description": "Create a financial scenario"
+      },
+      {
+        "type": "action",
+        "description": "Enter the cost assumptions"
+      },
+      {
+        "type": "action",
+        "description": "Enter the margin assumptions"
+      },
+      {
+        "type": "action",
+        "description": "Enter the revenue assumptions"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the scenario results are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC047",
+    "title": "Create a webhook subscription",
+    "description": "This test verifies that a user can configure a webhook with event subscriptions and a URL, save it, and see it listed as active.",
+    "category": "Integrations and API",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /integrations"
+      },
+      {
+        "type": "action",
+        "description": "Create a webhook"
+      },
+      {
+        "type": "action",
+        "description": "Configure the event subscriptions"
+      },
+      {
+        "type": "action",
+        "description": "Configure the webhook URL"
+      },
+      {
+        "type": "action",
+        "description": "Save the webhook"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the webhook appears in the list as active"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC048",
+    "title": "Filter activities by type and status",
+    "description": "This verifies that a user can filter activities and see only the matching results.",
+    "category": "Activity Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /activities"
+      },
+      {
+        "type": "action",
+        "description": "Apply a type filter"
+      },
+      {
+        "type": "action",
+        "description": "Apply a status filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only matching activities are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC049",
+    "title": "Review account details and linked records",
+    "description": "A user can open an account and review its information tabs, including linked contacts and branches.",
+    "category": "Account Management",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /accounts"
+      },
+      {
+        "type": "action",
+        "description": "Open an account"
+      },
+      {
+        "type": "action",
+        "description": "Open the contacts tab"
+      },
+      {
+        "type": "action",
+        "description": "Open the branches tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify linked account records are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC050",
+    "title": "Find products with search or filters",
+    "description": "Verifies a user can narrow the product catalog and see only matching items.",
+    "category": "Product Catalog",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the password field with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /products"
+      },
+      {
+        "type": "action",
+        "description": "Search for a product or apply a category or brand filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify only matching products are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the filtered result set is visible"
+      }
+    ],
+    "priority": "Medium"
+  }
+]

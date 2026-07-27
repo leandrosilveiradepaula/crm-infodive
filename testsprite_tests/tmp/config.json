@@ -1,0 +1,17 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "crm-next",
+    "projectPath": "c:\\Users\\Leandro Silveira\\Documents\\crm-next",
+    "testIds": [],
+    "additionalInstruction": "",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-eNAJtQ9bCdsYRNYjIvmBpU6FMw6DkMJ3WRo7KOKJDZ1IPWBMtimVG9QiCfgf1UFtLtXDR5eKpuZFcOEkdJqlJecig4L9hC206hcr7xj-zum4Op57xzK0zWfM2F_MoR_ebyQ"
+    }
+  },
+  "serverPort": 50157
+}

@@ -60,9 +60,43 @@ export const parseCSV = (file: File): Promise<any[][]> => {
         reader.onload = (e) => {
             try {
                 const text = e.target?.result as string;
-                const rows = text.split('\n').map(line =>
-                    line.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''))
-                );
+                const rows: any[][] = [];
+                let row: any[] = [];
+                let col = '';
+                let insideQuotes = false;
+                
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    const nextChar = text[i + 1];
+                    
+                    if (char === '"') {
+                        if (insideQuotes && nextChar === '"') {
+                            col += '"';
+                            i++; // Skip next quote
+                        } else {
+                            insideQuotes = !insideQuotes;
+                        }
+                    } else if (char === ',' && !insideQuotes) {
+                        row.push(col.trim());
+                        col = '';
+                    } else if ((char === '\r' || char === '\n') && !insideQuotes) {
+                        if (char === '\r' && nextChar === '\n') {
+                            i++; // Skip LF after CR
+                        }
+                        row.push(col.trim());
+                        rows.push(row);
+                        row = [];
+                        col = '';
+                    } else {
+                        col += char;
+                    }
+                }
+                
+                if (col !== '' || row.length > 0) {
+                    row.push(col.trim());
+                    rows.push(row);
+                }
+                
                 resolve(rows);
             } catch (error) {
                 reject(error);

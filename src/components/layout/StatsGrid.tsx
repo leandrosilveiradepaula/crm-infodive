@@ -28,7 +28,7 @@ export function StatsGrid({ items }: StatsGridProps) {
                     <div 
                         key={index} 
                         onClick={stat.onClick}
-                        className={`bg-gradient-to-br ${stat.gradient} dark:bg-card p-3 lg:p-4 rounded-2xl border ${stat.border} shadow-sm group hover:shadow-md transition-all relative overflow-hidden ${isClickable ? 'cursor-pointer active:scale-95' : ''}`}
+                        className={`bg-gradient-to-br ${stat.gradient} dark:bg-card p-3 lg:p-4 rounded-md border ${stat.border} shadow-sm group hover:shadow-md transition-all relative overflow-hidden ${isClickable ? 'cursor-pointer active:scale-95' : ''}`}
                     >
                         {/* Background Floating Icon */}
                         <div className="absolute right-0 top-0 p-12 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2 text-muted-foreground">
@@ -40,7 +40,7 @@ export function StatsGrid({ items }: StatsGridProps) {
                             <h3 className={`text-[9px] font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
                                 {stat.label}
                             </h3>
-                            <div className={`p-1.5 rounded-xl bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
+                            <div className={`p-1.5 rounded-md bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
                                 <Icon className={`h-3.5 w-3.5 ${stat.color}`} />
                             </div>
                         </div>

@@ -123,3 +123,22 @@ export async function getAccountsForSelect() {
     
     return data;
 }
+
+export async function getContactsForAccount(accountId: string) {
+    const { organizationId } = await requireSessionContext();
+    const supabase = createAdminClient();
+
+    const { data, error } = await supabase
+        .from('account_contacts')
+        .select('id, name, email, mobile_phone, landline_phone')
+        .eq('account_id', accountId)
+        .eq('organization_id', organizationId)
+        .order('name');
+
+    if (error) {
+        console.error('Error fetching contacts for account:', error);
+        return [];
+    }
+
+    return data as { id: string; name: string; email: string; mobile_phone: string | null; landline_phone: string | null }[];
+}

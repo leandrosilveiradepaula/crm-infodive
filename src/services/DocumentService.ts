@@ -137,6 +137,8 @@ export class DocumentService {
         meta: {
             category?: DocumentCategory;
             description?: string;
+            parent_id?: string | null;
+            quote_id?: string | null;
         }
     ): Promise<EntityDocument> {
         // --- Validation ---
@@ -151,6 +153,21 @@ export class DocumentService {
 
         // Validate entity ownership
         await this.validateEntityOwnership(supabase, organizationId, entityType, entityId);
+
+        // Fetch version if parent_id is provided
+        let version = 1;
+        if (meta.parent_id) {
+            const { data: versions, error: versionError } = await supabase
+                .from('documents')
+                .select('version')
+                .or(`id.eq.${meta.parent_id},parent_id.eq.${meta.parent_id}`)
+                .order('version', { ascending: false })
+                .limit(1);
+
+            if (!versionError && versions && versions.length > 0) {
+                version = versions[0].version + 1;
+            }
+        }
 
         // Unique path: documents/{orgId}/{entityType}/{entityId}/{uuid}-{name}
         const uuid = crypto.randomUUID();
@@ -185,6 +202,9 @@ export class DocumentService {
                     file_type: file.type,
                     file_size: file.size,
                     category: meta.category ?? 'outro',
+                    parent_id: meta.parent_id ?? null,
+                    version: version,
+                    quote_id: meta.quote_id ?? null,
                 },
             ])
             .select()
@@ -199,6 +219,7 @@ export class DocumentService {
 
         return data as EntityDocument;
     }
+
 
     /**
      * Generate a short-lived signed URL (5 min) for a document.

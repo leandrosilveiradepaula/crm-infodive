@@ -1,4 +1,5 @@
 import React from 'react';
+import { Switch } from '@/components/ui/switch';
 
 interface ConfigToggleProps {
     label: string;
@@ -11,7 +12,9 @@ interface ConfigToggleProps {
 
 export function ConfigToggle({ label, description, icon: Icon, checked, onChange, color }: ConfigToggleProps) {
     return (
-        <label className={`
+        <div 
+            onClick={() => onChange(!checked)}
+            className={`
             flex items-center justify-between p-5 rounded-2xl border cursor-pointer transition-all duration-300 group
             ${checked
                 ? 'bg-primary/5 border-primary/50 shadow-sm'
@@ -26,21 +29,12 @@ export function ConfigToggle({ label, description, icon: Icon, checked, onChange
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{description}</p>
                 </div>
             </div>
-            <div className={`
-                w-10 h-6 rounded-full p-1 transition-colors duration-300
-                ${checked ? 'bg-primary' : 'bg-muted'}
-            `}>
-                <div className={`
-                    bg-white w-4 h-4 rounded-full transition-transform duration-300
-                    ${checked ? 'translate-x-4' : 'translate-x-0'}
-                `} />
-            </div>
-            <input
-                type="checkbox"
+            <Switch
                 checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
-                className="hidden"
+                onCheckedChange={onChange}
+                className="scale-[0.65]"
+                onClick={(e) => e.stopPropagation()}
             />
-        </label>
+        </div>
     );
 }

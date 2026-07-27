@@ -7,7 +7,7 @@ const client = new GoogleGenAI({ apiKey: apiKey! });
 
 // List of vision models to try (fallback strategy)
 const VISION_MODELS = [
-    'gemini-2.0-flash',
+    'gemini-2.5-flash',
     'gemini-flash-latest',
     'gemini-pro-latest',
 ];

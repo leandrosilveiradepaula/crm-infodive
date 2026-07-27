@@ -19,7 +19,10 @@ export const createClient = async () => {
                 autoRefreshToken: false,
             },
             global: {
-                headers: clientHeaders
+                headers: clientHeaders,
+                fetch: (url, options) => {
+                    return fetch(url, { ...options, cache: 'no-store' })
+                }
             }
         }
     )

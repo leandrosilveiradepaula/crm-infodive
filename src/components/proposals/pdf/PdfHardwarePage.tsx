@@ -1,20 +1,23 @@
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
-import { PdfColors } from './pdfStyles';
+import { PdfColors, getPageProps } from './pdfStyles';
 import { LOGO_BASE64 } from './pdfAssetsBase64';
 import { isHardware, isService, isSupport, getClassificationLabel } from '@/utils/productClassification';
 import { getSmartProductDescription } from '@/utils/formatProductDescription';
+import { ExportProduct } from '@/utils/proposalExportMapper';
 
 interface PdfHardwarePageProps {
-    products: any[];
-    simplifiedProductNames?: Record<string, string>;
+    products: ExportProduct[];
     pdfColors: PdfColors;
     pdfStyles: any;
+    layout?: 'portrait' | 'landscape';
 }
 
-export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColors, pdfStyles }: PdfHardwarePageProps) {
+export function PdfHardwarePage({ products, pdfColors, pdfStyles, layout = 'portrait' }: PdfHardwarePageProps) {
     const hardwareProducts = products.filter(p =>
-        (isHardware(p) || isSupport(p) || isService(p)) && p.is_visible_on_proposal !== false
+        p.categoryLabel === 'Hardware & Infraestrutura' || 
+        p.categoryLabel === 'Suporte & Garantia' || 
+        p.categoryLabel === 'Serviços'
     );
     const deduplicated = hardwareProducts.filter((p, i, self) =>
         i === self.findIndex(t => t.name === p.name)
@@ -23,40 +26,31 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
     if (deduplicated.length === 0) return null;
 
     // Categorize products for the specific lists
-    const hw = deduplicated.filter(p => isHardware(p));
-    const support = deduplicated.filter(p => isSupport(p));
-    const services = deduplicated.filter(p => isService(p));
+    const hw = deduplicated.filter(p => p.categoryLabel === 'Hardware & Infraestrutura');
+    const support = deduplicated.filter(p => p.categoryLabel === 'Suporte & Garantia');
+    const services = deduplicated.filter(p => p.categoryLabel === 'Serviços' || p.categoryLabel === 'Serviços Profissionais');
 
     // Extract highlighted specs for the summary grid
     const allHighlightedSpecs: Array<{ label: string; value: string }> = [];
     deduplicated.forEach(p => {
-        const sourceDetails = p.description || p.tech_details;
-        if (sourceDetails) {
-            try {
-                const parsed = typeof sourceDetails === 'string' ? JSON.parse(sourceDetails) : sourceDetails;
-                if (Array.isArray(parsed)) {
-                    // Collect ALL highlighted items regardless of is_visible_on_proposal
-                    // because if they are marked as highlighted, they SHOULD be in the GRID
-                    parsed.forEach(item => {
-                        if (item.is_highlighted_on_grid && item.grid_label) {
-                            // Avoid duplicates
-                            if (!allHighlightedSpecs.some(s => s.label === item.grid_label)) {
-                                allHighlightedSpecs.push({
-                                    label: item.grid_label || 'Info',
-                                    value: item.description
-                                });
-                            }
-                        }
-                    });
+        if (p.techDetails && Array.isArray(p.techDetails)) {
+            p.techDetails.forEach(item => {
+                if (item.is_highlighted_on_grid && item.grid_label) {
+                    if (!allHighlightedSpecs.some(s => s.label === item.grid_label)) {
+                        allHighlightedSpecs.push({
+                            label: item.grid_label || 'Info',
+                            value: item.description
+                        });
+                    }
                 }
-            } catch (e) { /* ignore */ }
+            });
         }
     });
 
-    const renderProductList = (items: any[], title: string, color: string) => {
+    const renderProductList = (items: ExportProduct[], title: string, color: string) => {
         if (items.length === 0) return null;
 
-        const showSkuColumn = items.some(p => p.show_sku_on_proposal !== false && !!p.sku);
+        const showSkuColumn = items.some(p => p.showSkuOnProposal !== false && !!p.sku);
 
         return (
             <View wrap={false} style={{ marginBottom: 20 }}>
@@ -123,26 +117,21 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
                         {/* Name and Specs */}
                         <View style={{ flex: 1, paddingRight: 10 }}>
                             <Text style={{ fontSize: 11, fontWeight: 'semibold', color: pdfColors.text, marginBottom: 2 }}>
-                                {simplifiedProductNames[product.name] || product.display_name || product.name}
+                                {product.displayName}
                             </Text>
-                            {product.duration && product.duration_unit && (
+                            {product.duration && product.durationUnit && (
                                 <Text style={{ fontSize: 9, color: pdfColors.green, fontStyle: 'italic', fontWeight: 'bold', marginBottom: 2 }}>
-                                    (Válido por {product.duration} {product.duration_unit})
+                                    (Válido por {product.duration} {product.durationUnit})
                                 </Text>
                             )}
 
                             {/* Render Product Specs */}
                             {(() => {
                                 let rawSpecs: any[] = [];
-                                const sourceDetails = product.description || product.tech_details;
-                                if (sourceDetails) {
-                                    try {
-                                        const parsed = typeof sourceDetails === 'string' ? JSON.parse(sourceDetails) : sourceDetails;
-                                        if (Array.isArray(parsed) && parsed.length > 0) rawSpecs = parsed;
-                                    } catch {
-                                        // Not valid JSON or array, fallback by lines
-                                        rawSpecs = (String(sourceDetails)).split('\n').filter(l => l.trim().length > 0).map((l, i) => ({ description: l, quantity: 1, is_visible_on_proposal: true, id: i }));
-                                    }
+                                if (product.techDetails && product.techDetails.length > 0) {
+                                    rawSpecs = product.techDetails;
+                                } else if (product.description) {
+                                    rawSpecs = product.description.split('\n').filter(l => l.trim().length > 0).map((l, i) => ({ description: l, quantity: 1, is_visible_on_proposal: true, id: i }));
                                 }
 
                                 if (rawSpecs.length > 0) {
@@ -166,11 +155,10 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
                                 return null;
                             })()}
                         </View>
-                        {/* SKU */}
                         {showSkuColumn && (
                             <View style={{ width: 80 }}>
                                 <Text style={{ fontSize: 10, color: pdfColors.textLight }}>
-                                    {product.show_sku_on_proposal !== false ? (product.sku || '-') : ''}
+                                    {product.showSkuOnProposal !== false ? (product.sku || '-') : ''}
                                 </Text>
                             </View>
                         )}
@@ -187,7 +175,7 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
     };
 
     return (
-        <Page size="A4" style={pdfStyles.page} wrap>
+        <Page {...getPageProps(layout)} style={pdfStyles.page} wrap>
             {/* Top gradient bar */}
             <View style={{ position: 'absolute', top: 0, left: 0, width: '50%', height: 6, backgroundColor: pdfColors.accent }} />
             <View style={{ position: 'absolute', top: 0, left: '50%', width: '50%', height: 6, backgroundColor: pdfColors.primary }} />

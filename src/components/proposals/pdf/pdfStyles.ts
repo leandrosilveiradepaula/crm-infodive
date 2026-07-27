@@ -40,12 +40,22 @@ export function getPdfColors(themePrimary?: string, themeAccent?: string) {
 }
 
 /**
+ * Returns standard Page props for A4 vs Widescreen (16:9)
+ * 841.89pt = 297mm. 16:9 height = 473.56pt = 167mm.
+ */
+export function getPageProps(layout: 'portrait' | 'landscape' = 'portrait'): { size: any, orientation?: 'portrait' | 'landscape' } {
+    if (layout === 'landscape') {
+        return { size: [841.89, 473.56] }; // Exact 16:9 matching 297mm width
+    }
+    return { size: 'A4' };
+}
+
+/**
  * Generates StyleSheet based on theme colors
  */
 export function getPdfStyles(pdfColors = defaultColors) {
     return StyleSheet.create({
         page: {
-            width: '210mm',
             backgroundColor: pdfColors.white,
             fontFamily: 'Helvetica',
             color: pdfColors.primary,

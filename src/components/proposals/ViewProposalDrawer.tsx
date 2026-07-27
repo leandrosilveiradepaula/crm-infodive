@@ -1,12 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-
 import { Trash2, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { useDraftForm, FloatingSaveBar, UnsavedChangesDialog } from '@/components/ui/floating-save-bar';
+import { GhostField } from '@/components/ui/ghost-field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation';
 
 import { ProposalCoverPage } from './ProposalCoverPage';
 import { ProposalOverviewPage } from './ProposalOverviewPage';
@@ -24,12 +25,12 @@ import { useProposalDocx } from '@/hooks/useProposalDocx';
 import { formatCurrency } from '@/utils/analytics';
 import { PROPOSAL_STATUS } from '@/lib/constants';
 import { getOrganizationTheme } from '@/app/actions/theme-actions';
-import { Zap, ShieldCheck, Download, Send, History, ExternalLink, FileText, TrendingUp, Loader2, User, Calendar } from 'lucide-react';
+import { Zap, ShieldCheck, Download, Send, History, ExternalLink, FileText, TrendingUp, Loader2, User, Calendar, X } from 'lucide-react';
 import type { Proposal } from '@/types/proposal';
 import type { Deal } from '@/types/deal';
 import type { Account } from '@/types/account';
 
-interface ViewProposalModalProps {
+interface ViewProposalDrawerProps {
     proposal: Proposal;
     isOpen: boolean;
     onClose: () => void;
@@ -38,21 +39,55 @@ interface ViewProposalModalProps {
     distributors?: Account[];
 }
 
-export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
-    proposal,
+export const ViewProposalDrawer: React.FC<ViewProposalDrawerProps> = ({
+    proposal: initialProposal,
     isOpen,
     onClose,
     onDelete,
     onUpdateStatus,
     distributors = []
 }) => {
+    const router = useRouter();
+    const [proposal, setProposal] = useState<Proposal>(initialProposal);
+
+    // Sync state with prop changes
+    useEffect(() => {
+        setProposal(initialProposal);
+    }, [initialProposal?.id]);
+
+    const initialProposalData = React.useMemo(() => ({
+        title: proposal?.title || '',
+        status: proposal?.status || '',
+        validUntil: proposal?.validUntil || ''
+    }), [proposal]);
+
+    const {
+        formData,
+        setFormData,
+        updateField,
+        isDirty,
+        changedCount,
+        isSaving,
+        saveChanges,
+        discardChanges,
+        safeExecute,
+        showUnsavedModal,
+        setShowUnsavedModal
+    } = useDraftForm({
+        initialData: initialProposalData,
+        onSave: async (updated) => {
+            if (!proposal?.id) return;
+            await onUpdateStatus(proposal.id, updated as any);
+            setProposal(prev => prev ? { ...prev, ...updated } : prev);
+            router.refresh();
+        }
+    });
     const handleDelete = async () => {
         await onDelete(proposal.id);
     };
 
     const handleSend = async () => {
         try {
-            // Generate public token if not exists
             const publicToken = proposal.public_token || crypto.randomUUID().replace(/-/g, '').substring(0, 16);
 
             const updates = {
@@ -63,7 +98,6 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
             };
 
             await onUpdateStatus(proposal.id, updates);
-
             toast.success(`Proposta ${proposal.number} liberada com sucesso!`);
         } catch (error) {
             console.error('❌ Erro ao enviar proposta:', error);
@@ -71,9 +105,6 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
         }
     };
 
-    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-
-    // Refs for PDF capture
     const coverRef = useRef<HTMLDivElement>(null);
     const overviewRef = useRef<HTMLDivElement>(null);
     const hardwareRef = useRef<HTMLDivElement>(null);
@@ -124,7 +155,11 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
     const onDownloadDocxClick = async () => {
         if (!proposal) return;
-        await handleDownloadDocx(proposal);
+        await handleDownloadDocx({
+            proposal,
+            deal: pseudoDeal,
+            distributors,
+        });
     };
 
     const handleCopyLink = () => {
@@ -151,9 +186,6 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
     const aiSummary = proposal.content?.aiSummary;
     const config = proposal.content?.config || {};
 
-    // Pseudo-deal construction for components
-    // We need to fetch/construct a 'deal' object structure if possible, or pass partial data
-    // The components expect a 'Deal' object. We can construct a subset.
     const propRecord = proposal as unknown as Record<string, unknown>;
     const pseudoDeal = {
         id: proposal.deal_id || proposal.id,
@@ -167,46 +199,59 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
     const productsList = pseudoDeal.deal_products;
     const expirationDate = proposal.validUntil || (proposal.createdAt ? new Date(new Date(proposal.createdAt).getTime() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'N/A');
 
-    if (!isOpen) return null;
-
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+        <Sheet open={isOpen} onOpenChange={(open) => !open && safeExecute(onClose)}>
+            <SheetContent
+                side="right"
+                showCloseButton={false}
+                className="w-full sm:max-w-[850px] flex flex-col p-0 gap-0"
+                onPointerDownOutside={(e) => {
+                    if (e.target instanceof Element && e.target.closest('.floating-save-bar')) {
+                        e.preventDefault();
+                    }
+                }}
+            >
                 {/* Header */}
-                <div className="p-6 md:p-8 border-b border-border flex justify-between items-center relative overflow-hidden bg-gradient-to-r from-primary/5 to-transparent flex-shrink-0">
-                    <div className="flex items-center gap-6 relative z-10 w-full">
-                        <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
-                            <FileText className="h-6 w-6" />
+                <div className="p-6 border-b border-border flex justify-between items-center relative overflow-hidden bg-gradient-to-r from-primary/5 to-transparent shrink-0">
+                    <div className="flex items-center gap-4 relative z-10 w-full">
+                        <div className="h-10 w-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                            <FileText className="h-5 w-5" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 flex-wrap">
-                                <DialogTitle className="text-2xl font-black text-foreground uppercase tracking-tight leading-none truncate">
-                                    {proposal.title}
-                                </DialogTitle>
+                                <SheetTitle className="sr-only">Proposta {proposal.title}</SheetTitle>
+                                <input
+                                    type="text"
+                                    value={formData.title}
+                                    onChange={e => updateField('title', e.target.value)}
+                                    className="text-lg font-black text-foreground uppercase tracking-tight leading-none bg-transparent border-b border-transparent hover:border-border/40 focus:border-primary/40 focus:outline-none focus:ring-0 transition-all px-1 py-0.5 max-w-[320px] w-full rounded-md hover:bg-muted/20 focus:bg-muted/30"
+                                    placeholder="Título da proposta"
+                                />
                                 <span className={`flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase border tracking-widest ${statusInfo.color}`}>
                                     <StatusIcon className="h-2.5 w-2.5" /> {statusInfo.label}
                                 </span>
                             </div>
                             <div className="flex items-center gap-4 mt-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
+                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-0.5 rounded-md border border-border/50">
                                     <User className="h-3 w-3 text-primary" />
                                     <span className="truncate max-w-[200px]">{pseudoDeal.company}</span>
                                 </span>
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
+                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-0.5 rounded-md border border-border/50">
                                     <Calendar className="h-3 w-3 text-success" />
                                     Expira: {expirationDate}
                                 </span>
-                                <span className="hidden md:inline-block opacity-40">|</span>
-                                <span className="hidden md:inline-block opacity-60">Asset #{proposal.number}</span>
                             </div>
                         </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted shrink-0" onClick={onClose}>
+                            <X className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar bg-muted/30">
-                    <Tabs defaultValue="resume" className="w-full h-full flex flex-col">
-                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 md:px-8 py-2">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-muted/30">
+                    <Tabs defaultValue="resume" className="w-full h-full flex flex-col min-h-0">
+                        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 py-2 shrink-0">
                             <TabsList className="bg-muted w-full md:w-auto overflow-x-auto justify-start flex-nowrap hide-scrollbar">
                                 <TabsTrigger value="resume" className="min-w-[100px] gap-2"><FileText className="w-3.5 h-3.5" />Resumo</TabsTrigger>
                                 <TabsTrigger value="products" className="min-w-[100px] gap-2"><ShieldCheck className="w-3.5 h-3.5" />Produtos</TabsTrigger>
@@ -216,12 +261,12 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             </TabsList>
                         </div>
 
-                        <div className="p-6 md:p-8 flex-1">
+                        <div className="p-6 flex-1 overflow-y-auto custom-scrollbar">
                             {/* TAB: RESUMO */}
                             <TabsContent value="resume" className="mt-0 h-full">
                                 <div className="space-y-6 max-w-4xl mx-auto">
                                     {aiSummary ? (
-                                        <div className="bg-gradient-to-br from-stage-proposal/5 to-primary/5 p-8 rounded-3xl border border-stage-proposal/10 shadow-sm relative overflow-hidden">
+                                        <div className="bg-gradient-to-br from-stage-proposal/5 to-primary/5 p-6 rounded-3xl border border-stage-proposal/10 shadow-sm relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-stage-proposal/10 rounded-full blur-3xl -mr-10 -mt-10" />
                                             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -ml-10 -mb-10" />
                                             <div className="relative">
@@ -244,8 +289,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                         </div>
                                     )}
 
-                                    {/* Preview simplificado */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
                                         {['Capa', 'Confidencialidade', 'Premissas'].map((label, i) => (
                                             <div key={i} className="aspect-[1/1.414] bg-card border border-border border-dashed rounded-xl shadow-sm flex items-center justify-center relative overflow-hidden group hover:border-primary transition-colors cursor-default">
                                                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -261,7 +305,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
                             {/* TAB: PRODUTOS */}
                             <TabsContent value="products" className="mt-0">
-                                <div className="bg-white rounded-3xl border border-border shadow-sm p-6 overflow-hidden min-h-[500px]">
+                                <div className="bg-white rounded-3xl border border-border shadow-sm p-6 overflow-hidden min-h-[400px]">
                                     <ProposalProductsTable productsList={productsList || []} />
                                 </div>
                             </TabsContent>
@@ -269,7 +313,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             {/* TAB: FINANCEIRO */}
                             <TabsContent value="financial" className="mt-0">
                                 <div className="max-w-xl mx-auto space-y-6">
-                                    <div className="bg-gradient-to-br from-primary to-stage-proposal p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+                                    <div className="bg-gradient-to-br from-primary to-stage-proposal p-6 rounded-3xl text-white shadow-xl relative overflow-hidden">
                                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
                                         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-black/10 rounded-full blur-2xl" />
 
@@ -293,7 +337,6 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                         </div>
                                     </div>
 
-                                    {/* Breakdown por Distribuidor (Placeholder para futura expansão) */}
                                     <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
                                         <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">Quebra por Faturamento</h3>
                                         <div className="space-y-4">
@@ -312,7 +355,6 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             {/* TAB: AÇÕES */}
                             <TabsContent value="actions" className="mt-0">
                                 <div className="max-w-2xl mx-auto space-y-6">
-                                    {/* Link de Apresentação */}
                                     <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
                                         <div className="flex items-start gap-4 mb-4">
                                             <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -365,7 +407,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 <p className="text-xs text-muted-foreground uppercase font-bold">Exportar versão para apresentação ou impressão.</p>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex flex-col md:flex-row gap-2 w-full">
                                             <Button
                                                 onClick={onDownloadClick}
@@ -474,83 +516,96 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                 {/* Hidden Render Container for PDF / PPT */}
                 {generatingPdf && (
                     <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', width: '210mm', pointerEvents: 'none' }}>
-                            <div ref={coverRef}>
-                                <ProposalCoverPage
-                                    dealTitle={pseudoDeal.title}
-                                    companyName={pseudoDeal.company}
-                                    date={new Date(proposal.createdAt).toLocaleDateString('pt-BR')}
-                                    clientLogo={config.clientLogo}
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                    hideValues={generatingPpt}
-                                />
-                            </div>
-
-                            <div ref={confidentialityRef}>
-                                <ProposalConfidentialityPage
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={overviewRef}>
-                                <ProposalOverviewPage
-                                    dealTitle={pseudoDeal.title}
-                                    aiSummary={aiSummary}
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={hardwareRef}>
-                                <ProposalHardwarePage
-                                    deal={pseudoDeal}
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={softwareRef}>
-                                <ProposalSoftwarePage
-                                    deal={pseudoDeal}
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={investmentRef}>
-                                <ProposalInvestmentPage
-                                    deal={pseudoDeal}
-                                    distributors={distributors}
-                                    config={config}
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={differentialsRef}>
-                                <ProposalDifferentialsPage
-                                    themePrimary={orgTheme.theme_primary || undefined}
-                                    themeAccent={orgTheme.theme_accent || undefined}
-                                    layout={generatingPpt ? 'landscape' : 'portrait'}
-                                />
-                            </div>
-
-                            <div ref={customNotesRef}>
-                                {/* Placeholder for custom notes, 
-                                    currently used as ref by hooks */}
-                                <div className="bg-white p-20 min-h-[1123px] w-[794px]" />
-                            </div>
+                        <div ref={coverRef}>
+                            <ProposalCoverPage
+                                dealTitle={pseudoDeal.title}
+                                companyName={pseudoDeal.company}
+                                date={new Date(proposal.createdAt).toLocaleDateString('pt-BR')}
+                                clientLogo={config.clientLogo}
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                                hideValues={generatingPpt}
+                            />
                         </div>
-                    )
-                }
-            </DialogContent>
-        </Dialog>
+
+                        <div ref={confidentialityRef}>
+                            <ProposalConfidentialityPage
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={overviewRef}>
+                            <ProposalOverviewPage
+                                dealTitle={pseudoDeal.title}
+                                aiSummary={aiSummary}
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={hardwareRef}>
+                            <ProposalHardwarePage
+                                deal={pseudoDeal}
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={softwareRef}>
+                            <ProposalSoftwarePage
+                                deal={pseudoDeal}
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={investmentRef}>
+                            <ProposalInvestmentPage
+                                deal={pseudoDeal}
+                                distributors={distributors}
+                                config={config}
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={differentialsRef}>
+                            <ProposalDifferentialsPage
+                                themePrimary={orgTheme.theme_primary || undefined}
+                                themeAccent={orgTheme.theme_accent || undefined}
+                                layout={generatingPpt ? 'landscape' : 'portrait'}
+                            />
+                        </div>
+
+                        <div ref={customNotesRef}>
+                            <div className="bg-white p-20 min-h-[1123px] w-[794px]" />
+                        </div>
+                    </div>
+                )}
+
+                <FloatingSaveBar
+                    isDirty={isDirty && !showUnsavedModal}
+                    changedCount={changedCount}
+                    isSaving={isSaving}
+                    onSave={saveChanges}
+                    onDiscard={discardChanges}
+                />
+
+                <UnsavedChangesDialog
+                    open={showUnsavedModal}
+                    onOpenChange={setShowUnsavedModal}
+                    onSave={saveChanges}
+                    onDiscard={discardChanges}
+                    isSaving={isSaving}
+                />
+            </SheetContent>
+        </Sheet>
     );
 };

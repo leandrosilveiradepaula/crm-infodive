@@ -1,6 +1,7 @@
 export interface Lead {
     id: string;
     organization_id: string;
+    account_id?: string;
     company: string;
     contact_name: string;
     email: string;

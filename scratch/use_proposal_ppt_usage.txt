@@ -1,0 +1,7 @@
+src\components\proposals\ProposalGeneratorWizard.tsx:25: import { useProposalPpt } from '@/hooks/useProposalPpt';
+src\components\proposals\ProposalGeneratorWizard.tsx:112: const { handleDownloadPpt, generatingPpt } = useProposalPpt();
+src\components\proposals\ViewProposalModal.tsx:22: import { useProposalPpt } from '@/hooks/useProposalPpt';
+src\components\proposals\ViewProposalModal.tsx:100: const { generatingPpt, handleDownloadPpt } = useProposalPpt();
+src\components\proposals\editor\ProposalEditorClient.tsx:50: import { useProposalPpt } from '@/hooks/useProposalPpt';
+src\components\proposals\editor\ProposalEditorClient.tsx:156: const { generatingPpt, handleDownloadPpt } = useProposalPpt();
+src\hooks\useProposalPpt.ts:30: export function useProposalPpt() {

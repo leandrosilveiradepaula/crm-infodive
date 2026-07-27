@@ -3,6 +3,7 @@ import { LOGO_BASE64, DATACENTER_BASE64, HANDSHAKE_BASE64 } from '@/components/p
 import type { Deal, DealProduct } from '@/types/deal';
 import type { Account } from '@/types/account';
 import { isSoftware, isHardware, isSupport, isService } from '@/utils/productClassification';
+import { getSmartProductDescription } from '@/utils/formatProductDescription';
 
 // ─── Theme & Layout Constants ───────────────────────────────────────────────
 const SLIDE_W = 10;
@@ -168,6 +169,13 @@ export function buildConfidentialitySlide(pptx: pptxgen, primaryColor?: string, 
     return slide;
 }
 
+function truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text;
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+}
+
 // ─── Overview Slide ─────────────────────────────────────────────────────────
 export interface OverviewData {
     dealTitle: string;
@@ -186,9 +194,33 @@ export function buildOverviewSlide(pptx: pptxgen, data: OverviewData) {
     let contentY = 2.0;
 
     if (data.aiSummary) {
-        slide.addShape('roundRect', { x: 0.5, y: contentY, w: 9, h: 1.25, fill: { color: 'f8f9fa' }, line: { color: c.border, width: 0.5 }, rectRadius: 0.1 });
-        slide.addText(data.aiSummary, { x: 0.7, y: contentY + 0.05, w: 8.6, h: 1.15, fontSize: 9, color: c.primary, fontFace: FONT, lineSpacingMultiple: 1.2, valign: 'top' });
-        contentY += 1.4;
+        // Enforce max-length to guarantee that layout does not break/overflow the slide
+        const safeSummary = truncateText(data.aiSummary, 800);
+        
+        // Dynamically calculate block height based on text content
+        // Account for paragraph breaks, word-wrap, and line-spacing
+        const TEXT_W = 8.6;         // usable text width in inches
+        const FONT_SIZE = 9;        // font size in pt
+        const CHAR_WIDTH = 0.065;   // approx width per char at 9pt Inter (~15.4 chars/inch)
+        const CHARS_PER_LINE = Math.floor(TEXT_W / CHAR_WIDTH); // ~132 chars, but use conservative estimate
+        const EFFECTIVE_CPL = 105;   // conservative: accounts for word-wrap not breaking mid-word
+        const LINE_H_BASE = FONT_SIZE / 72; // base line height in inches (9pt = 0.125in)
+        const LINE_SPACING = 1.2;
+        const LINE_H = LINE_H_BASE * LINE_SPACING; // ~0.15in per line
+        const PADDING_V = 0.4;      // vertical padding (top + bottom combined)
+
+        // Count actual lines: split by paragraph breaks, then estimate wrapped lines per paragraph
+        const paragraphs = safeSummary.split('\n');
+        const totalLines = paragraphs.reduce((sum, para) => {
+            if (para.trim() === '') return sum + 0.5; // empty line = half line
+            return sum + Math.max(1, Math.ceil(para.length / EFFECTIVE_CPL));
+        }, 0);
+
+        const estimatedH = Math.min(3.2, Math.max(0.6, totalLines * LINE_H + PADDING_V));
+
+        slide.addShape('roundRect', { x: 0.5, y: contentY, w: 9, h: estimatedH, fill: { color: 'f8f9fa' }, line: { color: c.border, width: 0.5 }, rectRadius: 0.1 });
+        slide.addText(safeSummary, { x: 0.7, y: contentY + 0.12, w: 8.6, h: estimatedH - 0.24, fontSize: FONT_SIZE, color: c.primary, fontFace: FONT, lineSpacingMultiple: LINE_SPACING, valign: 'top' });
+        contentY += estimatedH + 0.15;
     }
 
     const objectives = data.objectives || [];
@@ -462,7 +494,8 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
                 name: override.selectedBranchName || 'Infodive Representações e Serviços Ltda',
                 cnpj: cnpjOverride || '05.613.186/0001-78',
                 terms: termsOverride,
-                type: 'reseller'
+                type: 'reseller',
+                products: resellerProducts
             });
         }
 
@@ -479,12 +512,18 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
                 const displayName = override.selectedBranchName || dist.name;
                 const displayTerms = override.paymentTerms ?? dist.payment_terms;
 
+                const distProducts = directProducts.filter(p => 
+                    (p.distributor_id || 'no-dist') === dId && 
+                    (p.distributor_cnpj || 'no-cnpj') === dCnpj
+                );
+
                 groups.push({
                     title: `Faturamento Direto (${dist.name})`,
                     name: displayName,
                     cnpj: displayCnpj,
                     terms: displayTerms,
-                    type: 'direct'
+                    type: 'direct',
+                    products: distProducts
                 });
             }
         });
@@ -500,6 +539,21 @@ export function buildInvestmentSlides(pptx: pptxgen, data: InvestmentData): pptx
             billingSlide.addText('FATURAMENTO DIRETO', { x: 0.7, y: y + 0.1, w: 5, h: 0.2, fontSize: 7, bold: true, color: accent, fontFace: 'Inter' });
             billingSlide.addText(group.name, { x: 0.7, y: y + 0.3, w: 8.5, h: 0.3, fontSize: 11, bold: true, color: c.primary, fontFace: 'Inter' });
             billingSlide.addText(`CNPJ: ${group.cnpj || '-'}`, { x: 0.7, y: y + 0.55, w: 4, h: 0.2, fontSize: 8, color: c.textMuted, fontFace: 'Inter' });
+
+            const productsList = Array.from((group.products || []).reduce((acc: Map<string, string>, p: any) => {
+                const rawName = (p.display_name || p.name || '').toString();
+                const clean = rawName.replace(/[\s\u00A0\u1680\u180e\u2000-\u200a\u202f\u205f\u3000\ufeff\u200b]+/g, ' ').trim();
+                const key = clean.toLowerCase();
+                if (clean && !acc.has(key)) acc.set(key, clean);
+                return acc;
+            }, new Map<string, string>()).values()).join(' • ');
+
+            if (productsList) {
+                billingSlide.addText([
+                    { text: 'PRODUTOS: ', options: { bold: true, color: c.textMuted, fontSize: 8, fontFace: FONT } },
+                    { text: productsList, options: { color: c.primary, fontSize: 8, fontFace: FONT, bold: true } }
+                ], { x: 4.5, y: y + 0.55, w: 4.8, h: 0.2 });
+            }
 
             if (group.terms) {
                 const termsY = y + 0.8;
@@ -535,41 +589,124 @@ export function buildHardwareSlides(pptx: pptxgen, data: HardwareData): pptxgen.
     const deduped = hwProducts.filter((p, i, s) => i === s.findIndex(t => t.name === p.name));
     if (deduped.length === 0) return slides;
 
-    const productsPerPage = 4;
-    for (let page = 0; page * productsPerPage < deduped.length; page++) {
-        const chunk = deduped.slice(page * productsPerPage, (page + 1) * productsPerPage);
-        const totalPages = Math.ceil(deduped.length / productsPerPage);
-        const pageInfo = totalPages > 1 ? `(${page + 1}/${totalPages})` : '';
-        const slide = pptx.addSlide();
-        slides.push(slide);
-        addStandardHeader(slide, c, 'Infraestrutura &', 'Hardware', undefined, pageInfo);
+    const MAX_Y = 5.1;
+    let page = 0;
+    let slide = pptx.addSlide();
+    slides.push(slide);
+    addStandardHeader(slide, c, 'Infraestrutura &', 'Hardware', undefined, '');
 
-        chunk.forEach((product, idx) => {
-            const y = 1.7 + idx * 0.85;
-            const name = simplify[product.name] || product.display_name || product.name || 'Produto';
-            slide.addShape('roundRect', { x: 0.5, y, w: 9, h: 0.75, fill: { color: idx % 2 === 0 ? 'f8fafc' : 'FFFFFF' }, line: { color: c.border, width: 0.5 }, rectRadius: 0.05 });
-            slide.addText(name, { x: 0.7, y: y + 0.1, w: 8.5, h: 0.22, fontSize: 10, bold: true, color: c.primary, fontFace: FONT });
+    let curY = 1.7;
+    let productsInPage = 0;
 
-            let descText = '';
-            try {
-                const parsed = JSON.parse(product.description || product.tech_details || '[]');
-                if (Array.isArray(parsed)) {
-                    descText = parsed.slice(0, 3).map((d: any) => {
-                        if (typeof d === 'string') return d;
-                        const label = d.label || d.title || d.name || '';
-                        const val = d.description || d.value || d.text || '';
-                        if (label && val) return `${label}: ${val}`;
-                        return label || val || '';
-                    }).filter(Boolean).join('  |  ');
-                }
-            } catch { descText = String(product.description || '').substring(0, 120); }
-            if (descText) {
-                slide.addText(descText, { x: 0.7, y: y + 0.4, w: 8.5, h: 0.25, fontSize: 8.5, color: c.textMuted, fontFace: FONT });
+    deduped.forEach((product) => {
+        // Parse specs into bullet lines using getSmartProductDescription (just like the PDF)
+        const specs: string[] = [];
+        let rawSpecs: any[] = [];
+        try {
+            const sourceDetails = product.description || product.tech_details;
+            if (sourceDetails) {
+                rawSpecs = typeof sourceDetails === 'string' ? JSON.parse(sourceDetails) : sourceDetails;
             }
+        } catch {
+            rawSpecs = String(product.description || '').split('\n').filter(l => l.trim().length > 0).map((l, i) => ({ description: l, quantity: 1 }));
+        }
+
+        if (rawSpecs && rawSpecs.length > 0) {
+            const specsLines = getSmartProductDescription(rawSpecs, 1);
+            specsLines.forEach(spec => {
+                const qtyPrefix = spec.qty && spec.qty > 0 ? `${spec.qty} x ` : '';
+                specs.push(`${qtyPrefix}${spec.description}`);
+            });
+        }
+
+        // Limit to 8 specs to prevent huge cards
+        const displaySpecs = specs.slice(0, 8);
+
+        // Height calculation: header (0.35) + 0.16 per spec + 0.15 padding
+        const cardH = 0.35 + (displaySpecs.length * 0.16) + 0.15;
+
+        // Check overflow
+        if (curY + cardH > MAX_Y && productsInPage > 0) {
+            page++;
+            slide = pptx.addSlide();
+            slides.push(slide);
+            addStandardHeader(slide, c, 'Infraestrutura &', 'Hardware', undefined, '');
+            curY = 1.7;
+            productsInPage = 0;
+        }
+
+        // Parent product name with quantity prefix
+        const qtyPrefix = product.quantity && product.quantity > 0 ? `${product.quantity} x ` : '';
+        const name = qtyPrefix + (simplify[product.name] || product.display_name || product.name || 'Produto');
+
+        // Draw card background
+        slide.addShape('roundRect', { 
+            x: 0.5, 
+            y: curY, 
+            w: 9, 
+            h: cardH, 
+            fill: { color: productsInPage % 2 === 0 ? 'f8fafc' : 'FFFFFF' }, 
+            line: { color: c.border, width: 0.5 }, 
+            rectRadius: 0.05 
         });
 
-        addFooter(slide, c, `Infodive IT Solutions - Pag ${page + 1} de ${totalPages}`);
-    }
+        // Left accent stripe
+        slide.addShape('rect', { 
+            x: 0.5, 
+            y: curY, 
+            w: 0.06, 
+            h: cardH, 
+            fill: { color: c.primary } 
+        });
+
+        // Product Title
+        slide.addText(name, { 
+            x: 0.7, 
+            y: curY + 0.1, 
+            w: 8.5, 
+            h: 0.22, 
+            fontSize: 10, 
+            bold: true, 
+            color: c.primary, 
+            fontFace: FONT 
+        });
+
+        // Spec bullets
+        displaySpecs.forEach((spec, sIdx) => {
+            const specY = curY + 0.35 + (sIdx * 0.16);
+            // Draw bullet marker
+            slide.addShape('ellipse', { 
+                x: 0.75, 
+                y: specY + 0.06, 
+                w: 0.04, 
+                h: 0.04, 
+                fill: { color: c.accent } 
+            });
+            // Draw text next to bullet
+            slide.addText(spec, { 
+                x: 0.85, 
+                y: specY, 
+                w: 8.3, 
+                h: 0.16, 
+                fontSize: 8.5, 
+                color: c.textMuted, 
+                fontFace: FONT 
+            });
+        });
+
+        curY += cardH + 0.15;
+        productsInPage++;
+    });
+
+    // Update page numbers across all created hardware slides
+    const totalPages = slides.length;
+    slides.forEach((s, idx) => {
+        const pageInfo = totalPages > 1 ? `(${idx + 1}/${totalPages})` : '';
+        // Re-apply standard header with correct page info (the simple addStandardHeader call in loop was blank)
+        addStandardHeader(s, c, 'Infraestrutura &', 'Hardware', undefined, pageInfo);
+        addFooter(s, c, `Infodive IT Solutions - Pag ${idx + 1} de ${totalPages}`);
+    });
+
     return slides;
 }
 

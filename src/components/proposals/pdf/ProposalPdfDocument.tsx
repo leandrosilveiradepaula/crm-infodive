@@ -12,32 +12,10 @@ import { PdfCustomNotesPage } from './PdfCustomNotesPage';
 import { sortProductsHierarchically } from '@/utils/productSorting';
 import { getPdfColors, getPdfStyles } from './pdfStyles';
 
+import { UnifiedExportData } from '@/utils/proposalExportMapper';
+
 interface ProposalPdfDocumentProps {
-    // Deal data
-    dealTitle: string;
-    companyName: string;
-    products: any[];
-    dealQuotes?: any[];
-    proposalNumber?: string;
-
-    // Editor state
-    activeSections: SectionId[];
-    editableTexts: EditableTexts;
-    config: EditorConfig;
-    aiSummary?: string;
-    objectives?: any[];
-    simplifiedProductNames?: Record<string, string>;
-
-    // AI content
-    softwareHighlights?: Array<{ title: string; value: string }>;
-    benefitTiles?: Array<{ value: string; label: string }>;
-
-    // Billing
-    distributors?: any[];
-
-    // Theme
-    themePrimary?: string;
-    themeAccent?: string;
+    exportData: UnifiedExportData;
 }
 
 function formatCurrency(value: number): string {
@@ -49,117 +27,96 @@ function formatCurrency(value: number): string {
 }
 
 export function ProposalPdfDocument({
-    dealTitle,
-    companyName,
-    products,
-    dealQuotes,
-    proposalNumber,
-    activeSections,
-    editableTexts,
-    config,
-    aiSummary,
-    softwareHighlights,
-    benefitTiles,
-    distributors,
-    themePrimary,
-    themeAccent,
-    objectives,
-    simplifiedProductNames,
+    exportData
 }: ProposalPdfDocumentProps) {
-    const today = new Date().toLocaleDateString('pt-BR', {
-        day: '2-digit', month: 'long', year: 'numeric',
-    });
+    const today = exportData.date;
 
-    const pdfColors = getPdfColors(themePrimary, themeAccent);
+    const pdfColors = getPdfColors(exportData.themePrimary, exportData.themeAccent);
     const pdfStyles = getPdfStyles(pdfColors);
-
-    const sortedProducts = sortProductsHierarchically(products);
 
     const sectionComponents: Record<SectionId, React.ReactNode> = {
         cover: (
             <PdfCoverPage
-                dealTitle={dealTitle}
-                companyName={companyName}
+                dealTitle={exportData.title}
+                companyName={exportData.companyName}
                 date={today}
-                proposalTitle={editableTexts.proposalTitle}
-                proposalNumber={proposalNumber}
-                clientLogo={config.clientLogo}
+                proposalTitle={exportData.title}
+                proposalNumber={exportData.proposalNumber}
+                clientLogo={exportData.clientLogo || undefined}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         confidentiality: (
             <PdfConfidentialityPage
-                confidentialityText={editableTexts.confidentialityText}
+                confidentialityText={exportData.confidentialityText || ''}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         overview: (
             <PdfOverviewPage
-                dealTitle={dealTitle}
-                aiSummary={config.includeAISummary ? aiSummary : undefined}
-                objectives={objectives}
+                dealTitle={exportData.title}
+                aiSummary={exportData.aiSummary}
+                objectives={exportData.objectives}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         hardware: (
             <PdfHardwarePage 
-                products={sortedProducts}
-                simplifiedProductNames={simplifiedProductNames}
+                products={exportData.allProducts}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         software: (
             <PdfSoftwarePage
-                products={sortedProducts}
-                simplifiedProductNames={simplifiedProductNames}
-                softwareHighlights={softwareHighlights}
-                benefitTiles={benefitTiles}
+                products={exportData.allProducts}
+                softwareHighlights={exportData.softwareHighlights}
+                benefitTiles={exportData.benefitTiles}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         investment: (
             <PdfInvestmentPage
-                products={sortedProducts}
-                dealQuotes={dealQuotes}
-                simplifiedProductNames={simplifiedProductNames}
-                showBillingInfo={config.showBillingInfo}
-                isPriceStudy={config.isPriceStudy}
-                priceStudyValidity={editableTexts.priceStudyValidity}
+                exportData={exportData}
                 formatCurrency={formatCurrency}
-                distributors={distributors}
-                billingOverrides={config.billingOverrides || {}}
-                quoteDisplayMode={config.quoteDisplayMode}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         differentials: (
             <PdfDifferentialsPage
-                differentials={editableTexts.differentials}
+                differentials={exportData.differentials || []}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
         custom_notes: (
             <PdfCustomNotesPage
-                title={editableTexts.customNotesTitle}
-                content={editableTexts.customNotesContent}
+                title={exportData.customNotesTitle || 'Notas Adicionais'}
+                content={exportData.customNotesContent || ''}
                 pdfColors={pdfColors}
                 pdfStyles={pdfStyles}
+                layout={exportData.layout}
             />
         ),
     };
 
     return (
         <Document>
-            {activeSections.map(sectionId => (
+            {exportData.activeSections.map(sectionId => (
                 <React.Fragment key={sectionId}>
-                    {sectionComponents[sectionId]}
+                    {sectionComponents[sectionId as SectionId]}
                 </React.Fragment>
             ))}
         </Document>

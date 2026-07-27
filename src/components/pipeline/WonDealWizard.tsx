@@ -36,7 +36,7 @@ import { toast } from 'sonner';
 import { formatCurrency } from '@/utils/format';
 import type { Deal } from '@/types/deal';
 import { convertDealToSalesOrdersAction, downloadDistributorOrderAction } from '@/app/(dashboard)/sales/actions';
-import { updateDealStage, uploadDealDocument, getDealDetails } from '@/app/(dashboard)/pipeline/actions';
+import { updateDealStage, uploadDealDocument, getDealDetails, getDealDocuments } from '@/app/(dashboard)/pipeline/actions';
 import { getOrgSettings as fetchOrgSettings } from '@/app/(dashboard)/settings/actions';
 import { useAuth } from '@/hooks/useAuth';
 import { type OrgSettings } from '@/services/SettingsService';
@@ -49,6 +49,9 @@ interface WonDealWizardProps {
 }
 
 export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizardProps) {
+    const { isManager, isAdmin } = useAuth();
+    const hasBypass = isManager || isAdmin;
+
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -58,6 +61,9 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isDownloading, setIsDownloading] = useState(false);
     const [hasConsolidated, setHasConsolidated] = useState(false);
+
+    const [activeQuote, setActiveQuote] = useState<any | null>(null);
+    const [dealDocs, setDealDocs] = useState<any[]>([]);
 
     // Comprehensive Order State
     const [formData, setFormData] = useState({
@@ -96,6 +102,14 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                     // Fetch most recent deal state with full account info
                     const fullDeal = await getDealDetails(deal.id);
                     if (!fullDeal) return;
+
+                    // Fetch documents for the deal
+                    const docs = await getDealDocuments(deal.id);
+                    setDealDocs(docs || []);
+
+                    const dealQuotes = fullDeal.deal_quotes || [];
+                    const foundActiveQuote = dealQuotes.find((q: any) => q.is_primary) || null;
+                    setActiveQuote(foundActiveQuote);
 
                     const primaryContact = fullDeal.account?.contacts?.find((c: any) => c.is_primary) || fullDeal.account?.contacts?.[0];
                     const address = fullDeal.account ? `${fullDeal.account.street || ''}, ${fullDeal.account.number || ''} ${fullDeal.account.complement || ''}`.trim() : '';
@@ -138,6 +152,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
             });
         }
     }, [isOpen, deal.id]);
+
+    const activeQuoteDocs = activeQuote ? dealDocs.filter(d => d.quote_id === activeQuote.id) : [];
+    const hasProposalDoc = activeQuoteDocs.some(d => d.category === 'proposta');
+    const hasPricesDoc = activeQuoteDocs.some(d => d.category === 'precos_aprovados');
+    const hasRequiredDocs = !activeQuote || (hasProposalDoc && hasPricesDoc);
 
     // Calculate grouped info
     const distributors = Array.from(new Set((deal.deal_products || []).map(p => p.distributor_id))).filter(Boolean);
@@ -262,6 +281,51 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                         <p>Esta é uma venda <strong>direta</strong>. Um pedido de faturamento direto será gerado.</p>
                                     )}
                                 </div>
+                            </section>
+
+                            {/* Documentos Obrigatórios da Cotação */}
+                            <section className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border">
+                                <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
+                                    <Paperclip className="w-4 h-4 text-emerald-500" />
+                                    Documentos Obrigatórios da Cotação Ativa
+                                </h4>
+                                {activeQuote ? (
+                                    <div className="space-y-2">
+                                        <p className="text-xs text-muted-foreground">
+                                            Cotação ativa (Valor no Funil): <strong className="text-foreground">{activeQuote.title}</strong>
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-3 mt-2">
+                                            <div className={`p-3 rounded-lg border flex items-center gap-2 ${
+                                                hasProposalDoc 
+                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
+                                                    : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                            }`}>
+                                                <span className="text-lg">{hasProposalDoc ? '🟢' : '🔴'}</span>
+                                                <span className="text-xs font-bold">Proposta Comercial</span>
+                                            </div>
+                                            <div className={`p-3 rounded-lg border flex items-center gap-2 ${
+                                                hasPricesDoc 
+                                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
+                                                    : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                            }`}>
+                                                <span className="text-lg">{hasPricesDoc ? '🟢' : '🔴'}</span>
+                                                <span className="text-xs font-bold">Preços Aprovados</span>
+                                            </div>
+                                        </div>
+                                        {(!hasProposalDoc || !hasPricesDoc) && (
+                                            <p className="text-[11px] text-destructive mt-1">
+                                                {hasBypass 
+                                                    ? '⚠️ Atenção: Documentos obrigatórios ausentes. Como administrador/gerente, você pode prosseguir (bypass).'
+                                                    : '❌ Bloqueio Comercial: Anexe os documentos na aba "Produtos & Cotações" para prosseguir.'
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-amber-600">
+                                        ⚠️ Nenhuma cotação ativa (primária) definida para esta oportunidade.
+                                    </p>
+                                )}
                             </section>
 
                             <section className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/50 rounded-xl">
@@ -749,7 +813,10 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <Button
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                                         onClick={() => setStep(step + 1)}
-                                        disabled={step === 2 && !uploadedDoc}
+                                        disabled={
+                                            (step === 2 && !uploadedDoc) || 
+                                            (step === 1 && !hasRequiredDocs && !hasBypass)
+                                        }
                                     >
                                         {step === 1 ? 'Próximo: Evidência' : 'Próximo: Dados do Pedido'}
                                         <ArrowRight className="w-4 h-4 ml-2" />
@@ -758,7 +825,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <Button
                                         className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold min-w-[140px]"
                                         onClick={handleConfirm}
-                                        disabled={isLoading || !uploadedDoc}
+                                        disabled={isLoading || !uploadedDoc || (!hasRequiredDocs && !hasBypass)}
                                     >
                                         {isLoading ? (
                                             <>

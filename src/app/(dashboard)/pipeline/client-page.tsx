@@ -2,19 +2,20 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { Plus, Search, Filter, MoreHorizontal, TrendingUp, Loader2, X, AlertCircle, Trash2, CalendarDays } from 'lucide-react';
+import { Plus, Search, TrendingUp, Loader2, X, CalendarDays } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DealCard } from '@/components/pipeline/DealCard';
 import { CommissionWidget } from '@/components/pipeline/CommissionWidget';
 import { calculateDealCommission } from '@/utils/commissionCalculator';
 import { updateDealStage, createDeal } from './actions';
 import { toast } from 'sonner';
-import { ViewDealModal } from '@/components/pipeline/ViewDealModal';
-import { DealFormModal } from '@/components/pipeline/DealFormModal';
+import { ViewDealDrawer } from '@/components/pipeline/ViewDealDrawer';
+import { DealFormDrawer } from '@/components/pipeline/DealFormDrawer';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDeals } from '@/hooks/useDeals';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { HeaderActions } from '@/components/layout/HeaderActions';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DollarSign, Sparkles } from 'lucide-react';
@@ -45,6 +46,17 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
     const [selectedQuarters, setSelectedQuarters] = useState<string[]>([]); // Array of 'YYYY-QX' e.g. ['2026-Q4', '2027-Q1']
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     const [showNewDealModal, setShowNewDealModal] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [activeTab, setActiveTab] = useState('qualification');
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // View Modal State
     const [viewingDeal, setViewingDeal] = useState<Deal | null>(null);
@@ -176,6 +188,16 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
 
         const dealId = draggableId;
         const newStage = destination.droppableId;
+        
+        // Validation: Require value for stages other than qualification and lost
+        const movedDeal = deals.find(d => d.id === dealId);
+        if (newStage !== 'qualification' && newStage !== 'lost') {
+            if (!movedDeal || !movedDeal.value || Number(movedDeal.value) <= 0) {
+                toast.error('Oportunidade precisa ter um valor definido para avançar de estágio.');
+                return;
+            }
+        }
+
         const targetStageConfig = DEFAULT_STAGES.find(s => s.id === newStage);
         const newProbability = targetStageConfig ? targetStageConfig.probability : undefined;
 
@@ -188,9 +210,9 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         try {
             await updateDealStage(dealId, newStage, newProbability);
             toast.success('Oportunidade atualizada!');
-        } catch (error) {
-            console.error(error);
-            toast.error('Erro ao atualizar oportunidade.');
+        } catch (error: any) {
+            console.error("DRAG ERROR:", error);
+            toast.error(`Erro ao atualizar: ${error.message || 'Desconhecido'}`);
             setDeals(initialDeals); // Revert on error
         }
     };
@@ -222,7 +244,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         {
             label: "Total Pipeline",
             value: formatCompact(metrics.totalValue),
-            description: "Valor bruto total",
+            description: `${metrics.count} oportunidades ativas`,
             icon: TrendingUp,
             color: "text-primary",
             gradient: "from-primary/5 to-white dark:from-primary/10",
@@ -258,19 +280,16 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
     ];
 
     return (
-        <div className="min-h-full flex flex-col relative space-y-6 pb-20">
-            {/* Header */}
-            <PageHeader 
-                title="Funil de Vendas" 
-                description="Gestão de Pipeline estratégico e acompanhamento de metas."
-            >
-                <button
+        <div className="space-y-6 w-full h-full flex flex-col">
+            {/* Action Buttons passed up to Global Layout */}
+            <HeaderActions>
+                <Button
                     onClick={() => setShowNewDealModal(true)}
-                    className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold h-[38px] px-5 rounded-xl flex items-center gap-2 transition-all active:scale-95"
+                    className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
                 >
-                    <Plus className="h-4 w-4" /> Nova Oportunidade
-                </button>
-            </PageHeader>
+                    <Plus className="h-5 w-5" /> Nova Oportunidade
+                </Button>
+            </HeaderActions>
 
             <StatsGrid items={stats} />
             
@@ -280,7 +299,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <ThemeInput
                         placeholder="Buscar deals por nome ou empresa..."
                         aria-label="Buscar oportunidades"
-                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
+                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -343,22 +362,45 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                 </div>
             </FilterBar>
 
+            {/* Mobile Column Navigation tabs */}
+            {isMobile && (
+                <div className="flex overflow-x-auto gap-1 bg-muted/20 p-1 rounded-md border border-border">
+                    {DEFAULT_STAGES.map(stage => {
+                        const stageDeals = columns[stage.id] || [];
+                        const isActive = activeTab === stage.id;
+                        return (
+                            <button
+                                key={stage.id}
+                                onClick={() => setActiveTab(stage.id)}
+                                className={`flex-1 px-3 py-2 text-[9px] font-black uppercase tracking-widest transition-all rounded-md whitespace-nowrap ${
+                                    isActive
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                }`}
+                            >
+                                {stage.title} [{stageDeals.length}]
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
             {/* Kanban Board */}
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-x-auto pb-4">
-                    <div className="flex space-x-4 h-full min-w-max">
-                        {DEFAULT_STAGES.map(stage => {
+                    <div className={`flex ${isMobile ? 'justify-center' : 'space-x-4'} h-full min-w-max`}>
+                        {DEFAULT_STAGES.filter(stage => !isMobile || activeTab === stage.id).map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
                                 <div key={stage.id} className="w-72 flex flex-col h-full">
-                                    <div className={`p-4 rounded-t-2xl border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
+                                    <div className={`p-3 rounded-t-[4px] border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
-                                            <div className="flex gap-2 mt-1">
-                                                <span className="text-[10px] bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
-                                                <span className="text-[10px] text-primary font-bold">{formatCompact(totalStageValue)}</span>
+                                            <div className="flex gap-2 items-center mt-1 font-mono">
+                                                <span className="text-[10px] text-muted-foreground font-bold">[{stageDeals.length}]</span>
+                                                <span className="text-[10px] text-foreground font-bold">{formatCompact(totalStageValue)}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -368,7 +410,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-1 rounded-2xl px-2 py-2 space-y-3 transition-colors ${snapshot.isDraggingOver ? 'bg-accent/50' : ''}`}
+                                                className={`flex-1 rounded-md px-2 py-2 space-y-3 transition-colors bg-muted/20 border border-dashed border-border/40 ${snapshot.isDraggingOver ? 'bg-accent/30 border-primary/20' : ''}`}
                                                 style={{ minHeight: '200px' }}
                                             >
                                                 {stageDeals.map((deal, index) => (
@@ -392,13 +434,13 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             </DragDropContext>
 
             {/* New Deal Modal */}
-            <DealFormModal
+            <DealFormDrawer
                 open={showNewDealModal}
                 onOpenChange={setShowNewDealModal}
             />
 
             {viewingDeal && (
-                <ViewDealModal
+                <ViewDealDrawer
                     isOpen={!!viewingDeal}
                     onClose={() => {
                         setViewingDeal(null);

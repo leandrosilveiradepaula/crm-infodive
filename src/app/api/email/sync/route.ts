@@ -17,7 +17,7 @@ async function parseSignatureWithGemini(emailBody: string): Promise<Record<strin
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `Analise o texto fornecido (pode ser uma assinatura simples ou o corpo de um e-mail inteiro).
 Se for um e-mail longo, role até o final/assinatura do remetente e concentre-se *exclusivamente* em extrair os dados profissionais de contato dessa pessoa que enviou o email.

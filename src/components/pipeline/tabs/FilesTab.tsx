@@ -23,6 +23,7 @@ export const FilesTab = ({ deal }: FilesTabProps) => {
             uploadDocument={uploadDealDocument}
             getSignedUrl={getDealDocumentSignedUrl}
             deleteDocument={deleteDealDocument}
+            dealQuotes={deal.deal_quotes}
         />
     );
 };

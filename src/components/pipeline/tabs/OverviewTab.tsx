@@ -18,11 +18,12 @@ import { ptBR } from 'date-fns/locale';
 
 interface OverviewTabProps {
     deal: Deal;
+    formData?: any;
     onViewStakeholders: () => void;
     onViewProducts: () => void;
 }
 
-export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: OverviewTabProps) {
+export function OverviewTab({ deal, formData, onViewStakeholders, onViewProducts }: OverviewTabProps) {
     // Helper for health trend icon
     const getTrendIcon = (trend?: string) => {
         switch (trend) {
@@ -69,6 +70,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
 
     const nextAction = getNextAction();
 
+    const currentValue = formData?.value !== undefined ? formData.value : deal.value;
+    const currentCloseDate = formData?.expected_close_date !== undefined ? formData.expected_close_date : deal.expected_close_date;
+
     return (
         <div className="space-y-8">
 
@@ -84,10 +88,10 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                     </div>
                     <div>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
-                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
+                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(currentValue)}</h4>
                         <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Calendar className="h-3 w-3" />
-                            {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString('pt-BR') : 'Não definido'}
+                            {currentCloseDate ? new Date(currentCloseDate).toLocaleDateString('pt-BR') : 'Não definido'}
                         </p>
                     </div>
                 </div>

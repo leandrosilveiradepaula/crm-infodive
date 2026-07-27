@@ -321,7 +321,11 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `proposta-${response.headers.get('X-Proposal-Number') || 'draft'}.pdf`;
+            const proposalNumber = response.headers.get('X-Proposal-Number') || 'Rascunho';
+            const cleanNumber = proposalNumber.replace(/[^a-zA-Z0-9-]/g, '');
+            const cleanCompany = (deal.company || 'Empresa').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            const cleanTitle = (deal.title || 'Solucao').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            a.download = `Proposta_${cleanNumber}_${cleanCompany} - ${cleanTitle}.pdf`;
             document.body.appendChild(a);
             a.click();
             a.remove();
@@ -360,22 +364,26 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
     // ── DOCX Generation ───────────────────────────────────────────────
     const handleGenerateDocx = useCallback(async () => {
         handleDownloadDocx({
-            id: 'draft',
-            title: state.editableTexts.proposalTitle,
-            company_name: deal.company,
-            createdAt: new Date().toISOString(),
-            products_json: proposalDeal.deal_products || [],
-            deal_quotes: deal.deal_quotes || [],
-            content: {
-                config: state.config,
-                editableTexts: state.editableTexts,
-                aiSummary: state.aiSummary,
-                objectives: state.objectives,
-                simplifiedProductNames: state.simplifiedProductNames,
-                activeSections: activeSections.map(s => s.id),
+            proposal: {
+                id: 'draft',
+                title: state.editableTexts.proposalTitle,
+                company_name: deal.company,
+                createdAt: new Date().toISOString(),
+                products_json: proposalDeal.deal_products || [],
+                deal_quotes: deal.deal_quotes || [],
+                content: {
+                    config: state.config,
+                    editableTexts: state.editableTexts,
+                    aiSummary: state.aiSummary,
+                    objectives: state.objectives,
+                    simplifiedProductNames: state.simplifiedProductNames,
+                    activeSections: activeSections.map(s => s.id),
+                },
             },
+            deal: proposalDeal as any,
+            distributors: distributors as any,
         });
-    }, [proposalDeal, deal.company, deal.deal_quotes, state, activeSections, handleDownloadDocx]);
+    }, [proposalDeal, deal.company, deal.deal_quotes, distributors, state, activeSections, handleDownloadDocx]);
 
     const previewDeal = { ...proposalDeal, title: state.editableTexts.proposalTitle } as Deal;
     const isExporting = state.isGenerating || generatingPpt || generatingDocx;
@@ -576,6 +584,29 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     {/* Config toggles */}
                     <div className="border-t border-border p-3 space-y-2">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Configurações</p>
+                        
+                        <div className="mb-3 border-b border-border pb-3">
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Layout / Orientação</p>
+                            <div className="flex rounded-lg border border-border overflow-hidden">
+                                {([
+                                    { key: 'portrait', label: 'Retrato (A4)' },
+                                    { key: 'landscape', label: 'Paisagem (16:9)' },
+                                ]).map(mode => (
+                                    <button
+                                        key={mode.key}
+                                        onClick={() => updateConfig({ layout: mode.key as 'portrait' | 'landscape' })}
+                                        className={`flex-1 px-2 py-1.5 text-[10px] font-bold transition-all ${
+                                            state.config.layout === mode.key
+                                                ? 'bg-primary text-white'
+                                                : 'bg-muted/20 text-muted-foreground hover:bg-muted/40'
+                                        }`}
+                                    >
+                                        {mode.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {[
                             { key: 'showBillingInfo', label: 'Faturamento' },
                             { key: 'isPriceStudy', label: 'Estudo de Preços' },
@@ -642,9 +673,9 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ duration: 0.2 }}
                                     className="bg-white rounded-lg shadow-xl border border-border overflow-hidden"
-                                    style={{ width: '210mm', transformOrigin: 'top center' }}
+                                    style={{ width: state.config.layout === 'landscape' ? '297mm' : '210mm', transformOrigin: 'top center' }}
                                 >
-                                    <div className="transform scale-[0.55] origin-top-left w-[210mm]" style={{ minHeight: 'calc(297mm * 0.55)' }}>
+                                    <div className={`transform scale-[0.55] origin-top-left ${state.config.layout === 'landscape' ? 'w-[297mm]' : 'w-[210mm]'}`} style={{ minHeight: state.config.layout === 'landscape' ? 'calc(167mm * 0.55)' : 'calc(297mm * 0.55)' }}>
                                         <PagePreview
                                             sectionId={currentSection.id}
                                             deal={previewDeal}
@@ -1044,24 +1075,25 @@ function PagePreview({
     config?: any;
 }) {
     const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const layout = config?.layout || 'portrait';
 
     switch (sectionId) {
         case 'cover':
-            return <ProposalCoverPage dealTitle={deal.title} companyName={deal.company || 'Cliente'} date={today} mainTitle={editableTexts?.proposalTitle} sellerName={deal.owner} />;
+            return <ProposalCoverPage dealTitle={deal.title} companyName={deal.company || 'Cliente'} date={today} mainTitle={editableTexts?.proposalTitle} sellerName={deal.owner} layout={layout} />;
         case 'confidentiality':
-            return <ProposalConfidentialityPage />;
+            return <ProposalConfidentialityPage layout={layout} />;
         case 'overview':
-            return <ProposalOverviewPage dealTitle={deal.title} aiSummary={aiSummary} objectives={objectives} />;
+            return <ProposalOverviewPage dealTitle={deal.title} aiSummary={aiSummary} objectives={objectives} layout={layout} />;
         case 'hardware':
-            return <ProposalHardwarePage deal={deal} simplifiedProductNames={simplifiedProductNames} />;
+            return <ProposalHardwarePage deal={deal} simplifiedProductNames={simplifiedProductNames} layout={layout} />;
         case 'software':
-            return <ProposalSoftwarePage deal={deal} simplifiedProductNames={simplifiedProductNames} />;
+            return <ProposalSoftwarePage deal={deal} simplifiedProductNames={simplifiedProductNames} layout={layout} />;
         case 'investment':
-            return <ProposalInvestmentPage deal={deal} distributors={distributors} billingOverrides={billingOverrides} simplifiedProductNames={simplifiedProductNames} config={config} />;
+            return <ProposalInvestmentPage deal={deal} distributors={distributors} billingOverrides={billingOverrides} simplifiedProductNames={simplifiedProductNames} config={config} layout={layout} />;
         case 'differentials':
-            return <ProposalDifferentialsPage />;
+            return <ProposalDifferentialsPage layout={layout} />;
         case 'custom_notes':
-            return <ProposalCustomNotesPage title={editableTexts?.customNotesTitle} content={editableTexts?.customNotesContent} />;
+            return <ProposalCustomNotesPage title={editableTexts?.customNotesTitle} content={editableTexts?.customNotesContent} layout={layout} />;
         default:
             return null;
     }

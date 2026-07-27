@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    GripVertical, ArrowUp, ArrowDown, ChevronUp, ChevronDown, ChevronRight,
+    GripVertical, ArrowUp, ArrowDown,
     DollarSign, Trash2, Link, Link2Off, Eye, EyeOff
 } from 'lucide-react';
 
@@ -17,8 +17,8 @@ interface ProductRowHeaderProps {
     selectedProducts: Set<string>;
     toggleSelectProduct: (productId: string) => void;
     toggleProductExpansion: (productId: string) => void;
-    expandedProducts: Set<string>;
-    handleUpdateProduct: (prodId: string, field: keyof ProductItem, value: any) => void;
+    drawerProductId?: string | null;
+    handleUpdateProduct: (prodId: string, field: keyof ProductItem, value: unknown) => void;
     handleRemoveProduct: (prodId: string) => void;
     moveProduct: (id: string, direction: 'up' | 'down') => void;
     previousProduct?: ProductItem;
@@ -28,7 +28,9 @@ interface ProductRowHeaderProps {
     // DnD kit props
     setNodeRef: (node: HTMLElement | null) => void;
     style: React.CSSProperties;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     attributes: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     listeners: any;
     isDragging: boolean;
     handleInputKeyDown: (e: React.KeyboardEvent) => void;
@@ -42,7 +44,7 @@ export function ProductRowHeader({
     selectedProducts,
     toggleSelectProduct,
     toggleProductExpansion,
-    expandedProducts,
+    drawerProductId,
     handleUpdateProduct,
     handleRemoveProduct,
     moveProduct,
@@ -66,7 +68,7 @@ export function ProductRowHeader({
 
     return (
         <tr 
-            ref={setNodeRef as any} 
+            ref={setNodeRef} 
             style={style} 
             className={rowClasses}
             onClick={() => toggleProductExpansion(product.id)}
@@ -113,32 +115,21 @@ export function ProductRowHeader({
                 )}
             </td>
             <td className="px-4 py-3">
-                <div className="flex gap-4 items-center">
+                <div className="flex gap-3 items-center">
                     {product.parent_id && (
-                        <div className="w-8 flex items-center justify-center">
+                        <div className="w-6 flex items-center justify-center">
                             <div className="h-8 w-px bg-border/50 relative">
-                                <div className="absolute top-1/2 left-0 w-4 h-px bg-border/50"></div>
+                                <div className="absolute top-1/2 left-0 w-3 h-px bg-border/50"></div>
                             </div>
                         </div>
                     )}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); toggleProductExpansion(product.id); }}
-                        className="p-1.5 rounded-md hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all shrink-0"
-                    >
-                        {expandedProducts.has(product.id) ? (
-                            <ChevronDown className="h-4 w-4 transition-transform" />
-                        ) : (
-                            <ChevronRight className="h-4 w-4 transition-transform" />
-                        )}
-                    </button>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <div className="min-w-0 flex-1">
-                                {/* Show display_name (proposal name) if set, otherwise show IBM name */}
                                 {product.display_name ? (
                                     <div className="min-w-0">
-                                        <p className="font-bold text-foreground text-sm leading-tight uppercase tracking-tight truncate">{product.display_name}</p>
-                                        <p className="text-[10px] text-muted-foreground/50 font-mono truncate leading-tight mt-0.5" title={product.name}>{product.name}</p>
+                                        <p className="font-bold text-foreground text-sm leading-[1.1] uppercase tracking-tight truncate pb-0.5">{product.display_name}</p>
+                                        <p className="text-[10px] text-muted-foreground/60 font-mono truncate leading-tight mt-0.5" title={product.name}>{product.name}</p>
                                     </div>
                                 ) : isEditing && !product.product_id ? (
                                     <Input
@@ -150,7 +141,7 @@ export function ProductRowHeader({
                                         placeholder="Nome do produto..."
                                     />
                                 ) : (
-                                    <p className="font-bold text-foreground text-sm leading-tight uppercase tracking-tight truncate shrink-0">{product.name}</p>
+                                    <p className="font-bold text-foreground text-sm leading-[1.1] uppercase tracking-tight truncate shrink-0">{product.name}</p>
                                 )}
                             </div>
 
@@ -231,11 +222,6 @@ export function ProductRowHeader({
                             <DollarSign className="h-2 w-2" /> USD
                         </Badge>
                     )}
-                    {product.is_optional && (
-                        <Badge variant="secondary" className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 text-[9px] font-bold uppercase border-amber-500/20">
-                            Opcional
-                        </Badge>
-                    )}
                     {product.pricing_model === 'monthly' && (
                         <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 text-[9px] font-black uppercase border-cyan-500/20 tracking-widest">
                             Mensal
@@ -248,7 +234,7 @@ export function ProductRowHeader({
                     )}
                 </div>
             </td>
-            <td className="px-4 py-3 text-center">
+            <td className="px-4 py-3 text-center w-32">
                 {isEditing ? (
                     <div className="flex items-center justify-center">
                         <Input
@@ -268,16 +254,16 @@ export function ProductRowHeader({
                     </div>
                 )}
             </td>
-            <td className="px-4 py-3 text-right">
+            <td className="px-4 py-3 text-right w-40">
                 <div className="h-9 flex items-center justify-end">
                     <p className="text-sm font-bold text-muted-foreground">
                         {formatCurrency(product.unit_price || 0)}
                     </p>
                 </div>
             </td>
-            <td className="px-6 py-3 text-right">
+            <td className="px-6 py-3 text-right w-40">
                 <div className="h-9 flex items-center justify-end">
-                    <p className={`text-sm font-bold ${product.is_optional ? 'text-muted-foreground/50 line-through' : 'text-primary'}`}>
+                    <p className="text-sm font-bold text-primary">
                         {formatCurrency((product.unit_price || 0) * (product.quantity || 0))}
                     </p>
                 </div>

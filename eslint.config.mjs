@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Project ignores
+    "*.js",
+    "*.mjs",
+    "*.ts",
+    "scratch/**",
+    "supabase/**",
+    "test/**",
+    "useProposalDocx.head.ts",
   ]),
 ]);
 

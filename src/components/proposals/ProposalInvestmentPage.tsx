@@ -319,7 +319,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
 
                 {config?.isPriceStudy && (
                     <div style={{ padding: '0 80px', marginTop: '10px' }}>
-                        <PriceStudySection themePrimary={primaryColor} />
+                        <PriceStudySection themePrimary={primaryColor} priceStudyValidity={config?.editableTexts?.priceStudyValidity} />
                     </div>
                 )}
 
@@ -395,7 +395,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
 
                             {config?.isPriceStudy && (
                                 <div style={{ padding: '0 80px', marginTop: '10px' }}>
-                                    <PriceStudySection themePrimary={primaryColor} />
+                                    <PriceStudySection themePrimary={primaryColor} priceStudyValidity={config?.editableTexts?.priceStudyValidity} />
                                 </div>
                             )}
                         </>
@@ -597,8 +597,9 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
 }
 
 // Helper component for Price Study Section
-function PriceStudySection({ themePrimary }: { themePrimary?: string }) {
+function PriceStudySection({ themePrimary, priceStudyValidity }: { themePrimary?: string; priceStudyValidity?: string }) {
     const primaryColor = themePrimary || '#1e3a5f';
+    const validityDate = priceStudyValidity || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
     return (
         <div style={{ marginTop: '20px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: '700', color: primaryColor, marginBottom: '10px', textTransform: 'uppercase' }}>
@@ -614,7 +615,7 @@ function PriceStudySection({ themePrimary }: { themePrimary?: string }) {
                 lineHeight: '1.5'
             }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Validade da Estimativa</div>
-                Este estudo tem validade até o dia <strong>25 de março de 2025</strong>, devido às constantes atualizações de preços por parte dos fabricantes nesse momento do mercado.
+                Este estudo tem validade até o dia <strong>{validityDate}</strong>, devido às constantes atualizações de preços por parte dos fabricantes nesse momento do mercado.
             </div>
         </div>
     );

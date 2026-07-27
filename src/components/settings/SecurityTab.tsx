@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Shield, Key, Smartphone, Lock, Eye, EyeOff, LogOut, Check } from 'lucide-react';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
+import { Switch } from '@/components/ui/switch';
 export const SecurityTab = () => {
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -28,15 +29,11 @@ export const SecurityTab = () => {
                             </p>
                         </div>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={is2FAEnabled}
-                            onChange={() => setIs2FAEnabled(!is2FAEnabled)}
-                        />
-                        <div className="w-14 h-7 bg-muted/50 border border-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-muted-foreground after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary peer-checked:after:bg-card peer-checked:after:border-white shadow-inner"></div>
-                    </label>
+                    <Switch
+                        checked={is2FAEnabled}
+                        onCheckedChange={setIs2FAEnabled}
+                        className="scale-[0.65]"
+                    />
                 </div>
                 {is2FAEnabled && (
                     <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2">

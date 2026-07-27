@@ -85,7 +85,10 @@ export function useProposalPdf() {
             if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processPage(investmentRef, 'investment');
             if (isSectionActive('custom_notes') && customNotesRef.current) await processPage(customNotesRef, 'custom_notes');
 
-            const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+            const cleanNumber = (proposal.number || 'Rascunho').replace(/[^a-zA-Z0-9-]/g, '');
+            const cleanCompany = (proposal.company_name || 'Empresa').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            const cleanTitle = (proposal.title || 'Solucao').replace(/[^a-zA-Z0-9- ]/g, '').trim();
+            const filename = `Proposta_${cleanNumber}_${cleanCompany} - ${cleanTitle}.pdf`;
             pdf.save(filename);
             toast.success('PDF gerado com sucesso!', { id: toastId });
         } catch (error) {

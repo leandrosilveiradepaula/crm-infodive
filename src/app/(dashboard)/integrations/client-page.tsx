@@ -7,7 +7,7 @@ import { IntegrationWebhooks } from '@/components/integrations/IntegrationWebhoo
 import { type Integration, type ApiKey, type Webhook } from '@/types/integration';
 import { toggleIntegrationStatus } from '@/app/(dashboard)/integrations/actions';
 import { useRouter } from 'next/navigation';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 interface IntegrationsClientPageProps {
     initialIntegrations: Integration[];
@@ -67,10 +67,7 @@ export default function IntegrationsClientPage({
 
     return (
         <div className="space-y-6 pb-10 animate-in fade-in duration-700">
-            <PageHeader
-                title="Integrações & API"
-                description="Potencialize seu CRM com ferramentas externas e acesso programático avançado."
-            />
+            
 
             <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full">
                 <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">

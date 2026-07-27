@@ -70,7 +70,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
     };
 
     return (
-        <div className="flex flex-col h-full bg-background rounded-[40px] overflow-hidden border border-border shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="flex flex-col h-full bg-background rounded-md overflow-hidden border border-border shadow-2xl animate-in zoom-in-95 duration-300">
             {/* Header */}
             <div className="bg-background border-b border-border p-8 flex items-center justify-between relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
@@ -93,7 +93,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-12 bg-muted/20 custom-scrollbar">
-                <div className="max-w-4xl mx-auto bg-card shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-border min-h-[1000px] p-20 relative rounded-[4px] animate-in slide-in-from-bottom-8 duration-700">
+                <div className="max-w-4xl mx-auto bg-card shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-border min-h-[1000px] p-20 relative rounded-md animate-in slide-in-from-bottom-8 duration-700">
                     {/* Visual Header of the Doc */}
                     <div className="mb-20 text-center border-b border-border pb-12">
                         <div className="flex justify-center mb-6">

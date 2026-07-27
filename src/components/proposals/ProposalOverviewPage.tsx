@@ -90,7 +90,7 @@ export function ProposalOverviewPage({
                         padding: '20px 25px',
                         borderRadius: '12px',
                         border: '1px solid #e5e7eb',
-                        flex: objectives.length > 0 ? '0 1 auto' : '1'
+                        flex: '0 0 auto'
                     }}>
                         <div style={{
                             color: '#1e3a5f',

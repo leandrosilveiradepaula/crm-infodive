@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Lead } from '@/types/lead';
 import { LeadCard } from '@/components/leads/LeadCard';
 import { LeadsTable } from '@/components/leads/LeadsTable';
-import { LeadFormModal } from '@/components/leads/LeadFormModal';
+import { LeadFormDrawer } from '@/components/leads/LeadFormDrawer';
 import { LeadConversionModal } from '@/components/leads/LeadConversionModal';
 import { LeadEnrichmentModal } from '@/components/leads/LeadEnrichmentModal';
 import { deleteLead } from '@/app/(dashboard)/leads/actions';
@@ -12,7 +12,7 @@ import { Plus, Search, Users, Target, TrendingUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeInput, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { PageHeaderActions } from "@/components/layout/PageHeaderActions";
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
@@ -148,15 +148,12 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
 
     return (
         <div className="flex-1 space-y-8 pb-10">
-            <PageHeader 
-                title="Gestão de Leads" 
-                description="Capture, qualifique e converta interessados em clientes."
-            >
+            <PageHeaderActions>
                 <Button onClick={() => setIsFormOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2">
                     <Plus className="h-5 w-5" />
                     Novo Lead
                 </Button>
-            </PageHeader>
+            </PageHeaderActions>
             
             <StatsGrid items={stats} />
 
@@ -221,7 +218,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                 />
             )}
 
-            <LeadFormModal
+            <LeadFormDrawer
                 isOpen={isFormOpen}
                 onClose={handleCloseForm}
                 lead={selectedLead}

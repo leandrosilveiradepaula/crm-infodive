@@ -46,7 +46,7 @@ Formato de resposta esperado (JSON puro, sem markdown):
 `;
 
         const result = await client.models.generateContent({
-            model: 'gemini-2.0-flash',
+            model: 'gemini-2.5-flash',
             contents: [{
                 role: "user",
                 parts: [{ text: prompt }]
