@@ -4,6 +4,13 @@ import { NextResponse } from 'next/server';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
+type GeminiPromptPart = string | {
+    inlineData: {
+        data: string;
+        mimeType: string;
+    };
+};
+
 export async function POST(req: Request) {
     try {
         await requireSessionContext();
@@ -20,7 +27,7 @@ export async function POST(req: Request) {
 
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-        const promptParts: any[] = [];
+        const promptParts: GeminiPromptPart[] = [];
 
         if (image) {
             // Image is expected to be a base64 string (data:image/png;base64,...)
@@ -85,21 +92,32 @@ export async function POST(req: Request) {
         try {
             const data = JSON.parse(jsonString);
             return NextResponse.json({ data });
-        } catch (e) {
-            console.error('Erro ao fazer parse do JSON:', text);
+        } catch {
+            console.error('Gemini signature response parse failed', {
+                operation: 'gemini.signature.parse',
+                provider: 'gemini',
+                status: 'parse_failed',
+                errorCode: 'gemini_response_parse_failed',
+            });
             return NextResponse.json({ error: 'Falha ao processar resposta da IA' }, { status: 500 });
         }
 
-    } catch (error: any) {
-        console.error('Error parsing signature:', error);
+    } catch (error: unknown) {
+        const signatureError = error as { code?: string; name?: string; message?: string; status?: number };
+        console.error('Gemini signature parse failed', {
+            operation: 'gemini.signature.parse',
+            provider: 'gemini',
+            status: 'failed',
+            errorCode: signatureError.code || signatureError.name || 'gemini_signature_parse_failed',
+        });
         
-        if (error.status === 429 || error.message?.includes('429 Too Many Requests') || error.message?.includes('Resource exhausted')) {
+        if (signatureError.status === 429 || signatureError.message?.includes('429 Too Many Requests') || signatureError.message?.includes('Resource exhausted')) {
             return NextResponse.json(
                 { error: 'A inteligência artificial está sobrecarregada no momento (limite excedido). Por favor, aguarde alguns instantes e tente novamente.' }, 
                 { status: 429 }
             );
         }
         
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: signatureError.message || 'Internal Server Error' }, { status: 500 });
     }
 }

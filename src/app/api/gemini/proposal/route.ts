@@ -3,6 +3,13 @@ import { NextResponse } from 'next/server';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
+type ProposalProduct = {
+    name: string;
+    quantity: number;
+    is_optional?: boolean;
+    description?: string;
+};
+
 export async function POST(request: Request) {
     try {
         await requireSessionContext();
@@ -23,7 +30,7 @@ export async function POST(request: Request) {
         };
 
         // Parse and enrich product list including bundle details and optional flag
-        const enrichedProductList = products.map((p: any) => {
+        const enrichedProductList = products.map((p: ProposalProduct) => {
             const productInfo = `📦 **${p.name}** (Qtd: ${p.quantity})${p.is_optional ? ' [ITEM OPCIONAL / ALTERNATIVA]' : ''}`;
 
             // Try to parse description
@@ -131,8 +138,13 @@ IMPORTANTE:
         let parsedContent;
         try {
             parsedContent = JSON.parse(contentText);
-        } catch (parseError) {
-            console.error('Erro de parse nativo. Tentando sanitizar o JSON bruto...', contentText);
+        } catch {
+            console.error('Gemini proposal response parse failed', {
+                operation: 'gemini.proposal.generate',
+                provider: 'gemini',
+                status: 'parse_failed',
+                errorCode: 'gemini_response_parse_failed',
+            });
             // Replace raw newlines and tabs which cause 'Bad control character'
             const sanitizedText = contentText
                 .replace(/[\n\r]/g, ' ')
@@ -150,8 +162,14 @@ IMPORTANTE:
             simplifiedProductNames: parsedContent.simplifiedProductNames || {}
         });
 
-    } catch (error: any) {
-        console.error('❌ Erro ao gerar resumo:', error);
-        return NextResponse.json({ error: error.message || 'Erro ao gerar resumo da proposta' }, { status: 500 });
+    } catch (error: unknown) {
+        const proposalError = error as { code?: string; name?: string; message?: string };
+        console.error('Gemini proposal generation failed', {
+            operation: 'gemini.proposal.generate',
+            provider: 'gemini',
+            status: 'failed',
+            errorCode: proposalError.code || proposalError.name || 'gemini_proposal_generation_failed',
+        });
+        return NextResponse.json({ error: proposalError.message || 'Erro ao gerar resumo da proposta' }, { status: 500 });
     }
 }

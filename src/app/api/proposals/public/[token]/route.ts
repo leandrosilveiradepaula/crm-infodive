@@ -21,7 +21,12 @@ export async function GET(
             .rpc('get_proposal_by_public_token', { token_input: token });
 
         if (error) {
-            console.error('Error fetching proposal:', error);
+            console.error('Public proposal fetch failed', {
+                operation: 'proposal.public.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: error.code || 'proposal_public_fetch_failed',
+            });
             return NextResponse.json(
                 { error: 'Erro ao buscar proposta' },
                 { status: 500 }
@@ -34,8 +39,6 @@ export async function GET(
                 { status: 404 }
             );
         }
-
-        console.log('📦 [API] Raw Proposal Data:', JSON.stringify(data, null, 2));
 
         // Map snake_case to camelCase for frontend
         const mappedData = {
@@ -54,8 +57,14 @@ export async function GET(
         };
 
         return NextResponse.json(mappedData);
-    } catch (error: any) {
-        console.error('Unexpected error:', error);
+    } catch (error: unknown) {
+        const proposalError = error as { code?: string; name?: string };
+        console.error('Public proposal fetch failed', {
+            operation: 'proposal.public.fetch',
+            provider: 'supabase',
+            status: 'failed',
+            errorCode: proposalError.code || proposalError.name || 'proposal_public_unexpected_error',
+        });
         return NextResponse.json(
             { error: 'Erro interno do servidor' },
             { status: 500 }

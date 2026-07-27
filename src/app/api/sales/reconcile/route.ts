@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireSessionContext } from '@/lib/auth-server';
 
+type InstallmentSalesOrder = {
+    deal?: {
+        title?: string;
+        customer?: {
+            name?: string;
+        };
+    };
+};
+
 export async function POST(req: NextRequest) {
     try {
         const { organizationId } = await requireSessionContext();
@@ -51,13 +60,17 @@ export async function POST(req: NextRequest) {
             """
 
             PARCELAS PENDENTES NO CRM:
-            ${JSON.stringify(installments.map(i => ({
-                id: i.id,
-                amount: i.amount,
-                due_date: i.due_date,
-                customer: (i.sales_order as any)?.deal?.customer?.name,
-                deal_title: (i.sales_order as any)?.deal?.title
-            })))}
+            ${JSON.stringify(installments.map(i => {
+                const salesOrder = i.sales_order as InstallmentSalesOrder | null;
+
+                return {
+                    id: i.id,
+                    amount: i.amount,
+                    due_date: i.due_date,
+                    customer: salesOrder?.deal?.customer?.name,
+                    deal_title: salesOrder?.deal?.title
+                };
+            }))}
 
             REGRAS:
             1. Identifique correspondências entre as entradas do extrato e as parcelas.
@@ -96,18 +109,30 @@ export async function POST(req: NextRequest) {
         // Robust JSON parsing
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            console.error('Failed to find JSON in Gemini response:', aiText);
+            console.error('Gemini reconciliation response parse failed', {
+                operation: 'sales.reconcile',
+                provider: 'gemini',
+                status: 'parse_failed',
+                errorCode: 'gemini_response_parse_failed',
+                organizationId,
+            });
             throw new Error('Could not parse AI response as JSON');
         }
 
         const result = JSON.parse(jsonMatch[0]);
         return NextResponse.json({ success: true, data: result });
 
-    } catch (error: any) {
-        console.error('AI Reconcile Error:', error);
+    } catch (error: unknown) {
+        const reconcileError = error as { code?: string; name?: string; message?: string };
+        console.error('Sales reconciliation failed', {
+            operation: 'sales.reconcile',
+            provider: 'gemini',
+            status: 'failed',
+            errorCode: reconcileError.code || reconcileError.name || 'sales_reconcile_failed',
+        });
         return NextResponse.json({ 
             success: false, 
-            error: error.message 
+            error: reconcileError.message
         }, { status: 500 });
     }
 }

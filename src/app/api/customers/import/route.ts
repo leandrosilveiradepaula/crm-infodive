@@ -98,13 +98,25 @@ export async function POST(req: Request) {
         try {
             const data = JSON.parse(responseText);
             return NextResponse.json(data);
-        } catch (e) {
-            console.error('Erro ao fazer parse do JSON da IA:', responseText);
+        } catch {
+            console.error('Gemini customer import response parse failed', {
+                operation: 'customers.import',
+                provider: 'gemini',
+                status: 'parse_failed',
+                errorCode: 'gemini_response_parse_failed',
+                organizationId,
+            });
             return NextResponse.json({ error: 'Falha ao processar os dados com IA' }, { status: 500 });
         }
 
-    } catch (error: any) {
-        console.error('Error importing customers:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    } catch (error: unknown) {
+        const importError = error as { code?: string; name?: string; message?: string };
+        console.error('Customer import failed', {
+            operation: 'customers.import',
+            provider: 'gemini',
+            status: 'failed',
+            errorCode: importError.code || importError.name || 'customers_import_failed',
+        });
+        return NextResponse.json({ error: importError.message || 'Internal Server Error' }, { status: 500 });
     }
 }
