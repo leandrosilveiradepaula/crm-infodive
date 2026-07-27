@@ -52,7 +52,14 @@ export class DealService {
         const { data: deals, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Error pipeline data fetch: ', JSON.stringify(error, null, 2));
+            console.error('Pipeline data fetch failed', {
+                operation: 'deal.pipeline.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: error.code || 'deal_pipeline_fetch_failed',
+                organizationId,
+                userId,
+            });
             return { deals: [], profile: null, distributors: [], allAccounts: [] };
         }
 
@@ -88,7 +95,16 @@ export class DealService {
             .eq('relationship_type', 'Distribuidor')
             .order('name');
 
-        if (distError) console.error('❌ Error fetching distributors:', distError);
+        if (distError) {
+            console.error('Pipeline distributors fetch failed', {
+                operation: 'deal.pipeline.distributors.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: distError.code || 'deal_pipeline_distributors_fetch_failed',
+                organizationId,
+                userId,
+            });
+        }
 
         // 5. Fetch all accounts (for Manufacturer mapping)
         const { data: allAccounts } = await supabase
@@ -128,7 +144,15 @@ export class DealService {
         const { data: deal, error } = await query.single();
 
         if (error) {
-            console.error('❌ Error fetching deal details:', error);
+            console.error('Deal details fetch failed', {
+                operation: 'deal.details.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: error.code || 'deal_details_fetch_failed',
+                organizationId,
+                userId,
+                entityId: dealId,
+            });
             return null;
         }
 
@@ -356,7 +380,16 @@ export class DealService {
                     throw insertProductsError;
                 }
             } catch (err: any) {
-                console.error('Failed to duplicate deal products. Rolling back deal creation:', err);
+                const duplicateProductsError = err as { code?: string; name?: string };
+                console.error('Deal duplicate products failed', {
+                    operation: 'deal.duplicate.products',
+                    provider: 'supabase',
+                    status: 'failed',
+                    errorCode: duplicateProductsError.code || duplicateProductsError.name || 'deal_duplicate_products_failed',
+                    organizationId,
+                    userId,
+                    entityId: dealId,
+                });
                 // Rollback: delete the newly created deal to maintain transaction integrity
                 await supabase.from('deals').delete().eq('id', newDeal.id).eq('organization_id', organizationId);
                 throw new Error(`Failed to duplicate deal products: ${err.message || err}`);
@@ -519,7 +552,15 @@ export class DealService {
             .single();
 
         if (dealError || !deal) {
-            console.error('Deal room access denied: deal not found or not in org', dealError);
+            console.error('Deal room deal fetch failed', {
+                operation: 'deal.room.deal.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: dealError?.code || 'deal_room_deal_fetch_failed',
+                organizationId,
+                userId,
+                entityId: dealId,
+            });
             return { error: 'Acesso negado ou oportunidade não encontrada' };
         }
 
@@ -531,7 +572,15 @@ export class DealService {
             .maybeSingle();
 
         if (fetchError) {
-            console.error('Error fetching existing deal room:', fetchError);
+            console.error('Deal room fetch failed', {
+                operation: 'deal.room.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: fetchError.code || 'deal_room_fetch_failed',
+                organizationId,
+                userId,
+                entityId: dealId,
+            });
             return { error: `Erro ao buscar sala: ${fetchError.message}` };
         }
 
@@ -545,7 +594,15 @@ export class DealService {
             .single();
 
         if (insertError) {
-            console.error('Error creating deal room:', insertError);
+            console.error('Deal room create failed', {
+                operation: 'deal.room.create',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: insertError.code || 'deal_room_create_failed',
+                organizationId,
+                userId,
+                entityId: dealId,
+            });
             return { error: `Erro ao criar sala: ${insertError.message}` };
         }
 
@@ -747,7 +804,16 @@ export class DealService {
                 }
             }
         } catch (err: any) {
-            console.error('Failed to duplicate deal quote products. Rolling back quote creation:', err);
+            const duplicateQuoteError = err as { code?: string; name?: string };
+            console.error('Deal quote duplicate failed', {
+                operation: 'deal.quote.duplicate',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: duplicateQuoteError.code || duplicateQuoteError.name || 'deal_quote_duplicate_failed',
+                organizationId,
+                userId,
+                entityId: quoteId,
+            });
             // Rollback: delete the newly created quote
             await supabase.from('deal_quotes').delete().eq('id', newQuote.id).eq('organization_id', organizationId);
             throw new Error(`Failed to duplicate quote products: ${err.message || err}`);

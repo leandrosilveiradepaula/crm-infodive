@@ -56,7 +56,14 @@ export async function fetchDistributorsForEditor() {
         .order('name');
 
     if (error) {
-        console.error('Error fetching distributors:', JSON.stringify(error, null, 2));
+        console.error('Proposal editor distributors fetch failed', {
+            operation: 'proposal.editor.distributors.fetch',
+            provider: 'supabase',
+            status: 'failed',
+            errorCode: error.code || 'proposal_editor_distributors_fetch_failed',
+            organizationId,
+            userId,
+        });
         return [];
     }
 
