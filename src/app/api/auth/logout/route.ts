@@ -9,6 +9,8 @@ export async function POST() {
 
         const cookieStore = await cookies();
         cookieStore.delete('crm_access_token');
+        cookieStore.delete('crm_provider_token');
+        cookieStore.delete('crm_refresh_token');
 
         return NextResponse.json({ success: true });
     } catch (error) {
