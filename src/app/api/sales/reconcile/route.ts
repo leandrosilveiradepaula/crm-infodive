@@ -97,8 +97,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (!aiRes.ok) {
-            const errText = await aiRes.text();
-            throw new Error(`Gemini API Error: ${aiRes.status} ${errText}`);
+            throw new Error('Gemini API Error');
         }
 
         const aiData = await aiRes.json();
@@ -132,7 +131,7 @@ export async function POST(req: NextRequest) {
         });
         return NextResponse.json({ 
             success: false, 
-            error: reconcileError.message
+            error: 'Erro ao reconciliar vendas'
         }, { status: 500 });
     }
 }

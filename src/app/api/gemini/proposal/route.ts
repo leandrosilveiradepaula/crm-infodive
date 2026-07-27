@@ -118,8 +118,7 @@ IMPORTANTE:
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Erro na API do Gemini: ${response.status} ${response.statusText}`);
+            throw new Error('Erro ao gerar resumo da proposta');
         }
 
         const data = await response.json();
@@ -170,6 +169,6 @@ IMPORTANTE:
             status: 'failed',
             errorCode: proposalError.code || proposalError.name || 'gemini_proposal_generation_failed',
         });
-        return NextResponse.json({ error: proposalError.message || 'Erro ao gerar resumo da proposta' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao gerar resumo da proposta' }, { status: 500 });
     }
 }

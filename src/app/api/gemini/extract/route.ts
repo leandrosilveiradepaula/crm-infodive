@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         const { imageData, mimeType } = payload;
 
         if (!imageData || !mimeType) {
-            return NextResponse.json({ error: `Os campos 'imageData' e 'mimeType' são obrigatórios. (Recebido: mimeType=${mimeType}, imageData length=${imageData?.length || 0})` }, { status: 400 });
+            return NextResponse.json({ error: "Os campos 'imageData' e 'mimeType' são obrigatórios." }, { status: 400 });
         }
 
         console.log('Gemini extraction started', {
@@ -150,6 +150,6 @@ REGRAS IMPORTANTES:
             status: 'failed',
             errorCode: extractError.code || extractError.name || 'gemini_extract_failed',
         });
-        return NextResponse.json({ error: extractError.message || 'Erro ao processar imagem' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao processar imagem' }, { status: 500 });
     }
 }

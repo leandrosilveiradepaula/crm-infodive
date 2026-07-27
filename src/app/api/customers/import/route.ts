@@ -117,6 +117,6 @@ export async function POST(req: Request) {
             status: 'failed',
             errorCode: importError.code || importError.name || 'customers_import_failed',
         });
-        return NextResponse.json({ error: importError.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao importar clientes' }, { status: 500 });
     }
 }

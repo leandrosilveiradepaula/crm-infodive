@@ -114,6 +114,6 @@ export async function POST(req: Request) {
             );
         }
         
-        return NextResponse.json({ error: companyError.message || 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Erro ao processar dados da empresa' }, { status: 500 });
     }
 }
