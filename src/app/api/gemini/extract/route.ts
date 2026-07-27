@@ -12,6 +12,12 @@ const VISION_MODELS = [
     'gemini-pro-latest',
 ];
 
+type ExtractedProduct = {
+    name?: string;
+    sku?: string;
+    quantity?: number;
+};
+
 export async function POST(request: Request) {
     // 1. Auth Guard (iron-session)
     try {
@@ -29,15 +35,15 @@ export async function POST(request: Request) {
         const payload = await request.json();
         const { imageData, mimeType } = payload;
 
-        console.log(`📦 Payload recebido: chaves = ${Object.keys(payload).join(', ')}`);
-        console.log(`- mimeType: ${mimeType}`);
-        console.log(`- imageData size: ${(imageData?.length || 0)} bytes`);
-
         if (!imageData || !mimeType) {
             return NextResponse.json({ error: `Os campos 'imageData' e 'mimeType' são obrigatórios. (Recebido: mimeType=${mimeType}, imageData length=${imageData?.length || 0})` }, { status: 400 });
         }
 
-        console.log(`📸 Processando arquivo (${mimeType})...`);
+        console.log('Gemini extraction started', {
+            operation: 'gemini.extract',
+            provider: 'gemini',
+            status: 'started',
+        });
 
         const prompt = `Analise este arquivo (imagem ou PDF de planilha/lista de produtos).
 Extraia os dados dos produtos em formato JSON.
@@ -56,12 +62,17 @@ REGRAS IMPORTANTES:
 3. Se não houver cabeçalhos claros, infira pelo conteúdo. 
 4. Apenas devolva o JSON, sem markdown.`;
 
-        let lastError: any;
+        let lastError: unknown;
 
         // Try models sequentially
         for (const modelName of VISION_MODELS) {
             try {
-                console.log(`🤖 Tentando modelo: ${modelName}...`);
+                console.log('Gemini extraction model attempt started', {
+                    operation: 'gemini.extract',
+                    provider: 'gemini',
+                    status: 'started',
+                    model: modelName,
+                });
 
                 const result = await client.models.generateContent({
                     model: modelName,
@@ -77,10 +88,15 @@ REGRAS IMPORTANTES:
                 const text = result.text;
                 if (!text) throw new Error('Resposta vazia do modelo');
 
-                console.log(`✅ Sucesso com modelo: ${modelName}`);
+                console.log('Gemini extraction model succeeded', {
+                    operation: 'gemini.extract',
+                    provider: 'gemini',
+                    status: 'succeeded',
+                    model: modelName,
+                });
 
                 // Match JSON array
-                let parsedData;
+                let parsedData: ExtractedProduct[];
                 const jsonMatch = text.match(/\[[\s\S]*\]/);
                 if (jsonMatch) {
                     parsedData = JSON.parse(jsonMatch[0]);
@@ -97,7 +113,7 @@ REGRAS IMPORTANTES:
                     /total venda/i
                 ];
 
-                parsedData = parsedData.filter((item: any) => {
+                parsedData = parsedData.filter((item: ExtractedProduct) => {
                     const name = item.name || '';
                     if (BLACKLIST_PATTERNS.some(pattern => pattern.test(name))) {
                         return false;
@@ -111,16 +127,29 @@ REGRAS IMPORTANTES:
 
                 return NextResponse.json({ products: parsedData });
 
-            } catch (error: any) {
-                console.warn(`❌ Falha com modelo ${modelName}:`, error.message);
+            } catch (error: unknown) {
+                const modelError = error as { code?: string; name?: string };
+                console.warn('Gemini extraction model failed', {
+                    operation: 'gemini.extract',
+                    provider: 'gemini',
+                    status: 'failed',
+                    model: modelName,
+                    errorCode: modelError.code || modelError.name || 'gemini_extract_model_failed',
+                });
                 lastError = error;
             }
         }
 
         throw lastError || new Error('Todos os modelos falharam');
 
-    } catch (error: any) {
-        console.error("💥 Erro na extração:", error);
-        return NextResponse.json({ error: error.message || 'Erro ao processar imagem' }, { status: 500 });
+    } catch (error: unknown) {
+        const extractError = error as { code?: string; name?: string; message?: string };
+        console.error('Gemini extraction failed', {
+            operation: 'gemini.extract',
+            provider: 'gemini',
+            status: 'failed',
+            errorCode: extractError.code || extractError.name || 'gemini_extract_failed',
+        });
+        return NextResponse.json({ error: extractError.message || 'Erro ao processar imagem' }, { status: 500 });
     }
 }
