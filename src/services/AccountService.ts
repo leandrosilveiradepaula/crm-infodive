@@ -145,7 +145,7 @@ export class AccountService {
             return { success: true, data: accData };
         } catch (error: any) {
             console.error('Error creating account:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível salvar a conta.' };
         }
     }
 
@@ -162,7 +162,7 @@ export class AccountService {
                 .single();
 
             if (fetchError) {
-                return { success: false, error: `Falha ao buscar conta original: ${fetchError.message}` };
+                return { success: false, error: 'Não foi possível atualizar a conta.' };
             }
 
             const originalData = {
@@ -317,7 +317,7 @@ export class AccountService {
             return { success: true };
         } catch (error: any) {
             console.error('Error updating account:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível atualizar a conta.' };
         }
     }
 
@@ -333,7 +333,7 @@ export class AccountService {
             return { success: true };
         } catch (error: any) {
             console.error('Error deleting account:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível excluir a conta.' };
         }
     }
 
