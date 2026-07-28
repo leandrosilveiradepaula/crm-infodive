@@ -400,9 +400,9 @@ export class AccountService {
                         }
                     }
                 }
-            } catch (err: any) {
+            } catch {
                 results.failed++;
-                results.errors.push(`Erro ao importar ${account.name}: ${err.message}`);
+                results.errors.push(`Erro ao importar ${account.name || 'conta'}: Não foi possível importar esta conta.`);
             }
         }
 
