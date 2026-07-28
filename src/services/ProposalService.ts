@@ -53,7 +53,7 @@ export class ProposalService {
             .select()
             .single();
 
-        if (error) throw new Error(`Database error: ${error.message}`);
+        if (error) throw new Error('Não foi possível atualizar a proposta.');
 
         return {
             ...data,
@@ -73,7 +73,7 @@ export class ProposalService {
             .eq('id', id)
             .eq('organization_id', organizationId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível excluir a proposta.');
         return true;
     }
 
@@ -137,10 +137,7 @@ export class ProposalService {
 
         if (error) {
             console.error('Error creating proposal:', error);
-            if (error.message.includes('column')) {
-                throw new Error(`Erro de esquema no Banco de Dados: ${error.message}. Por favor, contate o suporte.`);
-            }
-            throw new Error(error.message);
+            throw new Error('Não foi possível criar a proposta.');
         }
 
         return {
