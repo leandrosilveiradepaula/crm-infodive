@@ -82,14 +82,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (!response.ok) {
-            const errorText = await response.text();
             console.error('Microsoft Graph send failed', {
                 operation: 'email.send',
                 provider: 'microsoft_graph',
                 status: response.status,
                 errorCode: 'graph_send_failed',
             });
-            throw new Error(`Graph API returned ${response.status}: ${errorText}`);
+            throw new Error('Microsoft Graph email send failed');
         }
 
         const finalResponse = NextResponse.json({ success: true });
@@ -124,6 +123,6 @@ export async function POST(request: NextRequest) {
             status: 'failed',
             errorCode: sendError?.code || sendError?.name || 'email_send_failed',
         });
-        return NextResponse.json({ error: sendError.message }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível enviar o email.' }, { status: 500 });
     }
 }

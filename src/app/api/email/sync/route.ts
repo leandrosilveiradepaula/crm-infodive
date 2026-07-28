@@ -158,19 +158,18 @@ export async function GET(request: NextRequest) {
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
-                return NextResponse.json({ error: 'Microsoft API token expired and no refresh token available.' }, { status: 401 });
+                return NextResponse.json({ error: 'Sessão da Microsoft expirada. Conecte sua conta novamente.' }, { status: 401 });
             }
         }
 
         if (!response.ok) {
-            const errorText = await response.text();
             console.error('Microsoft Graph sync failed', {
                 operation: 'email.sync.fetch',
                 provider: 'microsoft_graph',
                 status: response.status,
                 errorCode: 'graph_fetch_failed',
             });
-            throw new Error(`Graph API returned ${response.status}: ${errorText}`);
+            throw new Error('Microsoft Graph sync failed');
         }
 
         const data = await response.json();
@@ -361,6 +360,6 @@ export async function GET(request: NextRequest) {
             status: 'failed',
             errorCode: syncError?.code || syncError?.name || 'email_sync_failed',
         });
-        return NextResponse.json({ error: syncError.message }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível sincronizar os emails.' }, { status: 500 });
     }
 }

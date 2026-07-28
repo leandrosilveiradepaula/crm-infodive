@@ -14,7 +14,7 @@ export async function refreshMicrosoftToken(refreshToken: string) {
             status: 'configuration_error',
             errorCode: 'missing_azure_credentials',
         });
-        throw new Error('Server misconfiguration: Missing Azure credentials.');
+        throw new Error('Microsoft token refresh configuration missing');
     }
 
     const params = new URLSearchParams({
@@ -41,7 +41,7 @@ export async function refreshMicrosoftToken(refreshToken: string) {
             status: response.status,
             errorCode: errorData?.error || 'oauth_refresh_failed',
         });
-        throw new Error(`Failed to refresh Microsoft token: ${errorData.error_description || errorData.error}`);
+        throw new Error('Microsoft token refresh failed');
     }
 
     const data = await response.json();
