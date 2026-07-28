@@ -11,7 +11,7 @@ export class ContactService {
             .eq('organization_id', organizationId)
             .order('name', { ascending: true });
 
-        if (error) return { contacts: [], error: error.message };
+        if (error) return { contacts: [], error: 'Não foi possível carregar os contatos.' };
         return { contacts: data as Contact[], error: null };
     }
 
@@ -73,10 +73,10 @@ export class ContactService {
                 if (existingContacts && existingContacts.length > 0) {
                     const match = existingContacts[0];
                     if (match.email === contactData.email) {
-                        return { success: false, error: `Já existe um contato com o email ${contactData.email}` };
+                        return { success: false, error: 'Já existe um contato com estes dados.' };
                     }
                     if (match.mobile_phone === contactData.mobile_phone) {
-                        return { success: false, error: `Já existe um contato com o celular ${contactData.mobile_phone}` };
+                        return { success: false, error: 'Já existe um contato com estes dados.' };
                     }
                     return { success: false, error: 'Contato duplicado encontrado.' };
                 }
@@ -97,7 +97,7 @@ export class ContactService {
             .select()
             .single();
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível salvar o contato.' };
         return { success: true, data };
     }
 
@@ -116,7 +116,7 @@ export class ContactService {
             .eq('id', id)
             .eq('organization_id', organizationId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar o contato.');
         return { success: true };
     }
 
@@ -128,7 +128,7 @@ export class ContactService {
             .eq('id', id)
             .eq('organization_id', organizationId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível excluir o contato.');
         return { success: true };
     }
 }
