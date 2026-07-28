@@ -213,6 +213,6 @@ export async function POST(request: Request) {
         if (error?.message?.includes('Unauthorized') || error?.message?.includes('session')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível gerar o PDF.' }, { status: 500 });
     }
 }

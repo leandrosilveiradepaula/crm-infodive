@@ -91,7 +91,6 @@ export async function POST(request: Request) {
             console.error('Error saving draft:', saveError);
             return NextResponse.json({ 
                 error: 'Error saving proposal draft',
-                details: saveError.message,
                 code: saveError.code 
             }, { status: 500 });
         }
@@ -103,6 +102,6 @@ export async function POST(request: Request) {
         });
     } catch (error: any) {
         console.error('Error in save-draft:', error);
-        return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível salvar o rascunho.' }, { status: 500 });
     }
 }

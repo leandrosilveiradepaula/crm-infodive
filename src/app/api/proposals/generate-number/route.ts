@@ -26,12 +26,12 @@ export async function GET() {
 
         if (error) {
             console.error('Error generating proposal number:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
         }
 
         return NextResponse.json({ number });
     } catch (err: any) {
         console.error('generate-number route error:', err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
     }
 }

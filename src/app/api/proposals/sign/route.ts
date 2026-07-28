@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
                 errorCode: error.code || 'proposal_sign_failed',
             });
             return NextResponse.json(
-                { error: error.message || 'Erro ao assinar proposta' },
+                { error: 'Não foi possível assinar a proposta.' },
                 { status: 400 }
             );
         }
 
         if (!data || !data.success) {
             return NextResponse.json(
-                { error: data?.error || 'Falha ao assinar proposta' },
+                { error: 'Proposta inválida ou indisponível.' },
                 { status: 400 }
             );
         }
