@@ -235,7 +235,7 @@ export class DealService {
         };
 
         const { data, error } = await supabase.from('deals').insert([payload]).select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível salvar a oportunidade.');
         return data as Deal;
     }
 
@@ -277,7 +277,7 @@ export class DealService {
 
         const { data, error } = await query.select().single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a oportunidade.');
         return data as Deal;
     }
 
@@ -305,7 +305,7 @@ export class DealService {
         }
 
         const { data, error } = await query.select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a etapa da oportunidade.');
         return data;
     }
 
@@ -321,7 +321,7 @@ export class DealService {
             .single();
 
         if (dealError || !originalDeal) {
-            throw new Error(`Failed to fetch original deal: ${dealError?.message}`);
+            throw new Error('Não foi possível duplicar a oportunidade.');
         }
 
         // 2. Fetch original products
@@ -332,7 +332,7 @@ export class DealService {
             .eq('organization_id', organizationId);
 
         if (productsError) {
-            throw new Error(`Failed to fetch original products: ${productsError?.message}`);
+            throw new Error('Não foi possível duplicar os produtos da oportunidade.');
         }
 
         // 3. Prepare duplicated deal data
@@ -357,7 +357,7 @@ export class DealService {
             .single();
 
         if (insertDealError || !newDeal) {
-            throw new Error(`Failed to duplicate deal: ${insertDealError?.message}`);
+            throw new Error('Não foi possível duplicar a oportunidade.');
         }
 
         // 4. Duplicate Products if any
@@ -392,7 +392,7 @@ export class DealService {
                 });
                 // Rollback: delete the newly created deal to maintain transaction integrity
                 await supabase.from('deals').delete().eq('id', newDeal.id).eq('organization_id', organizationId);
-                throw new Error(`Failed to duplicate deal products: ${err.message || err}`);
+                throw new Error('Não foi possível duplicar os produtos da oportunidade.');
             }
         }
 
@@ -427,7 +427,7 @@ export class DealService {
         };
 
         const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível adicionar o produto à oportunidade.');
         return data as DealProduct;
     }
 
@@ -440,7 +440,7 @@ export class DealService {
             .eq('organization_id', organizationId)
             .select()
             .single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar o produto da oportunidade.');
         return data as DealProduct;
     }
 
@@ -451,7 +451,7 @@ export class DealService {
             .delete()
             .eq('id', itemId)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível remover o produto da oportunidade.');
         return true;
     }
 
@@ -462,7 +462,7 @@ export class DealService {
             .delete()
             .in('id', itemIds)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
         return true;
     }
 
@@ -536,7 +536,7 @@ export class DealService {
         });
 
         const { data, error } = await supabase.from('deal_products').insert(payload).select();
-        if (error) throw new Error(`Database Error: ${error.message}`);
+        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
         return (data || []) as DealProduct[];
     }
 
@@ -581,7 +581,7 @@ export class DealService {
                 userId,
                 entityId: dealId,
             });
-            return { error: `Erro ao buscar sala: ${fetchError.message}` };
+            return { error: 'Não foi possível acessar a sala da oportunidade.' };
         }
 
         if (existing) return { room: existing };
@@ -603,7 +603,7 @@ export class DealService {
                 userId,
                 entityId: dealId,
             });
-            return { error: `Erro ao criar sala: ${insertError.message}` };
+            return { error: 'Não foi possível criar a sala da oportunidade.' };
         }
 
         return { room: newRoom };
@@ -636,7 +636,7 @@ export class DealService {
             .select()
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível criar a cotação.');
 
         // If this is the first quote, migrate all unassigned products to it to prevent shared-state bugs
         if (isPrimary) {
@@ -659,7 +659,7 @@ export class DealService {
             .eq('id', quoteId)
             .eq('organization_id', organizationId);
             
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível excluir a cotação.');
         return true;
     }
 
@@ -682,7 +682,7 @@ export class DealService {
             .select()
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a cotação.');
         return data;
     }
 
@@ -696,7 +696,7 @@ export class DealService {
             .select()
             .single();
             
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a cotação.');
         return data;
     }
     static async duplicateDealQuote(userId: string, dealId: string, quoteId: string, organizationId: string) {
@@ -710,7 +710,7 @@ export class DealService {
             .eq('organization_id', organizationId)
             .single();
 
-        if (quoteError) throw new Error(quoteError.message);
+        if (quoteError) throw new Error('Não foi possível duplicar a cotação.');
 
         // Extract numbers from title to figure out copy number
         const titleMatch = originalQuote.title.match(/(.+) \(Cópia (\d+)\)$/);
@@ -735,7 +735,7 @@ export class DealService {
             .select()
             .single();
 
-        if (newQuoteError) throw new Error(newQuoteError.message);
+        if (newQuoteError) throw new Error('Não foi possível duplicar a cotação.');
 
         try {
             // 3. Fetch products linked to original quote
@@ -747,7 +747,7 @@ export class DealService {
                 .eq('deal_id', dealId)
                 .eq('organization_id', organizationId);
 
-            if (productsError) throw new Error(productsError.message);
+            if (productsError) throw new Error('Não foi possível duplicar os produtos da cotação.');
 
             // Safety: If we found products with null quote_id, assign them to the ORIGINAL quote first
             // to prevent them from remaining "shared" and causing issues when deleted from copies.
@@ -759,7 +759,7 @@ export class DealService {
                     .in('id', sharedProducts.map(p => p.id))
                     .eq('organization_id', organizationId);
                 
-                if (updateSharedError) throw new Error(updateSharedError.message);
+                if (updateSharedError) throw new Error('Não foi possível atualizar os produtos da cotação.');
                 
                 // Update the local list so the duplication logic uses the right IDs/state
                 sharedProducts.forEach(p => p.quote_id = quoteId);
@@ -782,7 +782,7 @@ export class DealService {
                         .insert(parentPayloads)
                         .select();
 
-                     if (parentInsertError) throw new Error(parentInsertError.message);
+                     if (parentInsertError) throw new Error('Não foi possível duplicar os produtos da cotação.');
                      
                      // Map old to new
                      insertedParents.forEach((newP, index) => {
@@ -800,7 +800,7 @@ export class DealService {
                         .from('deal_products')
                         .insert(childPayloads);
 
-                     if (childInsertError) throw new Error(childInsertError.message);
+                     if (childInsertError) throw new Error('Não foi possível duplicar os produtos da cotação.');
                 }
             }
         } catch (err: any) {
@@ -816,7 +816,7 @@ export class DealService {
             });
             // Rollback: delete the newly created quote
             await supabase.from('deal_quotes').delete().eq('id', newQuote.id).eq('organization_id', organizationId);
-            throw new Error(`Failed to duplicate quote products: ${err.message || err}`);
+            throw new Error('Não foi possível duplicar os produtos da cotação.');
         }
         
         return newQuote;
