@@ -37,7 +37,7 @@ export class DocumentService {
         entityId: string
     ): Promise<void> {
         const table = ENTITY_TABLE_MAP[entityType];
-        if (!table) throw new Error(`Tipo de entidade inválido: ${entityType}`);
+        if (!table) throw new Error('Tipo de entidade inválido.');
 
         const { data } = await supabase
             .from(table)
@@ -143,7 +143,7 @@ export class DocumentService {
     ): Promise<EntityDocument> {
         // --- Validation ---
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-            throw new Error(`Tipo de arquivo não permitido: ${file.type}`);
+            throw new Error('Tipo de arquivo não permitido.');
         }
         if (file.size > MAX_SIZE_BYTES) {
             throw new Error(`Arquivo muito grande. Máximo permitido: 25 MB`);
@@ -184,7 +184,7 @@ export class DocumentService {
 
         if (storageError) {
             console.error('[DocumentService] storage upload error:', storageError);
-            throw new Error(`Erro ao enviar arquivo: ${storageError.message}`);
+            throw new Error('Não foi possível enviar o documento.');
         }
 
         // --- Save metadata in DB ---
@@ -214,7 +214,7 @@ export class DocumentService {
             // Best-effort cleanup: remove the uploaded file
             await supabase.storage.from(BUCKET).remove([filePath]);
             console.error('[DocumentService] db insert error:', dbError);
-            throw new Error(`Erro ao salvar metadados: ${dbError.message}`);
+            throw new Error('Não foi possível salvar o documento.');
         }
 
         return data as EntityDocument;
@@ -248,7 +248,7 @@ export class DocumentService {
             .createSignedUrl(doc.file_path, 300);
 
         if (error || !data?.signedUrl) {
-            throw new Error(`Erro ao gerar link de download: ${error?.message}`);
+            throw new Error('Não foi possível gerar o link do documento.');
         }
 
         return data.signedUrl;
@@ -287,7 +287,7 @@ export class DocumentService {
             .eq('organization_id', organizationId);
 
         if (dbError) {
-            throw new Error(`Erro ao excluir documento: ${dbError.message}`);
+            throw new Error('Não foi possível excluir o documento.');
         }
     }
 }
