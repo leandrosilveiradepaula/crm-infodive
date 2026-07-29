@@ -129,8 +129,8 @@ export class UserService {
             if (archiveError) throw archiveError;
 
             return { success: true };
-        } catch (error: any) {
-            return { success: false, error: error.message };
+        } catch {
+            return { success: false, error: 'Não foi possível arquivar o usuário.' };
         }
     }
 
