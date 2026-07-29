@@ -164,7 +164,7 @@ export class UserService {
             .select('id')
             .single();
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível enviar o convite.' };
         return { success: true, inviteId: data.id };
     }
 
@@ -197,7 +197,7 @@ export class UserService {
             .update({ status: 'accepted', updated_at: new Date().toISOString() })
             .eq('id', inviteId);
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível aceitar o convite.' };
         return { success: true };
     }
 }
