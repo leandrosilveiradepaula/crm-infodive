@@ -21,7 +21,7 @@ export class SalesService {
         }
 
         const { data, error } = await query;
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível carregar os dados de vendas.');
 
         // Fetch profiles for the users (either via created_by or deal's owner_id)
         let profilesMap: Record<string, { full_name: string; commission_rules: any }> = {};
@@ -78,7 +78,7 @@ export class SalesService {
             .select()
             .single();
 
-        if (orderError) throw orderError;
+        if (orderError) throw new Error('Não foi possível salvar os dados de vendas.');
 
         // 2. Create Items
         if (items && items.length > 0) {
@@ -92,7 +92,7 @@ export class SalesService {
                 .from('sales_order_items')
                 .insert(itemsToInsert);
 
-            if (itemsError) throw itemsError;
+            if (itemsError) throw new Error('Não foi possível salvar os dados de vendas.');
         }
 
         return orderData;
@@ -108,7 +108,7 @@ export class SalesService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível atualizar os dados de vendas.');
         return data;
     }
 
@@ -120,7 +120,7 @@ export class SalesService {
             .eq('id', id)
             .eq('organization_id', organizationId);
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível excluir os dados de vendas.');
         return true;
     }
 
@@ -139,7 +139,7 @@ export class SalesService {
             .eq('organization_id', organizationId)
             .single();
 
-        if (dealError || !deal) throw new Error('Deal not found or access denied');
+        if (dealError || !deal) throw new Error('Negócio não encontrado ou acesso negado.');
 
         const products = deal.deal_products || [];
         if (products.length === 0) return { success: true, message: 'No products to convert' };
@@ -235,7 +235,7 @@ export class SalesService {
             .insert(itemsToInsert)
             .select();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível salvar os dados de vendas.');
         return data;
     }
 
@@ -249,7 +249,7 @@ export class SalesService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível atualizar os dados de vendas.');
         return data;
     }
 
@@ -269,7 +269,7 @@ export class SalesService {
             .eq('organization_id', organizationId)
             .order('due_date', { ascending: true });
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível carregar os dados de vendas.');
         return data;
     }
 }

@@ -236,7 +236,7 @@ export class ActivityAiService {
             .eq('id', suggestionId)
             .eq('organization_id', organizationId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível processar a atividade com IA.');
     }
 
     static async hasValidCache(organizationId: string): Promise<boolean> {

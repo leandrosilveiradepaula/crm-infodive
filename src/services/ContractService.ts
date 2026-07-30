@@ -10,7 +10,7 @@ export class ContractService {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível carregar os contratos.');
         return data;
     }
 
@@ -38,7 +38,7 @@ export class ContractService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível salvar o contrato.');
         return data;
     }
 
@@ -69,7 +69,7 @@ export class ContractService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível atualizar o contrato.');
         return data;
     }
 
@@ -81,7 +81,7 @@ export class ContractService {
             .eq('id', id)
             .eq('organization_id', organizationId);
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível excluir o contrato.');
         return true;
     }
 }

@@ -48,7 +48,7 @@ export class AutomationService {
             return { success: true, data };
         } catch (error: any) {
             console.error('Error creating automation:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível salvar a automação.' };
         }
     }
 
@@ -67,8 +67,8 @@ export class AutomationService {
 
             if (error) throw error;
             return { success: true };
-        } catch (error: any) {
-            return { success: false, error: error.message };
+        } catch {
+            return { success: false, error: 'Não foi possível atualizar a automação.' };
         }
     }
 
@@ -89,7 +89,7 @@ export class AutomationService {
             return { success: true };
         } catch (error: any) {
             console.error('Error updating automation:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível atualizar a automação.' };
         }
     }
 
@@ -107,7 +107,7 @@ export class AutomationService {
             return { success: true };
         } catch (error: any) {
             console.error('Error deleting automation:', error);
-            return { success: false, error: error.message };
+            return { success: false, error: 'Não foi possível excluir a automação.' };
         }
     }
 

@@ -66,7 +66,7 @@ export class AssetService {
 
         if (error) {
             console.error('Error creating asset:', error);
-            throw new Error(`Falha ao criar ativo: ${error.message}`);
+            throw new Error('Não foi possível salvar o ativo.');
         }
 
         return data as CustomerAsset;
@@ -98,7 +98,7 @@ export class AssetService {
 
         if (error) {
             console.error('Error updating asset:', error);
-            throw new Error(`Falha ao atualizar ativo: ${error.message}`);
+            throw new Error('Não foi possível atualizar o ativo.');
         }
 
         return data as CustomerAsset;

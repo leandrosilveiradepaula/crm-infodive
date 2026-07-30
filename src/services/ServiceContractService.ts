@@ -66,7 +66,7 @@ export class ServiceContractService {
 
         if (error) {
             console.error('Error creating service contract:', error);
-            throw new Error(`Falha ao criar contrato: ${error.message}`);
+            throw new Error('Não foi possível salvar o contrato de serviço.');
         }
 
         return data as ServiceContract;
@@ -98,7 +98,7 @@ export class ServiceContractService {
 
         if (error) {
             console.error('Error updating service contract:', error);
-            throw new Error(`Falha ao atualizar contrato: ${error.message}`);
+            throw new Error('Não foi possível atualizar o contrato de serviço.');
         }
 
         return data as ServiceContract;
