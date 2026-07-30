@@ -37,9 +37,9 @@ export async function createContract(contract: Partial<Contract>) {
         const data = await ContractService.createContract(organizationId, contract);
         revalidatePath('/contracts');
         return { success: true, data };
-    } catch (error: any) {
+    } catch {
         console.error('[ContractsActions] contract creation failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 
@@ -49,9 +49,9 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
         await ContractService.updateContract(organizationId, id, updates);
         revalidatePath('/contracts');
         return { success: true };
-    } catch (error: any) {
+    } catch {
         console.error('[ContractsActions] contract update failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 
@@ -61,9 +61,9 @@ export async function deleteContract(id: string) {
         await ContractService.deleteContract(organizationId, id);
         revalidatePath('/contracts');
         return { success: true };
-    } catch (error: any) {
+    } catch {
         console.error('[ContractsActions] contract deletion failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 

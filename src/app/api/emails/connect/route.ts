@@ -31,7 +31,7 @@ export async function GET() {
         });
 
         if (error) {
-            return NextResponse.json({ error: error.message }, { status: 400 });
+            return NextResponse.json({ error: 'Não foi possível conectar a conta de email.' }, { status: 400 });
         }
 
         return NextResponse.json({ url: data.url });

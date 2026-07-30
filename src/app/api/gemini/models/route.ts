@@ -20,7 +20,7 @@ export async function GET(request: Request) {
         const response = await fetch(url);
 
         if (!response.ok) {
-            throw new Error(`API error: ${response.status} ${response.statusText}`);
+            throw new Error('Não foi possível carregar os modelos de IA.');
         }
 
         const data = await response.json();
@@ -46,8 +46,8 @@ export async function GET(request: Request) {
             models: modelList
         });
 
-    } catch (e: any) {
+    } catch {
         console.error('[GeminiModelsRoute] models list failed');
-        return NextResponse.json({ error: e.message || 'Erro ao listar modelos' }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível carregar os modelos de IA.' }, { status: 500 });
     }
 }

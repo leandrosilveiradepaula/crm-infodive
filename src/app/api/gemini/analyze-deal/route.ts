@@ -115,8 +115,8 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Erro na API do Gemini: ${response.status} ${response.statusText}`);
+            await response.json().catch(() => ({}));
+            throw new Error('Não foi possível analisar o negócio.');
         }
 
         const data = await response.json();
@@ -163,9 +163,8 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 
         return NextResponse.json(diagnosis);
 
-    } catch (error: unknown) {
-        const analysisError = error as { message?: string };
+    } catch {
         console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
-        return NextResponse.json({ error: analysisError.message || 'Erro ao analisar oportunidade' }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível analisar o negócio.' }, { status: 500 });
     }
 }

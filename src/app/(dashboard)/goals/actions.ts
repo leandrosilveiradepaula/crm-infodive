@@ -39,7 +39,7 @@ export async function updateUserGoals(userId: string, data: Partial<UserGoalData
         .update(data)
         .eq('id', userId)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -61,7 +61,7 @@ export async function createCampaign(campaign: Partial<Campaign>) {
     const { organizationId } = await requireSessionContext();
     const supabase = createAdminClient();
     const { error } = await supabase.from('campaigns').insert([{ ...campaign, organization_id: organizationId }]);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -74,7 +74,7 @@ export async function updateCampaign(id: string, updates: Partial<Campaign>) {
         .update(updates)
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -87,7 +87,7 @@ export async function deleteCampaign(id: string) {
         .delete()
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -114,7 +114,7 @@ export async function saveScenario(scenario: Partial<Scenario>) {
         user_id: userId,
         organization_id: organizationId
     }]);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -127,7 +127,7 @@ export async function deleteScenario(id: string) {
         .delete()
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a meta.' };
     revalidatePath('/goals');
     return { success: true };
 }
@@ -188,14 +188,13 @@ export async function applyScenarioToGoals(
         const results = await Promise.all(updatePromises);
         const hasErrors = results.some(r => r.error);
         if (hasErrors) {
-            const errorDetails = results.filter(r => r.error).map(r => r.error?.message).join('; ');
-            return { success: false, error: 'O Banco rejeitou: ' + errorDetails };
+            return { success: false, error: 'Não foi possível processar a meta.' };
         }
         const totalRowsAffected = results.reduce((sum, res) => sum + (res.data?.length || 0), 0);
         if (totalRowsAffected === 0)
             return { success: false, error: 'Nenhum perfil foi alterado. Verifique as permissões.' };
-    } catch (err: any) {
-        return { success: false, error: 'Erro inesperado: ' + err.message };
+    } catch {
+        return { success: false, error: 'Não foi possível processar a meta.' };
     }
 
     revalidatePath('/goals');

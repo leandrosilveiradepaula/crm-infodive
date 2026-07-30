@@ -170,8 +170,8 @@ REGRAS:
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Gemini API error: ${response.status}`);
+            await response.json().catch(() => ({}));
+            throw new Error('Não foi possível gerar sugestões de atividades.');
         }
 
         const data = await response.json();
@@ -234,7 +234,7 @@ REGRAS:
             const { error: insertError } = await supabase.from('ai_activity_suggestions').insert(rows);
             if (insertError) {
                 console.error('[GeminiSuggestActivitiesRoute] activity suggestions insert failed');
-                throw new Error("Falha ao salvar sugestões no banco: " + insertError.message);
+                throw new Error('Não foi possível gerar sugestões de atividades.');
             }
         }
 
@@ -249,7 +249,7 @@ REGRAS:
 
         if (fetchError) {
             console.error('[GeminiSuggestActivitiesRoute] activity suggestions fetch after insert failed');
-            throw new Error("Falha ao ler sugestões recém-criadas: " + fetchError.message);
+            throw new Error('Não foi possível gerar sugestões de atividades.');
         }
 
         return NextResponse.json({
@@ -258,11 +258,10 @@ REGRAS:
             totalGenerated: rows.length
         });
 
-    } catch (error: unknown) {
-        const suggestionsError = error as { message?: string };
+    } catch {
         console.error('[GeminiSuggestActivitiesRoute] activity suggestions failed');
         return NextResponse.json(
-            { error: suggestionsError.message || 'Failed to generate suggestions' },
+            { error: 'Não foi possível gerar sugestões de atividades.' },
             { status: 500 }
         );
     }

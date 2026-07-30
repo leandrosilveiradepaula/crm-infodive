@@ -33,7 +33,7 @@ export async function toggleIntegrationStatus(id: string, currentStatus: string)
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 
 export async function getApiKeys(): Promise<ApiKey[]> {
@@ -59,7 +59,7 @@ export async function createApiKey(name: string) {
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 
 export async function revokeApiKey(id: string) {
@@ -74,7 +74,7 @@ export async function revokeApiKey(id: string) {
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 
 export async function deleteApiKey(id: string) {
@@ -89,7 +89,7 @@ export async function deleteApiKey(id: string) {
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 
 export async function getWebhooks(): Promise<Webhook[]> {
@@ -113,7 +113,7 @@ export async function createWebhook(data: { url: string; events: string[]; statu
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 
 export async function deleteWebhook(id: string) {
@@ -128,6 +128,6 @@ export async function deleteWebhook(id: string) {
         if (error) throw error;
         revalidatePath('/integrations');
         return { success: true };
-    } catch (error: any) { return { success: false, error: error.message }; }
+    } catch { return { success: false, error: 'Não foi possível processar a integração.' }; }
 }
 

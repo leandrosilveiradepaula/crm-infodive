@@ -31,7 +31,7 @@ export async function login(formData: FormData) {
         if (error?.message?.includes('Invalid login credentials')) {
             return { error: 'Email ou senha incorretos.' };
         }
-        return { error: error?.message || 'Email ou senha incorretos.' };
+        return { error: 'Email ou senha incorretos.' };
     }
 
     // Get organizationId from user metadata (set at signup)
@@ -124,7 +124,7 @@ export async function signup(formData: FormData) {
     });
 
     if (error) {
-        return { error: error.message };
+        return { error: 'Não foi possível concluir a autenticação.' };
     }
 
     if (data.user) {

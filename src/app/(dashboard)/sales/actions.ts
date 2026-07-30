@@ -14,9 +14,9 @@ export async function getSalesOrders(dealId?: string) {
         const { organizationId } = await requireSessionContext();
         const data = await SalesService.getSalesOrders(organizationId, dealId);
         return { success: true, data };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] sales orders fetch failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -26,9 +26,9 @@ export async function createSalesOrder(order: Partial<SalesOrder>, items: Partia
         const data = await SalesService.createSalesOrder(organizationId, order, items);
         revalidatePath('/sales');
         return { success: true, data };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] sales order creation failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -38,9 +38,9 @@ export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>)
         const data = await SalesService.updateSalesOrder(organizationId, id, updates);
         revalidatePath('/sales');
         return { success: true, data };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] sales order update failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -50,9 +50,9 @@ export async function deleteSalesOrder(id: string) {
         await SalesService.deleteSalesOrder(organizationId, id);
         revalidatePath('/sales');
         return { success: true };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] sales order deletion failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -64,9 +64,9 @@ export async function updateInstallmentStatusAction(installmentId: string, statu
         await SalesService.updateInstallmentStatus(organizationId, installmentId, status);
         revalidatePath('/sales');
         return { success: true };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] installment status update failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -93,7 +93,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
 
         if (uploadError) {
             console.error('[SalesActions] invoice upload failed');
-            throw new Error(`Falha no upload: ${uploadError.message}`);
+            throw new Error('Não foi possível processar a operação de vendas.');
         }
 
         // 2. Extract Info
@@ -240,9 +240,9 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
         }
 
         return { success: true, extractedData, fileUrl: fileName };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] invoice processing failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -281,9 +281,9 @@ export async function convertDealToSalesOrdersAction(dealId: string, extraData?:
         revalidatePath('/sales');
         revalidatePath('/pipeline');
         return result;
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] deal conversion failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -295,9 +295,9 @@ export async function downloadDistributorOrderAction(dealId: string, extraData?:
         // Convert Buffer to base64 for transfer
         const base64 = buffer.toString('base64');
         return { success: true, base64, fileName };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] distributor order download failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
@@ -306,9 +306,9 @@ export async function getAllInstallmentsAction() {
         const { organizationId } = await requireSessionContext();
         const data = await SalesService.getAllInstallments(organizationId);
         return { success: true, data };
-    } catch (error: any) {
+    } catch {
         console.error('[SalesActions] installments fetch failed');
-        return { success: false, error: error.message };
+        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
     }
 }
 
