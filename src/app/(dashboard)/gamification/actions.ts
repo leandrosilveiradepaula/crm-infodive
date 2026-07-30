@@ -67,8 +67,8 @@ export async function getLeaderboard(): Promise<UserScore[]> {
                 badges: badgesMap.get(s.user_id) || []
             };
         });
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error);
+    } catch {
+        console.error('[GamificationActions] leaderboard fetch failed');
         return [];
     }
 }

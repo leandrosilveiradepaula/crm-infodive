@@ -13,7 +13,7 @@ export class ActivityService {
             .order('"dueDate"', { ascending: true });
 
         if (error) {
-            console.error('Error fetching activities:', error);
+            console.error('[ActivityService] activities fetch failed');
             return [];
         }
 
@@ -77,7 +77,7 @@ export class ActivityService {
             .limit(10);
 
         if (error) {
-            console.error('Error fetching tasks:', error);
+            console.error('[ActivityService] tasks fetch failed');
             return [];
         }
 

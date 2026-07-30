@@ -13,14 +13,7 @@ export class DashboardService {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Dashboard metrics fetch failed', {
-                operation: 'dashboard.metrics.fetch',
-                provider: 'supabase',
-                status: 'failed',
-                errorCode: error.code || 'dashboard_metrics_fetch_failed',
-                organizationId,
-                userId,
-            });
+            console.error('[DashboardService] dashboard metrics fetch failed');
             return {
                 totalPipeline: 0,
                 weightedForecast: 0,
@@ -155,14 +148,7 @@ export class DashboardService {
             .limit(5);
 
         if (error) {
-            console.error('Dashboard recent deals fetch failed', {
-                operation: 'dashboard.recentDeals.fetch',
-                provider: 'supabase',
-                status: 'failed',
-                errorCode: error.code || 'dashboard_recent_deals_fetch_failed',
-                organizationId,
-                userId,
-            });
+            console.error('[DashboardService] recent deals fetch failed');
             return [];
         }
 

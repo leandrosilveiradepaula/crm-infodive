@@ -23,11 +23,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "O campo 'company' é obrigatório" }, { status: 400 });
         }
 
-        console.log('Gemini enrichment started', {
-            operation: 'gemini.enrich',
-            provider: 'gemini',
-            status: 'started',
-        });
+        console.log('[GeminiEnrichRoute] enrichment started');
 
         const prompt = `Atue como um Especialista em Pesquisa de Vendas B2B (Sales Research Analyst).
 Sua tarefa é enriquecer os dados de um lead potencial para que eu possa fazer uma abordagem comercial mais efetiva.
@@ -69,12 +65,7 @@ Formato de resposta esperado (JSON puro, sem markdown):
 
     } catch (error: unknown) {
         const enrichError = error as { code?: string; name?: string; message?: string };
-        console.error('Gemini enrichment failed', {
-            operation: 'gemini.enrich',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: enrichError.code || enrichError.name || 'gemini_enrich_failed',
-        });
+        console.error('[GeminiEnrichRoute] enrichment failed');
         return NextResponse.json({
             error: enrichError.message || 'Erro ao enriquecer lead',
             summary: "Não foi possível gerar o resumo automático.",

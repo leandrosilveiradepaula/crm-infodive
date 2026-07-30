@@ -50,12 +50,7 @@ type EmailRow = {
 async function parseSignatureWithGemini(emailBody: string): Promise<Record<string, unknown> | null> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        console.warn('Gemini signature parsing skipped', {
-            operation: 'email.signature.parse',
-            provider: 'gemini',
-            status: 'configuration_error',
-            errorCode: 'missing_gemini_api_key',
-        });
+        console.warn('[EmailSyncRoute] signature parsing skipped');
         return null;
     }
 
@@ -134,11 +129,7 @@ export async function GET(request: NextRequest) {
         if (response.status === 401) {
             const refreshToken = request.cookies.get('crm_refresh_token')?.value;
             if (refreshToken) {
-                console.info('Microsoft token refresh started', {
-                    operation: 'email.sync.refresh',
-                    provider: 'microsoft',
-                    status: 'started',
-                });
+                console.info('[EmailSyncRoute] token refresh started');
                 try {
                     newTokens = await refreshMicrosoftToken(refreshToken);
                     // Retry with new token
@@ -149,12 +140,7 @@ export async function GET(request: NextRequest) {
                         }
                     });
                 } catch {
-                    console.error('Microsoft token refresh failed', {
-                        operation: 'email.sync.refresh',
-                        provider: 'microsoft',
-                        status: 'failed',
-                        errorCode: 'token_refresh_failed',
-                    });
+                    console.error('[EmailSyncRoute] token refresh failed');
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
@@ -163,12 +149,7 @@ export async function GET(request: NextRequest) {
         }
 
         if (!response.ok) {
-            console.error('Microsoft Graph sync failed', {
-                operation: 'email.sync.fetch',
-                provider: 'microsoft_graph',
-                status: response.status,
-                errorCode: 'graph_fetch_failed',
-            });
+            console.error('[EmailSyncRoute] graph sync failed');
             throw new Error('Microsoft Graph sync failed');
         }
 
@@ -270,22 +251,12 @@ export async function GET(request: NextRequest) {
                                         .from('contact_suggestions')
                                         .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                                     if (insertError) {
-                                        console.error('Contact suggestion insert failed', {
-                                            operation: 'email.signature.suggestion.insert',
-                                            provider: 'supabase',
-                                            status: 'failed',
-                                            errorCode: insertError.code || 'contact_suggestion_insert_failed',
-                                        });
+                                        console.error('[EmailSyncRoute] contact suggestion insert failed');
                                     }
                                     continue; // Extraiu com IA, vai pro próximo
                                 }
-                            } catch (aiErr) {
-                                console.error('Gemini signature parsing failed', {
-                                    operation: 'email.signature.parse',
-                                    provider: 'gemini',
-                                    status: 'failed',
-                                    errorCode: (aiErr as { status?: number })?.status || 'signature_parse_failed',
-                                });
+                            } catch {
+                                console.error('[EmailSyncRoute] signature parsing failed');
                             }
 
                             // 6. FALLBACK: Se falhou a IA ou ela retornou vazio, insere o basico que temos
@@ -300,21 +271,12 @@ export async function GET(request: NextRequest) {
                                 .from('contact_suggestions')
                                 .upsert([fallbackSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                             if (fallbackError) {
-                                console.error('Fallback contact suggestion insert failed', {
-                                    operation: 'email.signature.suggestion.fallback_insert',
-                                    provider: 'supabase',
-                                    status: 'failed',
-                                    errorCode: fallbackError.code || 'contact_suggestion_fallback_insert_failed',
-                                });
+                                console.error('[EmailSyncRoute] fallback contact suggestion insert failed');
                             }
                         }
 
                     } catch {
-                        console.error('Background signature extraction failed', {
-                            operation: 'email.signature.background_extract',
-                            status: 'failed',
-                            errorCode: 'signature_background_extract_failed',
-                        });
+                        console.error('[EmailSyncRoute] background signature extraction failed');
                     }
                 });
             }
@@ -352,14 +314,8 @@ export async function GET(request: NextRequest) {
 
         return finalResponse;
 
-    } catch (error: unknown) {
-        const syncError = error as { code?: string; name?: string; message?: string };
-        console.error('Email sync failed', {
-            operation: 'email.sync',
-            provider: 'microsoft_graph',
-            status: 'failed',
-            errorCode: syncError?.code || syncError?.name || 'email_sync_failed',
-        });
+    } catch {
+        console.error('[EmailSyncRoute] email sync failed');
         return NextResponse.json({ error: 'Não foi possível sincronizar os emails.' }, { status: 500 });
     }
 }

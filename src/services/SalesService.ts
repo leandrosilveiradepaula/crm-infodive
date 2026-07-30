@@ -175,7 +175,7 @@ export class SalesService {
                 .single();
 
             if (orderError) {
-                console.error(`Error creating sales order for dist ${distId}:`, orderError);
+                console.error('[SalesService] sales order creation failed');
                 continue;
             }
 
@@ -197,7 +197,7 @@ export class SalesService {
                 .insert(itemsToInsert);
 
             if (itemsError) {
-                console.error(`Error creating items for sales order ${order.id}:`, itemsError);
+                console.error('[SalesService] order item creation failed');
             }
 
             results.push(order);

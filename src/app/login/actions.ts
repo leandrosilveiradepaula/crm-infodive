@@ -142,7 +142,7 @@ export async function signup(formData: FormData) {
             });
 
         if (profileError) {
-            console.error('Error creating profile during signup:', profileError);
+            console.error('[LoginActions] profile creation during signup failed');
         } else {
             // 4. Mark invite as accepted only if profile is created successfully
             await UserService.acceptInvitation(invite_token);

@@ -21,12 +21,7 @@ export async function GET(
             .rpc('get_proposal_by_public_token', { token_input: token });
 
         if (error) {
-            console.error('Public proposal fetch failed', {
-                operation: 'proposal.public.fetch',
-                provider: 'supabase',
-                status: 'failed',
-                errorCode: error.code || 'proposal_public_fetch_failed',
-            });
+            console.error('[PublicProposalRoute] public proposal fetch failed');
             return NextResponse.json(
                 { error: 'Erro ao buscar proposta' },
                 { status: 500 }
@@ -57,14 +52,8 @@ export async function GET(
         };
 
         return NextResponse.json(mappedData);
-    } catch (error: unknown) {
-        const proposalError = error as { code?: string; name?: string };
-        console.error('Public proposal fetch failed', {
-            operation: 'proposal.public.fetch',
-            provider: 'supabase',
-            status: 'failed',
-            errorCode: proposalError.code || proposalError.name || 'proposal_public_unexpected_error',
-        });
+    } catch {
+        console.error('[PublicProposalRoute] public proposal fetch failed');
         return NextResponse.json(
             { error: 'Erro interno do servidor' },
             { status: 500 }

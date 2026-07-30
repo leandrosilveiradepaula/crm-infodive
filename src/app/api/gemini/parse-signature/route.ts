@@ -93,23 +93,13 @@ export async function POST(req: Request) {
             const data = JSON.parse(jsonString);
             return NextResponse.json({ data });
         } catch {
-            console.error('Gemini signature response parse failed', {
-                operation: 'gemini.signature.parse',
-                provider: 'gemini',
-                status: 'parse_failed',
-                errorCode: 'gemini_response_parse_failed',
-            });
+            console.error('[GeminiParseSignatureRoute] signature response parse failed');
             return NextResponse.json({ error: 'Falha ao processar resposta da IA' }, { status: 500 });
         }
 
     } catch (error: unknown) {
         const signatureError = error as { code?: string; name?: string; message?: string; status?: number };
-        console.error('Gemini signature parse failed', {
-            operation: 'gemini.signature.parse',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: signatureError.code || signatureError.name || 'gemini_signature_parse_failed',
-        });
+        console.error('[GeminiParseSignatureRoute] signature parse failed');
         
         if (signatureError.status === 429 || signatureError.message?.includes('429 Too Many Requests') || signatureError.message?.includes('Resource exhausted')) {
             return NextResponse.json(

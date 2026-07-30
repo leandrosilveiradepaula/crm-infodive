@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         });
 
     } catch (e: any) {
-        console.error('Erro ao listar modelos:', e);
+        console.error('[GeminiModelsRoute] models list failed');
         return NextResponse.json({ error: e.message || 'Erro ao listar modelos' }, { status: 500 });
     }
 }

@@ -73,7 +73,7 @@ Seja conciso. "value" deve ser direto.
         return NextResponse.json({ specs });
 
     } catch (error: any) {
-        console.error('__ Erro ao curar specs:', error);
+        console.error('[GeminiSpecsRoute] specs curation failed');
         // Fallback to empty array (client will handle or use local logic) or return error
         return NextResponse.json({ error: error.message || 'Erro ao curar specs' }, { status: 500 });
     }

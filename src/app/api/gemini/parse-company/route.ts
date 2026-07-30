@@ -89,23 +89,13 @@ export async function POST(req: Request) {
             const data = JSON.parse(jsonString);
             return NextResponse.json({ data });
         } catch {
-            console.error('Gemini company response parse failed', {
-                operation: 'gemini.company.parse',
-                provider: 'gemini',
-                status: 'parse_failed',
-                errorCode: 'gemini_response_parse_failed',
-            });
+            console.error('[GeminiParseCompanyRoute] company response parse failed');
             return NextResponse.json({ error: 'Falha ao processar resposta da IA' }, { status: 500 });
         }
 
     } catch (error: unknown) {
         const companyError = error as { code?: string; name?: string; message?: string; status?: number };
-        console.error('Gemini company parse failed', {
-            operation: 'gemini.company.parse',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: companyError.code || companyError.name || 'gemini_company_parse_failed',
-        });
+        console.error('[GeminiParseCompanyRoute] company parse failed');
         
         if (companyError.status === 429 || companyError.message?.includes('429 Too Many Requests') || companyError.message?.includes('Resource exhausted')) {
             return NextResponse.json(

@@ -11,7 +11,7 @@ export class AutomationService {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching automations:', error);
+            console.error('[AutomationService] automations fetch failed');
             return [];
         }
 
@@ -46,8 +46,8 @@ export class AutomationService {
 
             if (error) throw error;
             return { success: true, data };
-        } catch (error: any) {
-            console.error('Error creating automation:', error);
+        } catch {
+            console.error('[AutomationService] automation creation failed');
             return { success: false, error: 'Não foi possível salvar a automação.' };
         }
     }
@@ -87,8 +87,8 @@ export class AutomationService {
 
             if (error) throw error;
             return { success: true };
-        } catch (error: any) {
-            console.error('Error updating automation:', error);
+        } catch {
+            console.error('[AutomationService] automation update failed');
             return { success: false, error: 'Não foi possível atualizar a automação.' };
         }
     }
@@ -105,8 +105,8 @@ export class AutomationService {
 
             if (error) throw error;
             return { success: true };
-        } catch (error: any) {
-            console.error('Error deleting automation:', error);
+        } catch {
+            console.error('[AutomationService] automation deletion failed');
             return { success: false, error: 'Não foi possível excluir a automação.' };
         }
     }

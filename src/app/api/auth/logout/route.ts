@@ -13,8 +13,8 @@ export async function POST() {
         cookieStore.delete('crm_refresh_token');
 
         return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Logout API Error:', error);
+    } catch {
+        console.error('[AuthLogoutRoute] logout failed');
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

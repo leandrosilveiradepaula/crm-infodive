@@ -15,7 +15,7 @@ export async function getUsersWithGoals() {
         .eq('organization_id', organizationId)
         .order('full_name');
 
-    if (error) { console.error('Error fetching users:', error); return []; }
+    if (error) { console.error('[GoalsActions] users fetch failed'); return []; }
 
     return data.map((user: any) => ({
         id: user.id,

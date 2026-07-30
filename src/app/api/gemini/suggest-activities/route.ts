@@ -87,13 +87,7 @@ export async function POST(request: Request) {
 
         if (dealsError || !deals || deals.length === 0) {
             if (dealsError) {
-                console.error('Activity suggestion deals fetch failed', {
-                    operation: 'gemini.suggestActivities.fetchDeals',
-                    provider: 'supabase',
-                    status: 'failed',
-                    errorCode: dealsError.code || 'activity_suggestions_deals_fetch_failed',
-                    organizationId,
-                });
+                console.error('[GeminiSuggestActivitiesRoute] suggestion deals fetch failed');
             }
             return NextResponse.json({ suggestions: [], fromCache: false });
         }
@@ -239,14 +233,7 @@ REGRAS:
         if (rows.length > 0) {
             const { error: insertError } = await supabase.from('ai_activity_suggestions').insert(rows);
             if (insertError) {
-                console.error('Activity suggestions insert failed', {
-                    operation: 'gemini.suggestActivities.insert',
-                    provider: 'supabase',
-                    status: 'failed',
-                    errorCode: insertError.code || 'activity_suggestions_insert_failed',
-                    organizationId,
-                    count: rows.length,
-                });
+                console.error('[GeminiSuggestActivitiesRoute] activity suggestions insert failed');
                 throw new Error("Falha ao salvar sugestões no banco: " + insertError.message);
             }
         }
@@ -261,13 +248,7 @@ REGRAS:
             .order('created_at', { ascending: false });
 
         if (fetchError) {
-            console.error('Activity suggestions fetch after insert failed', {
-                operation: 'gemini.suggestActivities.fetchAfterInsert',
-                provider: 'supabase',
-                status: 'failed',
-                errorCode: fetchError.code || 'activity_suggestions_fetch_after_insert_failed',
-                organizationId,
-            });
+            console.error('[GeminiSuggestActivitiesRoute] activity suggestions fetch after insert failed');
             throw new Error("Falha ao ler sugestões recém-criadas: " + fetchError.message);
         }
 
@@ -278,16 +259,8 @@ REGRAS:
         });
 
     } catch (error: unknown) {
-        const suggestionsError = error as { code?: string; name?: string; message?: string };
-        console.error('Gemini activity suggestions failed', {
-            operation: 'gemini.suggestActivities',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: suggestionsError.code || suggestionsError.name || 'gemini_suggest_activities_failed',
-            organizationId,
-            userId,
-            model: 'gemini-2.5-flash',
-        });
+        const suggestionsError = error as { message?: string };
+        console.error('[GeminiSuggestActivitiesRoute] activity suggestions failed');
         return NextResponse.json(
             { error: suggestionsError.message || 'Failed to generate suggestions' },
             { status: 500 }

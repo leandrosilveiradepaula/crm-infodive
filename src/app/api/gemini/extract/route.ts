@@ -39,11 +39,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Os campos 'imageData' e 'mimeType' são obrigatórios." }, { status: 400 });
         }
 
-        console.log('Gemini extraction started', {
-            operation: 'gemini.extract',
-            provider: 'gemini',
-            status: 'started',
-        });
+        console.log('[GeminiExtractRoute] extraction started');
 
         const prompt = `Analise este arquivo (imagem ou PDF de planilha/lista de produtos).
 Extraia os dados dos produtos em formato JSON.
@@ -67,12 +63,7 @@ REGRAS IMPORTANTES:
         // Try models sequentially
         for (const modelName of VISION_MODELS) {
             try {
-                console.log('Gemini extraction model attempt started', {
-                    operation: 'gemini.extract',
-                    provider: 'gemini',
-                    status: 'started',
-                    model: modelName,
-                });
+                console.log('[GeminiExtractRoute] extraction model attempt started');
 
                 const result = await client.models.generateContent({
                     model: modelName,
@@ -88,12 +79,7 @@ REGRAS IMPORTANTES:
                 const text = result.text;
                 if (!text) throw new Error('Resposta vazia do modelo');
 
-                console.log('Gemini extraction model succeeded', {
-                    operation: 'gemini.extract',
-                    provider: 'gemini',
-                    status: 'succeeded',
-                    model: modelName,
-                });
+                console.log('[GeminiExtractRoute] extraction model succeeded');
 
                 // Match JSON array
                 let parsedData: ExtractedProduct[];
@@ -128,28 +114,15 @@ REGRAS IMPORTANTES:
                 return NextResponse.json({ products: parsedData });
 
             } catch (error: unknown) {
-                const modelError = error as { code?: string; name?: string };
-                console.warn('Gemini extraction model failed', {
-                    operation: 'gemini.extract',
-                    provider: 'gemini',
-                    status: 'failed',
-                    model: modelName,
-                    errorCode: modelError.code || modelError.name || 'gemini_extract_model_failed',
-                });
+                console.warn('[GeminiExtractRoute] extraction model failed');
                 lastError = error;
             }
         }
 
         throw lastError || new Error('Todos os modelos falharam');
 
-    } catch (error: unknown) {
-        const extractError = error as { code?: string; name?: string; message?: string };
-        console.error('Gemini extraction failed', {
-            operation: 'gemini.extract',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: extractError.code || extractError.name || 'gemini_extract_failed',
-        });
+    } catch {
+        console.error('[GeminiExtractRoute] extraction failed');
         return NextResponse.json({ error: 'Erro ao processar imagem' }, { status: 500 });
     }
 }

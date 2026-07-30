@@ -35,8 +35,8 @@ export async function GET() {
         }
 
         return NextResponse.json({ url: data.url });
-    } catch (error) {
-        console.error('Email Auth Route Error:', error);
+    } catch {
+        console.error('[EmailConnectRoute] email authorization failed');
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

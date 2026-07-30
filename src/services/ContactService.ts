@@ -45,7 +45,7 @@ export class ContactService {
         const { data, error } = await query;
 
         if (error) {
-            console.error('❌ Error fetching account contacts:', error.message);
+            console.error('[ContactService] account contacts fetch failed');
             return [];
         }
         return data || [];

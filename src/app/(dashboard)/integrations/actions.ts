@@ -13,7 +13,7 @@ export async function getIntegrations(): Promise<Integration[]> {
         .eq('organization_id', organizationId)
         .order('name');
 
-    if (error) { console.error('Error fetching integrations:', error); return []; }
+    if (error) { console.error('[IntegrationsActions] integrations fetch failed'); return []; }
     return data.map((item: any) => ({
         id: item.id, name: item.name, provider: item.provider,
         status: item.status, configJson: item.config_json, lastSync: item.last_sync

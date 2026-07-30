@@ -14,7 +14,7 @@ export class ProposalService {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching proposals:', error);
+            console.error('[ProposalService] proposals fetch failed');
             return [];
         }
 
@@ -136,7 +136,7 @@ export class ProposalService {
             .single();
 
         if (error) {
-            console.error('Error creating proposal:', error);
+            console.error('[ProposalService] proposal creation failed');
             throw new Error('Não foi possível criar a proposta.');
         }
 

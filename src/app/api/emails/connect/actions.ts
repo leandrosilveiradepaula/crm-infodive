@@ -27,7 +27,7 @@ export async function connectEmailAction() {
     });
 
     if (error) {
-        console.error('Email Connection Error:', error.message);
+        console.error('[EmailConnectActions] email connection failed');
         throw new Error(error.message);
     }
 

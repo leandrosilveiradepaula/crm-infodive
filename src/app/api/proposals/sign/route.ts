@@ -44,12 +44,7 @@ export async function POST(request: NextRequest) {
         });
 
         if (error) {
-            console.error('Proposal signing failed', {
-                operation: 'proposal.sign',
-                provider: 'supabase',
-                status: 'failed',
-                errorCode: error.code || 'proposal_sign_failed',
-            });
+            console.error('[ProposalSignRoute] proposal signing failed');
             return NextResponse.json(
                 { error: 'Não foi possível assinar a proposta.' },
                 { status: 400 }
@@ -64,14 +59,8 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json(data);
-    } catch (error: unknown) {
-        const signError = error as { code?: string; name?: string };
-        console.error('Proposal signing failed', {
-            operation: 'proposal.sign',
-            provider: 'supabase',
-            status: 'failed',
-            errorCode: signError.code || signError.name || 'proposal_sign_unexpected_error',
-        });
+    } catch {
+        console.error('[ProposalSignRoute] proposal signing failed');
         return NextResponse.json(
             { error: 'Erro interno do servidor' },
             { status: 500 }

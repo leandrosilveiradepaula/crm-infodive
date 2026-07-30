@@ -32,7 +32,9 @@ export async function updateDealStage(dealId: string, newStage: string, probabil
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
     // Trigger automation on stage change
     if (dealTitle) {
-        ActivityAiService.onStageChange(userId, organizationId, dealId, newStage, dealTitle).catch(console.error);
+        ActivityAiService.onStageChange(userId, organizationId, dealId, newStage, dealTitle).catch(() => {
+            console.error('[PipelineActions] stage change automation failed');
+        });
     }
     revalidatePath('/pipeline');
 }
@@ -41,7 +43,9 @@ export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
     const { userId, organizationId } = await requireSessionContext();
     const result = await DealService.createDeal(userId, organizationId, deal);
     // Trigger automation on deal creation
-    ActivityAiService.onDealCreated(userId, organizationId, result.id, result.title).catch(console.error);
+    ActivityAiService.onDealCreated(userId, organizationId, result.id, result.title).catch(() => {
+        console.error('[PipelineActions] deal creation automation failed');
+    });
     revalidatePath('/pipeline');
     return result;
 }

@@ -99,24 +99,12 @@ export async function POST(req: Request) {
             const data = JSON.parse(responseText);
             return NextResponse.json(data);
         } catch {
-            console.error('Gemini customer import response parse failed', {
-                operation: 'customers.import',
-                provider: 'gemini',
-                status: 'parse_failed',
-                errorCode: 'gemini_response_parse_failed',
-                organizationId,
-            });
+            console.error('[CustomersImportRoute] customer import response parse failed');
             return NextResponse.json({ error: 'Falha ao processar os dados com IA' }, { status: 500 });
         }
 
-    } catch (error: unknown) {
-        const importError = error as { code?: string; name?: string; message?: string };
-        console.error('Customer import failed', {
-            operation: 'customers.import',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: importError.code || importError.name || 'customers_import_failed',
-        });
+    } catch {
+        console.error('[CustomersImportRoute] customer import failed');
         return NextResponse.json({ error: 'Erro ao importar clientes' }, { status: 500 });
     }
 }

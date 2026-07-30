@@ -88,7 +88,7 @@ export async function POST(request: Request) {
             .single();
 
         if (saveError) {
-            console.error('Error saving draft:', saveError);
+            console.error('[ProposalSaveDraftRoute] proposal draft save failed');
             return NextResponse.json({ 
                 error: 'Error saving proposal draft',
                 code: saveError.code 
@@ -100,8 +100,8 @@ export async function POST(request: Request) {
             proposalId: savedProposal.id,
             version: savedProposal.version
         });
-    } catch (error: any) {
-        console.error('Error in save-draft:', error);
+    } catch {
+        console.error('[ProposalSaveDraftRoute] proposal draft save failed');
         return NextResponse.json({ error: 'Não foi possível salvar o rascunho.' }, { status: 500 });
     }
 }

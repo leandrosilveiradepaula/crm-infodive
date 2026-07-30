@@ -20,7 +20,7 @@ export class AssetService {
 
         const { data, error } = await query;
         if (error) {
-            console.error('Error fetching assets:', error);
+            console.error('[AssetService] assets fetch failed');
             throw new Error('Falha ao carregar ativos.');
         }
 
@@ -65,7 +65,7 @@ export class AssetService {
             .single();
 
         if (error) {
-            console.error('Error creating asset:', error);
+            console.error('[AssetService] asset creation failed');
             throw new Error('Não foi possível salvar o ativo.');
         }
 
@@ -97,7 +97,7 @@ export class AssetService {
             .single();
 
         if (error) {
-            console.error('Error updating asset:', error);
+            console.error('[AssetService] asset update failed');
             throw new Error('Não foi possível atualizar o ativo.');
         }
 
@@ -113,7 +113,7 @@ export class AssetService {
             .eq('organization_id', organizationId);
 
         if (error) {
-            console.error('Error deleting asset:', error);
+            console.error('[AssetService] asset deletion failed');
             throw new Error('Falha ao excluir ativo.');
         }
 

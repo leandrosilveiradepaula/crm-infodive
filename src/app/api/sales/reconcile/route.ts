@@ -108,27 +108,15 @@ export async function POST(req: NextRequest) {
         // Robust JSON parsing
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (!jsonMatch) {
-            console.error('Gemini reconciliation response parse failed', {
-                operation: 'sales.reconcile',
-                provider: 'gemini',
-                status: 'parse_failed',
-                errorCode: 'gemini_response_parse_failed',
-                organizationId,
-            });
+            console.error('[SalesReconcileRoute] reconciliation response parse failed');
             throw new Error('Could not parse AI response as JSON');
         }
 
         const result = JSON.parse(jsonMatch[0]);
         return NextResponse.json({ success: true, data: result });
 
-    } catch (error: unknown) {
-        const reconcileError = error as { code?: string; name?: string; message?: string };
-        console.error('Sales reconciliation failed', {
-            operation: 'sales.reconcile',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: reconcileError.code || reconcileError.name || 'sales_reconcile_failed',
-        });
+    } catch {
+        console.error('[SalesReconcileRoute] reconciliation failed');
         return NextResponse.json({ 
             success: false, 
             error: 'Erro ao reconciliar vendas'

@@ -54,11 +54,7 @@ export async function POST(request: NextRequest) {
         if (response.status === 401) {
             const refreshToken = request.cookies.get('crm_refresh_token')?.value;
             if (refreshToken) {
-                console.info('Microsoft token refresh started', {
-                    operation: 'email.send.refresh',
-                    provider: 'microsoft',
-                    status: 'started',
-                });
+                console.info('[EmailSendRoute] token refresh started');
                 try {
                     newTokens = await refreshMicrosoftToken(refreshToken);
                     response = await fetch(sendMailUrl, {
@@ -70,24 +66,14 @@ export async function POST(request: NextRequest) {
                         body: JSON.stringify(sendMail)
                     });
                 } catch {
-                    console.error('Microsoft token refresh failed', {
-                        operation: 'email.send.refresh',
-                        provider: 'microsoft',
-                        status: 'failed',
-                        errorCode: 'token_refresh_failed',
-                    });
+                    console.error('[EmailSendRoute] token refresh failed');
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             }
         }
 
         if (!response.ok) {
-            console.error('Microsoft Graph send failed', {
-                operation: 'email.send',
-                provider: 'microsoft_graph',
-                status: response.status,
-                errorCode: 'graph_send_failed',
-            });
+            console.error('[EmailSendRoute] graph send failed');
             throw new Error('Microsoft Graph email send failed');
         }
 
@@ -115,14 +101,8 @@ export async function POST(request: NextRequest) {
 
         return finalResponse;
 
-    } catch (error: unknown) {
-        const sendError = error as { code?: string; name?: string; message?: string };
-        console.error('Email send failed', {
-            operation: 'email.send',
-            provider: 'microsoft_graph',
-            status: 'failed',
-            errorCode: sendError?.code || sendError?.name || 'email_send_failed',
-        });
+    } catch {
+        console.error('[EmailSendRoute] email send failed');
         return NextResponse.json({ error: 'Não foi possível enviar o email.' }, { status: 500 });
     }
 }

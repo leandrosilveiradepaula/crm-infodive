@@ -20,7 +20,7 @@ export class ServiceContractService {
 
         const { data, error } = await query;
         if (error) {
-            console.error('Error fetching service contracts:', error);
+            console.error('[ServiceContractService] service contracts fetch failed');
             throw new Error('Falha ao carregar contratos de serviço.');
         }
 
@@ -65,7 +65,7 @@ export class ServiceContractService {
             .single();
 
         if (error) {
-            console.error('Error creating service contract:', error);
+            console.error('[ServiceContractService] service contract creation failed');
             throw new Error('Não foi possível salvar o contrato de serviço.');
         }
 
@@ -97,7 +97,7 @@ export class ServiceContractService {
             .single();
 
         if (error) {
-            console.error('Error updating service contract:', error);
+            console.error('[ServiceContractService] service contract update failed');
             throw new Error('Não foi possível atualizar o contrato de serviço.');
         }
 
@@ -113,7 +113,7 @@ export class ServiceContractService {
             .eq('organization_id', organizationId);
 
         if (error) {
-            console.error('Error deleting service contract:', error);
+            console.error('[ServiceContractService] service contract deletion failed');
             throw new Error('Falha ao excluir contrato.');
         }
 

@@ -15,7 +15,7 @@ export async function getSalesOrders(dealId?: string) {
         const data = await SalesService.getSalesOrders(organizationId, dealId);
         return { success: true, data };
     } catch (error: any) {
-        console.error('Error fetching sales orders:', error);
+        console.error('[SalesActions] sales orders fetch failed');
         return { success: false, error: error.message };
     }
 }
@@ -27,7 +27,7 @@ export async function createSalesOrder(order: Partial<SalesOrder>, items: Partia
         revalidatePath('/sales');
         return { success: true, data };
     } catch (error: any) {
-        console.error('Error creating sales order:', error);
+        console.error('[SalesActions] sales order creation failed');
         return { success: false, error: error.message };
     }
 }
@@ -39,7 +39,7 @@ export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>)
         revalidatePath('/sales');
         return { success: true, data };
     } catch (error: any) {
-        console.error('Error updating sales order:', error);
+        console.error('[SalesActions] sales order update failed');
         return { success: false, error: error.message };
     }
 }
@@ -51,7 +51,7 @@ export async function deleteSalesOrder(id: string) {
         revalidatePath('/sales');
         return { success: true };
     } catch (error: any) {
-        console.error('Error deleting sales order:', error);
+        console.error('[SalesActions] sales order deletion failed');
         return { success: false, error: error.message };
     }
 }
@@ -65,7 +65,7 @@ export async function updateInstallmentStatusAction(installmentId: string, statu
         revalidatePath('/sales');
         return { success: true };
     } catch (error: any) {
-        console.error('Error updating installment status:', error);
+        console.error('[SalesActions] installment status update failed');
         return { success: false, error: error.message };
     }
 }
@@ -92,7 +92,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
             });
 
         if (uploadError) {
-            console.error('Upload error details:', uploadError);
+            console.error('[SalesActions] invoice upload failed');
             throw new Error(`Falha no upload: ${uploadError.message}`);
         }
 
@@ -183,8 +183,8 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
                         }
                     }
 
-                } catch (pdfErr) {
-                    console.error('PDF Text Extraction failed, relying on filename key:', pdfErr);
+                } catch {
+                    console.error('[SalesActions] pdf text extraction fallback used');
                 }
 
                 extractedData = {
@@ -194,8 +194,8 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
                     issuer: extractedIssuer,
                     boletos: extractedBoletos
                 };
-            } catch (err) {
-                console.error('PDF Extraction Error:', err);
+            } catch {
+                console.error('[SalesActions] pdf extraction failed');
                 // Fallback if completely fails
                 extractedData = {
                     number: `PDF-${Math.floor(Math.random() * 10000)}`,
@@ -241,7 +241,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
 
         return { success: true, extractedData, fileUrl: fileName };
     } catch (error: any) {
-        console.error('Process Invoice Error:', error);
+        console.error('[SalesActions] invoice processing failed');
         return { success: false, error: error.message };
     }
 }
@@ -273,8 +273,8 @@ export async function convertDealToSalesOrdersAction(dealId: string, extraData?:
                     description: 'Pedido gerado automaticamente no fechamento.'
                 }
             );
-        } catch (excelError) {
-            console.error('Failed to auto-generate Excel order:', excelError);
+        } catch {
+            console.error('[SalesActions] distributor order generation failed');
             // Non-blocking for the transaction
         }
 
@@ -282,7 +282,7 @@ export async function convertDealToSalesOrdersAction(dealId: string, extraData?:
         revalidatePath('/pipeline');
         return result;
     } catch (error: any) {
-        console.error('Error converting deal to sales orders:', error);
+        console.error('[SalesActions] deal conversion failed');
         return { success: false, error: error.message };
     }
 }
@@ -296,7 +296,7 @@ export async function downloadDistributorOrderAction(dealId: string, extraData?:
         const base64 = buffer.toString('base64');
         return { success: true, base64, fileName };
     } catch (error: any) {
-        console.error('Error in downloadDistributorOrderAction:', error);
+        console.error('[SalesActions] distributor order download failed');
         return { success: false, error: error.message };
     }
 }
@@ -307,7 +307,7 @@ export async function getAllInstallmentsAction() {
         const data = await SalesService.getAllInstallments(organizationId);
         return { success: true, data };
     } catch (error: any) {
-        console.error('Error fetching all installments:', error);
+        console.error('[SalesActions] installments fetch failed');
         return { success: false, error: error.message };
     }
 }

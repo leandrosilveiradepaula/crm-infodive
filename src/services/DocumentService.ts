@@ -112,7 +112,7 @@ export class DocumentService {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('[DocumentService] getDocuments error:', error);
+                console.error('[DocumentService] documents fetch failed');
                 return [];
             }
 
@@ -183,7 +183,7 @@ export class DocumentService {
             });
 
         if (storageError) {
-            console.error('[DocumentService] storage upload error:', storageError);
+            console.error('[DocumentService] storage upload failed');
             throw new Error('Não foi possível enviar o documento.');
         }
 
@@ -213,7 +213,7 @@ export class DocumentService {
         if (dbError) {
             // Best-effort cleanup: remove the uploaded file
             await supabase.storage.from(BUCKET).remove([filePath]);
-            console.error('[DocumentService] db insert error:', dbError);
+            console.error('[DocumentService] document metadata insert failed');
             throw new Error('Não foi possível salvar o documento.');
         }
 

@@ -95,13 +95,7 @@ CRITÉRIOS DE ANÁLISE:
 IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 `;
 
-        console.log('Gemini deal analysis started', {
-            operation: 'gemini.analyzeDeal',
-            provider: 'gemini',
-            status: 'started',
-            organizationId,
-            model: 'gemini-2.5-flash',
-        });
+        console.log('[GeminiAnalyzeDealRoute] deal analysis started');
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
@@ -147,13 +141,7 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 
         // Persist analysis to database
         if (diagnosis && deal.id) {
-            console.log('Deal analysis persistence started', {
-                operation: 'deal.analysis.persist',
-                provider: 'supabase',
-                status: 'started',
-                organizationId,
-                entityId: deal.id,
-            });
+            console.log('[GeminiAnalyzeDealRoute] deal analysis persistence started');
             const supabase = createAdminClient();
             const { error: updateError } = await supabase
                 .from('deals')
@@ -167,37 +155,17 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
                 .eq('organization_id', organizationId);
 
             if (updateError) {
-                console.error('Deal analysis persistence failed', {
-                    operation: 'deal.analysis.persist',
-                    provider: 'supabase',
-                    status: 'failed',
-                    errorCode: updateError.code || 'deal_analysis_persist_failed',
-                    organizationId,
-                    entityId: deal.id,
-                });
+                console.error('[GeminiAnalyzeDealRoute] deal analysis persistence failed');
             } else {
-                console.log('Deal analysis persistence succeeded', {
-                    operation: 'deal.analysis.persist',
-                    provider: 'supabase',
-                    status: 'succeeded',
-                    organizationId,
-                    entityId: deal.id,
-                });
+                console.log('[GeminiAnalyzeDealRoute] deal analysis persistence succeeded');
             }
         }
 
         return NextResponse.json(diagnosis);
 
     } catch (error: unknown) {
-        const analysisError = error as { code?: string; name?: string; message?: string };
-        console.error('Gemini deal analysis failed', {
-            operation: 'gemini.analyzeDeal',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: analysisError.code || analysisError.name || 'gemini_analyze_deal_failed',
-            organizationId,
-            model: 'gemini-2.5-flash',
-        });
+        const analysisError = error as { message?: string };
+        console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
         return NextResponse.json({ error: analysisError.message || 'Erro ao analisar oportunidade' }, { status: 500 });
     }
 }

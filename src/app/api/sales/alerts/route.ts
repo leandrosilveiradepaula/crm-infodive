@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ success: true, alerts });
 
     } catch (error: any) {
-        console.error('Risk Alerts API Error:', error);
+        console.error('[SalesAlertsRoute] risk alerts request failed');
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

@@ -23,7 +23,7 @@ export class LossReasonService {
             .order('name');
             
         if (error) {
-            console.error('Error fetching loss reasons:', error);
+            console.error('[LossReasonService] loss reasons fetch failed');
             return [];
         }
         

@@ -138,12 +138,7 @@ IMPORTANTE:
         try {
             parsedContent = JSON.parse(contentText);
         } catch {
-            console.error('Gemini proposal response parse failed', {
-                operation: 'gemini.proposal.generate',
-                provider: 'gemini',
-                status: 'parse_failed',
-                errorCode: 'gemini_response_parse_failed',
-            });
+            console.error('[GeminiProposalRoute] proposal response parse failed');
             // Replace raw newlines and tabs which cause 'Bad control character'
             const sanitizedText = contentText
                 .replace(/[\n\r]/g, ' ')
@@ -161,14 +156,8 @@ IMPORTANTE:
             simplifiedProductNames: parsedContent.simplifiedProductNames || {}
         });
 
-    } catch (error: unknown) {
-        const proposalError = error as { code?: string; name?: string; message?: string };
-        console.error('Gemini proposal generation failed', {
-            operation: 'gemini.proposal.generate',
-            provider: 'gemini',
-            status: 'failed',
-            errorCode: proposalError.code || proposalError.name || 'gemini_proposal_generation_failed',
-        });
+    } catch {
+        console.error('[GeminiProposalRoute] proposal generation failed');
         return NextResponse.json({ error: 'Erro ao gerar resumo da proposta' }, { status: 500 });
     }
 }

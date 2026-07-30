@@ -163,7 +163,7 @@ export class ActivityAiService {
         const { data, error } = await query.limit(50);
 
         if (error) {
-            console.error('Error fetching suggestions:', error);
+            console.error('[ActivityAiService] suggestions fetch failed');
             return [];
         }
 

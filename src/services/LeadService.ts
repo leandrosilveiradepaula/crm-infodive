@@ -138,7 +138,7 @@ export class LeadService {
                 .single();
 
             if (contactError) {
-                console.error("Erro ao criar contato vinculado:", contactError);
+                console.error('[LeadService] contact creation failed');
             } else if (newContact) {
                 targetContactId = newContact.id;
             }

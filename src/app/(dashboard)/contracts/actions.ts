@@ -25,8 +25,8 @@ export async function getContracts(): Promise<Contract[]> {
             content_json: item.content_json,
             signature_image: item.signature_image
         }));
-    } catch (error: any) {
-        console.error('Error fetching contracts:', error);
+    } catch {
+        console.error('[ContractsActions] contracts fetch failed');
         return [];
     }
 }
@@ -38,7 +38,7 @@ export async function createContract(contract: Partial<Contract>) {
         revalidatePath('/contracts');
         return { success: true, data };
     } catch (error: any) {
-        console.error('Error creating contract:', error);
+        console.error('[ContractsActions] contract creation failed');
         return { success: false, error: error.message };
     }
 }
@@ -50,7 +50,7 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
         revalidatePath('/contracts');
         return { success: true };
     } catch (error: any) {
-        console.error('Error updating contract:', error);
+        console.error('[ContractsActions] contract update failed');
         return { success: false, error: error.message };
     }
 }
@@ -62,7 +62,7 @@ export async function deleteContract(id: string) {
         revalidatePath('/contracts');
         return { success: true };
     } catch (error: any) {
-        console.error('Error deleting contract:', error);
+        console.error('[ContractsActions] contract deletion failed');
         return { success: false, error: error.message };
     }
 }
