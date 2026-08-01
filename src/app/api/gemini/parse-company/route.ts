@@ -81,13 +81,14 @@ export async function POST(req: Request) {
         try {
             const data = JSON.parse(jsonString);
             return NextResponse.json({ data });
-        } catch (e) {
-            console.error('Erro ao fazer parse do JSON:', responseText);
+        } catch {
+            console.error('[GeminiParseCompanyRoute] company response parse failed');
             return NextResponse.json({ error: 'Falha ao processar resposta da IA' }, { status: 500 });
         }
 
-    } catch (error: any) {
-        console.error('Error parsing company:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    } catch {
+        console.error('[GeminiParseCompanyRoute] company parse failed');
+
+        return NextResponse.json({ error: 'Erro ao processar dados da empresa' }, { status: 500 });
     }
 }

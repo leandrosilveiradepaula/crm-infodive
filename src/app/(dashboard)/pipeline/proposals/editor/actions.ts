@@ -56,7 +56,7 @@ export async function fetchDistributorsForEditor() {
         .order('name');
 
     if (error) {
-        console.error('Error fetching distributors:', JSON.stringify(error, null, 2));
+        console.error('[ProposalEditorActions] distributors fetch failed');
         return [];
     }
 

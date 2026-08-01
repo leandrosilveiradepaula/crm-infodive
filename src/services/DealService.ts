@@ -51,7 +51,7 @@ export class DealService {
         const { data: deals, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
-            console.error('❌ Error pipeline data fetch: ', JSON.stringify(error, null, 2));
+            console.error('[DealService] pipeline data fetch failed');
             return { deals: [], profile: null, distributors: [], allAccounts: [] };
         }
 
@@ -87,7 +87,9 @@ export class DealService {
             .eq('relationship_type', 'Distribuidor')
             .order('name');
 
-        if (distError) console.error('❌ Error fetching distributors:', distError);
+        if (distError) {
+            console.error('[DealService] pipeline distributors fetch failed');
+        }
 
         // 5. Fetch all accounts (for Manufacturer mapping)
         const { data: allAccounts } = await supabase
@@ -127,7 +129,7 @@ export class DealService {
         const { data: deal, error } = await query.single();
 
         if (error) {
-            console.error('❌ Error fetching deal details:', error);
+            console.error('[DealService] deal details fetch failed');
             return null;
         }
 
@@ -202,7 +204,7 @@ export class DealService {
         };
 
         const { data, error } = await supabase.from('deals').insert([payload]).select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível salvar a oportunidade.');
         return data as Deal;
     }
 
@@ -250,7 +252,7 @@ export class DealService {
 
         const { data, error } = await query.select().single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a oportunidade.');
         return data as Deal;
     }
 
@@ -278,7 +280,7 @@ export class DealService {
         }
 
         const { data, error } = await query.select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar a etapa da oportunidade.');
         return data;
     }
 
@@ -294,7 +296,7 @@ export class DealService {
             .single();
 
         if (dealError || !originalDeal) {
-            throw new Error(`Failed to fetch original deal: ${dealError?.message}`);
+            throw new Error('Não foi possível duplicar a oportunidade.');
         }
 
         // 2. Fetch original products
@@ -305,7 +307,7 @@ export class DealService {
             .eq('organization_id', organizationId);
 
         if (productsError) {
-            throw new Error(`Failed to fetch original products: ${productsError?.message}`);
+            throw new Error('Não foi possível duplicar os produtos da oportunidade.');
         }
 
         // 3. Prepare duplicated deal data
@@ -330,7 +332,7 @@ export class DealService {
             .single();
 
         if (insertDealError || !newDeal) {
-            throw new Error(`Failed to duplicate deal: ${insertDealError?.message}`);
+            throw new Error('Não foi possível duplicar a oportunidade.');
         }
 
         // 4. Duplicate Products if any
@@ -349,7 +351,7 @@ export class DealService {
                 .insert(duplicatedProductsPayload);
 
             if (insertProductsError) {
-                console.error('Failed to duplicate deal products:', insertProductsError);
+                console.error('[DealService] deal product duplication failed');
                 // Return deal even if products fail to avoid complete block
             }
         }
@@ -384,7 +386,7 @@ export class DealService {
         };
 
         const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível adicionar o produto à oportunidade.');
         return data as DealProduct;
     }
 
@@ -397,7 +399,7 @@ export class DealService {
             .eq('organization_id', organizationId)
             .select()
             .single();
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar o produto da oportunidade.');
         return data as DealProduct;
     }
 
@@ -408,7 +410,7 @@ export class DealService {
             .delete()
             .eq('id', itemId)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível remover o produto da oportunidade.');
         return true;
     }
 
@@ -419,7 +421,7 @@ export class DealService {
             .delete()
             .in('id', itemIds)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
         return true;
     }
 
@@ -492,7 +494,7 @@ export class DealService {
         });
 
         const { data, error } = await supabase.from('deal_products').insert(payload).select();
-        if (error) throw new Error(`Database Error: ${error.message}`);
+        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
         return (data || []) as DealProduct[];
     }
 
@@ -508,7 +510,7 @@ export class DealService {
             .single();
 
         if (dealError || !deal) {
-            console.error('Deal room access denied: deal not found or not in org', dealError);
+            console.error('[DealService] deal room deal fetch failed');
             return { error: 'Acesso negado ou oportunidade não encontrada' };
         }
 
@@ -520,8 +522,8 @@ export class DealService {
             .maybeSingle();
 
         if (fetchError) {
-            console.error('Error fetching existing deal room:', fetchError);
-            return { error: `Erro ao buscar sala: ${fetchError.message}` };
+            console.error('[DealService] deal room fetch failed');
+            return { error: 'Não foi possível acessar a sala da oportunidade.' };
         }
 
         if (existing) return { room: existing };
@@ -534,8 +536,8 @@ export class DealService {
             .single();
 
         if (insertError) {
-            console.error('Error creating deal room:', insertError);
-            return { error: `Erro ao criar sala: ${insertError.message}` };
+            console.error('[DealService] deal room creation failed');
+            return { error: 'Não foi possível criar a sala da oportunidade.' };
         }
 
         return { room: newRoom };

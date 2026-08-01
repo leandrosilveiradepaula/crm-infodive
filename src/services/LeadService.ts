@@ -11,7 +11,7 @@ export class LeadService {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível carregar os leads.');
         return data as Lead[];
     }
 
@@ -37,7 +37,7 @@ export class LeadService {
             .select()
             .single();
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível salvar o lead.');
         return data;
     }
 
@@ -60,7 +60,7 @@ export class LeadService {
             .update(normalizedUpdates)
             .eq('id', id)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível atualizar o lead.');
         return true;
     }
 
@@ -71,7 +71,7 @@ export class LeadService {
             .delete()
             .eq('id', id)
             .eq('organization_id', organizationId);
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível excluir o lead.');
         return true;
     }
 
@@ -85,7 +85,7 @@ export class LeadService {
             .eq('id', leadId)
             .eq('organization_id', organizationId);
 
-        if (leadError) throw new Error(`Erro ao atualizar lead: ${leadError.message}`);
+        if (leadError) throw new Error('Não foi possível converter o lead.');
 
         // 2. Create Account
         const accountData = {
@@ -110,7 +110,7 @@ export class LeadService {
             .select()
             .single();
 
-        if (accError) throw new Error(`Erro ao criar conta: ${accError.message}`);
+        if (accError) throw new Error('Não foi possível converter o lead.');
 
         // 3. Create Contact for Account
         const contactData = {
@@ -124,7 +124,7 @@ export class LeadService {
         };
 
         const { error: contactError } = await supabase.from('account_contacts').insert([contactData]);
-        if (contactError) console.error("Erro ao criar contato vinculado:", contactError);
+        if (contactError) console.error('[LeadService] contact creation failed');
 
         // 4. Create Deal
         const dealData = {
@@ -139,7 +139,7 @@ export class LeadService {
         };
 
         const { error: dealError } = await supabase.from('deals').insert([dealData]);
-        if (dealError) throw new Error(`Erro ao criar oportunidade: ${dealError.message}`);
+        if (dealError) throw new Error('Não foi possível converter o lead.');
 
         return { success: true };
     }

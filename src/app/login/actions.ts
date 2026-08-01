@@ -31,7 +31,7 @@ export async function login(formData: FormData) {
         if (error?.message?.includes('Invalid login credentials')) {
             return { error: 'Email ou senha incorretos.' };
         }
-        return { error: error?.message || 'Email ou senha incorretos.' };
+        return { error: 'Email ou senha incorretos.' };
     }
 
     // Get organizationId from user metadata (set at signup)
@@ -124,7 +124,7 @@ export async function signup(formData: FormData) {
     });
 
     if (error) {
-        return { error: error.message };
+        return { error: 'Não foi possível concluir a autenticação.' };
     }
 
     if (data.user) {
@@ -142,7 +142,7 @@ export async function signup(formData: FormData) {
             });
 
         if (profileError) {
-            console.error('Error creating profile during signup:', profileError);
+            console.error('[LoginActions] profile creation during signup failed');
         } else {
             // 4. Mark invite as accepted only if profile is created successfully
             await UserService.acceptInvitation(invite_token);
@@ -158,6 +158,8 @@ export async function logout() {
     
     const cookieStore = await cookies();
     cookieStore.delete('crm_access_token');
+    cookieStore.delete('crm_provider_token');
+    cookieStore.delete('crm_refresh_token');
     
     revalidatePath('/', 'layout');
 }

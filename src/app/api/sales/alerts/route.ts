@@ -92,9 +92,9 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ success: true, alerts });
 
-    } catch (error: any) {
-        console.error('Risk Alerts API Error:', error);
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    } catch {
+        console.error('[SalesAlertsRoute] risk alerts request failed');
+        return NextResponse.json({ success: false, error: 'Não foi possível carregar os alertas de vendas.' }, { status: 500 });
     }
 }
 
@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ success: true, data: analysisResult });
 
-    } catch (error: any) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    } catch {
+        return NextResponse.json({ success: false, error: 'Não foi possível carregar os alertas de vendas.' }, { status: 500 });
     }
 }

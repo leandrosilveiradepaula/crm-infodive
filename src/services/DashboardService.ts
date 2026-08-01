@@ -13,8 +13,7 @@ export class DashboardService {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error dashboard metrics:', JSON.stringify(error, null, 2));
-            console.error('Full error object:', error);
+            console.error('[DashboardService] dashboard metrics fetch failed');
             return {
                 totalPipeline: 0,
                 weightedForecast: 0,
@@ -149,7 +148,7 @@ export class DashboardService {
             .limit(5);
 
         if (error) {
-            console.error('Error fetching recent deals:', error);
+            console.error('[DashboardService] recent deals fetch failed');
             return [];
         }
 

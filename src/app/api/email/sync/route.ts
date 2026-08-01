@@ -8,11 +8,49 @@ import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+type GraphMessage = {
+    id: string;
+    sender: {
+        emailAddress: {
+            name: string;
+            address: string;
+        };
+    };
+    subject: string;
+    bodyPreview: string;
+    body?: {
+        content?: string;
+    };
+    receivedDateTime: string;
+    isRead: boolean;
+    categories?: string[];
+};
+
+type EmailMessage = {
+    id: string;
+    sender: {
+        name: string;
+        email: string;
+        avatar: string;
+    };
+    subject: string;
+    preview: string;
+    body: string;
+    date: string;
+    read: boolean;
+    labels: string[];
+    folder: string;
+};
+
+type EmailRow = {
+    email: string;
+};
+
 // Direct Gemini SDK call — avoids internal HTTP fetch that gets blocked by middleware auth check
-async function parseSignatureWithGemini(emailBody: string): Promise<Record<string, any> | null> {
+async function parseSignatureWithGemini(emailBody: string): Promise<Record<string, unknown> | null> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        console.warn('🤖 Automagic: GEMINI_API_KEY não configurado.');
+        console.warn('[EmailSyncRoute] signature parsing skipped');
         return null;
     }
 
@@ -50,10 +88,10 @@ Retorne SOMENTE o JSON, sem markdown, sem código, sem texto adicional.`;
     // Gemini sometimes returns an array when the email has multiple signatures (thread).
     // Normalize: if array, return the first element (the most recent/relevant signer).
     if (Array.isArray(parsed)) {
-        return parsed.length > 0 ? parsed[0] : null;
+        return parsed.length > 0 ? parsed[0] as Record<string, unknown> : null;
     }
 
-    return parsed;
+    return parsed as Record<string, unknown>;
 }
 
 export async function GET(request: NextRequest) {
@@ -91,7 +129,7 @@ export async function GET(request: NextRequest) {
         if (response.status === 401) {
             const refreshToken = request.cookies.get('crm_refresh_token')?.value;
             if (refreshToken) {
-                console.log('🔄 Microsoft token expired. Attempting refresh...');
+                console.info('[EmailSyncRoute] token refresh started');
                 try {
                     newTokens = await refreshMicrosoftToken(refreshToken);
                     // Retry with new token
@@ -101,23 +139,22 @@ export async function GET(request: NextRequest) {
                             'Content-Type': 'application/json'
                         }
                     });
-                } catch (refreshErr) {
-                    console.error('❌ Failed to refresh Microsoft token:', refreshErr);
+                } catch {
+                    console.error('[EmailSyncRoute] token refresh failed');
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
-                return NextResponse.json({ error: 'Microsoft API token expired and no refresh token available.' }, { status: 401 });
+                return NextResponse.json({ error: 'Sessão da Microsoft expirada. Conecte sua conta novamente.' }, { status: 401 });
             }
         }
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Graph API Error:', errorText);
-            throw new Error(`Graph API returned ${response.status}: ${errorText}`);
+            console.error('[EmailSyncRoute] graph sync failed');
+            throw new Error('Microsoft Graph sync failed');
         }
 
         const data = await response.json();
-        const emails = data.value.map((msg: any) => ({
+        const emails: EmailMessage[] = data.value.map((msg: GraphMessage) => ({
             id: msg.id,
             sender: {
                 name: msg.sender.emailAddress.name,
@@ -139,7 +176,7 @@ export async function GET(request: NextRequest) {
 
         if (orgId && emails.length > 0) {
             // 1. Isolar remetentes únicos
-            const uniqueSenders = Array.from(new Set(emails.map((e: any) => e.sender.email).filter(Boolean)));
+            const uniqueSenders = Array.from(new Set(emails.map((e) => e.sender.email).filter(Boolean)));
 
             if (uniqueSenders.length > 0) {
                 // Dispara logica em background
@@ -160,13 +197,13 @@ export async function GET(request: NextRequest) {
                             .in('email', uniqueSenders);
 
                         const existingEmailsArray = [
-                            ...(existingContacts?.map((c: any) => c.email.toLowerCase()) || []),
-                            ...(blacklistedContacts?.map((c: any) => c.email.toLowerCase()) || [])
+                            ...((existingContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || []),
+                            ...((blacklistedContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || [])
                         ];
                         const existingEmails = new Set(existingEmailsArray);
 
                         // 3. Filtrar os emails que pertencem a Pessoas Não Cadastradas
-                        const unknownEmails = emails.filter((e: any) => !existingEmails.has(e.sender.email.toLowerCase()));
+                        const unknownEmails = emails.filter((e) => !existingEmails.has(e.sender.email.toLowerCase()));
 
                         // Mapa para não processar a mesma pessoa duas vezes se ela mandou 3 emails seguidos
                         const processedUnknowns = new Set();
@@ -178,8 +215,6 @@ export async function GET(request: NextRequest) {
                             if (!email.body || email.body.length < 20) {
                                 continue; // Evita emails vazios
                             }
-
-                            console.log(`🤖 Automagic: Analisando assinatura para ${email.sender.email}...`);
 
                             // 4. Chama o SDK do Gemini DIRETAMENTE (sem fetch interno)
                             // Fetch interno seria bloqueado pelo middleware de auth do Next.js
@@ -216,12 +251,12 @@ export async function GET(request: NextRequest) {
                                         .from('contact_suggestions')
                                         .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                                     if (insertError) {
-                                        console.error('🤖 Automagic: Falha ao inserir na tabela:', insertError);
+                                        console.error('[EmailSyncRoute] contact suggestion insert failed');
                                     }
                                     continue; // Extraiu com IA, vai pro próximo
                                 }
-                            } catch (aiErr) {
-                                console.error(`🤖 Automagic: Falha no Gemini SDK para ${email.sender.email} (rate limit ou erro):`, (aiErr as Error).message);
+                            } catch {
+                                console.error('[EmailSyncRoute] signature parsing failed');
                             }
 
                             // 6. FALLBACK: Se falhou a IA ou ela retornou vazio, insere o basico que temos
@@ -236,12 +271,12 @@ export async function GET(request: NextRequest) {
                                 .from('contact_suggestions')
                                 .upsert([fallbackSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
                             if (fallbackError) {
-                                console.error('🤖 Automagic: Falha ao inserir o fallback na tabela:', fallbackError);
+                                console.error('[EmailSyncRoute] fallback contact suggestion insert failed');
                             }
                         }
 
-                    } catch (bgErr) {
-                        console.error('Falha no processo de extração de assinaturas em background:', bgErr);
+                    } catch {
+                        console.error('[EmailSyncRoute] background signature extraction failed');
                     }
                 });
             }
@@ -249,8 +284,9 @@ export async function GET(request: NextRequest) {
         // --- FIM DA AUTOMAÇÃO ---
 
         // Limpar body enorme antes de mandar pro front-end pra economizar RAM do navegador
-        const frontEndEmails = emails.map((e: any) => {
-            const { body, ...rest } = e;
+        const frontEndEmails = emails.map((e) => {
+            const rest: Partial<EmailMessage> = { ...e };
+            delete rest.body;
             return rest;
         });
 
@@ -278,8 +314,8 @@ export async function GET(request: NextRequest) {
 
         return finalResponse;
 
-    } catch (error: any) {
-        console.error('Error syncing emails:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        console.error('[EmailSyncRoute] email sync failed');
+        return NextResponse.json({ error: 'Não foi possível sincronizar os emails.' }, { status: 500 });
     }
 }

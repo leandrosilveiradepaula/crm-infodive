@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         if (response.status === 401) {
             const refreshToken = request.cookies.get('crm_refresh_token')?.value;
             if (refreshToken) {
-                console.log('🔄 Microsoft token expired (send). Attempting refresh...');
+                console.info('[EmailSendRoute] token refresh started');
                 try {
                     newTokens = await refreshMicrosoftToken(refreshToken);
                     response = await fetch(sendMailUrl, {
@@ -65,17 +65,16 @@ export async function POST(request: NextRequest) {
                         },
                         body: JSON.stringify(sendMail)
                     });
-                } catch (refreshErr) {
-                    console.error('❌ Failed to refresh Microsoft token:', refreshErr);
+                } catch {
+                    console.error('[EmailSendRoute] token refresh failed');
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             }
         }
 
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Graph API Error (Send):', errorText);
-            throw new Error(`Graph API returned ${response.status}: ${errorText}`);
+            console.error('[EmailSendRoute] graph send failed');
+            throw new Error('Microsoft Graph email send failed');
         }
 
         const finalResponse = NextResponse.json({ success: true });
@@ -102,8 +101,8 @@ export async function POST(request: NextRequest) {
 
         return finalResponse;
 
-    } catch (error: any) {
-        console.error('Error sending email:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch {
+        console.error('[EmailSendRoute] email send failed');
+        return NextResponse.json({ error: 'Não foi possível enviar o email.' }, { status: 500 });
     }
 }

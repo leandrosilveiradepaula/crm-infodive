@@ -4,6 +4,12 @@ import { NextResponse } from 'next/server';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
+type DealActivity = {
+    created_at: string;
+    type: string;
+    title?: string;
+};
+
 export async function POST(request: Request) {
     let organizationId: string;
     try {
@@ -41,7 +47,7 @@ DADOS DA OPORTUNIDADE:
 - Data de Hoje: ${today}
 
 HISTÓRICO RECENTE (Resumo):
-${activities && activities.length > 0 ? activities.map((a: any) => `- [${new Date(a.created_at).toLocaleDateString()}] ${a.type}: ${a.title || 'Sem título'}`).join('\n') : 'Nenhuma atividade recente registrada.'}
+${activities && activities.length > 0 ? activities.map((a: DealActivity) => `- [${new Date(a.created_at).toLocaleDateString()}] ${a.type}: ${a.title || 'Sem título'}`).join('\n') : 'Nenhuma atividade recente registrada.'}
 
 TAREFA:
 Analise os dados acima e retorne um objeto JSON ESTRITAMENTE com a seguinte estrutura (sem markdown, apenas o JSON cru):
@@ -89,7 +95,7 @@ CRITÉRIOS DE ANÁLISE:
 IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 `;
 
-        console.log('🤖 Solicitando análise de Deal ao Gemini...');
+        console.log('[GeminiAnalyzeDealRoute] deal analysis started');
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
@@ -109,8 +115,8 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Erro na API do Gemini: ${response.status} ${response.statusText}`);
+            await response.json().catch(() => ({}));
+            throw new Error('Não foi possível analisar o negócio.');
         }
 
         const data = await response.json();
@@ -123,7 +129,7 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
         let diagnosis;
         try {
             diagnosis = JSON.parse(textResponse);
-        } catch (e) {
+        } catch {
             // Fallback parsing if JSON is wrapped in markdown code blocks
             const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
@@ -135,7 +141,7 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 
         // Persist analysis to database
         if (diagnosis && deal.id) {
-            console.log('💾 Salvando análise no banco de dados...');
+            console.log('[GeminiAnalyzeDealRoute] deal analysis persistence started');
             const supabase = createAdminClient();
             const { error: updateError } = await supabase
                 .from('deals')
@@ -149,16 +155,16 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
                 .eq('organization_id', organizationId);
 
             if (updateError) {
-                console.error('❌ Erro ao salvar análise no banco:', updateError);
+                console.error('[GeminiAnalyzeDealRoute] deal analysis persistence failed');
             } else {
-                console.log('✅ Análise salva com sucesso!');
+                console.log('[GeminiAnalyzeDealRoute] deal analysis persistence succeeded');
             }
         }
 
         return NextResponse.json(diagnosis);
 
-    } catch (error: any) {
-        console.error('❌ Erro na análise do Deal:', error);
-        return NextResponse.json({ error: error.message || 'Erro ao analisar oportunidade' }, { status: 500 });
+    } catch {
+        console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
+        return NextResponse.json({ error: 'Não foi possível analisar o negócio.' }, { status: 500 });
     }
 }

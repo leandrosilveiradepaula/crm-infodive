@@ -15,7 +15,7 @@ export async function getUsersWithGoals() {
         .eq('organization_id', organizationId)
         .order('full_name');
 
-    if (error) { console.error('Error fetching users:', error); return []; }
+    if (error) { console.error('[GoalsCommissionsActions] users fetch failed'); return []; }
 
     return data.map((user: any) => ({
         user_id: user.id || user.user_id,
@@ -41,7 +41,7 @@ export async function updateUserGoals(userId: string, data: Partial<UserGoalData
         .update(data)
         .eq('id', userId)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -61,7 +61,7 @@ export async function createCampaign(campaign: Partial<Campaign>) {
     const { organizationId } = await requireSessionContext();
     const supabase = createAdminClient();
     const { error } = await supabase.from('campaigns').insert([{ ...campaign, organization_id: organizationId }]);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -74,7 +74,7 @@ export async function updateCampaign(id: string, updates: Partial<Campaign>) {
         .update(updates)
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -87,7 +87,7 @@ export async function deleteCampaign(id: string) {
         .delete()
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -109,7 +109,7 @@ export async function saveScenario(scenario: Partial<Scenario>) {
     const { userId, organizationId } = await requireSessionContext();
     const supabase = createAdminClient();
     const { error } = await supabase.from('scenarios').insert([{ ...scenario, user_id: userId, organization_id: organizationId }]);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -122,7 +122,7 @@ export async function deleteScenario(id: string) {
         .delete()
         .eq('id', id)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }
@@ -147,7 +147,7 @@ export async function updateDealCommissionStatus(dealId: string, updates: any) {
         .update(updates)
         .eq('id', dealId)
         .eq('organization_id', organizationId);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: 'Não foi possível processar a comissão.' };
     revalidatePath('/goals-commissions');
     return { success: true };
 }

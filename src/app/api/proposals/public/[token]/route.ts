@@ -21,7 +21,7 @@ export async function GET(
             .rpc('get_proposal_by_public_token', { token_input: token });
 
         if (error) {
-            console.error('Error fetching proposal:', error);
+            console.error('[PublicProposalRoute] public proposal fetch failed');
             return NextResponse.json(
                 { error: 'Erro ao buscar proposta' },
                 { status: 500 }
@@ -34,8 +34,6 @@ export async function GET(
                 { status: 404 }
             );
         }
-
-        console.log('📦 [API] Raw Proposal Data:', JSON.stringify(data, null, 2));
 
         // Map snake_case to camelCase for frontend
         const mappedData = {
@@ -54,8 +52,8 @@ export async function GET(
         };
 
         return NextResponse.json(mappedData);
-    } catch (error: any) {
-        console.error('Unexpected error:', error);
+    } catch {
+        console.error('[PublicProposalRoute] public proposal fetch failed');
         return NextResponse.json(
             { error: 'Erro interno do servidor' },
             { status: 500 }

@@ -12,7 +12,7 @@ export class UserService {
             .eq('organization_id', organizationId)
             .single();
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível carregar o usuário.' };
         return { success: true, data };
     }
 
@@ -24,7 +24,7 @@ export class UserService {
             .eq('organization_id', organizationId)
             .order('full_name');
 
-        if (error) return { users: [], error: error.message };
+        if (error) return { users: [], error: 'Não foi possível carregar os usuários.' };
 
         const mapRole = (r: string) => {
             if (r === USER_ROLES.VENDEDOR) return USER_ROLES.SALES;
@@ -62,7 +62,7 @@ export class UserService {
             .update({ role: dbRole })
             .eq('id', userId)
             .eq('organization_id', organizationId);
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível atualizar o usuário.' };
         return { success: true };
     }
 
@@ -87,7 +87,7 @@ export class UserService {
             .update(dbUpdates)
             .eq('id', userId)
             .eq('organization_id', organizationId);
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível atualizar o perfil.' };
         return { success: true };
     }
 
@@ -100,7 +100,7 @@ export class UserService {
             .eq('id', userId)
             .eq('organization_id', organizationId);
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível atualizar o perfil.' };
         return { success: true };
     }
 
@@ -129,8 +129,8 @@ export class UserService {
             if (archiveError) throw archiveError;
 
             return { success: true };
-        } catch (error: any) {
-            return { success: false, error: error.message };
+        } catch {
+            return { success: false, error: 'Não foi possível arquivar o usuário.' };
         }
     }
 
@@ -164,7 +164,7 @@ export class UserService {
             .select('id')
             .single();
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível enviar o convite.' };
         return { success: true, inviteId: data.id };
     }
 
@@ -197,7 +197,7 @@ export class UserService {
             .update({ status: 'accepted', updated_at: new Date().toISOString() })
             .eq('id', inviteId);
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível aceitar o convite.' };
         return { success: true };
     }
 }

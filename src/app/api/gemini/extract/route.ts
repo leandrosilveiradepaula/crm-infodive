@@ -14,6 +14,12 @@ const VISION_MODELS = [
     'gemini-pro-latest',
 ];
 
+type ExtractedProduct = {
+    name?: string;
+    sku?: string;
+    quantity?: number;
+};
+
 export async function POST(request: Request) {
     // 1. Auth Guard (iron-session)
     try {
@@ -31,15 +37,11 @@ export async function POST(request: Request) {
         const payload = await request.json();
         const { imageData, mimeType } = payload;
 
-        console.log(`📦 Payload recebido: chaves = ${Object.keys(payload).join(', ')}`);
-        console.log(`- mimeType: ${mimeType}`);
-        console.log(`- imageData size: ${(imageData?.length || 0)} bytes`);
-
         if (!imageData || !mimeType) {
-            return NextResponse.json({ error: `Os campos 'imageData' e 'mimeType' são obrigatórios. (Recebido: mimeType=${mimeType}, imageData length=${imageData?.length || 0})` }, { status: 400 });
+            return NextResponse.json({ error: "Os campos 'imageData' e 'mimeType' são obrigatórios." }, { status: 400 });
         }
 
-        console.log(`📸 Processando arquivo (${mimeType})...`);
+        console.log('[GeminiExtractRoute] extraction started');
 
         const prompt = `Analise este arquivo (imagem ou PDF de planilha/lista de produtos).
 Extraia os dados dos produtos em formato JSON.
@@ -58,12 +60,12 @@ REGRAS IMPORTANTES:
 3. Se não houver cabeçalhos claros, infira pelo conteúdo. 
 4. Apenas devolva o JSON, sem markdown.`;
 
-        let lastError: any;
+        let lastError: unknown;
 
         // Try models sequentially
         for (const modelName of VISION_MODELS) {
             try {
-                console.log(`🤖 Tentando modelo: ${modelName}...`);
+                console.log('[GeminiExtractRoute] extraction model attempt started');
 
                 const result = await client.models.generateContent({
                     model: modelName,
@@ -79,10 +81,10 @@ REGRAS IMPORTANTES:
                 const text = result.text;
                 if (!text) throw new Error('Resposta vazia do modelo');
 
-                console.log(`✅ Sucesso com modelo: ${modelName}`);
+                console.log('[GeminiExtractRoute] extraction model succeeded');
 
                 // Match JSON array
-                let parsedData;
+                let parsedData: ExtractedProduct[];
                 const jsonMatch = text.match(/\[[\s\S]*\]/);
                 if (jsonMatch) {
                     parsedData = JSON.parse(jsonMatch[0]);
@@ -99,7 +101,7 @@ REGRAS IMPORTANTES:
                     /total venda/i
                 ];
 
-                parsedData = parsedData.filter((item: any) => {
+                parsedData = parsedData.filter((item: ExtractedProduct) => {
                     const name = item.name || '';
                     if (BLACKLIST_PATTERNS.some(pattern => pattern.test(name))) {
                         return false;
@@ -113,16 +115,16 @@ REGRAS IMPORTANTES:
 
                 return NextResponse.json({ products: parsedData });
 
-            } catch (error: any) {
-                console.warn(`❌ Falha com modelo ${modelName}:`, error.message);
+            } catch (error: unknown) {
+                console.warn('[GeminiExtractRoute] extraction model failed');
                 lastError = error;
             }
         }
 
         throw lastError || new Error('Todos os modelos falharam');
 
-    } catch (error: any) {
-        console.error("💥 Erro na extração:", error);
-        return NextResponse.json({ error: error.message || 'Erro ao processar imagem' }, { status: 500 });
+    } catch {
+        console.error('[GeminiExtractRoute] extraction failed');
+        return NextResponse.json({ error: 'Erro ao processar imagem' }, { status: 500 });
     }
 }
