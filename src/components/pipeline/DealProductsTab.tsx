@@ -17,6 +17,7 @@ import { updateDeal, reorderDealProducts, removeDealProduct, updateDealProduct, 
 import { ImportDealProductsModal } from './ImportDealProductsModal';
 import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculations';
 import { sortProductsHierarchically } from '@/utils/productSorting';
+import { normalizePricingModel } from './product-row/pricingModel';
 
 interface DealProductsTabProps {
     deal: Deal;
@@ -157,6 +158,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             duration: selectedCatalogProduct.duration,
             duration_unit: selectedCatalogProduct.duration_unit,
             show_sku_on_proposal: selectedCatalogProduct.show_sku_on_proposal,
+            pricing_model: normalizePricingModel(selectedCatalogProduct.pricing_model),
             display_order: (deal.deal_products?.length || 0)
         };
 
