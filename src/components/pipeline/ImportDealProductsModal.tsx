@@ -8,6 +8,7 @@ import { DealProductMapper } from './DealProductMapper';
 import { ProductSearch } from './ProductSearch';
 import { extractProductsFromImage } from '@/lib/gemini';
 import { type Product } from '@/types/product';
+import { normalizePricingModel, type PricingModel } from './product-row/pricingModel';
 
 // Simplified type for ProductItem since we don't have the full useDeals hook context
 export interface ProductItem {
@@ -26,6 +27,7 @@ export interface ProductItem {
     exchange_rate?: number;
     category?: string;
     subcategory?: string;
+    pricing_model?: PricingModel;
 }
 
 interface ImportDealProductsModalProps {
@@ -224,7 +226,8 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                     quantity: effectiveQuantity,
                     category: p.category || '',
                     subcategory: p.subcategory || '',
-                    is_bid: false
+                    is_bid: false,
+                    pricing_model: 'one_time'
                 };
             });
 
@@ -273,6 +276,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                         margin: 0,
                         unit_price: newTotalPrice,
                         description: JSON.stringify(finalDetails),
+                        pricing_model: normalizePricingModel(targetProduct.pricing_model),
                     };
                 } else {
                     const marginToUse = (typeof targetProduct.margin === 'number') ? targetProduct.margin : 20;
@@ -285,6 +289,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                         margin: marginToUse,
                         unit_price: newPrice,
                         description: JSON.stringify(finalDetails),
+                        pricing_model: normalizePricingModel(targetProduct.pricing_model),
                     };
                 }
 
@@ -318,7 +323,8 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                     is_bid: false,
                     category: selectedBundleProduct.category || '',
                     subcategory: selectedBundleProduct.subcategory || '',
-                    external_id: selectedBundleProduct.id
+                    external_id: selectedBundleProduct.id,
+                    pricing_model: 'one_time'
                 };
 
                 setImportPayload([bundleItem]);

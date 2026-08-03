@@ -34,6 +34,7 @@ export interface ProductItem {
     duration_unit?: string | null;
     catalog_description?: string;
     show_description_on_proposal?: boolean;
+    pricing_model?: 'one_time' | 'monthly' | 'annual' | null;
     [key: string]: any;
 }
 

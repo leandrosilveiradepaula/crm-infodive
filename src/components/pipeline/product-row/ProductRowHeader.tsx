@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import type { ProductItem } from '../SortableProductRow';
+import {
+    PRICING_MODEL_VALUES,
+    createPricingModelUpdate,
+    getPricingModelLabel,
+    getPricingModelShortLabel,
+    normalizePricingModel
+} from './pricingModel';
 
 interface ProductRowHeaderProps {
     product: ProductItem;
@@ -63,6 +70,7 @@ export function ProductRowHeader({
     };
 
     const rowClasses = `hover:bg-accent/30 transition-colors group cursor-pointer ${isDragging ? 'bg-primary/10' : ''}`;
+    const pricingModel = normalizePricingModel(product.pricing_model);
 
     return (
         <tr 
@@ -166,6 +174,37 @@ export function ProductRowHeader({
                                     Definir Duração
                                 </Badge>
                             )}
+                            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                                {isEditing ? (
+                                    <label className="block">
+                                        <span className="sr-only">Modelo de cobrança do produto</span>
+                                        <select
+                                            aria-label={`Modelo de cobrança de ${product.name}`}
+                                            title="Modelo de cobrança"
+                                            className="h-7 w-[136px] rounded-lg border border-primary/20 bg-primary/5 px-2 text-[11px] font-bold text-primary outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                                            value={pricingModel}
+                                            onChange={(e) => {
+                                                const update = createPricingModelUpdate(product.id, e.target.value);
+                                                handleUpdateProduct(update.productId, update.field, update.value);
+                                            }}
+                                        >
+                                            {PRICING_MODEL_VALUES.map(value => (
+                                                <option key={value} value={value}>
+                                                    {getPricingModelLabel(value)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                ) : (
+                                    <Badge
+                                        variant="outline"
+                                        className="h-5 px-2 text-[10px] font-bold bg-primary/5 text-primary border-primary/20 uppercase tracking-wider"
+                                        title={getPricingModelLabel(pricingModel)}
+                                    >
+                                        {getPricingModelShortLabel(pricingModel)}
+                                    </Badge>
+                                )}
+                            </div>
                             {isEditing && (
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {product.parent_id ? (
