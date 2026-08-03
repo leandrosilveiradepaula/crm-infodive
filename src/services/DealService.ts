@@ -382,7 +382,8 @@ export class DealService {
             exchange_rate: productData.exchange_rate || 5.0,
             billing_type: productData.billing_type || 'indirect',
             distributor_id: productData.distributor_id || null,
-            distributor_cnpj: productData.distributor_cnpj || null
+            distributor_cnpj: productData.distributor_cnpj || null,
+            pricing_model: productData.pricing_model || 'one_time'
         };
 
         const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
@@ -489,7 +490,8 @@ export class DealService {
                 bid_validity: p.bid_validity || null,
                 display_order: p.display_order || 999,
                 billing_type: p.billing_type || 'indirect',
-                distributor_cnpj: p.distributor_cnpj || null
+                distributor_cnpj: p.distributor_cnpj || null,
+                pricing_model: p.pricing_model || 'one_time'
             };
         });
 

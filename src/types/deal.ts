@@ -45,6 +45,7 @@ export interface DealProduct {
     display_order?: number;
     custom_label?: string | null;
     tech_details?: string | null;
+    pricing_model?: 'one_time' | 'monthly' | 'annual';
     [key: string]: any;
 }
 

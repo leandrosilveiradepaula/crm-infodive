@@ -9,6 +9,10 @@ export interface ProductPriceItem extends Partial<DealProduct> {
     parent_id?: string | null;
 }
 
+export const getRecurringPricingMultiplier = (pricingModel?: string | null): number => {
+    return pricingModel === 'monthly' ? 12 : 1;
+};
+
 /**
  * Calculates the total sales value for a deal, considering product groups (parent/child).
  * Logic:
@@ -29,7 +33,7 @@ export const calculateDealValue = (products: ProductPriceItem[]): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
 
-        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0) * getRecurringPricingMultiplier(item.pricing_model);
         const children = products.filter(p => p.parent_id === productId);
 
         const childrenSum = children.reduce((sum, child) => {
@@ -82,7 +86,7 @@ export const calculateDealTotalCost = (products: ProductPriceItem[]): number => 
     const getTreeValue = (productId: string, valueField: 'unit_price' | 'cost'): number => {
         const item = productsMap.get(productId);
         if (!item) return 0;
-        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0);
+        const val = (Number(item[valueField as keyof ProductPriceItem]) || 0) * (item.quantity || 0) * getRecurringPricingMultiplier(item.pricing_model);
         const children = products.filter(p => p.parent_id === productId);
         return val + children.reduce((sum, child) => sum + getTreeValue(child.id, valueField), 0);
     };
