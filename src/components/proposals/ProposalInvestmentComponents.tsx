@@ -1,6 +1,7 @@
 import React from 'react';
 import type { DealProduct } from '@/types/deal';
 import { isSoftware, isService, isSupport, getClassificationLabel } from '@/utils/productClassification';
+import { getProposalPricingLabels, getProposalProductDisplaySubtotal } from './proposalPricingGroups';
 
 interface ProposalInvestmentTableProps {
     mainProducts: DealProduct[];
@@ -8,12 +9,13 @@ interface ProposalInvestmentTableProps {
     totalMainValue: number;
     title?: string;
     isSubtotal?: boolean;
+    totalLabel?: string;
     simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMainValue, title, isSubtotal, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
+export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMainValue, title, isSubtotal, totalLabel, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     return (
@@ -55,7 +57,7 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                 </div>
 
                 {mainProducts.map((product, index) => {
-                    const productTotal = (product.unit_price || 0) * (product.quantity || 1);
+                    const productTotal = getProposalProductDisplaySubtotal(product);
 
                     let categoryLabel = product.category || getClassificationLabel(product);
                     if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
@@ -120,7 +122,7 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                     paddingRight: '20px',
                     letterSpacing: '0.5px'
                 }}>
-                    {isSubtotal ? 'Subtotal (Itens Acima)' : 'Investimento Consolidado (Itens Acima)'}
+                    {totalLabel || (isSubtotal ? 'Subtotal (Itens Acima)' : 'Investimento Consolidado (Itens Acima)')}
                 </div>
                 <div style={{
                     fontSize: isSubtotal ? '18px' : '22px',
@@ -209,6 +211,9 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{simplifiedProductNames[child.name] || child.name}</div>
+                                            <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
+                                                {getProposalPricingLabels(child.pricing_model).title}
+                                            </span>
                                             {isSoftware(child) && (
                                                 <span style={{
                                                     fontSize: '9px',
@@ -276,6 +281,9 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ fontWeight: '700', color: primaryColor, fontSize: '13px' }}>{simplifiedProductNames[parent.name] || parent.name}</div>
+                                        <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
+                                            {getProposalPricingLabels(parent.pricing_model).title}
+                                        </span>
                                         {parent.custom_label && (
                                             <span style={{
                                                 fontSize: '10px',

@@ -3,6 +3,7 @@ import type { Deal, DealProduct } from '@/types/deal';
 import type { Account } from '@/types/account';
 import type { BillingOverride } from '@/hooks/useProposalEditorState';
 import { ProposalInvestmentTable, ProposalInvestmentOptionals } from './ProposalInvestmentComponents';
+import { groupProposalInvestmentProducts } from './proposalPricingGroups';
 
 interface ProposalInvestmentPageProps {
     deal: Deal;
@@ -40,7 +41,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
     const products = deal.deal_products || [];
     const mainProducts = products.filter(p => !p.is_optional);
     const optionalProducts = products.filter(p => p.is_optional);
-    const totalConsolidatedValue = mainProducts.reduce((acc, item) => acc + ((item.unit_price || 0) * (item.quantity || 1)), 0);
+    const investmentGroups = groupProposalInvestmentProducts(mainProducts);
 
     // Grouping logic for Main Products
     interface BillingGroup {
@@ -139,15 +140,19 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                 </div>
 
-                {/* Single unified investment table with ALL products */}
-                <ProposalInvestmentTable
-                    mainProducts={mainProducts}
-                    formatCurrency={formatCurrency}
-                    totalMainValue={totalConsolidatedValue}
-                    simplifiedProductNames={simplifiedProductNames}
-                    themePrimary={primaryColor}
-                    themeAccent={accentColor}
-                />
+                {investmentGroups.map(group => (
+                        <ProposalInvestmentTable
+                            key={group.pricingModel}
+                            mainProducts={group.products}
+                            formatCurrency={formatCurrency}
+                            totalMainValue={group.subtotal}
+                            title={group.title}
+                            totalLabel={group.totalLabel}
+                            simplifiedProductNames={simplifiedProductNames}
+                            themePrimary={primaryColor}
+                            themeAccent={accentColor}
+                        />
+                ))}
 
                 {/* Separate billing info section */}
                 {showBilling && !config?.isPriceStudy && groups.some(g => g.distributor || g.type === 'reseller') && (

@@ -4,6 +4,14 @@ import { PdfColors } from './pdfStyles';
 import { LOGO_BASE64 } from './pdfAssetsBase64';
 import { getClassificationLabel } from '@/utils/productClassification';
 import type { BillingOverride } from '@/hooks/useProposalEditorState';
+import { groupProposalInvestmentProducts, getProposalPricingLabels, getProposalProductDisplaySubtotal } from '../proposalPricingGroups';
+import type { DealProduct } from '@/types/deal';
+
+type PdfInvestmentProduct = DealProduct & {
+    duration?: number | null;
+    duration_unit?: string | null;
+    pricingGroupTitle?: string;
+};
 
 interface PdfInvestmentPageProps {
     products: any[];
@@ -31,12 +39,14 @@ export function PdfInvestmentPage({
     pdfStyles,
 }: PdfInvestmentPageProps) {
     // Separate main and optional products
-    const mainProducts = products.filter(p => !p.is_optional);
+    const rawMainProducts = products.filter(p => !p.is_optional);
     const optionalProducts = products.filter(p => p.is_optional && p.is_visible_on_proposal !== false);
-
-    // Calculate total
-    const totalMainValue = mainProducts.reduce(
-        (acc, p) => acc + (p.unit_price || 0) * (p.quantity || 1), 0
+    const investmentGroups = groupProposalInvestmentProducts(rawMainProducts);
+    const mainProducts: PdfInvestmentProduct[] = investmentGroups.flatMap(group =>
+        group.products.map((product, index) => ({
+            ...product,
+            pricingGroupTitle: index === 0 ? group.title : undefined,
+        }))
     );
 
     const showSkuColumn = mainProducts.some(p => p.show_sku_on_proposal !== false && !!p.sku);
@@ -111,7 +121,7 @@ export function PdfInvestmentPage({
 
                     {/* Table Rows */}
                     {mainProducts.map((product, idx) => {
-                        const productTotal = (product.unit_price || 0) * (product.quantity || 1);
+                        const productTotal = getProposalProductDisplaySubtotal(product);
                         let categoryLabel = product.category || getClassificationLabel(product);
                         if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
                             categoryLabel += ` - ${product.subcategory}`;
@@ -130,6 +140,11 @@ export function PdfInvestmentPage({
                                     </Text>
                                 </View>
                                 <View style={{ flex: 1 }}>
+                                    {product.pricingGroupTitle && (
+                                        <Text style={{ fontSize: 8, fontWeight: 'bold', color: pdfColors.accent, textTransform: 'uppercase', marginBottom: 3 }}>
+                                            {product.pricingGroupTitle}
+                                        </Text>
+                                    )}
                                     <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.text }}>
                                         {simplifiedProductNames[product.name] || product.display_name || product.name}
                                     </Text>
@@ -173,20 +188,22 @@ export function PdfInvestmentPage({
                 </View>
 
                 {/* Total — keep together */}
-                <View wrap={false} style={{
-                    flexDirection: 'row', marginTop: 16, paddingHorizontal: 12,
-                    alignItems: 'baseline', justifyContent: 'flex-end',
-                }}>
-                    <Text style={{
-                        fontSize: 13, fontWeight: 'bold', color: '#4b5563',
-                        textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                {investmentGroups.map(group => (
+                    <View key={`total-${group.pricingModel}`} wrap={false} style={{
+                        flexDirection: 'row', marginTop: 10, paddingHorizontal: 12,
+                        alignItems: 'baseline', justifyContent: 'flex-end',
                     }}>
-                        Investimento Consolidado
-                    </Text>
-                    <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
-                        {formatCurrency(totalMainValue)}
-                    </Text>
-                </View>
+                        <Text style={{
+                            fontSize: 13, fontWeight: 'bold', color: '#4b5563',
+                            textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                        }}>
+                            {group.totalLabel}
+                        </Text>
+                        <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
+                            {formatCurrency(group.subtotal)}
+                        </Text>
+                    </View>
+                ))}
 
                 {/* Optional Products */}
                 {optionalProducts.length > 0 && (
@@ -203,7 +220,7 @@ export function PdfInvestmentPage({
                             </Text>
                         </View>
                         {optionalProducts.map((product, idx) => {
-                            const productTotal = (product.unit_price || 0) * (product.quantity || 1);
+                            const productTotal = getProposalProductDisplaySubtotal(product);
                             return (
                                 <View key={idx} wrap={false} style={{
                                     flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 16,
@@ -215,7 +232,7 @@ export function PdfInvestmentPage({
                                             {simplifiedProductNames[product.name] || product.display_name || product.name}
                                         </Text>
                                         <Text style={{ fontSize: 9, color: pdfColors.textLight }}>
-                                            {product.category || 'Opcional'} - Qtd: {product.quantity || 1}
+                                            {product.category || 'Opcional'} - {getProposalPricingLabels(product.pricing_model).title} - Qtd: {product.quantity || 1}
                                         </Text>
                                     </View>
                                     <View style={{ width: 120, alignItems: 'flex-end' }}>
