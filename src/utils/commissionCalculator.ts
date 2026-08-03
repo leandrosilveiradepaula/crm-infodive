@@ -1,5 +1,6 @@
 import type { Deal } from '@/types/deal';
 import type { Profile } from '@/types/profile';
+import { getRecurringPricingMultiplier } from './dealCalculations';
 
 export interface CommissionResult {
     commission: number;
@@ -36,7 +37,7 @@ export function calculateDealCommission(
     let lastAppliedRate = 0;
 
     const totals = products.reduce((acc, p) => {
-        const grossMargin = ((p.unit_price || 0) - (p.cost || 0)) * (p.quantity || 0);
+        const grossMargin = ((p.unit_price || 0) - (p.cost || 0)) * (p.quantity || 0) * getRecurringPricingMultiplier(p.pricing_model);
         const netMargin = grossMargin * (1 - deduction);
 
         // Map Portuguese UI categories to English rule keys
