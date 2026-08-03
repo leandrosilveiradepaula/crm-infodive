@@ -163,7 +163,7 @@ export class ActivityAiService {
         const { data, error } = await query.limit(50);
 
         if (error) {
-            console.error('Error fetching suggestions:', error);
+            console.error('[ActivityAiService] suggestions fetch failed');
             return [];
         }
 
@@ -236,7 +236,7 @@ export class ActivityAiService {
             .eq('id', suggestionId)
             .eq('organization_id', organizationId);
 
-        if (error) throw new Error(error.message);
+        if (error) throw new Error('Não foi possível processar a atividade com IA.');
     }
 
     static async hasValidCache(organizationId: string): Promise<boolean> {

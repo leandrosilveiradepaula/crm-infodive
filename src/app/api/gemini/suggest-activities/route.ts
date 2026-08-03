@@ -4,6 +4,25 @@ import { NextResponse } from 'next/server';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
+type ActivityRecord = {
+    deal_id: string;
+    title?: string;
+    type?: string;
+    status?: string;
+    created_at: string;
+    dueDate?: string;
+};
+
+type ActivitySuggestion = {
+    dealId?: string;
+    type?: string;
+    title?: string;
+    description?: string;
+    priority?: string;
+    dueDaysFromNow?: number;
+    reasoning?: string;
+};
+
 export async function POST(request: Request) {
     let userId: string;
     let organizationId: string;
@@ -67,7 +86,9 @@ export async function POST(request: Request) {
             .order('value', { ascending: false });
 
         if (dealsError || !deals || deals.length === 0) {
-            if (dealsError) console.error("Falha ao buscar deals na view de suggestions:", dealsError);
+            if (dealsError) {
+                console.error('[GeminiSuggestActivitiesRoute] suggestion deals fetch failed');
+            }
             return NextResponse.json({ suggestions: [], fromCache: false });
         }
 
@@ -80,8 +101,8 @@ export async function POST(request: Request) {
             .in('deal_id', dealIds)
             .order('created_at', { ascending: false });
 
-        const activitiesByDeal: Record<string, any[]> = {};
-        (allActivities || []).forEach((a: any) => {
+        const activitiesByDeal: Record<string, ActivityRecord[]> = {};
+        (allActivities || []).forEach((a: ActivityRecord) => {
             if (!activitiesByDeal[a.deal_id]) activitiesByDeal[a.deal_id] = [];
             if (activitiesByDeal[a.deal_id].length < 3) {
                 activitiesByDeal[a.deal_id].push(a);
@@ -149,8 +170,8 @@ REGRAS:
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Gemini API error: ${response.status}`);
+            await response.json().catch(() => ({}));
+            throw new Error('Não foi possível gerar sugestões de atividades.');
         }
 
         const data = await response.json();
@@ -160,7 +181,7 @@ REGRAS:
             throw new Error('Empty response from Gemini');
         }
 
-        let suggestions: any[];
+        let suggestions: ActivitySuggestion[];
         try {
             suggestions = JSON.parse(textResponse);
         } catch {
@@ -212,8 +233,8 @@ REGRAS:
         if (rows.length > 0) {
             const { error: insertError } = await supabase.from('ai_activity_suggestions').insert(rows);
             if (insertError) {
-                console.error("DB Insert Error:", insertError);
-                throw new Error("Falha ao salvar sugestões no banco: " + insertError.message);
+                console.error('[GeminiSuggestActivitiesRoute] activity suggestions insert failed');
+                throw new Error('Não foi possível gerar sugestões de atividades.');
             }
         }
 
@@ -227,8 +248,8 @@ REGRAS:
             .order('created_at', { ascending: false });
 
         if (fetchError) {
-            console.error("DB Select Error after insert:", fetchError);
-            throw new Error("Falha ao ler sugestões recém-criadas: " + fetchError.message);
+            console.error('[GeminiSuggestActivitiesRoute] activity suggestions fetch after insert failed');
+            throw new Error('Não foi possível gerar sugestões de atividades.');
         }
 
         return NextResponse.json({
@@ -237,10 +258,10 @@ REGRAS:
             totalGenerated: rows.length
         });
 
-    } catch (error: any) {
-        console.error('❌ Error generating suggestions:', error);
+    } catch {
+        console.error('[GeminiSuggestActivitiesRoute] activity suggestions failed');
         return NextResponse.json(
-            { error: error.message || 'Failed to generate suggestions' },
+            { error: 'Não foi possível gerar sugestões de atividades.' },
             { status: 500 }
         );
     }

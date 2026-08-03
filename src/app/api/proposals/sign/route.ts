@@ -44,23 +44,23 @@ export async function POST(request: NextRequest) {
         });
 
         if (error) {
-            console.error('Error signing proposal:', error);
+            console.error('[ProposalSignRoute] proposal signing failed');
             return NextResponse.json(
-                { error: error.message || 'Erro ao assinar proposta' },
+                { error: 'Não foi possível assinar a proposta.' },
                 { status: 400 }
             );
         }
 
         if (!data || !data.success) {
             return NextResponse.json(
-                { error: data?.error || 'Falha ao assinar proposta' },
+                { error: 'Proposta inválida ou indisponível.' },
                 { status: 400 }
             );
         }
 
         return NextResponse.json(data);
-    } catch (error: any) {
-        console.error('Unexpected error signing proposal:', error);
+    } catch {
+        console.error('[ProposalSignRoute] proposal signing failed');
         return NextResponse.json(
             { error: 'Erro interno do servidor' },
             { status: 500 }

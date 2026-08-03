@@ -46,7 +46,7 @@ export class DistributorOrderService {
     ): Promise<{ buffer: Buffer, fileName: string }> {
         // 1. Fetch Deal Data
         const deal = await DealService.getDealDetails('system', dealId, organizationId);
-        if (!deal) throw new Error('Deal not found');
+        if (!deal) throw new Error('Não foi possível processar o pedido do distribuidor.');
 
         // 2. Fetch Organization Settings
         const org = await SettingsService.getOrgSettings(organizationId);
@@ -55,7 +55,7 @@ export class DistributorOrderService {
         const templatePath = path.join(process.cwd(), 'docs', 'templates', 'FORMULÁRIO DE PEDIDOS HW Ingram.xlsx');
 
         if (!fs.existsSync(templatePath)) {
-            throw new Error(`Template not found at ${templatePath}`);
+            throw new Error('Não foi possível processar o pedido do distribuidor.');
         }
 
         const workbook = new ExcelJS.Workbook();
@@ -63,7 +63,7 @@ export class DistributorOrderService {
         await workbook.xlsx.load(fileBuffer as unknown as any);
 
         const worksheet = workbook.getWorksheet("Pedido HW");
-        if (!worksheet) throw new Error('Sheet "Pedido HW" not found in template');
+        if (!worksheet) throw new Error('Não foi possível processar o pedido do distribuidor.');
 
         // 4. Fill Dealer Data (Revenda)
         worksheet.getCell('B9').value = extraData?.dealerName || org.name || '';

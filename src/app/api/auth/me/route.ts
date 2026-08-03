@@ -17,8 +17,8 @@ export async function GET() {
             userId: session.userId,
             profile: profileRes.success ? profileRes.data : null,
         });
-    } catch (error) {
-        console.error('Me API Error:', error);
+    } catch {
+        console.error('[AuthMeRoute] me request failed');
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

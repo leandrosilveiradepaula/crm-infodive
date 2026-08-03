@@ -12,7 +12,7 @@ export class ProductService {
             .order('name');
 
         if (error) {
-            console.error('Error fetching products:', error);
+            console.error('[ProductService] products fetch failed');
             return [];
         }
 
@@ -44,11 +44,11 @@ export class ProductService {
             return { success: true, data };
         } catch (error: any) {
             const err = error as { code?: string; message?: string };
-            console.error('Error creating product:', err);
+            console.error('[ProductService] product creation failed');
             if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Este SKU já está cadastrado.' };
             }
-            return { success: false, error: err.message || 'Erro desconhecido' };
+            return { success: false, error: 'Não foi possível salvar o produto.' };
         }
     }
 
@@ -73,11 +73,11 @@ export class ProductService {
             return { success: true };
         } catch (error: unknown) {
             const err = error as { code?: string; message?: string };
-            console.error('Error updating product:', err);
+            console.error('[ProductService] product update failed');
             if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Este SKU já está cadastrado.' };
             }
-            return { success: false, error: err.message || 'Erro desconhecido' };
+            return { success: false, error: 'Não foi possível atualizar o produto.' };
         }
     }
 
@@ -94,10 +94,9 @@ export class ProductService {
             if (error) throw error;
 
             return { success: true };
-        } catch (error: unknown) {
-            const err = error as { message?: string };
-            console.error('Error deleting product:', err);
-            return { success: false, error: err.message || 'Erro desconhecido' };
+        } catch {
+            console.error('[ProductService] product deletion failed');
+            return { success: false, error: 'Não foi possível excluir o produto.' };
         }
     }
 
@@ -141,11 +140,11 @@ export class ProductService {
             return { success: true, data };
         } catch (error: unknown) {
             const err = error as { code?: string; message?: string };
-            console.error('Error duplicating product:', err);
+            console.error('[ProductService] product duplication failed');
             if (err.code === '23505' || err.message?.includes('products_sku_key')) {
                 return { success: false, error: 'Erro ao gerar SKU único para a cópia. Tente novamente.' };
             }
-            return { success: false, error: err.message || 'Erro desconhecido' };
+            return { success: false, error: 'Não foi possível duplicar o produto.' };
         }
     }
 }

@@ -16,7 +16,7 @@ export class AccountService {
             .order('name');
 
         if (error) {
-            console.error('Error fetching accounts:', error);
+            console.error('[AccountService] accounts fetch failed');
             return [];
         }
 
@@ -45,7 +45,7 @@ export class AccountService {
             .order('name', { ascending: true });
 
         if (error) {
-            console.error('Error fetching accounts:', error);
+            console.error('[AccountService] accounts fetch failed');
             return [];
         }
 
@@ -63,7 +63,7 @@ export class AccountService {
             .order('name', { ascending: true });
 
         if (error) {
-            console.error('Error fetching manufacturers:', error);
+            console.error('[AccountService] manufacturers fetch failed');
             return [];
         }
 
@@ -135,9 +135,9 @@ export class AccountService {
             }
 
             return { success: true, data: accData };
-        } catch (error: any) {
-            console.error('Error creating account:', error);
-            return { success: false, error: error.message };
+        } catch {
+            console.error('[AccountService] account creation failed');
+            return { success: false, error: 'Não foi possível salvar a conta.' };
         }
     }
 
@@ -220,9 +220,9 @@ export class AccountService {
             }
 
             return { success: true };
-        } catch (error: any) {
-            console.error('Error updating account:', error);
-            return { success: false, error: error.message };
+        } catch {
+            console.error('[AccountService] account update failed');
+            return { success: false, error: 'Não foi possível atualizar a conta.' };
         }
     }
 
@@ -236,9 +236,9 @@ export class AccountService {
                 .eq('organization_id', organization_id);
             if (error) throw error;
             return { success: true };
-        } catch (error: any) {
-            console.error('Error deleting account:', error);
-            return { success: false, error: error.message };
+        } catch {
+            console.error('[AccountService] account deletion failed');
+            return { success: false, error: 'Não foi possível excluir a conta.' };
         }
     }
 
@@ -305,9 +305,9 @@ export class AccountService {
                         }
                     }
                 }
-            } catch (err: any) {
+            } catch {
                 results.failed++;
-                results.errors.push(`Erro ao importar ${account.name}: ${err.message}`);
+                results.errors.push('Não foi possível importar esta conta.');
             }
         }
 

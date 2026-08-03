@@ -57,7 +57,7 @@ export class SettingsService {
                 updated_at: new Date().toISOString()
             }, { onConflict: 'organization_id,key' });
 
-        if (error) return { success: false, error: error.message };
+        if (error) return { success: false, error: 'Não foi possível salvar as configurações da organização.' };
         return { success: true };
     }
 
@@ -96,7 +96,7 @@ export class SettingsService {
             if (deleteError) {
                 return { 
                     success: false, 
-                    error: `Não foi possível remover algumas etapas pois elas já possuem negócios vinculados. (${deleteError.message})` 
+                    error: 'Não foi possível remover algumas etapas pois elas já possuem negócios vinculados.'
                 };
             }
         }
@@ -112,7 +112,7 @@ export class SettingsService {
 
         const { error: upsertError } = await supabase.from('pipeline_stages').upsert(toUpsert);
         
-        if (upsertError) return { success: false, error: upsertError.message };
+        if (upsertError) return { success: false, error: 'Não foi possível salvar as etapas do pipeline.' };
         return { success: true };
     }
 }

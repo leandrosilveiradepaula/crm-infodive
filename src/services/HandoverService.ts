@@ -14,7 +14,7 @@ export class HandoverService {
             .eq('organization_id', organizationId)
             .single();
 
-        if (error && error.code !== 'PGRST116') throw error;
+        if (error && error.code !== 'PGRST116') throw new Error('Não foi possível carregar os dados de passagem.');
         return data as Handover | null;
     }
 
@@ -32,7 +32,7 @@ export class HandoverService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível salvar os dados de passagem.');
         return data as Handover;
     }
 
@@ -46,7 +46,7 @@ export class HandoverService {
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) throw new Error('Não foi possível salvar os dados de passagem.');
         return data as Handover;
     }
 }

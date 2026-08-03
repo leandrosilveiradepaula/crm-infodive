@@ -3,6 +3,13 @@ import { NextResponse } from 'next/server';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
+type ProposalProduct = {
+    name: string;
+    quantity: number;
+    is_optional?: boolean;
+    description?: string;
+};
+
 export async function POST(request: Request) {
     try {
         await requireSessionContext();
@@ -23,7 +30,7 @@ export async function POST(request: Request) {
         };
 
         // Parse and enrich product list including bundle details and optional flag
-        const enrichedProductList = products.map((p: any) => {
+        const enrichedProductList = products.map((p: ProposalProduct) => {
             const productInfo = `📦 **${p.name}** (Qtd: ${p.quantity})${p.is_optional ? ' [ITEM OPCIONAL / ALTERNATIVA]' : ''}`;
 
             // Try to parse description
@@ -111,8 +118,7 @@ IMPORTANTE:
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `Erro na API do Gemini: ${response.status} ${response.statusText}`);
+            throw new Error('Erro ao gerar resumo da proposta');
         }
 
         const data = await response.json();
@@ -131,8 +137,8 @@ IMPORTANTE:
         let parsedContent;
         try {
             parsedContent = JSON.parse(contentText);
-        } catch (parseError) {
-            console.error('Erro de parse nativo. Tentando sanitizar o JSON bruto...', contentText);
+        } catch {
+            console.error('[GeminiProposalRoute] proposal response parse failed');
             // Replace raw newlines and tabs which cause 'Bad control character'
             const sanitizedText = contentText
                 .replace(/[\n\r]/g, ' ')
@@ -150,8 +156,8 @@ IMPORTANTE:
             simplifiedProductNames: parsedContent.simplifiedProductNames || {}
         });
 
-    } catch (error: any) {
-        console.error('❌ Erro ao gerar resumo:', error);
-        return NextResponse.json({ error: error.message || 'Erro ao gerar resumo da proposta' }, { status: 500 });
+    } catch {
+        console.error('[GeminiProposalRoute] proposal generation failed');
+        return NextResponse.json({ error: 'Erro ao gerar resumo da proposta' }, { status: 500 });
     }
 }

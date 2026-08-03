@@ -38,7 +38,7 @@ export async function getDealsForReports() {
         .eq('organization_id', organizationId);
 
     if (dealsError) {
-        console.error('Error fetching deals for reports:', dealsError);
+        console.error('[ReportsActions] report deals fetch failed');
         return [];
     }
 

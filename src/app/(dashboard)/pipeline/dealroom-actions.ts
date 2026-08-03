@@ -37,9 +37,14 @@ export async function getOrCreateDealRoom(dealId: string) {
 
         if (createError) throw createError;
         return { success: true, data: newRoom };
-    } catch (error: any) {
-        console.error('Error in getOrCreateDealRoom:', error);
-        return { success: false, error: error.message };
+    } catch (error: unknown) {
+        const dealRoomError = error as { code?: string; name?: string; message?: string };
+        console.error('Deal room creation failed', {
+            operation: 'dealroom.get_or_create',
+            status: 'failed',
+            errorCode: dealRoomError?.code || dealRoomError?.name || 'dealroom_get_or_create_failed',
+        });
+        return { success: false, error: dealRoomError.message };
     }
 }
 
@@ -53,19 +58,23 @@ export async function fetchPublicRoomData(token: string) {
         });
 
         if (error) {
-            console.error('❌ RPC Error (Admin) fetching room:', {
-                message: error.message,
-                details: error.details,
-                hint: error.hint,
-                code: error.code
+            console.error('Public deal room fetch failed', {
+                operation: 'dealroom.public.fetch',
+                provider: 'supabase',
+                status: 'failed',
+                errorCode: error.code || 'dealroom_public_fetch_failed',
             });
             throw error;
         }
 
-        console.log('✅ RPC Success (Admin) for token:', token.substring(0, 8) + '...');
         return { success: true, data };
-    } catch (error: any) {
-        console.error('❌ Critical Error in fetchPublicRoomData:', error);
-        return { success: false, error: error.message || 'Erro interno ao recuperar dados da sala' };
+    } catch (error: unknown) {
+        const publicRoomError = error as { code?: string; name?: string; message?: string };
+        console.error('Public deal room fetch failed', {
+            operation: 'dealroom.public.fetch',
+            status: 'failed',
+            errorCode: publicRoomError?.code || publicRoomError?.name || 'dealroom_public_fetch_failed',
+        });
+        return { success: false, error: publicRoomError.message || 'Erro interno ao recuperar dados da sala' };
     }
 }

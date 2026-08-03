@@ -68,8 +68,8 @@ export async function POST(request: Request) {
                     theme_accent: val.secondary_color || undefined
                 };
             }
-        } catch (orgError) {
-            console.warn('Error fetching organization theme:', orgError);
+        } catch {
+            console.warn('[ProposalGeneratePdfRoute] organization theme fetch failed');
         }
 
         // Generate proposal number
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
             .single();
 
         if (saveError) {
-            console.error('Error saving proposal:', saveError);
+            console.error('[ProposalGeneratePdfRoute] proposal save failed');
             // Still return PDF even if save fails
         }
 
@@ -178,10 +178,10 @@ export async function POST(request: Request) {
             },
         });
     } catch (error: any) {
-        console.error('Error generating PDF:', error);
+        console.error('[ProposalGeneratePdfRoute] pdf generation failed');
         if (error?.message?.includes('Unauthorized') || error?.message?.includes('session')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Não foi possível gerar o PDF.' }, { status: 500 });
     }
 }

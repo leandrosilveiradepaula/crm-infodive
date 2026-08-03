@@ -31,12 +31,12 @@ export async function GET() {
         });
 
         if (error) {
-            return NextResponse.json({ error: error.message }, { status: 400 });
+            return NextResponse.json({ error: 'Não foi possível conectar a conta de email.' }, { status: 400 });
         }
 
         return NextResponse.json({ url: data.url });
-    } catch (error) {
-        console.error('Email Auth Route Error:', error);
+    } catch {
+        console.error('[EmailConnectRoute] email authorization failed');
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

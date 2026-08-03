@@ -98,13 +98,13 @@ export async function POST(req: Request) {
         try {
             const data = JSON.parse(responseText);
             return NextResponse.json(data);
-        } catch (e) {
-            console.error('Erro ao fazer parse do JSON da IA:', responseText);
+        } catch {
+            console.error('[CustomersImportRoute] customer import response parse failed');
             return NextResponse.json({ error: 'Falha ao processar os dados com IA' }, { status: 500 });
         }
 
-    } catch (error: any) {
-        console.error('Error importing customers:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    } catch {
+        console.error('[CustomersImportRoute] customer import failed');
+        return NextResponse.json({ error: 'Erro ao importar clientes' }, { status: 500 });
     }
 }

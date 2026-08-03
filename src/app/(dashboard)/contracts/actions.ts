@@ -25,8 +25,8 @@ export async function getContracts(): Promise<Contract[]> {
             content_json: item.content_json,
             signature_image: item.signature_image
         }));
-    } catch (error: any) {
-        console.error('Error fetching contracts:', error);
+    } catch {
+        console.error('[ContractsActions] contracts fetch failed');
         return [];
     }
 }
@@ -37,9 +37,9 @@ export async function createContract(contract: Partial<Contract>) {
         const data = await ContractService.createContract(organizationId, contract);
         revalidatePath('/contracts');
         return { success: true, data };
-    } catch (error: any) {
-        console.error('Error creating contract:', error);
-        return { success: false, error: error.message };
+    } catch {
+        console.error('[ContractsActions] contract creation failed');
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 
@@ -49,9 +49,9 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
         await ContractService.updateContract(organizationId, id, updates);
         revalidatePath('/contracts');
         return { success: true };
-    } catch (error: any) {
-        console.error('Error updating contract:', error);
-        return { success: false, error: error.message };
+    } catch {
+        console.error('[ContractsActions] contract update failed');
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 
@@ -61,9 +61,9 @@ export async function deleteContract(id: string) {
         await ContractService.deleteContract(organizationId, id);
         revalidatePath('/contracts');
         return { success: true };
-    } catch (error: any) {
-        console.error('Error deleting contract:', error);
-        return { success: false, error: error.message };
+    } catch {
+        console.error('[ContractsActions] contract deletion failed');
+        return { success: false, error: 'Não foi possível processar o contrato.' };
     }
 }
 

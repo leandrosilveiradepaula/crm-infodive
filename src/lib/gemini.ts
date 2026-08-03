@@ -12,7 +12,7 @@ export interface ProductExtraction {
  * Extrai produtos de uma imagem usando a API interna do Gemini
  */
 export const extractProductsFromImage = async (file: File): Promise<ProductExtraction[]> => {
-    console.log(`🚀 Preparando envio para o Gemini. Arquivo: ${file.name}, Tipo: ${file.type}, Tamanho: ${file.size} bytes`);
+    console.log('[GeminiLib] product extraction request preparation started');
     
     if (!file || file.size === 0) {
         throw new Error(`Arquivo vazio ou corrompido (tamanho = 0 bytes). Verifique se o arquivo não está corrompido.`);
@@ -28,8 +28,8 @@ export const extractProductsFromImage = async (file: File): Promise<ProductExtra
 
     const imageData = base64Data.split(',')[1]; // Remove prefixo data:image/...
 
-    console.log(`- Base64 length total: ${base64Data.length}`);
-    console.log(`- imageData length: ${imageData ? imageData.length : 'UNDEFINED'}`);
+    console.log('[GeminiLib] product extraction payload prepared');
+    console.log('[GeminiLib] product extraction image data prepared');
 
     try {
         const payload = {
@@ -44,16 +44,16 @@ export const extractProductsFromImage = async (file: File): Promise<ProductExtra
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro na extração de produtos');
+            await response.json();
+            throw new Error('Não foi possível concluir a operação com IA.');
         }
 
         const { products } = await response.json();
         return products;
 
-    } catch (error: any) {
-        console.error('❌ Erro na extração:', error);
-        throw error;
+    } catch {
+        console.error('[GeminiLib] product extraction failed');
+        throw new Error('Não foi possível concluir a operação com IA.');
     }
 };
 
@@ -71,16 +71,16 @@ export const generateProposalSummary = async (request: any): Promise<string> => 
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro ao gerar resumo da proposta');
+            await response.json();
+            throw new Error('Não foi possível concluir a operação com IA.');
         }
 
         const { summary } = await response.json();
         return summary;
 
-    } catch (error: any) {
-        console.error('❌ Erro ao gerar resumo:', error);
-        throw error;
+    } catch {
+        console.error('[GeminiLib] proposal summary generation failed');
+        throw new Error('Não foi possível concluir a operação com IA.');
     }
 };
 
@@ -98,15 +98,15 @@ export const curateHardwareSpecs = async (request: any): Promise<any[]> => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro ao curar especificações');
+            await response.json();
+            throw new Error('Não foi possível concluir a operação com IA.');
         }
 
         const { specs } = await response.json();
         return specs;
 
     } catch (error: any) {
-        console.error('❌ Erro ao curar especificações:', error);
+        console.error('[GeminiLib] hardware specs curation failed');
         return []; // Fallback para vazio em caso de erro de API
     }
 };
@@ -150,16 +150,16 @@ export const analyzeDeal = async (deal: Deal): Promise<DealAnalysis> => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Erro na análise do deal');
+            await response.json().catch(() => ({}));
+            throw new Error('Não foi possível concluir a operação com IA.');
         }
 
         const analysis = await response.json();
 
         return analysis;
 
-    } catch (error) {
-        console.error('❌ Falha na análise via API, usando fallback local:', error);
+    } catch {
+        console.error('[GeminiLib] deal analysis fallback used');
 
         // Fallback para lógica local em caso de erro da API
         const activitiesCount = deal.deal_activities?.length || 0;
@@ -239,16 +239,16 @@ export const parseContactSignature = async (signature: string): Promise<any> => 
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro ao processar assinatura');
+            await response.json();
+            throw new Error('Não foi possível concluir a operação com IA.');
         }
 
         const { data } = await response.json();
         return data;
 
-    } catch (error: any) {
-        console.error('❌ Erro ao processar assinatura:', error);
-        throw error;
+    } catch {
+        console.error('[GeminiLib] signature processing failed');
+        throw new Error('Não foi possível concluir a operação com IA.');
     }
 };
 

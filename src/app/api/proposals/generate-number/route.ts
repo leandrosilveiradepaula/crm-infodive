@@ -25,13 +25,13 @@ export async function GET() {
             .rpc('get_next_proposal_number', { p_organization_id: profile.organization_id });
 
         if (error) {
-            console.error('Error generating proposal number:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
+            return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
         }
 
         return NextResponse.json({ number });
-    } catch (err: any) {
-        console.error('generate-number route error:', err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+    } catch {
+        console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
+        return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
     }
 }

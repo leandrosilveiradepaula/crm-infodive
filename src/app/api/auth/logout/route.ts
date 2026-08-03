@@ -9,10 +9,12 @@ export async function POST() {
 
         const cookieStore = await cookies();
         cookieStore.delete('crm_access_token');
+        cookieStore.delete('crm_provider_token');
+        cookieStore.delete('crm_refresh_token');
 
         return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Logout API Error:', error);
+    } catch {
+        console.error('[AuthLogoutRoute] logout failed');
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
