@@ -45,11 +45,15 @@ export function useProposalPpt() {
             };
             const { coverRef, confidentialityRef, overviewRef, differentialsRef, hardwareRef, softwareRef, investmentRef, customNotesRef } = refs;
 
-            const processSlide = async (ref: React.RefObject<HTMLDivElement | null>, name: string, addOverlays?: (slide: pptxgen.Slide) => void) => {
-                if (!ref.current) return;
+            const hasRealContent = (element: HTMLElement) => {
+                return !!(element.textContent?.trim() || element.querySelector('img,svg,canvas'));
+            };
+
+            const processElementAsSlide = async (element: HTMLElement, name: string, addOverlays?: (slide: pptxgen.Slide) => void) => {
+                if (!element) return;
 
                 try {
-                    const imgData = await domToPng(ref.current, {
+                    const imgData = await domToPng(element, {
                         scale: 2,
                         backgroundColor: '#ffffff',
                         width: 1280,
@@ -81,6 +85,30 @@ export function useProposalPpt() {
                     }
                 } catch (e) {
                     console.error(`Failed to capture ${name} for PPT`, e);
+                }
+            };
+
+            const processSlide = async (ref: React.RefObject<HTMLDivElement | null>, name: string, addOverlays?: (slide: pptxgen.Slide) => void) => {
+                if (!ref.current) return;
+                await processElementAsSlide(ref.current, name, addOverlays);
+            };
+
+            const processInvestmentSlides = async () => {
+                if (!investmentRef.current) return;
+
+                const investmentPages = Array.from(
+                    investmentRef.current.querySelectorAll<HTMLElement>('[data-proposal-page="true"]')
+                ).filter(hasRealContent);
+
+                if (investmentPages.length > 0) {
+                    for (const [index, page] of investmentPages.entries()) {
+                        await processElementAsSlide(page, `investment-${index + 1}`);
+                    }
+                    return;
+                }
+
+                if (hasRealContent(investmentRef.current)) {
+                    await processElementAsSlide(investmentRef.current, 'investment');
                 }
             };
 
@@ -125,7 +153,7 @@ export function useProposalPpt() {
             if (isSectionActive('hardware', config.includeHardware) && hardwareRef.current) await processSlide(hardwareRef, 'hardware');
             if (isSectionActive('software', config.includeSoftware) && softwareRef.current) await processSlide(softwareRef, 'software');
             if (isSectionActive('custom_notes') && customNotesRef.current) await processSlide(customNotesRef, 'custom_notes');
-            if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processSlide(investmentRef, 'investment');
+            if (isSectionActive('investment', config.includeInvestment) && investmentRef.current) await processInvestmentSlides();
 
             const filename = `Proposta-${(proposal.company_name || proposal.title).replace(/[^a-zA-Z0-9]/g, '-')}.pptx`;
             await pptx.writeFile({ fileName: filename });
