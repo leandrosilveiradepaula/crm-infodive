@@ -34,6 +34,7 @@ export interface DealProduct {
     is_usd?: boolean;
     usd_cost?: number;
     exchange_rate?: number;
+    present_in_usd?: boolean;
     billing_type?: 'direct' | 'indirect';
     distributor_id?: string;
     distributor_cnpj?: string;
