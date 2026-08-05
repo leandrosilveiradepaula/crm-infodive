@@ -18,6 +18,7 @@ import { ImportDealProductsModal } from './ImportDealProductsModal';
 import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculations';
 import { sortProductsHierarchically } from '@/utils/productSorting';
 import { normalizePricingModel } from './product-row/pricingModel';
+import { normalizeDealProductCurrencyFields } from '@/services/dealProductCurrencyPayload';
 
 interface DealProductsTabProps {
     deal: Deal;
@@ -159,6 +160,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
             duration_unit: selectedCatalogProduct.duration_unit,
             show_sku_on_proposal: selectedCatalogProduct.show_sku_on_proposal,
             pricing_model: normalizePricingModel(selectedCatalogProduct.pricing_model),
+            present_in_usd: false,
             display_order: (deal.deal_products?.length || 0)
         };
 
@@ -296,13 +298,9 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     unit_price: productToUpdate.unit_price,
                     cost: productToUpdate.cost,
                     margin: productToUpdate.margin,
-                    is_optional: productToUpdate.is_optional
+                    is_optional: productToUpdate.is_optional,
+                    ...normalizeDealProductCurrencyFields(productToUpdate)
                 };
-                if (productToUpdate.is_usd) {
-                    payload.is_usd = productToUpdate.is_usd;
-                    payload.usd_cost = productToUpdate.usd_cost;
-                    payload.exchange_rate = productToUpdate.exchange_rate;
-                }
                 await updateDealProduct(id, payload);
                 await updateDeal(deal.id, { value: newTotalValue });
             }
@@ -569,12 +567,25 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         try {
                             if (targetImportProductId && products.length > 0) {
                                 const updatedProduct = products[0];
+                                const currencyPayload = normalizeDealProductCurrencyFields(updatedProduct);
                                 const updatePayload = {
                                     description: updatedProduct.description,
                                     unit_price: updatedProduct.unit_price,
                                     quantity: updatedProduct.quantity,
                                     cost: updatedProduct.cost,
                                     margin: updatedProduct.margin,
+                                    ...currencyPayload,
+                                };
+                                const optimisticUpdate = {
+                                    description: updatedProduct.description,
+                                    unit_price: updatedProduct.unit_price,
+                                    quantity: updatedProduct.quantity,
+                                    cost: updatedProduct.cost,
+                                    margin: updatedProduct.margin,
+                                    is_usd: currencyPayload.is_usd,
+                                    usd_cost: currencyPayload.usd_cost ?? undefined,
+                                    exchange_rate: currencyPayload.exchange_rate ?? undefined,
+                                    present_in_usd: currencyPayload.present_in_usd,
                                 };
 
                                 await updateDealProduct(targetImportProductId, updatePayload);
@@ -589,7 +600,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                     ...prev,
                                     deal_products: (prev.deal_products || []).map(p =>
                                         p.id === targetImportProductId
-                                            ? { ...p, ...updatePayload, description: updatedProduct.description } // Ensure description is updated
+                                            ? { ...p, ...optimisticUpdate, description: updatedProduct.description } // Ensure description is updated
                                             : p
                                     )
                                 }));

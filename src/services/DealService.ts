@@ -5,6 +5,7 @@ import { Deal, DealProduct } from '@/types/deal';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 import { Activity } from '@/types/activity';
+import { normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
 
 export interface PipelineData {
     deals: Deal[];
@@ -341,6 +342,7 @@ export class DealService {
                 const { id, created_at, updated_at, ...baseProductData } = p;
                 return {
                     ...baseProductData,
+                    ...normalizeDealProductCurrencyFields(p),
                     deal_id: newDeal.id, // Link to the newly duplicated deal
                     organization_id: organizationId // Explicit SaaS Multitenant attribution
                 };
@@ -377,9 +379,10 @@ export class DealService {
             category: productData.category || '',
             subcategory: productData.subcategory || '',
             is_bid: productData.is_bid || false,
-            is_usd: productData.is_usd || false,
-            usd_cost: productData.usd_cost || 0,
-            exchange_rate: productData.exchange_rate || 5.0,
+            is_usd: productData.is_usd ?? false,
+            usd_cost: productData.usd_cost ?? 0,
+            exchange_rate: productData.exchange_rate ?? 5.0,
+            present_in_usd: productData.present_in_usd ?? false,
             billing_type: productData.billing_type || 'indirect',
             distributor_id: productData.distributor_id || null,
             distributor_cnpj: productData.distributor_cnpj || null,
@@ -485,6 +488,7 @@ export class DealService {
                 category: p.category || '',
                 subcategory: p.subcategory || '',
                 distributor_id: isValidUUID(p.distributor_id) ? p.distributor_id : null,
+                ...normalizeDealProductCurrencyFields(p),
                 is_bid: !!p.is_bid,
                 bid_number: p.bid_number || null,
                 bid_validity: p.bid_validity || null,
