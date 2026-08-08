@@ -19,6 +19,7 @@ import { calculateDealValue, calculateDealTotalCost } from '@/utils/dealCalculat
 import { sortProductsHierarchically } from '@/utils/productSorting';
 import { normalizePricingModel } from './product-row/pricingModel';
 import { normalizeDealProductCurrencyFields } from '@/services/dealProductCurrencyPayload';
+import { normalizePresentInUsdState } from './product-row/presentInUsd';
 
 interface DealProductsTabProps {
     deal: Deal;
@@ -281,7 +282,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                         updated.unit_price = parseFloat(((updated.cost || 0) / (1 - (marginToUse / 100))).toFixed(2));
                     }
                 }
-                return updated;
+                return normalizePresentInUsdState(updated);
             }
             return p;
         });
