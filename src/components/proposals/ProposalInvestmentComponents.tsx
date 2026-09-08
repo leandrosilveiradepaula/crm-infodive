@@ -1,26 +1,28 @@
 import React from 'react';
 import type { DealProduct } from '@/types/deal';
 import { isSoftware, isService, isSupport, getClassificationLabel } from '@/utils/productClassification';
-import { getProposalPricingLabels, getProposalProductDisplaySubtotal } from './proposalPricingGroups';
+import {
+    buildProposalDisplayItem,
+    formatProposalDisplayCurrency,
+    getProposalDisplayCurrencyTotals,
+    getProposalPricingLabels,
+    type ProposalDisplayPricingGroup,
+} from './proposalDisplayValues';
 
 interface ProposalInvestmentTableProps {
-    mainProducts: DealProduct[];
-    formatCurrency: (value: number) => string;
-    totalMainValue: number;
-    title?: string;
+    group: ProposalDisplayPricingGroup;
     isSubtotal?: boolean;
-    totalLabel?: string;
     simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMainValue, title, isSubtotal, totalLabel, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
+export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     return (
         <div style={{ padding: '0 80px', marginTop: '10px' }}>
-            {title && (
+            {group.title && (
                 <div style={{
                     fontSize: '14px',
                     fontWeight: '800',
@@ -33,7 +35,7 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                     marginTop: '15px'
                 }}>
                     <div style={{ width: '4px', height: '14px', backgroundColor: accentColor, borderRadius: '2px' }} />
-                    {title}
+                    {group.title}
                 </div>
             )}
             <div style={{
@@ -56,8 +58,8 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                     <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase', textAlign: 'right' }}>Investimento</div>
                 </div>
 
-                {mainProducts.map((product, index) => {
-                    const productTotal = getProposalProductDisplaySubtotal(product);
+                {group.items.map((item, index) => {
+                    const product = item.product;
 
                     let categoryLabel = product.category || getClassificationLabel(product);
                     if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
@@ -87,52 +89,54 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
                                 {(product.show_sku_on_proposal !== false) ? (product.sku || '-') : '-'}
                             </div>
                             <div style={{ color: '#374151', fontSize: '11px', textAlign: 'center', fontWeight: '600' }}>
-                                {product.quantity || 1}
+                                {item.quantity}
                             </div>
                             <div style={{ color: '#64748b', fontWeight: '600', fontSize: '11px', textAlign: 'right' }}>
-                                {formatCurrency(product.unit_price || 0)}
+                                {formatProposalDisplayCurrency(item.unitPrice, item.currency)}
                             </div>
                             <div style={{ color: '#111827', fontWeight: '700', fontSize: '12px', textAlign: 'right' }}>
-                                {formatCurrency(productTotal)}
+                                {formatProposalDisplayCurrency(item.subtotal, item.currency)}
                             </div>
                         </div>
                     );
                 })}
 
-                {mainProducts.length === 0 && (
+                {group.items.length === 0 && (
                     <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
                         Consulte as opções alternativas abaixo.
                     </div>
                 )}
             </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 110px',
-                marginTop: '16px',
-                padding: '0 15px',
-                alignItems: 'baseline'
-            }}>
-                <div style={{
-                    fontSize: isSubtotal ? '12px' : '14px',
-                    fontWeight: '800',
-                    color: '#4b5563',
-                    textTransform: 'uppercase',
-                    textAlign: 'right',
-                    paddingRight: '20px',
-                    letterSpacing: '0.5px'
+            {group.totals.map(total => (
+                <div key={total.currency} style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 160px',
+                    marginTop: '16px',
+                    padding: '0 15px',
+                    alignItems: 'baseline'
                 }}>
-                    {totalLabel || (isSubtotal ? 'Subtotal (Itens Acima)' : 'Investimento Consolidado (Itens Acima)')}
+                    <div style={{
+                        fontSize: isSubtotal ? '12px' : '14px',
+                        fontWeight: '800',
+                        color: '#4b5563',
+                        textTransform: 'uppercase',
+                        textAlign: 'right',
+                        paddingRight: '20px',
+                        letterSpacing: '0.5px'
+                    }}>
+                        {total.totalLabel}
+                    </div>
+                    <div style={{
+                        fontSize: isSubtotal ? '18px' : '22px',
+                        fontWeight: '800',
+                        color: accentColor,
+                        textAlign: 'right'
+                    }}>
+                        {formatProposalDisplayCurrency(total.subtotal, total.currency)}
+                    </div>
                 </div>
-                <div style={{
-                    fontSize: isSubtotal ? '18px' : '22px',
-                    fontWeight: '800',
-                    color: accentColor,
-                    textAlign: 'right'
-                }}>
-                    {formatCurrency(totalMainValue)}
-                </div>
-            </div>
+            ))}
         </div>
     );
 }
@@ -140,13 +144,12 @@ export function ProposalInvestmentTable({ mainProducts, formatCurrency, totalMai
 interface ProposalInvestmentOptionalsProps {
     optionalProducts: DealProduct[];
     rootProducts?: DealProduct[];
-    formatCurrency: (value: number) => string;
     simplifiedProductNames?: Record<string, string>;
     themePrimary?: string;
     themeAccent?: string;
 }
 
-export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, formatCurrency, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentOptionalsProps) {
+export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentOptionalsProps) {
     const primaryColor = themePrimary || '#1e3a5f';
     const accentColor = themeAccent || '#E31837';
     const visibleOptionalProducts = optionalProducts.filter(p => p.is_visible_on_proposal !== false);
@@ -180,88 +183,99 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                         const children = optionalProducts.filter(c => c.parent_id === parentId);
                         if (children.length === 0) return null;
 
-                        return children.map((child, cIdx) => (
-                            <React.Fragment key={child.id || cIdx}>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '1fr 140px',
-                                    padding: `8px 20px 8px ${48 + (depth * 20)}px`,
-                                    borderTop: '1px solid #fef3c7',
-                                    backgroundColor: '#fffbf0',
-                                    alignItems: 'center',
-                                    position: 'relative'
-                                }}>
-                                    <div style={{
-                                        position: 'absolute',
-                                        left: `${32 + (depth * 20)}px`,
-                                        top: '0',
-                                        bottom: cIdx === children.length - 1 && !optionalProducts.some(gc => gc.parent_id === child.id) ? '50%' : '100%',
-                                        width: '1px',
-                                        backgroundColor: '#f59e0b'
-                                    }} />
-                                    <div style={{
-                                        position: 'absolute',
-                                        left: `${32 + (depth * 20)}px`,
-                                        top: '50%',
-                                        width: '12px',
-                                        height: '1px',
-                                        backgroundColor: '#f59e0b'
-                                    }} />
+                        return children.map((child, cIdx) => {
+                            const displayItem = buildProposalDisplayItem(child);
 
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{simplifiedProductNames[child.name] || child.name}</div>
-                                            <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
-                                                {getProposalPricingLabels(child.pricing_model).title}
-                                            </span>
-                                            {isSoftware(child) && (
-                                                <span style={{
-                                                    fontSize: '9px',
-                                                    fontWeight: '800',
-                                                    backgroundColor: '#dcfce7',
-                                                    color: '#166534',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '12px',
-                                                    textTransform: 'uppercase',
-                                                    border: '1px solid #bbf7d0'
-                                                }}>
-                                                    Software
+                            return (
+                                <React.Fragment key={child.id || cIdx}>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '1fr 140px',
+                                        padding: `8px 20px 8px ${48 + (depth * 20)}px`,
+                                        borderTop: '1px solid #fef3c7',
+                                        backgroundColor: '#fffbf0',
+                                        alignItems: 'center',
+                                        position: 'relative'
+                                    }}>
+                                        <div style={{
+                                            position: 'absolute',
+                                            left: `${32 + (depth * 20)}px`,
+                                            top: '0',
+                                            bottom: cIdx === children.length - 1 && !optionalProducts.some(gc => gc.parent_id === child.id) ? '50%' : '100%',
+                                            width: '1px',
+                                            backgroundColor: '#f59e0b'
+                                        }} />
+                                        <div style={{
+                                            position: 'absolute',
+                                            left: `${32 + (depth * 20)}px`,
+                                            top: '50%',
+                                            width: '12px',
+                                            height: '1px',
+                                            backgroundColor: '#f59e0b'
+                                        }} />
+
+                                        <div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{simplifiedProductNames[child.name] || child.name}</div>
+                                                <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
+                                                    {getProposalPricingLabels(child.pricing_model).title}
                                                 </span>
-                                            )}
-                                            {child.custom_label && (
-                                                <span style={{
-                                                    fontSize: '9px',
-                                                    fontWeight: '700',
-                                                    backgroundColor: '#fef3c7',
-                                                    color: '#92400e',
-                                                    padding: '1px 6px',
-                                                    borderRadius: '10px',
-                                                    textTransform: 'uppercase',
-                                                    border: '1px solid #fde68a'
-                                                }}>
-                                                    {child.custom_label}
-                                                </span>
-                                            )}
+                                                {isSoftware(child) && (
+                                                    <span style={{
+                                                        fontSize: '9px',
+                                                        fontWeight: '800',
+                                                        backgroundColor: '#dcfce7',
+                                                        color: '#166534',
+                                                        padding: '2px 8px',
+                                                        borderRadius: '12px',
+                                                        textTransform: 'uppercase',
+                                                        border: '1px solid #bbf7d0'
+                                                    }}>
+                                                        Software
+                                                    </span>
+                                                )}
+                                                {child.custom_label && (
+                                                    <span style={{
+                                                        fontSize: '9px',
+                                                        fontWeight: '700',
+                                                        backgroundColor: '#fef3c7',
+                                                        color: '#92400e',
+                                                        padding: '1px 6px',
+                                                        borderRadius: '10px',
+                                                        textTransform: 'uppercase',
+                                                        border: '1px solid #fde68a'
+                                                    }}>
+                                                        {child.custom_label}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '1px', fontWeight: '500' }}>
+                                                {child.category || getClassificationLabel(child)} - Qtd: {displayItem.quantity} - Unit.: {formatProposalDisplayCurrency(displayItem.unitPrice, displayItem.currency)}
+                                            </div>
                                         </div>
-                                        <div style={{ fontSize: '10px', color: '#64748b', marginTop: '1px', fontWeight: '500' }}>
-                                            {child.category || getClassificationLabel(child)} - Qtd: {child.quantity} - Unit.: {formatCurrency(child.unit_price || 0)}
+                                        <div style={{ textAlign: 'right', fontWeight: '600', color: '#374151', fontSize: '13px' }}>
+                                            {formatProposalDisplayCurrency(displayItem.subtotal, displayItem.currency)}
                                         </div>
                                     </div>
-                                    <div style={{ textAlign: 'right', fontWeight: '600', color: '#374151', fontSize: '13px' }}>
-                                        {formatCurrency((child.unit_price || 0) * (child.quantity || 1))}
-                                    </div>
-                                </div>
-                                {renderChildren(child.id, depth + 1)}
-                            </React.Fragment>
-                        ));
+                                    {renderChildren(child.id, depth + 1)}
+                                </React.Fragment>
+                            );
+                        });
                     };
 
                     const directChildren = optionalProducts.filter(c => c.parent_id === parent.id);
-                    // Calculate total value recursively
-                    const calculateTotalRecursive = (pId: string): number => {
+                    const collectDescendants = (pId: string): DealProduct[] => {
                         const children = optionalProducts.filter(c => c.parent_id === pId);
-                        return children.reduce((acc, c) => acc + ((c.unit_price || 0) * (c.quantity || 1)) + calculateTotalRecursive(c.id), 0);
+                        return children.reduce<DealProduct[]>(
+                            (acc, child) => [...acc, child, ...collectDescendants(child.id)],
+                            []
+                        );
                     };
+                    const parentDisplayItem = buildProposalDisplayItem(parent);
+                    const optionTotals = getProposalDisplayCurrencyTotals(
+                        [parent, ...collectDescendants(parent.id)].map(buildProposalDisplayItem),
+                        'Investimento Total da Opção'
+                    );
 
                     return (
                         <div key={pIdx} style={{
@@ -300,11 +314,11 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                                         )}
                                     </div>
                                     <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
-                                        {parent.category || 'Hardware'} - Qtd: {parent.quantity} - Unit.: {formatCurrency(parent.unit_price || 0)}
+                                        {parent.category || 'Hardware'} - Qtd: {parentDisplayItem.quantity} - Unit.: {formatProposalDisplayCurrency(parentDisplayItem.unitPrice, parentDisplayItem.currency)}
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right', fontWeight: '700', color: '#111827', fontSize: '13px' }}>
-                                    {formatCurrency((parent.unit_price || 0) * (parent.quantity || 1))}
+                                    {formatProposalDisplayCurrency(parentDisplayItem.subtotal, parentDisplayItem.currency)}
                                 </div>
                             </div>
 
@@ -316,18 +330,19 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, fo
                                     backgroundColor: '#fffbeb',
                                     borderTop: '2px solid #fde68a',
                                     display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
+                                    flexDirection: 'column',
+                                    gap: '4px'
                                 }}>
-                                    <span style={{ fontSize: '11px', fontWeight: '800', color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                        Investimento Total da Opção (Incluindo Adicionais)
-                                    </span>
-                                    <span style={{ fontSize: '16px', fontWeight: '800', color: '#111827' }}>
-                                        {formatCurrency(
-                                            ((parent.unit_price || 0) * (parent.quantity || 1)) +
-                                            calculateTotalRecursive(parent.id)
-                                        )}
-                                    </span>
+                                    {optionTotals.map(total => (
+                                        <div key={total.currency} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '11px', fontWeight: '800', color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                {total.totalLabel}
+                                            </span>
+                                            <span style={{ fontSize: '16px', fontWeight: '800', color: '#111827' }}>
+                                                {formatProposalDisplayCurrency(total.subtotal, total.currency)}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </div>

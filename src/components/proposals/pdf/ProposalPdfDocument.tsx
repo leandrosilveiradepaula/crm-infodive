@@ -39,14 +39,6 @@ interface ProposalPdfDocumentProps {
     themeAccent?: string;
 }
 
-function formatCurrency(value: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 2,
-    }).format(value);
-}
-
 export function ProposalPdfDocument({
     dealTitle,
     companyName,
@@ -127,7 +119,6 @@ export function ProposalPdfDocument({
                 showBillingInfo={config.showBillingInfo}
                 isPriceStudy={config.isPriceStudy}
                 priceStudyValidity={editableTexts.priceStudyValidity}
-                formatCurrency={formatCurrency}
                 distributors={distributors}
                 billingOverrides={config.billingOverrides || {}}
                 pdfColors={pdfColors}
