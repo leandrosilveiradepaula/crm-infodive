@@ -13,6 +13,7 @@ import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 import { calculateDealCommission } from '@/utils/commissionCalculator';
 import { updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import type { ProductItem } from '../SortableProductRow';
+import { hasValidPresentInUsdExchangeRate } from './presentInUsd';
 
 interface ProductFinancialDetailsProps {
     product: ProductItem;
@@ -89,6 +90,7 @@ export function ProductFinancialDetails({
     const totalCost = costValue * qtyValue;
     const grossMargin = (priceValue - costValue) * qtyValue;
     const totalSales = priceValue * qtyValue;
+    const canPresentInUsd = product.is_usd === true && hasValidPresentInUsdExchangeRate(product);
 
     const commissionData = calculateDealCommission(
         {
@@ -388,38 +390,64 @@ export function ProductFinancialDetails({
 
                                 {/* USD Inputs */}
                                 {product.is_usd && (
-                                    <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                        <div>
-                                            <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">Custo USD</label>
-                                            {isEditing ? (
-                                                <Input
-                                                    type="number"
-                                                    className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
-                                                    value={product.usd_cost ?? ''}
-                                                    onChange={e => handleUpdateProduct(product.id, 'usd_cost', Number(e.target.value))}
-                                                    onFocus={(e: any) => e.target.select()}
-                                                />
-                                            ) : (
-                                                <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
-                                                    US$ {product.usd_cost?.toLocaleString('en-US')}
-                                                </div>
-                                            )}
+                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">Custo USD</label>
+                                                {isEditing ? (
+                                                    <Input
+                                                        type="number"
+                                                        className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
+                                                        value={product.usd_cost ?? ''}
+                                                        onChange={e => handleUpdateProduct(product.id, 'usd_cost', Number(e.target.value))}
+                                                        onFocus={(e: any) => e.target.select()}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
+                                                        US$ {product.usd_cost?.toLocaleString('en-US')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">PTAX</label>
+                                                {isEditing ? (
+                                                    <Input
+                                                        type="number"
+                                                        step="0.0001"
+                                                        className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
+                                                        value={product.exchange_rate ?? ''}
+                                                        onChange={e => handleUpdateProduct(product.id, 'exchange_rate', Number(e.target.value))}
+                                                        onFocus={(e: any) => e.target.select()}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
+                                                        {product.exchange_rate?.toFixed(4)}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">PTAX</label>
-                                            {isEditing ? (
-                                                <Input
-                                                    type="number"
-                                                    step="0.0001"
-                                                    className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
-                                                    value={product.exchange_rate ?? ''}
-                                                    onChange={e => handleUpdateProduct(product.id, 'exchange_rate', Number(e.target.value))}
-                                                    onFocus={(e: any) => e.target.select()}
+
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`present-usd-${product.id}`}
+                                                    checked={canPresentInUsd && product.present_in_usd === true}
+                                                    disabled={!isEditing || !canPresentInUsd}
+                                                    onChange={e => handleUpdateProduct(product.id, 'present_in_usd', e.target.checked)}
+                                                    className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0 disabled:opacity-50"
                                                 />
-                                            ) : (
-                                                <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
-                                                    {product.exchange_rate?.toFixed(4)}
-                                                </div>
+                                                <label htmlFor={`present-usd-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer select-none">
+                                                    Apresentar em USD
+                                                </label>
+                                            </div>
+                                            <p className="text-[9px] text-emerald-600/70 font-medium">
+                                                Exibe este produto em dólar na proposta.
+                                            </p>
+                                            {!canPresentInUsd && (
+                                                <p className="text-[9px] text-amber-600 font-bold">
+                                                    Informe uma taxa de câmbio válida para apresentar em USD.
+                                                </p>
                                             )}
                                         </div>
                                     </div>
