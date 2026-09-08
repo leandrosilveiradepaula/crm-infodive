@@ -4,12 +4,16 @@ import { PdfColors } from './pdfStyles';
 import { LOGO_BASE64 } from './pdfAssetsBase64';
 import { getClassificationLabel } from '@/utils/productClassification';
 import type { BillingOverride } from '@/hooks/useProposalEditorState';
-import { groupProposalInvestmentProducts, getProposalPricingLabels, getProposalProductDisplaySubtotal } from '../proposalPricingGroups';
+import {
+    buildProposalDisplayGroups,
+    buildProposalDisplayItem,
+    formatProposalDisplayCurrency,
+    getProposalPricingLabels,
+    type ProposalDisplayItem,
+} from '../proposalDisplayValues';
 import type { DealProduct } from '@/types/deal';
 
-type PdfInvestmentProduct = DealProduct & {
-    duration?: number | null;
-    duration_unit?: string | null;
+type PdfInvestmentProduct = ProposalDisplayItem & {
     pricingGroupTitle?: string;
 };
 
@@ -19,7 +23,6 @@ interface PdfInvestmentPageProps {
     showBillingInfo: boolean;
     isPriceStudy: boolean;
     priceStudyValidity: string;
-    formatCurrency: (value: number) => string;
     distributors?: any[];
     billingOverrides?: Record<string, BillingOverride>;
     pdfColors: PdfColors;
@@ -32,7 +35,6 @@ export function PdfInvestmentPage({
     showBillingInfo,
     isPriceStudy,
     priceStudyValidity,
-    formatCurrency,
     distributors = [],
     billingOverrides = {},
     pdfColors,
@@ -41,15 +43,15 @@ export function PdfInvestmentPage({
     // Separate main and optional products
     const rawMainProducts = products.filter(p => !p.is_optional);
     const optionalProducts = products.filter(p => p.is_optional && p.is_visible_on_proposal !== false);
-    const investmentGroups = groupProposalInvestmentProducts(rawMainProducts);
+    const investmentGroups = buildProposalDisplayGroups(rawMainProducts);
     const mainProducts: PdfInvestmentProduct[] = investmentGroups.flatMap(group =>
-        group.products.map((product, index) => ({
-            ...product,
+        group.items.map((item, index) => ({
+            ...item,
             pricingGroupTitle: index === 0 ? group.title : undefined,
         }))
     );
 
-    const showSkuColumn = mainProducts.some(p => p.show_sku_on_proposal !== false && !!p.sku);
+    const showSkuColumn = mainProducts.some(item => item.product.show_sku_on_proposal !== false && !!item.product.sku);
 
     const formatCNPJ = (cnpj: string) => {
         if (!cnpj) return '-';
@@ -120,8 +122,8 @@ export function PdfInvestmentPage({
                     </View>
 
                     {/* Table Rows */}
-                    {mainProducts.map((product, idx) => {
-                        const productTotal = getProposalProductDisplaySubtotal(product);
+                    {mainProducts.map((item, idx) => {
+                        const product = item.product;
                         let categoryLabel = product.category || getClassificationLabel(product);
                         if (product.subcategory && !categoryLabel.includes(product.subcategory)) {
                             categoryLabel += ` - ${product.subcategory}`;
@@ -163,17 +165,17 @@ export function PdfInvestmentPage({
                                 )}
                                 <View style={{ width: 35, alignItems: 'center' }}>
                                     <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.text }}>
-                                        {product.quantity || 1}
+                                        {item.quantity}
                                     </Text>
                                 </View>
                                 <View style={{ width: 70, alignItems: 'flex-end' }}>
                                     <Text style={{ fontSize: 10, fontWeight: 'semibold', color: pdfColors.textLight }}>
-                                        {formatCurrency(product.unit_price || 0)}
+                                        {formatProposalDisplayCurrency(item.unitPrice, item.currency)}
                                     </Text>
                                 </View>
                                 <View style={{ width: 95, alignItems: 'flex-end' }}>
                                     <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.black }}>
-                                        {formatCurrency(productTotal)}
+                                        {formatProposalDisplayCurrency(item.subtotal, item.currency)}
                                     </Text>
                                 </View>
                             </View>
@@ -189,20 +191,22 @@ export function PdfInvestmentPage({
 
                 {/* Total — keep together */}
                 {investmentGroups.map(group => (
-                    <View key={`total-${group.pricingModel}`} wrap={false} style={{
-                        flexDirection: 'row', marginTop: 10, paddingHorizontal: 12,
-                        alignItems: 'baseline', justifyContent: 'flex-end',
-                    }}>
-                        <Text style={{
-                            fontSize: 13, fontWeight: 'bold', color: '#4b5563',
-                            textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                    group.totals.map(total => (
+                        <View key={`total-${group.pricingModel}-${total.currency}`} wrap={false} style={{
+                            flexDirection: 'row', marginTop: 10, paddingHorizontal: 12,
+                            alignItems: 'baseline', justifyContent: 'flex-end',
                         }}>
-                            {group.totalLabel}
-                        </Text>
-                        <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
-                            {formatCurrency(group.subtotal)}
-                        </Text>
-                    </View>
+                            <Text style={{
+                                fontSize: 13, fontWeight: 'bold', color: '#4b5563',
+                                textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
+                            }}>
+                                {total.totalLabel}
+                            </Text>
+                            <Text style={{ fontSize: 22, fontWeight: 'bold', color: pdfColors.accent }}>
+                                {formatProposalDisplayCurrency(total.subtotal, total.currency)}
+                            </Text>
+                        </View>
+                    ))
                 ))}
 
                 {/* Optional Products */}
@@ -220,7 +224,7 @@ export function PdfInvestmentPage({
                             </Text>
                         </View>
                         {optionalProducts.map((product, idx) => {
-                            const productTotal = getProposalProductDisplaySubtotal(product);
+                            const displayItem = buildProposalDisplayItem(product);
                             return (
                                 <View key={idx} wrap={false} style={{
                                     flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 16,
@@ -232,12 +236,12 @@ export function PdfInvestmentPage({
                                             {simplifiedProductNames[product.name] || product.display_name || product.name}
                                         </Text>
                                         <Text style={{ fontSize: 9, color: pdfColors.textLight }}>
-                                            {product.category || 'Opcional'} - {getProposalPricingLabels(product.pricing_model).title} - Qtd: {product.quantity || 1}
+                                            {product.category || 'Opcional'} - {getProposalPricingLabels(product.pricing_model).title} - Qtd: {displayItem.quantity}
                                         </Text>
                                     </View>
                                     <View style={{ width: 120, alignItems: 'flex-end' }}>
                                         <Text style={{ fontSize: 12, fontWeight: 'bold', color: pdfColors.text }}>
-                                            {formatCurrency(productTotal)}
+                                            {formatProposalDisplayCurrency(displayItem.subtotal, displayItem.currency)}
                                         </Text>
                                     </View>
                                 </View>
@@ -279,7 +283,7 @@ export function PdfInvestmentPage({
                             const billingGroups: any[] = [];
                             
                             // 1. Reseller Group
-                            const resellerProducts = mainProducts.filter(p => p.billing_type === 'direct' || !p.billing_type);
+                            const resellerProducts = rawMainProducts.filter(p => p.billing_type === 'direct' || !p.billing_type);
                             if (resellerProducts.length > 0) {
                                 billingGroups.push({
                                     title: 'Faturamento Direto', // Label used for Infodive card header
@@ -291,7 +295,7 @@ export function PdfInvestmentPage({
                             }
 
                             // 2. Direct Groups by Distributor + CNPJ
-                            const directProducts = mainProducts.filter(p => p.billing_type === 'indirect');
+                            const directProducts = rawMainProducts.filter(p => p.billing_type === 'indirect');
                             const directGroupKeys = Array.from(new Set(directProducts.map(p => `${p.distributor_id || 'no-dist'}|${p.distributor_cnpj || 'no-cnpj'}`)));
 
                             directGroupKeys.forEach(key => {

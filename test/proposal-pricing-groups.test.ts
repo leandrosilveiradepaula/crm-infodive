@@ -6,6 +6,7 @@ import {
     groupProposalInvestmentProducts,
     normalizeProposalPricingModel,
 } from '../src/components/proposals/proposalPricingGroups';
+import { buildProposalDisplayGroups } from '../src/components/proposals/proposalDisplayValues';
 
 const product = (overrides: Partial<DealProduct> = {}): DealProduct => ({
     id: overrides.id || 'product-1',
@@ -55,6 +56,49 @@ describe('proposal recurring pricing groups', () => {
         const item = product({ quantity: 3, unit_price: 125 });
 
         expect(getProposalProductDisplaySubtotal(item)).toBe(375);
+    });
+
+    it('uses 0 subtotal when quantity is 0', () => {
+        const item = product({ quantity: 0, unit_price: 125 });
+
+        expect(getProposalProductDisplaySubtotal(item)).toBe(0);
+    });
+
+    it('keeps a numeric legacy subtotal for BRL-only groups', () => {
+        const groups = groupProposalInvestmentProducts([
+            product({ id: 'brl', pricing_model: 'monthly', unit_price: 1000 }),
+        ]);
+
+        expect(groups[0].subtotal).toBe(1000);
+    });
+
+    it('keeps a numeric legacy subtotal for USD-only groups', () => {
+        const groups = groupProposalInvestmentProducts([
+            product({ id: 'usd', pricing_model: 'monthly', is_usd: true, unit_price: 5200, present_in_usd: true, exchange_rate: 5.2 }),
+        ]);
+
+        expect(groups[0].subtotal).toBe(1000);
+    });
+
+    it('uses null legacy subtotal for mixed currency groups', () => {
+        const groups = groupProposalInvestmentProducts([
+            product({ id: 'brl', pricing_model: 'monthly', unit_price: 1000 }),
+            product({ id: 'usd', pricing_model: 'monthly', is_usd: true, unit_price: 5200, present_in_usd: true, exchange_rate: 5.2 }),
+        ]);
+
+        expect(groups[0].subtotal).toBeNull();
+    });
+
+    it('keeps separated display totals for mixed currency groups', () => {
+        const groups = buildProposalDisplayGroups([
+            product({ id: 'brl', pricing_model: 'monthly', unit_price: 1000 }),
+            product({ id: 'usd', pricing_model: 'monthly', is_usd: true, unit_price: 5200, present_in_usd: true, exchange_rate: 5.2 }),
+        ]);
+
+        expect(groups[0].totals).toEqual([
+            { currency: 'BRL', subtotal: 1000, totalLabel: 'Total mensal BRL' },
+            { currency: 'USD', subtotal: 1000, totalLabel: 'Total mensal USD' },
+        ]);
     });
 
     it('preserves relative order inside each group', () => {

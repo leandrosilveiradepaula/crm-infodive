@@ -23,7 +23,12 @@ import {
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { isHardware, isSoftware, isSupport, isService } from '@/utils/productClassification';
-import { groupProposalInvestmentProducts } from '@/components/proposals/proposalPricingGroups';
+import {
+    buildProposalDisplayGroups,
+    buildProposalDisplayItem,
+    formatProposalDisplayCurrency,
+} from '@/components/proposals/proposalDisplayValues';
+import { sortProductsHierarchically } from '@/utils/productSorting';
 
 // Infodive Brand Colors
 const COLORS = {
@@ -465,8 +470,10 @@ export function useProposalDocx() {
 
             // 5. Investment
             if (isSectionActive('investment')) {
-                const mainProducts = products.filter((p: any) => !p.is_optional && p.is_visible_on_proposal !== false);
-                const investmentGroups = groupProposalInvestmentProducts(mainProducts);
+                const investmentProducts = sortProductsHierarchically(products);
+                const mainProducts = investmentProducts.filter((p: any) => !p.is_optional);
+                const optionalProducts = investmentProducts.filter((p: any) => p.is_optional && p.is_visible_on_proposal !== false);
+                const investmentGroups = buildProposalDisplayGroups(mainProducts);
                 
                 if (investmentGroups.length > 0) {
                     children.push(
@@ -508,12 +515,25 @@ export function useProposalDocx() {
                                             }),
                                             new TableCell({
                                                 shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ children: [new TextRun({ text: "QUANTIDADE", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
+                                                width: { size: 15, type: WidthType.PERCENTAGE }
+                                            }),
+                                            new TableCell({
+                                                shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ children: [new TextRun({ text: "VALOR UNITÁRIO", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
+                                                width: { size: 25, type: WidthType.PERCENTAGE }
+                                            }),
+                                            new TableCell({
+                                                shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
                                                 children: [new Paragraph({ children: [new TextRun({ text: "INVESTIMENTO", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
-                                                width: { size: 30, type: WidthType.PERCENTAGE }
+                                                width: { size: 25, type: WidthType.PERCENTAGE }
                                             }),
                                         ],
                                     }),
-                                    ...group.products.map((p: any) => new TableRow({
+                                    ...group.items.map((item) => {
+                                        const p = item.product;
+
+                                        return new TableRow({
                                         children: [
                                             new TableCell({
                                                 children: [new Paragraph({
@@ -524,34 +544,139 @@ export function useProposalDocx() {
                                             }),
                                             new TableCell({
                                                 children: [new Paragraph({
+                                                    alignment: AlignmentType.CENTER,
+                                                    children: [new TextRun({ text: String(item.quantity), size: 20, bold: true })]
+                                                })]
+                                            }),
+                                            new TableCell({
+                                                children: [new Paragraph({
                                                     alignment: AlignmentType.RIGHT,
-                                                    children: [new TextRun({ text: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((p.unit_price || 0) * (p.quantity || 1)), size: 20, bold: true })]
+                                                    children: [new TextRun({ text: formatProposalDisplayCurrency(item.unitPrice, item.currency), size: 20, bold: true })]
+                                                })],
+                                                margins: { right: 200 }
+                                            }),
+                                            new TableCell({
+                                                children: [new Paragraph({
+                                                    alignment: AlignmentType.RIGHT,
+                                                    children: [new TextRun({ text: formatProposalDisplayCurrency(item.subtotal, item.currency), size: 20, bold: true })]
                                                 })],
                                                 margins: { right: 200 }
                                             }),
                                         ],
-                                    })),
-                                    new TableRow({
+                                        });
+                                    }),
+                                    ...group.totals.map(total => new TableRow({
                                         children: [
                                             new TableCell({
                                                 shading: { fill: COLORS.light, type: ShadingType.CLEAR },
-                                                children: [new Paragraph({ children: [new TextRun({ text: group.totalLabel, bold: true, color: COLORS.primary, size: 22 })] })],
+                                                children: [new Paragraph({ children: [new TextRun({ text: total.totalLabel, bold: true, color: COLORS.primary, size: 22 })] })],
                                                 margins: { left: 200 }
+                                            }),
+                                            new TableCell({
+                                                shading: { fill: COLORS.light, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ children: [] })]
+                                            }),
+                                            new TableCell({
+                                                shading: { fill: COLORS.light, type: ShadingType.CLEAR },
+                                                children: [new Paragraph({ children: [] })]
                                             }),
                                             new TableCell({
                                                 shading: { fill: COLORS.light, type: ShadingType.CLEAR },
                                                 children: [new Paragraph({
                                                     alignment: AlignmentType.RIGHT,
-                                                    children: [new TextRun({ text: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(group.subtotal), bold: true, color: COLORS.accent, size: 24 })]
+                                                    children: [new TextRun({ text: formatProposalDisplayCurrency(total.subtotal, total.currency), bold: true, color: COLORS.accent, size: 24 })]
                                                 })],
                                                 margins: { right: 200 }
                                             }),
                                         ],
-                                    }),
+                                    })),
                                 ],
                             })
                         );
                     });
+                }
+
+                if (optionalProducts.length > 0) {
+                    children.push(
+                        new Paragraph({
+                            heading: HeadingLevel.HEADING_2,
+                            spacing: { before: 400, after: 200 },
+                            children: [new TextRun({ text: "Opções Adicionais / Alternativas", color: COLORS.primary, bold: true, size: 24 })]
+                        }),
+                        new Table({
+                            width: { size: 100, type: WidthType.PERCENTAGE },
+                            margins: { top: 150, bottom: 150, left: 200, right: 200 },
+                            borders: {
+                                top: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
+                                bottom: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
+                                left: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
+                                right: { style: BorderStyle.SINGLE, size: 6, color: COLORS.border },
+                                insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: COLORS.border },
+                                insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+                            },
+                            rows: [
+                                new TableRow({
+                                    tableHeader: true,
+                                    children: [
+                                        new TableCell({
+                                            shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                            children: [new Paragraph({ children: [new TextRun({ text: "ITEM", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })]
+                                        }),
+                                        new TableCell({
+                                            shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                            children: [new Paragraph({ children: [new TextRun({ text: "QUANTIDADE", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
+                                            width: { size: 15, type: WidthType.PERCENTAGE }
+                                        }),
+                                        new TableCell({
+                                            shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                            children: [new Paragraph({ children: [new TextRun({ text: "VALOR UNITÁRIO", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
+                                            width: { size: 25, type: WidthType.PERCENTAGE }
+                                        }),
+                                        new TableCell({
+                                            shading: { fill: COLORS.primary, type: ShadingType.CLEAR },
+                                            children: [new Paragraph({ children: [new TextRun({ text: "INVESTIMENTO", bold: true, color: "FFFFFF", size: 18 })], alignment: AlignmentType.CENTER })],
+                                            width: { size: 25, type: WidthType.PERCENTAGE }
+                                        }),
+                                    ],
+                                }),
+                                ...optionalProducts.map((p: any) => {
+                                    const item = buildProposalDisplayItem(p);
+
+                                    return new TableRow({
+                                        children: [
+                                            new TableCell({
+                                                children: [new Paragraph({
+                                                    spacing: { before: 100, after: 100 },
+                                                    children: [new TextRun({ text: simplifiedProductNames[p.name] || p.display_name || p.name, size: 20 })]
+                                                })],
+                                                margins: { left: 200 }
+                                            }),
+                                            new TableCell({
+                                                children: [new Paragraph({
+                                                    alignment: AlignmentType.CENTER,
+                                                    children: [new TextRun({ text: String(item.quantity), size: 20, bold: true })]
+                                                })]
+                                            }),
+                                            new TableCell({
+                                                children: [new Paragraph({
+                                                    alignment: AlignmentType.RIGHT,
+                                                    children: [new TextRun({ text: formatProposalDisplayCurrency(item.unitPrice, item.currency), size: 20, bold: true })]
+                                                })],
+                                                margins: { right: 200 }
+                                            }),
+                                            new TableCell({
+                                                children: [new Paragraph({
+                                                    alignment: AlignmentType.RIGHT,
+                                                    children: [new TextRun({ text: formatProposalDisplayCurrency(item.subtotal, item.currency), size: 20, bold: true })]
+                                                })],
+                                                margins: { right: 200 }
+                                            }),
+                                        ],
+                                    });
+                                }),
+                            ],
+                        })
+                    );
                 }
 
                 // 5.1 Billing Info

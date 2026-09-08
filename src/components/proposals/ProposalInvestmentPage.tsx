@@ -3,7 +3,8 @@ import type { Deal, DealProduct } from '@/types/deal';
 import type { Account } from '@/types/account';
 import type { BillingOverride } from '@/hooks/useProposalEditorState';
 import { ProposalInvestmentTable, ProposalInvestmentOptionals } from './ProposalInvestmentComponents';
-import { groupProposalInvestmentProducts } from './proposalPricingGroups';
+import { buildProposalDisplayGroups } from './proposalDisplayValues';
+import { sortProductsHierarchically } from '@/utils/productSorting';
 
 interface ProposalInvestmentPageProps {
     deal: Deal;
@@ -22,13 +23,6 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
     const height = isLandscape ? '167mm' : '293mm';
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: deal.deal_products?.[0]?.is_usd ? 'USD' : 'BRL'
-        }).format(value);
-    };
-
     const formatCNPJ = (cnpj: string) => {
         if (!cnpj) return '-';
         const cleaned = cnpj.replace(/\D/g, '');
@@ -38,10 +32,10 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
 
     // Investment page shows ALL products regardless of visibility flag
     // (visibility only controls spec pages, not the financial summary)
-    const products = deal.deal_products || [];
+    const products = sortProductsHierarchically(deal.deal_products || []);
     const mainProducts = products.filter(p => !p.is_optional);
     const optionalProducts = products.filter(p => p.is_optional);
-    const investmentGroups = groupProposalInvestmentProducts(mainProducts);
+    const investmentGroups = buildProposalDisplayGroups(mainProducts);
 
     // Grouping logic for Main Products
     interface BillingGroup {
@@ -143,11 +137,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                 {investmentGroups.map(group => (
                         <ProposalInvestmentTable
                             key={group.pricingModel}
-                            mainProducts={group.products}
-                            formatCurrency={formatCurrency}
-                            totalMainValue={group.subtotal}
-                            title={group.title}
-                            totalLabel={group.totalLabel}
+                            group={group}
                             simplifiedProductNames={simplifiedProductNames}
                             themePrimary={primaryColor}
                             themeAccent={accentColor}
@@ -246,7 +236,6 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     <ProposalInvestmentOptionals
                         optionalProducts={optionalProducts}
                         rootProducts={chunk}
-                        formatCurrency={formatCurrency}
                         simplifiedProductNames={simplifiedProductNames}
                         themePrimary={primaryColor}
                         themeAccent={accentColor}
