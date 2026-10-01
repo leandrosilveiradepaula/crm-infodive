@@ -2,8 +2,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { requireSessionContext } from '@/lib/auth-server';
 import { NextResponse } from 'next/server';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 export async function POST(req: Request) {
     try {
         await requireSessionContext();
@@ -12,6 +10,11 @@ export async function POST(req: Request) {
     }
 
     try {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
+        }
+        const genAI = new GoogleGenerativeAI(apiKey);
         const { signature, image } = await req.json();
 
         if (!signature && !image) {

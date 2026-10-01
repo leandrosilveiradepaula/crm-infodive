@@ -2,9 +2,6 @@ import { requireSessionContext } from '@/lib/auth-server';
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 
-const apiKey = process.env.GEMINI_API_KEY;
-const client = new GoogleGenAI({ apiKey: apiKey! });
-
 export async function POST(request: Request) {
     try {
         await requireSessionContext();
@@ -12,11 +9,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
     }
 
     try {
+        const client = new GoogleGenAI({ apiKey });
         const { company, website } = await request.json();
 
         if (!company) {

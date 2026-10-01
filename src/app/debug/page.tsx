@@ -1,16 +1,17 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireSessionContext } from '@/lib/auth-server';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DebugPage() {
     const session = await requireSessionContext().catch(() => null);
-    const supabase = createAdminClient();
 
     // 1. Check Auth (Now using session)
     const user = session ? { id: session.userId, organization_id: session.organizationId } : null;
 
     // 2. Check DB Connection (Account)
-    const { data: accounts, error: dbError } = session 
-        ? await supabase.from('accounts').select('*').eq('organization_id', session.organizationId).limit(5)
+    const { data: accounts, error: dbError } = session
+        ? await createAdminClient().from('accounts').select('*').eq('organization_id', session.organizationId).limit(5)
         : { data: null, error: { message: 'No session to query DB' } as any };
 
     return (
