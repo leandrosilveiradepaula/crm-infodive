@@ -2,9 +2,6 @@ import { requireSessionContext } from '@/lib/auth-server';
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
 
-const apiKey = process.env.GEMINI_API_KEY;
-const client = new GoogleGenAI({ apiKey: apiKey! });
-
 // List of vision models to try (fallback strategy)
 const VISION_MODELS = [
     'gemini-2.5-flash',
@@ -29,11 +26,13 @@ export async function POST(request: Request) {
     }
 
     // 2. Validation
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
         return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
     }
 
     try {
+        const client = new GoogleGenAI({ apiKey });
         const payload = await request.json();
         const { imageData, mimeType } = payload;
 
