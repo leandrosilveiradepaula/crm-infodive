@@ -46,6 +46,14 @@ describe('present_in_usd core payload semantics', () => {
         expect(normalizeDealProductCurrencyFields({ exchange_rate: 0 }).exchange_rate).toBe(0);
     });
 
+    it('keeps an absent exchange rate null-safe', () => {
+        expect(normalizeDealProductCurrencyFields({ is_usd: true }).exchange_rate).toBeNull();
+    });
+
+    it('preserves an explicit zero exchange rate', () => {
+        expect(normalizeDealProductCurrencyFields({ exchange_rate: 0 }).exchange_rate).toBe(0);
+    });
+
     it('normalizes a bulk payload with all currency fields', () => {
         expect(normalizeDealProductCurrencyFields({
             is_usd: true,
