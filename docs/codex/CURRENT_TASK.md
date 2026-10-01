@@ -14,9 +14,14 @@ O usuario autorizou explicitamente a continuidade deste trabalho pela AI Product
 - `test/present-in-usd-core.test.ts`
 - `.github/workflows/crm-validation.yml` (somente para executar os checks obrigatorios deste PR)
 - `src/app/api/gemini/enrich/route.ts` (somente para remover a exigencia de GEMINI_API_KEY durante o build; a key continua obrigatoria em runtime)
+- `src/app/api/gemini/extract/route.ts` (mesma correcao de inicializacao runtime-only)
+- `src/app/api/gemini/specs/route.ts` (mesma correcao de inicializacao runtime-only)
+- `src/app/api/gemini/parse-company/route.ts` (mesma correcao de inicializacao runtime-only)
+- `src/app/api/gemini/parse-signature/route.ts` (mesma correcao de inicializacao runtime-only)
 
 ## CI blocker discovered
-- O primeiro CI real do PR passou TypeScript e 92 testes, mas `next build` falhou ao importar `/api/gemini/enrich` porque `GoogleGenAI` era instanciado no escopo de modulo sem `GEMINI_API_KEY`.
+- O primeiro CI real do PR passou TypeScript e 92 testes, mas `next build` falhou ao importar rotas Gemini que instanciavam clientes no escopo de modulo sem `GEMINI_API_KEY`.
+- A auditoria confirmou o mesmo padrao em `enrich`, `extract`, `specs`, `parse-company` e `parse-signature`.
 - A correcao autorizada e limitada a instanciar o cliente apenas no runtime da requisicao, depois de validar a variavel de ambiente.
 - Nenhuma credencial sera adicionada ao CI ou ao repositorio.
 
