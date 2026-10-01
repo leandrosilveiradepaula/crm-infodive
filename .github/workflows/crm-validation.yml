@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -34,5 +36,6 @@ jobs:
         run: |
           set -euo pipefail
           base_ref="${GITHUB_BASE_REF:-main}"
-          git fetch origin "$base_ref" --depth=1
-          git diff --check "origin/$base_ref"...HEAD
+          git fetch origin "$base_ref"
+          merge_base="$(git merge-base "origin/$base_ref" HEAD)"
+          git diff --check "$merge_base"..HEAD
