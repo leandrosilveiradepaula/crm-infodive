@@ -2,23 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getIronSession } from 'iron-session'
 import { sessionOptions, SessionData } from '@/lib/session'
-
-const PUBLIC_PATHS = new Set([
-    '/login',
-    '/auth/callback',
-    '/api/auth/logout',
-    '/api/proposals/sign',
-])
-
-const PUBLIC_PATTERNS = [
-    /^\/proposals\/public\/[a-f0-9]{16,32}$/i,
-    /^\/portal\/[a-f0-9]{32}$/i,
-    /^\/api\/proposals\/public\/[a-f0-9]{16,32}$/i,
-]
-
-function isPublicRoute(pathname: string) {
-    return PUBLIC_PATHS.has(pathname) || PUBLIC_PATTERNS.some((pattern) => pattern.test(pathname))
-}
+import { isPublicRoute } from '@/lib/public-routes'
 
 export async function middleware(request: NextRequest) {
     const response = NextResponse.next()
