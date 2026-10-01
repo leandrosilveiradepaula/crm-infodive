@@ -18,12 +18,14 @@ O usuario autorizou explicitamente a continuidade deste trabalho pela AI Product
 - `src/app/api/gemini/specs/route.ts` (mesma correcao de inicializacao runtime-only)
 - `src/app/api/gemini/parse-company/route.ts` (mesma correcao de inicializacao runtime-only)
 - `src/app/api/gemini/parse-signature/route.ts` (mesma correcao de inicializacao runtime-only)
+- `src/app/debug/page.tsx` (somente para impedir uso de service role durante prerender/build e manter acesso privilegiado condicionado a sessao em runtime)
 
 ## CI blocker discovered
 - O primeiro CI real do PR passou TypeScript e 92 testes, mas `next build` falhou ao importar rotas Gemini que instanciavam clientes no escopo de modulo sem `GEMINI_API_KEY`.
 - A auditoria confirmou o mesmo padrao em `enrich`, `extract`, `specs`, `parse-company` e `parse-signature`.
 - A correcao autorizada e limitada a instanciar o cliente apenas no runtime da requisicao, depois de validar a variavel de ambiente.
 - Nenhuma credencial sera adicionada ao CI ou ao repositorio.
+- O terceiro CI revelou `/debug` prerenderizando sem sessao e chamando `createAdminClient()`, o que exige `SUPABASE_SERVICE_ROLE_KEY` durante o build. A correcao autorizada e tornar a pagina dinamica e criar o cliente privilegiado somente quando houver sessao valida.
 
 ## Required behavior
 - taxa ausente permanece ausente/null-safe;
