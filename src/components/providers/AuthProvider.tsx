@@ -2,7 +2,8 @@
 
 import React, { createContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { Profile, AuthContextType } from '@/types/auth';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { isPublicRoute } from '@/lib/public-routes';
 
 export const AuthContext = createContext<AuthContextType>({
     user: null,
@@ -18,6 +19,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const pathname = usePathname();
 
     const fetchSession = useCallback(async () => {
         try {
@@ -45,8 +47,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     useEffect(() => {
+        if (isPublicRoute(pathname)) {
+            setUser(null);
+            setProfile(null);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
         fetchSession();
-    }, [fetchSession]);
+    }, [fetchSession, pathname]);
 
     const signOut = useCallback(async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
