@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - name: Install dependencies
         run: npm ci
@@ -30,4 +30,9 @@ jobs:
       - name: Build
         run: npm run build
       - name: Diff check
-        run: git diff --check origin/${{ github.base_ref }}...HEAD
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_ref="${GITHUB_BASE_REF:-main}"
+          git fetch origin "$base_ref" --depth=1
+          git diff --check "origin/$base_ref"...HEAD
