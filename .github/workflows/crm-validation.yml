@@ -1,6 +1,9 @@
 name: CRM validation
 
 on:
+  push:
+    branches:
+      - factory/fix-present-in-usd-safe-rate
   pull_request:
     branches:
       - main
