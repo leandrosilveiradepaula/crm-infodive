@@ -381,7 +381,7 @@ export class DealService {
             is_bid: productData.is_bid || false,
             is_usd: productData.is_usd ?? false,
             usd_cost: productData.usd_cost ?? 0,
-            exchange_rate: productData.exchange_rate ?? 5.0,
+            exchange_rate: normalizeDealProductCurrencyFields(productData).exchange_rate,
             present_in_usd: productData.present_in_usd ?? false,
             billing_type: productData.billing_type || 'indirect',
             distributor_id: productData.distributor_id || null,
