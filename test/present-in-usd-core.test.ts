@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeDealProductCurrencyFields } from '../src/services/dealProductCurrencyPayload';
+import { mergeDealProductCurrencyFields, normalizeDealProductCurrencyFields } from '../src/services/dealProductCurrencyPayload';
 import { normalizePresentInUsdState } from '../src/components/pipeline/product-row/presentInUsd';
 import { calculateDealValue, type ProductPriceItem } from '../src/utils/dealCalculations';
 import { calculateDealCommission } from '../src/utils/commissionCalculator';
@@ -21,8 +21,8 @@ describe('present_in_usd core payload semantics', () => {
         expect(normalizeDealProductCurrencyFields({ present_in_usd: false }).present_in_usd).toBe(false);
     });
 
-    it('preserves present_in_usd true', () => {
-        expect(normalizeDealProductCurrencyFields({ present_in_usd: true }).present_in_usd).toBe(true);
+    it('rejects present_in_usd true without USD mode and a valid rate', () => {
+        expect(normalizeDealProductCurrencyFields({ present_in_usd: true }).present_in_usd).toBe(false);
     });
 
     it('preserves is_usd', () => {
@@ -68,8 +68,12 @@ describe('present_in_usd core payload semantics', () => {
         });
     });
 
-    it('preserves present_in_usd for duplicated products', () => {
-        const original = normalizeDealProductCurrencyFields({ present_in_usd: true });
+    it('preserves valid present_in_usd for duplicated products', () => {
+        const original = normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: 5,
+            present_in_usd: true,
+        });
         const duplicated = { ...original, deal_id: 'new-deal' };
 
         expect(duplicated.present_in_usd).toBe(true);
@@ -81,6 +85,76 @@ describe('present_in_usd core payload semantics', () => {
             usd_cost: 10,
             exchange_rate: 5,
         }).present_in_usd).toBe(false);
+    });
+
+    it('rejects present_in_usd when USD mode is false', () => {
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: false,
+            exchange_rate: 5,
+            present_in_usd: true,
+        }).present_in_usd).toBe(false);
+    });
+
+    it('rejects present_in_usd when the exchange rate is null or non-positive', () => {
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: null,
+            present_in_usd: true,
+        }).present_in_usd).toBe(false);
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: 0,
+            present_in_usd: true,
+        }).present_in_usd).toBe(false);
+    });
+
+    it('allows present_in_usd only with USD mode and a positive finite rate', () => {
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: 5.2,
+            present_in_usd: true,
+        }).present_in_usd).toBe(true);
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: Number.NaN,
+            present_in_usd: true,
+        }).present_in_usd).toBe(false);
+    });
+
+    it('clears present_in_usd when a partial update disables USD mode', () => {
+        expect(mergeDealProductCurrencyFields(
+            { is_usd: true, exchange_rate: 5.2, present_in_usd: true, usd_cost: 10 },
+            { is_usd: false },
+        )).toEqual({
+            is_usd: false,
+            usd_cost: 10,
+            exchange_rate: 5.2,
+            present_in_usd: false,
+        });
+    });
+
+    it('clears present_in_usd when a partial update removes the exchange rate', () => {
+        expect(mergeDealProductCurrencyFields(
+            { is_usd: true, exchange_rate: 5.2, present_in_usd: true, usd_cost: 10 },
+            { exchange_rate: null },
+        )).toEqual({
+            is_usd: true,
+            usd_cost: 10,
+            exchange_rate: null,
+            present_in_usd: false,
+        });
+    });
+
+    it('keeps valid persisted currency state when updating only present_in_usd', () => {
+        expect(mergeDealProductCurrencyFields(
+            { is_usd: true, exchange_rate: 5.2, present_in_usd: false, usd_cost: 10 },
+            { present_in_usd: true },
+        )).toEqual({
+            is_usd: true,
+            usd_cost: 10,
+            exchange_rate: 5.2,
+            present_in_usd: true,
+        });
     });
 
     it('does not include present_in_usd in deal.value calculation', () => {
