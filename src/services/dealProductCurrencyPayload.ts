@@ -23,3 +23,18 @@ export function normalizeDealProductCurrencyFields(product: DealProductCurrencyP
             product.present_in_usd === true,
     };
 }
+
+export function mergeDealProductCurrencyFields(
+    current: DealProductCurrencyPayloadSource,
+    updates: DealProductCurrencyPayloadSource,
+) {
+    const hasOwn = (key: keyof DealProductCurrencyPayloadSource) =>
+        Object.prototype.hasOwnProperty.call(updates, key);
+
+    return normalizeDealProductCurrencyFields({
+        is_usd: hasOwn('is_usd') ? updates.is_usd : current.is_usd,
+        usd_cost: hasOwn('usd_cost') ? updates.usd_cost : current.usd_cost,
+        exchange_rate: hasOwn('exchange_rate') ? updates.exchange_rate : current.exchange_rate,
+        present_in_usd: hasOwn('present_in_usd') ? updates.present_in_usd : current.present_in_usd,
+    });
+}
