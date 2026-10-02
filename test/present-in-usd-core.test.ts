@@ -119,6 +119,11 @@ describe('present_in_usd core payload semantics', () => {
             exchange_rate: Number.NaN,
             present_in_usd: true,
         }).present_in_usd).toBe(false);
+        expect(normalizeDealProductCurrencyFields({
+            is_usd: true,
+            exchange_rate: Number.POSITIVE_INFINITY,
+            present_in_usd: true,
+        }).present_in_usd).toBe(false);
     });
 
     it('clears present_in_usd when a partial update disables USD mode', () => {
