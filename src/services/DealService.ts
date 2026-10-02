@@ -5,7 +5,7 @@ import { Deal, DealProduct } from '@/types/deal';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 import { Activity } from '@/types/activity';
-import { normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
+import { mergeDealProductCurrencyFields, normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
 
 export interface PipelineData {
     deals: Deal[];
@@ -410,15 +410,9 @@ export class DealService {
                 throw new Error('Não foi possível atualizar o produto da oportunidade.');
             }
 
-            const hasOwn = (key: keyof DealProduct) => Object.prototype.hasOwnProperty.call(updates, key);
             safeUpdates = {
                 ...safeUpdates,
-                ...normalizeDealProductCurrencyFields({
-                    is_usd: hasOwn('is_usd') ? updates.is_usd : current.is_usd,
-                    usd_cost: hasOwn('usd_cost') ? updates.usd_cost : current.usd_cost,
-                    exchange_rate: hasOwn('exchange_rate') ? updates.exchange_rate : current.exchange_rate,
-                    present_in_usd: hasOwn('present_in_usd') ? updates.present_in_usd : current.present_in_usd,
-                }),
+                ...mergeDealProductCurrencyFields(current, updates),
             };
         }
 
