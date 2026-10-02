@@ -45,3 +45,20 @@ Commit e PR estao autorizados. A continuidade foi reafirmada pelo usuario em 202
 
 ## External side effects
 Sem deploy, migration, mutacao de dados externos, secrets ou alteracoes de auth/RBAC.
+
+## Additional authorized task (2026-10-02): Reduce Vercel deployment usage
+
+Objective: reduce automatic Preview deployments while CRM and AI Product Factory are worked in parallel.
+
+Confirmed Factory controls:
+- `apps/console/vercel.json` disables Vercel Git deployments for ordinary branches and enables only `main` and `preview/**`.
+- Factory Preview promotions previously created the `preview/pr-N` ref at the base commit and then moved it to the candidate, potentially creating two deployments per promotion. Factory PR #573 removed that extra base deployment and made repeated promotion of the same SHA a no-op.
+
+Allowed additional CRM scope:
+- `vercel.json` at the repository root only, with `git.deploymentEnabled` set to disable ordinary branches, preserve production on `main`, and allow explicit final-candidate branches under `preview/**`.
+- `docs/codex/CURRENT_TASK.md` to record this scope.
+- No application code, credentials, dashboard-only settings, data, or schema changes.
+
+Operating rule: run the required CI on working branches; create or update one `preview/pr-N` ref only after the exact PR candidate is final and its required checks are green. Do not create a base-commit preview first. Merge to `main` only for a release-ready batch. `ignoreCommand` cancellations are not quota savings because Vercel counts canceled ignored deployments.
+
+Commit, PR, and merge for this narrowly scoped configuration change are authorized by the user's existing project authorization. The merge is expected to trigger one production deployment to install the policy; no other deployment or migration is authorized by this task.
