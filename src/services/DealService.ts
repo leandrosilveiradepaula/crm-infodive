@@ -396,7 +396,7 @@ export class DealService {
         const currencyKeys: Array<keyof DealProduct> = ['is_usd', 'usd_cost', 'exchange_rate', 'present_in_usd'];
         const touchesCurrencyState = currencyKeys.some(key => Object.prototype.hasOwnProperty.call(updates, key));
 
-        let safeUpdates: Partial<DealProduct> = { ...updates };
+        let safeUpdates: Record<string, unknown> = { ...updates };
 
         if (touchesCurrencyState) {
             const { data: current, error: currentError } = await supabase
