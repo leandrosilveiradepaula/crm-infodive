@@ -5,7 +5,7 @@ import { Deal, DealProduct } from '@/types/deal';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 import { Activity } from '@/types/activity';
-import { normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
+import { mergeDealProductCurrencyFields, normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
 
 export interface PipelineData {
     deals: Deal[];
@@ -379,10 +379,7 @@ export class DealService {
             category: productData.category || '',
             subcategory: productData.subcategory || '',
             is_bid: productData.is_bid || false,
-            is_usd: productData.is_usd ?? false,
-            usd_cost: productData.usd_cost ?? 0,
-            exchange_rate: normalizeDealProductCurrencyFields(productData).exchange_rate,
-            present_in_usd: productData.present_in_usd ?? false,
+            ...normalizeDealProductCurrencyFields(productData),
             billing_type: productData.billing_type || 'indirect',
             distributor_id: productData.distributor_id || null,
             distributor_cnpj: productData.distributor_cnpj || null,
@@ -396,9 +393,32 @@ export class DealService {
 
     static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
+        const currencyKeys: Array<keyof DealProduct> = ['is_usd', 'usd_cost', 'exchange_rate', 'present_in_usd'];
+        const touchesCurrencyState = currencyKeys.some(key => Object.prototype.hasOwnProperty.call(updates, key));
+
+        let safeUpdates: Record<string, unknown> = { ...updates };
+
+        if (touchesCurrencyState) {
+            const { data: current, error: currentError } = await supabase
+                .from('deal_products')
+                .select('is_usd, usd_cost, exchange_rate, present_in_usd')
+                .eq('id', itemId)
+                .eq('organization_id', organizationId)
+                .single();
+
+            if (currentError || !current) {
+                throw new Error('Não foi possível atualizar o produto da oportunidade.');
+            }
+
+            safeUpdates = {
+                ...safeUpdates,
+                ...mergeDealProductCurrencyFields(current, updates),
+            };
+        }
+
         const { data, error } = await supabase
             .from('deal_products')
-            .update(updates)
+            .update(safeUpdates)
             .eq('id', itemId)
             .eq('organization_id', organizationId)
             .select()
