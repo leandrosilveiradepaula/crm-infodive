@@ -5,11 +5,21 @@ export interface DealProductCurrencyPayloadSource {
     present_in_usd?: boolean | null;
 }
 
+export function hasValidDealProductExchangeRate(value: number | null | undefined): boolean {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
 export function normalizeDealProductCurrencyFields(product: DealProductCurrencyPayloadSource) {
+    const isUsd = product.is_usd ?? false;
+    const exchangeRate = product.exchange_rate ?? null;
+
     return {
-        is_usd: product.is_usd ?? false,
+        is_usd: isUsd,
         usd_cost: product.usd_cost ?? null,
-        exchange_rate: product.exchange_rate ?? null,
-        present_in_usd: product.present_in_usd ?? false,
+        exchange_rate: exchangeRate,
+        present_in_usd:
+            isUsd === true &&
+            hasValidDealProductExchangeRate(exchangeRate) &&
+            product.present_in_usd === true,
     };
 }
