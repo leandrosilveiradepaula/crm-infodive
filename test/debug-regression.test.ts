@@ -51,5 +51,5 @@ test('/debug does not render representative raw business records or database err
         assert.doesNotMatch(debugPageSource, new RegExp(field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     }
 
-    assert.doesNotMatch(debugPageSource, /\.select\('\*'\)(?!, \{ count: 'exact', head: true \}\)/);
+    assert.doesNotMatch(debugPageSource, /\.select\('\*'\)(?!, \{ count: 'exact', head: true \}\))/);
 });
