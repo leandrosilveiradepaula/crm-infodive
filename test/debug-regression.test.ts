@@ -9,14 +9,12 @@ const debugPageSource = readFileSync(
 
 test('/debug permits authenticated diagnostics only after resolving a session', () => {
     expect(debugPageSource).toMatch(/const session = await requireSessionContext\(\)\.catch\(\(\) => null\);/);
-    assert.match(debugPageSource, /session\s*\?\s*await createAdminClient\(\)/);
-    assert.match(debugPageSource, /export const dynamic = 'force-dynamic';/);
+    expect(debugPageSource).toMatch(/session\s*\?\s*await createAdminClient\(\)/);
+    expect(debugPageSource).toMatch(/export const dynamic = 'force-dynamic';/);
 });
 
 test('/debug diagnostics are restricted to the authenticated organization', () => {
-    assert.match(
-        debugPageSource,
-        /\.eq\('organization_id', session\.organizationId\)/);
+    expect(debugPageSource).toMatch(/\.eq\('organization_id', session\.organizationId\)/);
     expect(debugPageSource).toMatch(/Organization account count: \{accountCount \?\? 0\}/);
 });
 
