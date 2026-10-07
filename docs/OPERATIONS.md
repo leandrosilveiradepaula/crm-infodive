@@ -59,3 +59,66 @@ Toda migration nova ou alterada passa por validação estática no CI. O gate bl
 - timestamps de migration duplicados, exceto a duplicidade histórica documentada de `20240129000060`.
 
 Esse gate não executa SQL nem substitui um dry-run contra banco. Ele reduz regressões óbvias antes de qualquer aplicação real.
+
+
+## Release e rollback
+
+O merge em `main` é a fronteira de produção e exige gate humano explícito.
+
+### Pré-release
+
+Antes de aprovar um release:
+1. identificar e registrar o SHA candidato exato;
+2. exigir CI verde no mesmo SHA;
+3. exigir Preview `Ready` quando aplicável;
+4. verificar migrations separadamente; migration pendente não é autorizada pelo merge de código;
+5. confirmar que não existem blockers críticos conhecidos no assessment de product readiness;
+6. registrar o operador humano que autorizou o merge.
+
+### Após o merge
+
+Depois do merge humano:
+1. observar o deployment de produção e registrar o merge SHA;
+2. validar `/api/health`;
+3. confirmar que o SHA/version reportado corresponde ao release esperado;
+4. executar smoke checks das jornadas críticas;
+5. comparar erros, latência e integrações com o estado anterior;
+6. registrar qualquer incidente com request id, SHA e horário.
+
+### Critérios de rollback
+
+Rollback deve ser iniciado quando houver pelo menos um destes sinais:
+- health/readiness degradado de forma persistente após release;
+- falha crítica de autenticação/autorização;
+- perda de isolamento entre organizações;
+- regressão que impeça jornada comercial crítica;
+- erro de migration que comprometa leitura/escrita;
+- aumento severo e sustentado de erros sem mitigação rápida.
+
+### Procedimento de rollback
+
+Código:
+1. identificar o último deployment de produção conhecido como saudável;
+2. interromper novas alterações até estabilização;
+3. restaurar/reverter o código para o SHA saudável usando o mecanismo de deployment aprovado;
+4. validar `/api/health` e smoke checks no estado restaurado;
+5. manter o release defeituoso como evidência; não reescrever histórico.
+
+Banco:
+- migration destrutiva ou de dados não deve ser revertida automaticamente;
+- migrations devem preferir forward-fix;
+- qualquer reversão de schema/dados requer análise explícita de compatibilidade e risco de perda de dados;
+- se houver risco de perda/destruição, é obrigatório gate humano específico antes da ação.
+
+### Evidência mínima de recuperação
+
+Um exercício de recovery só conta como evidência quando registra:
+- SHA defeituoso/candidato;
+- SHA restaurado ou migration corretiva;
+- motivo;
+- horário;
+- operador;
+- health após recuperação;
+- resultado dos smoke checks.
+
+Ter um runbook documentado não significa que recovery foi exercitado. O domínio operacional permanece incompleto até existir evidência real de exercício ou incidente reconciliado.
