@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getRequestId } from '@/lib/request-context';
+import { recordOperationalEvent } from '@/lib/operational-events';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,13 +28,25 @@ export async function GET(request: Request) {
         }
     }
 
+    const durationMs = Date.now() - startedAt;
+    const databaseLatencyMs = checks.database?.latencyMs;
+
+    recordOperationalEvent({
+        area: 'health',
+        operation: 'readiness',
+        outcome: status,
+        requestId,
+        durationMs,
+        statusCode: status === 'ok' ? 200 : 503,
+    });
+
     const body = {
         status,
         service: 'crm-infodive',
         version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || process.env.GIT_COMMIT_SHA?.slice(0, 12) || 'unknown',
         requestId,
         checks,
-        durationMs: Date.now() - startedAt,
+        durationMs,
         timestamp: new Date().toISOString(),
     };
 
@@ -42,6 +55,10 @@ export async function GET(request: Request) {
         headers: {
             'Cache-Control': 'no-store',
             'X-Request-Id': requestId,
+            'Server-Timing': [
+                databaseLatencyMs !== undefined ? `db;dur=${databaseLatencyMs}` : null,
+                `total;dur=${durationMs}`,
+            ].filter(Boolean).join(', '),
         },
     });
 }
