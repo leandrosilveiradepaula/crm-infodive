@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 export async function GET(req: NextRequest) {
     try {
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     // This POST method will be used for "Deep Analysis" of a specific order
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         const { orderId, alertType } = await req.json();
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
         if (!apiKey) throw new Error('Gemini API Key not configured');
