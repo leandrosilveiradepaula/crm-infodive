@@ -295,7 +295,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
                             aria-label="Selecionar ano"
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
+                            className="bg-transparent text-xs font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -307,7 +307,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <div className="flex gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedQuarters([])}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Tempo Todo
                         </button>
@@ -330,7 +330,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                                 : [...prev, val].sort()
                                         );
                                     }}
-                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
+                                    className={`relative px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
                                         ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                         }`}
@@ -357,8 +357,8 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
                                             <div className="flex gap-2 mt-1">
-                                                <span className="text-[10px] bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
-                                                <span className="text-[10px] text-primary font-bold">{formatCompact(totalStageValue)}</span>
+                                                <span className="text-xs bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
+                                                <span className="text-xs text-primary font-bold">{formatCompact(totalStageValue)}</span>
                                             </div>
                                         </div>
                                     </div>
