@@ -28,6 +28,12 @@ describe('tenant RLS profile context migration', () => {
     expect(migration).toContain('Users can upload invoices to their organization folder');
   });
 
+  it('keeps audit logs server-owned and inaccessible to direct authenticated writes', () => {
+    expect(migration).toContain('REVOKE ALL ON TABLE public.audit_logs FROM anon');
+    expect(migration).toContain('REVOKE ALL ON TABLE public.audit_logs FROM authenticated');
+    expect(migration).not.toContain('CREATE POLICY "Tenant Isolation Profile"\n      ON public.audit_logs');
+  });
+
   it('keeps privileged inserts explicit rather than inventing a default tenant', () => {
     expect(migration).toContain("ELSIF NEW.organization_id IS NULL THEN");
     expect(migration).toContain("RAISE EXCEPTION 'Missing organization_id:");
