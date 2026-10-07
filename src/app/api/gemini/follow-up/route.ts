@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
 export async function POST(request: Request) {
+    let userId: string;
     let organizationId: string;
     try {
         const ctx = await requirePermission('deals:edit');
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,6 +30,11 @@ export async function POST(request: Request) {
 
     if (!dealId) {
         return NextResponse.json({ error: 'Oportunidade inválida.' }, { status: 400 });
+    }
+
+    const rateLimit = consumeRateLimit({ scope: 'gemini-follow-up', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+    if (!rateLimit.allowed) {
+        return NextResponse.json({ error: 'Muitas gerações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
     }
 
     const supabase = createAdminClient();
