@@ -5,14 +5,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard,
-    Trello, // Pipeline uses Kanban or Trello icon usually. Legacy used Trello/Kanban? Let's check.
-    FileText,
     Settings,
     LogOut,
-    Menu,
     Building2,
     Users,
-    User, // Added User icon
     Calendar,
     Kanban,
     Scroll,
@@ -23,10 +19,8 @@ import {
     Package,
     FileSpreadsheet,
     Target,
-    Sparkles,
     BarChart3,
-    X,
-    Palette
+    X
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -99,19 +93,11 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     <NavItem href="/price-lists" icon={FileSpreadsheet} label="Tabelas" isActive={pathname === '/price-lists'} collapsed={isCollapsed} />
                     <NavItem href="/goals-commissions" icon={Target} label="Metas" isActive={pathname === '/goals-commissions'} collapsed={isCollapsed} />
                     <NavItem href="/settings" icon={Settings} label="Configurações" isActive={pathname === '/settings'} collapsed={isCollapsed} />
-                    <NavItem href="/design-preview" icon={Palette} label="Design System" isActive={pathname === '/design-preview'} collapsed={isCollapsed} />
                 </div>
             </nav>
 
             {/* Footer / User Profile */}
             <div className="p-4 border-t border-sidebar-border space-y-4">
-                <Button
-                    className={cn("w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white border-0", isCollapsed && "px-0")}
-                    onClick={() => { }} // Open AI
-                >
-                    <Sparkles className="h-5 w-5 mr-0" />
-                    {!isCollapsed && <span className="ml-2">Watson AI</span>}
-                </Button>
 
                 <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "justify-center" : "")}>
                     <div className="flex items-center gap-3">
