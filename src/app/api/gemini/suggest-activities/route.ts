@@ -1,4 +1,4 @@
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     let userId: string;
     let organizationId: string;
     try {
-        const ctx = await requireSessionContext();
+        const ctx = await requirePermission('deals:edit');
         userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
