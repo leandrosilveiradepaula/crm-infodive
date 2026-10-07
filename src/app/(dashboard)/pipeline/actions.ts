@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -31,7 +32,9 @@ export async function getAccountContacts(accountId?: string | null): Promise<Con
 export async function updateDealStage(dealId: string, newStage: string, probability?: number, dealTitle?: string) {
     const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
+    const automationEventId = randomUUID();
     await AutomationRuntimeService.executeEvent(userId, organizationId, {
+        eventId: automationEventId,
         type: 'deal_moved',
         organizationId,
         entityId: dealId,
@@ -51,7 +54,9 @@ export async function updateDealStage(dealId: string, newStage: string, probabil
 export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
     const { userId, organizationId } = await requirePermission('deals:create');
     const result = await DealService.createDeal(userId, organizationId, deal);
+    const automationEventId = randomUUID();
     await AutomationRuntimeService.executeEvent(userId, organizationId, {
+        eventId: automationEventId,
         type: 'deal_created',
         organizationId,
         entityId: result.id,
