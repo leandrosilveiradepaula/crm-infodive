@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -7,7 +7,7 @@ const apiKey = process.env.GEMINI_API_KEY;
 export async function POST(request: Request) {
     let organizationId: string;
     try {
-        const ctx = await requireSessionContext();
+        const ctx = await requirePermission('deals:edit');
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
