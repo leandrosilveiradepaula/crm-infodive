@@ -18,7 +18,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
         <div className="space-y-4 pt-6 border-t border-border">
             <div className="flex justify-between items-center h-6 mb-2">
                 <ThemeSectionHeader title="Contatos" iconColor="bg-emerald-500" />
-                <Button type="button" size="sm" variant="ghost" onClick={onAddContact} className="h-6 text-[10px] font-bold uppercase tracking-wide text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2 rounded-lg">
+                <Button type="button" size="sm" variant="ghost" onClick={onAddContact} className="h-6 text-xs font-bold uppercase tracking-wide text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 px-2 rounded-lg">
                     <Plus className="h-3 w-3 mr-1" /> Adicionar
                 </Button>
             </div>
@@ -53,7 +53,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                         <div className="col-span-2 flex items-center gap-2 justify-center">
                             <Badge
                                 variant={contact.is_primary ? "default" : "outline"}
-                                className={`cursor-pointer text-[9px] h-[24px] px-2 uppercase tracking-wide border ${contact.is_primary ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground/30'}`}
+                                className={`cursor-pointer text-xs h-[24px] px-2 uppercase tracking-wide border ${contact.is_primary ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-transparent text-muted-foreground border-border hover:border-muted-foreground/30'}`}
                                 onClick={() => onSetPrimary(contact.id)}
                             >
                                 {contact.is_primary ? 'Principal' : 'Secundário'}
