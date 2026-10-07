@@ -1,6 +1,7 @@
 import { requireSessionContext } from '@/lib/auth-server';
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 // List of vision models to try (fallback strategy)
 const VISION_MODELS = [
@@ -19,8 +20,12 @@ type ExtractedProduct = {
 
 export async function POST(request: Request) {
     // 1. Auth Guard (iron-session)
+    let userId: string;
+    let organizationId: string;
     try {
-        await requireSessionContext();
+        const ctx = await requireSessionContext();
+        userId = ctx.userId;
+        organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -41,6 +46,11 @@ export async function POST(request: Request) {
         }
         if (typeof imageData !== 'string' || imageData.length > 12_000_000 || typeof mimeType !== 'string' || mimeType.length > 200) {
             return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
+
+        const rateLimit = consumeRateLimit({ scope: 'gemini-extract', subject: `${organizationId}:${userId}`, limit: 3, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Muitas extrações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         console.log('[GeminiExtractRoute] extraction started');
