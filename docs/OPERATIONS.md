@@ -31,7 +31,7 @@ Nunca registrar tokens, cookies, chaves, payloads completos de clientes ou conte
 
 ## Quality gates
 
-O workflow de CRM executa TypeScript, bloqueio de novos erros ESLint nas linhas alteradas, regressão de vulnerabilidades de dependências, testes, build e `git diff --check`.
+O workflow de CRM executa TypeScript, bloqueio de novos erros ESLint nas linhas alteradas, regressão de vulnerabilidades de dependências, política estática de migrations, testes, build e `git diff --check`. Em execução verde, grava `quality-evidence.json` vinculado ao SHA e ao run do GitHub Actions.
 
 O baseline atual de dependências representa dívida herdada e **não** significa que as vulnerabilidades existentes estão aceitas como estado final. Novos aumentos são bloqueados; a dívida deve ser reduzida progressivamente.
 
@@ -43,7 +43,19 @@ Este baseline não fecha a issue operacional. Permanecem necessários:
 - alertas externos para indisponibilidade/degradação;
 - E2E dos fluxos críticos;
 - a11y automatizada;
-- validação de migrations/schema;
-- evidência operacional por release.
+- validação dinâmica de migrations/schema contra um banco efêmero ou ambiente de validação;
+- retenção/persistência de evidência operacional por release além da janela do artifact do CI.
 
 Nenhum serviço pago deve ser ativado automaticamente para preencher essas lacunas.
+
+
+## Política de migrations
+
+Toda migration nova ou alterada passa por validação estática no CI. O gate bloqueia:
+- autorização baseada em `auth.jwt().user_metadata`;
+- `DISABLE ROW LEVEL SECURITY`;
+- políticas RLS novas com `USING (true)` ou `WITH CHECK (true)`;
+- funções `SECURITY DEFINER` sem `SET search_path`;
+- timestamps de migration duplicados, exceto a duplicidade histórica documentada de `20240129000060`.
+
+Esse gate não executa SQL nem substitui um dry-run contra banco. Ele reduz regressões óbvias antes de qualquer aplicação real.
