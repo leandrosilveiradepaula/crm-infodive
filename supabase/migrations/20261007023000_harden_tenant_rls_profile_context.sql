@@ -30,7 +30,7 @@ GRANT EXECUTE ON FUNCTION public.current_user_organization_id() TO authenticated
 GRANT EXECUTE ON FUNCTION public.current_user_organization_id() TO service_role;
 
 -- Keep the legacy helper name because existing triggers already call it, but remove
--- its dependency on request.jwt.claims/user_metadata.
+-- its dependency on editable JWT tenant claims.
 CREATE OR REPLACE FUNCTION public.get_jwt_org_id()
 RETURNS uuid
 LANGUAGE sql
