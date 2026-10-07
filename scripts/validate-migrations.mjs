@@ -46,6 +46,10 @@ for (const path of changed) {
     continue;
   }
 
+  if (/\bdo\s+\$(?!\$)/i.test(raw) || /\n\s*\$(?!\$)\s*;/m.test(raw)) {
+    violations.push(`${path}: dollar quoting malformado em bloco DO; use $ ... $`);
+  }
+
   if (/auth\.jwt\s*\(\s*\)[\s\S]{0,160}user_metadata/.test(sql)) {
     violations.push(`${path}: authorization via auth.jwt().user_metadata é proibida`);
   }
