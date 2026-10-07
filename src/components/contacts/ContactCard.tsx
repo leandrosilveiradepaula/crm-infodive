@@ -31,10 +31,10 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                            <DropdownMenuItem onClick={() => onEdit(contact)} className="hover:bg-accent hover:text-accent-foreground cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem onClick={() => onEdit(contact)} className="hover:bg-accent hover:text-accent-foreground cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                                 <Edit className="h-3 w-3 mr-2" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onDelete(contact.id)} className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem onClick={() => onDelete(contact.id)} className="text-destructive hover:bg-destructive/10 hover:text-destructive cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                                 <Trash2 className="h-3 w-3 mr-2" /> Remover
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -49,17 +49,17 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                     </Avatar>
                     <div className="pr-6">
                         <h3 className="text-foreground font-bold text-sm leading-tight line-clamp-1 group-hover:text-primary transition-colors">{contact.name}</h3>
-                        <p className="text-muted-foreground text-[9px] font-bold uppercase tracking-widest line-clamp-1 mt-0.5">{contact.role || 'Sem cargo'}</p>
+                        <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest line-clamp-1 mt-0.5">{contact.role || 'Sem cargo'}</p>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground bg-accent/50 p-1.5 rounded-md border border-border group-hover:border-border/80 transition-colors">
+                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground bg-accent/50 p-1.5 rounded-md border border-border group-hover:border-border/80 transition-colors">
                         <Building2 className="h-3 w-3 text-primary shrink-0" />
                         <span className="truncate text-foreground/80">{contact.account?.name || 'Sem Empresa'}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground group/email relative px-1.5">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground group/email relative px-1.5">
                         <Mail className="h-3 w-3 shrink-0" />
                         <span className="truncate">{contact.email}</span>
                         <button
@@ -72,7 +72,7 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                     </div>
 
                     {(contact.mobile_phone || contact.landline_phone) && (
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-1.5">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground px-1.5">
                             <Phone className="h-3 w-3 shrink-0" />
                             <span>{contact.mobile_phone || contact.landline_phone}</span>
                         </div>
@@ -83,7 +83,7 @@ export function ContactCard({ contact, onEdit, onDelete }: ContactCardProps) {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-full h-7 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border-[#0077b5]/20 text-[#0077b5] text-[9px] font-bold uppercase tracking-wider"
+                                className="w-full h-7 bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border-[#0077b5]/20 text-[#0077b5] text-xs font-bold uppercase tracking-wider"
                                 onClick={() => window.open(contact.linkedin, '_blank')}
                             >
                                 <Linkedin className="h-3 w-3 mr-1.5" />
