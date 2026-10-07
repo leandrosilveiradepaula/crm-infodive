@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const baseline = JSON.parse(readFileSync('config/dependency-audit-baseline.json', 'utf8'));
@@ -30,6 +30,46 @@ if (!current) {
 
 const severities = ['critical', 'high', 'moderate', 'low'];
 const regressions = [];
+
+const details = Object.entries(audit.vulnerabilities || {})
+  .filter(([, value]) => value?.severity === 'critical' || value?.severity === 'high')
+  .map(([name, value]) => ({
+    name,
+    severity: value.severity,
+    isDirect: Boolean(value.isDirect),
+    range: value.range || null,
+    fixAvailable: value.fixAvailable ?? false,
+    via: Array.isArray(value.via)
+      ? value.via.map(item => typeof item === 'string'
+        ? { dependency: item }
+        : {
+            source: item.source ?? null,
+            name: item.name ?? null,
+            dependency: item.dependency ?? null,
+            title: item.title ?? null,
+            url: item.url ?? null,
+            range: item.range ?? null,
+          })
+      : [],
+  }))
+  .sort((a, b) => a.severity.localeCompare(b.severity) || a.name.localeCompare(b.name));
+
+mkdirSync('artifacts', { recursive: true });
+writeFileSync(
+  'artifacts/dependency-audit.json',
+  JSON.stringify({
+    schema_version: 1,
+    generated_at: new Date().toISOString(),
+    counts: Object.fromEntries(severities.map(severity => [severity, Number(current[severity] || 0)])),
+    baseline: baseline.vulnerabilities || {},
+    critical_high: details,
+  }, null, 2) + '\n',
+  'utf8',
+);
+
+for (const item of details) {
+  console.log(`DEPENDENCY_AUDIT_PACKAGE ${item.severity} ${item.name} direct=${item.isDirect} fix=${JSON.stringify(item.fixAvailable)}`);
+}
 for (const severity of severities) {
   const observed = Number(current[severity] || 0);
   const allowed = Number(baseline.vulnerabilities?.[severity] ?? -1);
@@ -44,4 +84,4 @@ if (regressions.length) {
   process.exit(1);
 }
 
-console.log('DEPENDENCY_AUDIT_OK: no severity count increased above the committed legacy baseline');
+console.log(`DEPENDENCY_AUDIT_OK: no severity count increased above the committed legacy baseline; critical/high packages=${details.length}`);
