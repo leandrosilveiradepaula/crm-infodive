@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
@@ -8,7 +8,7 @@ import type { SectionId, EditableTexts, EditorConfig } from '@/hooks/useProposal
 
 export async function POST(request: Request) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
         const body = await request.json();
         const {
