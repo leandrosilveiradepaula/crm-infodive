@@ -79,7 +79,9 @@ BEGIN
   FOREACH table_name IN ARRAY ARRAY[
     'accounts','products','deals','app_settings','pipeline_stages','activities',
     'account_contacts','account_branches','deal_products','deal_activities',
-    'proposals','leads','automations','email_templates','deal_rooms'
+    'proposals','leads','automations','email_templates','deal_rooms',
+    'contact_suggestions','contact_blacklists','sales_orders','sales_order_items',
+    'documents','sales_order_installments','ai_activity_suggestions'
   ]
   LOOP
     IF to_regclass('public.' || table_name) IS NOT NULL
@@ -104,24 +106,40 @@ BEGIN
 END;
 $$;
 
--- Audit log policies: prevent an authenticated caller from choosing another tenant.
-DO $$
+-- Audit logs are server-owned evidence. Authenticated/anon clients must not be
+-- able to insert, update, delete, or directly enumerate the trail through Data API.
+-- The application reads audit logs through a privileged server action guarded by
+-- settings:view_audit; writes must also originate from trusted server/database code.
+DO $
 BEGIN
   IF to_regclass('public.audit_logs') IS NOT NULL THEN
     ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
     DROP POLICY IF EXISTS "Users can view logs of their organization" ON public.audit_logs;
     DROP POLICY IF EXISTS "System can insert logs" ON public.audit_logs;
     DROP POLICY IF EXISTS "Tenant Isolation Profile" ON public.audit_logs;
+    REVOKE ALL ON TABLE public.audit_logs FROM anon;
+    REVOKE ALL ON TABLE public.audit_logs FROM authenticated;
+  END IF;
+END;
+$;
+
+-- AI suggestion policies used a different legacy policy name and top-level JWT claim.
+DO $
+BEGIN
+  IF to_regclass('public.ai_activity_suggestions') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Users can view their org suggestions" ON public.ai_activity_suggestions;
+    DROP POLICY IF EXISTS "Users can manage their org suggestions" ON public.ai_activity_suggestions;
+    DROP POLICY IF EXISTS "Tenant Isolation Profile" ON public.ai_activity_suggestions;
 
     CREATE POLICY "Tenant Isolation Profile"
-      ON public.audit_logs
+      ON public.ai_activity_suggestions
       FOR ALL
       TO authenticated
       USING (organization_id = public.current_user_organization_id())
       WITH CHECK (organization_id = public.current_user_organization_id());
   END IF;
 END;
-$$;
+$;
 
 -- Integration tables: replace historical top-level JWT organization_id checks.
 DO $$

@@ -1,7 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
+import { requireSessionContext } from '@/lib/auth-server';
 
 export async function POST(req: Request) {
+    try {
+        await requireSessionContext();
+    } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -9,6 +16,14 @@ export async function POST(req: Request) {
         }
         const genAI = new GoogleGenerativeAI(apiKey);
         const { text, image } = await req.json();
+
+        if ((text != null && typeof text !== 'string') || (image != null && typeof image !== 'string')) {
+            return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+        }
+
+        if ((text?.length || 0) > 20_000 || (image?.length || 0) > 8_000_000) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
 
         if (!text && !image) {
             return NextResponse.json({ error: 'Text or image is required' }, { status: 400 });

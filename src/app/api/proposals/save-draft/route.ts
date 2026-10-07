@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: Request) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
         const body = await request.json();
         const {
@@ -100,8 +100,15 @@ export async function POST(request: Request) {
             proposalId: savedProposal.id,
             version: savedProposal.version
         });
-    } catch {
+    } catch (error: unknown) {
         console.error('[ProposalSaveDraftRoute] proposal draft save failed');
+        const message = error instanceof Error ? error.message : '';
+        if (message.includes('Forbidden')) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (message.includes('Unauthorized') || message.includes('session')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
         return NextResponse.json({ error: 'Não foi possível salvar o rascunho.' }, { status: 500 });
     }
 }
