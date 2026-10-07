@@ -201,7 +201,13 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
                             <div className="flex items-center justify-between">
                                 <label className="block text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">O que deve acontecer?</label>
-                                <button className="flex items-center gap-2 text-primary text-xs font-black hover:text-primary/80 transition-colors">
+                                <button
+                                    onClick={() => {
+                                        const newActions = [...(formData.actions || []), { type: 'send_notification', config: {} }];
+                                        setFormData({ ...formData, actions: newActions as any });
+                                    }}
+                                    className="flex items-center gap-2 text-primary text-xs font-black hover:text-primary/80 transition-colors"
+                                >
                                     <Plus className="h-4 w-4" /> Adicionar Ação
                                 </button>
                             </div>
