@@ -1,3 +1,5 @@
+import { recordOperationalEvent } from '@/lib/operational-events';
+
 type RateLimitBucket = {
   count: number;
   resetAt: number;
@@ -35,10 +37,12 @@ export function consumeRateLimit({ scope, subject, limit, windowMs }: RateLimitO
   if (!current || current.resetAt <= now) {
     const resetAt = now + windowMs;
     buckets.set(key, { count: 1, resetAt });
+    recordOperationalEvent({ area: 'ai', operation: 'rate_limit', outcome: 'allowed', scope, remaining: limit - 1, limit });
     return { allowed: true, remaining: limit - 1, resetAt };
   }
 
   if (current.count >= limit) {
+    recordOperationalEvent({ area: 'ai', operation: 'rate_limit', outcome: 'rate_limited', scope, remaining: 0, limit });
     return {
       allowed: false,
       remaining: 0,
@@ -48,6 +52,7 @@ export function consumeRateLimit({ scope, subject, limit, windowMs }: RateLimitO
   }
 
   current.count += 1;
+  recordOperationalEvent({ area: 'ai', operation: 'rate_limit', outcome: 'allowed', scope, remaining: limit - current.count, limit });
   return { allowed: true, remaining: limit - current.count, resetAt: current.resetAt };
 }
 
