@@ -16,6 +16,14 @@ Endpoint público intencional: `GET /api/health`.
 
 O health endpoint é readiness operacional básica; não substitui E2E, alertas ou métricas de negócio.
 
+O browser smoke do CI também verifica, sem credenciais reais:
+- que o runtime inicia de forma determinística com segredo de sessão sintético;
+- que `/api/health` falha fechado como `503/degraded` quando dependências externas não estão configuradas;
+- que um `X-Request-Id` UUID válido é preservado;
+- que um request id inválido é substituído por UUID gerado pelo servidor;
+- que API protegida sem sessão retorna `401` com request id;
+- que viewport mobile usa largura real do dispositivo e não cria overflow horizontal.
+
 ## Request correlation
 
 O middleware cria um UUID por requisição. Um `X-Request-Id` recebido só é preservado se já tiver formato UUID válido; valores arbitrários são descartados para evitar uso do campo como canal de dados não confiável.

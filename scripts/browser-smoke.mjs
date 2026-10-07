@@ -10,11 +10,14 @@ function record(name, ok, detail = '') {
   if (!ok) failures.push({ name, detail });
 }
 
-async function noHorizontalOverflow(page, name) {
+async function noHorizontalOverflow(page, name, expectedWidth = null) {
   const result = await page.evaluate(() => ({
     innerWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
+  if (expectedWidth !== null) {
+    record(name + '_uses_device_width', Math.abs(result.innerWidth - expectedWidth) <= 2, JSON.stringify(result));
+  }
   const ok = result.scrollWidth <= result.innerWidth + 1;
   record(name, ok, JSON.stringify(result));
 }
@@ -59,6 +62,40 @@ try {
   await noHorizontalOverflow(page, 'login_desktop_no_horizontal_overflow');
   await tabSequenceIncludes(page, ['email', 'password', 'Entrar no Sistema']);
 
+  const knownRequestId = '11111111-1111-4111-8111-111111111111';
+  const healthResponse = await page.request.get(baseUrl + '/api/health', {
+    headers: { 'X-Request-Id': knownRequestId },
+  });
+  const healthBody = await healthResponse.json().catch(() => ({}));
+  record(
+    'health_fails_closed_without_external_config',
+    healthResponse.status() === 503 && healthBody.status === 'degraded',
+    JSON.stringify({ status: healthResponse.status(), body: healthBody }),
+  );
+  record(
+    'health_preserves_valid_request_id',
+    healthResponse.headers()['x-request-id'] === knownRequestId && healthBody.requestId === knownRequestId,
+    JSON.stringify({ header: healthResponse.headers()['x-request-id'], body: healthBody.requestId }),
+  );
+
+  const invalidIdResponse = await page.request.get(baseUrl + '/api/health', {
+    headers: { 'X-Request-Id': 'not-a-valid-request-id' },
+  });
+  const replacementId = invalidIdResponse.headers()['x-request-id'] || '';
+  record(
+    'health_replaces_invalid_request_id',
+    replacementId !== 'not-a-valid-request-id' && /^[0-9a-f-]{36}$/i.test(replacementId),
+    replacementId,
+  );
+
+  const protectedApi = await page.request.post(baseUrl + '/api/sales/reconcile', { data: {} });
+  const protectedApiRequestId = protectedApi.headers()['x-request-id'] || '';
+  record(
+    'protected_api_returns_401_with_request_id',
+    protectedApi.status() === 401 && /^[0-9a-f-]{36}$/i.test(protectedApiRequestId),
+    JSON.stringify({ status: protectedApi.status(), requestId: protectedApiRequestId }),
+  );
+
   const protectedResponse = await page.goto(baseUrl + '/dashboard', { waitUntil: 'domcontentloaded' });
   await page.waitForURL(/\/login(?:\?|$)/, { timeout: 10_000 }).catch(() => {});
   const protectedUrl = new URL(page.url());
@@ -74,12 +111,12 @@ try {
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
   record('login_mobile_renders', await mobilePage.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false));
-  await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow');
+  await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow', 390);
 
   await mobilePage.goto(baseUrl + '/login?invite_token=smoke-test', { waitUntil: 'networkidle' });
   record('invite_registration_state_renders', await mobilePage.getByText('Criar nova conta', { exact: true }).isVisible().catch(() => false));
   record('invite_registration_name_field_visible', await mobilePage.locator('input[name="name"]').isVisible().catch(() => false));
-  await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow');
+  await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow', 390);
 
   await mobile.close();
 } finally {
