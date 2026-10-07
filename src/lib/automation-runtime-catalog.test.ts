@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 describe('automation runtime catalog', () => {
     it('does not offer triggers that the runtime core rejects', () => {
         const modal = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
+        const options = readFileSync('src/data/automations/automationOptions.tsx', 'utf8');
+        const options = readFileSync('src/data/automations/automationOptions.tsx', 'utf8');
         for (const unsupported of [
             'proposal_sent',
             'deal_stagnant',
@@ -13,6 +15,8 @@ describe('automation runtime catalog', () => {
             'proposal_not_viewed',
         ]) {
             expect(modal).not.toContain(`id: '${unsupported}'`);
+            expect(options).not.toContain(`id: '${unsupported}'`);
+            expect(options).not.toContain(`id: '${unsupported}'`);
         }
     });
 
@@ -28,5 +32,6 @@ describe('automation runtime catalog', () => {
             expect(modal).not.toContain(`id: '${unsupported}'`);
         }
         expect(modal).toContain("id: 'create_task'");
+        expect(options).toContain("id: 'create_task'");
     });
 });
