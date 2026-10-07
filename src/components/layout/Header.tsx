@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, Search, Moon, Sun, Bell, Bot } from 'lucide-react';
+import { Menu, Search, Moon, Sun, Bot } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AiAssistant } from '@/components/ai/AiAssistant';
 import { cn } from '@/lib/utils';
+import { NotificationCenter, useNotifications } from './NotificationCenter';
 
 interface HeaderProps {
     onMenuClick: () => void;
@@ -19,6 +20,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
     const { theme, toggleTheme } = useTheme();
     const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
+    const { notifications, markAsRead, clearAll, remove } = useNotifications();
     
     const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
 
@@ -74,10 +76,12 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     <span className="sr-only">Toggle theme</span>
                 </Button>
 
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-950" />
-                </Button>
+                <NotificationCenter
+                    notifications={notifications}
+                    onMarkAsRead={markAsRead}
+                    onClearAll={clearAll}
+                    onRemove={remove}
+                />
             </div>
 
             <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
