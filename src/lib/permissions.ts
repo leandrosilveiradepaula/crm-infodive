@@ -6,7 +6,7 @@ export const ROLE_PERMISSIONS: Record<string, readonly Permission[]> = {
         'deals:view_all', 'deals:create', 'deals:edit', 'deals:delete', 'deals:change_owner',
         'products:create', 'products:edit', 'products:delete',
         'clients:view_all',
-        'settings:manage_users', 'settings:configure_pipeline',
+        'settings:manage_users', 'settings:view_audit', 'settings:configure_pipeline',
         'integrations:manage'
     ],
     manager: [

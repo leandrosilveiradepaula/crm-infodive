@@ -19,6 +19,7 @@ export type Permission =
     | 'products:delete'
     | 'clients:view_all'
     | 'settings:manage_users'
+    | 'settings:view_audit'
     | 'settings:configure_pipeline'
     | 'integrations:manage';
 

@@ -21,7 +21,7 @@ export interface PriceListTemplate {
     column_mapping: ColumnMapping;
 }
 
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 export async function getPriceLists() {
     try {
@@ -43,7 +43,7 @@ export async function getPriceLists() {
 
 export async function saveTemplateAction(manufacturer: string, mapping: ColumnMapping) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('products:edit');
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('price_list_templates')
@@ -88,7 +88,7 @@ export async function importPriceListAction(
     products: ParsedRow[]
 ) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('products:edit');
         const supabase = createAdminClient();
 
         const { data: priceList, error: createError } = await supabase
@@ -185,7 +185,7 @@ export async function importPriceListAction(
 
 export async function deletePriceListAction(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('products:edit');
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('price_lists')

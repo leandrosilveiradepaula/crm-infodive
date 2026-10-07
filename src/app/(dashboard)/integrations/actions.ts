@@ -1,12 +1,12 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { revalidatePath } from 'next/cache';
 import { type Integration, type ApiKey, type Webhook } from '@/types/integration';
 
 export async function getIntegrations(): Promise<Integration[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('integrations').select('*')
@@ -21,7 +21,7 @@ export async function getIntegrations(): Promise<Integration[]> {
 }
 
 export async function toggleIntegrationStatus(id: string, currentStatus: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const newStatus = currentStatus === 'connected' ? 'disconnected' : 'connected';
     try {
@@ -37,7 +37,7 @@ export async function toggleIntegrationStatus(id: string, currentStatus: string)
 }
 
 export async function getApiKeys(): Promise<ApiKey[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('api_keys').select('*')
@@ -48,7 +48,7 @@ export async function getApiKeys(): Promise<ApiKey[]> {
 }
 
 export async function createApiKey(name: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const tokenPrefix = 'sk_' + Math.random().toString(36).substring(7);
     try {
@@ -63,7 +63,7 @@ export async function createApiKey(name: string) {
 }
 
 export async function revokeApiKey(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     try {
         const { error } = await supabase
@@ -78,7 +78,7 @@ export async function revokeApiKey(id: string) {
 }
 
 export async function deleteApiKey(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     try {
         const { error } = await supabase
@@ -93,7 +93,7 @@ export async function deleteApiKey(id: string) {
 }
 
 export async function getWebhooks(): Promise<Webhook[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('webhooks').select('*')
@@ -104,7 +104,7 @@ export async function getWebhooks(): Promise<Webhook[]> {
 }
 
 export async function createWebhook(data: { url: string; events: string[]; status: string }) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     try {
         const { error } = await supabase.from('webhooks').insert([{
@@ -117,7 +117,7 @@ export async function createWebhook(data: { url: string; events: string[]; statu
 }
 
 export async function deleteWebhook(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     try {
         const { error } = await supabase

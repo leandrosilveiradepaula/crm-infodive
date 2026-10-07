@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 
 export interface AuditLog {
     id: string;
@@ -14,7 +14,7 @@ export interface AuditLog {
 }
 
 export async function getAuditLogs(): Promise<AuditLog[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:view_audit');
     const supabase = createAdminClient();
 
     try {
@@ -38,30 +38,6 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
     } catch (error) {
         console.error('Error fetching audit logs:', error);
         return [];
-    }
-}
-
-export async function createAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>) {
-    const { organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
-    try {
-        const { error } = await supabase
-            .from('audit_logs')
-            .insert([{
-                user_name: log.user,
-                action: log.action,
-                details: log.details,
-                category: log.category,
-                ip_address: log.ip,
-                organization_id: organizationId
-            }]);
-
-        if (error) throw error;
-        return { success: true };
-    } catch (error: any) {
-        console.error('Error adding audit log:', error);
-        return { success: false, error: error.message };
     }
 }
 
