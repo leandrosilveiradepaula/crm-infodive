@@ -188,12 +188,14 @@ export async function GET(request: NextRequest) {
                         const { data: existingContacts } = await bgSupabase
                             .from('account_contacts')
                             .select('email')
+                            .eq('organization_id', orgId)
                             .in('email', uniqueSenders);
 
                         // 2.5 Verificar quem está na BLOCKLIST (Ignorados pelo Usuário)
                         const { data: blacklistedContacts } = await bgSupabase
                             .from('contact_blacklists')
                             .select('email')
+                            .eq('organization_id', orgId)
                             .in('email', uniqueSenders);
 
                         const existingEmailsArray = [
