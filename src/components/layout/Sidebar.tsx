@@ -59,7 +59,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     <div className="bg-primary p-2 rounded-lg flex-shrink-0">
                         <BarChart3 className="h-6 w-6 text-white" />
                     </div>
-                    {!isCollapsed && <span className="font-bold text-xl tracking-tight whitespace-nowrap">Nexus CRM</span>}
+                    {!isCollapsed && <span className="font-bold text-xl tracking-tight whitespace-nowrap">CRM Infodive</span>}
                 </div>
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}

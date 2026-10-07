@@ -58,7 +58,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     size="icon"
                     onClick={() => setIsAiOpen(true)}
                     className="text-primary hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
-                    title="Watson AI"
+                    title="Assistente do CRM"
                 >
                     <Bot className="h-5 w-5" />
                 </Button>
