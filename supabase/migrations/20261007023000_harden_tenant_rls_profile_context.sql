@@ -104,24 +104,22 @@ BEGIN
 END;
 $$;
 
--- Audit log policies: prevent an authenticated caller from choosing another tenant.
-DO $$
+-- Audit logs are server-owned evidence. Authenticated/anon clients must not be
+-- able to insert, update, delete, or directly enumerate the trail through Data API.
+-- The application reads audit logs through a privileged server action guarded by
+-- settings:view_audit; writes must also originate from trusted server/database code.
+DO $
 BEGIN
   IF to_regclass('public.audit_logs') IS NOT NULL THEN
     ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
     DROP POLICY IF EXISTS "Users can view logs of their organization" ON public.audit_logs;
     DROP POLICY IF EXISTS "System can insert logs" ON public.audit_logs;
     DROP POLICY IF EXISTS "Tenant Isolation Profile" ON public.audit_logs;
-
-    CREATE POLICY "Tenant Isolation Profile"
-      ON public.audit_logs
-      FOR ALL
-      TO authenticated
-      USING (organization_id = public.current_user_organization_id())
-      WITH CHECK (organization_id = public.current_user_organization_id());
+    REVOKE ALL ON TABLE public.audit_logs FROM anon;
+    REVOKE ALL ON TABLE public.audit_logs FROM authenticated;
   END IF;
 END;
-$$;
+$;
 
 -- Integration tables: replace historical top-level JWT organization_id checks.
 DO $$
