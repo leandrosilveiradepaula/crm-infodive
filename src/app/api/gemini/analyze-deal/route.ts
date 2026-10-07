@@ -1,4 +1,4 @@
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 
@@ -13,7 +13,7 @@ type DealActivity = {
 export async function POST(request: Request) {
     let organizationId: string;
     try {
-        const ctx = await requireSessionContext();
+        const ctx = await requirePermission('deals:edit');
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -25,6 +25,9 @@ export async function POST(request: Request) {
 
     try {
         const { deal, activities } = await request.json();
+        if (JSON.stringify({ deal, activities }).length > 100_000) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
 
         // Format currency for Brazilian Real
         const formatCurrency = (value: number) => {

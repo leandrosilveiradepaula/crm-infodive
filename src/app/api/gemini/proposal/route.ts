@@ -1,4 +1,4 @@
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { NextResponse } from 'next/server';
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -12,7 +12,7 @@ type ProposalProduct = {
 
 export async function POST(request: Request) {
     try {
-        await requireSessionContext();
+        await requirePermission('deals:edit');
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

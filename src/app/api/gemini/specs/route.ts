@@ -17,6 +17,9 @@ export async function POST(request: Request) {
     try {
         const client = new GoogleGenAI({ apiKey });
         const { products } = await request.json();
+        if (!Array.isArray(products) || products.length > 100 || JSON.stringify(products).length > 100_000) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
 
         // Prepare context for AI
         const productList = products.map((p: any) =>

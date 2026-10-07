@@ -12,6 +12,9 @@ export async function POST(req: Request) {
         if (!fileContent) {
             return NextResponse.json({ error: 'Conteúdo do arquivo é obrigatório' }, { status: 400 });
         }
+        if (typeof fileContent !== 'string' || fileContent.length > 200_000) {
+            return NextResponse.json({ error: 'Conteúdo do arquivo excede o limite permitido' }, { status: 413 });
+        }
 
         const model = genAI.getGenerativeModel({ 
             model: 'gemini-2.0-flash',

@@ -39,6 +39,9 @@ export async function POST(request: Request) {
         if (!imageData || !mimeType) {
             return NextResponse.json({ error: "Os campos 'imageData' e 'mimeType' são obrigatórios." }, { status: 400 });
         }
+        if (typeof imageData !== 'string' || imageData.length > 12_000_000 || typeof mimeType !== 'string' || mimeType.length > 200) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
 
         console.log('[GeminiExtractRoute] extraction started');
 
