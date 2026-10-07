@@ -94,7 +94,7 @@ export const AIDealSummaryHeader = ({ deal }: AIDealSummaryHeaderProps) => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1.5">
                                     <Sparkles className="h-3.5 w-3.5 text-teal-400" />
-                                    <h3 className="text-[10px] font-black text-teal-300 uppercase tracking-widest">Análise Inteligente</h3>
+                                    <h3 className="text-xs font-black text-teal-300 uppercase tracking-widest">Análise Inteligente</h3>
                                 </div>
 
                                 {isLoading ? (
@@ -131,19 +131,19 @@ export const AIDealSummaryHeader = ({ deal }: AIDealSummaryHeaderProps) => {
                             {deal.stage === 'won' && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg">
                                     <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                                    <span className="text-[9px] font-black text-emerald-300 uppercase tracking-wider">Ganho</span>
+                                    <span className="text-xs font-black text-emerald-300 uppercase tracking-wider">Ganho</span>
                                 </div>
                             )}
                             {deal.probability && deal.probability >= 80 && deal.stage !== 'won' && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                                     <TrendingUp className="h-3 w-3 text-blue-400" />
-                                    <span className="text-[9px] font-black text-blue-300 uppercase tracking-wider">Alta Chance</span>
+                                    <span className="text-xs font-black text-blue-300 uppercase tracking-wider">Alta Chance</span>
                                 </div>
                             )}
                             {deal.days_in_stage && deal.days_in_stage > 7 && (
                                 <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/20 border border-red-500/30 rounded-lg animate-pulse">
                                     <AlertTriangle className="h-3 w-3 text-red-400" />
-                                    <span className="text-[9px] font-black text-red-300 uppercase tracking-wider">Atenção Necessária</span>
+                                    <span className="text-xs font-black text-red-300 uppercase tracking-wider">Atenção Necessária</span>
                                 </div>
                             )}
                         </div>
