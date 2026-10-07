@@ -34,7 +34,7 @@ export async function POST(request: Request) {
                         && typeof candidate.content === 'string';
                 })
                 .slice(-10)
-                .map(item => ({ role: item.role, content: item.content.slice(0, 4000) }))
+                .map((item: ChatMessage) => ({ role: item.role, content: item.content.slice(0, 4000) }))
             : [];
     } catch {
         history = [];
