@@ -41,13 +41,13 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-teal-500/10 hover:text-teal-400 cursor-pointer text-[9px] font-bold uppercase tracking-wide py-1.5 text-teal-400">
+                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-teal-500/10 hover:text-teal-400 cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5 text-teal-400">
                                 <Sparkles className="h-3 w-3 mr-2" /> Enriquecer (AI)
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEdit(lead)} className="hover:bg-muted hover:text-foreground cursor-pointer text-[9px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem onClick={() => onEdit(lead)} className="hover:bg-muted hover:text-foreground cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                                 <Edit className="h-3 w-3 mr-2" /> Editar
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onDelete(lead)} className="text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer text-[9px] font-bold uppercase tracking-wide py-1.5">
+                            <DropdownMenuItem onClick={() => onDelete(lead)} className="text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                                 <Trash2 className="h-3 w-3 mr-2" /> Remover
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -56,7 +56,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
 
                 <div className="flex items-center gap-2.5 mb-2">
                     <Avatar className="h-8 w-8 border border-primary/20 shadow-none">
-                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black">
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-black">
                             {lead.contact_name ? lead.contact_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'L'}
                         </AvatarFallback>
                     </Avatar>
@@ -70,17 +70,17 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                 </div>
 
                 <div className="space-y-1.5 mb-2.5">
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground relative px-0.5">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground relative px-0.5">
                         <Mail className="h-3 w-3 shrink-0 text-primary/60" />
                         <span className="truncate">{lead.email}</span>
                     </div>
                     {lead.phone && (
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-0.5">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground px-0.5">
                             <Phone className="h-3 w-3 shrink-0 text-primary/60" />
                             <span>{lead.phone}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-1.5 bg-muted/30 py-1 rounded-md border border-border group-hover:border-border/80 transition-colors mt-1.5">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground px-1.5 bg-muted/30 py-1 rounded-md border border-border group-hover:border-border/80 transition-colors mt-1.5">
                         <Briefcase className="h-3 w-3 shrink-0 text-primary/80" />
                         <span className="truncate font-bold text-foreground/80">{lead.interest || 'Negócio Geral'}</span>
                     </div>
