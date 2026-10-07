@@ -5,7 +5,7 @@ describe('automation runtime service contract', () => {
     it('is tenant scoped and idempotent by event key', () => {
         const source = readFileSync('src/services/AutomationRuntimeService.ts', 'utf8');
         expect(source).toContain("event.organizationId !== organizationId");
-        expect(source).toContain("unique");
+        expect(source).toContain("automation event id is required");
         expect(source).toContain("duplicate_event");
         expect(source).toContain(".eq('organization_id', organizationId)");
     });
@@ -33,6 +33,8 @@ describe('automation runtime service contract', () => {
         expect(actions).toContain('AutomationRuntimeService.executeEvent');
         expect(actions).toContain("type: 'deal_created'");
         expect(actions).toContain("type: 'deal_moved'");
+        expect(actions).toContain('randomUUID()');
+        expect(actions).toContain('eventId: automationEventId');
     });
 
     it('keeps persisted execution history server-side and UI backed', () => {
