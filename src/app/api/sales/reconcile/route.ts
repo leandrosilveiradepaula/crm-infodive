@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 
 type InstallmentSalesOrder = {
     deal?: {
@@ -13,7 +13,7 @@ type InstallmentSalesOrder = {
 
 export async function POST(req: NextRequest) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         const body = await req.json();
         const { statementText } = body;
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
@@ -21,6 +21,9 @@ export async function POST(req: NextRequest) {
         if (!apiKey) throw new Error('Gemini API Key not configured');
         if (!statementText) {
             return NextResponse.json({ success: false, error: 'Statement text is required' }, { status: 400 });
+        }
+        if (typeof statementText !== 'string' || statementText.length > 100_000) {
+            return NextResponse.json({ success: false, error: 'Statement text exceeds the allowed limit' }, { status: 413 });
         }
 
         const supabase = createAdminClient();
