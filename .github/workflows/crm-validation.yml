@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - factory/fix-present-in-usd-safe-rate
+      - 'security/**'
+      - 'ops/**'
+      - 'product/**'
   pull_request:
     branches:
       - main
@@ -27,6 +30,10 @@ jobs:
         run: npm ci
       - name: TypeScript
         run: npx tsc --noEmit
+      - name: New lint errors
+        run: node scripts/lint-changed.mjs
+      - name: Dependency audit regression guard
+        run: node scripts/audit-dependencies.mjs
       - name: Tests
         run: npm test
       - name: Build

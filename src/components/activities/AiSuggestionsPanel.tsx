@@ -184,7 +184,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                         )}
                     </div>
                     {suggestions.length > 0 && (
-                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-primary text-white rounded-full uppercase tracking-widest">
+                        <span className="px-2.5 py-0.5 text-xs font-black bg-primary text-white rounded-full uppercase tracking-widest">
                             {suggestions.length}
                         </span>
                     )}
@@ -196,7 +196,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                             handleGenerate();
                         }}
                         disabled={generating}
-                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        className="px-3 py-1.5 text-xs font-black uppercase tracking-widest bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
                         title="Gerar novas sugestões"
                     >
                         {generating ? (
@@ -252,7 +252,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                             {suggestion.title}
                                                         </h4>
                                                         {suggestion.dealTitle && (
-                                                            <p className="text-[10px] font-bold text-primary mt-0.5 flex items-center gap-1">
+                                                            <p className="text-xs font-bold text-primary mt-0.5 flex items-center gap-1">
                                                                 <ArrowRight className="h-2.5 w-2.5" />
                                                                 {suggestion.dealTitle}
                                                                 {suggestion.companyName && (
@@ -287,14 +287,14 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
                                                 {/* Badges */}
                                                 <div className={`flex flex-wrap items-center gap-1.5 ${compact ? 'mt-1.5' : 'mt-2'}`}>
-                                                    <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-wider ${getTypeColor(suggestion.type)}`}>
+                                                    <span className={`px-2 py-0.5 rounded-md border text-xs font-black uppercase tracking-wider ${getTypeColor(suggestion.type)}`}>
                                                         {getTypeLabel(suggestion.type)}
                                                     </span>
-                                                    <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-wider ${getPriorityColor(suggestion.priority)}`}>
+                                                    <span className={`px-2 py-0.5 rounded-md border text-xs font-black uppercase tracking-wider ${getPriorityColor(suggestion.priority)}`}>
                                                         {getPriorityLabel(suggestion.priority)}
                                                     </span>
                                                     {suggestion.suggestedDueDate && (
-                                                        <span className="px-2 py-0.5 rounded-md border border-border bg-muted/30 text-[9px] font-bold text-muted-foreground">
+                                                        <span className="px-2 py-0.5 rounded-md border border-border bg-muted/30 text-xs font-bold text-muted-foreground">
                                                             📅 {new Date(suggestion.suggestedDueDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                                                         </span>
                                                     )}
@@ -302,7 +302,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
                                                 {/* Reasoning (expandable on hover) */}
                                                 {suggestion.reasoning && !compact && (
-                                                    <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
+                                                    <p className="mt-2 text-xs text-muted-foreground leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
                                                         💡 {suggestion.reasoning}
                                                     </p>
                                                 )}
