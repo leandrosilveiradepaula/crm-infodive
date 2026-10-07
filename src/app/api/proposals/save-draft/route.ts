@@ -89,6 +89,12 @@ export async function POST(request: Request) {
 
         if (saveError) {
             console.error('[ProposalSaveDraftRoute] proposal draft save failed');
+        if (error?.message?.includes('Forbidden')) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (error?.message?.includes('Unauthorized') || error?.message?.includes('session')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
             return NextResponse.json({ 
                 error: 'Error saving proposal draft',
                 code: saveError.code 
@@ -100,7 +106,7 @@ export async function POST(request: Request) {
             proposalId: savedProposal.id,
             version: savedProposal.version
         });
-    } catch {
+    } catch (error: any) {
         console.error('[ProposalSaveDraftRoute] proposal draft save failed');
         return NextResponse.json({ error: 'Não foi possível salvar o rascunho.' }, { status: 500 });
     }
