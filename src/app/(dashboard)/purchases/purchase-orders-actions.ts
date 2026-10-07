@@ -2,7 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PurchaseOrder } from '@/hooks/usePurchaseOrders';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 export async function getPurchaseOrders() {
     const { organizationId } = await requireSessionContext();
@@ -32,7 +32,7 @@ export async function getPurchaseOrders() {
 }
 
 export async function createPurchaseOrder(po: Partial<PurchaseOrder>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('deals:create');
     const supabase = createAdminClient();
 
     try {
@@ -59,7 +59,7 @@ export async function createPurchaseOrder(po: Partial<PurchaseOrder>) {
 }
 
 export async function updatePurchaseOrder(id: string, updates: Partial<PurchaseOrder>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('deals:edit');
     const supabase = createAdminClient();
 
     try {
