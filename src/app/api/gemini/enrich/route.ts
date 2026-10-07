@@ -21,6 +21,9 @@ export async function POST(request: Request) {
         if (!company) {
             return NextResponse.json({ error: "O campo 'company' é obrigatório" }, { status: 400 });
         }
+        if (typeof company !== 'string' || company.length > 500 || (website && (typeof website !== 'string' || website.length > 2_000))) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
 
         console.log('[GeminiEnrichRoute] enrichment started');
 
