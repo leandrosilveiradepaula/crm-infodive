@@ -34,26 +34,21 @@ export async function login(formData: FormData) {
         return { error: 'Email ou senha incorretos.' };
     }
 
-    // Get organizationId from user metadata (set at signup)
-    let organizationId: string | undefined = data.user.user_metadata?.organization_id;
+    // Resolve tenant membership only from the server-side profile.
+    // user_metadata is user-editable in Supabase and must never authorize tenant access.
+    const adminClient = createAdminClient();
+    const { data: profile, error: profileError } = await adminClient
+        .from('profiles')
+        .select('organization_id, status')
+        .eq('id', data.user.id)
+        .single();
 
-    // Fallback: if not in JWT metadata, look up from profiles table
-    if (!organizationId) {
-        const adminClient = createAdminClient();
-        const { data: profile } = await adminClient
-            .from('profiles')
-            .select('organization_id')
-            .eq('id', data.user.id)
-            .single();
-        organizationId = profile?.organization_id || undefined;
+    if (profileError || !profile || profile.status === 'inactive' || !profile.organization_id) {
+        await supabase.auth.signOut();
+        return { error: 'Não foi possível validar o acesso desta conta.' };
     }
 
-    // Also try auth.users raw_user_meta_data via admin
-    if (!organizationId) {
-        const adminClient = createAdminClient();
-        const { data: authUser } = await adminClient.auth.admin.getUserById(data.user.id);
-        organizationId = authUser?.user?.user_metadata?.organization_id;
-    }
+    const organizationId: string = profile.organization_id;
 
     // Save session
     const session = await getSession();
