@@ -47,7 +47,7 @@ export default function DesignPreviewPage() {
                             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
                                 <Briefcase className="w-4 h-4" />
                             </div>
-                            CRM Next
+                            CRM Infodive
                         </div>
                         <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground">
                             <Button variant="ghost" className="text-foreground">Dashboard</Button>
