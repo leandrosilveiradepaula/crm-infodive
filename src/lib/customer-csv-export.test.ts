@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accountsToCsv, escapeCsvCell } from '@/utils/customerCsv';
+import { accountsToCsv, escapeCsvCell } from '../utils/customerCsv';
 
 describe('customer CSV export', () => {
   it('quotes values and escapes embedded quotes', () => {
