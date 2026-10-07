@@ -43,6 +43,7 @@ import { RiskRadar } from './ai/RiskRadar';
 import { DealSuggestedActions } from './ai/DealSuggestedActions';
 import { AIEmailDrafter } from './ai/AIEmailDrafter';
 import { ContractBuilder } from '../contracts/ContractBuilder';
+import { createContract } from '@/app/(dashboard)/contracts/actions';
 import { LostDealModal } from './LostDealModal';
 import { WonDealWizard } from './WonDealWizard';
 import { TechnicalHandoverModal } from '../handover/TechnicalHandoverModal';
@@ -803,10 +804,25 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <ContractBuilder
                                 deal={deal}
                                 onClose={() => setShowContractBuilder(false)}
-                                onSave={(contract) => {
-                                    console.log('Saving contract', contract);
+                                onSave={async (contract, signature) => {
+                                    const result = await createContract({
+                                        ...contract,
+                                        company: contract.company || deal.company,
+                                        value: contract.value ?? deal.value,
+                                        dealId: contract.dealId || deal.id,
+                                        type: contract.type || 'service',
+                                        signature_image: signature || contract.signature_image
+                                    });
+
+                                    if (!result.success) {
+                                        toast.error(result.error || 'Não foi possível salvar o contrato.');
+                                        return;
+                                    }
+
                                     setShowContractBuilder(false);
-                                    toast.success('Contrato salvo (Mock)');
+                                    toast.success(contract.status === 'signed'
+                                        ? 'Contrato assinado e salvo com sucesso.'
+                                        : 'Rascunho do contrato salvo com sucesso.');
                                 }}
                             />
                         </div>
