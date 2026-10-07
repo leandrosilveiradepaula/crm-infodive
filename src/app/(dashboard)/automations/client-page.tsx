@@ -123,13 +123,17 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     });
 
     const handleSave = async (automation: Partial<Automation>) => {
-        if (automation.id) {
-            await updateAutomation(automation.id, automation);
-            toast.success('Automação atualizada com sucesso!');
-        } else {
-            await createAutomation(automation);
-            toast.success('Automação criada com sucesso!');
+        const result = automation.id
+            ? await updateAutomation(automation.id, automation)
+            : await createAutomation(automation);
+
+        if (!result.success) {
+            const message = result.error || 'Não foi possível salvar a automação.';
+            toast.error(message);
+            throw new Error(message);
         }
+
+        toast.success(automation.id ? 'Automação atualizada com sucesso!' : 'Automação criada com sucesso!');
         setShowNewModal(false);
         setInitialModalData(undefined);
         router.refresh();
@@ -147,7 +151,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja excluir esta automação?')) {
-            await deleteAutomation(id);
+            const result = await deleteAutomation(id);
+            if (!result.success) {
+                toast.error(result.error || 'Não foi possível excluir a automação.');
+                return;
+            }
             toast.success('Automação excluída');
             router.refresh();
         }
@@ -160,7 +168,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             name: `${automation.name} (Cópia)`,
             enabled: false
         } as any;
-        await createAutomation(copy);
+        const result = await createAutomation(copy);
+        if (!result.success) {
+            toast.error(result.error || 'Não foi possível duplicar a automação.');
+            return;
+        }
         toast.success('Automação duplicada');
         router.refresh();
     };
