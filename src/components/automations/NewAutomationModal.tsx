@@ -30,7 +30,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         name: initialData?.name || '',
         description: initialData?.description || '',
         category: initialData?.category || 'followup',
-        enabled: false,
+        enabled: initialData?.enabled ?? false,
         trigger: initialData?.trigger || {
             type: 'deal_created',
             config: {}
