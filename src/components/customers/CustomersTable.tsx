@@ -23,12 +23,12 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">CNPJ</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Segmento</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cidade / UF</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Contatos</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">CNPJ</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Segmento</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cidade / UF</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Contatos</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                                     </div>
                                     <div>
                                         <p className="font-bold text-foreground text-sm leading-tight truncate max-w-[180px]">{account.name}</p>
-                                        <p className="text-[10px] text-muted-foreground font-medium capitalize">{account.relationship_type || 'Cliente'}</p>
+                                        <p className="text-xs text-muted-foreground font-medium capitalize">{account.relationship_type || 'Cliente'}</p>
                                     </div>
                                 </div>
                             </td>
@@ -69,7 +69,7 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                             </td>
                             <td className="px-4 py-3">
                                 <span className={cn(
-                                    'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide',
+                                    'px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wide',
                                     statusColors[account.status || 'Ativo'] || 'bg-muted text-muted-foreground'
                                 )}>
                                     {account.status || 'Ativo'}
