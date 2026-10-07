@@ -255,20 +255,20 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         <h2 className="text-base font-black text-foreground uppercase tracking-tight">
                             Planejamento de Cenários Financeiros
                         </h2>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">
                             Simule equipe, custos e rentabilidade do negócio
                         </p>
                     </div>
                     <div className="flex gap-2">
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-muted/40 hover:bg-muted/60 text-foreground px-5 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border border-border flex items-center gap-2 shadow-sm"
+                            className="bg-muted/40 hover:bg-muted/60 text-foreground px-5 h-11 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-border flex items-center gap-2 shadow-sm"
                         >
                             <FolderOpen className="h-3.5 w-3.5 text-primary" /> Meus Cenários ({scenarios.length})
                         </button>
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-primary hover:bg-primary/90 text-white px-5 h-11 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+                            className="bg-primary hover:bg-primary/90 text-white px-5 h-11 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
                         >
                             <Save className="h-3.5 w-3.5" /> Salvar Cenário
                         </button>
@@ -285,7 +285,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         onClick={() => setExpandedSection(expandedSection === 'goals' ? 'goals' : 'goals')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'goals' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
                             <Target className="h-4 w-4 text-primary opacity-80" />
                             1. Metas e Sazonalidade
                         </h3>
@@ -298,26 +298,26 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="col-span-2 md:col-span-1">
                                 <div className="col-span-2 md:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
+                                    <label className="text-xs font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         Definir Meta Por:
                                     </label>
                                     <div className="flex bg-muted/30 p-1 rounded-2xl border border-border h-11 items-center">
                                         <button
                                             onClick={() => setGoalMode('revenue')}
-                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'revenue' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-xs font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'revenue' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                         >
                                             Faturamento
                                         </button>
                                         <button
                                             onClick={() => setGoalMode('profit_absolute')}
-                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_absolute' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-xs font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_absolute' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Lucro Absoluto (R$)"
                                         >
                                             Lucro (R$)
                                         </button>
                                         <button
                                             onClick={() => setGoalMode('profit_percent')}
-                                            className={`flex-1 text-[9px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_percent' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-xs font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${goalMode === 'profit_percent' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Margem de Lucro (%)"
                                         >
                                             Margem (%)
@@ -326,7 +326,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                 </div>
                                 </div>
                                 <div className="col-span-2 md:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
+                                    <label className="text-xs font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         {goalMode === 'revenue' ? 'Meta Faturamento (Mensal)' : goalMode === 'profit_absolute' ? 'Lucro Desejado (Mensal)' : 'Margem Alvo'}
                                     </label>
                                     <div className="relative group">
@@ -344,13 +344,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                     value={goalValue}
                                                     onChange={(e) => setGoalValue(e.target.value)}
                                                 />
-                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground uppercase opacity-50">%</span>
                                             </>
                                         )}
                                     </div>
                                 </div>
                                 <div className="col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Ticket Médio</label>
+                                    <label className="text-xs font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Ticket Médio</label>
                                     <ThemeCurrencyInput
                                         className="w-full bg-muted/30 border border-border rounded-2xl pl-9 pr-4 h-11 text-sm font-black text-foreground focus:ring-1 focus:ring-primary outline-none text-left transition-all"
                                         value={avgTicket || 0}
@@ -358,7 +358,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     />
                                 </div>
                                 <div className="col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Conversão (Conv.)</label>
+                                    <label className="text-xs font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Conversão (Conv.)</label>
                                     <div className="relative group">
                                         <input
                                             type="number"
@@ -366,7 +366,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             value={conversionRate}
                                             onChange={(e) => setConversionRate(e.target.value)}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground uppercase opacity-50">%</span>
                                     </div>
                                 </div>
                             </div>
@@ -381,7 +381,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                         const key = `q${q}` as keyof typeof qPct;
                                         return (
                                             <div key={q} className="space-y-1">
-                                                <label className="text-[10px] uppercase font-bold text-muted-foreground block text-center">
+                                                <label className="text-xs uppercase font-bold text-muted-foreground block text-center">
                                                     Q{q} <span className="hidden sm:inline">- {q === '1' ? 'Jan-Mar' : q === '2' ? 'Abr-Jun' : q === '3' ? 'Jul-Set' : 'Out-Dez'}</span>
                                                 </label>
                                                 <div className="relative">
@@ -392,14 +392,14 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                         onChange={(e) => setQPct({ ...qPct, [key]: Number(e.target.value) })}
                                                         onFocus={(e) => e.target.select()}
                                                     />
-                                                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
+                                                    <span className="absolute right-1 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">%</span>
                                                 </div>
                                             </div>
                                         );
                                     })}
                                 </div>
                                 {Object.values(qPct).reduce((a, b) => a + b, 0) !== 100 && (
-                                    <p className="text-[10px] font-bold text-red-500 mt-2 text-center bg-red-500/10 py-1 rounded">
+                                    <p className="text-xs font-bold text-red-500 mt-2 text-center bg-red-500/10 py-1 rounded">
                                         Pendente: A soma dos trimestres deve ser 100% (Atual: {Object.values(qPct).reduce((a, b) => a + b, 0)}%)
                                     </p>
                                 )}
@@ -414,7 +414,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         onClick={() => setExpandedSection(expandedSection === 'staff' ? 'staff' : 'staff')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'staff' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
                             <Users className="h-4 w-4 text-emerald-500 opacity-80" />
                             2. Equipe & Folha de Pagamento
                         </h3>
@@ -425,7 +425,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         <div className="p-6 pt-2 border-t border-border/50 animate-in slide-in-from-top-2 duration-300">
                             <div className="flex justify-between items-center mb-4">
                                 <div className="flex items-center gap-1.5 bg-muted/50 rounded-lg px-2 py-1">
-                                    <span className="text-[10px] text-muted-foreground font-bold">Encargos:</span>
+                                    <span className="text-xs text-muted-foreground font-bold">Encargos:</span>
                                     <div className="relative w-12">
                                         <input
                                             type="number"
@@ -433,7 +433,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             value={payrollTax}
                                             onChange={(e) => setPayrollTax(Number(e.target.value))}
                                         />
-                                        <span className="absolute right-0 top-0 text-[10px] text-muted-foreground">%</span>
+                                        <span className="absolute right-0 top-0 text-xs text-muted-foreground">%</span>
                                     </div>
                                 </div>
                                 <button onClick={handleAddStaff} className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
@@ -461,7 +461,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             />
                                         </div>
                                         <div className="col-span-2 flex items-center gap-2">
-                                            <span className="text-[10px] font-black text-muted-foreground uppercase">x</span>
+                                            <span className="text-xs font-black text-muted-foreground uppercase">x</span>
                                             <input
                                                 type="number"
                                                 className="w-full bg-muted/40 border border-border rounded-xl h-9 text-center text-xs font-black text-foreground focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -503,7 +503,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         onClick={() => setExpandedSection(expandedSection === 'costs' ? 'costs' : 'costs')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'costs' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
-                        <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
+                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2.5">
                             <Target className="h-4 w-4 text-orange-500 opacity-80" />
                             3. Custos Operacionais (Fixos/Var)
                         </h3>
@@ -607,7 +607,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                         setVariableCostItems(arr);
                                                     }}
                                                 />
-                                                <span className="absolute right-0 top-1 text-muted-foreground text-[10px]">%</span>
+                                                <span className="absolute right-0 top-1 text-muted-foreground text-xs">%</span>
                                             </div>
                                             <button
                                                 onClick={() => setVariableCostItems(variableCostItems.filter((_, i) => i !== idx))}
@@ -666,7 +666,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                             <p className="text-xs font-bold text-emerald-500/70 uppercase mt-1">Meta Alcançada</p>
                         </div>
                     </div>
-                    <p className="text-[10px] text-center text-muted-foreground mt-4">
+                    <p className="text-xs text-center text-muted-foreground mt-4">
                         Baseado em um ticket médio de {avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} e conversão de {conversionRate}%.
                     </p>
                 </div>
@@ -676,13 +676,13 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                     <div className="flex bg-muted/40 p-1 rounded-2xl border border-border mb-6 h-12 items-center">
                         <button
                             onClick={() => setActiveChartTab('profitability')}
-                            className={`flex-1 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'profitability' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-xs font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'profitability' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Ponto de Equilíbrio (P&L)
                         </button>
                         <button
                             onClick={() => setActiveChartTab('seasonality')}
-                            className={`flex-1 text-[10px] font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'seasonality' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-xs font-black uppercase tracking-widest py-2 rounded-xl transition-all h-full flex items-center justify-center ${activeChartTab === 'seasonality' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Curva de Sazonalidade
                         </button>
@@ -731,7 +731,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                 <div className="bg-card border border-border rounded-xl p-5 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center shadow-sm gap-4">
                                     <div>
                                         <h4 className="font-bold text-sm text-foreground">Salvar as configurações da tela</h4>
-                                        <p className="text-[10px] text-muted-foreground mt-0.5">Irá guardar Sazonalidade, Equipe, Múltiplos e Custos ativos.</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5">Irá guardar Sazonalidade, Equipe, Múltiplos e Custos ativos.</p>
                                     </div>
                                     <div className="flex w-full md:w-auto gap-2">
                                         <input
@@ -791,17 +791,17 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                 <h4 className="font-bold text-foreground text-sm mb-3 pr-16 truncate">{scenario.name}</h4>
                                                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-lg mb-4">
                                                     <div>
-                                                        <span className="block text-[10px] uppercase font-bold text-muted-foreground/70">Equipe</span>
+                                                        <span className="block text-xs uppercase font-bold text-muted-foreground/70">Equipe</span>
                                                         <span className="font-medium text-foreground">{scenario.headcount} staffs</span>
                                                     </div>
                                                     <div>
-                                                        <span className="block text-[10px] uppercase font-bold text-muted-foreground/70">Margem alvo</span>
+                                                        <span className="block text-xs uppercase font-bold text-muted-foreground/70">Margem alvo</span>
                                                         <span className="font-medium text-foreground">{scenario.desired_margin}%</span>
                                                     </div>
                                                 </div>
 
                                                 <div className="flex justify-between items-center mb-1">
-                                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                                    <span className="text-xs text-muted-foreground font-medium">
                                                         Modificado em {new Date(scenario.created_at).toLocaleDateString()}
                                                     </span>
                                                 </div>
@@ -818,7 +818,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                         <Target className="h-3.5 w-3.5" /> Enviar Base p/ CRM
                                                     </button>
                                                 ) : (
-                                                    <div className="w-full mt-4 text-center text-[10px] text-muted-foreground italic bg-muted/30 py-2 rounded-lg border border-dashed border-border px-2">
+                                                    <div className="w-full mt-4 text-center text-xs text-muted-foreground italic bg-muted/30 py-2 rounded-lg border border-dashed border-border px-2">
                                                         Carregue e salve para integrar
                                                     </div>
                                                 )}
