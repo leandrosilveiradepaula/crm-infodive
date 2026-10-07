@@ -50,6 +50,8 @@ jobs:
         run: node scripts/validate-migrations.mjs
       - name: Product surface audit
         run: node scripts/audit-product-surface.mjs
+      - name: Paid AI endpoint audit
+        run: node scripts/audit-ai-endpoints.mjs
       - name: Tests
         run: npm test
       - name: Build
