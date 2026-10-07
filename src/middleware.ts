@@ -3,9 +3,26 @@ import type { NextRequest } from 'next/server'
 import { getIronSession } from 'iron-session'
 import { sessionOptions, SessionData } from '@/lib/session'
 import { isPublicRoute } from '@/lib/public-routes'
+import { getRequestId } from '@/lib/request-context'
+
+function withRequestId<T extends NextResponse>(response: T, requestId: string): T {
+    response.headers.set('X-Request-Id', requestId)
+    return response
+}
 
 export async function middleware(request: NextRequest) {
-    const response = NextResponse.next()
+    const requestHeaders = new Headers(request.headers)
+    const requestId = getRequestId(requestHeaders.get('X-Request-Id'))
+    requestHeaders.set('X-Request-Id', requestId)
+
+    const response = withRequestId(
+        NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            }
+        }),
+        requestId
+    )
 
     const session = await getIronSession<SessionData>(
         request,
@@ -17,21 +34,21 @@ export async function middleware(request: NextRequest) {
 
     // Allow only the public routes intentionally exposed by the app.
     if (isPublicRoute(pathname)) {
-        return response;
+        return response
     }
 
     // Protect routes
     if (!session.isLoggedIn || !session.userId) {
         if (pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return withRequestId(
+                NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+                requestId
+            )
         }
         const url = request.nextUrl.clone()
         url.pathname = '/login'
-        return NextResponse.redirect(url)
+        return withRequestId(NextResponse.redirect(url), requestId)
     }
-
-    // Build new request headers forwarding auth context
-    const requestHeaders = new Headers(request.headers)
 
     // Inject userId for BFF security layer
     requestHeaders.set('X-User-Id', session.userId)
@@ -42,11 +59,14 @@ export async function middleware(request: NextRequest) {
         requestHeaders.set('X-Supabase-Token', accessToken)
     }
 
-    return NextResponse.next({
-        request: {
-            headers: requestHeaders,
-        }
-    })
+    return withRequestId(
+        NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            }
+        }),
+        requestId
+    )
 }
 
 export const config = {
