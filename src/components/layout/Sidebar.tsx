@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard,
@@ -22,8 +22,6 @@ import {
     BarChart3,
     X
 } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -37,8 +35,6 @@ interface SidebarProps {
 export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
     const pathname = usePathname();
     const { profile, signOut } = useAuth();
-    const router = useRouter();
-
     const handleLogout = async () => {
         try {
             await signOut();
