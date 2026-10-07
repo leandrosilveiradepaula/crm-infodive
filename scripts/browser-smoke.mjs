@@ -1,0 +1,101 @@
+import { chromium } from 'playwright';
+import { mkdirSync, writeFileSync } from 'node:fs';
+
+const baseUrl = process.env.CRM_SMOKE_BASE_URL || 'http://127.0.0.1:3000';
+const checks = [];
+const failures = [];
+
+function record(name, ok, detail = '') {
+  checks.push({ name, ok, detail });
+  if (!ok) failures.push({ name, detail });
+}
+
+async function noHorizontalOverflow(page, name) {
+  const result = await page.evaluate(() => ({
+    innerWidth: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  const ok = result.scrollWidth <= result.innerWidth + 1;
+  record(name, ok, JSON.stringify(result));
+}
+
+async function tabSequenceIncludes(page, expectedNames) {
+  const seen = [];
+  await page.locator('body').click({ position: { x: 5, y: 5 } });
+  for (let i = 0; i < 12; i += 1) {
+    await page.keyboard.press('Tab');
+    const active = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el) return '';
+      return [
+        el.tagName,
+        el.getAttribute('name') || '',
+        el.getAttribute('type') || '',
+        (el.textContent || '').trim().slice(0, 80),
+      ].join('|');
+    });
+    seen.push(active);
+  }
+  const ok = expectedNames.every((expected) => seen.some((item) => item.includes(expected)));
+  record('keyboard_tab_reaches_login_controls', ok, JSON.stringify(seen));
+}
+
+const browser = await chromium.launch({ headless: true });
+try {
+  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await desktop.newPage();
+
+  const loginResponse = await page.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
+  record('login_http_success', Boolean(loginResponse && loginResponse.ok()), String(loginResponse?.status() ?? 'no-response'));
+
+  const titleVisible = await page.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false);
+  record('login_desktop_renders', titleVisible);
+
+  const email = page.locator('input[name="email"]');
+  const password = page.locator('input[name="password"]');
+  const submit = page.getByRole('button', { name: 'Entrar no Sistema' });
+  record('login_controls_have_accessible_roles', await email.isVisible() && await password.isVisible() && await submit.isVisible());
+
+  await noHorizontalOverflow(page, 'login_desktop_no_horizontal_overflow');
+  await tabSequenceIncludes(page, ['email', 'password', 'Entrar no Sistema']);
+
+  const protectedResponse = await page.goto(baseUrl + '/dashboard', { waitUntil: 'domcontentloaded' });
+  await page.waitForURL(/\/login(?:\?|$)/, { timeout: 10_000 }).catch(() => {});
+  const protectedUrl = new URL(page.url());
+  record(
+    'protected_dashboard_redirects_unauthenticated',
+    protectedUrl.pathname === '/login',
+    JSON.stringify({ status: protectedResponse?.status() ?? null, url: page.url() }),
+  );
+
+  await desktop.close();
+
+  const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
+  const mobilePage = await mobile.newPage();
+  await mobilePage.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
+  record('login_mobile_renders', await mobilePage.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false));
+  await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow');
+
+  await mobilePage.goto(baseUrl + '/login?invite_token=smoke-test', { waitUntil: 'networkidle' });
+  record('invite_registration_state_renders', await mobilePage.getByText('Criar nova conta', { exact: true }).isVisible().catch(() => false));
+  record('invite_registration_name_field_visible', await mobilePage.locator('input[name="name"]').isVisible().catch(() => false));
+  await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow');
+
+  await mobile.close();
+} finally {
+  await browser.close();
+}
+
+mkdirSync('artifacts', { recursive: true });
+const evidence = {
+  schema_version: 1,
+  status: failures.length ? 'failed' : 'passed',
+  base_url: baseUrl,
+  checks,
+  failures,
+  generated_at: new Date().toISOString(),
+};
+writeFileSync('artifacts/browser-smoke.json', JSON.stringify(evidence, null, 2) + '\n', 'utf8');
+console.log(JSON.stringify(evidence));
+
+if (failures.length) process.exit(1);
