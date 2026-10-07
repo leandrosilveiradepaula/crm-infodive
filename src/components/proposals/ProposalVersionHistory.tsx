@@ -57,7 +57,7 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
 
     return (
         <div className="bg-white rounded-3xl border border-border shadow-sm p-4 overflow-hidden relative">
-            <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h3 className="text-xs font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
                 <History className="h-3.5 w-3.5 text-teal-600" />
                 Histórico de Versões
             </h3>
@@ -106,7 +106,7 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-black opacity-60">
+                                            <p className="text-xs text-muted-foreground uppercase tracking-widest font-black opacity-60">
                                                 {new Date(prop.createdAt).toLocaleString('pt-BR')} • #{prop.number || 'Draft'}
                                             </p>
                                         </div>
@@ -115,7 +115,7 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
                                     <div className="text-right">
                                         <p className="text-[13px] font-black leading-tight tracking-tighter">{formatCurrency(prop.total || 0)}</p>
                                         {prevProp && valueDiff !== 0 && (
-                                            <p className={`text-[9px] font-bold ${valueDiff > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                            <p className={`text-xs font-bold ${valueDiff > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
                                                 {valueDiff > 0 ? '+' : ''}{formatCurrency(valueDiff)}
                                             </p>
                                         )}
@@ -133,7 +133,7 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
                                                 // Currently editor only takes dealId. We can pass proposalId as query param
                                                 router.push(`/pipeline/proposals/editor/${dealId}?sourceProposalId=${prop.id}`);
                                             }}
-                                            className="h-7 px-2 text-[9px] uppercase font-black tracking-widest text-teal-700 hover:text-teal-800 hover:bg-teal-50 border-teal-100"
+                                            className="h-7 px-2 text-xs uppercase font-black tracking-widest text-teal-700 hover:text-teal-800 hover:bg-teal-50 border-teal-100"
                                         >
                                             <Copy className="h-3 w-3 mr-1.5" />
                                             Restaurar Versão
