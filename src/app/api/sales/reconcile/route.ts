@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requirePermission } from '@/lib/auth-server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 type InstallmentSalesOrder = {
     deal?: {
@@ -13,7 +14,7 @@ type InstallmentSalesOrder = {
 
 export async function POST(req: NextRequest) {
     try {
-        const { organizationId } = await requirePermission('deals:edit');
+        const { userId, organizationId } = await requirePermission('deals:edit');
         const body = await req.json();
         const { statementText } = body;
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
@@ -24,6 +25,11 @@ export async function POST(req: NextRequest) {
         }
         if (typeof statementText !== 'string' || statementText.length > 100_000) {
             return NextResponse.json({ success: false, error: 'Statement text exceeds the allowed limit' }, { status: 413 });
+        }
+
+        const rateLimit = consumeRateLimit({ scope: 'sales-reconcile-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ success: false, error: 'Muitas reconciliações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const supabase = createAdminClient();
