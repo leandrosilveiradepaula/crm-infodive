@@ -44,4 +44,12 @@ describe('dashboard error and loading states', () => {
     expect(source).not.toContain('transition-all cursor-pointer group min-h-[350px]');
   });
 
+
+  it('keeps incremental accessibility lint rules enabled', () => {
+    const source = readFileSync('eslint.config.mjs', 'utf8');
+    expect(source).toContain('"jsx-a11y/control-has-associated-label": "error"');
+    expect(source).toContain('"jsx-a11y/click-events-have-key-events": "error"');
+    expect(source).toContain('"jsx-a11y/no-static-element-interactions": "error"');
+  });
+
 });
