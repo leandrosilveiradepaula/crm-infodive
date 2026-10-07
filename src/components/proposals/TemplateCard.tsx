@@ -55,7 +55,7 @@ export const TemplateCard = ({
             {/* Select Button */}
             <div className="mt-8">
                 <span className={`
-                    inline-flex items-center gap-2 text-[10px] font-black px-4 py-1.5 rounded-full transition-all duration-300 uppercase tracking-widest
+                    inline-flex items-center gap-2 text-xs font-black px-4 py-1.5 rounded-full transition-all duration-300 uppercase tracking-widest
                     ${isSelected
                         ? 'bg-primary text-white shadow-inner'
                         : 'bg-muted text-muted-foreground group-hover:bg-blue-500 group-hover:text-white'
