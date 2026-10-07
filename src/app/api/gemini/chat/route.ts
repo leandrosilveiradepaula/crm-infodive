@@ -25,17 +25,16 @@ export async function POST(request: Request) {
     let history: ChatMessage[];
     try {
         const body = await request.json();
-        history = Array.isArray(body?.history)
-            ? body.history
-                .filter((item: unknown): item is ChatMessage => {
-                    if (!item || typeof item !== 'object') return false;
-                    const candidate = item as ChatMessage;
-                    return (candidate.role === 'user' || candidate.role === 'assistant')
-                        && typeof candidate.content === 'string';
-                })
-                .slice(-10)
-                .map((item: ChatMessage) => ({ role: item.role, content: item.content.slice(0, 4000) }))
-            : [];
+        const rawHistory: unknown[] = Array.isArray(body?.history) ? body.history : [];
+        history = rawHistory
+            .filter((item: unknown): item is ChatMessage => {
+                if (!item || typeof item !== 'object') return false;
+                const candidate = item as ChatMessage;
+                return (candidate.role === 'user' || candidate.role === 'assistant')
+                    && typeof candidate.content === 'string';
+            })
+            .slice(-10)
+            .map((item: ChatMessage) => ({ role: item.role, content: item.content.slice(0, 4000) }));
     } catch {
         history = [];
     }
