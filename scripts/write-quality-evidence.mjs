@@ -19,6 +19,7 @@ const evidence = {
     'new_lint_errors',
     'dependency_audit_regression',
     'migration_policy',
+    'product_surface_audit',
     'tests',
     'build',
     'diff_check'
