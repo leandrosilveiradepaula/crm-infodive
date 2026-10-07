@@ -5,6 +5,7 @@ on:
     branches:
       - factory/fix-present-in-usd-safe-rate
       - 'security/**'
+      - 'ops/**'
   pull_request:
     branches:
       - main
@@ -28,6 +29,8 @@ jobs:
         run: npm ci
       - name: TypeScript
         run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
       - name: Tests
         run: npm test
       - name: Build
