@@ -93,7 +93,7 @@ export const IntegrationKeys = () => {
                                         {key.token_prefix}••••••••
                                     </td>
                                     <td className="py-5 px-6">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${key.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase border ${key.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
                                             <span className={`w-1.5 h-1.5 rounded-full ${key.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
                                             {key.status === 'active' ? 'Ativo' : 'Revogado'}
                                         </span>
