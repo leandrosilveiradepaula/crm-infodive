@@ -27,6 +27,7 @@ describe('automation runtime core', () => {
     it('plans a supported matching automation deterministically', () => {
         const automation = baseAutomation();
         const plan = planAutomation(automation, {
+            eventId: 'event-1',
             type: 'deal_moved',
             organizationId: 'org-1',
             entityId: 'deal-1',
@@ -46,6 +47,7 @@ describe('automation runtime core', () => {
             'unsupported action[0]: send_email'
         );
         expect(planAutomation(automation, {
+            eventId: 'event-2',
             type: 'deal_moved',
             organizationId: 'org-1',
             entityId: 'deal-1',
@@ -64,6 +66,7 @@ describe('automation runtime core', () => {
     it('requires the configured stage for deal_moved', () => {
         const automation = baseAutomation();
         const plan = planAutomation(automation, {
+            eventId: 'event-1',
             type: 'deal_moved',
             organizationId: 'org-1',
             entityId: 'deal-1',
@@ -92,6 +95,7 @@ describe('automation runtime core', () => {
         const automation = baseAutomation();
         automation.enabled = false;
         expect(planAutomation(automation, {
+            eventId: 'event-2',
             type: 'deal_moved',
             organizationId: 'org-1',
             entityId: 'deal-1',
