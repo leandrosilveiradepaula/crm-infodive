@@ -26,6 +26,19 @@ describe('tenant RLS profile context migration', () => {
     expect(migration).toContain("'accounts','products','deals'");
     expect(migration).toContain('Users can manage their api keys');
     expect(migration).toContain('Users can upload invoices to their organization folder');
+    for (const table of [
+      'contact_suggestions',
+      'contact_blacklists',
+      'sales_orders',
+      'sales_order_items',
+      'documents',
+      'sales_order_installments',
+      'ai_activity_suggestions',
+    ]) {
+      expect(migration).toContain(`'${table}'`);
+    }
+    expect(migration).toContain('Users can view their org suggestions');
+    expect(migration).toContain('Users can manage their org suggestions');
   });
 
   it('keeps audit logs server-owned and inaccessible to direct authenticated writes', () => {
