@@ -89,7 +89,6 @@ export async function POST(request: Request) {
 
         if (saveError) {
             console.error('[ProposalSaveDraftRoute] proposal draft save failed');
-        const message = error instanceof Error ? error.message : '';
             return NextResponse.json({ 
                 error: 'Error saving proposal draft',
                 code: saveError.code 
@@ -103,6 +102,7 @@ export async function POST(request: Request) {
         });
     } catch (error: unknown) {
         console.error('[ProposalSaveDraftRoute] proposal draft save failed');
+        const message = error instanceof Error ? error.message : '';
         if (message.includes('Forbidden')) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
