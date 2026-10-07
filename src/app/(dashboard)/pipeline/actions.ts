@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 import { DealService } from '@/services/DealService';
 import { ProposalService } from '@/services/ProposalService';
@@ -28,7 +28,7 @@ export async function getAccountContacts(accountId?: string | null): Promise<Con
 }
 
 export async function updateDealStage(dealId: string, newStage: string, probability?: number, dealTitle?: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
     // Trigger automation on stage change
     if (dealTitle) {
@@ -40,7 +40,7 @@ export async function updateDealStage(dealId: string, newStage: string, probabil
 }
 
 export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:create');
     const result = await DealService.createDeal(userId, organizationId, deal);
     // Trigger automation on deal creation
     ActivityAiService.onDealCreated(userId, organizationId, result.id, result.title).catch(() => {
@@ -57,14 +57,14 @@ export async function getDealDetails(dealId: string): Promise<Deal | null> {
 }
 
 export async function updateDeal(dealId: string, updates: Partial<Deal>): Promise<boolean> {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.updateDeal(userId, dealId, organizationId, updates);
     revalidatePath('/pipeline');
     return true;
 }
 
 export async function duplicateDealEntry(dealId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:create');
     const result = await DealService.duplicateDeal(userId, dealId, organizationId);
     revalidatePath('/pipeline');
     return result;
@@ -81,42 +81,42 @@ export async function getAccounts() {
 }
 
 export async function addDealProduct(dealId: string, product: any) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     const data = await DealService.addDealProduct(userId, dealId, organizationId, product);
     revalidatePath('/pipeline');
     return data;
 }
 
 export async function removeDealProduct(itemId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.removeDealProduct(userId, itemId, organizationId);
     revalidatePath('/pipeline');
     return true;
 }
 
 export async function bulkRemoveDealProducts(itemIds: string[]) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.bulkRemoveDealProducts(userId, itemIds, organizationId);
     revalidatePath('/pipeline');
     return true;
 }
 
 export async function updateDealProduct(itemId: string, updates: any) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.updateDealProduct(userId, itemId, organizationId, updates);
     revalidatePath('/pipeline');
     return true;
 }
 
 export async function reorderDealProducts(items: { id: string, display_order: number }[]) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.reorderDealProducts(userId, organizationId, items);
     revalidatePath('/pipeline');
     return true;
 }
 
 export async function bulkAddDealProducts(dealId: string, products: any[]) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     const data = await DealService.bulkAddDealProducts(userId, dealId, organizationId, products);
     revalidatePath('/pipeline');
     return data;
@@ -128,7 +128,7 @@ export async function fetchProposals(dealId: string) {
 }
 
 export async function deleteProposal(id: string, dealId?: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await ProposalService.deleteProposal(userId, id, organizationId);
     if (dealId) revalidatePath(`/pipeline/${dealId}`);
     revalidatePath('/pipeline');
@@ -136,21 +136,21 @@ export async function deleteProposal(id: string, dealId?: string) {
 }
 
 export async function createProposal(payload: any) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     const data = await ProposalService.createProposal(userId, organizationId, payload);
     revalidatePath('/pipeline');
     return data;
 }
 
 export async function updateProposal(proposalId: string, updates: Partial<Proposal>) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     const data = await ProposalService.updateProposal(userId, proposalId, organizationId, updates);
     revalidatePath('/pipeline');
     return data;
 }
 
 export async function getOrCreateRoom(dealId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     return await DealService.getOrCreateRoom(userId, dealId, organizationId);
 }
 
@@ -164,7 +164,7 @@ export async function getDealDocuments(dealId: string) {
 }
 
 export async function uploadDealDocument(dealId: string, formData: FormData) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     const file = formData.get('file') as File | null;
     if (!file) throw new Error('Nenhum arquivo enviado.');
@@ -198,7 +198,7 @@ export async function getDealDocumentSignedUrl(documentId: string) {
 }
 
 export async function deleteDealDocument(documentId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DocumentService.deleteDocument(userId, organizationId, documentId);
     revalidatePath('/pipeline');
     return true;
