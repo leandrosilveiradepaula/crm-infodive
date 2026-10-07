@@ -5,6 +5,11 @@ import { requireSessionContext } from '@/lib/auth-server';
 export async function POST(req: Request) {
     try {
         await requireSessionContext();
+    } catch {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
@@ -12,7 +17,7 @@ export async function POST(req: Request) {
         const genAI = new GoogleGenerativeAI(apiKey);
         const { text, image } = await req.json();
 
-        if (text != null && typeof text !== 'string' || image != null && typeof image !== 'string') {
+        if ((text != null && typeof text !== 'string') || (image != null && typeof image !== 'string')) {
             return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
         }
 
