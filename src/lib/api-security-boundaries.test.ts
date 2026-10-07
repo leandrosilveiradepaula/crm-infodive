@@ -8,6 +8,7 @@ describe('API security boundaries', () => {
     expect(source).toContain('20_000');
     expect(source).toContain('8_000_000');
     expect(source).toContain("status: 413");
+    expect(source).toContain("status: 401");
   });
 
   it('requires deals:edit on proposal routes that persist or allocate proposal state', () => {
@@ -19,6 +20,7 @@ describe('API security boundaries', () => {
       const source = readFileSync(path, 'utf8');
       expect(source).toContain("requirePermission('deals:edit')");
       expect(source).not.toContain('requireSessionContext()');
+      expect(source).toContain("status: 403");
     }
   });
 
