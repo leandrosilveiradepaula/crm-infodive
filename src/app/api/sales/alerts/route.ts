@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requirePermission, requireSessionContext } from '@/lib/auth-server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 export async function GET(req: NextRequest) {
     try {
@@ -101,8 +102,15 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     // This POST method will be used for "Deep Analysis" of a specific order
     try {
-        const { organizationId } = await requirePermission('deals:edit');
+        const { userId, organizationId } = await requirePermission('deals:edit');
         const { orderId, alertType } = await req.json();
+        if (typeof orderId !== 'string' || orderId.length > 100 || typeof alertType !== 'string' || alertType.length > 100) {
+            return NextResponse.json({ success: false, error: 'Parâmetros inválidos.' }, { status: 400 });
+        }
+        const rateLimit = consumeRateLimit({ scope: 'sales-alert-analysis-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ success: false, error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+        }
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
         if (!apiKey) throw new Error('Gemini API Key not configured');
 
