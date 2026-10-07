@@ -17,6 +17,7 @@ export class AutomationService {
 
         return data.map((item: any) => ({
             ...item,
+            enabled: false,
             trigger: item.trigger || { type: 'deal_created', config: {} },
             conditions: item.conditions || [],
             actions: item.actions || [],
@@ -34,6 +35,7 @@ export class AutomationService {
                 .from('automations')
                 .insert([{
                     ...automation,
+                    enabled: false,
                     organization_id: organizationId,
                     execution_count: 0,
                     success_count: 0,
@@ -53,6 +55,13 @@ export class AutomationService {
     }
 
     static async toggleAutomation(userId: string, id: string, organizationId: string, enabled: boolean) {
+        if (enabled) {
+            return {
+                success: false,
+                error: 'A execução automática está bloqueada até o runtime de automações estar disponível.'
+            };
+        }
+
         const supabase = createAdminClient();
 
         try {
@@ -80,6 +89,7 @@ export class AutomationService {
                 .from('automations')
                 .update({
                     ...automation,
+                    enabled: false,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)

@@ -30,7 +30,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         name: initialData?.name || '',
         description: initialData?.description || '',
         category: initialData?.category || 'followup',
-        enabled: true,
+        enabled: false,
         trigger: initialData?.trigger || {
             type: 'deal_created',
             config: {}
@@ -302,7 +302,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                                 </div>
                                 <p className="text-sm text-muted-foreground font-medium">
-                                    Este fluxo será ativado <span className="text-foreground font-bold">Imediatamente</span> após a criação.
+                                    A configuração será salva como <span className="text-foreground font-bold">rascunho</span>. A ativação automática fica bloqueada até o executor real estar disponível.
                                 </p>
                             </div>
                         </div>
@@ -327,7 +327,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                             }`}
                     >
                         {loading ? 'Criando...' : step === 3 ? (
-                            <>Concluir e Ativar <CheckCircle2 className="h-5 w-5" /></>
+                            <>Salvar Configuração <CheckCircle2 className="h-5 w-5" /></>
                         ) : (
                             <>Próximo <ArrowRight className="h-5 w-5" /></>
                         )}
