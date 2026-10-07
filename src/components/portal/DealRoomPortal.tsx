@@ -52,7 +52,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                         </div>
                         <div>
                             <h1 className="text-lg font-black tracking-tight uppercase">Portal <span className="text-primary">Infodive</span></h1>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-tight">Espaço do Cliente</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest leading-tight">Espaço do Cliente</p>
                         </div>
                     </div>
 
@@ -80,7 +80,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                             <div className="bg-card/40 backdrop-blur-md border border-border/50 p-10 rounded-[32px] shadow-sm">
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                     <div className="space-y-4">
-                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full border border-emerald-500/20 text-xs font-black uppercase tracking-widest">
                                             <CheckCircle2 className="w-3 h-3" />
                                             Oportunidade Ativa
                                         </div>
@@ -101,7 +101,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                     </div>
 
                                     <div className="bg-primary text-primary-foreground p-8 rounded-3xl shadow-2xl shadow-primary/20 flex flex-col items-end min-w-[240px]">
-                                        <span className="text-[11px] font-black uppercase tracking-[0.2em] opacity-80 mb-2">Investimento Estimado</span>
+                                        <span className="text-xs font-black uppercase tracking-[0.2em] opacity-80 mb-2">Investimento Estimado</span>
                                         <span className="text-4xl font-black tabular-nums tracking-tighter">
                                             {formatCurrency(deal.value)}
                                         </span>
@@ -127,9 +127,9 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-muted/30">
-                                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em]">Produto / Serviço</th>
-                                                <th className="px-6 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em] text-center w-24">Qtd</th>
-                                                <th className="px-8 py-5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em] text-right w-40">Investimento</th>
+                                                <th className="px-8 py-5 text-xs font-black text-muted-foreground uppercase tracking-[0.15em]">Produto / Serviço</th>
+                                                <th className="px-6 py-5 text-xs font-black text-muted-foreground uppercase tracking-[0.15em] text-center w-24">Qtd</th>
+                                                <th className="px-8 py-5 text-xs font-black text-muted-foreground uppercase tracking-[0.15em] text-right w-40">Investimento</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border/40">
@@ -139,14 +139,14 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                                         <div className="space-y-1">
                                                             <div className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">{product.name}</div>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] font-mono tracking-tighter text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded italic">
+                                                                <span className="text-xs font-mono tracking-tighter text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded italic">
                                                                     {product.category || 'Solução'}
                                                                 </span>
                                                                 {product.sku && product.show_sku_on_proposal !== false && (
-                                                                    <span className="text-[9px] font-medium text-muted-foreground/60">{product.sku}</span>
+                                                                    <span className="text-xs font-medium text-muted-foreground/60">{product.sku}</span>
                                                                 )}
                                                                 {product.duration && product.duration_unit && (
-                                                                    <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded italic border border-emerald-500/20 uppercase">
+                                                                    <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded italic border border-emerald-500/20 uppercase">
                                                                         {product.duration} {product.duration_unit}
                                                                     </span>
                                                                 )}
@@ -256,13 +256,13 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                         <img src="/assets/logo-infodive.png" alt="Infodive" className="h-8" />
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
                         <a href="#" className="hover:text-primary transition-colors">Termos de Uso</a>
                         <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
                         <a href="#" className="hover:text-primary transition-colors">Suporte</a>
                     </div>
 
-                    <div className="text-[10px] text-muted-foreground font-medium">
+                    <div className="text-xs text-muted-foreground font-medium">
                         © {new Date().getFullYear()} Infodive IT Solutions. Todos os direitos reservados.
                     </div>
                 </div>

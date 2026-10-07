@@ -60,7 +60,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
             {/* User List Sidebar */}
             <div className="w-72 border-r border-border pr-6 overflow-y-auto">
                 <div className="mb-6">
-                    <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Selecione o Usuário</h3>
+                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Selecione o Usuário</h3>
                     <p className="text-xs text-muted-foreground">Configure as comissões individuais</p>
                 </div>
                 <div className="space-y-2">
@@ -84,7 +84,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                     }`}>
                                     {user.name}
                                 </p>
-                                <p className={`text-[10px] uppercase tracking-wider font-medium ${selectedUserId === (user.user_id || user.id) ? 'text-blue-200' : 'text-muted-foreground'
+                                <p className={`text-xs uppercase tracking-wider font-medium ${selectedUserId === (user.user_id || user.id) ? 'text-blue-200' : 'text-muted-foreground'
                                     }`}>
                                     {user.role}
                                 </p>
@@ -117,7 +117,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                             </div>
                             <button
                                 onClick={() => setIsSimulatorOpen(true)}
-                                className="flex items-center gap-2 h-11 px-6 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10"
+                                className="flex items-center gap-2 h-11 px-6 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-2xl transition-all font-black text-xs uppercase tracking-widest border border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10"
                             >
                                 <Calculator className="h-4 w-4" />
                                 Simular Ganhos
@@ -149,7 +149,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                 <div className="grid grid-cols-2 gap-4">
                                                     {/* Base Client */}
                                                     <div className="space-y-2">
-                                                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider block">
+                                                        <label className="text-xs font-black text-muted-foreground uppercase tracking-wider block">
                                                             Cliente Base
                                                         </label>
                                                         <div className="relative">
@@ -170,13 +170,13 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                     handleUpdateRules(newRules);
                                                                 }}
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground uppercase opacity-50">%</span>
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-muted-foreground uppercase opacity-50">%</span>
                                                         </div>
                                                     </div>
 
                                                     {/* New Client */}
                                                     <div className="space-y-1.5 flex-1">
-                                                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">
+                                                        <label className="text-xs font-black text-muted-foreground uppercase tracking-widest block">
                                                             Cliente Novo
                                                             <span className="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-lg text-[8px] font-black">BÔNUS</span>
                                                         </label>
@@ -198,7 +198,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                                     handleUpdateRules(newRules);
                                                                 }}
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-emerald-600 uppercase opacity-50">%</span>
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-emerald-600 uppercase opacity-50">%</span>
                                                         </div>
                                                     </div>
                                                 </div>

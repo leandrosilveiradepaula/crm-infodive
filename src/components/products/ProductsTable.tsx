@@ -21,10 +21,10 @@ export function ProductsTable({ products, onEdit, onDelete, onDuplicate }: Produ
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Produto</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">SKU</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Fabricante</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Categoria</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest">Produto</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">SKU</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Fabricante</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Categoria</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@ export function ProductsTable({ products, onEdit, onDelete, onDuplicate }: Produ
                                     <div>
                                         <p className="font-bold text-foreground text-sm leading-tight truncate max-w-[200px]">{product.name}</p>
                                         {product.description && (
-                                            <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">{product.description}</p>
+                                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">{product.description}</p>
                                         )}
                                     </div>
                                 </div>
@@ -62,7 +62,7 @@ export function ProductsTable({ products, onEdit, onDelete, onDuplicate }: Produ
                             </td>
                             <td className="px-4 py-3 hidden lg:table-cell">
                                 {product.category ? (
-                                    <span className="px-2 py-0.5 bg-muted rounded-full text-[10px] font-bold text-muted-foreground">
+                                    <span className="px-2 py-0.5 bg-muted rounded-full text-xs font-bold text-muted-foreground">
                                         {product.category}
                                     </span>
                                 ) : <span className="text-xs text-muted-foreground">—</span>}

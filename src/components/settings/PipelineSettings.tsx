@@ -106,7 +106,7 @@ export function PipelineSettings() {
                                     placeholder="Nome da etapa"
                                 />
 
-                                <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
+                                <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
                                     #{index + 1}
                                 </span>
 

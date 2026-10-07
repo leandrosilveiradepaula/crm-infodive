@@ -34,6 +34,8 @@ jobs:
         run: node scripts/lint-changed.mjs
       - name: Dependency audit regression guard
         run: node scripts/audit-dependencies.mjs
+      - name: Product surface audit
+        run: node scripts/audit-product-surface.mjs
       - name: Tests
         run: npm test
       - name: Build

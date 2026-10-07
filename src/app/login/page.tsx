@@ -100,13 +100,13 @@ function LoginForm() {
             <CardContent>
                 <form action={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3 text-red-500 text-[10px] font-black uppercase">
+                        <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center gap-3 text-red-500 text-xs font-black uppercase">
                             <AlertCircle className="h-4 w-4 flex-shrink-0" />
                             {error}
                         </div>
                     )}
                     {success && (
-                        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3 text-green-500 text-[10px] font-black uppercase">
+                        <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3 text-green-500 text-xs font-black uppercase">
                             <AlertCircle className="h-4 w-4 flex-shrink-0" />
                             {success}
                         </div>
@@ -115,7 +115,7 @@ function LoginForm() {
                     {!isLogin && (
                         <>
                             <div className="space-y-2">
-                                <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Nome Completo</Label>
+                                <Label className="text-muted-foreground text-xs font-black uppercase tracking-widest">Nome Completo</Label>
                                 <div className="relative group">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                     <Input
@@ -132,7 +132,7 @@ function LoginForm() {
 
                     {isLogin && (
                         <div className="space-y-2">
-                            <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Email Corporativo</Label>
+                            <Label className="text-muted-foreground text-xs font-black uppercase tracking-widest">Email Corporativo</Label>
                             <div className="relative group">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <Input
@@ -147,7 +147,7 @@ function LoginForm() {
                     )}
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-widest">Senha</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-widest">Senha</Label>
                         <div className="relative group">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
@@ -162,7 +162,7 @@ function LoginForm() {
                     </div>
 
                     <Button
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-6 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-[0.2em] text-[11px]"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-6 rounded-2xl shadow-xl shadow-primary/20 transition-all uppercase tracking-[0.2em] text-xs"
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
@@ -179,12 +179,12 @@ function LoginForm() {
                     <button
                         type="button"
                         onClick={() => router.push('/login')}
-                        className="text-[10px] text-muted-foreground hover:text-primary font-black uppercase tracking-widest transition-colors"
+                        className="text-xs text-muted-foreground hover:text-primary font-black uppercase tracking-widest transition-colors"
                     >
                         Já tem uma conta? Voltar para o Login
                     </button>
                 ) : (
-                    <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest cursor-default">
+                    <p className="text-xs text-muted-foreground/60 font-black uppercase tracking-widest cursor-default">
                         O cadastro no sistema é feito exclusivamente por convite
                     </p>
                 )}
@@ -202,7 +202,7 @@ export default function LoginPage() {
                     <div className="w-10 h-10 bg-primary rounded-xl" />
                     INFODIVE<span className="text-primary">CRM</span>
                 </div>
-                <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Next Gen Business Intelligence</div>
+                <div className="text-xs font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Next Gen Business Intelligence</div>
             </div>
 
             {/* Background Effects */}
@@ -212,11 +212,11 @@ export default function LoginPage() {
                 <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
             </div>
 
-            <Suspense fallback={<div className="text-muted-foreground animate-pulse font-black uppercase text-[10px] tracking-widest">Carregando ambiente...</div>}>
+            <Suspense fallback={<div className="text-muted-foreground animate-pulse font-black uppercase text-xs tracking-widest">Carregando ambiente...</div>}>
                 <LoginForm />
             </Suspense>
 
-            <div className="mt-12 text-[9px] font-black text-muted-foreground uppercase tracking-widest opacity-30 select-none">
+            <div className="mt-12 text-xs font-black text-muted-foreground uppercase tracking-widest opacity-30 select-none">
                 © 2026 INFODIVE S.A. | Todos os direitos reservados
             </div>
         </div>

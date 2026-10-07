@@ -36,14 +36,14 @@ export function PremiumEmptyState({
             </div>
 
             <h3 className={`${isCompact ? 'text-xs' : 'text-xl'} font-black text-foreground tracking-tight mb-2 uppercase`}>{title}</h3>
-            <p className={`${isCompact ? 'text-[10px]' : 'text-sm'} text-muted-foreground font-medium max-w-xs mx-auto leading-relaxed ${!isCompact && actionLabel ? 'mb-8' : ''}`}>
+            <p className={`${isCompact ? 'text-xs' : 'text-sm'} text-muted-foreground font-medium max-w-xs mx-auto leading-relaxed ${!isCompact && actionLabel ? 'mb-8' : ''}`}>
                 {description}
             </p>
 
             {!isCompact && actionLabel && onAction && (
                 <Button 
                     onClick={onAction}
-                    className="h-12 px-8 bg-primary text-white font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center gap-2 uppercase text-[11px] tracking-widest group"
+                    className="h-12 px-8 bg-primary text-white font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center gap-2 uppercase text-xs tracking-widest group"
                 >
                     <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
                     {actionLabel}
