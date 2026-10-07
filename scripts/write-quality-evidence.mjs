@@ -20,6 +20,7 @@ const evidence = {
     'dependency_audit_regression',
     'migration_policy',
     'product_surface_audit',
+    'paid_ai_endpoint_audit',
     'tests',
     'build',
     'diff_check'
