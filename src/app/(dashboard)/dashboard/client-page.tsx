@@ -212,7 +212,9 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         {/* Tempo Todo + Q1–Q4 */}
                         <div className="flex gap-1 items-center px-1">
                             <button
+                                type="button"
                                 onClick={() => setSelectedQuarters([])}
+                                aria-pressed={selectedQuarters.length === 0}
                                 className={`px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                             >
                                 Tempo Todo
@@ -229,7 +231,9 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                                 return (
                                     <button
+                                        type="button"
                                         key={tab.id}
+                                        aria-pressed={isSelected}
                                         onClick={() => {
                                             setSelectedQuarters(prev =>
                                                 prev.includes(val)
@@ -258,7 +262,10 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                     {/* Config Button */}
                     <button
+                        type="button"
                         onClick={() => setShowConfig(!showConfig)}
+                        aria-label="Configurar layout do dashboard"
+                        aria-expanded={showConfig}
                         className={`p-2.5 rounded-xl transition-colors ${showConfig ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
                         title="Configurar Layout"
                     >
@@ -272,7 +279,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                 <h3 className="text-sm font-black text-foreground uppercase tracking-wider flex items-center gap-2">
                                     <LayoutIcon className="h-4 w-4 text-primary" /> Personalizar
                                 </h3>
-                                <button onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
+                                <button type="button" onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors" aria-label="Fechar configuração do dashboard" title="Fechar"><X className="h-4 w-4" /></button>
                             </div>
 
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
