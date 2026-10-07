@@ -29,4 +29,30 @@ describe('paid AI route guards', () => {
     expect(source).toContain('fileContent.length > 200_000');
     expect(source).toContain('status: 413');
   });
+  it('protects deal-specific Gemini routes with existing deal edit permission', () => {
+    for (const path of [
+      'src/app/api/gemini/analyze-deal/route.ts',
+      'src/app/api/gemini/follow-up/route.ts',
+      'src/app/api/gemini/proposal/route.ts',
+    ]) {
+      const source = readFileSync(path, 'utf8');
+      expect(source).toContain("requirePermission('deals:edit')");
+    }
+  });
+
+  it('caps high-cost Gemini payload surfaces without inventing new permissions', () => {
+    const analyze = readFileSync('src/app/api/gemini/analyze-deal/route.ts', 'utf8');
+    const enrich = readFileSync('src/app/api/gemini/enrich/route.ts', 'utf8');
+    const extract = readFileSync('src/app/api/gemini/extract/route.ts', 'utf8');
+    const signature = readFileSync('src/app/api/gemini/parse-signature/route.ts', 'utf8');
+    const specs = readFileSync('src/app/api/gemini/specs/route.ts', 'utf8');
+
+    expect(analyze).toContain("JSON.stringify({ deal, activities }).length > 100_000");
+    expect(enrich).toContain("company.length > 500");
+    expect(extract).toContain("imageData.length > 12_000_000");
+    expect(signature).toContain("signature.length > 20_000");
+    expect(signature).toContain("image.length > 8_000_000");
+    expect(specs).toContain("products.length > 100");
+    expect(specs).toContain("JSON.stringify(products).length > 100_000");
+  });
 });
