@@ -90,7 +90,7 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
                             <button
                                 key={type.key}
                                 onClick={() => setSelectedProductType(type.key as any)}
-                                className={`py-2 px-1 rounded-lg text-[10px] font-black uppercase tracking-wider border-2 transition-all ${selectedProductType === type.key
+                                className={`py-2 px-1 rounded-lg text-xs font-black uppercase tracking-wider border-2 transition-all ${selectedProductType === type.key
                                     ? type.color
                                     : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50'
                                     }`}
@@ -107,7 +107,7 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
                         }`}>
                         <div className="flex flex-col">
                             <span className={`text-xs font-bold ${isNewClient ? 'text-emerald-600' : 'text-muted-foreground'}`}>Cliente Novo?</span>
-                            <span className="text-[10px] text-muted-foreground/80">Aplica bônus se configurado</span>
+                            <span className="text-xs text-muted-foreground/80">Aplica bônus se configurado</span>
                         </div>
                         <div className={`w-10 h-5 rounded-full relative transition-colors ${isNewClient ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`}>
                             <input
@@ -158,11 +158,11 @@ export const CommissionSimulator = ({ user, defaultMargin = 50, onClose }: Commi
                             </label>
                             <div className="flex items-center gap-2">
                                 {isNewClient && effectiveRate > 0 && (
-                                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-lg">
+                                    <span className="text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-lg">
                                         + Bônus
                                     </span>
                                 )}
-                                <span className="text-[10px] font-bold text-foreground bg-muted w-fit px-2 py-1 rounded-lg">
+                                <span className="text-xs font-bold text-foreground bg-muted w-fit px-2 py-1 rounded-lg">
                                     Taxa: {effectiveRate.toFixed(1)}%
                                 </span>
                             </div>
