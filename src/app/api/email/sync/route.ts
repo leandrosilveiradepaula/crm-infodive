@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
 import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -96,9 +97,11 @@ Retorne SOMENTE o JSON, sem markdown, sem código, sem texto adicional.`;
 
 export async function GET(request: NextRequest) {
     // 1. Auth guard (iron-session)
+    let userId: string;
     let organizationId: string;
     try {
         const ctx = await requireSessionContext();
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -173,6 +176,8 @@ export async function GET(request: NextRequest) {
         // --- INÍCIO DA AUTOMAÇÃO DE CADASTRO DE CONTATOS (FIRE-AND-FORGET) ---
         // Não prendemos o await aqui para não travar o carregamento da lista de e-mails no frontend.
         const orgId = organizationId;
+        const aiRateLimit = consumeRateLimit({ scope: 'email-sync-signature-ai', subject: `${organizationId}:${userId}`, limit: 2, windowMs: 60_000 });
+        let aiAnalysesRemaining = aiRateLimit.allowed ? 3 : 0;
 
         if (orgId && emails.length > 0) {
             // 1. Isolar remetentes únicos
@@ -221,11 +226,14 @@ export async function GET(request: NextRequest) {
                             // 4. Chama o SDK do Gemini DIRETAMENTE (sem fetch interno)
                             // Fetch interno seria bloqueado pelo middleware de auth do Next.js
 
-                            // Delay entre chamadas para evitar rate limit
-                            await sleep(1500);
+                            // A sincronização continua funcionando mesmo sem orçamento local de IA.
+                            // No máximo três assinaturas são analisadas por sincronização; o restante usa fallback básico.
+                            if (aiAnalysesRemaining > 0) {
+                                aiAnalysesRemaining -= 1;
+                                await sleep(1500);
 
-                            try {
-                                const contactData = await parseSignatureWithGemini(email.body);
+                                try {
+                                    const contactData = await parseSignatureWithGemini(email.body);
 
                                 // Dados suficientes = qualquer campo com informação util além do email do remetente
                                 const hasSufficientData = contactData && (
@@ -257,8 +265,9 @@ export async function GET(request: NextRequest) {
                                     }
                                     continue; // Extraiu com IA, vai pro próximo
                                 }
-                            } catch {
-                                console.error('[EmailSyncRoute] signature parsing failed');
+                                } catch {
+                                    console.error('[EmailSyncRoute] signature parsing failed');
+                                }
                             }
 
                             // 6. FALLBACK: Se falhou a IA ou ela retornou vazio, insere o basico que temos
