@@ -238,7 +238,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
+                                <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
                                     Usar Modelo
                                 </span>
                                 <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
@@ -300,7 +300,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
                                                 {!automation.enabled && (
-                                                    <span className="text-[10px] font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
+                                                    <span className="text-xs font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
                                                 )}
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{automation.description}</p>
@@ -356,19 +356,19 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
+                                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
                                         <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
                                     <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
+                                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
                                                     key={`${action.type}-${idx}`}
-                                                    className="text-[10px] font-black bg-background border border-border px-3 py-1.5 rounded-lg text-primary group-hover:border-primary/20 transition-all"
+                                                    className="text-xs font-black bg-background border border-border px-3 py-1.5 rounded-lg text-primary group-hover:border-primary/20 transition-all"
                                                 >
                                                     {action.type.replace('_', ' ').toUpperCase()}
                                                 </span>
@@ -380,11 +380,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>
                                             <span className="text-sm font-black text-foreground">{automation.executionCount || 0}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
                                             <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
                                                     ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)
@@ -458,7 +458,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                         <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                                     </div>
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-card px-3 py-2 rounded-xl border border-border/50 text-center group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-card px-3 py-2 rounded-xl border border-border/50 text-center group-hover:bg-primary group-hover:text-white transition-all">
                                         Explorar Modelo
                                     </span>
                                 </button>
