@@ -10,12 +10,17 @@ describe('automation runtime fail-closed surface', () => {
         expect(history).toContain('Nenhuma execução verificada');
     });
 
-    it('saves automation configuration as a draft until the executor exists', () => {
+    it('only exposes runtime-backed triggers and actions and preserves explicit enablement', () => {
         const modal = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
         const service = readFileSync('src/services/AutomationService.ts', 'utf8');
-        expect(modal).toContain('enabled: false');
+        const options = readFileSync('src/data/automations/automationOptions.tsx', 'utf8');
+        expect(modal).toContain("enabled: initialData?.enabled ?? false");
         expect(modal).toContain('Salvar Configuração');
-        expect(service).toContain('A execução automática está bloqueada');
-        expect(service).toContain('enabled: false');
+        expect(service).toContain('enabled: Boolean(item.enabled)');
+        expect(options).toContain("id: 'deal_created'");
+        expect(options).toContain("id: 'deal_moved'");
+        expect(options).toContain("id: 'create_task'");
+        expect(options).not.toContain("id: 'send_email'");
+        expect(options).not.toContain("id: 'move_deal'");
     });
 });
