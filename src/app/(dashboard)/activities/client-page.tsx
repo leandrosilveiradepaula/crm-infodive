@@ -304,7 +304,10 @@ export function ActivitiesClientPage() {
                     {/* View Toggle */}
                     <div className="flex gap-1 bg-muted/30 p-1 rounded-full border border-border h-11 items-center">
                         <button
+                            type="button"
                             onClick={() => setViewMode('list')}
+                            aria-label="Exibir atividades em lista"
+                            aria-pressed={viewMode === 'list'}
                             className={`p-2 rounded-full transition-all ${viewMode === 'list'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -313,7 +316,10 @@ export function ActivitiesClientPage() {
                             <List className="h-4 w-4" />
                         </button>
                         <button
+                            type="button"
                             onClick={() => setViewMode('calendar')}
+                            aria-label="Exibir atividades no calendário"
+                            aria-pressed={viewMode === 'calendar'}
                             className={`p-2 rounded-full transition-all ${viewMode === 'calendar'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -394,11 +400,14 @@ export function ActivitiesClientPage() {
                                                 <div className="flex items-start gap-5 relative z-10">
                                                     {/* Checkbox */}
                                                     <button
+                                                        type="button"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleToggleComplete(activity.id);
                                                         }}
                                                         className="mt-1 flex-shrink-0"
+                                                        aria-label={activity.status === 'completed' ? `Marcar ${activity.title} como pendente` : `Marcar ${activity.title} como concluída`}
+                                                        title={activity.status === 'completed' ? 'Marcar como pendente' : 'Marcar como concluída'}
                                                     >
                                                         {activity.status === 'completed' ? (
                                                             <CheckCircle2 className="h-6 w-6 text-success" />
@@ -478,21 +487,27 @@ export function ActivitiesClientPage() {
                                                             {/* Actions */}
                                                             <div className="flex gap-2">
                                                                 <button
+                                                                    type="button"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setEditingActivity(activity);
                                                                         setShowNewModal(true);
                                                                     }}
                                                                     className="p-2 bg-muted/50 hover:bg-primary/10 rounded-xl text-muted-foreground hover:text-primary transition-colors border border-border"
+                                                                    aria-label={`Editar atividade ${activity.title}`}
+                                                                    title="Editar atividade"
                                                                 >
                                                                     <Edit className="h-4 w-4" />
                                                                 </button>
                                                                 <button
+                                                                    type="button"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleDelete(activity.id);
                                                                     }}
-                                                                    className="p-2 bg-card/5 hover:bg-red-500/10 rounded-xl text-muted-foreground hover:text-red-400 transition-colors border border-white/5"
+                                                                    className="p-2 bg-card/5 hover:bg-red-500/10 rounded-xl text-muted-foreground hover:text-red-400 transition-colors border border-border"
+                                                                    aria-label={`Excluir atividade ${activity.title}`}
+                                                                    title="Excluir atividade"
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </button>

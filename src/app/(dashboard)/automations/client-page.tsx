@@ -267,7 +267,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         {filterType && (
                             <span className="text-xs font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
                                 <AlertCircle className="h-3 w-3" /> Filtrado: {filterType}
-                                <button onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
+                                <button type="button" onClick={() => setFilterType(null)} className="hover:text-foreground" aria-label="Remover filtro de automações" title="Remover filtro">×</button>
                             </span>
                         )}
                         <span className="bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground">
@@ -331,7 +331,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <button className="p-2 text-muted-foreground hover:text-white transition-colors">
+                                                <button type="button" className="p-2 text-muted-foreground hover:text-foreground transition-colors" aria-label={`Abrir ações da automação ${automation.name}`} title="Ações da automação">
                                                     <MoreHorizontal className="h-5 w-5" />
                                                 </button>
                                             </DropdownMenuTrigger>
@@ -447,10 +447,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     <div className="bg-card w-full max-w-4xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-10 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
                             <div>
-                                <h2 className="text-3xl font-black text-white tracking-tighter">Biblioteca de Receitas</h2>
+                                <h2 className="text-3xl font-black text-foreground tracking-tighter">Biblioteca de Receitas</h2>
                                 <p className="text-muted-foreground font-medium mt-1">Escolha um modelo e comece em segundos</p>
                             </div>
-                            <button onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all">
+                            <button type="button" onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all" aria-label="Fechar biblioteca de receitas" title="Fechar">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
