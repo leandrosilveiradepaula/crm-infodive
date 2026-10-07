@@ -11,8 +11,9 @@ type RuntimeResult = {
 };
 
 function eventKey(event: AutomationRuntimeEvent): string {
-    const stage = typeof event.data.stage === 'string' ? event.data.stage : '';
-    return [event.type, event.entityId, stage].join(':');
+    const eventId = String(event.eventId || '').trim();
+    if (!eventId) throw new Error('automation event id is required');
+    return eventId;
 }
 
 function sanitizeError(error: unknown): string {
