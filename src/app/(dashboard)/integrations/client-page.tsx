@@ -127,12 +127,13 @@ export default function IntegrationsClientPage({
                     ))}
 
                     {/* Request Integration Feature */}
-                    <div className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group min-h-[350px]">
-                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-500">
-                            <Plus className="h-8 w-8 text-muted-foreground group-hover:text-white group-hover:rotate-180 transition-all duration-500" />
+                    <div className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center min-h-[350px]" aria-disabled="true">
+                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6">
+                            <Plus className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <h3 className="font-black text-muted-foreground group-hover:text-primary text-xl mb-2 transition-colors">Solicitar Integração</h3>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-[200px] leading-relaxed font-medium group-hover:text-muted-foreground">Não encontrou o que precisa?<br />Nossa equipe desenvolve para você.</p>
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full mb-3">Em breve</span>
+                        <h3 className="font-black text-muted-foreground text-xl mb-2">Solicitar Integração</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-[220px] leading-relaxed font-medium">Este recurso ainda não está disponível. As integrações atuais podem ser configuradas nos cards acima.</p>
                     </div>
                 </div>
                 </TabsContent>
