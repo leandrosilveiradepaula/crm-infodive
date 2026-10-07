@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getRequestId } from '@/lib/request-context';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
     const startedAt = Date.now();
+    const requestId = getRequestId(request.headers.get('X-Request-Id'));
     const checks: Record<string, { status: 'ok' | 'failed'; latencyMs?: number }> = {};
     let status: 'ok' | 'degraded' = 'ok';
 
@@ -29,6 +31,7 @@ export async function GET() {
         status,
         service: 'crm-infodive',
         version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) || process.env.GIT_COMMIT_SHA?.slice(0, 12) || 'unknown',
+        requestId,
         checks,
         durationMs: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
@@ -36,6 +39,9 @@ export async function GET() {
 
     return NextResponse.json(body, {
         status: status === 'ok' ? 200 : 503,
-        headers: { 'Cache-Control': 'no-store' },
+        headers: {
+            'Cache-Control': 'no-store',
+            'X-Request-Id': requestId,
+        },
     });
 }
