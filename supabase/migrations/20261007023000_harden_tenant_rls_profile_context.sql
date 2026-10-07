@@ -110,7 +110,7 @@ $$;
 -- able to insert, update, delete, or directly enumerate the trail through Data API.
 -- The application reads audit logs through a privileged server action guarded by
 -- settings:view_audit; writes must also originate from trusted server/database code.
-DO $
+DO $$
 BEGIN
   IF to_regclass('public.audit_logs') IS NOT NULL THEN
     ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
@@ -121,10 +121,10 @@ BEGIN
     REVOKE ALL ON TABLE public.audit_logs FROM authenticated;
   END IF;
 END;
-$;
+$$;
 
 -- AI suggestion policies used a different legacy policy name and top-level JWT claim.
-DO $
+DO $$
 BEGIN
   IF to_regclass('public.ai_activity_suggestions') IS NOT NULL THEN
     DROP POLICY IF EXISTS "Users can view their org suggestions" ON public.ai_activity_suggestions;
@@ -139,7 +139,7 @@ BEGIN
       WITH CHECK (organization_id = public.current_user_organization_id());
   END IF;
 END;
-$;
+$$;
 
 -- Integration tables: replace historical top-level JWT organization_id checks.
 DO $$
