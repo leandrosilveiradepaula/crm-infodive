@@ -15,6 +15,17 @@ interface StatementTabProps {
     users: UserGoalData[];
 }
 
+type CommissionDeal = Deal & {
+    commission_status?: 'pending' | 'paid';
+    commission_value_final?: number | null;
+    customer?: { name?: string | null } | null;
+};
+
+type GoalUserView = UserGoalData & {
+    name?: string | null;
+    avatar?: string | null;
+};
+
 export function StatementTab({ deals, users }: StatementTabProps) {
     const router = useRouter();
     const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid'>('all');
@@ -24,7 +35,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
     const handleTogglePayment = async (deal: Deal) => {
         // Assume deal has commission_status field. If not in type definition, we might need to cast or fix type.
         // The source code logic:
-        const currentStatus = (deal as any).commission_status || 'pending';
+        const currentStatus = (deal as CommissionDeal).commission_status || 'pending';
         const newStatus = currentStatus === 'paid' ? 'pending' : 'paid';
         const paidAt = newStatus === 'paid' ? new Date().toISOString() : null;
 
@@ -54,7 +65,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
         return deals.filter(deal => {
             // const isWon = deal.stage === 'won'; // Assuming deals passed are already won as per server action
             const matchesUser = selectedUserId === 'all' ? true : (deal.owner === selectedUserId || deal.owner_id === selectedUserId);
-            const status = (deal as any).commission_status || 'pending';
+            const status = (deal as CommissionDeal).commission_status || 'pending';
             const matchesStatus = filterStatus === 'all' ? true : status === filterStatus;
 
             // Month Filter
@@ -79,7 +90,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                         >
                             <option value="all">Todos os Vendedores</option>
                             {users.map(u => (
-                                <option key={u.user_id} value={u.user_id}>{(u as any).name}</option>
+                                <option key={u.user_id} value={u.user_id}>{(u as GoalUserView).name}</option>
                             ))}
                         </ThemeSelect>
                     </div>
@@ -89,7 +100,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                         <ThemeSelect
                             className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
                             value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value as any)}
+                            onChange={e => setFilterStatus(e.target.value as 'all' | 'pending' | 'paid')}
                         >
                             <option value="all">Todos os Status</option>
                             <option value="pending">Pendente</option>
@@ -131,8 +142,8 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                         ) : (
                             filteredDeals.map(deal => {
                                 const dealOwner = users.find(u => u.user_id === deal.owner || u.user_id === deal.owner_id);
-                                const commissionStatus = (deal as any).commission_status || 'pending';
-                                const commissionValueFinal = (deal as any).commission_value_final;
+                                const commissionStatus = (deal as CommissionDeal).commission_status || 'pending';
+                                const commissionValueFinal = (deal as CommissionDeal).commission_value_final;
 
                                 // If paid, use frozen value, otherwise calculate dynamic
                                 const dynamicCalc = calculateDealCommission(
@@ -151,14 +162,14 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                     <tr key={deal.id} className="hover:bg-muted/30 transition-colors group">
                                         <td className="px-5 py-3">
                                             <p className="font-black text-foreground text-sm tracking-tight">{deal.title}</p>
-                                            <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
+                                            <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as CommissionDeal).customer?.name || deal.company || 'Empresa não informada'}</p>
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-xs font-black shadow-md">
-                                                    {(dealOwner as any)?.avatar || (dealOwner as any)?.name?.charAt(0) || '?'}
+                                                    {(dealOwner as GoalUserView | undefined)?.avatar || (dealOwner as GoalUserView | undefined)?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <span className="text-sm font-bold text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
+                                                <span className="text-sm font-bold text-foreground">{(dealOwner as GoalUserView | undefined)?.name || 'Unknown'}</span>
                                             </div>
                                         </td>
                                         <td className="px-5 py-3 text-xs font-bold text-muted-foreground">
