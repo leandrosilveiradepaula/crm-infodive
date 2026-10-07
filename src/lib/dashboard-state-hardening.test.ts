@@ -36,4 +36,12 @@ describe('dashboard error and loading states', () => {
     expect(source).toContain('text-foreground tracking-tighter">Biblioteca de Receitas');
   });
 
+
+  it('does not present the unavailable integration request as clickable', () => {
+    const source = readFileSync('src/app/(dashboard)/integrations/client-page.tsx', 'utf8');
+    expect(source).toContain('aria-disabled="true"');
+    expect(source).toContain('Este recurso ainda não está disponível.');
+    expect(source).not.toContain('transition-all cursor-pointer group min-h-[350px]');
+  });
+
 });
