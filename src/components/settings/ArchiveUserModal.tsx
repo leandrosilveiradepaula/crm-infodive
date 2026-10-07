@@ -66,7 +66,7 @@ export const ArchiveUserModal = ({ isOpen, onClose, user, otherUsers, onSuccess 
                             <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                             <div className="space-y-1">
                                 <p className="text-xs font-bold text-foreground tracking-wide uppercase">Transferir Oportunidades</p>
-                                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                     Deseja mover as oportunidades ativas deste usuário para outro vendedor agora?
                                 </p>
                             </div>
