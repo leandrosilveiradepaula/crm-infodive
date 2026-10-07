@@ -1,10 +1,15 @@
 import { requireSessionContext } from '@/lib/auth-server';
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 export async function POST(request: Request) {
+    let userId: string;
+    let organizationId: string;
     try {
-        await requireSessionContext();
+        const ctx = await requireSessionContext();
+        userId = ctx.userId;
+        organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -23,6 +28,11 @@ export async function POST(request: Request) {
         }
         if (typeof company !== 'string' || company.length > 500 || (website && (typeof website !== 'string' || website.length > 2_000))) {
             return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
+
+        const rateLimit = consumeRateLimit({ scope: 'gemini-enrich', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         console.log('[GeminiEnrichRoute] enrichment started');

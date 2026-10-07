@@ -1,6 +1,7 @@
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -32,6 +33,11 @@ export async function POST(request: Request) {
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimit = consumeRateLimit({ scope: 'activity-suggestions-ai', subject: `${organizationId}:${userId}`, limit: 3, windowMs: 60_000 });
+    if (!rateLimit.allowed) {
+        return NextResponse.json({ error: 'Muitas atualizações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
     }
 
     if (!apiKey) {

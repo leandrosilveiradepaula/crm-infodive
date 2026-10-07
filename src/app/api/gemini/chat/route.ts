@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -10,9 +11,11 @@ type ChatMessage = {
 };
 
 export async function POST(request: Request) {
+    let userId: string;
     let organizationId: string;
     try {
         const ctx = await requireSessionContext();
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -42,6 +45,11 @@ export async function POST(request: Request) {
 
     if (!history.some(item => item.role === 'user' && item.content.trim())) {
         return NextResponse.json({ error: 'Pergunta inválida.' }, { status: 400 });
+    }
+
+    const rateLimit = consumeRateLimit({ scope: 'gemini-chat', subject: `${organizationId}:${userId}`, limit: 10, windowMs: 60_000 });
+    if (!rateLimit.allowed) {
+        return NextResponse.json({ error: 'Muitas mensagens em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
     }
 
     const supabase = createAdminClient();
