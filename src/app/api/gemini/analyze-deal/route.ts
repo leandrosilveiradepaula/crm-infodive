@@ -1,6 +1,7 @@
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -11,9 +12,11 @@ type DealActivity = {
 };
 
 export async function POST(request: Request) {
+    let userId: string;
     let organizationId: string;
     try {
         const ctx = await requirePermission('deals:edit');
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,6 +30,11 @@ export async function POST(request: Request) {
         const { deal, activities } = await request.json();
         if (JSON.stringify({ deal, activities }).length > 100_000) {
             return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
+
+        const rateLimit = consumeRateLimit({ scope: 'analyze-deal-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         // Format currency for Brazilian Real
