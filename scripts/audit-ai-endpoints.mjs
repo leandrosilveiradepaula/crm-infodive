@@ -15,12 +15,11 @@ function walk(dir) {
 
 walk(API_ROOT);
 
-const paidProviderPatterns = [
-  /@google\/generative-ai/,
-  /@google\/genai/,
-  /generativelanguage\.googleapis\.com/,
-  /api\.openai\.com/,
-  /api\.anthropic\.com/,
+const paidGenerationPatterns = [
+  /\.generateContent\s*\(/,
+  /:generateContent(?:\?|\`|'|")/,
+  /api\.openai\.com\/v1\/(?:chat\/completions|responses)/,
+  /api\.anthropic\.com\/v1\/messages/,
 ];
 
 const violations = [];
@@ -28,7 +27,7 @@ const paidRoutes = [];
 
 for (const path of routeFiles) {
   const source = readFileSync(path, 'utf8');
-  if (!paidProviderPatterns.some(pattern => pattern.test(source))) continue;
+  if (!paidGenerationPatterns.some(pattern => pattern.test(source))) continue;
 
   const file = relative('.', path);
   paidRoutes.push(file);
