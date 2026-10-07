@@ -1,0 +1,35 @@
+name: Generate dependency lock
+
+on:
+  push:
+    branches:
+      - deps/next-jspdf-security
+    paths:
+      - '.github/workflows/generate-dependency-lock.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Generate patched dependency lock
+        run: npm install --package-lock-only --ignore-scripts --save-exact next@16.4.0 eslint-config-next@16.4.0 jspdf@4.2.1
+      - name: Audit patched production dependencies
+        run: npm audit --omit=dev --json > dependency-audit-after.json || true
+      - name: Upload generated files
+        uses: actions/upload-artifact@v4
+        with:
+          name: patched-dependency-lock
+          path: |
+            package.json
+            package-lock.json
+            dependency-audit-after.json
+          retention-days: 7
