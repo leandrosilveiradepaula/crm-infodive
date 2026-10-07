@@ -9,6 +9,7 @@ import { AccountService } from '@/services/AccountService';
 import { ContactService } from '@/services/ContactService';
 import { ProductService } from '@/services/ProductService';
 import { ActivityAiService } from '@/services/ActivityAiService';
+import { AutomationRuntimeService } from '@/services/AutomationRuntimeService';
 import { DocumentService } from '@/services/DocumentService';
 import type { DocumentCategory } from '@/types/document';
 import { Deal } from '@/types/deal';
@@ -30,7 +31,15 @@ export async function getAccountContacts(accountId?: string | null): Promise<Con
 export async function updateDealStage(dealId: string, newStage: string, probability?: number, dealTitle?: string) {
     const { userId, organizationId } = await requirePermission('deals:edit');
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
-    // Trigger automation on stage change
+    await AutomationRuntimeService.executeEvent(userId, organizationId, {
+        type: 'deal_moved',
+        organizationId,
+        entityId: dealId,
+        data: { stage: newStage, title: dealTitle || '' },
+    }).catch(() => {
+        console.error('[PipelineActions] configurable stage automation failed');
+    });
+    // Trigger legacy deterministic activity rule on stage change
     if (dealTitle) {
         ActivityAiService.onStageChange(userId, organizationId, dealId, newStage, dealTitle).catch(() => {
             console.error('[PipelineActions] stage change automation failed');
@@ -42,7 +51,15 @@ export async function updateDealStage(dealId: string, newStage: string, probabil
 export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
     const { userId, organizationId } = await requirePermission('deals:create');
     const result = await DealService.createDeal(userId, organizationId, deal);
-    // Trigger automation on deal creation
+    await AutomationRuntimeService.executeEvent(userId, organizationId, {
+        type: 'deal_created',
+        organizationId,
+        entityId: result.id,
+        data: { title: result.title, stage: result.stage || '', value: result.value || 0 },
+    }).catch(() => {
+        console.error('[PipelineActions] configurable deal automation failed');
+    });
+    // Trigger legacy deterministic activity rule on deal creation
     ActivityAiService.onDealCreated(userId, organizationId, result.id, result.title).catch(() => {
         console.error('[PipelineActions] deal creation automation failed');
     });
