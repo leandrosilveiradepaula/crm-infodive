@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // GET /api/proposals/generate-number
 // Generates the next proposal number for the authenticated user's organization
 export async function GET() {
     try {
-        const { userId } = await requireSessionContext();
+        const { userId } = await requirePermission('deals:edit');
         const supabase = createAdminClient();
 
         // Get the user's organization_id
