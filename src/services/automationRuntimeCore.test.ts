@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { Automation } from '@/types/automation';
+import type { Automation } from '../types/automation';
 import {
     evaluateConditions,
     planAutomation,
     validateAutomationForRuntime,
-} from '@/services/automationRuntimeCore';
+} from './automationRuntimeCore';
 
 const baseAutomation = (): Automation => ({
     id: 'automation-1',
