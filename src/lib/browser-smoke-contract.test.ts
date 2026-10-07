@@ -9,6 +9,7 @@ describe('browser smoke contract', () => {
     expect(source).toContain('keyboard_tab_reaches_login_controls');
     expect(source).toContain('protected_dashboard_redirects_unauthenticated');
     expect(source).toContain('invite_registration_state_renders');
+    expect(source).toContain("_uses_device_width");
     expect(source).toContain('browser-smoke.json');
   });
 
@@ -20,6 +21,9 @@ describe('browser smoke contract', () => {
     expect(smoke).toBeGreaterThan(build);
     expect(workflow).toContain('playwright@1.63.0');
     expect(workflow).toContain('crm-browser-smoke-');
+    expect(workflow).toContain('SESSION_SECRET: crm-ci-browser-smoke-session-secret-2026');
+    expect(workflow).toContain('ready=false');
+    expect(workflow).toContain('CRM did not become ready for browser smoke.');
     expect(workflow).toContain('retention-days: 30');
   });
 
