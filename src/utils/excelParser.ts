@@ -1,5 +1,4 @@
-
-// import * as XLSX from 'xlsx'; // NOTE: Requires 'npm install xlsx'
+import type ExcelJS from 'exceljs';
 
 export interface ColumnMapping {
     sku?: string;
@@ -22,33 +21,47 @@ export interface ParsedRow {
 }
 
 /**
- * Parse Excel file and return rows as 2D array
+ * Normalize an ExcelJS cell value into the primitive shape expected by the
+ * existing mapping/import flow.
  */
-export const parseExcel = async (file: File): Promise<any[][]> => {
-    // Dynamic import to avoid build errors if package is missing
-    let XLSX;
-    try {
-        XLSX = await import('xlsx');
-    } catch (e) {
-        throw new Error('Biblioteca XLSX não encontrada. Por favor, instale com "npm install xlsx"');
-    }
+const excelCellValue = (value: ExcelJS.CellValue): unknown => {
+    if (value == null) return '';
+    if (value instanceof Date) return value;
+    if (typeof value !== 'object') return value;
 
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = new Uint8Array(e.target?.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                resolve(rows as any[][]);
-            } catch (error) {
-                reject(error);
-            }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
+    if ('result' in value && value.result != null) return value.result;
+    if ('text' in value && typeof value.text === 'string') return value.text;
+    if ('richText' in value && Array.isArray(value.richText)) {
+        return value.richText.map(part => part.text).join('');
+    }
+    if ('error' in value) return String(value.error);
+
+    return String(value);
+};
+
+export const worksheetToRows = (worksheet: ExcelJS.Worksheet): unknown[][] => {
+    const rows: unknown[][] = [];
+    worksheet.eachRow({ includeEmpty: false }, (row) => {
+        const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+        rows.push(values.map(value => excelCellValue(value as ExcelJS.CellValue)));
     });
+    return rows;
+};
+
+/**
+ * Parse Excel file and return rows as 2D array.
+ * Uses ExcelJS, which is already part of the product dependency set.
+ */
+export const parseExcel = async (file: File): Promise<unknown[][]> => {
+    const module = await import('exceljs');
+    const Excel = module.default ?? module;
+    const workbook = new Excel.Workbook();
+    const buffer = await file.arrayBuffer();
+    await workbook.xlsx.load(buffer);
+    const worksheet = workbook.worksheets[0];
+
+    if (!worksheet) return [];
+    return worksheetToRows(worksheet);
 };
 
 /**
