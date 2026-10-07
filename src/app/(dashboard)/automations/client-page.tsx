@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { NewAutomationModal } from '@/components/automations/NewAutomationModal';
 import { AutomationHistorySheet } from '@/components/automations/HistorySheet';
-import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation } from '@/app/(dashboard)/automations/actions';
+import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation, getAutomationHistory } from '@/app/(dashboard)/automations/actions';
 import { type Automation } from '@/types/automation';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -51,6 +51,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     const [initialModalData, setInitialModalData] = useState<Partial<Automation> | undefined>(undefined);
     const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState<any[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
     const [filterType, setFilterType] = useState<string | null>(null);
     const [showGallery, setShowGallery] = useState(false);
 
@@ -145,7 +147,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             toast.error(result.error || 'Não foi possível alterar a automação.');
             return;
         }
-        toast.success('Automação pausada');
+        toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
         router.refresh();
     };
 
@@ -311,7 +313,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
                                                 <span className="text-xs font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">
-                                                    Rascunho
+                                                    {automation.enabled ? 'Ativa' : 'Pausada'}
                                                 </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{automation.description}</p>
@@ -321,10 +323,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         <label className="relative inline-flex items-center cursor-pointer scale-110">
                                             <input
                                                 type="checkbox"
-                                                checked={false}
+                                                checked={automation.enabled}
                                                 onChange={(e) => handleToggle(automation.id, e.target.checked)}
                                                 className="sr-only peer"
-                                                aria-label="Ativação indisponível até o runtime de automações estar implementado"
+                                                aria-label={automation.enabled ? 'Pausar automação' : 'Ativar automação'}
                                             />
                                             <div className="w-12 h-6.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border"></div>
                                         </label>
@@ -405,9 +407,15 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                     </div>
                                     <button 
-                                        onClick={() => {
+                                        onClick={async () => {
                                             setSelectedAutomation(automation);
                                             setShowHistory(true);
+                                            setHistoryLoading(true);
+                                            try {
+                                                setHistory(await getAutomationHistory(automation.id));
+                                            } finally {
+                                                setHistoryLoading(false);
+                                            }
                                         }}
                                         className="flex items-center gap-2 text-primary font-black text-xs hover:text-foreground transition-colors group/btn"
                                     >
@@ -439,6 +447,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     automation={selectedAutomation}
                     open={showHistory}
                     onOpenChange={setShowHistory}
+                    executions={history}
+                    loading={historyLoading}
                 />
             )}
 
