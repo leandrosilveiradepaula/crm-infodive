@@ -214,7 +214,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             <Zap className="h-4 w-4 text-primary-foreground" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Gatilho Ativo</p>
+                                            <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Gatilho Ativo</p>
                                             <p className="text-sm font-bold text-foreground">
                                                 {triggerTypes.find(t => t.id === formData.trigger?.type)?.label || 'Início'}
                                             </p>
@@ -239,10 +239,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                         <div className="grid grid-cols-1 gap-6">
                                             <div>
                                                 <div className="flex items-center justify-between mb-3">
-                                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Ação #{idx + 1}</p>
-                                                    {initialData && (
-                                                        <span className="text-[9px] font-black bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Sugerido por IA</span>
-                                                    )}
+                                                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Ação #{idx + 1}</p>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     {actionTypes.map(type => (
@@ -253,7 +250,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                                                 newActions[idx].type = type.id;
                                                                 setFormData({ ...formData, actions: newActions });
                                                             }}
-                                                            className={`p-3 rounded-xl border text-[11px] font-black transition-all ${action.type === type.id
+                                                            className={`p-3 rounded-xl border text-xs font-black transition-all ${action.type === type.id
                                                                 ? 'bg-primary/20 border-primary text-primary'
                                                                 : 'bg-card border-transparent text-muted-foreground hover:border-border'
                                                                 }`}
@@ -265,7 +262,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             </div>
 
                                             <div>
-                                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Configuração</p>
+                                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-3">Configuração</p>
                                                 <input
                                                     type="text"
                                                     placeholder="Assunto / Título da Ação"
