@@ -63,7 +63,7 @@ jobs:
       - name: Browser smoke
         shell: bash
         env:
-          SESSION_SECRET: "crm-ci-browser-smoke-session-secret-2026"
+          SESSION_SECRET: ci-${{ github.run_id }}-${{ github.sha }}
         run: |
           set -euo pipefail
           npm start > /tmp/crm-next.log 2>&1 &
