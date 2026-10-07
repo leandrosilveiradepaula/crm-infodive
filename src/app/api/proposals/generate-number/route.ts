@@ -26,13 +26,13 @@ export async function GET() {
 
         if (error) {
             console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
-        const message = error instanceof Error ? error.message : '';
             return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
         }
 
         return NextResponse.json({ number });
     } catch (error: unknown) {
         console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
+        const message = error instanceof Error ? error.message : '';
         if (message.includes('Forbidden')) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
