@@ -1,4 +1,4 @@
-import { recordOperationalEvent } from '@/lib/operational-events';
+import { recordOperationalEvent } from './operational-events';
 
 type RateLimitBucket = {
   count: number;
