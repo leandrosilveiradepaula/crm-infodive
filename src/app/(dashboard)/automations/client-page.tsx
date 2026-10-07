@@ -64,46 +64,6 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
     ];
 
-    const parseAIIntent = (prompt: string): Partial<Automation> => {
-        const p = prompt.toLowerCase();
-        let trigger: any = { type: 'deal_created', config: {} };
-        let actions: any[] = [{ type: 'send_notification', config: { title: 'AI Automation', description: prompt } }];
-        const name = prompt.charAt(0).toUpperCase() + prompt.slice(1);
-        let category: any = 'custom';
-
-        if (p.includes('estagnar') || p.includes('parado') || p.includes('parada') || p.includes('dias')) {
-            trigger = { type: 'deal_stagnant', config: { days: 7 } };
-            category = 'followup';
-        } else if (p.includes('ganhar') || p.includes('ganhou') || p.includes('fechar') || p.includes('venda')) {
-            trigger = { type: 'deal_moved', config: { stage: 'won' } };
-            category = 'alert';
-        } else if (p.includes('novo') || p.includes('criar')) {
-            trigger = { type: 'deal_created', config: {} };
-            category = 'welcome';
-        }
-
-        if (p.includes('email') || p.includes('e-mail')) {
-            actions = [{ type: 'send_email', config: { title: name } }];
-            category = 'followup';
-        } else if (p.includes('tarefa') || p.includes('agenda')) {
-            actions = [{ type: 'create_task', config: { title: name } }];
-        } else if (p.includes('mover') || p.includes('fase') || p.includes('estágio')) {
-            actions = [{ type: 'move_deal', config: {} }];
-        }
-
-        return { name, trigger, actions, category };
-    };
-
-    const handleAIBuilder = () => {
-        if (!searchTerm) {
-            setInitialModalData(undefined);
-        } else {
-            const data = parseAIIntent(searchTerm);
-            setInitialModalData(data);
-        }
-        setShowNewModal(true);
-    };
-
     const handleUseRecipe = (recipe: typeof recipes[0]) => {
         const data: Partial<Automation> = {
             name: recipe.title,
@@ -115,6 +75,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         setShowNewModal(true);
     };
 
+    const activeAutomations = initialAutomations.filter((automation: Automation) => automation.enabled).length;
     const totalExecutions = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.executionCount || 0), 0);
     const totalSuccessCount = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.successCount || 0), 0);
     const successRate = totalExecutions > 0 
@@ -133,13 +94,14 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             onClick: () => setFilterType(filterType === 'active' ? null : 'active')
         },
         {
-            label: "Tempo Economizado",
-            value: "42h",
-            description: "Estimativa mensal",
-            icon: Clock,
+            label: "Automações Ativas",
+            value: activeAutomations.toString(),
+            description: `${initialAutomations.length} configuradas`,
+            icon: Activity,
             color: "text-emerald-500",
             gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-            border: "border-emerald-100 dark:border-emerald-900/50"
+            border: "border-emerald-100 dark:border-emerald-900/50",
+            onClick: () => setFilterType(filterType === 'active' ? null : 'active')
         },
         {
             label: "Taxa de Sucesso",
@@ -218,7 +180,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
-                description="Otimize sua rotina com gatilhos e ações automáticas inteligentes."
+                description="Otimize sua rotina com gatilhos e ações automáticas."
             >
                 <div className="flex items-center gap-3">
                     <button
@@ -233,31 +195,17 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 </div>
             </PageHeader>
 
-            {/* AI Builder Quick Input */}
-            <div className="bg-card border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl shadow-sm mb-6">
-                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                        <Zap className="h-5 w-5 text-white animate-pulse" />
-                    </div>
-                    <div className="flex-1 space-y-0.5 text-center md:text-left">
-                        <h3 className="text-sm font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
-                        <p className="text-xs text-muted-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
-                    </div>
-                    <div className="w-full md:w-[450px] relative group">
+            {/* Search */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm mb-6">
+                <div className="p-4">
+                    <div className="relative group max-w-2xl">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
-                            placeholder="Descreva sua automação e a IA fará o resto..."
-                            className="pl-10 pr-28 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
+                            placeholder="Buscar automações por nome ou descrição..."
+                            className="pl-10 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                         />
-                        <button
-                            onClick={handleAIBuilder}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all flex items-center gap-1.5"
-                        >
-                            <Zap className="h-3 w-3 fill-current" />
-                            Gerar com IA
-                        </button>
                     </div>
                 </div>
             </div>
@@ -324,7 +272,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                             title="Nenhuma automação encontrada"
                             description={searchTerm || filterType 
                                 ? "Não encontramos fluxos com os filtros aplicados." 
-                                : "Você ainda não criou nenhuma automação. Use a IA acima para começar agora!"
+                                : "Você ainda não criou nenhuma automação. Crie seu primeiro fluxo ou comece por uma receita."
                             }
                             actionLabel="Criar Automação"
                             onAction={() => setShowNewModal(true)}
@@ -520,23 +468,20 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 </div>
             )}
 
-            {/* Footer / AI Tip */}
+            {/* Automation tip */}
             <div className="bg-gradient-to-r from-primary/10 to-transparent p-6 rounded-3xl border border-primary/10 flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
+                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center">
                     <Zap className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                    <h4 className="font-black text-white text-sm uppercase tracking-widest">Dica da Antigravity AI</h4>
+                    <h4 className="font-black text-foreground text-sm uppercase tracking-widest">Dica de automação</h4>
                     <p className="text-muted-foreground text-sm mt-1">
-                        Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação. 
-                        <button 
-                            onClick={() => {
-                                setSearchTerm("Mandar e-mail ao estagnar por 7 dias");
-                                handleAIBuilder();
-                            }}
+                        Comece por uma receita validada e ajuste gatilho e ações antes de ativar o fluxo.
+                        <button
+                            onClick={() => handleUseRecipe(recipes[0])}
                             className="text-primary font-bold hover:underline ml-1"
                         >
-                            Configurar agora
+                            Usar modelo de follow-up
                         </button>
                     </p>
                 </div>
