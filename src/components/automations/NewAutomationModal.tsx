@@ -14,7 +14,7 @@ import {
     Plus,
     Trash2
 } from 'lucide-react';
-import type { TriggerType, ActionType, Automation } from '@/types/automation';
+import type { TriggerType, ActionType, Automation, Action } from '@/types/automation';
 
 interface NewAutomationModalProps {
     onClose: () => void;
@@ -67,6 +67,13 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
     const handleNext = () => setStep(s => s + 1);
     const handleBack = () => setStep(s => s - 1);
+    const addAction = () => {
+        const newAction: Action = { type: 'send_notification', config: {} };
+        setFormData(prev => ({
+            ...prev,
+            actions: [...(prev.actions || []), newAction]
+        }));
+    };
 
     const handleSubmit = async () => {
         setLoading(true);
@@ -142,7 +149,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     {categories.map(cat => (
                                         <button
                                             key={cat.id}
-                                            onClick={() => setFormData({ ...formData, category: cat.id as any })}
+                                            onClick={() => setFormData({ ...formData, category: cat.id as Automation['category'] })}
                                             className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-300 ${formData.category === cat.id
                                                 ? 'bg-primary/10 border-primary/40 shadow-xl shadow-primary/5'
                                                 : 'bg-muted/50 border-transparent hover:border-border'
@@ -201,7 +208,10 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                         <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
                             <div className="flex items-center justify-between">
                                 <label className="block text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">O que deve acontecer?</label>
-                                <button className="flex items-center gap-2 text-primary text-xs font-black hover:text-primary/80 transition-colors">
+                                <button
+                                    onClick={addAction}
+                                    className="flex items-center gap-2 text-primary text-xs font-black hover:text-primary/80 transition-colors"
+                                >
                                     <Plus className="h-4 w-4" /> Adicionar Ação
                                 </button>
                             </div>
@@ -214,7 +224,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             <Zap className="h-4 w-4 text-primary-foreground" />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Gatilho Ativo</p>
+                                            <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">Gatilho Ativo</p>
                                             <p className="text-sm font-bold text-foreground">
                                                 {triggerTypes.find(t => t.id === formData.trigger?.type)?.label || 'Início'}
                                             </p>
@@ -239,10 +249,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                         <div className="grid grid-cols-1 gap-6">
                                             <div>
                                                 <div className="flex items-center justify-between mb-3">
-                                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Ação #{idx + 1}</p>
-                                                    {initialData && (
-                                                        <span className="text-[9px] font-black bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Sugerido por IA</span>
-                                                    )}
+                                                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Ação #{idx + 1}</p>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     {actionTypes.map(type => (
@@ -253,7 +260,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                                                 newActions[idx].type = type.id;
                                                                 setFormData({ ...formData, actions: newActions });
                                                             }}
-                                                            className={`p-3 rounded-xl border text-[11px] font-black transition-all ${action.type === type.id
+                                                            className={`p-3 rounded-xl border text-xs font-black transition-all ${action.type === type.id
                                                                 ? 'bg-primary/20 border-primary text-primary'
                                                                 : 'bg-card border-transparent text-muted-foreground hover:border-border'
                                                                 }`}
@@ -265,7 +272,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             </div>
 
                                             <div>
-                                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-3">Configuração</p>
+                                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-3">Configuração</p>
                                                 <input
                                                     type="text"
                                                     placeholder="Assunto / Título da Ação"
@@ -283,10 +290,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                 ))}
 
                                 <button 
-                                    onClick={() => {
-                                        const newActions = [...(formData.actions || []), { type: 'send_notification', config: {} }];
-                                        setFormData({ ...formData, actions: newActions as any });
-                                    }}
+                                    onClick={addAction}
                                     className="w-full p-4 border-2 border-dashed border-border rounded-2xl text-xs font-black text-muted-foreground hover:text-primary hover:border-primary/40 transition-all flex items-center justify-center gap-2 group"
                                 >
                                     <Plus className="h-4 w-4 group-hover:rotate-90 transition-all" /> Adicionar Passo Sequencial
