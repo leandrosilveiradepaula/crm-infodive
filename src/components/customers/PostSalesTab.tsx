@@ -118,7 +118,7 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                             <div key={contract.id} className="bg-card border border-border rounded-2xl p-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <p className="font-bold text-sm truncate">{contract.title}</p>
-                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                    <span className={`text-xs font-black uppercase px-2 py-0.5 rounded-full ${
                                         contract.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
                                     }`}>
                                         {contract.status}
@@ -163,9 +163,9 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <p className="font-bold text-sm truncate">{asset.name_model}</p>
-                                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">{asset.manufacturer} • {asset.type}</p>
+                                        <p className="text-xs text-muted-foreground font-black uppercase tracking-wider">{asset.manufacturer} • {asset.type}</p>
                                     </div>
-                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                    <span className={`text-xs font-black uppercase px-2 py-0.5 rounded-full ${
                                         asset.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
                                     }`}>
                                         {asset.status}
@@ -175,7 +175,7 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                                     {asset.serial_number_or_key && <p className="font-mono truncate">SN/Key: {asset.serial_number_or_key}</p>}
                                     <p>Garantia Expira: {asset.warranty_expires_at ? new Date(asset.warranty_expires_at).toLocaleDateString() : '—'}</p>
                                     {(asset as any).service_contract && (
-                                        <p className="text-blue-500 truncate text-[10px] uppercase font-bold mt-1">
+                                        <p className="text-blue-500 truncate text-xs uppercase font-bold mt-1">
                                             Coberto por: {(asset as any).service_contract.title}
                                         </p>
                                     )}
@@ -219,7 +219,7 @@ function EmptyState({ text }: { text: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border rounded-2xl">
             <p className="text-sm font-bold text-muted-foreground">{text}</p>
-            <p className="text-[10px] text-muted-foreground/60 uppercase mt-1">Use os botões acima para cadastrar</p>
+            <p className="text-xs text-muted-foreground/60 uppercase mt-1">Use os botões acima para cadastrar</p>
         </div>
     );
 }
