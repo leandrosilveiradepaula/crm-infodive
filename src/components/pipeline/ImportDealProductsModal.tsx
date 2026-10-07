@@ -402,7 +402,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             {/* Bundle Configuration */}
             {targetProduct ? (
                 <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4">
-                    <p className="text-[10px] text-primary font-bold uppercase tracking-widest mb-2">Importando dados para:</p>
+                    <p className="text-xs text-primary font-bold uppercase tracking-widest mb-2">Importando dados para:</p>
                     <div className="flex items-center gap-3">
                         <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-black">
                             {targetProduct.name.charAt(0)}
@@ -494,9 +494,9 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                 <table className="w-full text-left">
                     <thead className="bg-muted sticky top-0">
                         <tr>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase">Produto</th>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase text-right">Qtd</th>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase text-right">Total</th>
+                            <th className="px-4 py-3 text-xs font-black text-muted-foreground uppercase">Produto</th>
+                            <th className="px-4 py-3 text-xs font-black text-muted-foreground uppercase text-right">Qtd</th>
+                            <th className="px-4 py-3 text-xs font-black text-muted-foreground uppercase text-right">Total</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">

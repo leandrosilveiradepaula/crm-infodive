@@ -416,15 +416,15 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                             <div>
                                 <h4 className="text-base font-black text-foreground uppercase tracking-tight">{selectedCatalogProduct.name}</h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded tracking-tighter">{selectedCatalogProduct.sku}</span>
-                                    <span className="text-[10px] text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded">{selectedCatalogProduct.brand}</span>
+                                    <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded tracking-tighter">{selectedCatalogProduct.sku}</span>
+                                    <span className="text-xs text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded">{selectedCatalogProduct.brand}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-6">
                             <div className="text-right">
-                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Quantidade</label>
+                                <label className="text-xs font-black text-muted-foreground uppercase tracking-widest block mb-1">Quantidade</label>
                                 <Input
                                     type="number"
                                     min="1"
@@ -452,18 +452,18 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                     onDragEnd={handleDragEnd}
                 >
                     <table className="w-full text-left table-fixed">
-                        <thead className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide bg-muted/30">
+                        <thead className="text-xs text-muted-foreground uppercase font-bold tracking-wide bg-muted/30">
                             <tr>
                                 <th className="w-10"></th>
                                 <th className="pl-6 py-5 w-16 text-center">
                                     <div className="flex flex-col items-center gap-1">
-                                        {isEditing && <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
+                                        {isEditing && <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
                                     </div>
                                 </th>
-                                <th className="px-4 py-5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
-                                <th className="px-4 py-5 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
-                                <th className="px-4 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
-                                <th className="px-6 py-5 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-32">Total</th>
+                                <th className="px-4 py-5 text-left text-xs font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
+                                <th className="px-4 py-5 text-center text-xs font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
+                                <th className="px-4 py-5 text-right text-xs font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
+                                <th className="px-6 py-5 text-right text-xs font-bold text-foreground uppercase tracking-wide w-32">Total</th>
                                 <th className="w-10"></th>
                             </tr>
                         </thead>
@@ -525,7 +525,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                             <span className="text-sm font-black text-muted-foreground">
                                                 {formatCurrency(calculateDealTotalCost(deal.deal_products || []))}
                                             </span>
-                                            <p className="text-[9px] text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total</p>
+                                            <p className="text-xs text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total</p>
                                         </div>
 
                                         <div className="flex flex-col items-end gap-2">
@@ -533,11 +533,11 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                                 <span className="text-2xl font-black text-primary tracking-tight whitespace-nowrap">
                                                     {formatCurrency(calculateDealValue(deal.deal_products || []))}
                                                 </span>
-                                                <p className="text-[9px] text-primary font-bold uppercase tracking-wide">Valor de Venda</p>
+                                                <p className="text-xs text-primary font-bold uppercase tracking-wide">Valor de Venda</p>
                                             </div>
 
                                             <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                                                <span className="text-[10px] font-bold text-emerald-500">
+                                                <span className="text-xs font-bold text-emerald-500">
                                                     {(() => {
                                                         const totalCost = calculateDealTotalCost(deal.deal_products || []);
                                                         const totalSales = calculateDealValue(deal.deal_products || []);
@@ -546,7 +546,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                                         return `${margin.toFixed(1)} % `;
                                                     })()}
                                                 </span>
-                                                <span className="text-[9px] font-bold text-emerald-500/70 uppercase">Margem</span>
+                                                <span className="text-xs font-bold text-emerald-500/70 uppercase">Margem</span>
                                             </div>
                                         </div>
                                     </div>

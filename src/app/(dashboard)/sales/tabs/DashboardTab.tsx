@@ -295,12 +295,12 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     <TrendingUp className="w-4 h-4 text-primary" />
                                 </div>
                                 <div>
-                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Projeção de Fluxo de Caixa</h3>
+                                    <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Projeção de Fluxo de Caixa</h3>
                                     <p className="text-xs text-muted-foreground mt-0.5">Expectativa de recebimento acumulado para os próximos 90 dias</p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <span className="text-[10px] font-black uppercase text-muted-foreground">Total Projetado</span>
+                                <span className="text-xs font-black uppercase text-muted-foreground">Total Projetado</span>
                                 <div className="text-xl font-black text-primary">{formatCurrency(currentCumulative)}</div>
                             </div>
                         </div>
@@ -332,14 +332,14 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                             if (active && payload && payload.length) {
                                                 return (
                                                     <div className="glass-card p-4 border border-border/50 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">Semana de {payload[0].payload.date}</p>
+                                                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">Semana de {payload[0].payload.date}</p>
                                                         <div className="space-y-1">
                                                             <div className="flex justify-between gap-8 items-center">
-                                                                <span className="text-[10px] font-bold text-muted-foreground">RECEBIMENTO:</span>
+                                                                <span className="text-xs font-bold text-muted-foreground">RECEBIMENTO:</span>
                                                                 <span className="text-xs font-black text-foreground">{formatCurrency(payload[0].payload.amount)}</span>
                                                             </div>
                                                             <div className="flex justify-between gap-8 items-center">
-                                                                <span className="text-[10px] font-bold text-primary">ACUMULADO:</span>
+                                                                <span className="text-xs font-bold text-primary">ACUMULADO:</span>
                                                                 <span className="text-sm font-black text-primary">{formatCurrency(payload[0].payload.cumulative)}</span>
                                                             </div>
                                                         </div>
@@ -371,9 +371,9 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                             <div className="p-2 rounded-xl bg-rose-500/10">
                                 <AlertTriangle className="w-4 h-4 text-rose-500" />
                             </div>
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Alertas de Risco AI</h3>
+                            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Alertas de Risco AI</h3>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-[9px] font-black text-rose-500 border border-rose-500/20">
+                        <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-xs font-black text-rose-500 border border-rose-500/20">
                             {alerts.length} ATIVOS
                         </span>
                     </div>
@@ -382,7 +382,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         {isLoadingAlerts ? (
                             <div className="flex flex-col items-center justify-center h-full space-y-2 opacity-50 py-12">
                                 <Loader2 className="w-6 h-6 animate-spin" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Analisando Pipeline...</span>
+                                <span className="text-xs font-bold uppercase tracking-widest">Analisando Pipeline...</span>
                             </div>
                         ) : alerts.length === 0 ? (
                             <PremiumEmptyState 
@@ -404,9 +404,9 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                             alert.severity === 'medium' ? 'bg-amber-500' : 'bg-blue-500'
                                         }`} />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-black text-foreground truncate uppercase">{alert.customer || 'Cliente Desconhecido'}</p>
-                                            <p className="text-[9px] font-bold text-muted-foreground truncate">{alert.title}</p>
-                                            <p className="text-[11px] font-medium text-foreground/80 mt-1 line-clamp-2 leading-tight">{alert.message}</p>
+                                            <p className="text-xs font-black text-foreground truncate uppercase">{alert.customer || 'Cliente Desconhecido'}</p>
+                                            <p className="text-xs font-bold text-muted-foreground truncate">{alert.title}</p>
+                                            <p className="text-xs font-medium text-foreground/80 mt-1 line-clamp-2 leading-tight">{alert.message}</p>
                                         </div>
                                         <ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
                                     </div>
@@ -429,7 +429,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-2 rounded-xl bg-orange-500/10">
                             <Target className="w-4 h-4 text-orange-500" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Distribuição por Status</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Distribuição por Status</h3>
                     </div>
                     <div className="h-[240px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -467,7 +467,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     align="center"
                                     layout="horizontal"
                                     iconType="circle"
-                                    formatter={(value) => <span className="text-[9px] font-bold text-muted-foreground uppercase">{value}</span>}
+                                    formatter={(value) => <span className="text-xs font-bold text-muted-foreground uppercase">{value}</span>}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -480,7 +480,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-2 rounded-xl bg-emerald-500/10">
                             <BarChart3 className="w-4 h-4 text-emerald-500" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Volume por Faturamento</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Volume por Faturamento</h3>
                     </div>
                     <div className="h-[240px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -535,7 +535,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-2 rounded-xl bg-amber-500/10">
                             <Calendar className="w-4 h-4 text-amber-500" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Heatmap de Recebíveis (8 Semanas)</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Heatmap de Recebíveis (8 Semanas)</h3>
                     </div>
                     <div className="grid grid-cols-4 gap-2 h-full">
                         {heatmapWeeks.map((week, idx) => (
@@ -548,7 +548,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 }}
                             >
                                 <div className="text-[8px] font-black uppercase tracking-tighter text-muted-foreground">{week.label}</div>
-                                <div className="text-[10px] font-black text-foreground mt-1">{formatCurrency(week.amount)}</div>
+                                <div className="text-xs font-black text-foreground mt-1">{formatCurrency(week.amount)}</div>
                                 
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-background/95 flex items-center justify-center p-2 rounded-lg transition-opacity pointer-events-none border border-amber-500/30">
                                     <span className="text-[8px] font-black text-amber-500 leading-tight text-center">
@@ -566,7 +566,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-2 rounded-xl bg-emerald-500/10">
                             <Target className="w-4 h-4 text-emerald-500" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Saúde do Pipeline</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Saúde do Pipeline</h3>
                     </div>
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
@@ -580,7 +580,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                             />
                         </div>
                         <div className="flex justify-between items-center pt-1">
-                            <span className="text-xs text-muted-foreground text-[10px] font-bold">VENCIDAS:</span>
+                            <span className="text-xs text-muted-foreground text-xs font-bold">VENCIDAS:</span>
                             <span className="text-xs font-black text-rose-500">{overdueInstallments}</span>
                         </div>
                     </div>
@@ -592,7 +592,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-2 rounded-xl bg-amber-500/10">
                             <Zap className="w-4 h-4 text-amber-500" />
                         </div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ações Rápidas</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Ações Rápidas</h3>
                     </div>
                     <div className="space-y-2">
                         {pendingInvoicesCount > 0 && (
@@ -600,7 +600,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 onClick={() => onNavigateToOrders('pedido_gerado')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:bg-amber-500/10 transition-all text-left"
                             >
-                                <span className="text-[10px] font-bold text-amber-600">{pendingInvoicesCount} NF PEN.</span>
+                                <span className="text-xs font-bold text-amber-600">{pendingInvoicesCount} NF PEN.</span>
                                 <ArrowUpRight className="w-3 h-3 text-amber-500" />
                             </button>
                         )}
@@ -609,7 +609,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 onClick={() => onNavigateToOrders()}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 transition-all text-left"
                             >
-                                <span className="text-[10px] font-bold text-rose-600">{overdueInstallments} VENCIDOS</span>
+                                <span className="text-xs font-bold text-rose-600">{overdueInstallments} VENCIDOS</span>
                                 <ArrowUpRight className="w-3 h-3 text-rose-500" />
                             </button>
                         )}
@@ -628,7 +628,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-black uppercase tracking-widest leading-none">Análise de Risco IA</h3>
-                                    <p className="text-[10px] font-bold text-muted-foreground mt-1">Investigação inteligente de gargalo</p>
+                                    <p className="text-xs font-bold text-muted-foreground mt-1">Investigação inteligente de gargalo</p>
                                 </div>
                             </div>
                             <button 
@@ -642,7 +642,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <div className="p-8 space-y-6">
                             <div className="p-4 rounded-xl border border-border bg-muted/20">
                                 <div className="flex justify-between items-start mb-2">
-                                    <p className="text-[10px] font-black uppercase tracking-tight text-primary">{selectedAlert.customer}</p>
+                                    <p className="text-xs font-black uppercase tracking-tight text-primary">{selectedAlert.customer}</p>
                                     <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border ${
                                         selectedAlert.severity === 'high' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' :
                                         'bg-amber-500/10 text-amber-500 border-amber-500/20'
@@ -655,7 +655,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                             </div>
 
                             <div className="space-y-4">
-                                <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                     <Zap className="w-3 h-3" /> Resultado da IA
                                 </h4>
                                 
@@ -667,11 +667,11 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 ) : aiAnalysis ? (
                                     <div className="space-y-4 animate-in slide-in-from-bottom-2 duration-500">
                                         <div className="space-y-1.5 border-l-2 border-primary pl-4 py-1">
-                                            <p className="text-[10px] font-black text-primary uppercase">Diagnóstico</p>
+                                            <p className="text-xs font-black text-primary uppercase">Diagnóstico</p>
                                             <p className="text-xs font-medium leading-relaxed">{aiAnalysis.analysis}</p>
                                         </div>
                                         <div className="space-y-1.5 border-l-2 border-emerald-500 pl-4 py-1">
-                                            <p className="text-[10px] font-black text-emerald-500 uppercase">Sugestão de Ação</p>
+                                            <p className="text-xs font-black text-emerald-500 uppercase">Sugestão de Ação</p>
                                             <p className="text-xs font-bold bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">{aiAnalysis.suggestion}</p>
                                         </div>
                                     </div>
