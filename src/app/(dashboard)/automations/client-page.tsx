@@ -56,12 +56,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
 
     const recipes = [
-        { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
-        { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
-        { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+        { title: 'Tarefa para Nova Oportunidade', triggerType: 'deal_created', actionType: 'create_task', category: 'followup', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+        { title: 'Tarefa ao Mover Oportunidade', triggerType: 'deal_moved', actionType: 'create_task', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
     ];
 
     const handleUseRecipe = (recipe: typeof recipes[0]) => {
