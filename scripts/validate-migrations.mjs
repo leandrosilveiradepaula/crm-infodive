@@ -47,7 +47,7 @@ for (const path of changed) {
   }
 
   if (/\bdo\s+\$(?!\$)/i.test(raw) || /\n\s*\$(?!\$)\s*;/m.test(raw)) {
-    violations.push(`${path}: dollar quoting malformado em bloco DO; use $ ... $`);
+    violations.push(`${path}: dollar quoting malformado em bloco DO; use dois cifroes como delimitador`);
   }
 
   if (/auth\.jwt\s*\(\s*\)[\s\S]{0,160}user_metadata/.test(sql)) {
