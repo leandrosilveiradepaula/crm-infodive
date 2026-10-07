@@ -26,11 +26,17 @@ export async function GET() {
 
         if (error) {
             console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
+        if (error?.message?.includes('Forbidden')) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (error?.message?.includes('Unauthorized') || error?.message?.includes('session')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
             return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
         }
 
         return NextResponse.json({ number });
-    } catch {
+    } catch (error: any) {
         console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
         return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
     }
