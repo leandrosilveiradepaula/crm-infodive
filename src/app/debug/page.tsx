@@ -1,9 +1,11 @@
+import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requireSessionContext } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DebugPage() {
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_INTERNAL_DEBUG_ROUTES !== 'true') notFound();
     const session = await requireSessionContext().catch(() => null);
 
     // 1. Check Auth (Now using session)
