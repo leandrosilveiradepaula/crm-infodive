@@ -56,6 +56,40 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Install pinned Playwright browser
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Browser smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm start > /tmp/crm-next.log 2>&1 &
+          app_pid=$!
+          cleanup() {
+            kill "$app_pid" 2>/dev/null || true
+            wait "$app_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          for _ in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/login >/dev/null; then
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/crm-next.log
+              exit 1
+            fi
+            sleep 1
+          done
+          CRM_SMOKE_BASE_URL=http://127.0.0.1:3000 node scripts/browser-smoke.mjs
+      - name: Upload browser smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-browser-smoke-${{ github.sha }}
+          path: artifacts/browser-smoke.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Diff check
         shell: bash
         run: |
