@@ -56,12 +56,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
 
     const recipes = [
-        { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
-        { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
-        { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+        { title: 'Tarefa para Nova Oportunidade', triggerType: 'deal_created', actionType: 'create_task', category: 'followup', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+        { title: 'Tarefa ao Mover Oportunidade', triggerType: 'deal_moved', actionType: 'create_task', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
     ];
 
     const handleUseRecipe = (recipe: typeof recipes[0]) => {
@@ -75,7 +71,6 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         setShowNewModal(true);
     };
 
-    const activeAutomations = initialAutomations.filter((automation: Automation) => automation.enabled).length;
     const totalExecutions = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.executionCount || 0), 0);
     const totalSuccessCount = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.successCount || 0), 0);
     const successRate = totalExecutions > 0 
@@ -94,9 +89,9 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             onClick: () => setFilterType(filterType === 'active' ? null : 'active')
         },
         {
-            label: "Automações Ativas",
-            value: activeAutomations.toString(),
-            description: `${initialAutomations.length} configuradas`,
+            label: "Execução Automática",
+            value: "Bloqueada",
+            description: `${initialAutomations.length} configurações salvas`,
             icon: Activity,
             color: "text-emerald-500",
             gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
@@ -141,8 +136,12 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     };
 
     const handleToggle = async (id: string, enabled: boolean) => {
-        await toggleAutomation(id, enabled);
-        toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
+        const result = await toggleAutomation(id, enabled);
+        if (!result.success) {
+            toast.error(result.error || 'Não foi possível alterar a automação.');
+            return;
+        }
+        toast.success('Automação pausada');
         router.refresh();
     };
 
@@ -299,9 +298,9 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         <div>
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
-                                                {!automation.enabled && (
-                                                    <span className="text-xs font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
-                                                )}
+                                                <span className="text-xs font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">
+                                                    Rascunho
+                                                </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{automation.description}</p>
                                         </div>
@@ -310,9 +309,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         <label className="relative inline-flex items-center cursor-pointer scale-110">
                                             <input
                                                 type="checkbox"
-                                                checked={automation.enabled}
+                                                checked={false}
                                                 onChange={(e) => handleToggle(automation.id, e.target.checked)}
                                                 className="sr-only peer"
+                                                aria-label="Ativação indisponível até o runtime de automações estar implementado"
                                             />
                                             <div className="w-12 h-6.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border"></div>
                                         </label>

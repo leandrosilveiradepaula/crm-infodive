@@ -30,7 +30,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         name: initialData?.name || '',
         description: initialData?.description || '',
         category: initialData?.category || 'followup',
-        enabled: true,
+        enabled: false,
         trigger: initialData?.trigger || {
             type: 'deal_created',
             config: {}
@@ -51,18 +51,12 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     ];
 
     const triggerTypes: { id: TriggerType; label: string; desc: string }[] = [
-        { id: 'deal_created', label: 'Oportunidade Criada', desc: 'Sempre que um novo deal entrar no pipeline' },
-        { id: 'deal_moved', label: 'Oportunidade Movida', desc: 'Quando um deal mudar de estágio' },
-        { id: 'proposal_sent', label: 'Proposta Enviada', desc: 'Ao gerar e enviar uma proposta' },
-        { id: 'deal_stagnant', label: 'Oportunidade Estagnada', desc: 'Sem movimentação por X dias' },
-        { id: 'activity_created', label: 'Atividade Criada', desc: 'Quando um novo compromisso é agendado' },
+        { id: 'deal_created', label: 'Oportunidade Criada', desc: 'Sempre que uma nova oportunidade entrar no pipeline' },
+        { id: 'deal_moved', label: 'Oportunidade Movida', desc: 'Quando uma oportunidade mudar de estágio' },
     ];
 
     const actionTypes: { id: ActionType; label: string; desc: string }[] = [
-        { id: 'send_notification', label: 'Notificação Push', desc: 'Avisa o dono do deal no sistema' },
-        { id: 'send_email', label: 'Enviar E-mail', desc: 'Usa um template pré-definido' },
-        { id: 'create_task', label: 'Criar Tarefa', desc: 'Agenda uma atividade pendente' },
-        { id: 'move_deal', label: 'Mover Oportunidade', desc: 'Troca o estágio automaticamente' },
+        { id: 'create_task', label: 'Criar Tarefa', desc: 'Agenda uma atividade pendente vinculada à oportunidade' },
     ];
 
     const handleNext = () => setStep(s => s + 1);
@@ -302,7 +296,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                                 </div>
                                 <p className="text-sm text-muted-foreground font-medium">
-                                    Este fluxo será ativado <span className="text-foreground font-bold">Imediatamente</span> após a criação.
+                                    A configuração será salva como <span className="text-foreground font-bold">rascunho</span>. A ativação automática fica bloqueada até o executor real estar disponível.
                                 </p>
                             </div>
                         </div>
@@ -327,7 +321,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                             }`}
                     >
                         {loading ? 'Criando...' : step === 3 ? (
-                            <>Concluir e Ativar <CheckCircle2 className="h-5 w-5" /></>
+                            <>Salvar Configuração <CheckCircle2 className="h-5 w-5" /></>
                         ) : (
                             <>Próximo <ArrowRight className="h-5 w-5" /></>
                         )}

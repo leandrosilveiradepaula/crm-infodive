@@ -16,7 +16,7 @@ describe('automation product truthfulness', () => {
 
     expect(source).not.toContain('42h');
     expect(source).not.toContain('Tempo Economizado');
-    expect(source).toContain('Automações Ativas');
-    expect(source).toContain('activeAutomations');
+    expect(source).toContain('Execução Automática');
+    expect(source).toContain('Bloqueada');
   });
 });
