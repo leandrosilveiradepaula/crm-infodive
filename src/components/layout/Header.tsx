@@ -30,6 +30,8 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                 <button
                     onClick={onMenuClick}
                     className="lg:hidden p-2 text-muted-foreground dark:text-muted-foreground hover:bg-muted/50 dark:hover:bg-gray-800 rounded-lg"
+                    aria-label="Abrir menu principal"
+                    title="Abrir menu principal"
                 >
                     <Menu className="h-6 w-6" />
                 </button>
@@ -37,7 +39,8 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                     <button
                         onClick={onToggleSidebar}
                         className="p-2 text-muted-foreground hover:bg-muted/50 rounded-lg transition-all"
-                        title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
+                        title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+                        aria-label={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
                     >
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
@@ -61,9 +64,21 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                 <Button
                     variant="ghost"
                     size="icon"
+                    onClick={onSearchClick}
+                    className="md:hidden"
+                    aria-label="Abrir busca global"
+                    title="Abrir busca global"
+                >
+                    <Search className="h-5 w-5" />
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setIsAiOpen(true)}
                     className="text-primary hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
                     title="Assistente do CRM"
+                    aria-label="Abrir assistente do CRM"
                 >
                     <Bot className="h-5 w-5" />
                 </Button>
@@ -72,11 +87,12 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                     variant="ghost"
                     size="icon"
                     onClick={toggleTheme}
-                    title="Alternar Tema"
+                    title="Alternar tema"
+                    aria-label="Alternar tema"
                 >
                     <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
+                    <span className="sr-only">Alternar tema</span>
                 </Button>
 
                 <NotificationCenter

@@ -64,6 +64,8 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="lg:hidden text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                    aria-label="Fechar menu principal"
+                    title="Fechar menu principal"
                 >
                     <X className="h-6 w-6" />
                 </button>
@@ -110,7 +112,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     </div>
 
                     {!isCollapsed && (
-                        <button onClick={handleLogout} className="p-2 text-sidebar-foreground/50 hover:text-rose-500 transition-colors" title="Sair do sistema">
+                        <button onClick={handleLogout} className="p-2 text-sidebar-foreground/50 hover:text-rose-500 transition-colors" title="Sair do sistema" aria-label="Sair do sistema">
                             <LogOut className="h-4 w-4" />
                         </button>
                     )}
@@ -125,6 +127,8 @@ function NavItem({ href, icon: Icon, label, isActive, collapsed }: { href: strin
         <Link
             href={href}
             title={collapsed ? label : ''}
+            aria-label={collapsed ? label : undefined}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 group",
                 isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-blue-900/20" : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",

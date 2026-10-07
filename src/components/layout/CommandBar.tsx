@@ -280,14 +280,14 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         {pages.length > 0 && (
                             <span className="flex items-center gap-1">
-                                <kbd className="command-kbd-small">Esc</kbd> Back
+                                <kbd className="command-kbd-small">Esc</kbd> Voltar
                             </span>
                         )}
                         <span className="flex items-center gap-1">
-                            <kbd className="command-kbd-small">↑↓</kbd> Navigate
+                            <kbd className="command-kbd-small">↑↓</kbd> Navegar
                         </span>
                         <span className="flex items-center gap-1">
-                            <kbd className="command-kbd-small">Enter</kbd> Select
+                            <kbd className="command-kbd-small">Enter</kbd> Selecionar
                         </span>
                     </div>
                 </div>
