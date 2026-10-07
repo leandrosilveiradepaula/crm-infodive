@@ -5,6 +5,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
 import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { getRequestId } from '@/lib/request-context';
+import { recordOperationalEvent } from '@/lib/operational-events';
 
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -96,6 +98,9 @@ Retorne SOMENTE o JSON, sem markdown, sem código, sem texto adicional.`;
 }
 
 export async function GET(request: NextRequest) {
+    const startedAt = Date.now();
+    const requestId = getRequestId(request.headers.get('X-Request-Id'));
+
     // 1. Auth guard (iron-session)
     let userId: string;
     let organizationId: string;
@@ -104,6 +109,7 @@ export async function GET(request: NextRequest) {
         userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'unauthorized', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -111,6 +117,7 @@ export async function GET(request: NextRequest) {
     const providerToken = request.cookies.get('crm_provider_token')?.value;
 
     if (!providerToken) {
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'provider_token_missing', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
         return NextResponse.json({ error: 'Not authenticated or missing provider token. Please sign in with Office 365.' }, { status: 401 });
     }
 
@@ -144,15 +151,18 @@ export async function GET(request: NextRequest) {
                     });
                 } catch {
                     console.error('[EmailSyncRoute] token refresh failed');
+                    recordOperationalEvent({ area: 'email', operation: 'token_refresh', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
+                recordOperationalEvent({ area: 'email', operation: 'token_refresh', outcome: 'refresh_token_missing', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
                 return NextResponse.json({ error: 'Sessão da Microsoft expirada. Conecte sua conta novamente.' }, { status: 401 });
             }
         }
 
         if (!response.ok) {
             console.error('[EmailSyncRoute] graph sync failed');
+            recordOperationalEvent({ area: 'integration', operation: 'microsoft_graph_sync', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: response.status });
             throw new Error('Microsoft Graph sync failed');
         }
 
@@ -184,8 +194,11 @@ export async function GET(request: NextRequest) {
             const uniqueSenders = Array.from(new Set(emails.map((e) => e.sender.email).filter(Boolean)));
 
             if (uniqueSenders.length > 0) {
+                recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'scheduled', requestId, count: uniqueSenders.length });
                 // Dispara logica em background
                 Promise.resolve().then(async () => {
+                    const backgroundStartedAt = Date.now();
+                    let processedCount = 0;
                     try {
                         const bgSupabase = createAdminClient();
 
@@ -218,6 +231,7 @@ export async function GET(request: NextRequest) {
                         for (const email of unknownEmails) {
                             if (processedUnknowns.has(email.sender.email)) continue;
                             processedUnknowns.add(email.sender.email);
+                            processedCount += 1;
 
                             if (!email.body || email.body.length < 20) {
                                 continue; // Evita emails vazios
@@ -286,8 +300,10 @@ export async function GET(request: NextRequest) {
                             }
                         }
 
+                        recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'success', requestId, durationMs: Date.now() - backgroundStartedAt, count: processedCount });
                     } catch {
                         console.error('[EmailSyncRoute] background signature extraction failed');
+                        recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'failure', requestId, durationMs: Date.now() - backgroundStartedAt, count: processedCount });
                     }
                 });
             }
@@ -323,10 +339,12 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'success', requestId, durationMs: Date.now() - startedAt, statusCode: 200, count: frontEndEmails.length });
         return finalResponse;
 
     } catch {
         console.error('[EmailSyncRoute] email sync failed');
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: 500 });
         return NextResponse.json({ error: 'Não foi possível sincronizar os emails.' }, { status: 500 });
     }
 }
