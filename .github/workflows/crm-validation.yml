@@ -62,6 +62,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Browser smoke
         shell: bash
+        env:
+          SESSION_SECRET: "crm-ci-browser-smoke-session-secret-2026"
         run: |
           set -euo pipefail
           npm start > /tmp/crm-next.log 2>&1 &
