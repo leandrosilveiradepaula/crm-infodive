@@ -1,0 +1,10 @@
+{
+  "source": "npm audit on 2026-10-07",
+  "policy": "Legacy baseline only; CI must fail if any severity count increases. Reduce this file only when vulnerabilities are remediated.",
+  "vulnerabilities": {
+    "critical": 5,
+    "high": 28,
+    "moderate": 28,
+    "low": 2
+  }
+}

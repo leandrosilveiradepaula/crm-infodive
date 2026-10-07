@@ -3,6 +3,7 @@ export const PUBLIC_PATHS = new Set([
     '/auth/callback',
     '/api/auth/logout',
     '/api/proposals/sign',
+    '/api/health',
 ]);
 
 export const PUBLIC_PATTERNS = [

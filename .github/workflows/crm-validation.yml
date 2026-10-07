@@ -5,6 +5,7 @@ on:
     branches:
       - factory/fix-present-in-usd-safe-rate
       - 'security/**'
+      - 'ops/**'
   pull_request:
     branches:
       - main
@@ -28,6 +29,12 @@ jobs:
         run: npm ci
       - name: TypeScript
         run: npx tsc --noEmit
+      - name: New lint errors
+        run: node scripts/lint-changed.mjs
+      - name: Dependency audit regression guard
+        run: node scripts/audit-dependencies.mjs
+      - name: Migration policy
+        run: node scripts/validate-migrations.mjs
       - name: Tests
         run: npm test
       - name: Build
@@ -40,3 +47,11 @@ jobs:
           git fetch origin "$base_ref"
           merge_base="$(git merge-base "origin/$base_ref" HEAD)"
           git diff --check "$merge_base"..HEAD
+      - name: Write quality evidence
+        run: node scripts/write-quality-evidence.mjs
+      - name: Upload quality evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-quality-evidence-${{ github.sha }}
+          path: artifacts/quality-evidence.json
+          retention-days: 30
