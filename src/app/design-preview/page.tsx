@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { notFound } from 'next/navigation';
 import {
     LayoutDashboard,
     BarChart3,
@@ -34,6 +35,7 @@ import { RiskRadar } from '@/components/pipeline/ai/RiskRadar';
 // ----------------------------------------------------------------------
 
 export default function DesignPreviewPage() {
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_INTERNAL_DEBUG_ROUTES !== 'true') notFound();
     return (
         <div className="min-h-screen bg-muted/40 font-sans text-foreground">
 
