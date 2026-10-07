@@ -175,7 +175,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                             <Send className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="text-center text-[10px] text-muted-foreground mt-2">
+                    <p className="text-center text-xs text-muted-foreground mt-2">
                         Respostas de IA podem conter erros. Confirme informações importantes no CRM.
                     </p>
                 </div>
