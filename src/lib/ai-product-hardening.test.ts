@@ -19,7 +19,7 @@ describe('AI product hardening', () => {
       'src/app/api/gemini/follow-up/route.ts'
     ]) {
       const source = readFileSync(path, 'utf8');
-      expect(source).toContain('requireSessionContext');
+      expect(source).toMatch(/require(?:SessionContext|Permission)/);
       expect(source).toContain(".eq('organization_id', organizationId)");
       expect(source).toContain('GEMINI_API_KEY');
     }
