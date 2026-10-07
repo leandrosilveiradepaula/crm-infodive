@@ -15,10 +15,9 @@ interface RiskRadarProps {
 }
 
 export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
-    // Fallback if data is missing (e.g. before migration runs on existing deals)
-    // We will use mock data for now if props are missing
-    const score = deal.health_score ?? 100;
-    const trend = deal.health_trend ?? 'stable';
+    const hasHealthScore = typeof deal.health_score === 'number' && Number.isFinite(deal.health_score);
+    const score = hasHealthScore ? Math.max(0, Math.min(100, deal.health_score as number)) : null;
+    const trend = deal.health_trend ?? null;
     const factors = deal.risk_factors ?? [];
 
     const getScoreColor = (s: number) => {
@@ -41,6 +40,33 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
         }
     };
 
+    if (score === null) {
+        return (
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-lg shadow-slate-200/50">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-muted/50 rounded-xl border border-border shadow-sm">
+                        <Activity className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold text-foreground leading-tight">Radar de Risco</h3>
+                        <p className="text-xs font-medium text-muted-foreground mt-0.5">Dados de saúde ainda não disponíveis</p>
+                    </div>
+                </div>
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-4">
+                    <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-bold text-foreground">Sem avaliação de risco calculada</p>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                O CRM ainda não possui score de saúde para esta oportunidade. Nenhum status saudável ou crítico será presumido até existirem dados calculados.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-card border border-border rounded-2xl p-5 shadow-lg shadow-slate-200/50 relative overflow-hidden group hover:shadow-xl transition-shadow duration-500">
             {/* Background Effect */}
@@ -52,8 +78,8 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                         <Activity className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-foreground leading-tight">Risk Radar</h3>
-                        <p className="text-[10px] font-medium text-muted-foreground mt-0.5">Monitoramento Contínuo</p>
+                        <h3 className="text-sm font-bold text-foreground leading-tight">Radar de Risco</h3>
+                        <p className="text-xs font-medium text-muted-foreground mt-0.5">Monitoramento Contínuo</p>
                     </div>
                 </div>
                 <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${trend === 'improving' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
@@ -61,7 +87,7 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                             'bg-muted/50 border-border text-muted-foreground'
                     }`}>
                     {getTrendIcon()}
-                    <span className="text-[10px] font-bold uppercase tracking-wide">
+                    <span className="text-xs font-bold uppercase tracking-wide">
                         {trend === 'improving' ? 'Melhorando' : trend === 'declining' ? 'Crítico' : 'Estável'}
                     </span>
                 </div>
@@ -97,7 +123,7 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className={`text-2xl font-black ${getScoreColor(score)} tracking-tighter`}>{score}</span>
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-[-2px]">Score</span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mt-[-2px]">Score</span>
                     </div>
                 </div>
 
@@ -105,7 +131,7 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                 <div className="flex-1 min-w-0 py-1">
                     {factors.length > 0 ? (
                         <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                                 <AlertTriangle className="h-3 w-3" /> Pontos de Atenção
                             </p>
                             <ul className="space-y-2.5">
@@ -121,10 +147,10 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                         <div className="flex flex-col justify-center h-full animate-in fade-in slide-in-from-right-4 duration-500">
                             <div className="flex items-center gap-2 text-emerald-600 mb-1">
                                 <ShieldCheck className="h-4 w-4" />
-                                <span className="font-bold text-sm">Deal Saudável</span>
+                                <span className="font-bold text-sm">Sem pontos de atenção registrados</span>
                             </div>
                             <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                                Nenhuma anomalia detectada. O engajamento está positivo e dentro do esperado.
+                                Não há fatores de risco registrados para este score. Confirme os dados da oportunidade antes de concluir que o cenário está saudável.
                             </p>
                         </div>
                     )}
