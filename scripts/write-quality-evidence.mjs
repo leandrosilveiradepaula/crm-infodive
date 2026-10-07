@@ -23,6 +23,7 @@ const evidence = {
     'paid_ai_endpoint_audit',
     'tests',
     'build',
+    'browser_smoke_desktop_mobile_keyboard_route_guard',
     'diff_check'
   ]
 };
