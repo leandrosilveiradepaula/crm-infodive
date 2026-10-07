@@ -2,10 +2,10 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { UserProfile } from '@/hooks/useUsers';
-import { requireUserId, requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 
 export async function getUsers() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:manage_users');
     const supabase = createAdminClient();
 
     try {
@@ -53,7 +53,7 @@ export async function getUsers() {
 }
 
 export async function updateUserAction(updateId: string, updates: Partial<UserProfile>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:manage_users');
     const supabase = createAdminClient();
 
     try {
@@ -96,7 +96,7 @@ export async function updateUserAction(updateId: string, updates: Partial<UserPr
 }
 
 export async function archiveUserAction(archiveId: string, newOwnerId?: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:manage_users');
     const supabase = createAdminClient();
 
     try {
