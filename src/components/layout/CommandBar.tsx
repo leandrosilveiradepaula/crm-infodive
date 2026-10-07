@@ -99,7 +99,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
         <Command.Dialog
             open={open}
             onOpenChange={onOpenChange}
-            label="Global Command Menu"
+            label="Menu global de comandos"
             className="command-palette"
             onKeyDown={(e) => {
                 if (e.key === 'Escape' && pages.length > 0) {
@@ -111,7 +111,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
         >
             <div className="command-palette-wrapper">
                 <Command.Input
-                    placeholder={!activePage ? "Type a command or search..." : activePage === 'move-deal' ? "Select deal to move..." : "Select target stage..."}
+                    placeholder={!activePage ? "Digite um comando ou busque..." : activePage === 'move-deal' ? "Selecione a oportunidade..." : "Selecione o estágio..."}
                     value={search}
                     onValueChange={setSearch}
                     className="command-input"
@@ -123,14 +123,14 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                         {isSearching ? (
                             <div className="flex items-center justify-center gap-2 py-4 text-muted-foreground">
                                 <Loader2 className="h-4 w-4 animate-spin" />
-                                <span>Searching universe...</span>
+                                <span>Buscando...</span>
                             </div>
-                        ) : 'No results found.'}
+                        ) : 'Nenhum resultado encontrado.'}
                     </Command.Empty>
 
                     {/* --- ASK AI FUNCTION --- */}
                     {onAskAI && search.length > 2 && (
-                        <Command.Group heading="Watson AI" className="command-group">
+                        <Command.Group heading="Assistente do CRM" className="command-group">
                             <Command.Item
                                 value="ask-ai"
                                 onSelect={() => {
@@ -142,7 +142,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                             >
                                 <Sparkles className="command-icon text-teal-400" />
                                 <div className="flex-1">
-                                    <div className="font-semibold text-white">Perguntar ao Watson...</div>
+                                    <div className="font-semibold text-white">Perguntar ao assistente...</div>
                                     <div className="text-xs text-muted-foreground">"{search}"</div>
                                     - </div>
                                 <kbd className="command-kbd">↵</kbd>
@@ -157,7 +157,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                             {(foundDeals.length > 0 || foundCustomers.length > 0) && (
                                 <>
                                     {foundDeals.length > 0 && (
-                                        <Command.Group heading="Deals Found" className="command-group">
+                                        <Command.Group heading="Oportunidades encontradas" className="command-group">
                                             {foundDeals.map(deal => (
                                                 <Command.Item
                                                     key={deal.id}
@@ -175,7 +175,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                     )}
 
                                     {foundCustomers.length > 0 && (
-                                        <Command.Group heading="Clients Found" className="command-group">
+                                        <Command.Group heading="Empresas encontradas" className="command-group">
                                             {foundCustomers.map(client => (
                                                 <Command.Item
                                                     key={client.id}
@@ -197,7 +197,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                             {/* DEFAULT MODE (No Search or No Results) */}
                             {search.length < 2 && (
                                 <>
-                                    <Command.Group heading="Quick Actions" className="command-group">
+                                    <Command.Group heading="Ações rápidas" className="command-group">
                                         <Command.Item value="new-deal" onSelect={() => handleSelect(() => router.push('/pipeline?newDeal=true'))} className="command-item">
                                             <Plus className="command-icon text-green-500" />
                                             <span>Criar Nova Oportunidade</span>
@@ -213,7 +213,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                         </Command.Item>
                                     </Command.Group>
 
-                                    <Command.Group heading="Navigation" className="command-group">
+                                    <Command.Group heading="Navegação" className="command-group">
                                         <Command.Item value="nav-dashboard" onSelect={() => handleSelect(() => router.push('/dashboard'))} className="command-item">
                                             <LayoutDashboard className="command-icon" />
                                             <span>Dashboard</span>
@@ -236,7 +236,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
 
                     {/* --- SUB-PAGE: MOVE DEAL --- */}
                     {activePage === 'move-deal' && (
-                        <Command.Group heading="Select Deal to Move" className="command-group">
+                        <Command.Group heading="Selecione a oportunidade" className="command-group">
                             {deals.slice(0, 20).map(deal => (
                                 <Command.Item
                                     key={deal.id}
@@ -261,7 +261,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
 
                     {/* --- SUB-PAGE: PICK STAGE --- */}
                     {activePage === 'pick-stage' && (
-                        <Command.Group heading="Select Target Stage" className="command-group">
+                        <Command.Group heading="Selecione o estágio" className="command-group">
                             {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map(stage => (
                                 <Command.Item key={stage} onSelect={() => handleMoveDeal(stage)} className="command-item">
                                     <div className={`h-2 w-2 rounded-full mr-2 ${stage === 'won' ? 'bg-green-500' :
@@ -280,14 +280,14 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         {pages.length > 0 && (
                             <span className="flex items-center gap-1">
-                                <kbd className="command-kbd-small">Esc</kbd> Back
+                                <kbd className="command-kbd-small">Esc</kbd> Voltar
                             </span>
                         )}
                         <span className="flex items-center gap-1">
-                            <kbd className="command-kbd-small">↑↓</kbd> Navigate
+                            <kbd className="command-kbd-small">↑↓</kbd> Navegar
                         </span>
                         <span className="flex items-center gap-1">
-                            <kbd className="command-kbd-small">Enter</kbd> Select
+                            <kbd className="command-kbd-small">Enter</kbd> Selecionar
                         </span>
                     </div>
                 </div>

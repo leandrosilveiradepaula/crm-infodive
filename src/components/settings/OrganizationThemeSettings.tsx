@@ -35,8 +35,8 @@ export function OrganizationThemeSettings() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-1">
-                <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] ml-1">Tema Padrão da Organização</Label>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide ml-1 opacity-60">
+                <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em] ml-1">Tema Padrão da Organização</Label>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide ml-1 opacity-60">
                     Defina a experiência visual para novos membros da equipe.
                 </p>
             </div>
@@ -85,7 +85,7 @@ export function OrganizationThemeSettings() {
                 <Button 
                     onClick={handleSave} 
                     disabled={loading} 
-                    className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl transition-all"
+                    className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 font-black uppercase text-xs tracking-widest px-8 h-12 rounded-xl transition-all"
                 >
                     {loading ? <Loader2 className="mr-3 h-4 w-4 animate-spin" /> : <Palette className="mr-3 h-4 w-4" />}
                     Salvar Tema Padrão

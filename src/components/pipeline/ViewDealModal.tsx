@@ -43,6 +43,7 @@ import { RiskRadar } from './ai/RiskRadar';
 import { DealSuggestedActions } from './ai/DealSuggestedActions';
 import { AIEmailDrafter } from './ai/AIEmailDrafter';
 import { ContractBuilder } from '../contracts/ContractBuilder';
+import { createContract } from '@/app/(dashboard)/contracts/actions';
 import { LostDealModal } from './LostDealModal';
 import { WonDealWizard } from './WonDealWizard';
 import { TechnicalHandoverModal } from '../handover/TechnicalHandoverModal';
@@ -418,7 +419,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
                                 )}
                                 <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
+                                <span className="text-xs uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>
@@ -429,7 +430,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                                className="text-muted-foreground hover:text-foreground h-8 font-bold text-[10px] uppercase tracking-widest"
+                                className="text-muted-foreground hover:text-foreground h-8 font-bold text-xs uppercase tracking-widest"
                             >
                                 {isEditing ? <Save className="w-3.5 h-3.5 mr-2 text-emerald-500" /> : <Edit2 className="w-3.5 h-3.5 mr-2" />}
                                 {isEditing ? 'Salvar' : 'Editar'}
@@ -592,15 +593,15 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <div className="p-1.5 bg-blue-100 rounded-lg border border-blue-200">
                                         <Zap className="h-4 w-4 text-primary" />
                                     </div>
-                                    <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wide">Cockpit Financeiro</h4>
+                                    <h4 className="text-xs font-bold text-foreground uppercase tracking-wide">Cockpit Financeiro</h4>
                                 </div>
                                 {/* Stats Container */}
                                 <div className="space-y-3 relative z-10">
                                     {/* Value Display */}
                                     <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
-                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
+                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-[10px] font-bold text-primary">R$</span>
+                                            <span className="text-xs font-bold text-primary">R$</span>
                                             <span className="text-2xl font-black text-foreground tracking-tight">
                                                 {formatCurrency(calculateDealValue(deal.deal_products || [])).replace('R$', '').trim()}
                                             </span>
@@ -610,8 +611,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     {/* Probability Gauge */}
                                     <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
                                         <div className="flex justify-between items-center mb-3">
-                                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
-                                            <span className={`text-[10px] font-black uppercase ${formData.probability > 70 ? 'text-emerald-600' : 'text-primary'}`}>
+                                            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
+                                            <span className={`text-xs font-black uppercase ${formData.probability > 70 ? 'text-emerald-600' : 'text-primary'}`}>
                                                 {formData.probability}%
                                             </span>
                                         </div>
@@ -638,7 +639,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Data de Fechamento</p>
+                                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1">Data de Fechamento</p>
                                                 <p className="text-sm font-bold text-foreground">
                                                     {isEditing ? (
                                                         <input
@@ -663,13 +664,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 <section className="space-y-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <AlertCircle className="h-4 w-4 text-red-500 fill-red-50" />
-                                        <h4 className="text-[10px] font-black text-red-600 uppercase tracking-widest">Feedback de Perda</h4>
+                                        <h4 className="text-xs font-black text-red-600 uppercase tracking-widest">Feedback de Perda</h4>
                                     </div>
                                     <div className="bg-card/5 p-4 rounded-xl border border-white/5 transition-all hover:bg-card/10 hover:border-primary/20 group">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
+                                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
                                         <p className="text-sm font-bold text-red-500">{deal.loss_reason || 'Não informado'}</p>
                                         {deal.lost_at && (
-                                            <p className="text-[9px] text-red-500/50 font-medium mt-1">
+                                            <p className="text-xs text-red-500/50 font-medium mt-1">
                                                 Registrado em: {new Date(deal.lost_at).toLocaleDateString('pt-BR')}
                                             </p>
                                         )}
@@ -712,7 +713,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             <Globe className="h-4 w-4 text-primary" />
                                             Portal do Cliente
                                         </h3>
-                                        <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                        <p className="text-xs text-muted-foreground leading-relaxed">
                                             Compartilhe este link seguro para acompanhamento da proposta e status.
                                         </p>
                                     </div>
@@ -747,10 +748,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                             {/* Tags */}
                             <section>
-                                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Segmentação & Tags</h4>
+                                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-4">Segmentação & Tags</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {(deal.tags || ['Enterprise', 'High Priority']).map(tag => (
-                                        <span key={tag} className="px-2.5 py-1 rounded-full bg-blue-100 text-[9px] font-black text-blue-700 border border-blue-200 uppercase tracking-tighter">
+                                        <span key={tag} className="px-2.5 py-1 rounded-full bg-blue-100 text-xs font-black text-blue-700 border border-blue-200 uppercase tracking-tighter">
                                             {tag}
                                         </span>
                                     ))}
@@ -803,10 +804,25 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <ContractBuilder
                                 deal={deal}
                                 onClose={() => setShowContractBuilder(false)}
-                                onSave={(contract) => {
-                                    console.log('Saving contract', contract);
+                                onSave={async (contract, signature) => {
+                                    const result = await createContract({
+                                        ...contract,
+                                        company: contract.company || deal.company,
+                                        value: contract.value ?? deal.value,
+                                        dealId: contract.dealId || deal.id,
+                                        type: contract.type || 'service',
+                                        signature_image: signature || contract.signature_image
+                                    });
+
+                                    if (!result.success) {
+                                        toast.error(result.error || 'Não foi possível salvar o contrato.');
+                                        return;
+                                    }
+
                                     setShowContractBuilder(false);
-                                    toast.success('Contrato salvo (Mock)');
+                                    toast.success(contract.status === 'signed'
+                                        ? 'Contrato assinado e salvo com sucesso.'
+                                        : 'Rascunho do contrato salvo com sucesso.');
                                 }}
                             />
                         </div>

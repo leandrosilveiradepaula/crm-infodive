@@ -34,23 +34,23 @@ export function StatsCard({ title, value, icon: Icon, trend, subtitle, color = '
         <div className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${colorClasses[color]} p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
                         {title}
                     </p>
                     <p className="text-2xl font-black text-foreground">
                         {value}
                     </p>
                     {subtitle && (
-                        <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                        <p className="text-xs text-muted-foreground font-medium mt-0.5">
                             {subtitle}
                         </p>
                     )}
                     {trend && (
                         <div className="mt-2 flex items-center gap-1">
-                            <span className={`text-[10px] font-bold ${trend.isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+                            <span className={`text-xs font-bold ${trend.isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
                                 {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                             </span>
-                            <span className="text-[10px] text-muted-foreground">vs último mês</span>
+                            <span className="text-xs text-muted-foreground">vs último mês</span>
                         </div>
                     )}
                 </div>

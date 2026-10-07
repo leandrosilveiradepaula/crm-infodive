@@ -71,13 +71,13 @@ export const IntegrationWebhooks = () => {
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                                     <h4 className="font-bold text-foreground truncate max-w-full" title={hook.url}>{hook.url}</h4>
-                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${hook.status === 'active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-muted/50 text-muted-foreground border-border'}`}>
+                                    <span className={`text-xs uppercase font-bold px-2 py-0.5 rounded-full border ${hook.status === 'active' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-muted/50 text-muted-foreground border-border'}`}>
                                         {hook.status}
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {hook.events.map(event => (
-                                        <span key={event} className="text-[10px] font-bold bg-muted/50 text-muted-foreground px-2 py-0.5 rounded border border-border/50 uppercase tracking-wider">
+                                        <span key={event} className="text-xs font-bold bg-muted/50 text-muted-foreground px-2 py-0.5 rounded border border-border/50 uppercase tracking-wider">
                                             {event}
                                         </span>
                                     ))}
@@ -87,7 +87,7 @@ export const IntegrationWebhooks = () => {
 
                         <div className="flex items-center justify-between md:justify-end gap-8 border-t md:border-t-0 pt-4 md:pt-0">
                             <div className="text-left md:text-right">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Último disparo</p>
+                                <p className="text-xs font-bold text-muted-foreground uppercase mb-1">Último disparo</p>
                                 <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 md:justify-end">
                                     <Activity className={`h-3.5 w-3.5 ${hook.status === 'active' ? 'text-green-500' : 'text-muted-foreground'}`} />
                                     {formatDate(hook.last_triggered)}

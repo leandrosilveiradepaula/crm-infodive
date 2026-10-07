@@ -50,11 +50,11 @@ export const AuditLogTab = () => {
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 px-4 h-[38px] bg-muted/30 border border-border rounded-xl text-[10px] font-black text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-all uppercase tracking-[0.15em]">
+                <div className="flex items-center gap-3 px-4 h-[38px] bg-muted/30 border border-border rounded-xl text-xs font-black text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-all uppercase tracking-[0.15em]">
                     <Calendar className="h-4 w-4 text-primary" />
                     <span>Últimos 30 dias</span>
                 </div>
-                <div className="flex items-center gap-3 px-4 h-[38px] bg-muted/30 border border-border rounded-xl text-[10px] font-black text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-all uppercase tracking-[0.15em]">
+                <div className="flex items-center gap-3 px-4 h-[38px] bg-muted/30 border border-border rounded-xl text-xs font-black text-muted-foreground cursor-pointer hover:bg-muted hover:text-foreground transition-all uppercase tracking-[0.15em]">
                     <Filter className="h-4 w-4 text-primary" />
                     <span>Todas Categorias</span>
                 </div>
@@ -70,7 +70,7 @@ export const AuditLogTab = () => {
                             </div>
                             <h3 className="font-black text-foreground text-sm uppercase tracking-[0.2em]">Registro de Atividades</h3>
                         </div>
-                        <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">{filteredLogs.length} Entradas Encontradas</span>
+                        <span className="text-xs font-black text-muted-foreground/50 uppercase tracking-widest">{filteredLogs.length} Entradas Encontradas</span>
                     </div>
                 </div>
                 <div className="divide-y divide-border">
@@ -83,10 +83,10 @@ export const AuditLogTab = () => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start gap-4">
                                     <p className="text-sm font-black text-foreground tracking-tight group-hover:text-primary transition-colors leading-tight">{log.action}</p>
-                                    <span className="flex-shrink-0 text-[10px] text-muted-foreground font-black uppercase tracking-widest bg-muted/40 px-2.5 py-1 rounded-lg border border-border">{new Date(log.timestamp).toLocaleString('pt-BR')}</span>
+                                    <span className="flex-shrink-0 text-xs text-muted-foreground font-black uppercase tracking-widest bg-muted/40 px-2.5 py-1 rounded-lg border border-border">{new Date(log.timestamp).toLocaleString('pt-BR')}</span>
                                 </div>
                                 <p className="text-sm text-muted-foreground mt-2 font-medium leading-relaxed max-w-3xl">{log.details}</p>
-                                <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
+                                <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
                                     <span className="flex items-center gap-2 font-black text-foreground bg-muted/40 px-2.5 py-1 rounded-lg border border-border">
                                         <UserCircle className="h-4 w-4 text-primary" /> {log.user.toUpperCase()}
                                     </span>

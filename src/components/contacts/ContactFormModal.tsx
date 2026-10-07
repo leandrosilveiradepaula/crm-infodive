@@ -141,7 +141,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                             </div>
                             {contact ? 'Editar Contato' : 'Novo Contato'}
                         </DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2">
+                        <DialogDescription className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em] mt-2">
                             Gerencie as informações do seu contato
                         </DialogDescription>
                     </div>
@@ -270,7 +270,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                         <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-xs tracking-widest flex items-center gap-2">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (

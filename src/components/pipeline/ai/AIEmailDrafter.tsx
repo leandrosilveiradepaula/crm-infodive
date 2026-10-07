@@ -45,7 +45,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                         </div>
                         <div>
                             <h2 className="text-2xl font-black text-white uppercase tracking-tighter">AI Email Drafter</h2>
-                            <p className="text-[10px] font-black text-white/60 uppercase tracking-widest mt-1">Inteligência Artificial Generativa</p>
+                            <p className="text-xs font-black text-white/60 uppercase tracking-widest mt-1">Inteligência Artificial Generativa</p>
                         </div>
                     </div>
                     <button
@@ -87,7 +87,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                                 <Loader2 className="h-16 w-16 text-primary animate-spin relative z-10" />
                             </div>
                             <p className="text-lg font-black text-foreground uppercase tracking-widest mb-2">Compondo Mensagem...</p>
-                            <p className="text-[11px] text-muted-foreground uppercase font-black tracking-widest">Otimizando gatilhos mentais e tom de voz</p>
+                            <p className="text-xs text-muted-foreground uppercase font-black tracking-widest">Otimizando gatilhos mentais e tom de voz</p>
                         </div>
                     )}
 
@@ -106,11 +106,11 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-1 h-4 bg-primary rounded-full"></div>
-                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Conteúdo Sugerido</label>
+                                    <label className="text-xs font-black text-muted-foreground uppercase tracking-widest">Conteúdo Sugerido</label>
                                 </div>
                                 <button
                                     onClick={handleCopy}
-                                    className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-xl transition-all border border-primary/20"
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/10 rounded-xl transition-all border border-primary/20"
                                 >
                                     {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                                     {copied ? 'Copiado!' : 'Copiar Texto'}
@@ -129,7 +129,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                                 <div className="p-1.5 bg-primary/10 rounded-lg">
                                     <Sparkles className="h-4 w-4 text-primary" />
                                 </div>
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">
                                     Dica: Refine o texto para alinhar com sua proximidade ao stakeholder.
                                 </p>
                             </div>
@@ -142,20 +142,20 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                     <div className="p-8 border-t border-border bg-card flex items-center justify-between gap-6">
                         <button
                             onClick={handleGenerate}
-                            className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-2xl transition-all border border-border"
+                            className="px-8 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-2xl transition-all border border-border"
                         >
                             Refazer com IA
                         </button>
                         <div className="flex gap-4">
                             <button
                                 onClick={onClose}
-                                className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all underline underline-offset-8 decoration-border"
+                                className="px-8 py-4 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all underline underline-offset-8 decoration-border"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleCopy}
-                                className="px-10 py-4 bg-primary text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-[0_15px_30px_rgba(0,102,255,0.3)] hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
+                                className="px-10 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-[0_15px_30px_rgba(0,102,255,0.3)] hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
                             >
                                 <Copy className="h-4 w-4" /> Copiar para o Clipboard
                             </button>

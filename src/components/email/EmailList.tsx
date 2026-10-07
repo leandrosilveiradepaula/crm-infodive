@@ -74,7 +74,7 @@ export function EmailList({ emails, selectedEmailId, onSelectEmail }: EmailListP
                                 )}>
                                     {email.sender.name}
                                 </span>
-                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
                                     {formatDistanceToNow(email.date, { addSuffix: true, locale: ptBR })}
                                 </span>
                             </div>
@@ -95,7 +95,7 @@ export function EmailList({ emails, selectedEmailId, onSelectEmail }: EmailListP
 
                             <div className="flex items-center gap-2 mt-1">
                                 {email.labels.map(label => (
-                                    <Badge key={label} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
+                                    <Badge key={label} variant="secondary" className="text-xs h-5 px-1.5 font-normal">
                                         {label}
                                     </Badge>
                                 ))}

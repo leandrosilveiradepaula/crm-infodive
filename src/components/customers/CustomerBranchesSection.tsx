@@ -17,7 +17,7 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
         <div className="space-y-4 pt-6 border-t border-border">
             <div className="flex justify-between items-center h-6 mb-2">
                 <ThemeSectionHeader title="Filiais" iconColor="bg-amber-500" />
-                <Button type="button" size="sm" variant="ghost" onClick={onAddBranch} className="h-6 text-[10px] font-bold uppercase tracking-wide text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 px-2 rounded-lg">
+                <Button type="button" size="sm" variant="ghost" onClick={onAddBranch} className="h-6 text-xs font-bold uppercase tracking-wide text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 px-2 rounded-lg">
                     <Plus className="h-3 w-3 mr-1" /> Adicionar Filial
                 </Button>
             </div>
@@ -39,7 +39,7 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => onOpenParser(branch.id)}
-                                        className="h-6 gap-1 text-[10px] text-blue-500 hover:text-primary hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2"
+                                        className="h-6 gap-1 text-xs text-blue-500 hover:text-primary hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2"
                                     >
                                         <Sparkles className="h-3 w-3" />
                                         Preencher (IA)
