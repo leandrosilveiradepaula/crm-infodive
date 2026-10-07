@@ -113,7 +113,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
+                            <tr className="text-xs font-black text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
                                 <th className="px-5 py-3">Oportunidade</th>
                                 <th className="px-5 py-3">Vendedor</th>
                                 <th className="px-5 py-3">Data Fechamento</th>
@@ -151,17 +151,17 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                     <tr key={deal.id} className="hover:bg-muted/30 transition-colors group">
                                         <td className="px-5 py-3">
                                             <p className="font-black text-foreground text-sm tracking-tight">{deal.title}</p>
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
+                                            <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-md">
+                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-xs font-black shadow-md">
                                                     {(dealOwner as any)?.avatar || (dealOwner as any)?.name?.charAt(0) || '?'}
                                                 </div>
                                                 <span className="text-sm font-bold text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-5 py-3 text-[11px] font-bold text-muted-foreground">
+                                        <td className="px-5 py-3 text-xs font-bold text-muted-foreground">
                                             {deal.won_at ? new Date(deal.won_at).toLocaleDateString() : '-'}
                                         </td>
                                         <td className="px-5 py-3 text-right font-bold text-muted-foreground text-sm tabular-nums tracking-tighter">
@@ -173,7 +173,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                             </span>
                                         </td>
                                         <td className="px-5 py-3 text-center">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${commissionStatus === 'paid'
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border shadow-sm ${commissionStatus === 'paid'
                                                 ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                                                 : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
                                                 }`}>
