@@ -52,4 +52,14 @@ describe('dashboard error and loading states', () => {
     expect(source).toContain('"jsx-a11y/no-static-element-interactions": "error"');
   });
 
+
+  it('exposes dashboard toggle state and labels icon-only configuration controls', () => {
+    const source = readFileSync('src/app/(dashboard)/dashboard/client-page.tsx', 'utf8');
+    expect(source).toContain('aria-pressed={selectedQuarters.length === 0}');
+    expect(source).toContain('aria-pressed={isSelected}');
+    expect(source).toContain('aria-label="Configurar layout do dashboard"');
+    expect(source).toContain('aria-expanded={showConfig}');
+    expect(source).toContain('aria-label="Fechar configuração do dashboard"');
+  });
+
 });
