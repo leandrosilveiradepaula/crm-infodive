@@ -83,9 +83,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         <Badge variant="outline" className="text-[8px] uppercase font-black text-blue-500 border-blue-500/20 px-1.5 py-0">Forecast</Badge>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
                         <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
-                        <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Calendar className="h-3 w-3" />
                             {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString('pt-BR') : 'Não definido'}
                         </p>
@@ -99,14 +99,14 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                             <Zap className="h-3.5 w-3.5 text-emerald-500" />
                         </div>
                         <div className="flex items-center gap-1">
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
+                            <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
                             {getTrendIcon(deal.health_trend)}
                         </div>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
                         <Progress value={deal.health_score || 0} className="h-1 bg-muted" />
-                        <p className="text-[9px] text-muted-foreground mt-1">Baseado em atividade</p>
+                        <p className="text-xs text-muted-foreground mt-1">Baseado em atividade</p>
                     </div>
                 </div>
 
@@ -118,9 +118,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         </div>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
                         <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
                     </div>
                 </div>
 
@@ -135,9 +135,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         </Badge>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
                         <h4 className="text-[13px] font-bold text-foreground truncate leading-tight">{deal.contact_name || 'Não definido'}</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
                     </div>
                 </div>
             </div>
@@ -153,7 +153,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         <div>
                             <div className="flex items-center gap-1.5 mb-1">
                                 <Sparkles className="h-3 w-3 text-blue-500" />
-                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
+                                <span className="text-xs font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
                             </div>
                             <h3 className="text-base font-black text-foreground mb-0.5">{nextAction.title}</h3>
                             <p className="text-xs text-muted-foreground leading-relaxed">{nextAction.description}</p>
@@ -179,7 +179,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                             <ActivityIcon className="h-4 w-4 text-blue-500" />
                             Timeline de Atividade
                         </h3>
-                        <Button variant="ghost" size="sm" className="text-[10px] font-bold uppercase text-muted-foreground hover:text-blue-500">
+                        <Button variant="ghost" size="sm" className="text-xs font-bold uppercase text-muted-foreground hover:text-blue-500">
                             Ver Histórico Completo
                         </Button>
                     </div>
@@ -200,7 +200,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                 <div className="bg-card border border-border p-3.5 rounded-xl hover:border-blue-500/20 transition-all shadow-sm">
                                     <div className="flex justify-between items-start mb-1">
                                         <h4 className="text-sm font-bold text-foreground">{item.title}</h4>
-                                        <span className="text-[10px] text-muted-foreground font-medium uppercase">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase">
                                             {formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}
                                         </span>
                                     </div>
@@ -208,7 +208,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                         <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
                                             <User className="h-2.5 w-2.5 text-muted-foreground" />
                                         </div>
-                                        <span className="text-[10px] text-muted-foreground font-bold">{item.user}</span>
+                                        <span className="text-xs text-muted-foreground font-bold">{item.user}</span>
                                     </div>
                                 </div>
                             </div>
@@ -236,14 +236,14 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                         ))}
                                     </div>
                                     <div className="pt-3 border-t border-border flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Itens</span>
+                                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Total Itens</span>
                                         <span className="text-sm font-black text-primary">{(deal.deal_products || []).length}</span>
                                     </div>
                                 </>
                             ) : (
                                 <p className="text-xs text-muted-foreground italic text-center py-4">Nenhum produto adicionado</p>
                             )}
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewProducts}>
+                            <Button variant="outline" size="sm" className="w-full text-xs font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewProducts}>
                                 Gerenciar Mix
                             </Button>
                         </div>
@@ -262,8 +262,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                         <User className="h-4 w-4 text-blue-500" />
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-bold text-foreground leading-tight">{deal.contact_name || 'Decisor não definido'}</p>
-                                        <p className="text-[9px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Tomador de Decisão</p>
+                                        <p className="text-xs font-bold text-foreground leading-tight">{deal.contact_name || 'Decisor não definido'}</p>
+                                        <p className="text-xs text-blue-500 font-black uppercase tracking-widest mt-0.5">Tomador de Decisão</p>
                                     </div>
                                 </div>
                                 {deal.custom_fields?.technical_influencer && (
@@ -272,13 +272,13 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                             <User className="h-4 w-4 text-teal-500" />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
-                                            <p className="text-[9px] text-teal-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
+                                            <p className="text-xs font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
+                                            <p className="text-xs text-teal-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
                                         </div>
                                     </div>
                                 )}
                             </div>
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewStakeholders}>
+                            <Button variant="outline" size="sm" className="w-full text-xs font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewStakeholders}>
                                 Ver Todos
                             </Button>
                         </div>
