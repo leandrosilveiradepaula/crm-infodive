@@ -256,7 +256,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                                     {step.label}
                                                 </h4>
                                                 {isCurrent && (
-                                                    <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                                    <span className="text-xs uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                                         Atual
                                                     </span>
                                                 )}
