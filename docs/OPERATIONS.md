@@ -35,6 +35,19 @@ O workflow de CRM executa TypeScript, bloqueio de novos erros ESLint nas linhas 
 
 O baseline atual de dependências representa dívida herdada e **não** significa que as vulnerabilidades existentes estão aceitas como estado final. Novos aumentos são bloqueados; a dívida deve ser reduzida progressivamente.
 
+## Eventos operacionais estruturados
+
+O CRM emite eventos JSON com `event=crm_operational_event` para sinais que já passam pelos logs da plataforma, sem ativar serviço pago adicional.
+
+Campos permitidos são deliberadamente restritos: área, operação, resultado, request id, duração, status HTTP, contagem e dados de quota não identificáveis. Texto livre inesperado é neutralizado; tokens, e-mails, cookies e payloads de cliente não fazem parte do contrato.
+
+Cobertura atual:
+- health/readiness: resultado, duração e `Server-Timing`;
+- guard de IA: chamadas permitidas versus bloqueadas por scope, sem usuário/tenant;
+- sync de e-mail: resultado do Graph, agendamento/conclusão da extração e contagens agregadas, sem endereço ou corpo de e-mail.
+
+Esses eventos tornam os logs atuais pesquisáveis e mensuráveis, mas **não** equivalem a agregação central, tracing distribuído ou alertas externos.
+
 ## Alertas e observabilidade ainda pendentes
 
 Este baseline não fecha a issue operacional. Permanecem necessários:
