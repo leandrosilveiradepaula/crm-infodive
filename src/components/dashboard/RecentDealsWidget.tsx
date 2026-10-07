@@ -17,7 +17,7 @@ export const RecentDealsWidget = ({ deals }: RecentDealsWidgetProps) => {
                 <h2 className="text-base font-bold text-foreground">Oportunidades Recentes</h2>
                 <button
                     onClick={() => router.push('/pipeline')}
-                    className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary/80"
+                    className="text-xs font-black uppercase tracking-widest text-primary hover:text-primary/80"
                 >
                     Ver Todas
                 </button>
@@ -38,12 +38,12 @@ export const RecentDealsWidget = ({ deals }: RecentDealsWidgetProps) => {
                         >
                             <div className="flex justify-between items-start">
                                 <div className="flex items-start">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black ${i % 2 === 0 ? 'bg-primary/20 text-primary' : 'bg-info/20 text-info'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${i % 2 === 0 ? 'bg-primary/20 text-primary' : 'bg-info/20 text-info'}`}>
                                         {deal.company?.charAt(0) || '?'}
                                     </div>
                                     <div className="ml-2.5">
                                         <p className="font-bold text-foreground text-[13px] tracking-tight leading-none mb-1 group-hover:text-primary transition-colors">{deal.company}</p>
-                                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest opacity-60 leading-none">{deal.title}</p>
+                                        <p className="text-xs text-muted-foreground font-black uppercase tracking-widest opacity-60 leading-none">{deal.title}</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
@@ -60,7 +60,7 @@ export const RecentDealsWidget = ({ deals }: RecentDealsWidgetProps) => {
 
             <button
                 onClick={() => router.push('/pipeline')}
-                className="w-full mt-4 py-2 rounded-xl border border-dashed border-border text-muted-foreground font-black text-[10px] uppercase tracking-widest hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center gap-2 group shrink-0"
+                className="w-full mt-4 py-2 rounded-xl border border-dashed border-border text-muted-foreground font-black text-xs uppercase tracking-widest hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center gap-2 group shrink-0"
             >
                 <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 Ver Pipeline Completo
