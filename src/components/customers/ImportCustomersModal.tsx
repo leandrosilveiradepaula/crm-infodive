@@ -176,11 +176,11 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                 <div className="flex items-center gap-2">
                                     <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                                     <h3 className="text-sm font-bold">Mapeamento Concluído</h3>
-                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 text-[10px] font-black rounded-full uppercase">
+                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 text-xs font-black rounded-full uppercase">
                                         {parsedData.length} Registros Detectados
                                     </span>
                                 </div>
-                                <Button variant="ghost" size="sm" onClick={() => setParsedData([])} className="h-8 text-[10px] font-black uppercase">
+                                <Button variant="ghost" size="sm" onClick={() => setParsedData([])} className="h-8 text-xs font-black uppercase">
                                     <X className="h-3 w-3 mr-1" /> Trocar Arquivo
                                 </Button>
                             </div>
@@ -189,9 +189,9 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                 <table className="w-full text-xs">
                                     <thead className="bg-muted/50 sticky top-0 z-10">
                                         <tr className="border-b border-border">
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Empresa / CNPJ</th>
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Localização</th>
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Contatos Primários</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-xs text-muted-foreground">Empresa / CNPJ</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-xs text-muted-foreground">Localização</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-xs text-muted-foreground">Contatos Primários</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/50">
@@ -199,17 +199,17 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                             <tr key={idx} className="hover:bg-muted/20 transition-colors">
                                                 <td className="p-3">
                                                     <p className="font-bold text-foreground">{item.name}</p>
-                                                    <p className="text-[10px] text-muted-foreground font-mono">{item.cnpj}</p>
+                                                    <p className="text-xs text-muted-foreground font-mono">{item.cnpj}</p>
                                                 </td>
                                                 <td className="p-3">
                                                     <p className="text-muted-foreground">{item.city} - {item.state}</p>
-                                                    <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">{item.street}, {item.number}</p>
+                                                    <p className="text-xs text-muted-foreground truncate max-w-[200px]">{item.street}, {item.number}</p>
                                                 </td>
                                                 <td className="p-3">
                                                     {item.contacts?.map((c: any, cIdx: number) => (
                                                         <div key={cIdx} className="mb-1 last:mb-0">
                                                             <p className="font-medium text-foreground">{c.name}</p>
-                                                            <p className="text-[9px] text-muted-foreground">{c.email || c.mobile_phone}</p>
+                                                            <p className="text-xs text-muted-foreground">{c.email || c.mobile_phone}</p>
                                                         </div>
                                                     ))}
                                                     {!item.contacts?.length && <span className="text-muted-foreground italic opacity-50">Nenhum</span>}
