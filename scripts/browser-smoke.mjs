@@ -10,11 +10,14 @@ function record(name, ok, detail = '') {
   if (!ok) failures.push({ name, detail });
 }
 
-async function noHorizontalOverflow(page, name) {
+async function noHorizontalOverflow(page, name, expectedWidth = null) {
   const result = await page.evaluate(() => ({
     innerWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
   }));
+  if (expectedWidth !== null) {
+    record(name + '_uses_device_width', Math.abs(result.innerWidth - expectedWidth) <= 2, JSON.stringify(result));
+  }
   const ok = result.scrollWidth <= result.innerWidth + 1;
   record(name, ok, JSON.stringify(result));
 }
@@ -74,12 +77,12 @@ try {
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
   record('login_mobile_renders', await mobilePage.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false));
-  await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow');
+  await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow', 390);
 
   await mobilePage.goto(baseUrl + '/login?invite_token=smoke-test', { waitUntil: 'networkidle' });
   record('invite_registration_state_renders', await mobilePage.getByText('Criar nova conta', { exact: true }).isVisible().catch(() => false));
   record('invite_registration_name_field_visible', await mobilePage.locator('input[name="name"]').isVisible().catch(() => false));
-  await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow');
+  await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow', 390);
 
   await mobile.close();
 } finally {
