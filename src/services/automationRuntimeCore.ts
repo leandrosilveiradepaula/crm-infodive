@@ -1,4 +1,4 @@
-import type { Action, Automation, Condition, TriggerType } from '@/types/automation';
+import type { Action, Automation, Condition, TriggerType } from '../types/automation';
 
 export type AutomationRuntimeEvent = {
     type: 'deal_created' | 'deal_moved';
