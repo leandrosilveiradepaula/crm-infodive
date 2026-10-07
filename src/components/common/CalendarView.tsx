@@ -102,7 +102,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
             {/* Dias da semana */}
             <div className="grid grid-cols-7 gap-2 mb-4 border-b border-border pb-4">
                 {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                    <div key={day} className="text-center text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div key={day} className="text-center text-xs font-black text-muted-foreground uppercase tracking-widest">
                         {day}
                     </div>
                 ))}
@@ -150,7 +150,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                             }
                                         }}
                                         className={`
-                                            text-[10px] px-1.5 py-1 rounded-md truncate font-medium cursor-pointer border
+                                            text-xs px-1.5 py-1 rounded-md truncate font-medium cursor-pointer border
                                             ${activity.type === 'meeting' ? 'bg-teal-500/10 text-teal-500 border-teal-500/20 hover:bg-teal-500/20' : ''}
                                             ${activity.type === 'call' ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20' : ''}
                                             ${activity.type === 'task' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20' : ''}
@@ -164,7 +164,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                     </div>
                                 ))}
                                 {dayActivities.length > 3 && (
-                                    <div className="text-[10px] text-muted-foreground font-medium px-1.5">
+                                    <div className="text-xs text-muted-foreground font-medium px-1.5">
                                         +{dayActivities.length - 3} mais
                                     </div>
                                 )}
