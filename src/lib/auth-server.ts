@@ -1,6 +1,8 @@
 import { headers } from 'next/headers';
 import { getSession } from './session';
 import { createAdminClient } from './supabase/admin';
+import { hasPermission } from './permissions';
+import type { Permission } from '@/types/auth';
 
 /**
  * Reads the X-User-Id header injected by middleware.
@@ -61,4 +63,26 @@ export async function requireSessionContext(): Promise<{ userId: string; organiz
     }
 
     return { userId: session.userId, organizationId };
+}
+
+
+export async function requirePermission(permission: Permission): Promise<{ userId: string; organizationId: string }> {
+    const { userId, organizationId } = await requireSessionContext();
+    const adminClient = createAdminClient();
+    const { data: profile, error } = await adminClient
+        .from('profiles')
+        .select('role, roles, status, organization_id')
+        .eq('id', userId)
+        .eq('organization_id', organizationId)
+        .single();
+
+    if (error || !profile || profile.status === 'inactive') {
+        throw new Error('Forbidden: active profile required');
+    }
+
+    if (!hasPermission(profile.role, profile.roles, permission)) {
+        throw new Error(`Forbidden: missing permission ${permission}`);
+    }
+
+    return { userId, organizationId };
 }
