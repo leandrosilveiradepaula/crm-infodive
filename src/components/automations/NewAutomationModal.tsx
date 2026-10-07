@@ -37,8 +37,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         },
         actions: initialData?.actions || [
             {
-                type: 'send_notification',
-                config: { title: 'Nova Automação Ativada', description: 'Um fluxo foi iniciado.' }
+                type: 'create_task',
+                config: { title: 'Nova tarefa' }
             }
         ]
     });
@@ -62,7 +62,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     const handleNext = () => setStep(s => s + 1);
     const handleBack = () => setStep(s => s - 1);
     const addAction = () => {
-        const newAction: Action = { type: 'send_notification', config: {} };
+        const newAction: Action = { type: 'create_task', config: { title: 'Nova tarefa' } };
         setFormData(prev => ({
             ...prev,
             actions: [...(prev.actions || []), newAction]
@@ -79,9 +79,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 successCount: initialData?.successCount || 0,
                 failureCount: initialData?.failureCount || 0
             });
-            onClose();
-        } catch (error) {
-            console.error(error);
+        } catch {
+            // Parent surface already presents the persistence error to the user.
         } finally {
             setLoading(false);
         }
@@ -314,8 +313,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
                     <button
                         onClick={step === 3 ? handleSubmit : handleNext}
-                        disabled={step === 1 && !formData.name}
-                        className={`px-10 py-3.5 rounded-2xl font-bold flex items-center gap-2 shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] ${step === 1 && !formData.name
+                        disabled={(step === 1 && !formData.name) || (step === 3 && !(formData.actions?.length))}
+                        className={`px-10 py-3.5 rounded-2xl font-bold flex items-center gap-2 shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] ${(step === 1 && !formData.name) || (step === 3 && !(formData.actions?.length))
                             ? 'bg-muted text-muted-foreground cursor-not-allowed shadow-none'
                             : 'bg-primary text-primary-foreground shadow-primary/40'
                             }`}
