@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: Request) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
         const body = await request.json();
         const {
