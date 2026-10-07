@@ -263,11 +263,11 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="bg-muted/50 text-muted-foreground text-left">
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Pedido / Deal</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Responsável NF</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Valor</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Status Atual</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Próxima Etapa</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-xs">Pedido / Deal</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-xs">Responsável NF</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-xs">Valor</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-xs">Status Atual</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-xs">Próxima Etapa</th>
                             <th className="px-5 py-3"></th>
                         </tr>
                     </thead>
@@ -305,7 +305,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     )}
                                                     {order.deal?.title || 'Pedido S/ N'}
                                                 </span>
-                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
+                                                <span className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
                                                     <User className="w-3 h-3" />
                                                     {order.deal?.customer?.name || 'Cliente final'}
                                                 </span>
@@ -315,7 +315,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             <Badge 
                                                 variant="outline" 
                                                 onClick={(e) => e.stopPropagation()}
-                                                className={`text-[9px] uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
+                                                className={`text-xs uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
                                             >
                                                 {order.billing_entity === 'infodive' ? 'Infodive' : 'Distribuidor'}
                                             </Badge>
@@ -324,7 +324,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             {formatCurrency(order.total_value)}
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white/5 shadow-sm ${config.color}`}>
+                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-black uppercase border border-white/5 shadow-sm ${config.color}`}>
                                                 <config.icon className="w-3 h-3" />
                                                 {config.label}
                                             </div>
@@ -343,13 +343,13 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             onStatusUpdate(order.id, nextStatus);
                                                         }
                                                     }}
-                                                    className="text-[9px] h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-black tracking-widest gap-1.5 rounded-xl border border-primary/10"
+                                                    className="text-xs h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-black tracking-widest gap-1.5 rounded-xl border border-primary/10"
                                                 >
                                                     Mudar para {STATUS_CONFIG[nextStatus].label}
                                                     <ChevronRight className="w-3 h-3" />
                                                 </Button>
                                             ) : (
-                                                <span className="text-[9px] text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
+                                                <span className="text-xs text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
                                             )}
                                         </td>
                                         <td className="px-5 py-3 text-right">
@@ -367,14 +367,14 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-2xl border-white/10 shadow-2xl">
-                                                        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">Ações do Pedido</div>
+                                                        <div className="px-3 py-2 text-xs font-black uppercase tracking-widest text-muted-foreground/50">Ações do Pedido</div>
                                                         <DropdownMenuItem className="gap-2 cursor-pointer text-xs font-bold p-3 rounded-xl" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
                                                             <FileText className="w-4 h-4" /> Ver Parcelas/Detalhes
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator className="bg-white/5 my-1" />
-                                                        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 text-warning">Forçar Status</div>
+                                                        <div className="px-3 py-2 text-xs font-black uppercase tracking-widest text-muted-foreground/50 text-warning">Forçar Status</div>
                                                         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                                                            <DropdownMenuItem key={key} onClick={() => onStatusUpdate(order.id, key as SalesOrder['status'])} className="gap-2 cursor-pointer text-[10px] uppercase font-bold hover:bg-primary/5 hover:text-primary p-3 rounded-xl">
+                                                            <DropdownMenuItem key={key} onClick={() => onStatusUpdate(order.id, key as SalesOrder['status'])} className="gap-2 cursor-pointer text-xs uppercase font-bold hover:bg-primary/5 hover:text-primary p-3 rounded-xl">
                                                                 <cfg.icon className="w-3 h-3" />
                                                                 {cfg.label}
                                                             </DropdownMenuItem>
@@ -401,7 +401,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             {order.installments.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).map((inst, index) => (
                                                                 <div key={inst.id} className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-colors ${inst.status === 'paid' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-background border-border hover:border-primary/30'}`}>
                                                                     <div className="flex justify-between items-start">
-                                                                        <Badge variant="outline" className={`text-[9px] font-bold ${inst.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-none' : 'bg-muted text-muted-foreground'}`}>
+                                                                        <Badge variant="outline" className={`text-xs font-bold ${inst.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-none' : 'bg-muted text-muted-foreground'}`}>
                                                                             PARCELA {index + 1}
                                                                         </Badge>
                                                                         <span className={`text-xs font-mono font-bold ${inst.status === 'paid' ? 'text-emerald-600' : 'text-primary'}`}>
@@ -414,7 +414,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                                     <Button
                                                                         variant={inst.status === 'paid' ? "outline" : "default"}
                                                                         size="sm"
-                                                                        className={`w-full text-[10px] h-8 uppercase font-bold tracking-widest ${inst.status === 'paid' ? 'text-muted-foreground border-dashed hover:text-orange-500' : 'bg-primary hover:bg-primary/90 shadow'} transition-all`}
+                                                                        className={`w-full text-xs h-8 uppercase font-bold tracking-widest ${inst.status === 'paid' ? 'text-muted-foreground border-dashed hover:text-orange-500' : 'bg-primary hover:bg-primary/90 shadow'} transition-all`}
                                                                         onClick={async () => {
                                                                             const newStatus = inst.status === 'paid' ? 'pending' : 'paid';
                                                                             const success = await onInstallmentUpdate(inst.id, newStatus);
@@ -500,7 +500,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                     <Check className="w-5 h-5" />
                                 </div>
                                 <p className="text-sm font-bold text-emerald-600">{invoiceFile.name}</p>
-                                <button onClick={() => { setInvoiceFile(null); setCapturedData(null); }} className="text-[10px] uppercase font-bold text-muted-foreground hover:text-rose-500 mt-2">
+                                <button onClick={() => { setInvoiceFile(null); setCapturedData(null); }} className="text-xs uppercase font-bold text-muted-foreground hover:text-rose-500 mt-2">
                                     Trocar Arquivo
                                 </button>
                             </div>
@@ -508,7 +508,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                             <>
                                 <Upload className="w-10 h-10 text-muted-foreground mb-2" />
                                 <p className="text-sm font-medium">Selecione ou arraste o arquivo da NF</p>
-                                <p className="text-[10px] text-muted-foreground mt-1 uppercase font-bold tracking-widest">Suporta XML e PDF</p>
+                                <p className="text-xs text-muted-foreground mt-1 uppercase font-bold tracking-widest">Suporta XML e PDF</p>
                             </>
                         )}
                         <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".xml,.pdf" onChange={handleFileChange} />
@@ -518,33 +518,33 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                         <div className="mt-6 border-t pt-6">
                             <div className="rounded-xl border border-primary/20 bg-card p-5 space-y-4 shadow-sm ring-1 ring-primary/5">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
                                         <Sparkles className="w-3 h-3" />
                                         Review de Dados Capturados
                                     </div>
-                                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-none text-[9px]">VALIDADO</Badge>
+                                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-none text-xs">VALIDADO</Badge>
                                 </div>
                                 <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                                     <div className="space-y-1">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight">Número da NF</p>
+                                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Número da NF</p>
                                         <p className="text-sm font-semibold text-foreground">{capturedData.number}</p>
                                     </div>
                                     <div className="space-y-1 text-right">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight">Data Emissão</p>
+                                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Data Emissão</p>
                                         <p className="text-sm font-semibold text-foreground">{capturedData.date}</p>
                                     </div>
                                     <div className="col-span-2 py-2 border-y border-border/50">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight mb-1 font-mono">Emitente / Fornecedor</p>
+                                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight mb-1 font-mono">Emitente / Fornecedor</p>
                                         <p className="text-sm font-medium text-foreground truncate">{capturedData.issuer}</p>
                                     </div>
                                     <div className="col-span-2 bg-muted/30 p-3 rounded-lg flex justify-between items-center">
-                                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Valor Total da NF</p>
+                                        <p className="text-xs text-muted-foreground uppercase font-bold">Valor Total da NF</p>
                                         <p className="text-lg font-black text-primary">{formatCurrency(capturedData.total)}</p>
                                     </div>
 
                                     {capturedData.boletos && capturedData.boletos.length > 0 && (
                                         <div className="col-span-2 mt-2 border-t pt-4">
-                                            <p className="text-[10px] text-primary uppercase font-bold tracking-widest mb-3 flex items-center gap-2">
+                                            <p className="text-xs text-primary uppercase font-bold tracking-widest mb-3 flex items-center gap-2">
                                                 <FileText className="w-3 h-3" />
                                                 Boletos / Parcelas ({capturedData.boletos.length})
                                             </p>
@@ -553,7 +553,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     <div key={idx} className="bg-background border border-primary/10 rounded-lg p-3 flex flex-col items-center justify-center text-center shadow-sm hover:border-primary/30 transition-colors">
                                                         <Badge variant="outline" className="mb-2 text-[8px] tracking-widest bg-primary/5 text-primary border-primary/20">PARCELA {idx + 1}</Badge>
                                                         <span className="text-sm font-black text-foreground">{formatCurrency(boleto.amount)}</span>
-                                                        <span className="text-[10px] text-muted-foreground font-bold font-mono mt-1">Venc: <span className="text-primary">{boleto.dueDate}</span></span>
+                                                        <span className="text-xs text-muted-foreground font-bold font-mono mt-1">Venc: <span className="text-primary">{boleto.dueDate}</span></span>
                                                     </div>
                                                 ))}
                                             </div>
