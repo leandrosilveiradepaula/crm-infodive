@@ -6,6 +6,7 @@ on:
       - factory/fix-present-in-usd-safe-rate
       - 'security/**'
       - 'ops/**'
+      - 'product/**'
   pull_request:
     branches:
       - main
