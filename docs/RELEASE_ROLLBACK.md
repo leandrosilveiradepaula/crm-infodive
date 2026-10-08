@@ -40,3 +40,19 @@ Se houver falha crítica:
 - [ ] registrar resultado e causa raiz
 
 Este checklist é evidência de processo; não substitui evidência de execução real.
+
+
+## Automation runtime candidate
+The candidate adds the versioned migration `20261007233000_automation_runtime_executions.sql` and code that depends on `automation_executions`.
+
+Important:
+- the CRM Supabase project is not accessible through the current connector, so the migration has not been applied or dynamically validated against the real schema;
+- deployment of this candidate must remain fail-closed until the real CRM database schema confirms compatible identifier types and the migration is applied in a reviewed environment;
+- code and migration may be merged into the non-production release candidate branch before database application, but production release must not enable the runtime without the schema evidence.
+
+Rollback order if the runtime is activated later:
+1. disable all configurable automations;
+2. revert the application release to the previous verified SHA;
+3. preserve `automation_executions` for audit/evidence; do not drop it during emergency rollback;
+4. inspect failed/running rows before any schema cleanup;
+5. schema removal, if ever desired, is a separate destructive change and requires an explicit human gate.
