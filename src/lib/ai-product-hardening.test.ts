@@ -24,4 +24,27 @@ describe('AI product hardening', () => {
       expect(source).toContain('GEMINI_API_KEY');
     }
   });
+
+  it('requires durable quota coverage for every paid AI route', () => {
+    const audit = readFileSync('scripts/audit-ai-endpoints.mjs', 'utf8');
+    expect(audit).toContain("rule: 'durable-quota'");
+    expect(audit).toContain('consumeDurableAiQuota|guardPaidAiRequest');
+
+    for (const path of [
+      'src/app/api/gemini/chat/route.ts',
+      'src/app/api/gemini/analyze-deal/route.ts',
+      'src/app/api/gemini/enrich/route.ts',
+      'src/app/api/gemini/extract/route.ts',
+      'src/app/api/gemini/follow-up/route.ts',
+      'src/app/api/gemini/parse-company/route.ts',
+      'src/app/api/gemini/parse-signature/route.ts',
+      'src/app/api/gemini/proposal/route.ts',
+      'src/app/api/gemini/specs/route.ts',
+    ]) {
+      expect(readFileSync(path, 'utf8')).toContain('guardPaidAiRequest');
+    }
+
+    expect(readFileSync('src/app/api/email/sync/route.ts', 'utf8')).toContain('consumeDurableAiQuota');
+  });
+
 });
