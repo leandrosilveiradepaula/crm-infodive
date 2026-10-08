@@ -63,10 +63,17 @@ function automation(): Automation {
         name: 'Criar acompanhamento',
         description: 'Criar tarefa',
         enabled: true,
+        category: 'followup',
+        createdBy: 'user-a',
+        createdAt: '2026-10-08T00:00:00.000Z',
+        updatedAt: '2026-10-08T00:00:00.000Z',
+        executionCount: 0,
+        successCount: 0,
+        failureCount: 0,
         trigger: { type: 'deal_created', config: {} },
         conditions: [],
         actions: [{ type: 'create_task', config: { title: 'Acompanhar oportunidade' } }],
-    } as Automation;
+    };
 }
 function event(): AutomationRuntimeEvent {
     return {
