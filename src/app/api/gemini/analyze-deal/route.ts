@@ -32,6 +32,11 @@ export async function POST(request: Request) {
 
     try {
         const { deal, activities } = await request.json();
+        if (!deal || typeof deal !== 'object' || Array.isArray(deal) ||
+            typeof deal.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deal.id)) {
+            telemetry.record('invalid_request', 400);
+            return telemetry.respond({ error: 'Oportunidade inválida.' }, 400);
+        }
         if (JSON.stringify({ deal, activities }).length > 100_000) {
             telemetry.record('payload_too_large', 413);
             return telemetry.respond({ error: 'Payload too large' }, 413);
@@ -162,28 +167,28 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
             return telemetry.respond({ error: 'A análise retornou dados inválidos.' }, 502);
         }
 
-        // Persist only validated fields to the tenant-scoped record.
-        if (deal && typeof deal.id === 'string' && deal.id) {
-            console.log('[GeminiAnalyzeDealRoute] deal analysis persistence started');
-            const supabase = createAdminClient();
-            const { error: updateError } = await supabase
-                .from('deals')
-                .update({
-                    health_score: validated.healthScore,
-                    health_trend: validated.trend,
-                    risk_factors: validated.riskFactors,
-                    last_analysis_at: new Date().toISOString()
-                })
-                .eq('id', deal.id)
-                .eq('organization_id', organizationId);
+        // PostgREST may return no error when zero rows were updated.
+        const supabase = createAdminClient();
+        const { data: updatedDeal, error: updateError } = await supabase
+            .from('deals')
+            .update({
+                health_score: validated.healthScore,
+                health_trend: validated.trend,
+                risk_factors: validated.riskFactors,
+                last_analysis_at: new Date().toISOString()
+            })
+            .eq('id', deal.id)
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
-            if (updateError) {
-                console.error('[GeminiAnalyzeDealRoute] deal analysis persistence failed');
-                telemetry.record('persistence_failure', 503);
-                return telemetry.respond({ error: 'Não foi possível salvar a análise.' }, 503);
-            } else {
-                console.log('[GeminiAnalyzeDealRoute] deal analysis persistence succeeded');
-            }
+        if (updateError) {
+            telemetry.record('persistence_failure', 503);
+            return telemetry.respond({ error: 'Não foi possível salvar a análise.' }, 503);
+        }
+        if (!updatedDeal) {
+            telemetry.record('deal_not_found', 404);
+            return telemetry.respond({ error: 'Oportunidade não encontrada.' }, 404);
         }
 
         telemetry.record('success', 200);
