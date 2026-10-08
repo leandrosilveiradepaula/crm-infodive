@@ -24,6 +24,12 @@ const paidGenerationPatterns = [
 
 const violations = [];
 const paidRoutes = [];
+const criticalObservedRoutes = new Set([
+  'src/app/api/gemini/chat/route.ts',
+  'src/app/api/gemini/follow-up/route.ts',
+  'src/app/api/gemini/analyze-deal/route.ts',
+  'src/app/api/gemini/enrich/route.ts',
+]);
 
 for (const path of routeFiles) {
   const source = readFileSync(path, 'utf8');
@@ -43,6 +49,10 @@ for (const path of routeFiles) {
   if (!/(?:consumeDurableAiQuota|guardPaidAiRequest)\s*\(/.test(source)) {
     violations.push({ file, rule: 'durable-quota', message: 'rota paga de IA sem quota duravel/distribuida' });
   }
+
+  if (criticalObservedRoutes.has(file) && !/createAiRouteContext\s*\(/.test(source)) {
+    violations.push({ file, rule: 'request-correlation', message: 'rota crítica de IA sem request id/telemetria operacional' });
+  }
 }
 
 if (violations.length) {
@@ -53,5 +63,5 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`AI_ENDPOINT_AUDIT_OK: ${paidRoutes.length} rota(s) paga(s) coberta(s) por autenticação, guard local e quota durável`);
+console.log(`AI_ENDPOINT_AUDIT_OK: ${paidRoutes.length} rota(s) paga(s) coberta(s) por autenticação, guard local e quota durável; rotas críticas com correlação operacional`);
 for (const file of paidRoutes) console.log(`AI_ENDPOINT_AUDIT_ROUTE ${file}`);

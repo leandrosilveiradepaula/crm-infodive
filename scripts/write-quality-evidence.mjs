@@ -21,6 +21,8 @@ const evidence = {
     'migration_policy',
     'product_surface_audit',
     'paid_ai_endpoint_audit',
+    'paid_ai_request_correlation',
+    'paid_ai_provider_outcome_telemetry',
     'tests',
     'build',
     'browser_smoke_desktop_mobile_keyboard_route_guard',
