@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 import { createAiRouteContext } from '@/lib/ai-route-observability';
+import { parseDealDiagnosis } from '@/lib/deal-diagnosis-validation';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -155,16 +156,22 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
             }
         }
 
-        // Persist analysis to database
-        if (diagnosis && deal.id) {
+        const validated = parseDealDiagnosis(diagnosis);
+        if (!validated) {
+            telemetry.record('invalid_provider_output', 502);
+            return telemetry.respond({ error: 'A análise retornou dados inválidos.' }, 502);
+        }
+
+        // Persist only validated fields to the tenant-scoped record.
+        if (deal && typeof deal.id === 'string' && deal.id) {
             console.log('[GeminiAnalyzeDealRoute] deal analysis persistence started');
             const supabase = createAdminClient();
             const { error: updateError } = await supabase
                 .from('deals')
                 .update({
-                    health_score: diagnosis.healthScore,
-                    health_trend: diagnosis.trend,
-                    risk_factors: diagnosis.riskFactors,
+                    health_score: validated.healthScore,
+                    health_trend: validated.trend,
+                    risk_factors: validated.riskFactors,
                     last_analysis_at: new Date().toISOString()
                 })
                 .eq('id', deal.id)
@@ -172,13 +179,15 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
 
             if (updateError) {
                 console.error('[GeminiAnalyzeDealRoute] deal analysis persistence failed');
+                telemetry.record('persistence_failure', 503);
+                return telemetry.respond({ error: 'Não foi possível salvar a análise.' }, 503);
             } else {
                 console.log('[GeminiAnalyzeDealRoute] deal analysis persistence succeeded');
             }
         }
 
         telemetry.record('success', 200);
-        return telemetry.respond(diagnosis);
+        return telemetry.respond(validated);
 
     } catch {
         console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
