@@ -5,7 +5,7 @@ create table if not exists public.ai_usage_buckets (
   window_seconds integer not null check (window_seconds > 0),
   request_count integer not null default 0 check (request_count >= 0),
   updated_at timestamptz not null default now(),
-  primary key (organization_id, scope, window_started_at)
+  primary key (organization_id, scope, window_started_at, window_seconds)
 );
 
 alter table public.ai_usage_buckets enable row level security;
@@ -61,7 +61,7 @@ begin
     1,
     v_now
   )
-  on conflict (organization_id, scope, window_started_at)
+  on conflict (organization_id, scope, window_started_at, window_seconds)
   do update
     set request_count = public.ai_usage_buckets.request_count + 1,
         updated_at = v_now
@@ -74,7 +74,8 @@ begin
       from public.ai_usage_buckets
      where organization_id = p_organization_id
        and scope = p_scope
-       and window_started_at = v_window_start;
+       and window_started_at = v_window_start
+       and window_seconds = p_window_seconds;
 
     return query
     select
