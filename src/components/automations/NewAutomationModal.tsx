@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     X,
     Zap,
@@ -25,6 +25,7 @@ interface NewAutomationModalProps {
 export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomationModalProps) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const submitInFlight = useRef(false);
 
     const [formData, setFormData] = useState<Partial<Automation>>({
         name: initialData?.name || '',
@@ -70,7 +71,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     };
 
     const handleSubmit = async () => {
-        if (loading) return;
+        if (submitInFlight.current) return;
+        submitInFlight.current = true;
         setLoading(true);
         try {
             await onSave({
@@ -83,6 +85,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         } catch {
             // Parent surface already presents the persistence error to the user.
         } finally {
+            submitInFlight.current = false;
             setLoading(false);
         }
     };
