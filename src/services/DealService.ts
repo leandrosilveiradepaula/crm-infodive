@@ -275,6 +275,23 @@ export class DealService {
 
         const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'owner_id')) {
+            if (!isAdminOrManager || typeof sanitizedUpdates.owner_id !== 'string' || !sanitizedUpdates.owner_id.trim()) {
+                throw new Error('Não foi possível alterar o responsável pela oportunidade.');
+            }
+
+            const { data: targetOwner, error: targetOwnerError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', sanitizedUpdates.owner_id)
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+
+            if (targetOwnerError || !targetOwner) {
+                throw new Error('Não foi possível alterar o responsável pela oportunidade.');
+            }
+        }
+
         let query = supabase
             .from('deals')
             .update(sanitizedUpdates)
