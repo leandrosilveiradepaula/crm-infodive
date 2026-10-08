@@ -309,3 +309,20 @@ credentials or production release. Prepare PR against the non-production
 candidate and require full CI for exact PR SHA; merge and Preview only once
 the corresponding safe gates are independently green. Do not assume real
 cross-tenant tests are covered by offline mocks.
+
+
+## Additional authorized task (2026-10-08): Deal service tenant and mutation integrity batch
+
+After CRM PR #94 is fully verified in nonproduction Preview, harden DealService in five related blocks:
+1. Resolve deal visibility roles only from the authenticated user's profile inside the current organization, and reuse the same fail-closed decision in pipeline/detail/update/stage/duplicate paths.
+2. Tenant-scope profile lookups and stop presenting failed pipeline/profile/account queries as valid empty data.
+3. Prevent non-manager users from duplicating opportunities they could not read under the existing owner visibility rule.
+4. If duplicated products cannot be persisted, roll back the newly created duplicate and never report a partial clone as success.
+5. Make product removal/bulk removal/reorder validate inputs, inspect Supabase errors and confirm affected tenant-scoped rows; add offline regression/contract coverage.
+
+Authorized paths:
+- `docs/codex/CURRENT_TASK.md`
+- `src/services/DealService.ts`
+- `src/services/DealService.integration.test.ts` (new)
+
+Do not change the RBAC matrix or invent new roles/permissions, do not apply migrations, mutate live data, call paid models, expand access or merge production. Preserve the existing `deals:create` / `deals:edit` server-action policy; this batch only makes the service enforce its existing tenant/owner boundaries truthfully. CI must pass on the exact PR SHA and merge SHA before Preview promotion.
