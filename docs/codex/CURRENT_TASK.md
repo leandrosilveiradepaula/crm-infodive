@@ -347,3 +347,16 @@ Authorized paths:
 - `src/services/AccountService.integration.test.ts` (new)
 
 No new permissions, no migration/RLS changes, no live Supabase writes, no paid calls, no production merge. This work branch does not trigger CI; create a dedicated validation branch only after the preceding candidate integration is complete.
+
+
+## Additional authorized task (2026-10-08): ContactService tenant and persistence integrity
+
+After the AccountService #96 integration, harden the contact service with five bounded blocks:
+1. Fail closed on contact/list database read failures rather than presenting valid empty data.
+2. Validate the parent account belongs to the current tenant before creating or reassigning contact association.
+3. Whitelist mutable contact attributes to prevent ID/tenant/audit/relationship spoofing; never trust caller-supplied organization_id.
+4. Reject duplicate-check database errors before creating contacts, and use safe input validation rather than building PostgREST OR filters from unsanitized user email/phone strings.
+5. Confirm affected tenant-scoped row before reporting update/delete success, with offline fake-Supabase regression tests.
+
+Allowed paths: `docs/codex/CURRENT_TASK.md`, `src/services/ContactService.ts`, `src/services/ContactService.integration.test.ts` (new).
+Do not modify migrations, live data, roles/RBAC policy, credentials or production. Commit and nonproduction PR are authorized. CI and exact-SHA Preview policies remain fail-closed.
