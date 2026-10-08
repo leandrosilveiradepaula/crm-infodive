@@ -55,7 +55,7 @@ export function AutomationHistorySheet({
                             <div>
                                 <SheetTitle className="text-2xl font-black text-foreground tracking-tight">{automation.name}</SheetTitle>
                                 <SheetDescription className="text-muted-foreground font-medium">
-                                    Execuções verificadas deste fluxo
+                                    Histórico registrado deste fluxo
                                 </SheetDescription>
                             </div>
                         </div>
