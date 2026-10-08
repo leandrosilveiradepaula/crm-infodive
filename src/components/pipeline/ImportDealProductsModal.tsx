@@ -79,7 +79,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             
             if (selectedFile.name.endsWith('.csv')) {
                 parsedRows = await parseCSV(selectedFile);
-            } else if (selectedFile.name.match(/\.(xlsx|xls)$/)) {
+            } else if (selectedFile.name.toLowerCase().endsWith('.xlsx')) {
                 parsedRows = await parseExcel(selectedFile);
             } else if (isImage || isPdf) {
                 setStep('processing');
@@ -149,7 +149,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                 setStep('mapping');
                 return;
             } else {
-                throw new Error('Formato não suportado. Use .xlsx, .csv, .xml, Imagem ou PDF');
+                throw new Error('Formato não suportado. Use .xlsx, .csv, .xml, imagem ou PDF');
             }
 
             if (parsedRows.length === 0) {
@@ -375,7 +375,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                 <p className="text-lg font-black text-foreground mb-2">Arraste seus arquivos aqui</p>
                 <p className="text-sm text-muted-foreground font-bold mb-4">ou clique para selecionar</p>
                 <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground font-mono">
-                    <span className="flex items-center gap-1"><FileSpreadsheet className="h-3 w-3" /> XLS/CSV</span>
+                    <span className="flex items-center gap-1"><FileSpreadsheet className="h-3 w-3" /> XLSX/CSV</span>
                     <span className="flex items-center gap-1"><FileCode className="h-3 w-3" /> XML</span>
                     <span className="flex items-center gap-1"><ImageIcon className="h-3 w-3" /> IMG/PDF</span>
                 </div>
@@ -383,7 +383,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.xls,.csv,.xml,.png,.jpg,.jpeg,.webp,.pdf"
+                accept=".xlsx,.csv,.xml,.png,.jpg,.jpeg,.webp,.pdf"
                 onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
                 className="hidden"
             />
