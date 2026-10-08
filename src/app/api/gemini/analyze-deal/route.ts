@@ -1,7 +1,7 @@
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { NextResponse } from 'next/server';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
+import { createAiRouteContext } from '@/lib/ai-route-observability';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -12,6 +12,7 @@ type DealActivity = {
 };
 
 export async function POST(request: Request) {
+    const telemetry = createAiRouteContext(request, 'gemini_analyze_deal');
     let userId: string;
     let organizationId: string;
     try {
@@ -19,22 +20,26 @@ export async function POST(request: Request) {
         userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        telemetry.record('unauthorized', 401);
+        return telemetry.respond({ error: 'Unauthorized' }, 401);
     }
 
     if (!apiKey) {
-        return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
+        telemetry.record('not_configured', 503);
+        return telemetry.respond({ error: 'Integração de IA não configurada.' }, 503);
     }
 
     try {
         const { deal, activities } = await request.json();
         if (JSON.stringify({ deal, activities }).length > 100_000) {
-            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+            telemetry.record('payload_too_large', 413);
+            return telemetry.respond({ error: 'Payload too large' }, 413);
         }
 
         const rateLimit = await guardPaidAiRequest({ scope: 'analyze-deal-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            telemetry.record(rateLimit.reason, rateLimit.status);
+            return telemetry.respond({ error: 'Muitas análises em pouco tempo.' }, rateLimit.status, { 'Retry-After': String(rateLimit.retryAfterSeconds) });
         }
 
         // Format currency for Brazilian Real
@@ -172,10 +177,12 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
             }
         }
 
-        return NextResponse.json(diagnosis);
+        telemetry.record('success', 200);
+        return telemetry.respond(diagnosis);
 
     } catch {
         console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
-        return NextResponse.json({ error: 'Não foi possível analisar o negócio.' }, { status: 500 });
+        telemetry.record('failure', 500);
+        return telemetry.respond({ error: 'Não foi possível analisar o negócio.' }, 500);
     }
 }
