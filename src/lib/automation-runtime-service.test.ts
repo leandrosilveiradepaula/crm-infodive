@@ -41,6 +41,17 @@ describe('automation runtime service contract', () => {
         expect(source).toContain("if (message === 'automation execution finalization failed') throw error");
     });
 
+    it('does not disguise read errors or zero-row writes as successful operations', () => {
+        const service = readFileSync('src/services/AutomationService.ts', 'utf8');
+        expect(service).toContain("throw new Error('Não foi possível carregar as automações.')");
+        expect(service).toContain("throw new Error('Não foi possível carregar o histórico de execuções.')");
+        expect(service).toContain("throw new Error('Não foi possível carregar os modelos de email.')");
+        expect(service).toContain("if (error || !updated)");
+        expect(service).toContain("if (error || !deleted)");
+        expect(service).toContain("sanitizeAutomationWrite(automation)");
+        expect(service).toContain("assertSupportedAutomation(");
+    });
+
     it('is connected to deal_created and deal_moved events', () => {
         const actions = readFileSync('src/app/(dashboard)/pipeline/actions.ts', 'utf8');
         expect(actions).toContain('AutomationRuntimeService.executeEvent');
