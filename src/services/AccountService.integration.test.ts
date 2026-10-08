@@ -165,6 +165,28 @@ describe('AccountService offline persistence integrity', () => {
             .resolves.toMatchObject({ success: false });
     });
 
+    it('classifies bulk upsert from account existence instead of timestamp equality', async () => {
+        fakeDatabase({
+            'accounts:read': { data: { id: 'account-existing' }, error: null },
+            'accounts:upsert': {
+                data: {
+                    id: 'account-existing',
+                    created_at: '2026-10-08T00:00:00Z',
+                    updated_at: '2026-10-08T00:00:00Z',
+                },
+                error: null,
+            },
+        });
+
+        const result = await AccountService.bulkCreateAccounts('user-a', 'tenant-a', [{
+            name: 'Cliente existente',
+            cnpj: '12345678000100',
+            contacts: [],
+        }]);
+
+        expect(result).toMatchObject({ created: 0, updated: 1, failed: 0 });
+    });
+
     it('fails an imported row instead of moving an existing email contact to another account', async () => {
         const db = fakeDatabase({
             'accounts:read': { data: null, error: null },
