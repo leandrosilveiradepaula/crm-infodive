@@ -189,3 +189,11 @@ automation runs, paid calls, migrations or production release. Commits and a
 PR against non-prod candidate are authorized; wait for CI of exact HEAD
 before merge, CI of merge SHA before single Preview promotion. Manual merge
 to main stays mandatory.
+
+### CI follow-up: product truthfulness regression assertion
+
+CI run 37819750265 found one outdated source-contract test still requiring the
+removed 'Execução Automática / Bloqueada' presentation. Update only
+`src/lib/automation-product-truthfulness.test.ts` to assert the new truthful
+active/paused metrics and explicit absence of the misleading blocked claim.
+Do not revert the interface fix or weaken other product assertions.
