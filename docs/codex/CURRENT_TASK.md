@@ -360,3 +360,15 @@ After the AccountService #96 integration, harden the contact service with five b
 
 Allowed paths: `docs/codex/CURRENT_TASK.md`, `src/services/ContactService.ts`, `src/services/ContactService.integration.test.ts` (new).
 Do not modify migrations, live data, roles/RBAC policy, credentials or production. Commit and nonproduction PR are authorized. CI and exact-SHA Preview policies remain fail-closed.
+
+
+## Additional authorized task (2026-10-08): deal product write guards
+
+After PR #97 integrated into the non-production candidate, harden product write paths in DealService:
+- Whitelist mutable fields in updateDealProduct, rejecting attempts to overwrite record identity, tenant, deal relation, and audit metadata.
+- Fail closed when tenant-scoped catalog verification errors in bulkAddDealProducts.
+- Reject bulk insert responses that do not confirm all requested rows, without falsely reporting success.
+- Add offline regressions for these three cases.
+
+Authorized paths: `docs/codex/CURRENT_TASK.md`, `src/services/DealService.ts`, `src/services/DealService.integration.test.ts`.
+Do not mutate live data, change permissions/RBAC, add migrations, call paid models, deploy production, or merge the main release candidate.
