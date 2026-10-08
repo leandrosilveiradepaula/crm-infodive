@@ -30,7 +30,7 @@ export const parseExcel = async (file: File): Promise<any[][]> => {
     const workbook = new ExcelJS.Workbook();
     const buffer = await file.arrayBuffer();
 
-    await workbook.xlsx.load(buffer as any);
+    await workbook.xlsx.load(buffer as unknown as Buffer);
 
     const worksheet = workbook.worksheets[0];
     if (!worksheet) return [];
