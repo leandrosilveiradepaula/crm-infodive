@@ -155,36 +155,47 @@ export class DealService {
             return null;
         }
 
-        const { data: products } = await supabase
+        const { data: products, error: productsError } = await supabase
             .from('deal_products')
             .select('*')
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('display_order', { ascending: true });
+        if (productsError) {
+            throw new Error('Não foi possível carregar os produtos da oportunidade.');
+        }
 
-        const { data: activities } = await supabase
+        const { data: activities, error: activitiesError } = await supabase
             .from('activities')
             .select('*')
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
+        if (activitiesError) {
+            throw new Error('Não foi possível carregar as atividades da oportunidade.');
+        }
 
         let account: Account | null = null;
         if (deal.account_id) {
-            const { data: acc } = await supabase
+            const { data: acc, error: accountError } = await supabase
                 .from('accounts')
                 .select('*')
                 .eq('id', deal.account_id)
                 .eq('organization_id', organizationId)
-                .single();
-            if (acc) {
-                const { data: contacts } = await supabase
-                    .from('account_contacts')
-                    .select('*')
-                    .eq('account_id', acc.id)
-                    .eq('organization_id', organizationId);
-                account = { ...(acc as any as Account), contacts: (contacts || []) as any };
+                .maybeSingle();
+            if (accountError || !acc) {
+                throw new Error('Não foi possível carregar a conta da oportunidade.');
             }
+
+            const { data: contacts, error: contactsError } = await supabase
+                .from('account_contacts')
+                .select('*')
+                .eq('account_id', acc.id)
+                .eq('organization_id', organizationId);
+            if (contactsError) {
+                throw new Error('Não foi possível carregar os contatos da oportunidade.');
+            }
+            account = { ...(acc as any as Account), contacts: (contacts || []) as any };
         }
 
         let owner_profile: Profile | null = null;
