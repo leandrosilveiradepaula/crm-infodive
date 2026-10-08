@@ -463,7 +463,20 @@ export class DealService {
         const currencyKeys: Array<keyof DealProduct> = ['is_usd', 'usd_cost', 'exchange_rate', 'present_in_usd'];
         const touchesCurrencyState = currencyKeys.some(key => Object.prototype.hasOwnProperty.call(updates, key));
 
-        let safeUpdates: Record<string, unknown> = { ...updates };
+        // Never accept tenant, identity, relationship or audit fields from product edit payloads.
+        const writableFields = new Set([
+            'name', 'description', 'sku', 'unit_price', 'quantity', 'cost', 'margin',
+            'manufacturer', 'category', 'subcategory', 'is_bid', 'bid_number',
+            'bid_validity', 'display_order', 'billing_type', 'distributor_id',
+            'distributor_cnpj', 'pricing_model', 'is_usd', 'usd_cost',
+            'exchange_rate', 'present_in_usd',
+        ]);
+        let safeUpdates: Record<string, unknown> = Object.fromEntries(
+            Object.entries(updates).filter(([key]) => writableFields.has(key))
+        );
+        if (!Object.keys(safeUpdates).length) {
+            throw new Error('Nenhuma alteração de produto válida.');
+        }
 
         if (touchesCurrencyState) {
             const { data: current, error: currentError } = await supabase
@@ -572,7 +585,8 @@ export class DealService {
                 .select('id')
                 .in('id', potentialProductIds)
                 .eq('organization_id', organizationId);
-            if (!verifyError && existingProducts) existingProducts.forEach(p => validProductIds.add(p.id));
+            if (verifyError) throw new Error('Não foi possível validar os produtos selecionados.');
+            (existingProducts || []).forEach(p => validProductIds.add(p.id));
         }
 
         const payload = products.map(p => {
@@ -611,9 +625,12 @@ export class DealService {
             };
         });
 
+        if (!payload.length) return [];
         const { data, error } = await supabase.from('deal_products').insert(payload).select();
-        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
-        return (data || []) as DealProduct[];
+        if (error || !data || data.length !== payload.length) {
+            throw new Error('Não foi possível atualizar todos os produtos da oportunidade.');
+        }
+        return data as DealProduct[];
     }
 
     static async getOrCreateRoom(userId: string, dealId: string, organizationId: string): Promise<{ room?: any, error?: string }> {
