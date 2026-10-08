@@ -107,10 +107,6 @@ export function validateAutomationForRuntime(automation: Automation): string[] {
         blockers.push('invalid actions');
         return blockers;
     }
-    if (!SUPPORTED_RUNTIME_TRIGGERS.has(automation.trigger.type)) {
-        blockers.push(`unsupported trigger: ${automation.trigger.type}`);
-    }
-
     if (!automation.actions.length) {
         blockers.push('automation has no actions');
     }
@@ -122,9 +118,6 @@ export function validateAutomationForRuntime(automation: Automation): string[] {
         }
         if (!action.config || typeof action.config !== 'object' || Array.isArray(action.config)) blockers.push(`invalid action config[${index}]`);
         if (action.delay !== undefined && (typeof action.delay !== 'number' || !Number.isFinite(action.delay) || action.delay < 0)) blockers.push(`invalid action delay[${index}]`);
-        if (!SUPPORTED_RUNTIME_ACTIONS.has(action.type)) {
-            blockers.push(`unsupported action[${index}]: ${action.type}`);
-        }
         if ((action.delay || 0) > 0) {
             blockers.push(`unsupported delayed action[${index}]`);
         }
