@@ -36,7 +36,7 @@ describe('deal diagnosis validation', () => {
     expect(source).toContain(".eq('organization_id', organizationId)");
     expect(source).toContain('.maybeSingle()');
     expect(source).toContain("telemetry.record('deal_not_found', 404)");
-    expect(source.indexOf('typeof deal.id')).toBeLessThan(source.indexOf('guardPaidAiRequest'));
+    expect(source.indexOf('typeof deal.id')).toBeLessThan(source.indexOf('await guardPaidAiRequest('));
     expect(source).toContain("telemetry.record('invalid_request', 400)");
   });
 });
