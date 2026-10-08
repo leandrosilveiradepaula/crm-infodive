@@ -1,6 +1,8 @@
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { consumeDurableAiQuota } from '@/lib/ai-durable-quota';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -27,11 +29,16 @@ export async function POST(request: Request) {
     let userId: string;
     let organizationId: string;
     try {
-        const ctx = await requireSessionContext();
+        const ctx = await requirePermission('deals:edit');
         userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const rateLimit = consumeRateLimit({ scope: 'activity-suggestions-ai', subject: `${organizationId}:${userId}`, limit: 3, windowMs: 60_000 });
+    if (!rateLimit.allowed) {
+        return NextResponse.json({ error: 'Muitas atualizações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
     }
 
     if (!apiKey) {
@@ -159,6 +166,19 @@ REGRAS:
 `;
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const durableQuota = await consumeDurableAiQuota({
+            organizationId,
+            scope: 'activity-suggestions-ai',
+            limit: 3,
+            windowSeconds: 60,
+        });
+        if (!durableQuota.allowed) {
+            return NextResponse.json(
+                { error: durableQuota.reason === 'quota_unavailable' ? 'Controle de uso da IA indisponível.' : 'Limite de IA atingido.' },
+                { status: durableQuota.reason === 'quota_unavailable' ? 503 : 429, headers: { 'Retry-After': String(durableQuota.retryAfterSeconds) } }
+            );
+        }
 
         const response = await fetch(apiUrl, {
             method: 'POST',

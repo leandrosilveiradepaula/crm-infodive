@@ -64,7 +64,7 @@ export const SecurityTab = () => {
 
                 <form onSubmit={handleSavePassword} className="max-w-xl space-y-6 relative z-10">
                     <div>
-                        <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Senha Atual</label>
+                        <label className="block text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Senha Atual</label>
                         <div className="relative group">
                             <ThemeInput
                                 type={showPassword ? "text" : "password"}
@@ -85,7 +85,7 @@ export const SecurityTab = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Nova Senha</label>
+                            <label className="block text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Nova Senha</label>
                             <div className="relative group">
                                 <ThemeInput
                                     type={showPassword ? "text" : "password"}
@@ -98,7 +98,7 @@ export const SecurityTab = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Confirmar Nova Senha</label>
+                            <label className="block text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Confirmar Nova Senha</label>
                             <div className="relative group">
                                 <input
                                     type={showPassword ? "text" : "password"}
@@ -151,13 +151,13 @@ export const SecurityTab = () => {
                             </div>
                             <div>
                                 <p className="font-black text-foreground text-base tracking-tight">Windows PC - Chrome</p>
-                                <p className="text-[10px] text-emerald-500 font-black flex items-center gap-2 mt-1 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md w-fit">
+                                <p className="text-xs text-emerald-500 font-black flex items-center gap-2 mt-1 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md w-fit">
                                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#34d399]"></span> Ativo agora
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="hidden sm:block text-[10px] font-mono font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">IP: 192.168.1.10 • Brasil</span>
+                            <span className="hidden sm:block text-xs font-mono font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">IP: 192.168.1.10 • Brasil</span>
                             <div className="w-px h-10 bg-border/50 ml-2" />
                         </div>
                     </div>
@@ -169,7 +169,7 @@ export const SecurityTab = () => {
                             </div>
                             <div>
                                 <p className="font-bold text-foreground text-base tracking-tight">iPhone 14 - App</p>
-                                <p className="text-[10px] text-muted-foreground font-black mt-1 uppercase tracking-widest">Último acesso: 2h atrás</p>
+                                <p className="text-xs text-muted-foreground font-black mt-1 uppercase tracking-widest">Último acesso: 2h atrás</p>
                             </div>
                         </div>
                         <button className="text-red-500 hover:text-white p-2.5 hover:bg-red-500 rounded-xl transition-all border border-border hover:border-red-400" title="Encerrar Sessão">

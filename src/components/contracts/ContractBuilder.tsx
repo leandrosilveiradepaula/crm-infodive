@@ -10,8 +10,8 @@ export interface Contract {
     company: string;
     value: number;
     dealId: string;
-    status: 'draft' | 'sent' | 'signed' | 'expired';
-    type: 'service' | 'product';
+    status: 'draft' | 'sent' | 'viewed' | 'signed' | 'declined';
+    type: 'service' | 'nda' | 'sales';
     content_json: any;
     signature_image?: string;
     signerName?: string;
@@ -36,7 +36,7 @@ IDENTIFICAÇÃO DAS PARTES
 
 CONTRATANTE: ${deal.company}, representada por ${deal.contact_name || '[NOME DO RESPONSÁVEL]'}, doravante denominada CONTRATANTE.
 
-CONTRATADA: IBM BRASIL / LENOVO TECNOLOGIA, doravante denominada CONTRATADA.
+CONTRATADA: INFODIVE, doravante denominada CONTRATADA.
 
 1. DO OBJETO
 1.1. O presente contrato tem como objeto o fornecimento dos produtos e serviços descritos na Proposta Comercial #${deal.id.slice(0, 8)}, anexa a este instrumento.
@@ -80,7 +80,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                     </div>
                     <div>
                         <h2 className="text-2xl font-black text-foreground uppercase tracking-tighter">Editor de Contratos</h2>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1 opacity-80">{deal.company}</p>
+                        <p className="text-xs font-black text-primary uppercase tracking-widest mt-1 opacity-80">{deal.company}</p>
                     </div>
                 </div>
                 <button
@@ -99,11 +99,11 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                         <div className="flex justify-center mb-6">
                             <div className="w-12 h-1 bg-primary rounded-full"></div>
                         </div>
-                        <h1 className="text-3xl font-black text-foreground uppercase tracking-[0.3em] mb-4">Contrato Social</h1>
+                        <h1 className="text-3xl font-black text-foreground uppercase tracking-[0.3em] mb-4">Contrato Comercial</h1>
                         <input
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground w-full bg-muted/10 border border-border hover:border-primary/30 hover:bg-muted/20 rounded-xl p-3 transition-all focus:ring-1 focus:ring-primary/30 focus:text-foreground outline-none"
+                            className="text-center text-xs font-black uppercase tracking-widest text-muted-foreground w-full bg-muted/10 border border-border hover:border-primary/30 hover:bg-muted/20 rounded-xl p-3 transition-all focus:ring-1 focus:ring-primary/30 focus:text-foreground outline-none"
                             placeholder="Título do Contrato"
                         />
                     </div>
@@ -119,11 +119,11 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                     <div className="mt-24 pt-12 border-t border-border flex justify-between items-end gap-12">
                         <div className="text-center flex-1">
                             <div className="h-24 flex items-center justify-center mb-4">
-                                <span className="text-muted-foreground font-serif italic text-3xl opacity-20">IBM Global Services</span>
+                                <span className="text-muted-foreground font-serif italic text-3xl opacity-20">Infodive</span>
                             </div>
                             <div className="w-full border-b border-border mb-4 shadow-[0_1px_0_rgba(255,255,255,0.05)]"></div>
-                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contratada</p>
-                            <p className="text-[9px] text-primary font-bold mt-1 uppercase">IBM / Lenovo Technology</p>
+                            <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Contratada</p>
+                            <p className="text-xs text-primary font-bold mt-1 uppercase">Infodive</p>
                         </div>
 
                         <div className="text-center flex-1">
@@ -133,10 +133,10 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                                         <img src={signature} alt="Assinatura" className="h-20 invert grayscale brightness-200 contrast-200 dark:invert-0" />
                                     </div>
                                     <div className="w-full border-b border-border mb-4 shadow-[0_1px_0_rgba(255,255,255,0.05)]"></div>
-                                    <p className="text-[10px] font-black text-foreground uppercase tracking-widest">{deal.company}</p>
+                                    <p className="text-xs font-black text-foreground uppercase tracking-widest">{deal.company}</p>
                                     <div className="mt-2 flex items-center gap-2 justify-center px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                                         <Check className="h-3 w-3 text-emerald-500" />
-                                        <p className="text-[8px] text-emerald-500 font-black uppercase tracking-widest">
+                                        <p className="text-xs text-emerald-500 font-black uppercase tracking-widest">
                                             Assinatura Digital Validada
                                         </p>
                                     </div>
@@ -149,7 +149,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                                     <div className="w-12 h-12 rounded-full bg-muted/20 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                                         <FileText className="h-6 w-6" />
                                     </div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Capturar Assinatura</span>
+                                    <span className="text-xs font-black uppercase tracking-widest">Capturar Assinatura</span>
                                 </button>
                             )}
                         </div>
@@ -161,25 +161,25 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
             <div className="p-8 bg-background border-t border-border flex justify-between items-center gap-6">
                 <div className="flex items-center gap-4">
                     <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status: Em Edição</span>
+                    <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">Status: Em Edição</span>
                 </div>
                 <div className="flex gap-4">
                     <button
                         onClick={onClose}
-                        className="px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border"
+                        className="px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border"
                     >
                         Descartar
                     </button>
                     <button
                         onClick={() => onSave({ title, content_json: { text: content } as any, status: 'draft' })}
-                        className="px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-muted text-foreground border border-border hover:bg-muted/80 transition-all shadow-xl"
+                        className="px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-muted text-foreground border border-border hover:bg-muted/80 transition-all shadow-xl"
                     >
                         Salvar Rascunho
                     </button>
                     {!signature && (
                         <button
                             onClick={() => setStep('sign')}
-                            className="px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-primary text-white hover:bg-primary/90 transition-all shadow-xl shadow-primary/30 hover:-translate-y-1"
+                            className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-primary text-white hover:bg-primary/90 transition-all shadow-xl shadow-primary/30 hover:-translate-y-1"
                         >
                             Prosseguir para Assinatura
                         </button>

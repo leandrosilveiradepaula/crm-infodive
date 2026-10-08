@@ -335,7 +335,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     <div className="h-5 w-px bg-border" />
                     <div>
                         <h1 className="text-sm font-bold text-foreground leading-tight">{deal.title}</h1>
-                        <p className="text-[10px] text-muted-foreground">{deal.company} • Editor de Proposta</p>
+                        <p className="text-xs text-muted-foreground">{deal.company} • Editor de Proposta</p>
                     </div>
                 </div>
 
@@ -412,7 +412,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 {/* ── LEFT: Section List (240px) ──────────────────────── */}
                 <aside className="w-60 border-r border-border bg-card shrink-0 flex flex-col">
                     <div className="p-3 border-b border-border">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2">
                         {isMounted ? (
@@ -436,7 +436,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                     <div key={section.id} className="flex items-center gap-2 px-2.5 py-2 rounded-lg mb-1 border-l-2 border-transparent">
                                         <div className="w-3" />
                                         <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                                        <span className="text-[11px] flex-1 truncate text-foreground/80">{section.label}</span>
+                                        <span className="text-xs flex-1 truncate text-foreground/80">{section.label}</span>
                                         <Switch checked={section.enabled} className="scale-[0.55]" />
                                     </div>
                                 );
@@ -446,14 +446,14 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
 
                     {/* Config toggles */}
                     <div className="border-t border-border p-3 space-y-2">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Configurações</p>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Configurações</p>
                         {[
                             { key: 'showBillingInfo', label: 'Faturamento' },
                             { key: 'isPriceStudy', label: 'Estudo de Preços' },
                             { key: 'allowSignature', label: 'Assinatura Digital' },
                         ].map(item => (
                             <div key={item.key} className="flex items-center justify-between">
-                                <span className="text-[11px] text-foreground">{item.label}</span>
+                                <span className="text-xs text-foreground">{item.label}</span>
                                 <Switch
                                     checked={(state.config as any)[item.key]}
                                     onCheckedChange={v => updateConfig({ [item.key]: v })}
@@ -495,7 +495,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                 <span className="text-xs font-bold text-foreground">{currentSection.label}</span>
                             </div>
                         )}
-                        <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <span>{activeSections.length} páginas</span>
                             <span>{deal.deal_products?.length || 0} produtos</span>
                             <span className="font-bold text-primary">{formatCurrency(totalValue)}</span>
@@ -542,7 +542,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 {/* ── RIGHT: Inspector ─────────────────────────────────── */}
                 <aside className="w-80 border-l border-border bg-card shrink-0 overflow-y-auto flex flex-col">
                     <div className="p-3 border-b border-border">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                             {currentSection ? `Editar: ${currentSection.label}` : 'Propriedades'}
                         </p>
                     </div>
@@ -659,7 +659,7 @@ function SortableSectionItem({
                 <GripVertical className="w-3 h-3" />
             </div>
             <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[11px] flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
+            <span className={`text-xs flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
                 {section.label}
             </span>
             <Switch
@@ -743,7 +743,7 @@ function InspectorPanel({
                                 {state.objectives.map((obj: any, i: number) => (
                                     <div key={i} className="text-xs p-2 bg-muted/20 rounded-lg border border-border">
                                         <p className="font-bold text-foreground">{obj.title}</p>
-                                        <p className="text-muted-foreground mt-0.5 text-[10px]">{obj.description?.substring(0, 100)}</p>
+                                        <p className="text-muted-foreground mt-0.5 text-xs">{obj.description?.substring(0, 100)}</p>
                                     </div>
                                 ))}
                             </div>
@@ -755,7 +755,7 @@ function InspectorPanel({
         case 'differentials':
             return (
                 <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Diferenciais</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Diferenciais</p>
                     {state.editableTexts.differentials.map((diff: any, i: number) => (
                         <div key={i} className="p-3 bg-muted/20 rounded-lg border border-border space-y-2">
                             <Input
@@ -768,7 +768,7 @@ function InspectorPanel({
                                 value={diff.description}
                                 onChange={e => updateDifferential(i, 'description', e.target.value)}
                                 rows={2}
-                                className="w-full text-[11px] p-2 rounded-md bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
+                                className="w-full text-xs p-2 rounded-md bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
                                 placeholder="Descrição"
                             />
                         </div>
@@ -891,7 +891,7 @@ function InspectorPanel({
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <div>
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                 {label}
             </label>
             {children}

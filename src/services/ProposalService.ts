@@ -1,9 +1,46 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import type { Proposal } from '@/types/proposal';
+import { createAdminClient } from '../lib/supabase/admin';
+import type { Proposal } from '../types/proposal';
 
 export class ProposalService {
+    private static async assertDealVisible(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        organizationId: string,
+        dealId: string,
+    ): Promise<void> {
+        if (!dealId || typeof dealId !== 'string') throw new Error('Oportunidade inválida.');
+        const { data: profile, error: profileError } = await supabase.from('profiles')
+            .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+        if (profileError || !profile) throw new Error('Não foi possível validar o acesso à proposta.');
+        const roles = Array.isArray(profile.roles) ? profile.roles : [];
+        const fullAccess = profile.role === 'admin' || profile.role === 'manager' ||
+            roles.some((role: unknown) => role === 'admin' || role === 'manager');
+        let dealQuery = supabase.from('deals').select('id')
+            .eq('id', dealId).eq('organization_id', organizationId);
+        if (!fullAccess) dealQuery = dealQuery.eq('owner_id', userId);
+        const { data: deal, error } = await dealQuery.maybeSingle();
+        if (error || !deal) throw new Error('Oportunidade indisponível ou sem permissão.');
+    }
+
+    private static async assertProposalVisible(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        organizationId: string,
+        proposalId: string,
+    ): Promise<void> {
+        const { data: proposal, error } = await supabase.from('proposals')
+            .select('deal_id, created_by').eq('id', proposalId).eq('organization_id', organizationId).maybeSingle();
+        if (error || !proposal) throw new Error('Proposta indisponível ou sem permissão.');
+        if (proposal.deal_id) {
+            await this.assertDealVisible(supabase, userId, organizationId, proposal.deal_id);
+            return;
+        }
+        // Standalone proposals remain accessible to their creator without broadening access.
+        if (proposal.created_by !== userId) throw new Error('Proposta indisponível ou sem permissão.');
+    }
     static async fetchProposals(userId: string, dealId: string, organizationId: string): Promise<Proposal[]> {
         const supabase = createAdminClient();
+        await this.assertDealVisible(supabase, userId, organizationId, dealId);
 
         // 2. Fetch proposals strictly within the user's organization
         const { data, error } = await supabase
@@ -15,7 +52,7 @@ export class ProposalService {
 
         if (error) {
             console.error('[ProposalService] proposals fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as propostas.');
         }
 
         return (data || []).map((p: any) => ({
@@ -29,6 +66,7 @@ export class ProposalService {
 
     static async updateProposal(userId: string, proposalId: string, organizationId: string, updates: Partial<Proposal>): Promise<Proposal> {
         const supabase = createAdminClient();
+        await this.assertProposalVisible(supabase, userId, organizationId, proposalId);
         const dbUpdates: any = {};
 
         if (updates.status) dbUpdates.status = updates.status;
@@ -66,14 +104,16 @@ export class ProposalService {
 
     static async deleteProposal(userId: string, id: string, organizationId: string) {
         const supabase = createAdminClient();
+        await this.assertProposalVisible(supabase, userId, organizationId, id);
 
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('proposals')
             .delete()
             .eq('id', id)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id').maybeSingle();
 
-        if (error) throw new Error('Não foi possível excluir a proposta.');
+        if (error || !deleted) throw new Error('Não foi possível excluir a proposta.');
         return true;
     }
 
@@ -103,6 +143,10 @@ export class ProposalService {
             public_token: payload.public_token,
             allow_signature: payload.allow_signature
         };
+
+        if (insertData.deal_id) {
+            await this.assertDealVisible(supabase, userId, organizationId, insertData.deal_id);
+        }
 
         // Auto-increment version for the deal
         if (insertData.deal_id) {

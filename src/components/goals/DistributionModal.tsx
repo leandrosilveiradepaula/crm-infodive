@@ -95,7 +95,7 @@ export function DistributionModal({
                             </div>
                             <h2 className="text-base font-black text-foreground uppercase tracking-tight">Distribuir Metas</h2>
                         </div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none">
+                        <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none">
                             Cenário: <span className="text-primary">{scenarioName}</span> &mdash; Meta: {formatCurrency(revenueGoal)}
                         </p>
                     </div>
@@ -152,12 +152,12 @@ export function DistributionModal({
                     {users.length > 1 && (
                         <>
                             <div className="flex items-center justify-between mb-4 px-1">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                <p className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                                     <Users className="h-3.5 w-3.5 text-primary opacity-70" /> Vendedores do Time
                                 </p>
                                 <button
                                     onClick={handleEqualDistribution}
-                                    className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 transition-all active:scale-95"
+                                    className="text-xs font-black text-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 transition-all active:scale-95"
                                 >
                                     <Zap className="h-3 w-3" /> Distribuição Igual
                                 </button>
@@ -174,7 +174,7 @@ export function DistributionModal({
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-bold text-foreground text-sm truncate">{seller.name}</p>
-                                                    <p className="text-[10px] text-muted-foreground">
+                                                    <p className="text-xs text-muted-foreground">
                                                         Mensal: <span className="font-bold text-emerald-500">{formatCurrency(sellerMonthly)}</span>
                                                         {' · '}
                                                         Anual: <span className="font-bold text-foreground">{formatCurrency(sellerMonthly * 12)}</span>
@@ -205,7 +205,7 @@ export function DistributionModal({
                             </div>
 
                             {/* Total indicator */}
-                            <div className={`flex items-center justify-between rounded-2xl p-4 text-[10px] font-black uppercase tracking-widest border-2 transition-all shadow-sm ${isValid
+                            <div className={`flex items-center justify-between rounded-2xl p-4 text-xs font-black uppercase tracking-widest border-2 transition-all shadow-sm ${isValid
                                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
                                 : 'bg-red-500/10 border-red-500/20 text-red-500'
                                 }`}>
@@ -224,14 +224,14 @@ export function DistributionModal({
                     <div className="flex gap-4 p-8 pt-0">
                         <button
                             onClick={onClose}
-                            className="flex-1 h-12 rounded-2xl border border-border text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 shadow-sm"
+                            className="flex-1 h-12 rounded-2xl border border-border text-xs font-black uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-95 shadow-sm"
                         >
                             Cancelar
                         </button>
                         <button
                             onClick={handleConfirm}
                             disabled={users.length > 1 && !isValid}
-                            className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:scale-100 text-white text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                            className="flex-1 h-12 rounded-2xl bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:scale-100 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                         >
                             {users.length === 1 ? 'Aplicar Meta' : <><Zap className="h-3.5 w-3.5" /> Confirmar Distribuição</>}
                         </button>

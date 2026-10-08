@@ -56,7 +56,7 @@ function getCategoryBadge(category: DocumentCategory, entityType: EntityType) {
     const label = categories.find((c) => c.value === category)?.label ?? category;
     const colors = map[category] ?? map.outro;
     return (
-        <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${colors.bg} ${colors.text}`}>
+        <span className={`px-1.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${colors.bg} ${colors.text}`}>
             {label}
         </span>
     );
@@ -268,7 +268,7 @@ export const DocumentsTab = ({
                 <div className="flex items-center gap-2 flex-wrap">
                     <button
                         onClick={() => setFilter('all')}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filter === 'all'
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === 'all'
                                 ? 'bg-primary text-white shadow-sm'
                                 : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                             }`}
@@ -282,7 +282,7 @@ export const DocumentsTab = ({
                             <button
                                 key={cat.value}
                                 onClick={() => setFilter(cat.value)}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filter === cat.value
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${filter === cat.value
                                         ? 'bg-primary text-white shadow-sm'
                                         : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                                     }`}
@@ -328,13 +328,13 @@ export const DocumentsTab = ({
                                             {doc.name}
                                         </p>
                                         {doc.source_name && (
-                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
+                                            <span className="px-1.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
                                                 {doc.source_name}
                                             </span>
                                         )}
                                         {getCategoryBadge(doc.category, entityType)}
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono mt-0.5">
                                         <span>{formatFileSize(doc.file_size)}</span>
                                         <span className="opacity-40">•</span>
                                         <span>

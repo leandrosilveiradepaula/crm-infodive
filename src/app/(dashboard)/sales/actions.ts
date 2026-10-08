@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { SalesService } from '@/services/SalesService';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 import { DistributorOrderService } from '@/services/DistributorOrderService';
 import { DocumentService } from '@/services/DocumentService';
 import type { DocumentCategory } from '@/types/document';
@@ -22,7 +22,7 @@ export async function getSalesOrders(dealId?: string) {
 
 export async function createSalesOrder(order: Partial<SalesOrder>, items: Partial<SalesOrderItem>[]) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:create');
         const data = await SalesService.createSalesOrder(organizationId, order, items);
         revalidatePath('/sales');
         return { success: true, data };
@@ -34,7 +34,7 @@ export async function createSalesOrder(order: Partial<SalesOrder>, items: Partia
 
 export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         const data = await SalesService.updateSalesOrder(organizationId, id, updates);
         revalidatePath('/sales');
         return { success: true, data };
@@ -46,7 +46,7 @@ export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>)
 
 export async function deleteSalesOrder(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:delete');
         await SalesService.deleteSalesOrder(organizationId, id);
         revalidatePath('/sales');
         return { success: true };
@@ -58,7 +58,7 @@ export async function deleteSalesOrder(id: string) {
 
 export async function updateInstallmentStatusAction(installmentId: string, status: string) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
         if (!userId || !organizationId) throw new Error('Unauthorized');
 
         await SalesService.updateInstallmentStatus(organizationId, installmentId, status);
@@ -72,7 +72,7 @@ export async function updateInstallmentStatusAction(installmentId: string, statu
 
 export async function processInvoiceAction(orderId: string, formData: FormData) {
     try {
-        const { organizationId, userId } = await requireSessionContext();
+        const { organizationId, userId } = await requirePermission('deals:edit');
         const file = formData.get('file') as File;
         const confirmSave = formData.get('confirmSave') === 'true';
         if (!file) throw new Error('Arquivo não encontrado');
@@ -248,7 +248,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
 
 export async function convertDealToSalesOrdersAction(dealId: string, extraData?: any) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
         // 1. Convert Deal to Sales Orders (Internal Records)
         const result = await SalesService.convertDealToSalesOrders(userId, organizationId, dealId);
@@ -330,7 +330,7 @@ export async function getSalesOrderDocuments(dealId: string) {
  * Upload a document for a sales order (stored under the deal entity).
  */
 export async function uploadSalesOrderDocument(dealId: string, formData: FormData) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     const file = formData.get('file') as File | null;
     if (!file) throw new Error('Nenhum arquivo enviado.');
@@ -364,7 +364,7 @@ export async function getSalesDocumentSignedUrl(documentId: string) {
  * Delete a document linked to a sales order.
  */
 export async function deleteSalesDocument(documentId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DocumentService.deleteDocument(userId, organizationId, documentId);
     revalidatePath('/sales');
     return true;

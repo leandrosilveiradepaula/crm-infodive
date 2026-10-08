@@ -68,7 +68,7 @@ export interface AutomationExecution {
     id: string;
     automationId: string;
     executedAt: string;
-    status: 'success' | 'failed' | 'skipped';
+    status: 'running' | 'success' | 'failed' | 'skipped';
     trigger: string;
     actions: string[];
     error?: string;

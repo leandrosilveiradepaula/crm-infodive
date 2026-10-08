@@ -1,7 +1,7 @@
 import { ActivitiesClientPage } from './client-page';
 
 export const metadata = {
-    title: 'Atividades | CRM Next Gen',
+    title: 'Atividades | CRM Infodive',
 };
 
 export default function ActivitiesPage() {

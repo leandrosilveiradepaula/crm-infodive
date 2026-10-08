@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     Zap,
     Plus,
@@ -24,8 +24,8 @@ import {
 } from 'lucide-react';
 import { NewAutomationModal } from '@/components/automations/NewAutomationModal';
 import { AutomationHistorySheet } from '@/components/automations/HistorySheet';
-import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation } from '@/app/(dashboard)/automations/actions';
-import { type Automation } from '@/types/automation';
+import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation, getAutomationHistory } from '@/app/(dashboard)/automations/actions';
+import { type Automation, type AutomationExecution } from '@/types/automation';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
@@ -51,58 +51,20 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     const [initialModalData, setInitialModalData] = useState<Partial<Automation> | undefined>(undefined);
     const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [history, setHistory] = useState<AutomationExecution[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyError, setHistoryError] = useState<string | null>(null);
+    const historyRequest = useRef(0);
+    const pendingAction = useRef(false);
+    const [pendingActionId, setPendingActionId] = useState<string | null>(null);
     const [filterType, setFilterType] = useState<string | null>(null);
     const [showGallery, setShowGallery] = useState(false);
 
 
     const recipes = [
-        { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
-        { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
-        { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+        { title: 'Tarefa para Nova Oportunidade', triggerType: 'deal_created', actionType: 'create_task', category: 'followup', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+        { title: 'Tarefa ao Mover Oportunidade', triggerType: 'deal_moved', actionType: 'create_task', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
     ];
-
-    const parseAIIntent = (prompt: string): Partial<Automation> => {
-        const p = prompt.toLowerCase();
-        let trigger: any = { type: 'deal_created', config: {} };
-        let actions: any[] = [{ type: 'send_notification', config: { title: 'AI Automation', description: prompt } }];
-        const name = prompt.charAt(0).toUpperCase() + prompt.slice(1);
-        let category: any = 'custom';
-
-        if (p.includes('estagnar') || p.includes('parado') || p.includes('parada') || p.includes('dias')) {
-            trigger = { type: 'deal_stagnant', config: { days: 7 } };
-            category = 'followup';
-        } else if (p.includes('ganhar') || p.includes('ganhou') || p.includes('fechar') || p.includes('venda')) {
-            trigger = { type: 'deal_moved', config: { stage: 'won' } };
-            category = 'alert';
-        } else if (p.includes('novo') || p.includes('criar')) {
-            trigger = { type: 'deal_created', config: {} };
-            category = 'welcome';
-        }
-
-        if (p.includes('email') || p.includes('e-mail')) {
-            actions = [{ type: 'send_email', config: { title: name } }];
-            category = 'followup';
-        } else if (p.includes('tarefa') || p.includes('agenda')) {
-            actions = [{ type: 'create_task', config: { title: name } }];
-        } else if (p.includes('mover') || p.includes('fase') || p.includes('estágio')) {
-            actions = [{ type: 'move_deal', config: {} }];
-        }
-
-        return { name, trigger, actions, category };
-    };
-
-    const handleAIBuilder = () => {
-        if (!searchTerm) {
-            setInitialModalData(undefined);
-        } else {
-            const data = parseAIIntent(searchTerm);
-            setInitialModalData(data);
-        }
-        setShowNewModal(true);
-    };
 
     const handleUseRecipe = (recipe: typeof recipes[0]) => {
         const data: Partial<Automation> = {
@@ -117,39 +79,49 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
     const totalExecutions = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.executionCount || 0), 0);
     const totalSuccessCount = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.successCount || 0), 0);
-    const successRate = totalExecutions > 0 
-        ? ((totalSuccessCount / totalExecutions) * 100).toFixed(1)
-        : "0";
+    const successRate = totalExecutions > 0
+        ? ((totalSuccessCount / totalExecutions) * 100).toFixed(1) + '%'
+        : '—';
+    const activeCount = initialAutomations.filter((automation) => automation.enabled).length;
 
     const stats: StatItem[] = [
         {
-            label: "Total de Execuções",
+            label: "Execuções registradas",
             value: totalExecutions.toString(),
-            description: "Ações processadas",
+            description: "Contadores persistidos",
             icon: Zap,
             color: "text-blue-500",
             gradient: "from-blue-50 to-white dark:from-blue-950/20",
             border: "border-blue-100 dark:border-blue-900/50",
+        },
+        {
+            label: "Fluxos ativos",
+            value: activeCount.toString(),
+            description: "Gatilhos: criação e movimentação",
+            icon: Activity,
+            color: "text-emerald-500",
+            gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
+            border: "border-emerald-100 dark:border-emerald-900/50",
             onClick: () => setFilterType(filterType === 'active' ? null : 'active')
         },
         {
-            label: "Tempo Economizado",
-            value: "42h",
-            description: "Estimativa mensal",
-            icon: Clock,
-            color: "text-emerald-500",
-            gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-            border: "border-emerald-100 dark:border-emerald-900/50"
-        },
-        {
             label: "Taxa de Sucesso",
-            value: `${successRate}%`,
-            description: "Execuções sem erro",
+            value: successRate,
+            description: totalExecutions ? "Indicador pelos contadores" : "Sem execuções registradas",
             icon: CheckCircle2,
             color: "text-orange-500",
             gradient: "from-orange-50 to-white dark:from-orange-950/20",
             border: "border-orange-100 dark:border-orange-900/50",
-            onClick: () => setFilterType(filterType === 'failed' ? null : 'failed')
+        },
+        {
+            label: "Fluxos pausados",
+            value: (initialAutomations.length - activeCount).toString(),
+            description: "Desativadas no momento",
+            icon: Clock,
+            color: "text-slate-500",
+            gradient: "from-slate-50 to-white dark:from-slate-900/20",
+            border: "border-slate-200 dark:border-slate-800",
+            onClick: () => setFilterType(filterType === 'inactive' ? null : 'inactive')
         }
     ];
 
@@ -166,43 +138,103 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     });
 
     const handleSave = async (automation: Partial<Automation>) => {
-        if (automation.id) {
-            await updateAutomation(automation.id, automation);
-            toast.success('Automação atualizada com sucesso!');
-        } else {
-            await createAutomation(automation);
-            toast.success('Automação criada com sucesso!');
+        let result: { success: boolean; error?: string };
+        try {
+            result = automation.id
+                ? await updateAutomation(automation.id, automation)
+                : await createAutomation(automation);
+        } catch {
+            toast.error('Falha de conexão ao salvar. Tente novamente.');
+            throw new Error('Automation save failed');
         }
+
+        if (!result.success) {
+            const message = result.error || 'Não foi possível salvar a automação.';
+            toast.error(message);
+            throw new Error(message);
+        }
+
+        toast.success(automation.id ? 'Automação atualizada com sucesso!' : 'Automação criada com sucesso!');
         setShowNewModal(false);
         setInitialModalData(undefined);
         router.refresh();
     };
 
-    const handleToggle = async (id: string, enabled: boolean) => {
-        await toggleAutomation(id, enabled);
-        toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
-        router.refresh();
-    };
-
-    const handleDelete = async (id: string) => {
-        if (confirm('Tem certeza que deseja excluir esta automação?')) {
-            await deleteAutomation(id);
-            toast.success('Automação excluída');
-            router.refresh();
+    const withPending = async (id: string, operation: () => Promise<void>) => {
+        if (pendingAction.current) return;
+        pendingAction.current = true;
+        setPendingActionId(id);
+        try {
+            await operation();
+        } catch {
+            toast.error('Não foi possível concluir a operação. Tente novamente.');
+        } finally {
+            pendingAction.current = false;
+            setPendingActionId(null);
         }
     };
 
-    const handleDuplicate = async (automation: Automation) => {
-        const { id, createdAt, updatedAt, ...rest } = automation;
-        const copy = {
-            ...rest,
-            name: `${automation.name} (Cópia)`,
-            enabled: false
-        } as any;
-        await createAutomation(copy);
+    const handleOpenHistory = async (automation: Automation) => {
+        const request = ++historyRequest.current;
+        setSelectedAutomation(automation);
+        setShowHistory(true);
+        setHistory([]);
+        setHistoryError(null);
+        setHistoryLoading(true);
+        try {
+            const executions = await getAutomationHistory(automation.id);
+            if (historyRequest.current === request) setHistory(executions);
+        } catch {
+            if (historyRequest.current === request) {
+                setHistory([]);
+                setHistoryError('A consulta falhou. Nenhum resultado foi confirmado.');
+            }
+        } finally {
+            if (historyRequest.current === request) setHistoryLoading(false);
+        }
+    };
+
+    const handleToggle = async (id: string, enabled: boolean) => withPending(id, async () => {
+        const result = await toggleAutomation(id, enabled);
+        if (!result.success) {
+            toast.error(result.error || 'Não foi possível alterar a automação.');
+            return;
+        }
+        toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
+        router.refresh();
+    });
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir esta automação?')) return;
+        await withPending(id, async () => {
+            const result = await deleteAutomation(id);
+            if (!result.success) {
+                toast.error(result.error || 'Não foi possível excluir a automação.');
+                return;
+            }
+            toast.success('Automação excluída');
+            router.refresh();
+        });
+    };
+
+    const handleDuplicate = async (automation: Automation) => withPending(automation.id, async () => {
+        const copy: Partial<Automation> = {
+            name: automation.name + ' (Cópia)',
+            description: automation.description,
+            category: automation.category,
+            trigger: automation.trigger,
+            conditions: automation.conditions,
+            actions: automation.actions,
+            enabled: false,
+        };
+        const result = await createAutomation(copy);
+        if (!result.success) {
+            toast.error(result.error || 'Não foi possível duplicar a automação.');
+            return;
+        }
         toast.success('Automação duplicada');
         router.refresh();
-    };
+    });
 
     const getCategoryIcon = (category?: string) => {
         switch (category) {
@@ -218,7 +250,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
-                description="Otimize sua rotina com gatilhos e ações automáticas inteligentes."
+                description="Otimize sua rotina com gatilhos e ações automáticas."
             >
                 <div className="flex items-center gap-3">
                     <button
@@ -233,31 +265,17 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 </div>
             </PageHeader>
 
-            {/* AI Builder Quick Input */}
-            <div className="bg-card border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl shadow-sm mb-6">
-                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                        <Zap className="h-5 w-5 text-white animate-pulse" />
-                    </div>
-                    <div className="flex-1 space-y-0.5 text-center md:text-left">
-                        <h3 className="text-sm font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
-                        <p className="text-xs text-muted-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
-                    </div>
-                    <div className="w-full md:w-[450px] relative group">
+            {/* Search */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm mb-6">
+                <div className="p-4">
+                    <div className="relative group max-w-2xl">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
-                            placeholder="Descreva sua automação e a IA fará o resto..."
-                            className="pl-10 pr-28 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
+                            placeholder="Buscar automações por nome ou descrição..."
+                            className="pl-10 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                         />
-                        <button
-                            onClick={handleAIBuilder}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all flex items-center gap-1.5"
-                        >
-                            <Zap className="h-3 w-3 fill-current" />
-                            Gerar com IA
-                        </button>
                     </div>
                 </div>
             </div>
@@ -290,7 +308,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
+                                <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
                                     Usar Modelo
                                 </span>
                                 <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
@@ -308,7 +326,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         {filterType && (
                             <span className="text-xs font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
                                 <AlertCircle className="h-3 w-3" /> Filtrado: {filterType}
-                                <button onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
+                                <button type="button" onClick={() => setFilterType(null)} className="hover:text-foreground" aria-label="Remover filtro de automações" title="Remover filtro">×</button>
                             </span>
                         )}
                         <span className="bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground">
@@ -324,7 +342,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                             title="Nenhuma automação encontrada"
                             description={searchTerm || filterType 
                                 ? "Não encontramos fluxos com os filtros aplicados." 
-                                : "Você ainda não criou nenhuma automação. Use a IA acima para começar agora!"
+                                : "Você ainda não criou nenhuma automação. Crie seu primeiro fluxo ou comece por uma receita."
                             }
                             actionLabel="Criar Automação"
                             onAction={() => setShowNewModal(true)}
@@ -351,9 +369,9 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         <div>
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
-                                                {!automation.enabled && (
-                                                    <span className="text-[10px] font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
-                                                )}
+                                                <span className="text-xs font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">
+                                                    {automation.enabled ? 'Ativa' : 'Pausada'}
+                                                </span>
                                             </div>
                                             <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{automation.description}</p>
                                         </div>
@@ -363,15 +381,17 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <input
                                                 type="checkbox"
                                                 checked={automation.enabled}
+                                                disabled={pendingActionId !== null}
                                                 onChange={(e) => handleToggle(automation.id, e.target.checked)}
                                                 className="sr-only peer"
+                                                aria-label={automation.enabled ? 'Pausar automação' : 'Ativar automação'}
                                             />
                                             <div className="w-12 h-6.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border"></div>
                                         </label>
                                         
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <button className="p-2 text-muted-foreground hover:text-white transition-colors">
+                                                <button type="button" className="p-2 text-muted-foreground hover:text-foreground transition-colors" aria-label={`Abrir ações da automação ${automation.name}`} title="Ações da automação">
                                                     <MoreHorizontal className="h-5 w-5" />
                                                 </button>
                                             </DropdownMenuTrigger>
@@ -408,19 +428,19 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
+                                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
                                         <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
                                     <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
+                                        <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
                                                     key={`${action.type}-${idx}`}
-                                                    className="text-[10px] font-black bg-background border border-border px-3 py-1.5 rounded-lg text-primary group-hover:border-primary/20 transition-all"
+                                                    className="text-xs font-black bg-background border border-border px-3 py-1.5 rounded-lg text-primary group-hover:border-primary/20 transition-all"
                                                 >
                                                     {action.type.replace('_', ' ').toUpperCase()}
                                                 </span>
@@ -432,11 +452,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>
                                             <span className="text-sm font-black text-foreground">{automation.executionCount || 0}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
                                             <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
                                                     ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)
@@ -445,10 +465,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                     </div>
                                     <button 
-                                        onClick={() => {
-                                            setSelectedAutomation(automation);
-                                            setShowHistory(true);
-                                        }}
+                                        onClick={() => handleOpenHistory(automation)}
                                         className="flex items-center gap-2 text-primary font-black text-xs hover:text-foreground transition-colors group/btn"
                                     >
                                         <History className="h-4 w-4" />
@@ -478,7 +495,13 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 <AutomationHistorySheet
                     automation={selectedAutomation}
                     open={showHistory}
-                    onOpenChange={setShowHistory}
+                    onOpenChange={(open) => {
+                        setShowHistory(open);
+                        if (!open) historyRequest.current += 1;
+                    }}
+                    executions={history}
+                    loading={historyLoading}
+                    error={historyError}
                 />
             )}
 
@@ -487,10 +510,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     <div className="bg-card w-full max-w-4xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col max-h-[85vh]">
                         <div className="p-10 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
                             <div>
-                                <h2 className="text-3xl font-black text-white tracking-tighter">Biblioteca de Receitas</h2>
+                                <h2 className="text-3xl font-black text-foreground tracking-tighter">Biblioteca de Receitas</h2>
                                 <p className="text-muted-foreground font-medium mt-1">Escolha um modelo e comece em segundos</p>
                             </div>
-                            <button onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all">
+                            <button type="button" onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all" aria-label="Fechar biblioteca de receitas" title="Fechar">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -510,7 +533,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                         <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                                     </div>
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-card px-3 py-2 rounded-xl border border-border/50 text-center group-hover:bg-primary group-hover:text-white transition-all">
+                                    <span className="text-xs font-black text-muted-foreground uppercase tracking-widest bg-card px-3 py-2 rounded-xl border border-border/50 text-center group-hover:bg-primary group-hover:text-white transition-all">
                                         Explorar Modelo
                                     </span>
                                 </button>
@@ -520,23 +543,20 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 </div>
             )}
 
-            {/* Footer / AI Tip */}
+            {/* Automation tip */}
             <div className="bg-gradient-to-r from-primary/10 to-transparent p-6 rounded-3xl border border-primary/10 flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
+                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center">
                     <Zap className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                    <h4 className="font-black text-white text-sm uppercase tracking-widest">Dica da Antigravity AI</h4>
+                    <h4 className="font-black text-foreground text-sm uppercase tracking-widest">Dica de automação</h4>
                     <p className="text-muted-foreground text-sm mt-1">
-                        Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação. 
-                        <button 
-                            onClick={() => {
-                                setSearchTerm("Mandar e-mail ao estagnar por 7 dias");
-                                handleAIBuilder();
-                            }}
+                        Comece por uma receita validada e ajuste gatilho e ações antes de ativar o fluxo.
+                        <button
+                            onClick={() => handleUseRecipe(recipes[0])}
                             className="text-primary font-bold hover:underline ml-1"
                         >
-                            Configurar agora
+                            Usar modelo de follow-up
                         </button>
                     </p>
                 </div>

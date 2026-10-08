@@ -1,18 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
     LayoutDashboard,
-    Trello, // Pipeline uses Kanban or Trello icon usually. Legacy used Trello/Kanban? Let's check.
-    FileText,
     Settings,
     LogOut,
-    Menu,
     Building2,
     Users,
-    User, // Added User icon
     Calendar,
     Kanban,
     Scroll,
@@ -23,13 +19,9 @@ import {
     Package,
     FileSpreadsheet,
     Target,
-    Sparkles,
     BarChart3,
-    X,
-    Palette
+    X
 } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -43,8 +35,6 @@ interface SidebarProps {
 export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, setIsCollapsed }: SidebarProps) {
     const pathname = usePathname();
     const { profile, signOut } = useAuth();
-    const router = useRouter();
-
     const handleLogout = async () => {
         try {
             await signOut();
@@ -69,11 +59,13 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     <div className="bg-primary p-2 rounded-lg flex-shrink-0">
                         <BarChart3 className="h-6 w-6 text-white" />
                     </div>
-                    {!isCollapsed && <span className="font-bold text-xl tracking-tight whitespace-nowrap">Nexus CRM</span>}
+                    {!isCollapsed && <span className="font-bold text-xl tracking-tight whitespace-nowrap">CRM Infodive</span>}
                 </div>
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="lg:hidden text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                    aria-label="Fechar menu principal"
+                    title="Fechar menu principal"
                 >
                     <X className="h-6 w-6" />
                 </button>
@@ -99,19 +91,11 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     <NavItem href="/price-lists" icon={FileSpreadsheet} label="Tabelas" isActive={pathname === '/price-lists'} collapsed={isCollapsed} />
                     <NavItem href="/goals-commissions" icon={Target} label="Metas" isActive={pathname === '/goals-commissions'} collapsed={isCollapsed} />
                     <NavItem href="/settings" icon={Settings} label="Configurações" isActive={pathname === '/settings'} collapsed={isCollapsed} />
-                    <NavItem href="/design-preview" icon={Palette} label="Design System" isActive={pathname === '/design-preview'} collapsed={isCollapsed} />
                 </div>
             </nav>
 
             {/* Footer / User Profile */}
             <div className="p-4 border-t border-sidebar-border space-y-4">
-                <Button
-                    className={cn("w-full bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white border-0", isCollapsed && "px-0")}
-                    onClick={() => { }} // Open AI
-                >
-                    <Sparkles className="h-5 w-5 mr-0" />
-                    {!isCollapsed && <span className="ml-2">Watson AI</span>}
-                </Button>
 
                 <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "justify-center" : "")}>
                     <div className="flex items-center gap-3">
@@ -128,7 +112,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                     </div>
 
                     {!isCollapsed && (
-                        <button onClick={handleLogout} className="p-2 text-sidebar-foreground/50 hover:text-rose-500 transition-colors" title="Sair do sistema">
+                        <button onClick={handleLogout} className="p-2 text-sidebar-foreground/50 hover:text-rose-500 transition-colors" title="Sair do sistema" aria-label="Sair do sistema">
                             <LogOut className="h-4 w-4" />
                         </button>
                     )}
@@ -143,6 +127,8 @@ function NavItem({ href, icon: Icon, label, isActive, collapsed }: { href: strin
         <Link
             href={href}
             title={collapsed ? label : ''}
+            aria-label={collapsed ? label : undefined}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-200 group",
                 isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-blue-900/20" : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent",

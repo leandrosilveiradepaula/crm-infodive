@@ -19,7 +19,9 @@ export type Permission =
     | 'products:delete'
     | 'clients:view_all'
     | 'settings:manage_users'
-    | 'settings:configure_pipeline';
+    | 'settings:view_audit'
+    | 'settings:configure_pipeline'
+    | 'integrations:manage';
 
 export interface AuthContextType {
     user: { id: string; email?: string } | null;

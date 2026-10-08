@@ -6,7 +6,7 @@ export default async function PipelinePage() {
     const { deals, profile, distributors, allAccounts } = await getPipelineData();
 
     return (
-        <Suspense fallback={<div className="text-white p-8">Carregando pipeline...</div>}>
+        <Suspense fallback={<div className="text-foreground p-8">Carregando pipeline...</div>}>
             <PipelineClientPage
                 initialDeals={deals}
                 userProfile={profile}

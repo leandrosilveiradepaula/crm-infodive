@@ -13,7 +13,7 @@ export const ThemePanel = ({ children, className }: { children: ReactNode, class
 
 export const ThemeSectionHeader = ({ title, iconColor = "bg-primary", children }: { title: string, iconColor?: string, children?: ReactNode }) => (
     <div className="flex items-center justify-between h-6 mb-2">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
             <span className={cn("w-1 h-1 rounded-full", iconColor)}></span>
             {title}
         </p>
@@ -24,7 +24,7 @@ export const ThemeSectionHeader = ({ title, iconColor = "bg-primary", children }
 // --- Typography & Labels ---
 
 export const ThemeLabel = ({ children, className, ...props }: { children: ReactNode, className?: string } & React.ComponentProps<typeof Label>) => (
-    <Label className={cn("text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5", className)} {...props}>
+    <Label className={cn("text-xs font-bold text-muted-foreground uppercase tracking-wide block mb-1.5", className)} {...props}>
         {children}
     </Label>
 );

@@ -205,24 +205,45 @@ export const analyzeDeal = async (deal: Deal): Promise<DealAnalysis> => {
 };
 
 export const generateFollowUpEmail = async (deal: Deal): Promise<string> => {
-    // Mock implementation - TODO: migrate to backend API for full AI capabilities
-    return `Olá ${deal.contact_name || 'equipe'},
+    const response = await fetch('/api/gemini/follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealId: deal.id })
+    });
 
-Espero que estejam bem!
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Não foi possível gerar o e-mail de follow-up.');
+    }
 
-Gostaria de fazer um follow-up sobre nossa proposta de ${deal.title} no valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}.
+    const payload = await response.json();
+    if (!payload.email || typeof payload.email !== 'string') {
+        throw new Error('A integração de IA retornou uma resposta inválida.');
+    }
 
-Estamos à disposição para esclarecer qualquer dúvida e ajustar a proposta conforme necessário.
-
-Aguardo seu retorno.
-
-Atenciosamente,
-Equipe IBM/Lenovo`;
+    return payload.email;
 };
 
-export const runCRMConsultantChat = async (history: { role: string, content: string }[], context: string): Promise<string> => {
-    // Mock chat response - TODO: migrate to backend for full AI chat capabilities
-    return "Olá! Sou o Watson AI. Para habilitar respostas inteligentes, configure a integração com o backend. Por enquanto, você pode usar o Command Bar (Ctrl+K) para buscar informações do CRM.";
+export const runCRMConsultantChat = async (
+    history: { role: string, content: string }[]
+): Promise<string> => {
+    const response = await fetch('/api/gemini/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history })
+    });
+
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Não foi possível consultar o assistente.');
+    }
+
+    const payload = await response.json();
+    if (!payload.message || typeof payload.message !== 'string') {
+        throw new Error('A integração de IA retornou uma resposta inválida.');
+    }
+
+    return payload.message;
 };
 
 /**

@@ -4,7 +4,7 @@ import { getUsersWithGoals, getCampaigns, getScenarios, getCommissionDeals } fro
 import { requireSessionContext } from '@/lib/auth-server';
 
 export const metadata = {
-    title: 'Metas e Comissões | CRM Next Gen',
+    title: 'Metas e Comissões | CRM Infodive Gen',
 };
 
 export default async function GoalsCommissionsPage() {

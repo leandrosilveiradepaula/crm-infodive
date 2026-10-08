@@ -1,6 +1,6 @@
 'use server';
 
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 import { ContractService } from '@/services/ContractService';
 import { revalidatePath } from 'next/cache';
 import { type Contract } from '@/types/contract';
@@ -33,7 +33,7 @@ export async function getContracts(): Promise<Contract[]> {
 
 export async function createContract(contract: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         const data = await ContractService.createContract(organizationId, contract);
         revalidatePath('/contracts');
         return { success: true, data };
@@ -45,7 +45,7 @@ export async function createContract(contract: Partial<Contract>) {
 
 export async function updateContract(id: string, updates: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         await ContractService.updateContract(organizationId, id, updates);
         revalidatePath('/contracts');
         return { success: true };
@@ -57,7 +57,7 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
 
 export async function deleteContract(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         await ContractService.deleteContract(organizationId, id);
         revalidatePath('/contracts');
         return { success: true };

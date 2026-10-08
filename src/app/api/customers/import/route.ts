@@ -1,16 +1,25 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: Request) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requireSessionContext();
         const { fileName, fileContent, contentType } = await req.json();
 
         if (!fileContent) {
             return NextResponse.json({ error: 'Conteúdo do arquivo é obrigatório' }, { status: 400 });
+        }
+        if (typeof fileContent !== 'string' || fileContent.length > 200_000) {
+            return NextResponse.json({ error: 'Conteúdo do arquivo excede o limite permitido' }, { status: 413 });
+        }
+
+        const rateLimit = await guardPaidAiRequest({ scope: 'customers-import-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo. Tente novamente em instantes.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const model = genAI.getGenerativeModel({ 

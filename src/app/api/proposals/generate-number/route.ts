@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 // GET /api/proposals/generate-number
 // Generates the next proposal number for the authenticated user's organization
 export async function GET() {
     try {
-        const { userId } = await requireSessionContext();
+        const { userId } = await requirePermission('deals:edit');
         const supabase = createAdminClient();
 
         // Get the user's organization_id
@@ -30,8 +30,15 @@ export async function GET() {
         }
 
         return NextResponse.json({ number });
-    } catch {
+    } catch (error: unknown) {
         console.error('[ProposalGenerateNumberRoute] proposal number generation failed');
+        const message = error instanceof Error ? error.message : '';
+        if (message.includes('Forbidden')) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (message.includes('Unauthorized') || message.includes('session')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
         return NextResponse.json({ error: 'Não foi possível gerar o número da proposta.' }, { status: 500 });
     }
 }

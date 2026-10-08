@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 export interface DealRoom {
     id: string;
@@ -14,7 +14,7 @@ export interface DealRoom {
 }
 
 export async function getOrCreateDealRoom(dealId: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('deals:edit');
     const supabase = createAdminClient();
 
     try {

@@ -304,7 +304,10 @@ export function ActivitiesClientPage() {
                     {/* View Toggle */}
                     <div className="flex gap-1 bg-muted/30 p-1 rounded-full border border-border h-11 items-center">
                         <button
+                            type="button"
                             onClick={() => setViewMode('list')}
+                            aria-label="Exibir atividades em lista"
+                            aria-pressed={viewMode === 'list'}
                             className={`p-2 rounded-full transition-all ${viewMode === 'list'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -313,7 +316,10 @@ export function ActivitiesClientPage() {
                             <List className="h-4 w-4" />
                         </button>
                         <button
+                            type="button"
                             onClick={() => setViewMode('calendar')}
+                            aria-label="Exibir atividades no calendário"
+                            aria-pressed={viewMode === 'calendar'}
                             className={`p-2 rounded-full transition-all ${viewMode === 'calendar'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -351,7 +357,7 @@ export function ActivitiesClientPage() {
 
                         return (
                             <div key={group} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h3 className={`text-[11px] font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${groupColors[group]}`}>
+                                <h3 className={`text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${groupColors[group]}`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     {groupTitles[group]}
                                     <span className="ml-1 opacity-50">({items.length})</span>
@@ -394,11 +400,14 @@ export function ActivitiesClientPage() {
                                                 <div className="flex items-start gap-5 relative z-10">
                                                     {/* Checkbox */}
                                                     <button
+                                                        type="button"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleToggleComplete(activity.id);
                                                         }}
                                                         className="mt-1 flex-shrink-0"
+                                                        aria-label={activity.status === 'completed' ? `Marcar ${activity.title} como pendente` : `Marcar ${activity.title} como concluída`}
+                                                        title={activity.status === 'completed' ? 'Marcar como pendente' : 'Marcar como concluída'}
                                                     >
                                                         {activity.status === 'completed' ? (
                                                             <CheckCircle2 className="h-6 w-6 text-success" />
@@ -420,7 +429,7 @@ export function ActivitiesClientPage() {
 
                                                                 <div className="flex flex-wrap items-center gap-3">
                                                                     {/* Type Badge */}
-                                                                    <span className={`px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${typeColors[activity.type]}`}>
+                                                                    <span className={`px-2.5 py-1 rounded-lg border text-xs font-black uppercase tracking-wider flex items-center gap-1.5 ${typeColors[activity.type]}`}>
                                                                         <TypeIcon className="h-3 w-3" />
                                                                         {activity.type === 'meeting' && 'Reunião'}
                                                                         {activity.type === 'call' && 'Ligação'}
@@ -430,7 +439,7 @@ export function ActivitiesClientPage() {
                                                                     </span>
 
                                                                     {/* Priority */}
-                                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${priorityColors[activity.priority]}`}>
+                                                                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-wider ${priorityColors[activity.priority]}`}>
                                                                         {activity.priority === 'urgent' && '🔥 Urgente'}
                                                                         {activity.priority === 'high' && 'Alta'}
                                                                         {activity.priority === 'medium' && 'Média'}
@@ -452,14 +461,14 @@ export function ActivitiesClientPage() {
                                                                     )}
 
                                                                     {/* Assignee */}
-                                                                    <span className="bg-card/5 px-2.5 py-1 rounded-lg border border-white/5 text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                                                                    <span className="bg-card/5 px-2.5 py-1 rounded-lg border border-white/5 text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
                                                                         <Users className="h-3 w-3" />
                                                                         {activity.assignedTo || 'Unassigned'}
                                                                     </span>
 
                                                                     {/* Linked Deal */}
                                                                     {activity.dealTitle && (
-                                                                        <span className="bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 text-xs font-black text-primary uppercase tracking-widest flex items-center gap-1">
                                                                             <List className="h-3 w-3" />
                                                                             {activity.dealTitle}
                                                                         </span>
@@ -467,7 +476,7 @@ export function ActivitiesClientPage() {
 
                                                                     {/* Linked Account */}
                                                                     {activity.customerName && (
-                                                                        <span className="bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 text-[10px] font-black text-success uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 text-xs font-black text-success uppercase tracking-widest flex items-center gap-1">
                                                                             <Users className="h-3 w-3" />
                                                                             {activity.customerName}
                                                                         </span>
@@ -478,21 +487,27 @@ export function ActivitiesClientPage() {
                                                             {/* Actions */}
                                                             <div className="flex gap-2">
                                                                 <button
+                                                                    type="button"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setEditingActivity(activity);
                                                                         setShowNewModal(true);
                                                                     }}
                                                                     className="p-2 bg-muted/50 hover:bg-primary/10 rounded-xl text-muted-foreground hover:text-primary transition-colors border border-border"
+                                                                    aria-label={`Editar atividade ${activity.title}`}
+                                                                    title="Editar atividade"
                                                                 >
                                                                     <Edit className="h-4 w-4" />
                                                                 </button>
                                                                 <button
+                                                                    type="button"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleDelete(activity.id);
                                                                     }}
-                                                                    className="p-2 bg-card/5 hover:bg-red-500/10 rounded-xl text-muted-foreground hover:text-red-400 transition-colors border border-white/5"
+                                                                    className="p-2 bg-card/5 hover:bg-red-500/10 rounded-xl text-muted-foreground hover:text-red-400 transition-colors border border-border"
+                                                                    aria-label={`Excluir atividade ${activity.title}`}
+                                                                    title="Excluir atividade"
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </button>

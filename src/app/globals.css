@@ -163,19 +163,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  /* Responsive Scaling for Layout */
-  @media (max-width: 1550px) {
-    html {
-      font-size: 14.5px;
-    }
-  }
-
-  @media (max-width: 1366px) {
-    html {
-      font-size: 13.5px;
-    }
-  }
 }
 
 @layer utilities {

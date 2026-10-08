@@ -131,8 +131,8 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                         <LayoutTemplate className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Normalizador Automático</p>
-                        <p className="text-[11px] text-muted-foreground font-medium">Dividir itens internos pela quantidade do produto ({parentQuantity} un).</p>
+                        <p className="text-xs font-black text-primary uppercase tracking-widest leading-none mb-1">Normalizador Automático</p>
+                        <p className="text-xs text-muted-foreground font-medium">Dividir itens internos pela quantidade do produto ({parentQuantity} un).</p>
                     </div>
                 </div>
 
@@ -140,7 +140,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                     <button
                         onClick={handleNormalize}
                         disabled={!parentQuantity || parentQuantity <= 1 || details.length === 0}
-                        className="h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-2 shadow-sm"
+                        className="h-9 px-4 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-primary disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-2 shadow-sm"
                     >
                         Normalizar para 1 un.
                     </button>
@@ -152,12 +152,12 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                     <thead className="bg-muted">
                         <tr>
                             <th className="w-8 px-3 py-2"></th>
-                            <th className="px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider">Descrição Técnico/Comercial</th>
-                            <th className="w-20 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Qtd</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Custo (Unit)</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Venda (Unit)</th>
-                            <th className="w-20 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-center">Proposta</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider">Destaque</th>
+                            <th className="px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider">Descrição Técnico/Comercial</th>
+                            <th className="w-20 px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider text-right">Qtd</th>
+                            <th className="w-32 px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider text-right">Custo (Unit)</th>
+                            <th className="w-32 px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider text-right">Venda (Unit)</th>
+                            <th className="w-20 px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider text-center">Proposta</th>
+                            <th className="w-32 px-3 py-2 text-xs font-black text-muted-foreground uppercase tracking-wider">Destaque</th>
                             <th className="w-10 px-3 py-2"></th>
                         </tr>
                     </thead>
@@ -184,7 +184,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
 
                                     <td className="px-3 py-2">
                                         <div className="flex flex-col">
-                                            {item.sku && <span className="text-[10px] font-mono text-muted-foreground">{item.sku}</span>}
+                                            {item.sku && <span className="text-xs font-mono text-muted-foreground">{item.sku}</span>}
                                             <input
                                                 ref={editingId === item.id ? descriptionInputRef : null}
                                                 type="text"
@@ -216,7 +216,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
 
                                     <td className="px-3 py-2 text-right">
                                         <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-md transition-all">
-                                            <span className="pl-2.5 text-[10px] font-bold text-muted-foreground/50">R$</span>
+                                            <span className="pl-2.5 text-xs font-bold text-muted-foreground/50">R$</span>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -234,7 +234,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
 
                                     <td className="px-3 py-2 text-right">
                                         <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-md transition-all">
-                                            <span className="pl-2.5 text-[10px] font-bold text-muted-foreground/50">R$</span>
+                                            <span className="pl-2.5 text-xs font-bold text-muted-foreground/50">R$</span>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -275,7 +275,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                     type="text"
                                                     value={item.grid_label || ''}
                                                     onChange={(e) => handleUpdate(item.id, 'grid_label', e.target.value)}
-                                                    className="text-[10px] px-2 py-1 border border-border rounded bg-background focus:border-primary focus:ring-0 w-24 h-7"
+                                                    className="text-xs px-2 py-1 border border-border rounded bg-background focus:border-primary focus:ring-0 w-24 h-7"
                                                     placeholder="Rótulo..."
                                                 />
                                             )}
@@ -297,9 +297,9 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                     {details.length > 0 && (
                         <tfoot className="bg-muted/30 border-t border-border">
                             <tr className="divide-x divide-border/10">
-                                <td colSpan={3} className="px-3 py-1.5 text-[9px] font-bold text-muted-foreground uppercase text-right">Subtotal Composição:</td>
-                                <td className="px-3 py-1.5 text-right text-[10px] font-black text-emerald-600/80">{formatCurrency(totals.cost)}</td>
-                                <td className="px-3 py-1.5 text-right text-[10px] font-black text-primary/80">{formatCurrency(totals.price)}</td>
+                                <td colSpan={3} className="px-3 py-1.5 text-xs font-bold text-muted-foreground uppercase text-right">Subtotal Composição:</td>
+                                <td className="px-3 py-1.5 text-right text-xs font-black text-emerald-600/80">{formatCurrency(totals.cost)}</td>
+                                <td className="px-3 py-1.5 text-right text-xs font-black text-primary/80">{formatCurrency(totals.price)}</td>
                                 <td colSpan={3}></td>
                             </tr>
                         </tfoot>
@@ -307,7 +307,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                 </table>
             </div>
 
-            <div className="flex gap-2 text-[10px] font-medium text-muted-foreground bg-muted/30 p-2 rounded-lg">
+            <div className="flex gap-2 text-xs font-medium text-muted-foreground bg-muted/30 p-2 rounded-lg">
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Determina se a linha aparecerá na lista detalhada da proposta.</span>
                 <span className="flex items-center gap-1 ml-4"><LayoutTemplate className="h-3 w-3" /> Cria um "Card" especial na capa do sumário de hardware.</span>
             </div>

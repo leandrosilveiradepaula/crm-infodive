@@ -238,11 +238,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Valor Total</p>
+                                    <p className="text-xs uppercase font-bold text-muted-foreground tracking-wider mb-1">Valor Total</p>
                                     <p className="text-xl font-black text-foreground">{formatCurrency(totalValue)}</p>
                                 </div>
                                 <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Distribuidores</p>
+                                    <p className="text-xs uppercase font-bold text-muted-foreground tracking-wider mb-1">Distribuidores</p>
                                     <p className="text-xl font-black text-foreground">{distributors.length || 'Venda Direta'}</p>
                                 </div>
                             </div>
@@ -289,7 +289,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Tipo de Evidência</p>
+                                    <p className="text-xs font-bold text-muted-foreground uppercase">Tipo de Evidência</p>
                                     <Select
                                         value={evidenceCategory}
                                         onValueChange={(v: any) => setEvidenceCategory(v)}
@@ -313,7 +313,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                             </div>
                                             <div>
                                                 <p className="text-sm font-medium text-foreground">Clique para selecionar o arquivo</p>
-                                                <p className="text-[10px] text-muted-foreground mt-1">PDF, PNG, JPG ou DOCX até 25MB</p>
+                                                <p className="text-xs text-muted-foreground mt-1">PDF, PNG, JPG ou DOCX até 25MB</p>
                                             </div>
                                             <input
                                                 type="file"
@@ -378,7 +378,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200 truncate">{uploadedDoc.name}</p>
-                                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black">{evidenceCategory.replace('_', ' ')}</p>
+                                            <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase font-black">{evidenceCategory.replace('_', ' ')}</p>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -404,7 +404,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     </div>
                                     <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Revisão Completa do Pedido</h3>
                                 </div>
-                                <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-full font-bold">ESTILO PRESERVADO</span>
+                                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-bold">ESTILO PRESERVADO</span>
                             </div>
 
                             <ScrollArea className="h-[400px] pr-4">
@@ -413,11 +413,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 text-primary">
                                             <Building2 className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Dados da Revenda (Sua Empresa)</h4>
+                                            <h4 className="text-xs font-black uppercase tracking-widest">Dados da Revenda (Sua Empresa)</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Razão Social</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Razão Social</Label>
                                                 <Input
                                                     value={formData.dealerName}
                                                     onChange={e => setFormData({ ...formData, dealerName: e.target.value })}
@@ -425,7 +425,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CNPJ</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">CNPJ</Label>
                                                 <Input
                                                     value={formData.dealerCnpj}
                                                     onChange={e => setFormData({ ...formData, dealerCnpj: e.target.value })}
@@ -441,11 +441,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 text-emerald-600">
                                             <User className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Dados do Usuário Final (Cliente)</h4>
+                                            <h4 className="text-xs font-black uppercase tracking-widest">Dados do Usuário Final (Cliente)</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Razão Social / Nome</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Razão Social / Nome</Label>
                                                 <Input
                                                     value={formData.userName}
                                                     onChange={e => setFormData({ ...formData, userName: e.target.value })}
@@ -453,7 +453,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CNPJ / CPF</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">CNPJ / CPF</Label>
                                                 <Input
                                                     value={formData.userCnpj}
                                                     onChange={e => setFormData({ ...formData, userCnpj: e.target.value })}
@@ -461,7 +461,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Inscrição Estadual</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Inscrição Estadual</Label>
                                                 <Input
                                                     value={formData.userIe}
                                                     onChange={e => setFormData({ ...formData, userIe: e.target.value })}
@@ -469,7 +469,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Endereço Completo</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Endereço Completo</Label>
                                                 <Input
                                                     value={formData.userAddress}
                                                     onChange={e => setFormData({ ...formData, userAddress: e.target.value })}
@@ -477,7 +477,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Bairro</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Bairro</Label>
                                                 <Input
                                                     value={formData.userNeighborhood}
                                                     onChange={e => setFormData({ ...formData, userNeighborhood: e.target.value })}
@@ -485,7 +485,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CEP</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">CEP</Label>
                                                 <Input
                                                     value={formData.userZip}
                                                     onChange={e => setFormData({ ...formData, userZip: e.target.value })}
@@ -493,7 +493,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Cidade</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Cidade</Label>
                                                 <Input
                                                     value={formData.userCity}
                                                     onChange={e => setFormData({ ...formData, userCity: e.target.value })}
@@ -501,7 +501,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Estado (UF)</Label>
                                                 <Input
                                                     value={formData.userState}
                                                     onChange={e => setFormData({ ...formData, userState: e.target.value })}
@@ -512,7 +512,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
 
                                         <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/30 grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Contato</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Contato</Label>
                                                 <Input
                                                     value={formData.userContact}
                                                     onChange={e => setFormData({ ...formData, userContact: e.target.value })}
@@ -520,7 +520,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Telefone</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Telefone</Label>
                                                 <Input
                                                     value={formData.userPhone}
                                                     onChange={e => setFormData({ ...formData, userPhone: e.target.value })}
@@ -528,7 +528,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">E-mail para Licenças/Faturamento</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">E-mail para Licenças/Faturamento</Label>
                                                 <Input
                                                     value={formData.userEmail}
                                                     onChange={e => setFormData({ ...formData, userEmail: e.target.value })}
@@ -544,11 +544,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 text-amber-600">
                                             <Package className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Informações do Pedido Ingram</h4>
+                                            <h4 className="text-xs font-black uppercase tracking-widest">Informações do Pedido Ingram</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Faturamento por conta de:</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Faturamento por conta de:</Label>
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <Button
                                                         variant={formData.billingType === 'reseller' ? 'default' : 'outline'}
@@ -569,7 +569,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 </div>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">BID / Proposta Ingram</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">BID / Proposta Ingram</Label>
                                                 <Input
                                                     placeholder="Ex: 3182875/1"
                                                     value={formData.bidNumber}
@@ -578,7 +578,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Condição de Pagamento</Label>
+                                                <Label className="text-xs text-muted-foreground uppercase font-bold">Condição de Pagamento</Label>
                                                 <Input
                                                     placeholder="Ex: 30 DDF"
                                                     value={formData.paymentTerms}
@@ -596,7 +596,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-blue-600">
                                                 <Truck className="w-4 h-4" />
-                                                <h4 className="text-[11px] font-black uppercase tracking-widest">Grade de Produtos</h4>
+                                                <h4 className="text-xs font-black uppercase tracking-widest">Grade de Produtos</h4>
                                             </div>
                                         </div>
 
@@ -604,7 +604,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                             {formData.products.map((product, idx) => (
                                                 <div key={idx} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-lg bg-muted/30">
                                                     <div className="col-span-6 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Part Number / Nome</Label>
+                                                        <Label className="text-xs uppercase font-bold">Part Number / Nome</Label>
                                                         <Input
                                                             value={product.sku}
                                                             onChange={e => {
@@ -612,11 +612,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].sku = e.target.value;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-xs"
                                                         />
                                                     </div>
                                                     <div className="col-span-2 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Qtd</Label>
+                                                        <Label className="text-xs uppercase font-bold">Qtd</Label>
                                                         <Input
                                                             type="number"
                                                             value={product.quantity}
@@ -625,11 +625,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].quantity = parseInt(e.target.value) || 0;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-xs"
                                                         />
                                                     </div>
                                                     <div className="col-span-3 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Preço Unit.</Label>
+                                                        <Label className="text-xs uppercase font-bold">Preço Unit.</Label>
                                                         <Input
                                                             type="number"
                                                             value={product.unitPrice}
@@ -638,7 +638,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].unitPrice = parseFloat(e.target.value) || 0;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-xs"
                                                         />
                                                     </div>
                                                     <div className="col-span-1 flex justify-center pb-1">
@@ -660,7 +660,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="w-full h-8 border-dashed text-[10px] font-bold"
+                                                className="w-full h-8 border-dashed text-xs font-bold"
                                                 onClick={() => {
                                                     setFormData({
                                                         ...formData,
@@ -677,7 +677,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                             </ScrollArea>
 
                             <div className="bg-primary p-3 rounded-lg text-white">
-                                <p className="text-[10px] leading-relaxed opacity-90">
+                                <p className="text-xs leading-relaxed opacity-90">
                                     <span className="font-bold uppercase">Aviso:</span> Ao clicar em "Confirmar & Efetivar", o sistema usará exatamente os dados acima para preencher o formulário oficial da Ingram. Verifique se os impostos estão embutidos conforme a regra do distribuidor.
                                 </p>
                             </div>
@@ -697,7 +697,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                             <Separator className="my-6" />
 
                             <div className="space-y-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Automação de Pedidos</p>
+                                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Automação de Pedidos</p>
                                 <Button
                                     className="w-full bg-primary font-bold text-white h-12 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     onClick={handleDownloadOrder}
@@ -710,7 +710,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     )}
                                     Baixar Formulário Ingram (Excel)
                                 </Button>
-                                <p className="text-[10px] text-muted-foreground italic">
+                                <p className="text-xs text-muted-foreground italic">
                                     *Arquivo pré-preenchido com dados da Revenda, Cliente e Produtos.
                                 </p>
                             </div>

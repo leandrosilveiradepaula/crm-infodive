@@ -58,7 +58,7 @@ export default function IntegrationsClientPage({
 
     const getFeatures = (provider: string) => {
         switch (provider) {
-            case 'ibm_cloud': return ['Watson AI', 'Cloud Storage', 'Auto-Scaling'];
+            case 'ibm_cloud': return ['Assistente do CRM', 'Cloud Storage', 'Auto-Scaling'];
             case 'lenovo': return ['Warranty Check', 'Order Tracking', 'Spec Sync'];
             case 'whatsapp': return ['Lead Alerts', 'Auto-Replies', 'Chat Sync'];
             default: return ['Sincronização', 'Notificações', 'API Access'];
@@ -88,7 +88,7 @@ export default function IntegrationsClientPage({
                     {initialIntegrations.map(app => (
                         <div key={app.id} className="bg-card p-6 rounded-2xl border border-border shadow-md hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all group relative overflow-hidden">
                             {app.status === 'connected' && (
-                                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-emerald-600 text-white px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-bl-2xl shadow-lg z-10 animate-in slide-in-from-right-full duration-500">
+                                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-emerald-600 text-white px-5 py-2 text-xs font-black uppercase tracking-widest rounded-bl-2xl shadow-lg z-10 animate-in slide-in-from-right-full duration-500">
                                     Conectado
                                 </div>
                             )}
@@ -97,7 +97,7 @@ export default function IntegrationsClientPage({
                                 <div className={`h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 ${getIconColor(app.provider)} border border-border`}>
                                     {getAppIcon(app.provider)}
                                 </div>
-                                <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground bg-muted px-3 py-1.5 rounded-xl border border-border backdrop-blur-sm">{app.provider.replace('_', ' ')}</span>
+                                <span className="text-xs uppercase font-black tracking-widest text-muted-foreground bg-muted px-3 py-1.5 rounded-xl border border-border backdrop-blur-sm">{app.provider.replace('_', ' ')}</span>
                             </div>
 
                             <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight">{app.name}</h3>
@@ -106,7 +106,7 @@ export default function IntegrationsClientPage({
                             {/* Feature Pills */}
                             <div className="flex flex-wrap gap-2 mb-8 h-16 content-start">
                                 {getFeatures(app.provider).map(f => (
-                                    <span key={f} className="text-[10px] font-bold text-muted-foreground border border-border bg-muted px-2.5 py-1 rounded-lg hover:bg-muted/80 transition-colors cursor-default">{f}</span>
+                                    <span key={f} className="text-xs font-bold text-muted-foreground border border-border bg-muted px-2.5 py-1 rounded-lg hover:bg-muted/80 transition-colors cursor-default">{f}</span>
                                 ))}
                             </div>
 
@@ -127,12 +127,13 @@ export default function IntegrationsClientPage({
                     ))}
 
                     {/* Request Integration Feature */}
-                    <div className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group min-h-[350px]">
-                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-500">
-                            <Plus className="h-8 w-8 text-muted-foreground group-hover:text-white group-hover:rotate-180 transition-all duration-500" />
+                    <div className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center min-h-[350px]" aria-disabled="true">
+                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6">
+                            <Plus className="h-8 w-8 text-muted-foreground" />
                         </div>
-                        <h3 className="font-black text-muted-foreground group-hover:text-primary text-xl mb-2 transition-colors">Solicitar Integração</h3>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-[200px] leading-relaxed font-medium group-hover:text-muted-foreground">Não encontrou o que precisa?<br />Nossa equipe desenvolve para você.</p>
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground bg-muted px-3 py-1 rounded-full mb-3">Em breve</span>
+                        <h3 className="font-black text-muted-foreground text-xl mb-2">Solicitar Integração</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-[220px] leading-relaxed font-medium">Este recurso ainda não está disponível. As integrações atuais podem ser configuradas nos cards acima.</p>
                     </div>
                 </div>
                 </TabsContent>

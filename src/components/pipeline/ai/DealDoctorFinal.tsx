@@ -144,7 +144,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                                     }`}>
                                     {analysis.healthScore}/100
                                 </span>
-                                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
                                     {statusConfig.label}
                                 </span>
                             </div>
@@ -216,7 +216,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         <ul className="space-y-2">
                             {analysis.nextSteps.map((step, i) => (
                                 <li key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold">
                                         {i + 1}
                                     </span>
                                     <span className="text-sm text-foreground font-medium">{step}</span>

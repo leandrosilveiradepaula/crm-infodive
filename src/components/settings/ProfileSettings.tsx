@@ -69,7 +69,7 @@ export function ProfileSettings() {
                             </AvatarFallback>
                         </Avatar>
                         <div className="absolute inset-0 bg-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer backdrop-blur-[2px]">
-                            <p className="text-[10px] font-bold uppercase text-white tracking-widest">Alterar</p>
+                            <p className="text-xs font-bold uppercase text-white tracking-widest">Alterar</p>
                         </div>
                     </div>
                     <div className="flex-1 text-center md:text-left space-y-2">
@@ -78,11 +78,11 @@ export function ProfileSettings() {
                             <p className="text-sm text-muted-foreground font-medium">{user?.email}</p>
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                            <Badge className="bg-primary/10 text-primary border border-primary/20 font-bold uppercase text-[9px] tracking-wider px-2.5 py-0.5 rounded-lg">
+                            <Badge className="bg-primary/10 text-primary border border-primary/20 font-bold uppercase text-xs tracking-wider px-2.5 py-0.5 rounded-lg">
                                 <Shield className="h-3 w-3 mr-1" />
                                 {profile.role || 'admin'}
                             </Badge>
-                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-lg border-border">
+                            <Badge variant="outline" className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-lg border-border">
                                 Membro Ativo
                             </Badge>
                         </div>
@@ -92,7 +92,7 @@ export function ProfileSettings() {
                 {/* Fields Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nome Completo</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Nome Completo</Label>
                         <div className="relative group">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
@@ -105,7 +105,7 @@ export function ProfileSettings() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Email Principal</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Email Principal</Label>
                         <div className="relative group">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
@@ -117,7 +117,7 @@ export function ProfileSettings() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Telefone / WhatsApp</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Telefone / WhatsApp</Label>
                         <div className="relative group">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
@@ -130,7 +130,7 @@ export function ProfileSettings() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nível de Acesso</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Nível de Acesso</Label>
                         <div className="relative group">
                             <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input

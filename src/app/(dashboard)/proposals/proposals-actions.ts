@@ -2,7 +2,7 @@
 
 import { PROPOSAL_STATUS } from '@/lib/constants';
 import type { Proposal, ProposalStatus } from '@/types/proposal';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 import { ProposalService } from '@/services/ProposalService';
 import { revalidatePath } from 'next/cache';
 
@@ -12,7 +12,7 @@ export async function getProposals(dealId: string): Promise<Proposal[]> {
 }
 
 export async function createProposalAction(proposalData: Partial<Proposal>) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     try {
         const data = await ProposalService.createProposal(userId, organizationId, {
@@ -76,7 +76,7 @@ export async function createProposalAction(proposalData: Partial<Proposal>) {
 }
 
 export async function updateProposalAction(id: string, updates: Partial<Proposal>) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     try {
         await ProposalService.updateProposal(userId, id, organizationId, {
@@ -95,7 +95,7 @@ export async function updateProposalAction(id: string, updates: Partial<Proposal
 }
 
 export async function deleteProposalAction(id: string, dealId?: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     try {
         await ProposalService.deleteProposal(userId, id, organizationId);

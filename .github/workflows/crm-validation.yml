@@ -4,12 +4,20 @@ on:
   push:
     branches:
       - factory/fix-present-in-usd-safe-rate
+      - 'security/**'
+      - 'ops/**'
+      - 'product/**'
   pull_request:
     branches:
       - main
 
+concurrency:
+  group: crm-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   validate:
@@ -27,10 +35,77 @@ jobs:
         run: npm ci
       - name: TypeScript
         run: npx tsc --noEmit
+      - name: New lint errors
+        run: node scripts/lint-changed.mjs
+      - name: Dependency audit regression guard
+        id: dependency_audit
+        run: node scripts/audit-dependencies.mjs
+      - name: Upload dependency audit evidence
+        if: ${{ always() && steps.dependency_audit.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-dependency-audit-${{ github.sha }}
+          path: artifacts/dependency-audit.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Migration policy
+        run: node scripts/validate-migrations.mjs
+      - name: Product surface audit
+        run: node scripts/audit-product-surface.mjs
+      - name: Paid AI endpoint audit
+        run: node scripts/audit-ai-endpoints.mjs
       - name: Tests
         run: npm test
       - name: Build
         run: npm run build
+      - name: Prepare pinned Playwright with system Chrome
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          test -x /usr/bin/google-chrome
+          /usr/bin/google-chrome --version
+      - name: Browser smoke
+        id: browser_smoke
+        shell: bash
+        env:
+          SESSION_SECRET: "crm-ci-browser-smoke-session-secret-2026"
+          CRM_BROWSER_EXECUTABLE_PATH: /usr/bin/google-chrome
+        run: |
+          set -euo pipefail
+          npm start > /tmp/crm-next.log 2>&1 &
+          app_pid=$!
+          cleanup() {
+            kill "$app_pid" 2>/dev/null || true
+            wait "$app_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          ready=false
+          for _ in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/login >/dev/null; then
+              ready=true
+              break
+            fi
+            if ! kill -0 "$app_pid" 2>/dev/null; then
+              cat /tmp/crm-next.log
+              exit 1
+            fi
+            sleep 1
+          done
+          if [ "$ready" != "true" ]; then
+            echo "CRM did not become ready for browser smoke."
+            cat /tmp/crm-next.log
+            exit 1
+          fi
+          CRM_SMOKE_BASE_URL=http://127.0.0.1:3000 node scripts/browser-smoke.mjs
+      - name: Upload browser smoke evidence
+        if: ${{ always() && steps.browser_smoke.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-browser-smoke-${{ github.sha }}
+          path: artifacts/browser-smoke.json
+          if-no-files-found: error
+          retention-days: 30
       - name: Diff check
         shell: bash
         run: |
@@ -39,3 +114,27 @@ jobs:
           git fetch origin "$base_ref"
           merge_base="$(git merge-base "origin/$base_ref" HEAD)"
           git diff --check "$merge_base"..HEAD
+      - name: Write quality evidence
+        run: node scripts/write-quality-evidence.mjs
+      - name: Upload quality evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: crm-quality-evidence-${{ github.sha }}
+          path: artifacts/quality-evidence.json
+          retention-days: 30
+      - name: Publish exact CRM validation status
+        if: ${{ always() }}
+        uses: actions/github-script@v8
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const success = process.env.JOB_STATUS === 'success';
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: context.sha,
+              state: success ? 'success' : 'failure',
+              context: 'CRM validation',
+              description: success ? 'CRM quality gates passed' : 'CRM quality gates failed',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });

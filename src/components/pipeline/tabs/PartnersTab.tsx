@@ -249,7 +249,7 @@ export const PartnersTab = ({
                                             <div>
                                                 <h5 className="font-bold text-foreground text-sm">{m.name}</h5>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Vendor</span>
+                                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Vendor</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -275,7 +275,7 @@ export const PartnersTab = ({
                                     )}
 
                                     {isVirtual && (
-                                        <p className="text-[10px] text-muted-foreground border-t border-border/50 pt-3">
+                                        <p className="text-xs text-muted-foreground border-t border-border/50 pt-3">
                                             Detectado automaticamente. Cadastre como Conta para vincular contatos.
                                         </p>
                                     )}

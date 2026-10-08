@@ -395,7 +395,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {formData.tags?.map(tag => (
-                                    <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary border border-primary/20 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+                                    <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary border border-primary/20 rounded-md px-2 py-1 text-xs font-bold uppercase tracking-wider">
                                         {tag}
                                         <button type="button" onClick={() => removeTag(tag)} className="ml-1.5 hover:text-foreground transition-colors">
                                             <X className="h-3 w-3" />

@@ -205,12 +205,12 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <table className="w-full">
                         <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Documento</th>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Cliente</th>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Valor</th>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
-                                <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Data</th>
-                                <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Ações</th>
+                                <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Documento</th>
+                                <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Cliente</th>
+                                <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Valor</th>
+                                <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
+                                <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Data</th>
+                                <th className="text-right py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -223,7 +223,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                             </div>
                                             <div>
                                                 <p className="text-sm font-black text-foreground group-hover:text-primary transition-colors cursor-pointer tracking-tight" onClick={() => handleViewContract(contract)}>{contract.title}</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{contract.type}</p>
+                                                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">{contract.type}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -238,7 +238,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                         </span>
                                     </td>
                                     <td className="py-3 px-4">
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${getStatusColor(contract.status)} uppercase tracking-widest flex items-center w-fit gap-1.5`}>
+                                        <span className={`px-2 py-0.5 rounded text-xs font-black border ${getStatusColor(contract.status)} uppercase tracking-widest flex items-center w-fit gap-1.5`}>
                                             {contract.status === 'signed' && <CheckCircle2 className="h-3 w-3" />}
                                             {contract.status === 'sent' && <Clock className="h-3 w-3" />}
                                             {getStatusLabel(contract.status)}
@@ -247,7 +247,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                     <td className="py-3 px-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-bold text-foreground">{new Date(contract.createdAt).toLocaleDateString('pt-BR')}</span>
-                                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Criado em</span>
+                                            <span className="text-xs text-muted-foreground uppercase tracking-wider">Criado em</span>
                                         </div>
                                     </td>
                                     <td className="py-3 px-4 text-right">
