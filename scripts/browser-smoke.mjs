@@ -11,6 +11,15 @@ function record(name, ok, detail = '') {
   if (!ok) failures.push({ name, detail });
 }
 
+async function visibleWithin(locator, timeout = 10_000) {
+  try {
+    await locator.waitFor({ state: 'visible', timeout });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function noHorizontalOverflow(page, name, expectedWidth = null) {
   const result = await page.evaluate(() => ({
     innerWidth: window.innerWidth,
@@ -55,13 +64,13 @@ try {
   const loginResponse = await page.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
   record('login_http_success', Boolean(loginResponse && loginResponse.ok()), String(loginResponse?.status() ?? 'no-response'));
 
-  const titleVisible = await page.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false);
+  const titleVisible = await visibleWithin(page.getByText('Bem-vindo de volta', { exact: true }));
   record('login_desktop_renders', titleVisible);
 
   const email = page.locator('input[name="email"]');
   const password = page.locator('input[name="password"]');
   const submit = page.getByRole('button', { name: 'Entrar no Sistema' });
-  record('login_controls_have_accessible_roles', await email.isVisible() && await password.isVisible() && await submit.isVisible());
+  record('login_controls_have_accessible_roles', (await Promise.all([email, password, submit].map(visibleWithin))).every(Boolean));
 
   await noHorizontalOverflow(page, 'login_desktop_no_horizontal_overflow');
   await tabSequenceIncludes(page, ['email', 'password', 'Entrar no Sistema']);
@@ -125,12 +134,12 @@ try {
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true });
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(baseUrl + '/login', { waitUntil: 'networkidle' });
-  record('login_mobile_renders', await mobilePage.getByText('Bem-vindo de volta', { exact: true }).isVisible().catch(() => false));
+  record('login_mobile_renders', await visibleWithin(mobilePage.getByText('Bem-vindo de volta', { exact: true })));
   await noHorizontalOverflow(mobilePage, 'login_mobile_no_horizontal_overflow', 390);
 
   await mobilePage.goto(baseUrl + '/login?invite_token=smoke-test', { waitUntil: 'networkidle' });
-  record('invite_registration_state_renders', await mobilePage.getByText('Criar nova conta', { exact: true }).isVisible().catch(() => false));
-  record('invite_registration_name_field_visible', await mobilePage.locator('input[name="name"]').isVisible().catch(() => false));
+  record('invite_registration_state_renders', await visibleWithin(mobilePage.getByText('Criar nova conta', { exact: true })));
+  record('invite_registration_name_field_visible', await visibleWithin(mobilePage.locator('input[name="name"]')));
   await noHorizontalOverflow(mobilePage, 'invite_mobile_no_horizontal_overflow', 390);
 
   await mobile.close();
