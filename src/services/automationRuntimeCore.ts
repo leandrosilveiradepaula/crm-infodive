@@ -40,7 +40,7 @@ function finiteNumber(value: unknown): number | null {
 
 const validOperators = new Set(['equals','not_equals','contains','not_contains','greater_than','less_than','is_empty','is_not_empty']);
 function validField(field: unknown): field is string {
-    return typeof field === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*$/.test(field)
+    return typeof field === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*$/.test(field)
         && !field.split('.').some(part => ['__proto__', 'prototype', 'constructor'].includes(part));
 }
 function compare(condition: Condition, actual: unknown): boolean {
@@ -102,6 +102,7 @@ export function validateAutomationForRuntime(automation: Automation): string[] {
         blockers.push('missing or unsupported trigger');
         return blockers;
     }
+    if (!automation.trigger.config || typeof automation.trigger.config !== 'object' || Array.isArray(automation.trigger.config)) blockers.push('invalid trigger config');
     if (!Array.isArray(automation.conditions) || automation.conditions.some(condition => !condition || !validField(condition.field) || !validOperators.has(condition.operator) || !['AND', 'OR'].includes(condition.logic))) blockers.push('invalid conditions');
     if (!Array.isArray(automation.actions)) {
         blockers.push('invalid actions');
@@ -113,7 +114,7 @@ export function validateAutomationForRuntime(automation: Automation): string[] {
 
     automation.actions.forEach((action, index) => {
         if (!action || !SUPPORTED_RUNTIME_ACTIONS.has(action.type)) {
-            blockers.push(`unsupported action[${index}]`);
+            blockers.push(`unsupported action[${index}]: ${action?.type ?? 'missing'}`);
             return;
         }
         if (!action.config || typeof action.config !== 'object' || Array.isArray(action.config)) blockers.push(`invalid action config[${index}]`);
