@@ -178,7 +178,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                 <div className="flex-1">
                                     <div className="font-semibold text-white">Perguntar ao assistente...</div>
                                     <div className="text-xs text-muted-foreground">"{search}"</div>
-                                    - </div>
+                                    </div>
                                 <kbd className="command-kbd">↵</kbd>
                             </Command.Item>
                         </Command.Group>
@@ -305,7 +305,8 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                         stage.value === 'lost' ? 'bg-red-500' : 'bg-blue-500'}`} />
                                     <span>{stage.label}</span>
                                     {isMoving && <Loader2 className="h-4 w-4 ml-auto animate-spin" aria-hidden="true" />}
-                                </Command.Item>)}
+                                </Command.Item>
+                            ))}
                         </Command.Group>
                     )}
 
