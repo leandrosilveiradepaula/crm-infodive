@@ -16,7 +16,7 @@ export class AutomationService {
             throw new Error('Não foi possível carregar as automações.');
         }
 
-        return (data || []).map((item: any) => ({
+        return (data || []).map((item) => ({
             ...item,
             enabled: Boolean(item.enabled),
             trigger: item.trigger || { type: 'deal_created', config: {} },
