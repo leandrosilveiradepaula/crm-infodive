@@ -442,6 +442,18 @@ export class DealService {
         if (error || !data) throw new Error('Oportunidade indisponível ou sem permissão.');
     }
 
+    private static async assertWritableProduct(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        itemId: string,
+        organizationId: string,
+    ): Promise<void> {
+        const { data: product, error } = await supabase.from('deal_products')
+            .select('deal_id').eq('id', itemId).eq('organization_id', organizationId).maybeSingle();
+        if (error || !product?.deal_id) throw new Error('Produto indisponível ou sem permissão.');
+        await this.assertWritableDeal(supabase, userId, product.deal_id, organizationId);
+    }
+
     static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
         await this.assertWritableDeal(supabase, userId, dealId, organizationId);
@@ -475,6 +487,7 @@ export class DealService {
 
     static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
+        await this.assertWritableProduct(supabase, userId, itemId, organizationId);
         const currencyKeys: Array<keyof DealProduct> = ['is_usd', 'usd_cost', 'exchange_rate', 'present_in_usd'];
         const touchesCurrencyState = currencyKeys.some(key => Object.prototype.hasOwnProperty.call(updates, key));
 
@@ -528,6 +541,7 @@ export class DealService {
         }
 
         const supabase = createAdminClient();
+        await this.assertWritableProduct(supabase, userId, itemId, organizationId);
         const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
