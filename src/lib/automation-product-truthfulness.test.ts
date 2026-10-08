@@ -16,7 +16,9 @@ describe('automation product truthfulness', () => {
 
     expect(source).not.toContain('42h');
     expect(source).not.toContain('Tempo Economizado');
-    expect(source).toContain('Execução Automática');
-    expect(source).toContain('Bloqueada');
+    expect(source).toContain('Fluxos ativos');
+    expect(source).toContain('Fluxos pausados');
+    expect(source).toContain('Sem execuções registradas');
+    expect(source).not.toContain('value: "Bloqueada"');
   });
 });
