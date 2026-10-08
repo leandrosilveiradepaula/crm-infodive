@@ -33,5 +33,10 @@ describe('deal diagnosis validation', () => {
     expect(source).toContain('health_score: validated.healthScore');
     expect(source).toContain('health_trend: validated.trend');
     expect(source).toContain('risk_factors: validated.riskFactors');
+    expect(source).toContain(".eq('organization_id', organizationId)");
+    expect(source).toContain('.maybeSingle()');
+    expect(source).toContain("telemetry.record('deal_not_found', 404)");
+    expect(source.indexOf('typeof deal.id')).toBeLessThan(source.indexOf('guardPaidAiRequest'));
+    expect(source).toContain("telemetry.record('invalid_request', 400)");
   });
 });
