@@ -384,3 +384,8 @@ Ensure `DealService.getOrCreateRoom` enforces the same tenant-scoped role and ow
 Ensure single and bulk deal-product insert paths validate the parent deal is visible to the caller under the existing tenant/owner policy before any write. Add behavioral regression for unauthorized owner; update existing bulk tests to include an authorized parent. Scope: DealService and its offline tests only. No production, migration, paid calls or RBAC changes.
 
 Additional same-batch scope: verify product parent deal ownership on single product updates and deletes, with negative offline regressions. Do not change bulk delete/reorder semantics in this increment.
+
+
+## Additional authorized task (2026-10-08): bulk product ownership
+
+Ensure bulk delete and reorder of deal products verify every tenant-scoped item and validate access to its parent deal under the existing owner visibility rule before any mutation. Preserve existing error handling for partial database writes and add offline regression coverage. Scope limited to DealService, its integration test and this task record; no migration, live data modification, paid calls or production merge.

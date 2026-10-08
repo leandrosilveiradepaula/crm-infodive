@@ -561,6 +561,17 @@ export class DealService {
         }
 
         const supabase = createAdminClient();
+        const { data: selected, error: selectionError } = await supabase
+            .from('deal_products')
+            .select('id, deal_id')
+            .in('id', normalizedIds)
+            .eq('organization_id', organizationId);
+        if (selectionError || !selected || selected.length !== normalizedIds.length) {
+            throw new Error('Não foi possível validar os produtos da oportunidade.');
+        }
+        for (const dealId of new Set(selected.map(item => String(item.deal_id)))) {
+            await this.assertWritableDeal(supabase, userId, dealId, organizationId);
+        }
         const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
@@ -583,6 +594,17 @@ export class DealService {
         }
 
         const supabase = createAdminClient();
+        const { data: selected, error: selectionError } = await supabase
+            .from('deal_products')
+            .select('id, deal_id')
+            .in('id', ids)
+            .eq('organization_id', organizationId);
+        if (selectionError || !selected || selected.length !== ids.length) {
+            throw new Error('Não foi possível validar a ordenação dos produtos.');
+        }
+        for (const dealId of new Set(selected.map(item => String(item.deal_id)))) {
+            await this.assertWritableDeal(supabase, userId, dealId, organizationId);
+        }
         const results = await Promise.all(items.map(item =>
             supabase
                 .from('deal_products')
