@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Automation } from '@/types/automation';
-import type { AutomationRuntimeEvent } from '@/services/automationRuntimeCore';
+import type { Automation } from '../types/automation';
+import type { AutomationRuntimeEvent } from './automationRuntimeCore';
 
 const mocks = vi.hoisted(() => ({
     createAdminClient: vi.fn(),
@@ -8,15 +8,15 @@ const mocks = vi.hoisted(() => ({
     createActivity: vi.fn(),
 }));
 
-vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
-vi.mock('@/services/AutomationService', () => ({
+vi.mock('../lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
+vi.mock('./AutomationService', () => ({
     AutomationService: { getAutomations: mocks.getAutomations },
 }));
-vi.mock('@/services/ActivityService', () => ({
+vi.mock('./ActivityService', () => ({
     ActivityService: { createActivity: mocks.createActivity },
 }));
 
-import { AutomationRuntimeService } from '@/services/AutomationRuntimeService';
+import { AutomationRuntimeService } from './AutomationRuntimeService';
 
 type Write = { table: string; operation: string; payload: unknown };
 type FakeOptions = { duplicate?: boolean; finalizationMissing?: boolean };
