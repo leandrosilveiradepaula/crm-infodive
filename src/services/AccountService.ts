@@ -3,6 +3,27 @@ import { type Account } from '@/types/account';
 import { normalizeCasing, normalizeTaxId, normalizeZip } from '@/lib/string-utils';
 
 export class AccountService {
+    private static async cleanupCreatedAccount(
+        supabase: ReturnType<typeof createAdminClient>,
+        accountId: string,
+        organizationId: string,
+    ): Promise<boolean> {
+        const [contactsResult, branchesResult] = await Promise.all([
+            supabase.from('account_contacts').delete().eq('account_id', accountId).eq('organization_id', organizationId),
+            supabase.from('account_branches').delete().eq('account_id', accountId).eq('organization_id', organizationId),
+        ]);
+
+        const { data: deletedAccount, error: accountError } = await supabase
+            .from('accounts')
+            .delete()
+            .eq('id', accountId)
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+
+        return !contactsResult.error && !branchesResult.error && !accountError && Boolean(deletedAccount);
+    }
+
     static async getAccounts(userId: string, organizationId: string): Promise<Account[]> {
         const supabase = createAdminClient();
         const { data, error } = await supabase
@@ -72,6 +93,7 @@ export class AccountService {
 
     static async createAccount(userId: string, organizationId: string, account: Partial<Account>) {
         const supabase = createAdminClient();
+        let createdAccountId: string | null = null;
 
         try {
             const { data: accData, error: accError } = await supabase
@@ -98,45 +120,51 @@ export class AccountService {
                 .select()
                 .single();
 
-            if (accError) throw accError;
-            const newAccId = accData.id;
+            if (accError || !accData) throw accError || new Error('account insert returned no row');
+            createdAccountId = accData.id;
 
             if (account.contacts && account.contacts.length > 0) {
-                const contactsToInsert = account.contacts.map(c => ({
-                    account_id: newAccId,
+                const contactsToInsert = account.contacts.map(contact => ({
+                    account_id: createdAccountId,
                     organization_id: organizationId,
-                    name: c.name,
-                    email: c.email,
-                    mobile_phone: c.mobile_phone,
-                    landline_phone: c.landline_phone,
-                    role: c.role,
-                    is_primary: c.is_primary
+                    name: contact.name,
+                    email: contact.email,
+                    mobile_phone: contact.mobile_phone,
+                    landline_phone: contact.landline_phone,
+                    role: contact.role,
+                    is_primary: contact.is_primary
                 }));
-                await supabase.from('account_contacts').insert(contactsToInsert);
+                const { error: contactsError } = await supabase.from('account_contacts').insert(contactsToInsert);
+                if (contactsError) throw contactsError;
             }
 
             if (account.branches && account.branches.length > 0) {
-                const branchesToInsert = account.branches.map(b => ({
-                    account_id: newAccId,
+                const branchesToInsert = account.branches.map(branch => ({
+                    account_id: createdAccountId,
                     organization_id: organizationId,
-                    name: b.name,
-                    zip: b.zip,
-                    street: b.street,
-                    number: b.number,
-                    complement: b.complement,
-                    neighborhood: b.neighborhood,
-                    city: b.city,
-                    state: b.state,
-                    cnpj: b.cnpj,
-                    ie: b.ie,
-                    payment_terms: b.payment_terms
+                    name: branch.name,
+                    zip: branch.zip,
+                    street: branch.street,
+                    number: branch.number,
+                    complement: branch.complement,
+                    neighborhood: branch.neighborhood,
+                    city: branch.city,
+                    state: branch.state,
+                    cnpj: branch.cnpj,
+                    ie: branch.ie,
+                    payment_terms: branch.payment_terms
                 }));
-                await supabase.from('account_branches').insert(branchesToInsert);
+                const { error: branchesError } = await supabase.from('account_branches').insert(branchesToInsert);
+                if (branchesError) throw branchesError;
             }
 
             return { success: true, data: accData };
         } catch {
             console.error('[AccountService] account creation failed');
+            if (createdAccountId) {
+                const rolledBack = await this.cleanupCreatedAccount(supabase, createdAccountId, organizationId);
+                if (!rolledBack) console.error('[AccountService] account creation rollback failed');
+            }
             return { success: false, error: 'Não foi possível salvar a conta.' };
         }
     }
