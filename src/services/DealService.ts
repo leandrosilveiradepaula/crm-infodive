@@ -196,7 +196,7 @@ export class DealService {
             if (contactsError) {
                 throw new Error('Não foi possível carregar os contatos da oportunidade.');
             }
-            account = { ...(acc as any as Account), contacts: (contacts || []) as any };
+            account = { ...(acc as unknown as Account), contacts: (contacts || []) as Account['contacts'] };
         }
 
         let owner_profile: Profile | null = null;
