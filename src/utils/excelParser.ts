@@ -22,33 +22,53 @@ export interface ParsedRow {
 }
 
 /**
- * Parse Excel file and return rows as 2D array
+ * Parse XLSX file and return rows as 2D array.
+ * Uses ExcelJS instead of the unmaintained/vulnerable SheetJS npm package.
  */
 export const parseExcel = async (file: File): Promise<any[][]> => {
-    // Dynamic import to avoid build errors if package is missing
-    let XLSX;
-    try {
-        XLSX = await import('xlsx');
-    } catch (e) {
-        throw new Error('Biblioteca XLSX não encontrada. Por favor, instale com "npm install xlsx"');
-    }
+    const ExcelJS = await import('exceljs');
+    const workbook = new ExcelJS.Workbook();
+    const buffer = await file.arrayBuffer();
 
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = new Uint8Array(e.target?.result as ArrayBuffer);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                resolve(rows as any[][]);
-            } catch (error) {
-                reject(error);
+    await workbook.xlsx.load(buffer as any);
+
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) return [];
+
+    const normalizeCellValue = (value: unknown): unknown => {
+        if (value == null) return '';
+        if (value instanceof Date) return value;
+
+        if (typeof value === 'object') {
+            const record = value as Record<string, unknown>;
+
+            if ('result' in record && record.result != null) {
+                return record.result;
             }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
+
+            if (Array.isArray(record.richText)) {
+                return record.richText
+                    .map((part) => typeof part === 'object' && part && 'text' in part
+                        ? String((part as { text?: unknown }).text ?? '')
+                        : '')
+                    .join('');
+            }
+
+            if (typeof record.text === 'string') {
+                return record.text;
+            }
+        }
+
+        return value;
+    };
+
+    const rows: any[][] = [];
+    worksheet.eachRow({ includeEmpty: true }, (row) => {
+        const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+        rows.push(values.map(normalizeCellValue));
     });
+
+    return rows;
 };
 
 /**
