@@ -327,4 +327,29 @@ describe('DealService offline tenant and mutation integrity', () => {
         expect(db.operations.some(op => op.table === 'deal_products' && ['delete', 'update'].includes(op.mode))).toBe(false);
     });
 
+    it('rejects a catalog product from another tenant without inserting', async () => {
+        const db = fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
+            'products:read': { data: null, error: null },
+        });
+        await expect(DealService.addDealProduct('user-a', 'deal-1', 'tenant-a', {
+            name: 'Produto', product_id: 'foreign-product',
+        })).rejects.toThrow('Produto de catálogo inválido para esta organização.');
+        expect(db.operations.some(op => op.table === 'deal_products' && op.mode === 'insert')).toBe(false);
+    });
+
+    it('rejects distributor reassignment outside the current tenant', async () => {
+        const db = fakeDatabase({
+            'deal_products:read': { data: { deal_id: 'deal-1' }, error: null },
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
+            'accounts:read': { data: null, error: null },
+        });
+        await expect(DealService.updateDealProduct('user-a', 'item-1', 'tenant-a', {
+            distributor_id: 'foreign-account',
+        })).rejects.toThrow('Distribuidor inválido para esta organização.');
+        expect(db.operations.some(op => op.table === 'deal_products' && op.mode === 'update')).toBe(false);
+    });
+
 });
