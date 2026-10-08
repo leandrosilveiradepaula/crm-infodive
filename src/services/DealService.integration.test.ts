@@ -197,4 +197,38 @@ describe('DealService offline tenant and mutation integrity', () => {
         expect(db.operations.filter(operation => operation.table === 'deal_products' && operation.mode === 'update'))
             .toHaveLength(2);
     });
+    it('does not allow product edit payloads to overwrite identity or tenant fields', async () => {
+        const db = fakeDatabase({
+            'deal_products:update': { data: { id: 'item-1' }, error: null },
+        });
+        await DealService.updateDealProduct('user-a', 'item-1', 'tenant-a', {
+            name: 'Produto seguro',
+            organization_id: 'tenant-b',
+            deal_id: 'deal-other',
+            id: 'other',
+        } as unknown as Parameters<typeof DealService.updateDealProduct>[3]);
+        const update = db.operations.find(operation => operation.table === 'deal_products' && operation.mode === 'update');
+        expect(update?.payload).toEqual({ name: 'Produto seguro' });
+        expect(update?.filters).toContainEqual(['organization_id', 'tenant-a']);
+    });
+
+    it('fails closed when catalog verification errors before bulk insert', async () => {
+        const db = fakeDatabase({
+            'products:read': { data: null, error: { message: 'catalog unavailable' } },
+        });
+        await expect(DealService.bulkAddDealProducts('user-a', 'deal-1', 'tenant-a', [
+            { name: 'Produto', product_id: '11111111-1111-4111-8111-111111111111' },
+        ])).rejects.toThrow('Não foi possível validar os produtos selecionados.');
+        expect(db.operations.some(operation => operation.table === 'deal_products' && operation.mode === 'insert')).toBe(false);
+    });
+
+    it('rejects partial bulk inserts instead of declaring success', async () => {
+        fakeDatabase({
+            'deal_products:insert': { data: [{ id: 'item-1' }], error: null },
+        });
+        await expect(DealService.bulkAddDealProducts('user-a', 'deal-1', 'tenant-a', [
+            { name: 'Produto 1' }, { name: 'Produto 2' },
+        ])).rejects.toThrow('Não foi possível atualizar todos os produtos da oportunidade.');
+    });
+
 });
