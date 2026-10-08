@@ -176,7 +176,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                             >
                                 <Sparkles className="command-icon text-teal-400" />
                                 <div className="flex-1">
-                                    <div className="font-semibold text-white">Perguntar ao assistente...</div>
+                                    <div className="font-semibold">Perguntar ao assistente...</div>
                                     <div className="text-xs text-muted-foreground">"{search}"</div>
                                     </div>
                                 <kbd className="command-kbd">↵</kbd>
@@ -200,7 +200,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                                 >
                                                     <Briefcase className="command-icon text-primary" />
                                                     <div className="flex-1">
-                                                        <div className="font-semibold text-white">{deal.title}</div>
+                                                        <div className="font-semibold">{deal.title}</div>
                                                         <div className="text-xs text-muted-foreground">{deal.company} • {deal.stage}</div>
                                                     </div>
                                                 </Command.Item>
@@ -218,7 +218,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                                 >
                                                     <Users className="command-icon text-teal-500" />
                                                     <div className="flex-1">
-                                                        <div className="font-semibold text-white">{client.name}</div>
+                                                        <div className="font-semibold">{client.name}</div>
                                                         <div className="text-xs text-muted-foreground">{client.segment}</div>
                                                     </div>
                                                 </Command.Item>
