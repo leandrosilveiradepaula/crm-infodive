@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { type Automation, type AutomationExecution, type EmailTemplate } from '@/types/automation';
+import { sanitizeAutomationWrite, assertSupportedAutomation } from './automationMutationPolicy';
 
 export class AutomationService {
     static async getAutomations(userId: string, organizationId: string): Promise<Automation[]> {
@@ -12,10 +13,10 @@ export class AutomationService {
 
         if (error) {
             console.error('[AutomationService] automations fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as automações.');
         }
 
-        return data.map((item: any) => ({
+        return (data || []).map((item) => ({
             ...item,
             enabled: Boolean(item.enabled),
             trigger: item.trigger || { type: 'deal_created', config: {} },
@@ -31,10 +32,13 @@ export class AutomationService {
         const supabase = createAdminClient();
 
         try {
+            const fields = sanitizeAutomationWrite(automation);
+            assertSupportedAutomation({ trigger: fields.trigger!, conditions: fields.conditions || [], actions: fields.actions || [] });
             const { data, error } = await supabase
                 .from('automations')
                 .insert([{
-                    ...automation,
+                    ...fields,
+                    enabled: fields.enabled === true,
                     organization_id: organizationId,
                     execution_count: 0,
                     success_count: 0,
@@ -57,16 +61,33 @@ export class AutomationService {
         const supabase = createAdminClient();
 
         try {
-            const { error } = await supabase
+            if (typeof enabled !== 'boolean') throw new Error('Invalid enablement');
+            if (enabled) {
+                const { data: current, error: readError } = await supabase
+                    .from('automations')
+                    .select('trigger, conditions, actions')
+                    .eq('id', id)
+                    .eq('organization_id', organizationId)
+                    .maybeSingle();
+                if (readError || !current) throw new Error('Automation missing');
+                assertSupportedAutomation({
+                    trigger: current.trigger,
+                    conditions: current.conditions || [],
+                    actions: current.actions || [],
+                });
+            }
+            const { data: updated, error } = await supabase
                 .from('automations')
                 .update({
                     enabled,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
-                .eq('organization_id', organizationId);
+                .eq('organization_id', organizationId)
+                .select('id')
+                .maybeSingle();
 
-            if (error) throw error;
+            if (error || !updated) throw new Error('Automation not updated');
             return { success: true };
         } catch {
             return { success: false, error: 'Não foi possível atualizar a automação.' };
@@ -77,16 +98,32 @@ export class AutomationService {
         const supabase = createAdminClient();
 
         try {
-            const { error } = await supabase
+            const fields = sanitizeAutomationWrite(automation);
+            const { data: current, error: readError } = await supabase
+                .from('automations')
+                .select('trigger, conditions, actions, enabled')
+                .eq('id', id)
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+            if (readError || !current) throw new Error('Automation missing');
+            const merged = {
+                trigger: fields.trigger ?? current.trigger,
+                conditions: fields.conditions ?? current.conditions ?? [],
+                actions: fields.actions ?? current.actions ?? [],
+            };
+            if (fields.enabled === true || (current.enabled && fields.enabled !== false)) assertSupportedAutomation(merged);
+            const { data: updated, error } = await supabase
                 .from('automations')
                 .update({
-                    ...automation,
+                    ...fields,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
-                .eq('organization_id', organizationId);
+                .eq('organization_id', organizationId)
+                .select('id')
+                .maybeSingle();
 
-            if (error) throw error;
+            if (error || !updated) throw new Error('Automation not updated');
             return { success: true };
         } catch {
             console.error('[AutomationService] automation update failed');
@@ -98,13 +135,15 @@ export class AutomationService {
         const supabase = createAdminClient();
 
         try {
-            const { error } = await supabase
+            const { data: deleted, error } = await supabase
                 .from('automations')
                 .delete()
                 .eq('id', id)
-                .eq('organization_id', organizationId);
+                .eq('organization_id', organizationId)
+                .select('id')
+                .maybeSingle();
 
-            if (error) throw error;
+            if (error || !deleted) throw new Error('Automation not deleted');
             return { success: true };
         } catch {
             console.error('[AutomationService] automation deletion failed');
@@ -120,7 +159,7 @@ export class AutomationService {
             .eq('organization_id', organizationId)
             .order('name');
 
-        if (error) return [];
+        if (error) throw new Error('Não foi possível carregar os modelos de email.');
         return data || [];
     }
 
@@ -136,7 +175,7 @@ export class AutomationService {
 
         if (error) {
             console.error('[AutomationService] execution history fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar o histórico de execuções.');
         }
 
         type AutomationExecutionRow = {

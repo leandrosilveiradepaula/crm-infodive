@@ -120,3 +120,24 @@ Validation via CRM PR CI: TypeScript, unit/regression tests, lint, build, diff r
 Commit and PR are authorized for a non-production candidate branch. No production
 merge, data mutation, migrations, external automation runs or paid model tests.
 Preview promotion is permitted only after the exact merged candidate passes CI.
+
+## Additional authorized task (2026-10-08): Automation service integrity batch
+
+User explicitly asked to combine 4-5 related CRM improvements per PR. This batch:
+1. Surface failed tenant-scoped reads instead of showing fabricated empty lists/history.
+2. Require affected-row evidence on toggle, update and deletion before returning success.
+3. Whitelist user-writable automation fields, protecting tenant, identity, counters and audit fields.
+4. Validate activation against supported deterministic runtime triggers/actions and stored config.
+5. Add executable unit tests plus service-contract regression tests; no paid calls or data writes.
+
+Allowed scope: `docs/codex/CURRENT_TASK.md`,
+`src/services/AutomationService.ts`,
+`src/services/automationMutationPolicy.ts` (new),
+`src/services/automationMutationPolicy.test.ts` (new),
+`src/lib/automation-runtime-service.test.ts` and
+`src/lib/automation-runtime-fail-closed.test.ts`.
+The pre-existing runtime is unchanged. No migration, credential change, new public
+permission, execution of real automations, production deployment, or paid models.
+Commits and a PR to the non-production candidate are authorized; merge only
+after required PR CI green on exact HEAD, and Preview only after CI on merge SHA.
+Concurrent counter updates and live tenant-RLS verification remain open issues.
