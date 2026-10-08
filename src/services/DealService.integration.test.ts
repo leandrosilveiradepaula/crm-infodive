@@ -109,6 +109,32 @@ describe('DealService offline tenant and mutation integrity', () => {
             .resolves.toBeNull();
     });
 
+    it('rejects owner reassignment by a non-manager and cross-tenant target owners', async () => {
+        let db = fakeDatabase({
+            'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
+        });
+
+        await expect(DealService.updateDeal('seller-a', 'deal-1', 'tenant-a', { owner_id: 'user-b' }))
+            .rejects.toThrow('Não foi possível alterar o responsável pela oportunidade.');
+        expect(db.operations.some(operation => operation.table === 'deals' && operation.mode === 'update')).toBe(false);
+
+        db = fakeDatabase({
+            'profiles:read': [
+                { data: { role: 'admin', roles: [] }, error: null },
+                { data: null, error: null },
+            ],
+        });
+
+        await expect(DealService.updateDeal('admin-a', 'deal-1', 'tenant-a', { owner_id: 'other-tenant-user' }))
+            .rejects.toThrow('Não foi possível alterar o responsável pela oportunidade.');
+
+        const targetOwnerQuery = db.operations
+            .filter(operation => operation.table === 'profiles')[1];
+        expect(targetOwnerQuery?.filters).toContainEqual(['id', 'other-tenant-user']);
+        expect(targetOwnerQuery?.filters).toContainEqual(['organization_id', 'tenant-a']);
+        expect(db.operations.some(operation => operation.table === 'deals' && operation.mode === 'update')).toBe(false);
+    });
+
     it('does not let a salesperson duplicate a deal outside the existing owner visibility boundary', async () => {
         const db = fakeDatabase({
             'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
