@@ -47,8 +47,7 @@ function fakeDatabase(responses: Record<string, DbResponse | DbResponse[]>) {
     const from = vi.fn((table: string) => {
         const state: Operation = { table, mode: 'read', filters: [] };
         operations.push(state);
-        let builder: FakeBuilder;
-        builder = {
+        const builder: FakeBuilder = {
             select() { return builder; },
             eq(column: string, value: unknown) { state.filters.push([column, value]); return builder; },
             in(column: string, values: unknown[]) { state.filters.push([column, values]); return builder; },
