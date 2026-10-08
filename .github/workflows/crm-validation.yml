@@ -17,6 +17,7 @@ concurrency:
 
 permissions:
   contents: read
+  statuses: write
 
 jobs:
   validate:
@@ -119,3 +120,19 @@ jobs:
           name: crm-quality-evidence-${{ github.sha }}
           path: artifacts/quality-evidence.json
           retention-days: 30
+      - name: Publish exact CRM validation status
+        if: ${{ always() }}
+        uses: actions/github-script@v8
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const success = process.env.JOB_STATUS === 'success';
+            await github.rest.repos.createCommitStatus({
+              ...context.repo,
+              sha: context.sha,
+              state: success ? 'success' : 'failure',
+              context: 'CRM validation',
+              description: success ? 'CRM quality gates passed' : 'CRM quality gates failed',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
