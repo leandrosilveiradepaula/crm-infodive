@@ -148,12 +148,13 @@ export class DealService {
             query = query.eq('owner_id', userId);
         }
 
-        const { data: deal, error } = await query.single();
+        const { data: deal, error } = await query.maybeSingle();
 
         if (error) {
             console.error('[DealService] deal details fetch failed');
-            return null;
+            throw new Error('Não foi possível carregar a oportunidade.');
         }
+        if (!deal) return null;
 
         const { data: products, error: productsError } = await supabase
             .from('deal_products')
