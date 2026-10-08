@@ -70,7 +70,7 @@ try {
   const email = page.locator('input[name="email"]');
   const password = page.locator('input[name="password"]');
   const submit = page.getByRole('button', { name: 'Entrar no Sistema' });
-  record('login_controls_have_accessible_roles', (await Promise.all([email, password, submit].map(visibleWithin))).every(Boolean));
+  record('login_controls_have_accessible_roles', (await Promise.all([email, password, submit].map((locator) => visibleWithin(locator)))).every(Boolean));
 
   await noHorizontalOverflow(page, 'login_desktop_no_horizontal_overflow');
   await tabSequenceIncludes(page, ['email', 'password', 'Entrar no Sistema']);
