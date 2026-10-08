@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { calculateDealMetrics, calculateSalesPerformance, calculateRevenueForecast } from '@/utils/analytics';
+import { createAdminClient } from '../lib/supabase/admin';
+import { calculateDealMetrics, calculateSalesPerformance, calculateRevenueForecast } from '../utils/analytics';
 
 export class DashboardService {
     static async getDashboardMetrics(userId: string, organizationId: string) {
