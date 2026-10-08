@@ -228,3 +228,32 @@ or paid model calls. In particular, the rights to approve commissions
 remain unresolved in issue #61; this change does NOT close that security
 gate. Commits/PR against the nonproduction candidate are authorized,
 with exact-HEAD CI before merge and merged-SHA CI before Preview promotion.
+
+
+## Additional authorized task (2026-10-08): Harden legacy goals actions
+
+After PR #91 merge to the non-production CRM candidate, avoid preserving a
+duplicate, less-secure API in `goals/actions.ts`. Implement a grouped batch:
+1. Delegate duplicate campaign CRUD/reads to the previously hardened canonical
+   `goals-commissions/actions.ts` functions; keep legacy route revalidation.
+2. Strictly validate user goal amounts and nested goal/commission rules,
+   whitelisting writable columns and checking tenant-scoped affected rows.
+3. Keep personal scenarios owned by the authenticated user when reading,
+   saving, and deleting; do not permit user_id/organization_id spoofing.
+4. Validate scenario distribution before any financial goal updates:
+   finite positive revenue, quarter percentages, exact user set/weights,
+   no silent fallback from invalid custom weights to equal distribution,
+   and no success with missing affected profile rows.
+5. Add pure unit tests and server-action regression/contract tests.
+
+Authorized paths: `docs/codex/CURRENT_TASK.md`,
+`src/app/(dashboard)/goals/actions.ts`,
+`src/lib/goal-mutation-integrity.ts` (new),
+`src/lib/goal-mutation-integrity.test.ts` (new),
+`src/lib/goals-actions-security-contract.test.ts` (new).
+
+Do not invent sales/commission approval RBAC: the decision remains issue #61.
+Do not execute financial writes, deploy production, change schema/migrations,
+access credentials, call paid AI or modify RLS. Work in a dedicated branch;
+CI must pass for exact PR SHA prior to merge into candidate, merge SHA must
+pass before a single Preview promotion.
