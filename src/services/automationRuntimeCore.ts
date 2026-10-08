@@ -30,6 +30,13 @@ function readField(data: Record<string, unknown>, field: string): unknown {
     }, data);
 }
 
+function finiteNumber(value: unknown): number | null {
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    if (typeof value !== 'string' || !value.trim()) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
 function compare(condition: Condition, actual: unknown): boolean {
     switch (condition.operator) {
         case 'equals':
@@ -37,17 +44,21 @@ function compare(condition: Condition, actual: unknown): boolean {
         case 'not_equals':
             return actual !== condition.value;
         case 'contains':
-            return typeof actual === 'string'
-                ? actual.includes(String(condition.value ?? ''))
-                : Array.isArray(actual) && actual.includes(condition.value);
-        case 'not_contains':
-            return typeof actual === 'string'
-                ? !actual.includes(String(condition.value ?? ''))
-                : Array.isArray(actual) && !actual.includes(condition.value);
+        case 'not_contains': {
+            if (typeof condition.value !== 'string' || !condition.value.trim()) return false;
+            if (typeof actual !== 'string' && !Array.isArray(actual)) return false;
+            const contained = typeof actual === 'string'
+                ? actual.includes(condition.value)
+                : actual.includes(condition.value);
+            return condition.operator === 'contains' ? contained : !contained;
+        }
         case 'greater_than':
-            return Number(actual) > Number(condition.value);
-        case 'less_than':
-            return Number(actual) < Number(condition.value);
+        case 'less_than': {
+            const left = finiteNumber(actual);
+            const right = finiteNumber(condition.value);
+            if (left === null || right === null) return false;
+            return condition.operator === 'greater_than' ? left > right : left < right;
+        }
         case 'is_empty':
             return actual === null || actual === undefined || actual === '' ||
                 (Array.isArray(actual) && actual.length === 0);
