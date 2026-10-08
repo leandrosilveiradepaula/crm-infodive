@@ -154,7 +154,7 @@ export class AutomationService {
             id: String(item.id),
             automationId: String(item.automation_id),
             executedAt: String(item.completed_at || item.started_at),
-            status: item.status === 'running' ? 'skipped' : item.status,
+            status: item.status,
             trigger: String(item.event_type),
             actions: Array.isArray(item.actions) ? item.actions.map((action: unknown) => String(action)) : [],
             error: item.error ? String(item.error) : undefined,
