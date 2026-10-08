@@ -141,3 +141,24 @@ permission, execution of real automations, production deployment, or paid models
 Commits and a PR to the non-production candidate are authorized; merge only
 after required PR CI green on exact HEAD, and Preview only after CI on merge SHA.
 Concurrent counter updates and live tenant-RLS verification remain open issues.
+
+
+## Additional authorized task (2026-10-08): Browser smoke readiness race
+
+After human merge of CRM PR #87 to non-production candidate SHA
+`332fa206d91bfb9ba89347c56bd93a46295acf98`, exact-SHA CI
+failed solely in desktop login visibility smoke. Its persisted browser
+artifact shows that the same login heading appears later during keyboard
+navigation, confirming a timing-related false negative.
+
+Allowed files for this narrowly scoped repair:
+- `docs/codex/CURRENT_TASK.md`
+- `scripts/browser-smoke.mjs`
+
+Fix: wait for the real visibility of each login/registration control within
+a bounded timeout; retain the same assertion names and a failed result when
+elements never become visible. No skipped assertions, disabled smoke, or
+production changes. Commit/PR to `product/hardening-release-candidate`
+are authorized by user's request to continue safe work. CI must pass on
+the fix PR and merge SHA before single promotion of Preview. No live
+CRM automations, migrations, credentials, or paid model calls.
