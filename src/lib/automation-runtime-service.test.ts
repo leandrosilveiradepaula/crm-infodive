@@ -23,6 +23,7 @@ describe('automation runtime service contract', () => {
             expect(source).toContain(status);
         }
         expect(source).toContain('sanitizeError');
+        expect(source).toContain("return 'automation action failed';");
         expect(source).toContain('execution_count');
         expect(source).toContain('success_count');
         expect(source).toContain('failure_count');
