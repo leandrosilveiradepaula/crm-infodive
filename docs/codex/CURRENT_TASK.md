@@ -351,7 +351,7 @@ No new permissions, no migration/RLS changes, no live Supabase writes, no paid c
 
 ## Additional authorized task (2026-10-08): Contact service tenant and mutation integrity batch
 
-After the account-service batch is technically green, harden ContactService in five related blocks:
+After the account-service batch is technically green, harden ContactService in six related blocks:
 1. Contact list/read failures must not masquerade as valid empty collections.
 2. Duplicate email/mobile checks must fail closed on database errors and avoid raw PostgREST OR-filter construction from user input.
 3. Creating or updating a contact with an account reference must verify that the account belongs to the same organization.
