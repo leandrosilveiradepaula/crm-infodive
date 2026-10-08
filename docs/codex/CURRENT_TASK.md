@@ -389,3 +389,8 @@ Additional same-batch scope: verify product parent deal ownership on single prod
 ## Additional authorized task (2026-10-08): bulk product ownership
 
 Ensure bulk delete and reorder of deal products verify every tenant-scoped item and validate access to its parent deal under the existing owner visibility rule before any mutation. Preserve existing error handling for partial database writes and add offline regression coverage. Scope limited to DealService, its integration test and this task record; no migration, live data modification, paid calls or production merge.
+
+
+## Additional authorized task (2026-10-08): deal product relationship guards
+
+Validate catalog product_id against the current tenant in single-product insert; never mistake the deal-product row id for a catalog product id. Validate distributor_id tenant membership on product edit. Cover foreign references with offline integration tests. Paths limited to DealService, its tests and this task record; no paid calls, migrations, live data writes, RBAC changes or production merge.
