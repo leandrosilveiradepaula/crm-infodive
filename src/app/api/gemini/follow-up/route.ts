@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -32,9 +32,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Oportunidade inválida.' }, { status: 400 });
     }
 
-    const rateLimit = consumeRateLimit({ scope: 'gemini-follow-up', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+    const rateLimit = await guardPaidAiRequest({ scope: 'gemini-follow-up', organizationId, userId, limit: 5, windowMs: 60_000 });
     if (!rateLimit.allowed) {
-        return NextResponse.json({ error: 'Muitas gerações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+        return NextResponse.json({ error: 'Muitas gerações em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
     }
 
     const supabase = createAdminClient();
