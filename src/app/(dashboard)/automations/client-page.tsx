@@ -145,7 +145,41 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         router.refresh();
     };
 
-    const handleToggle = async (id: string, enabled: boolean) => {
+    const withPending = async (id: string, operation: () => Promise<void>) => {
+        if (pendingAction.current) return;
+        pendingAction.current = true;
+        setPendingActionId(id);
+        try {
+            await operation();
+        } catch {
+            toast.error('Não foi possível concluir a operação. Tente novamente.');
+        } finally {
+            pendingAction.current = false;
+            setPendingActionId(null);
+        }
+    };
+
+    const handleOpenHistory = async (automation: Automation) => {
+        const request = ++historyRequest.current;
+        setSelectedAutomation(automation);
+        setShowHistory(true);
+        setHistory([]);
+        setHistoryError(null);
+        setHistoryLoading(true);
+        try {
+            const executions = await getAutomationHistory(automation.id);
+            if (historyRequest.current === request) setHistory(executions);
+        } catch {
+            if (historyRequest.current === request) {
+                setHistory([]);
+                setHistoryError('A consulta falhou. Nenhum resultado foi confirmado.');
+            }
+        } finally {
+            if (historyRequest.current === request) setHistoryLoading(false);
+        }
+    };
+
+    const handleToggle = async (id: string, enabled: boolean) => withPending(id, async () => {
         const result = await toggleAutomation(id, enabled);
         if (!result.success) {
             toast.error(result.error || 'Não foi possível alterar a automação.');
@@ -153,10 +187,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         }
         toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
         router.refresh();
-    };
+    });
 
     const handleDelete = async (id: string) => {
-        if (confirm('Tem certeza que deseja excluir esta automação?')) {
+        if (!confirm('Tem certeza que deseja excluir esta automação?')) return;
+        await withPending(id, async () => {
             const result = await deleteAutomation(id);
             if (!result.success) {
                 toast.error(result.error || 'Não foi possível excluir a automação.');
@@ -164,16 +199,19 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             }
             toast.success('Automação excluída');
             router.refresh();
-        }
+        });
     };
 
-    const handleDuplicate = async (automation: Automation) => {
-        const { id, createdAt, updatedAt, ...rest } = automation;
-        const copy = {
-            ...rest,
-            name: `${automation.name} (Cópia)`,
-            enabled: false
-        } as any;
+    const handleDuplicate = async (automation: Automation) => withPending(automation.id, async () => {
+        const copy: Partial<Automation> = {
+            name: automation.name + ' (Cópia)',
+            description: automation.description,
+            category: automation.category,
+            trigger: automation.trigger,
+            conditions: automation.conditions,
+            actions: automation.actions,
+            enabled: false,
+        };
         const result = await createAutomation(copy);
         if (!result.success) {
             toast.error(result.error || 'Não foi possível duplicar a automação.');
@@ -181,7 +219,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         }
         toast.success('Automação duplicada');
         router.refresh();
-    };
+    });
 
     const getCategoryIcon = (category?: string) => {
         switch (category) {
@@ -328,6 +366,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <input
                                                 type="checkbox"
                                                 checked={automation.enabled}
+                                                disabled={pendingActionId !== null}
                                                 onChange={(e) => handleToggle(automation.id, e.target.checked)}
                                                 className="sr-only peer"
                                                 aria-label={automation.enabled ? 'Pausar automação' : 'Ativar automação'}
@@ -411,16 +450,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                     </div>
                                     <button 
-                                        onClick={async () => {
-                                            setSelectedAutomation(automation);
-                                            setShowHistory(true);
-                                            setHistoryLoading(true);
-                                            try {
-                                                setHistory(await getAutomationHistory(automation.id));
-                                            } finally {
-                                                setHistoryLoading(false);
-                                            }
-                                        }}
+                                        onClick={() => handleOpenHistory(automation)}
                                         className="flex items-center gap-2 text-primary font-black text-xs hover:text-foreground transition-colors group/btn"
                                     >
                                         <History className="h-4 w-4" />
@@ -450,9 +480,13 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 <AutomationHistorySheet
                     automation={selectedAutomation}
                     open={showHistory}
-                    onOpenChange={setShowHistory}
+                    onOpenChange={(open) => {
+                        setShowHistory(open);
+                        if (!open) historyRequest.current += 1;
+                    }}
                     executions={history}
                     loading={historyLoading}
+                    error={historyError}
                 />
             )}
 
