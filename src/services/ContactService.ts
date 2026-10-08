@@ -22,6 +22,41 @@ export class ContactService {
         }
     }
 
+    private static async attachTenantAccounts(
+        supabase: ReturnType<typeof createAdminClient>,
+        organizationId: string,
+        contacts: Record<string, unknown>[],
+    ): Promise<Record<string, unknown>[]> {
+        const accountIds = [...new Set(
+            contacts
+                .map(contact => contact.account_id)
+                .filter((value): value is string => typeof value === 'string' && Boolean(value))
+        )];
+
+        if (accountIds.length === 0) return contacts;
+
+        const { data: accounts, error } = await supabase
+            .from('accounts')
+            .select('id, name')
+            .eq('organization_id', organizationId)
+            .in('id', accountIds);
+
+        if (error) {
+            throw new Error('Não foi possível carregar as contas dos contatos.');
+        }
+
+        const accountMap = new Map(
+            (accounts || []).map(account => [String(account.id), account])
+        );
+
+        return contacts.map(contact => ({
+            ...contact,
+            account: typeof contact.account_id === 'string'
+                ? accountMap.get(contact.account_id) || null
+                : null,
+        }));
+    }
+
     private static async assertUniqueContact(
         supabase: ReturnType<typeof createAdminClient>,
         organizationId: string,
@@ -56,12 +91,22 @@ export class ContactService {
         const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('account_contacts')
-            .select('*, account:accounts!account_contacts_account_id_fkey(name)')
+            .select('*')
             .eq('organization_id', organizationId)
             .order('name', { ascending: true });
 
         if (error) return { contacts: [], error: 'Não foi possível carregar os contatos.' };
-        return { contacts: (data || []) as Contact[], error: null };
+
+        try {
+            const contacts = await this.attachTenantAccounts(
+                supabase,
+                organizationId,
+                (data || []) as Record<string, unknown>[],
+            );
+            return { contacts: contacts as unknown as Contact[], error: null };
+        } catch {
+            return { contacts: [], error: 'Não foi possível carregar os contatos.' };
+        }
     }
 
     static async getAccountContacts(userId: string, organizationId: string, accountId?: string | null) {
@@ -76,13 +121,13 @@ export class ContactService {
             .select(`
                 id,
                 account_id,
+                organization_id,
                 name,
                 email,
                 mobile_phone,
                 landline_phone,
                 role,
-                is_primary,
-                account:accounts(id, name)
+                is_primary
             `)
             .eq('organization_id', organizationId)
             .order('name');
@@ -97,7 +142,12 @@ export class ContactService {
             console.error('[ContactService] account contacts fetch failed');
             throw new Error('Não foi possível carregar os contatos.');
         }
-        return data || [];
+
+        return await this.attachTenantAccounts(
+            supabase,
+            organizationId,
+            (data || []) as Record<string, unknown>[],
+        );
     }
 
     static async createContact(userId: string, organizationId: string, contact: Partial<Contact>) {
