@@ -117,7 +117,7 @@ describe('AccountService offline persistence integrity', () => {
             'accounts:read': { data: { id: 'account-1' }, error: null },
             'account_contacts:read': { data: [oldContact], error: null },
             'account_contacts:delete': [
-                { data: null, error: null },
+                { data: [{ id: 'contact-old' }], error: null },
                 { data: null, error: null },
             ],
             'account_contacts:insert': [
