@@ -1,8 +1,8 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { ActivityService } from '@/services/ActivityService';
-import { AutomationService } from '@/services/AutomationService';
-import { planAutomation, type AutomationRuntimeEvent } from '@/services/automationRuntimeCore';
-import type { Automation, AutomationExecution } from '@/types/automation';
+import { createAdminClient } from '../lib/supabase/admin';
+import { ActivityService } from './ActivityService';
+import { AutomationService } from './AutomationService';
+import { planAutomation, type AutomationRuntimeEvent } from './automationRuntimeCore';
+import type { Automation, AutomationExecution } from '../types/automation';
 
 type RuntimeResult = {
     automationId: string;
