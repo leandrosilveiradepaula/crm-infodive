@@ -282,3 +282,30 @@ Supabase, external integrations, credentials, paid model calls, permission
 expansions or production merge. PR against the nonproduction candidate.
 CI TypeScript/lint/tests/build/browser must pass at PR exact SHA and merge SHA
 before a single Preview promotion.
+
+
+## Additional authorized task (2026-10-08): Activity service integrity batch
+
+Following CRM PR #93 in the nonproduction candidate, address confirmed
+activity integrity gaps in five related blocks:
+1. Read errors for activities/upcoming tasks do not masquerade as empty lists.
+2. Related deal/account lookups fail closed rather than silently discarding
+   relationship labels on a database error.
+3. Tenant-scoped update/delete must confirm affected activity row before success.
+4. Creating/updating activities with a deal or account reference checks that
+   the referenced record belongs to the same organization, before mutation.
+5. Server action for manual activity creation forces `source: 'manual'` so
+   external clients cannot masquerade as the internal automation runner;
+   add offline regression tests with fake Supabase clients.
+
+Authorized files: `docs/codex/CURRENT_TASK.md`,
+`src/services/ActivityService.ts`,
+`src/app/(dashboard)/activities/actions.ts`,
+`src/services/ActivityService.integration.test.ts` (new).
+
+No change to UI behavior beyond truthful error propagation, no schema/RLS
+migration, new access rights, external activity creation, paid LLM calls,
+credentials or production release. Prepare PR against the non-production
+candidate and require full CI for exact PR SHA; merge and Preview only once
+the corresponding safe gates are independently green. Do not assume real
+cross-tenant tests are covered by offline mocks.
