@@ -39,7 +39,7 @@ Ao investigar erro de API:
 4. validar `/api/health`;
 5. só então inspecionar a integração específica.
 
-Nunca registrar tokens, cookies, chaves, payloads completos de clientes ou conteúdo sensível apenas para obter correlação.
+Nunca registrar tokens, cookies, chaves, payloads completos de clientes ou conteúdo sensível apenas para obter correlação. Mensagens cruas de erro de providers de IA também não devem ser devolvidas ao cliente.
 
 ## Quality gates
 
@@ -56,6 +56,7 @@ Campos permitidos são deliberadamente restritos: área, operação, resultado, 
 Cobertura atual:
 - health/readiness: resultado, duração e `Server-Timing`;
 - guard de IA: chamadas permitidas versus bloqueadas por scope, sem usuário/tenant;
+- rotas críticas de IA (chat, follow-up, análise de deal e enrichment): `X-Request-Id`, duração, status e resultado do provider, sem prompt, resposta ou identificador de tenant;
 - sync de e-mail: resultado do Graph, agendamento/conclusão da extração e contagens agregadas, sem endereço ou corpo de e-mail.
 
 Esses eventos tornam os logs atuais pesquisáveis e mensuráveis, mas **não** equivalem a agregação central, tracing distribuído ou alertas externos.
