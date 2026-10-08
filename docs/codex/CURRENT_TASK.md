@@ -329,3 +329,21 @@ Authorized paths:
 - `src/lib/pipeline-actions-security-contract.test.ts` (new)
 
 Do not change the RBAC matrix or invent new roles/permissions, do not apply migrations, mutate live data, call paid models, expand access or merge production. Preserve the existing permissions model: ordinary deal updates require `deals:edit`, owner reassignment requires the already-defined `deals:change_owner`. CI must pass on the exact PR SHA and merge SHA before Preview promotion.
+
+
+## Additional authorized task (2026-10-08): Account service persistence integrity batch
+
+After the deal-service batch is technically green, harden AccountService without changing customer RBAC policy:
+1. Account/manufacturer reads must surface database failures instead of returning trustworthy-looking empty lists.
+2. Account creation must inspect contact/branch writes and compensate the just-created account/children if the aggregate creation cannot complete.
+3. Account update/delete must confirm the tenant-scoped account row actually exists/is affected before returning success.
+4. Contact/branch replacement during update must inspect every delete/insert result and attempt compensating restoration from a tenant-scoped snapshot if replacement fails; never report success after partial failure.
+5. Bulk import must inspect contact writes, fail the affected row truthfully, and prevent email-based upsert from silently moving an existing contact between accounts.
+6. Add offline behavioral regression coverage with a fake Supabase adapter.
+
+Authorized paths:
+- `docs/codex/CURRENT_TASK.md`
+- `src/services/AccountService.ts`
+- `src/services/AccountService.integration.test.ts` (new)
+
+No new permissions, no migration/RLS changes, no live Supabase writes, no paid calls, no production merge. This work branch does not trigger CI; create a dedicated validation branch only after the preceding candidate integration is complete.
