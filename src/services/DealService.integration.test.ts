@@ -244,4 +244,22 @@ describe('DealService offline tenant and mutation integrity', () => {
         expect(db.operations.some(operation => operation.table === 'deal_rooms')).toBe(false);
     });
 
+    it('blocks product inserts when the parent deal is not visible in the tenant', async () => {
+        const db = fakeDatabase({
+            'profiles:read': { data: { role: 'vendedor', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+        });
+        await expect(DealService.addDealProduct('seller-a', 'deal-b', 'tenant-a', { name: 'Produto' }))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        await expect(DealService.bulkAddDealProducts('seller-a', 'deal-b', 'tenant-a', [{ name: 'Produto' }]))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        expect(db.operations.filter(op => op.table === 'deal_products' && op.mode === 'insert')).toHaveLength(0);
+        const parentReads = db.operations.filter(op => op.table === 'deals' && op.mode === 'read');
+        expect(parentReads).toHaveLength(2);
+        for (const read of parentReads) {
+            expect(read.filters).toContainEqual(['owner_id', 'seller-a']);
+            expect(read.filters).toContainEqual(['organization_id', 'tenant-a']);
+        }
+    });
+
 });
