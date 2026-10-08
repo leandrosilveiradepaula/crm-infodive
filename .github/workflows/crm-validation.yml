@@ -56,14 +56,18 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
-      - name: Install pinned Playwright browser
+      - name: Prepare pinned Playwright with system Chrome
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0
-          npx playwright install --with-deps chromium
+          test -x /usr/bin/google-chrome
+          /usr/bin/google-chrome --version
       - name: Browser smoke
         shell: bash
         env:
           SESSION_SECRET: "crm-ci-browser-smoke-session-secret-2026"
+          CRM_BROWSER_EXECUTABLE_PATH: /usr/bin/google-chrome
         run: |
           set -euo pipefail
           npm start > /tmp/crm-next.log 2>&1 &
