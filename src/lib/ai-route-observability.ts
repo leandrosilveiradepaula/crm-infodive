@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getRequestId } from '@/lib/request-context';
-import { recordOperationalEvent, type OperationalLevel } from '@/lib/operational-events';
+import { getRequestId } from './request-context';
+import { recordOperationalEvent, type OperationalLevel } from './operational-events';
 
 type JsonHeaders = HeadersInit | undefined;
 
