@@ -61,7 +61,7 @@ export const parseExcel = async (file: File): Promise<any[][]> => {
     const worksheet = workbook.worksheets[0];
     if (!worksheet) return [];
 
-    const rows: any[][] = [];
+    const rows: unknown[][] = [];
     const maxColumns = worksheet.columnCount;
 
     for (let rowNumber = 1; rowNumber <= worksheet.rowCount; rowNumber += 1) {
