@@ -1,6 +1,7 @@
 import type { Action, Automation, Condition, TriggerType } from '../types/automation';
 
 export type AutomationRuntimeEvent = {
+    eventId: string;
     type: 'deal_created' | 'deal_moved';
     organizationId: string;
     entityId: string;

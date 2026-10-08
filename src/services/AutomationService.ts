@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin';
-import { type Automation, type EmailTemplate } from '@/types/automation';
+import { type Automation, type AutomationExecution, type EmailTemplate } from '@/types/automation';
 
 export class AutomationService {
     static async getAutomations(userId: string, organizationId: string): Promise<Automation[]> {
@@ -17,7 +17,7 @@ export class AutomationService {
 
         return data.map((item: any) => ({
             ...item,
-            enabled: false,
+            enabled: Boolean(item.enabled),
             trigger: item.trigger || { type: 'deal_created', config: {} },
             conditions: item.conditions || [],
             actions: item.actions || [],
@@ -35,7 +35,6 @@ export class AutomationService {
                 .from('automations')
                 .insert([{
                     ...automation,
-                    enabled: false,
                     organization_id: organizationId,
                     execution_count: 0,
                     success_count: 0,
@@ -55,13 +54,6 @@ export class AutomationService {
     }
 
     static async toggleAutomation(userId: string, id: string, organizationId: string, enabled: boolean) {
-        if (enabled) {
-            return {
-                success: false,
-                error: 'A execução automática está bloqueada até o runtime de automações estar disponível.'
-            };
-        }
-
         const supabase = createAdminClient();
 
         try {
@@ -89,7 +81,6 @@ export class AutomationService {
                 .from('automations')
                 .update({
                     ...automation,
-                    enabled: false,
                     updated_at: new Date().toISOString()
                 })
                 .eq('id', id)
@@ -132,4 +123,42 @@ export class AutomationService {
         if (error) return [];
         return data || [];
     }
+
+    static async getExecutionHistory(automationId: string, organizationId: string): Promise<AutomationExecution[]> {
+        const supabase = createAdminClient();
+        const { data, error } = await supabase
+            .from('automation_executions')
+            .select('id, automation_id, started_at, completed_at, status, event_type, actions, error')
+            .eq('organization_id', organizationId)
+            .eq('automation_id', automationId)
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        if (error) {
+            console.error('[AutomationService] execution history fetch failed');
+            return [];
+        }
+
+        type AutomationExecutionRow = {
+            id: string;
+            automation_id: string;
+            started_at: string;
+            completed_at: string | null;
+            status: 'running' | 'success' | 'failed' | 'skipped';
+            event_type: string;
+            actions: unknown;
+            error: string | null;
+        };
+
+        return ((data || []) as AutomationExecutionRow[]).map((item) => ({
+            id: String(item.id),
+            automationId: String(item.automation_id),
+            executedAt: String(item.completed_at || item.started_at),
+            status: item.status === 'running' ? 'skipped' : item.status,
+            trigger: String(item.event_type),
+            actions: Array.isArray(item.actions) ? item.actions.map((action: unknown) => String(action)) : [],
+            error: item.error ? String(item.error) : undefined,
+        }));
+    }
+
 }

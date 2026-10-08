@@ -42,3 +42,9 @@ export async function getTemplates(): Promise<EmailTemplate[]> {
     const { userId, organizationId } = await requireSessionContext();
     return await AutomationService.getTemplates(userId, organizationId);
 }
+
+
+export async function getAutomationHistory(id: string) {
+    const { organizationId } = await requireSessionContext();
+    return await AutomationService.getExecutionHistory(id, organizationId);
+}
