@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boundedChatHistory, CHAT_INPUT_LIMIT, CHAT_HISTORY_LIMIT } from './ai-chat-ui-policy';
+import { boundedChatHistory, CHAT_INPUT_LIMIT, CHAT_HISTORY_LIMIT, readableChatError } from './ai-chat-ui-policy';
 
 describe('Gemini assistant client message policy', () => {
     it('only sends the last ten nonempty messages in order', () => {
@@ -21,4 +21,13 @@ describe('Gemini assistant client message policy', () => {
     it('does not send whitespace-only messages', () => {
         expect(boundedChatHistory([{ role: 'user', content: '   ' }])).toEqual([]);
     });
+    it('only displays approved operational error messages', () => {
+        expect(readableChatError(new Error('Integração de IA não configurada.')))
+            .toBe('Integração de IA não configurada.');
+        expect(readableChatError(new Error('provider secret:abc123')))
+            .toBe('Não foi possível consultar o assistente agora. Tente novamente.');
+        expect(readableChatError({ internal: 'details' }))
+            .toBe('Não foi possível consultar o assistente agora. Tente novamente.');
+    });
+
 });
