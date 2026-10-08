@@ -17,7 +17,7 @@ export class AccountService {
 
         if (error) {
             console.error('[AccountService] accounts fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as contas.');
         }
 
         return data.map((acc: any) => ({
@@ -46,7 +46,7 @@ export class AccountService {
 
         if (error) {
             console.error('[AccountService] accounts fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as contas.');
         }
 
         return data || [];
@@ -64,7 +64,7 @@ export class AccountService {
 
         if (error) {
             console.error('[AccountService] manufacturers fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar os fabricantes.');
         }
 
         return data || [];
