@@ -63,7 +63,7 @@ export const parseExcel = async (file: File): Promise<any[][]> => {
         return value;
     };
 
-    const rows: any[][] = [];
+    const rows: unknown[][] = [];
     worksheet.eachRow({ includeEmpty: true }, (row) => {
         const values = Array.isArray(row.values) ? row.values.slice(1) : [];
         rows.push(values.map(normalizeCellValue));
