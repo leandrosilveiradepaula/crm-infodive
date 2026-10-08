@@ -344,12 +344,14 @@ export class AccountService {
     static async deleteAccount(userId: string, organization_id: string, id: string) {
         const supabase = createAdminClient();
         try {
-            const { error } = await supabase
+            const { data: deleted, error } = await supabase
                 .from('accounts')
                 .delete()
                 .eq('id', id)
-                .eq('organization_id', organization_id);
-            if (error) throw error;
+                .eq('organization_id', organization_id)
+                .select('id')
+                .maybeSingle();
+            if (error || !deleted) throw error || new Error('account deletion returned no row');
             return { success: true };
         } catch {
             console.error('[AccountService] account deletion failed');
@@ -357,7 +359,7 @@ export class AccountService {
         }
     }
 
-    static async bulkCreateAccounts(userId: string, organizationId: string, accounts: any[]) {
+    static async bulkCreateAccounts(userId: string, organizationId: string, accounts: unknown[]) {
         const supabase = createAdminClient();
         const results = {
             created: 0,
@@ -366,60 +368,107 @@ export class AccountService {
             errors: [] as string[]
         };
 
-        for (const account of accounts) {
+        for (const rawAccount of accounts) {
             try {
-                // 1. Upsert Account by CNPJ
+                if (!rawAccount || typeof rawAccount !== 'object' || Array.isArray(rawAccount)) {
+                    throw new Error('invalid account import row');
+                }
+                const account = rawAccount as Record<string, unknown>;
+                const accountName = typeof account.name === 'string' ? account.name : '';
+                const accountCnpj = typeof account.cnpj === 'string' ? account.cnpj : '';
+                const contacts = Array.isArray(account.contacts) ? account.contacts : [];
+
                 const { data: accData, error: accError } = await supabase
                     .from('accounts')
                     .upsert({
                         organization_id: organizationId,
-                        name: normalizeCasing(account.name, 'name'),
-                        cnpj: normalizeTaxId(account.cnpj),
+                        name: normalizeCasing(accountName, 'name'),
+                        cnpj: normalizeTaxId(accountCnpj),
                         ie: account.ie || null,
-                        segment: normalizeCasing(account.segment, 'name') || 'Outros',
+                        segment: normalizeCasing(typeof account.segment === 'string' ? account.segment : '', 'name') || 'Outros',
                         status: account.status || 'Ativo',
-                        zip: normalizeZip(account.zip) || null,
-                        street: normalizeCasing(account.street, 'address') || null,
+                        zip: normalizeZip(typeof account.zip === 'string' ? account.zip : '') || null,
+                        street: normalizeCasing(typeof account.street === 'string' ? account.street : '', 'address') || null,
                         number: account.number || null,
                         complement: account.complement || null,
-                        neighborhood: normalizeCasing(account.neighborhood, 'address') || null,
-                        city: normalizeCasing(account.city, 'address') || null,
-                        state: normalizeCasing(account.state, 'address') || null,
+                        neighborhood: normalizeCasing(typeof account.neighborhood === 'string' ? account.neighborhood : '', 'address') || null,
+                        city: normalizeCasing(typeof account.city === 'string' ? account.city : '', 'address') || null,
+                        state: normalizeCasing(typeof account.state === 'string' ? account.state : '', 'address') || null,
                         relationship_type: account.relationship_type || 'Cliente'
                     }, { onConflict: 'cnpj, organization_id' })
                     .select()
                     .single();
 
-                if (accError) throw accError;
+                if (accError || !accData) throw accError || new Error('account upsert returned no row');
 
-                const accId = accData.id;
-                
-                // Determine if it was an update or create (simplified check)
-                if (accData.created_at === accData.updated_at) results.created++;
-                else results.updated++;
+                const accId = String(accData.id);
+                for (const rawContact of contacts) {
+                    if (!rawContact || typeof rawContact !== 'object' || Array.isArray(rawContact)) {
+                        throw new Error('invalid account contact import row');
+                    }
+                    const contact = rawContact as Record<string, unknown>;
+                    const email = typeof contact.email === 'string' && contact.email.trim()
+                        ? contact.email.trim()
+                        : null;
+                    const contactPayload = {
+                        account_id: accId,
+                        organization_id: organizationId,
+                        name: typeof contact.name === 'string' ? contact.name : '',
+                        email,
+                        mobile_phone: contact.mobile_phone || null,
+                        landline_phone: contact.landline_phone || null,
+                        role: contact.role || null,
+                        is_primary: Boolean(contact.is_primary)
+                    };
 
-                // 2. Handle Contacts
-                if (account.contacts && account.contacts.length > 0) {
-                    for (const contact of account.contacts) {
-                        // Upsert Contact by Email (if exists) or just insert
-                        const contactPayload = {
-                            account_id: accId,
-                            organization_id: organizationId,
-                            name: contact.name,
-                            email: contact.email || null,
-                            mobile_phone: contact.mobile_phone || null,
-                            landline_phone: contact.landline_phone || null,
-                            role: contact.role || null,
-                            is_primary: !!contact.is_primary
-                        };
+                    if (email) {
+                        const { data: existingContact, error: contactLookupError } = await supabase
+                            .from('account_contacts')
+                            .select('id, account_id')
+                            .eq('email', email)
+                            .eq('organization_id', organizationId)
+                            .maybeSingle();
+                        if (contactLookupError) throw contactLookupError;
 
-                        if (contact.email) {
-                            await supabase.from('account_contacts').upsert(contactPayload, { onConflict: 'email, organization_id' });
+                        if (existingContact && String(existingContact.account_id) !== accId) {
+                            throw new Error('contact email already belongs to another account');
+                        }
+
+                        if (existingContact) {
+                            const { data: updatedContact, error: contactUpdateError } = await supabase
+                                .from('account_contacts')
+                                .update(contactPayload)
+                                .eq('id', existingContact.id)
+                                .eq('organization_id', organizationId)
+                                .select('id')
+                                .maybeSingle();
+                            if (contactUpdateError || !updatedContact) {
+                                throw contactUpdateError || new Error('contact update returned no row');
+                            }
                         } else {
-                            await supabase.from('account_contacts').insert(contactPayload);
+                            const { data: insertedContact, error: contactInsertError } = await supabase
+                                .from('account_contacts')
+                                .insert(contactPayload)
+                                .select('id')
+                                .maybeSingle();
+                            if (contactInsertError || !insertedContact) {
+                                throw contactInsertError || new Error('contact insert returned no row');
+                            }
+                        }
+                    } else {
+                        const { data: insertedContact, error: contactInsertError } = await supabase
+                            .from('account_contacts')
+                            .insert(contactPayload)
+                            .select('id')
+                            .maybeSingle();
+                        if (contactInsertError || !insertedContact) {
+                            throw contactInsertError || new Error('contact insert returned no row');
                         }
                     }
                 }
+
+                if (accData.created_at === accData.updated_at) results.created++;
+                else results.updated++;
             } catch {
                 results.failed++;
                 results.errors.push('Não foi possível importar esta conta.');
@@ -428,4 +477,5 @@ export class AccountService {
 
         return results;
     }
+
 }
