@@ -1,10 +1,10 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { sortProductsHierarchically } from '@/utils/productSorting';
-import { normalizeCasing } from '@/lib/string-utils';
-import { Deal, DealProduct } from '@/types/deal';
-import { Profile } from '@/types/profile';
-import { Account } from '@/types/account';
-import { Activity } from '@/types/activity';
+import { createAdminClient } from '../lib/supabase/admin';
+import { sortProductsHierarchically } from '../utils/productSorting';
+import { normalizeCasing } from '../lib/string-utils';
+import { Deal, DealProduct } from '../types/deal';
+import { Profile } from '../types/profile';
+import { Account } from '../types/account';
+import { Activity } from '../types/activity';
 import { mergeDealProductCurrencyFields, normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
 
 export interface PipelineData {
