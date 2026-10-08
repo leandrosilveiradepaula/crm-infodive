@@ -28,6 +28,6 @@ describe('automation mutation policy', () => {
         expect(() => sanitizeAutomationWrite({ actions: {} as unknown as Parameters<typeof sanitizeAutomationWrite>[0]['actions'] })).toThrow();
         expect(() => assertSupportedAutomation(supported)).not.toThrow();
         expect(() => assertSupportedAutomation({ ...supported, actions: [{ type: 'send_email', config: {} }] } as Parameters<typeof assertSupportedAutomation>[0])).toThrow();
-        expect(() => assertSupportedAutomation({ ...supported, trigger: { type: 'time_based', config: {} } } as any)).toThrow();
+        expect(() => assertSupportedAutomation({ ...supported, trigger: { type: 'time_based', config: {} } } as Parameters<typeof assertSupportedAutomation>[0])).toThrow();
     });
 });
