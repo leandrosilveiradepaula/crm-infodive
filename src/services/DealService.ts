@@ -428,8 +428,23 @@ export class DealService {
         return newDeal as Deal;
     }
 
+    private static async assertWritableDeal(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        dealId: string,
+        organizationId: string,
+    ): Promise<void> {
+        const canViewAll = await this.canAccessAllDeals(supabase, userId, organizationId);
+        let query = supabase.from('deals').select('id')
+            .eq('id', dealId).eq('organization_id', organizationId);
+        if (!canViewAll) query = query.eq('owner_id', userId);
+        const { data, error } = await query.maybeSingle();
+        if (error || !data) throw new Error('Oportunidade indisponível ou sem permissão.');
+    }
+
     static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: Partial<DealProduct>): Promise<DealProduct> {
         const supabase = createAdminClient();
+        await this.assertWritableDeal(supabase, userId, dealId, organizationId);
 
         const payload = {
             deal_id: dealId,
@@ -572,6 +587,7 @@ export class DealService {
 
     static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]): Promise<DealProduct[]> {
         const supabase = createAdminClient();
+        await this.assertWritableDeal(supabase, userId, dealId, organizationId);
 
         const isValidUUID = (id: any) =>
             typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
