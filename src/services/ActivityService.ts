@@ -39,7 +39,7 @@ export class ActivityService {
             throw new Error('Não foi possível carregar as atividades.');
         }
 
-        const dealIds = (activitiesData || []).map((a: any) => a.deal_id).filter((id: any) => id);
+        const dealIds = (activitiesData || []).map((a) => a.deal_id).filter(Boolean);
 
         let dealsMap: Record<string, string> = {};
         if (dealIds.length > 0) {
@@ -51,14 +51,14 @@ export class ActivityService {
 
             if (dealsError) throw new Error('Não foi possível carregar os vínculos das oportunidades.');
             if (dealsData) {
-                dealsMap = dealsData.reduce((acc: any, deal: any) => {
+                dealsMap = dealsData.reduce((acc: Record<string, string>, deal) => {
                     acc[deal.id] = deal.title;
                     return acc;
                 }, {});
             }
         }
 
-        const accountIds = activitiesData.map((a: any) => a.account_id).filter((id: any) => id);
+        const accountIds = activitiesData.map((a) => a.account_id).filter(Boolean);
 
         let accountsMap: Record<string, string> = {};
         if (accountIds.length > 0) {
@@ -70,14 +70,14 @@ export class ActivityService {
 
             if (accountsError) throw new Error('Não foi possível carregar os vínculos dos clientes.');
             if (accountsData) {
-                accountsMap = accountsData.reduce((acc: any, account: any) => {
+                accountsMap = accountsData.reduce((acc: Record<string, string>, account) => {
                     acc[account.id] = account.name;
                     return acc;
                 }, {});
             }
         }
 
-        return (activitiesData || []).map((item: any) => ({
+        return (activitiesData || []).map((item) => ({
             ...item,
             dueDate: item.dueDate,
             dueTime: item.dueTime,
@@ -107,7 +107,7 @@ export class ActivityService {
 
         if (!data) return [];
 
-        return data.map((t: any) => ({
+        return data.map((t) => ({
             id: t.id,
             title: t.title,
             dueDate: t.dueDate, // Already camelCase in DB response if quoted col
@@ -158,7 +158,7 @@ export class ActivityService {
         }
         await this.assertRelatedRecords(supabase, organizationId, updates.dealId, updates.customerId);
 
-        const dbUpdates: any = {
+        const dbUpdates: Record<string, unknown> = {
             updated_at: new Date().toISOString()
         };
 
@@ -167,8 +167,8 @@ export class ActivityService {
         if (updates.type !== undefined) dbUpdates.type = updates.type;
         if (updates.status !== undefined) dbUpdates.status = updates.status;
         if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
-        if (updates.dealId !== undefined) dbUpdates.deal_id = updates.dealId;
-        if (updates.customerId !== undefined) dbUpdates.account_id = updates.customerId;
+        if (updates.dealId !== undefined) dbUpdates.deal_id = updates.dealId || null;
+        if (updates.customerId !== undefined) dbUpdates.account_id = updates.customerId || null;
         if (updates.dueDate !== undefined) dbUpdates["dueDate"] = updates.dueDate;
         if (updates.dueTime !== undefined) dbUpdates["dueTime"] = updates.dueTime;
         if (updates.assignedTo !== undefined) dbUpdates["assignedTo"] = updates.assignedTo;
