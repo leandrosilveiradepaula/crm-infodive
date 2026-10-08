@@ -90,3 +90,33 @@ merge requires green CI and exact HEAD; preview promotion requires green merge
 SHA. No migrations, external automation execution, paid model calls or
 production merge/release are authorized by this task. Any operational
 race/atomic-counter work needing DB changes must remain an explicit follow-up.
+
+## Additional authorized task (2026-10-08): Fail-closed rule evaluation and truthful history
+
+The user reaffirmed autonomous work on CRM security and functionality after PR #85.
+This scope extends the previous automation hardening task:
+
+- Never match `equals` / `not_equals` on missing event fields or undefined rule values.
+- Reject malformed conditions, unsafe data paths, unsupported operators, and
+  invalid action delay/configuration before attempting any runtime side effects.
+- Keep raw exception contents out of persisted automation errors.
+- Distinguish a genuinely running execution from skipped, and label planned
+  action types without claiming they were executed.
+- Add regression tests for these behaviors, preserving legitimate
+  `is_empty` / `is_not_empty` and explicitly configured null comparisons.
+
+Allowed additional files:
+- `docs/codex/CURRENT_TASK.md`
+- `src/services/automationRuntimeCore.ts`
+- `src/services/automationRuntimeCore.test.ts`
+- `src/services/AutomationRuntimeService.ts`
+- `src/services/AutomationService.ts`
+- `src/types/automation.ts`
+- `src/components/automations/HistorySheet.tsx`
+- `src/lib/automation-runtime-service.test.ts`
+- `src/lib/automation-runtime-fail-closed.test.ts`
+
+Validation via CRM PR CI: TypeScript, unit/regression tests, lint, build, diff review.
+Commit and PR are authorized for a non-production candidate branch. No production
+merge, data mutation, migrations, external automation runs or paid model tests.
+Preview promotion is permitted only after the exact merged candidate passes CI.
