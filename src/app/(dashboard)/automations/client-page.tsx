@@ -116,7 +116,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         {
             label: "Fluxos pausados",
             value: (initialAutomations.length - activeCount).toString(),
-            description: "Configurações sem execução",
+            description: "Desativadas no momento",
             icon: Clock,
             color: "text-slate-500",
             gradient: "from-slate-50 to-white dark:from-slate-900/20",
