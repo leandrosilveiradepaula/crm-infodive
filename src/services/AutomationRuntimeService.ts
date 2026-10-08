@@ -11,9 +11,10 @@ type RuntimeResult = {
 };
 
 function eventKey(event: AutomationRuntimeEvent): string {
-    const eventId = String(event.eventId || '').trim();
-    if (!eventId) throw new Error('automation event id is required');
-    return eventId;
+    if (typeof event.eventId !== 'string' || !event.eventId.trim()) {
+        throw new Error('automation event id is required');
+    }
+    return event.eventId.trim();
 }
 
 function sanitizeError(error: unknown): string {
@@ -27,8 +28,19 @@ export class AutomationRuntimeService {
         organizationId: string,
         event: AutomationRuntimeEvent,
     ): Promise<RuntimeResult[]> {
-        if (event.organizationId !== organizationId) {
+        if (!event || event.organizationId !== organizationId || !organizationId?.trim() || !userId?.trim()) {
             throw new Error('automation runtime tenant mismatch');
+        }
+        // Reject malformed events even if there are no active automations.
+        eventKey(event);
+        if (typeof event.entityId !== 'string' || !event.entityId.trim()) {
+            throw new Error('automation entity id is required');
+        }
+        if (!event.data || typeof event.data !== 'object' || Array.isArray(event.data)) {
+            throw new Error('automation event data is invalid');
+        }
+        if (event.type !== 'deal_created' && event.type !== 'deal_moved') {
+            throw new Error('automation event type unsupported');
         }
 
         const automations = await AutomationService.getAutomations(userId, organizationId);
