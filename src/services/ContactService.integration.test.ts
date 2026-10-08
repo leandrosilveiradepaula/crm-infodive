@@ -4,15 +4,27 @@ const mocks = vi.hoisted(() => ({ createAdminClient: vi.fn() }));
 vi.mock('../lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
 import { ContactService } from './ContactService';
 
-type Result = { data: any; error: { message?: string } | null };
+type Result = { data: unknown; error: { message?: string } | null };
 type Operation = { table: string; action: string; filters: [string, unknown][]; payload?: unknown };
+type FakeQuery = {
+    select: () => FakeQuery;
+    eq: (key: string, value: unknown) => FakeQuery;
+    order: () => FakeQuery;
+    limit: () => FakeQuery;
+    insert: (payload: unknown) => FakeQuery;
+    update: (payload: unknown) => FakeQuery;
+    delete: () => FakeQuery;
+    single: () => Promise<Result>;
+    maybeSingle: () => Promise<Result>;
+    then: (ok: (value: Result) => unknown, fail?: (reason: unknown) => unknown) => Promise<unknown>;
+};
 function database(responses: Record<string, Result | Result[]>) {
     const operations: Operation[] = [];
     const queues = new Map(Object.entries(responses).map(([key, value]) => [key, Array.isArray(value) ? [...value] : [value]]));
     const from = vi.fn((table: string) => {
         const state: Operation = { table, action: 'select', filters: [] };
         operations.push(state);
-        const query: any = {
+        const query: FakeQuery = {
             select() { return query; },
             eq(key: string, value: unknown) { state.filters.push([key, value]); return query; },
             order() { return query; },
@@ -64,7 +76,7 @@ describe('ContactService offline integrity', () => {
         const db = database({ 'accounts:select': { data: { id: 'account-2' }, error: null } });
         await ContactService.updateContact('u', 'contact-1', 'tenant', {
             name: 'maria', account_id: 'account-2', organization_id: 'forged', id: 'forged',
-        } as any);
+        } as unknown as Parameters<typeof ContactService.updateContact>[3]);
         const update = db.operations.find(op => op.action === 'update');
         expect(update?.payload).not.toHaveProperty('organization_id');
         expect(update?.payload).not.toHaveProperty('id');
