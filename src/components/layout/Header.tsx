@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Menu, Search, Moon, Sun, Bot } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/providers/ThemeProvider';
@@ -21,6 +21,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, isMobileMenuOpen, onTo
     const { theme, toggleTheme } = useTheme();
     const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
+    const closeAssistant = useCallback(() => setIsAiOpen(false), []);
     const { notifications, markAsRead, clearAll, remove } = useNotifications();
     
     const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
@@ -108,7 +109,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, isMobileMenuOpen, onTo
                 />
             </div>
 
-            <AiAssistant isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+            <AiAssistant isOpen={isAiOpen} onClose={closeAssistant} />
         </header>
     );
 }
