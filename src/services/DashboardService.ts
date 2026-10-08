@@ -189,26 +189,40 @@ export class DashboardService {
 
     static async searchGlobal(userId: string, organizationId: string, query: string) {
         const supabase = createAdminClient();
-        const searchTerm = `%${query}%`;
+        const normalized = typeof query === 'string' ? query.trim().slice(0, 80) : '';
+        if (normalized.length < 2) return { deals: [], customers: [] };
 
-        const [dealsRes, customersRes] = await Promise.all([
-            supabase
-                .from('deals')
+        const searchTerm = `%${normalized}%`;
+        // The .or() grammar accepts raw PostgREST syntax and must not interpolate
+        // arbitrary user search text. Use separate, parameterized ilike filters.
+        const [titleRes, companyRes, customersRes] = await Promise.all([
+            supabase.from('deals')
                 .select('id, title, company, stage, value')
                 .eq('organization_id', organizationId)
-                .or(`title.ilike.${searchTerm},company.ilike.${searchTerm}`)
+                .ilike('title', searchTerm)
                 .limit(5),
-            supabase
-                .from('accounts')
+            supabase.from('deals')
+                .select('id, title, company, stage, value')
+                .eq('organization_id', organizationId)
+                .ilike('company', searchTerm)
+                .limit(5),
+            supabase.from('accounts')
                 .select('id, name, segment, status')
                 .eq('organization_id', organizationId)
                 .ilike('name', searchTerm)
-                .limit(5)
+                .limit(5),
         ]);
 
-        return {
-            deals: dealsRes.data || [],
-            customers: customersRes.data || []
-        };
+        if (titleRes.error || companyRes.error || customersRes.error) {
+            console.error('[DashboardService] global search failed');
+            throw new Error('Não foi possível concluir a busca.');
+        }
+
+        const matches = [...(titleRes.data || []), ...(companyRes.data || [])];
+        const deals = matches
+            .filter((deal, index) => matches.findIndex(other => other.id === deal.id) === index)
+            .slice(0, 5);
+
+        return { deals, customers: customersRes.data || [] };
     }
 }
