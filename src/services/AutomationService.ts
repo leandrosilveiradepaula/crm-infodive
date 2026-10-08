@@ -139,7 +139,18 @@ export class AutomationService {
             return [];
         }
 
-        return (data || []).map((item: any) => ({
+        type AutomationExecutionRow = {
+            id: string;
+            automation_id: string;
+            started_at: string;
+            completed_at: string | null;
+            status: 'running' | 'success' | 'failed' | 'skipped';
+            event_type: string;
+            actions: unknown;
+            error: string | null;
+        };
+
+        return ((data || []) as AutomationExecutionRow[]).map((item) => ({
             id: String(item.id),
             automationId: String(item.automation_id),
             executedAt: String(item.completed_at || item.started_at),
