@@ -8,6 +8,12 @@ describe('automation runtime fail-closed surface', () => {
         expect(history).not.toContain('TIMEOUT');
         expect(history).not.toContain('Configurar Notificações de Erro');
         expect(history).toContain('Nenhuma execução verificada');
+        expect(history).toContain('Em andamento');
+        expect(history).toContain('Ações planejadas: ');
+        expect(history).not.toContain("'Ações: ' + execution.actions");
+        const service = readFileSync('src/services/AutomationService.ts', 'utf8');
+        expect(service).toContain('status: item.status,');
+        expect(service).not.toContain("item.status === 'running' ? 'skipped'");
     });
 
     it('only exposes runtime-backed triggers and actions and preserves explicit enablement', () => {

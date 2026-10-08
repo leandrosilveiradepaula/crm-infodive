@@ -26,6 +26,7 @@ export const SUPPORTED_RUNTIME_ACTIONS: ReadonlySet<Action['type']> = new Set([
 function readField(data: Record<string, unknown>, field: string): unknown {
     return field.split('.').reduce<unknown>((value, part) => {
         if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+        if (!Object.prototype.hasOwnProperty.call(value, part)) return undefined;
         return (value as Record<string, unknown>)[part];
     }, data);
 }
@@ -37,7 +38,14 @@ function finiteNumber(value: unknown): number | null {
     return Number.isFinite(parsed) ? parsed : null;
 }
 
+const validOperators = new Set(['equals','not_equals','contains','not_contains','greater_than','less_than','is_empty','is_not_empty']);
+function validField(field: unknown): field is string {
+    return typeof field === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)*$/.test(field)
+        && !field.split('.').some(part => ['__proto__', 'prototype', 'constructor'].includes(part));
+}
 function compare(condition: Condition, actual: unknown): boolean {
+    if (actual === undefined && condition.operator !== 'is_empty' && condition.operator !== 'is_not_empty') return false;
+    if (condition.value === undefined && condition.operator !== 'is_empty' && condition.operator !== 'is_not_empty') return false;
     switch (condition.operator) {
         case 'equals':
             return actual === condition.value;
@@ -74,7 +82,9 @@ export function evaluateConditions(
     conditions: Condition[],
     data: Record<string, unknown>
 ): boolean {
+    if (!Array.isArray(conditions)) return false;
     if (!conditions.length) return true;
+    if (conditions.some(condition => !condition || !validField(condition.field) || !validOperators.has(condition.operator) || !['AND', 'OR'].includes(condition.logic))) return false;
 
     let result = compare(conditions[0], readField(data, conditions[0].field));
     for (let index = 1; index < conditions.length; index += 1) {
@@ -88,18 +98,27 @@ export function evaluateConditions(
 export function validateAutomationForRuntime(automation: Automation): string[] {
     const blockers: string[] = [];
 
-    if (!SUPPORTED_RUNTIME_TRIGGERS.has(automation.trigger.type)) {
-        blockers.push(`unsupported trigger: ${automation.trigger.type}`);
+    if (!automation.trigger || !SUPPORTED_RUNTIME_TRIGGERS.has(automation.trigger.type)) {
+        blockers.push('missing or unsupported trigger');
+        return blockers;
     }
-
+    if (!automation.trigger.config || typeof automation.trigger.config !== 'object' || Array.isArray(automation.trigger.config)) blockers.push('invalid trigger config');
+    if (!Array.isArray(automation.conditions) || automation.conditions.some(condition => !condition || !validField(condition.field) || !validOperators.has(condition.operator) || !['AND', 'OR'].includes(condition.logic))) blockers.push('invalid conditions');
+    if (!Array.isArray(automation.actions)) {
+        blockers.push('invalid actions');
+        return blockers;
+    }
     if (!automation.actions.length) {
         blockers.push('automation has no actions');
     }
 
     automation.actions.forEach((action, index) => {
-        if (!SUPPORTED_RUNTIME_ACTIONS.has(action.type)) {
-            blockers.push(`unsupported action[${index}]: ${action.type}`);
+        if (!action || !SUPPORTED_RUNTIME_ACTIONS.has(action.type)) {
+            blockers.push(`unsupported action[${index}]: ${action?.type ?? 'missing'}`);
+            return;
         }
+        if (!action.config || typeof action.config !== 'object' || Array.isArray(action.config)) blockers.push(`invalid action config[${index}]`);
+        if (action.delay !== undefined && (typeof action.delay !== 'number' || !Number.isFinite(action.delay) || action.delay < 0)) blockers.push(`invalid action delay[${index}]`);
         if ((action.delay || 0) > 0) {
             blockers.push(`unsupported delayed action[${index}]`);
         }

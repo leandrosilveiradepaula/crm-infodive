@@ -21,11 +21,13 @@ interface AutomationHistorySheetProps {
 function statusLabel(status: AutomationExecution['status']) {
     if (status === 'success') return 'Sucesso';
     if (status === 'failed') return 'Falhou';
+    if (status === 'running') return 'Em andamento';
     return 'Ignorada';
 }
 
 function statusIcon(status: AutomationExecution['status']) {
     if (status === 'success') return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
+    if (status === 'running') return <History className="h-5 w-5 text-amber-500" />;
     if (status === 'failed') return <XCircle className="h-5 w-5 text-red-500" />;
     return <MinusCircle className="h-5 w-5 text-muted-foreground" />;
 }
@@ -88,7 +90,7 @@ export function AutomationHistorySheet({
                                         </div>
                                         <div className="mt-3 text-sm text-muted-foreground">
                                             {execution.actions.length
-                                                ? 'Ações: ' + execution.actions.join(', ')
+                                                ? 'Ações planejadas: ' + execution.actions.join(', ')
                                                 : 'Nenhuma ação executada.'}
                                         </div>
                                         {execution.error ? (

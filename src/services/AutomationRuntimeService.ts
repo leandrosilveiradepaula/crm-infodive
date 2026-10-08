@@ -17,8 +17,8 @@ function eventKey(event: AutomationRuntimeEvent): string {
 }
 
 function sanitizeError(error: unknown): string {
-    const message = error instanceof Error ? error.message : String(error);
-    return message.replace(/[\r\n\t]+/g, ' ').slice(0, 300) || 'runtime_error';
+    if (error instanceof Error && error.message === 'automation execution finalization failed') return error.message;
+    return 'automation action failed';
 }
 
 export class AutomationRuntimeService {
