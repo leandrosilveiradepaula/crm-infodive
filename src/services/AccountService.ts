@@ -171,85 +171,172 @@ export class AccountService {
 
     static async updateAccount(userId: string, organizationId: string, id: string, updates: Partial<Account>) {
         const supabase = createAdminClient();
+        let previousContacts: Record<string, unknown>[] | null = null;
+        let previousBranches: Record<string, unknown>[] | null = null;
 
-        try {
-            const { error: accError } = await supabase
-                .from('accounts')
-                .update({
-                    name: normalizeCasing(updates.name, 'name'),
-                    cnpj: normalizeTaxId(updates.cnpj),
-                    ie: updates.ie,
-                    segment: normalizeCasing(updates.segment, 'name'),
-                    status: updates.status,
-                    zip: normalizeZip(updates.zip),
-                    street: normalizeCasing(updates.street, 'address'),
-                    number: updates.number,
-                    complement: updates.complement,
-                    neighborhood: normalizeCasing(updates.neighborhood, 'address'),
-                    city: normalizeCasing(updates.city, 'address'),
-                    state: normalizeCasing(updates.state, 'address'),
-                    tags: updates.tags,
-                    relationship_type: updates.relationship_type,
-                    logo_url: updates.logo_url,
-                    payment_terms: updates.payment_terms
-                })
-                .eq('id', id)
-                .eq('organization_id', organizationId);
+        const restoreChildren = async (): Promise<boolean> => {
+            let restored = true;
 
-            if (accError) throw accError;
-
-            if (updates.contacts) {
-                await supabase
+            if (previousContacts) {
+                const { error: deleteContactsError } = await supabase
                     .from('account_contacts')
                     .delete()
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
-
-                if (updates.contacts.length > 0) {
-                    const contactsToInsert = updates.contacts.map(c => ({
-                        account_id: id,
-                        organization_id: organizationId,
-                        name: c.name,
-                        email: c.email,
-                        mobile_phone: c.mobile_phone,
-                        landline_phone: c.landline_phone,
-                        role: c.role,
-                        is_primary: c.is_primary
-                    }));
-                    await supabase.from('account_contacts').insert(contactsToInsert);
+                if (deleteContactsError) restored = false;
+                if (!deleteContactsError && previousContacts.length > 0) {
+                    const { error: restoreContactsError } = await supabase
+                        .from('account_contacts')
+                        .insert(previousContacts);
+                    if (restoreContactsError) restored = false;
                 }
             }
 
-            if (updates.branches) {
-                await supabase
+            if (previousBranches) {
+                const { error: deleteBranchesError } = await supabase
                     .from('account_branches')
                     .delete()
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
+                if (deleteBranchesError) restored = false;
+                if (!deleteBranchesError && previousBranches.length > 0) {
+                    const { error: restoreBranchesError } = await supabase
+                        .from('account_branches')
+                        .insert(previousBranches);
+                    if (restoreBranchesError) restored = false;
+                }
+            }
 
-                if (updates.branches.length > 0) {
-                    const branchesToInsert = updates.branches.map(b => ({
+            return restored;
+        };
+
+        try {
+            const { data: existingAccount, error: existingAccountError } = await supabase
+                .from('accounts')
+                .select('id')
+                .eq('id', id)
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+
+            if (existingAccountError || !existingAccount) {
+                throw existingAccountError || new Error('account not found');
+            }
+
+            if (updates.contacts !== undefined) {
+                const { data: contactsSnapshot, error: contactsSnapshotError } = await supabase
+                    .from('account_contacts')
+                    .select('id, account_id, organization_id, name, email, mobile_phone, landline_phone, role, is_primary')
+                    .eq('account_id', id)
+                    .eq('organization_id', organizationId);
+                if (contactsSnapshotError) throw contactsSnapshotError;
+                previousContacts = (contactsSnapshot || []) as Record<string, unknown>[];
+
+                const { error: deleteContactsError } = await supabase
+                    .from('account_contacts')
+                    .delete()
+                    .eq('account_id', id)
+                    .eq('organization_id', organizationId);
+                if (deleteContactsError) throw deleteContactsError;
+
+                if (updates.contacts.length > 0) {
+                    const contactsToInsert = updates.contacts.map(contact => ({
                         account_id: id,
                         organization_id: organizationId,
-                        name: b.name,
-                        zip: b.zip,
-                        street: b.street,
-                        number: b.number,
-                        complement: b.complement,
-                        neighborhood: b.neighborhood,
-                        city: b.city,
-                        state: b.state,
-                        cnpj: b.cnpj,
-                        ie: b.ie,
-                        payment_terms: b.payment_terms
+                        name: contact.name,
+                        email: contact.email,
+                        mobile_phone: contact.mobile_phone,
+                        landline_phone: contact.landline_phone,
+                        role: contact.role,
+                        is_primary: contact.is_primary
                     }));
-                    await supabase.from('account_branches').insert(branchesToInsert);
+                    const { error: contactsInsertError } = await supabase
+                        .from('account_contacts')
+                        .insert(contactsToInsert);
+                    if (contactsInsertError) throw contactsInsertError;
+                }
+            }
+
+            if (updates.branches !== undefined) {
+                const { data: branchesSnapshot, error: branchesSnapshotError } = await supabase
+                    .from('account_branches')
+                    .select('id, account_id, organization_id, name, zip, street, number, complement, neighborhood, city, state, cnpj, ie, payment_terms')
+                    .eq('account_id', id)
+                    .eq('organization_id', organizationId);
+                if (branchesSnapshotError) throw branchesSnapshotError;
+                previousBranches = (branchesSnapshot || []) as Record<string, unknown>[];
+
+                const { error: deleteBranchesError } = await supabase
+                    .from('account_branches')
+                    .delete()
+                    .eq('account_id', id)
+                    .eq('organization_id', organizationId);
+                if (deleteBranchesError) throw deleteBranchesError;
+
+                if (updates.branches.length > 0) {
+                    const branchesToInsert = updates.branches.map(branch => ({
+                        account_id: id,
+                        organization_id: organizationId,
+                        name: branch.name,
+                        zip: branch.zip,
+                        street: branch.street,
+                        number: branch.number,
+                        complement: branch.complement,
+                        neighborhood: branch.neighborhood,
+                        city: branch.city,
+                        state: branch.state,
+                        cnpj: branch.cnpj,
+                        ie: branch.ie,
+                        payment_terms: branch.payment_terms
+                    }));
+                    const { error: branchesInsertError } = await supabase
+                        .from('account_branches')
+                        .insert(branchesToInsert);
+                    if (branchesInsertError) throw branchesInsertError;
+                }
+            }
+
+            const accountUpdates: Record<string, unknown> = {};
+            const setIfPresent = (key: keyof Account, value: unknown) => {
+                if (Object.prototype.hasOwnProperty.call(updates, key)) accountUpdates[key] = value;
+            };
+            setIfPresent('name', normalizeCasing(updates.name, 'name'));
+            setIfPresent('cnpj', normalizeTaxId(updates.cnpj));
+            setIfPresent('ie', updates.ie);
+            setIfPresent('segment', normalizeCasing(updates.segment, 'name'));
+            setIfPresent('status', updates.status);
+            setIfPresent('zip', normalizeZip(updates.zip));
+            setIfPresent('street', normalizeCasing(updates.street, 'address'));
+            setIfPresent('number', updates.number);
+            setIfPresent('complement', updates.complement);
+            setIfPresent('neighborhood', normalizeCasing(updates.neighborhood, 'address'));
+            setIfPresent('city', normalizeCasing(updates.city, 'address'));
+            setIfPresent('state', normalizeCasing(updates.state, 'address'));
+            setIfPresent('tags', updates.tags);
+            setIfPresent('relationship_type', updates.relationship_type);
+            setIfPresent('logo_url', updates.logo_url);
+            setIfPresent('payment_terms', updates.payment_terms);
+
+            if (Object.keys(accountUpdates).length > 0) {
+                const { data: updatedAccount, error: accError } = await supabase
+                    .from('accounts')
+                    .update(accountUpdates)
+                    .eq('id', id)
+                    .eq('organization_id', organizationId)
+                    .select('id')
+                    .maybeSingle();
+
+                if (accError || !updatedAccount) {
+                    throw accError || new Error('account update returned no row');
                 }
             }
 
             return { success: true };
         } catch {
             console.error('[AccountService] account update failed');
+            if (previousContacts || previousBranches) {
+                const restored = await restoreChildren();
+                if (!restored) console.error('[AccountService] account child restoration failed');
+            }
             return { success: false, error: 'Não foi possível atualizar a conta.' };
         }
     }
