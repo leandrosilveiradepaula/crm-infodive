@@ -152,10 +152,7 @@ describe('AccountService offline persistence integrity', () => {
 
     it('fails an imported row instead of moving an existing email contact to another account', async () => {
         const db = fakeDatabase({
-            'accounts:upsert': {
-                data: { id: 'account-new', created_at: '2026-10-08T00:00:00Z', updated_at: '2026-10-08T00:00:00Z' },
-                error: null,
-            },
+            'accounts:read': { data: null, error: null },
             'account_contacts:read': {
                 data: { id: 'contact-existing', account_id: 'account-other' },
                 error: null,
@@ -169,6 +166,7 @@ describe('AccountService offline persistence integrity', () => {
         }]);
 
         expect(result).toMatchObject({ created: 0, updated: 0, failed: 1 });
+        expect(db.operations.some(operation => operation.table === 'accounts' && operation.mode === 'upsert')).toBe(false);
         expect(db.operations.some(operation =>
             operation.table === 'account_contacts' &&
             (operation.mode === 'update' || operation.mode === 'insert')
