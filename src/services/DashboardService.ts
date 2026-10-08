@@ -192,20 +192,33 @@ export class DashboardService {
         const normalized = typeof query === 'string' ? query.trim().slice(0, 80) : '';
         if (normalized.length < 2) return { deals: [], customers: [] };
 
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+        if (profileError || !profile) throw new Error('Não foi possível validar a permissão de busca.');
+        const roles = Array.isArray(profile.roles) ? profile.roles : [];
+        const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+            roles.some((role: unknown) => role === 'admin' || role === 'manager');
+
         const searchTerm = `%${normalized}%`;
         // The .or() grammar accepts raw PostgREST syntax and must not interpolate
-        // arbitrary user search text. Use separate, parameterized ilike filters.
+        // arbitrary user search text. Use separate parameterized ilike filters.
+        let titleQuery = supabase.from('deals')
+            .select('id, title, company, stage, value')
+            .eq('organization_id', organizationId);
+        let companyQuery = supabase.from('deals')
+            .select('id, title, company, stage, value')
+            .eq('organization_id', organizationId);
+        if (!canViewAll) {
+            titleQuery = titleQuery.eq('owner_id', userId);
+            companyQuery = companyQuery.eq('owner_id', userId);
+        }
         const [titleRes, companyRes, customersRes] = await Promise.all([
-            supabase.from('deals')
-                .select('id, title, company, stage, value')
-                .eq('organization_id', organizationId)
-                .ilike('title', searchTerm)
-                .limit(5),
-            supabase.from('deals')
-                .select('id, title, company, stage, value')
-                .eq('organization_id', organizationId)
-                .ilike('company', searchTerm)
-                .limit(5),
+            titleQuery.ilike('title', searchTerm).limit(5),
+            companyQuery.ilike('company', searchTerm).limit(5),
             supabase.from('accounts')
                 .select('id, name, segment, status')
                 .eq('organization_id', organizationId)
