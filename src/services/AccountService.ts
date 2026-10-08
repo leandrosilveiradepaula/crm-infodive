@@ -389,14 +389,49 @@ export class AccountService {
                 const account = rawAccount as Record<string, unknown>;
                 const accountName = typeof account.name === 'string' ? account.name : '';
                 const accountCnpj = typeof account.cnpj === 'string' ? account.cnpj : '';
+                const normalizedCnpj = normalizeTaxId(accountCnpj);
                 const contacts = Array.isArray(account.contacts) ? account.contacts : [];
+
+                let existingAccountId: string | null = null;
+                if (normalizedCnpj) {
+                    const { data: existingAccount, error: existingAccountError } = await supabase
+                        .from('accounts')
+                        .select('id')
+                        .eq('cnpj', normalizedCnpj)
+                        .eq('organization_id', organizationId)
+                        .maybeSingle();
+                    if (existingAccountError) throw existingAccountError;
+                    existingAccountId = existingAccount ? String(existingAccount.id) : null;
+                }
+
+                for (const rawContact of contacts) {
+                    if (!rawContact || typeof rawContact !== 'object' || Array.isArray(rawContact)) {
+                        throw new Error('invalid account contact import row');
+                    }
+                    const contact = rawContact as Record<string, unknown>;
+                    const email = typeof contact.email === 'string' && contact.email.trim()
+                        ? contact.email.trim()
+                        : null;
+                    if (!email) continue;
+
+                    const { data: existingContact, error: contactLookupError } = await supabase
+                        .from('account_contacts')
+                        .select('id, account_id')
+                        .eq('email', email)
+                        .eq('organization_id', organizationId)
+                        .maybeSingle();
+                    if (contactLookupError) throw contactLookupError;
+                    if (existingContact && (!existingAccountId || String(existingContact.account_id) !== existingAccountId)) {
+                        throw new Error('contact email already belongs to another account');
+                    }
+                }
 
                 const { data: accData, error: accError } = await supabase
                     .from('accounts')
                     .upsert({
                         organization_id: organizationId,
                         name: normalizeCasing(accountName, 'name'),
-                        cnpj: normalizeTaxId(accountCnpj),
+                        cnpj: normalizedCnpj,
                         ie: account.ie || null,
                         segment: normalizeCasing(typeof account.segment === 'string' ? account.segment : '', 'name') || 'Outros',
                         status: account.status || 'Ativo',
