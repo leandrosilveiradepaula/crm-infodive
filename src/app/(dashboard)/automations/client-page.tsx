@@ -112,6 +112,16 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             color: "text-orange-500",
             gradient: "from-orange-50 to-white dark:from-orange-950/20",
             border: "border-orange-100 dark:border-orange-900/50",
+        },
+        {
+            label: "Fluxos pausados",
+            value: (initialAutomations.length - activeCount).toString(),
+            description: "Configurações sem execução",
+            icon: Clock,
+            color: "text-slate-500",
+            gradient: "from-slate-50 to-white dark:from-slate-900/20",
+            border: "border-slate-200 dark:border-slate-800",
+            onClick: () => setFilterType(filterType === 'inactive' ? null : 'inactive')
         }
     ];
 
@@ -128,7 +138,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     });
 
     const handleSave = async (automation: Partial<Automation>) => {
-        let result: Awaited<ReturnType<typeof createAutomation>>;
+        let result: { success: boolean; error?: string };
         try {
             result = automation.id
                 ? await updateAutomation(automation.id, automation)
