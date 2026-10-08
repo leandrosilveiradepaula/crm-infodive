@@ -9,12 +9,18 @@ export default async function DebugPage() {
     const session = await requireSessionContext().catch(() => null);
 
     // Internal diagnostics must never dump tenant/user identifiers or customer rows.
-    const { count: accountCount, error: dbError } = session
-        ? await createAdminClient()
+    let accountCount: number | null = null;
+    let dbErrorMessage: string | null = null;
+    if (session) {
+        const { count, error } = await createAdminClient()
             .from('accounts')
             .select('id', { head: true, count: 'exact' })
-            .eq('organization_id', session.organizationId)
-        : { count: null, error: { message: 'No session to query DB' } as any };
+            .eq('organization_id', session.organizationId);
+        accountCount = count;
+        dbErrorMessage = error?.message ?? null;
+    } else {
+        dbErrorMessage = 'No session to query DB';
+    }
 
     return (
         <div className="p-10 bg-black min-h-screen text-white font-mono space-y-6">
@@ -51,7 +57,7 @@ export default async function DebugPage() {
                 <h2 className="text-xl font-bold text-teal-400 mb-2">3. Database Connection</h2>
 
                 <h3 className="font-bold mt-2">Accounts Table (Tenant-Scoped Count):</h3>
-                {dbError ? (
+                {dbErrorMessage ? (
                     <div className="text-red-400">Database diagnostic failed.</div>
                 ) : (
                     <div className="text-green-400">
