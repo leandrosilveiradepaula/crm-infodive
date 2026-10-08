@@ -1,6 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { Contact } from '@/types/contact';
-import { normalizeCasing, normalizePhone } from '@/lib/string-utils';
+import { createAdminClient } from '../lib/supabase/admin';
+import { Contact } from '../types/contact';
+import { normalizeCasing, normalizePhone } from '../lib/string-utils';
 
 export class ContactService {
     private static async assertAccountInTenant(
