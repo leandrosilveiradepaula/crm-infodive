@@ -28,6 +28,18 @@ describe('automation runtime service contract', () => {
         expect(source).toContain('failure_count');
     });
 
+    it('requires a confirmed tenant-scoped finalization before success', () => {
+        const source = readFileSync('src/services/AutomationRuntimeService.ts', 'utf8');
+        expect(source).toContain("private static async finalizeExecution(");
+        expect(source).toContain(".select('id')");
+        expect(source).toContain(".maybeSingle()");
+        expect(source).toContain("persistenceError || !data");
+        expect(source).toContain("throw new Error('automation execution finalization failed')");
+        expect(source).toContain("await this.finalizeExecution(executionId, organizationId, 'success', null)");
+        expect(source).toContain("await this.finalizeExecution(executionId, organizationId, 'failed', message)");
+        expect(source).toContain("if (message === 'automation execution finalization failed') throw error");
+    });
+
     it('is connected to deal_created and deal_moved events', () => {
         const actions = readFileSync('src/app/(dashboard)/pipeline/actions.ts', 'utf8');
         expect(actions).toContain('AutomationRuntimeService.executeEvent');

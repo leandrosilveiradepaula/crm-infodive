@@ -62,3 +62,31 @@ Allowed additional CRM scope:
 Operating rule: run the required CI on working branches; create or update one `preview/pr-N` ref only after the exact PR candidate is final and its required checks are green. Do not create a base-commit preview first. Merge to `main` only for a release-ready batch. `ignoreCommand` cancellations are not quota savings because Vercel counts canceled ignored deployments.
 
 Commit, PR, and merge for this narrowly scoped configuration change are authorized by the user's existing project authorization. The merge is expected to trigger one production deployment to install the policy; no other deployment or migration is authorized by this task.
+
+## Additional authorized task (2026-10-08): Verify automation execution finalization
+
+The user reaffirmed autonomous CRM hardening through the Factory. This scoped
+follow-up is independent of the historical exchange-rate task above.
+
+Objective:
+- Do not report an automation success/failure as durably persisted unless its
+  tenant-scoped `automation_executions` row was actually updated.
+- Keep operational errors sanitized and prevent missing-field negative
+  conditions from firing unintended automations.
+- Keep counter-update errors separate from action execution so that a completed
+  action is never relabeled as failed because statistics could not be updated.
+
+Allowed files for this follow-up:
+- `docs/codex/CURRENT_TASK.md`
+- `src/services/AutomationRuntimeService.ts`
+- `src/services/automationRuntimeCore.ts`
+- `src/services/automationRuntimeCore.test.ts`
+- `src/lib/automation-runtime-service.test.ts`
+
+Validation: TypeScript, repository test suite, lint and build through CRM CI;
+review the PR diff for unrelated files. Commits and a PR against
+`product/hardening-release-candidate` are authorized. Non-production candidate
+merge requires green CI and exact HEAD; preview promotion requires green merge
+SHA. No migrations, external automation execution, paid model calls or
+production merge/release are authorized by this task. Any operational
+race/atomic-counter work needing DB changes must remain an explicit follow-up.

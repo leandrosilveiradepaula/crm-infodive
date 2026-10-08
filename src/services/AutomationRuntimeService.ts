@@ -42,6 +42,26 @@ export class AutomationRuntimeService {
         return results;
     }
 
+    private static async finalizeExecution(
+        executionId: string,
+        organizationId: string,
+        status: 'success' | 'failed',
+        error: string | null,
+    ): Promise<void> {
+        const supabase = createAdminClient();
+        const { data, error: persistenceError } = await supabase
+            .from('automation_executions')
+            .update({ status, completed_at: new Date().toISOString(), error })
+            .eq('id', executionId)
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+
+        if (persistenceError || !data) {
+            throw new Error('automation execution finalization failed');
+        }
+    }
+
     private static async executeAutomation(
         userId: string,
         organizationId: string,
@@ -103,25 +123,23 @@ export class AutomationRuntimeService {
                 });
             }
 
-            await supabase
-                .from('automation_executions')
-                .update({ status: 'success', completed_at: new Date().toISOString(), error: null })
-                .eq('id', executionId)
-                .eq('organization_id', organizationId);
-
-            await this.incrementCounters(automation.id, organizationId, 'success');
-            return { automationId: automation.id, status: 'success', reason: 'executed' };
+            await this.finalizeExecution(executionId, organizationId, 'success', null);
         } catch (error) {
             const message = sanitizeError(error);
-            await supabase
-                .from('automation_executions')
-                .update({ status: 'failed', completed_at: new Date().toISOString(), error: message })
-                .eq('id', executionId)
-                .eq('organization_id', organizationId);
-
-            await this.incrementCounters(automation.id, organizationId, 'failed');
+            // If the success finalization failed after actions ran, do not
+            // overwrite that indeterminate execution with a false failure.
+            if (message === 'automation execution finalization failed') throw error;
+            await this.finalizeExecution(executionId, organizationId, 'failed', message);
+            await this.incrementCounters(automation.id, organizationId, 'failed').catch(() => {
+                console.error('[AutomationRuntime] failure counters could not be updated');
+            });
             return { automationId: automation.id, status: 'failed', reason: message };
         }
+
+        await this.incrementCounters(automation.id, organizationId, 'success').catch(() => {
+            console.error('[AutomationRuntime] success counters could not be updated');
+        });
+        return { automationId: automation.id, status: 'success', reason: 'executed' };
     }
 
     private static async incrementCounters(
