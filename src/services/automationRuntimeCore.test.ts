@@ -108,6 +108,30 @@ describe('automation runtime core', () => {
         expect(evaluateConditions([{ field: 'title', operator: 'contains', value: 'deal', logic: 'AND' }], { title: 'new deal' })).toBe(true);
     });
 
+    it('rejects missing fields for negative comparisons without blocking explicit empty checks', () => {
+        for (const operator of ['equals', 'not_equals'] as const) {
+            expect(evaluateConditions([{ field: 'missing', operator, value: 'x', logic: 'AND' }], {})).toBe(false);
+            expect(evaluateConditions([{ field: 'missing', operator, value: undefined, logic: 'AND' }], {})).toBe(false);
+        }
+        expect(evaluateConditions([{ field: 'missing', operator: 'is_empty', value: null, logic: 'AND' }], {})).toBe(true);
+        expect(evaluateConditions([{ field: 'nested.value', operator: 'equals', value: null, logic: 'AND' }], { nested: { value: null } })).toBe(true);
+        expect(evaluateConditions([{ field: 'status', operator: 'not_equals', value: 'closed', logic: 'AND' }], { status: 'open' })).toBe(true);
+    });
+
+    it('rejects invalid rule paths, unsupported operators, and invalid delay values', () => {
+        for (const field of ['__proto__.flag', 'constructor', 'nested..field', '']) {
+            expect(evaluateConditions([{ field, operator: 'not_equals', value: 'x', logic: 'AND' }], { status: 'open' })).toBe(false);
+        }
+        const automation = baseAutomation();
+        automation.conditions = [{ field: '__proto__.flag', operator: 'not_equals', value: 'x', logic: 'AND' }];
+        expect(validateAutomationForRuntime(automation)).toContain('invalid conditions');
+        automation.conditions = [];
+        automation.actions[0].delay = Number.NaN;
+        expect(validateAutomationForRuntime(automation)).toContain('invalid action delay[0]');
+        automation.actions[0].delay = -1;
+        expect(validateAutomationForRuntime(automation)).toContain('invalid action delay[0]');
+    });
+
     it('never plans disabled automations', () => {
         const automation = baseAutomation();
         automation.enabled = false;
