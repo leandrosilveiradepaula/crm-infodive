@@ -257,3 +257,28 @@ Do not execute financial writes, deploy production, change schema/migrations,
 access credentials, call paid AI or modify RLS. Work in a dedicated branch;
 CI must pass for exact PR SHA prior to merge into candidate, merge SHA must
 pass before a single Preview promotion.
+
+
+## Additional authorized task (2026-10-08): Executable offline automation integration checks
+
+After merging CRM PRs #91/#92 into nonproduction candidate, create 4-5
+behavioral tests for actual AutomationRuntimeService execution with a fake
+Supabase adapter and mocked ActivityService, without calling live services:
+1. Matching deal_created event creates one task, confirms success and counters.
+2. Duplicated event unique-constraint claim safely skips task creation.
+3. Nonmatching conditions persist skipped status without tasks.
+4. Failed task persists sanitized failed status; failed finalization must not
+   report success or rewrite a success as a failure.
+5. Cross-tenant or malformed event identifiers/payloads fail before database
+   reads/side effects (validating event identity prior to querying automations).
+
+Authorized paths only:
+- `docs/codex/CURRENT_TASK.md`
+- `src/services/AutomationRuntimeService.ts`
+- `src/services/AutomationRuntimeService.integration.test.ts` (new)
+
+Preserve runtime action/trigger semantics, no migrations, data mutations on live
+Supabase, external integrations, credentials, paid model calls, permission
+expansions or production merge. PR against the nonproduction candidate.
+CI TypeScript/lint/tests/build/browser must pass at PR exact SHA and merge SHA
+before a single Preview promotion.
