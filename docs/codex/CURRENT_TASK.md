@@ -377,3 +377,8 @@ Do not mutate live data, change permissions/RBAC, add migrations, call paid mode
 ## Additional authorized task (2026-10-08): deal room visibility boundary
 
 Ensure `DealService.getOrCreateRoom` enforces the same tenant-scoped role and owner visibility as deal details before returning or creating a room. Add offline regression for a seller attempting to access another seller's deal. No schema changes, production writes, privilege changes or paid requests. Authorized paths: `docs/codex/CURRENT_TASK.md`, `src/services/DealService.ts`, `src/services/DealService.integration.test.ts`.
+
+
+## Additional authorized task (2026-10-08): deal product parent access
+
+Ensure single and bulk deal-product insert paths validate the parent deal is visible to the caller under the existing tenant/owner policy before any write. Add behavioral regression for unauthorized owner; update existing bulk tests to include an authorized parent. Scope: DealService and its offline tests only. No production, migration, paid calls or RBAC changes.
