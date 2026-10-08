@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requirePermission } from '@/lib/auth-server';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 type InstallmentSalesOrder = {
     deal?: {
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Statement text exceeds the allowed limit' }, { status: 413 });
         }
 
-        const rateLimit = consumeRateLimit({ scope: 'sales-reconcile-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        const rateLimit = await guardPaidAiRequest({ scope: 'sales-reconcile-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ success: false, error: 'Muitas reconciliações em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            return NextResponse.json({ success: false, error: 'Muitas reconciliações em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const supabase = createAdminClient();

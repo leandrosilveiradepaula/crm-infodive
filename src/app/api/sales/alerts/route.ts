@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { requirePermission, requireSessionContext } from '@/lib/auth-server';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
+import { consumeDurableAiQuota } from '@/lib/ai-durable-quota';
 
 export async function GET(req: NextRequest) {
     try {
@@ -107,9 +108,9 @@ export async function POST(req: NextRequest) {
         if (typeof orderId !== 'string' || orderId.length > 100 || typeof alertType !== 'string' || alertType.length > 100) {
             return NextResponse.json({ success: false, error: 'Parâmetros inválidos.' }, { status: 400 });
         }
-        const rateLimit = consumeRateLimit({ scope: 'sales-alert-analysis-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        const rateLimit = await guardPaidAiRequest({ scope: 'sales-alert-analysis-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ success: false, error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            return NextResponse.json({ success: false, error: 'Muitas análises em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
         const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
         if (!apiKey) throw new Error('Gemini API Key not configured');
@@ -177,7 +178,20 @@ export async function POST(req: NextRequest) {
             const aiData = await aiRes.json();
             aiText = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
         } else {
-             // Retry without responseMimeType if it was the error (like in reconcile/route.ts)
+             // Retry is a second paid provider call and must consume a second durable quota unit.
+             const retryQuota = await consumeDurableAiQuota({
+                 organizationId,
+                 scope: 'sales-alert-analysis-ai',
+                 limit: 5,
+                 windowSeconds: 60,
+             });
+             if (!retryQuota.allowed) {
+                 return NextResponse.json(
+                     { success: false, error: retryQuota.reason === 'quota_unavailable' ? 'Controle de uso da IA indisponível.' : 'Limite de IA atingido.' },
+                     { status: retryQuota.reason === 'quota_unavailable' ? 503 : 429, headers: { 'Retry-After': String(retryQuota.retryAfterSeconds) } }
+                 );
+             }
+
              const retryRes = await fetch(genAIUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

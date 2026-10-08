@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 export async function POST(req: Request) {
     let userId: string;
@@ -34,9 +34,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Text or image is required' }, { status: 400 });
         }
 
-        const rateLimit = consumeRateLimit({ scope: 'parse-company-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        const rateLimit = await guardPaidAiRequest({ scope: 'parse-company-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });

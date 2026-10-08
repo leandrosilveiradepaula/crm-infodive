@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -17,9 +17,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Conteúdo do arquivo excede o limite permitido' }, { status: 413 });
         }
 
-        const rateLimit = consumeRateLimit({ scope: 'customers-import-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        const rateLimit = await guardPaidAiRequest({ scope: 'customers-import-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ error: 'Muitas análises em pouco tempo. Tente novamente em instantes.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo. Tente novamente em instantes.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const model = genAI.getGenerativeModel({ 

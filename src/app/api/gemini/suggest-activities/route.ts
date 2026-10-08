@@ -2,6 +2,7 @@ import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
 import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { consumeDurableAiQuota } from '@/lib/ai-durable-quota';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -165,6 +166,19 @@ REGRAS:
 `;
 
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const durableQuota = await consumeDurableAiQuota({
+            organizationId,
+            scope: 'activity-suggestions-ai',
+            limit: 3,
+            windowSeconds: 60,
+        });
+        if (!durableQuota.allowed) {
+            return NextResponse.json(
+                { error: durableQuota.reason === 'quota_unavailable' ? 'Controle de uso da IA indisponível.' : 'Limite de IA atingido.' },
+                { status: durableQuota.reason === 'quota_unavailable' ? 503 : 429, headers: { 'Retry-After': String(durableQuota.retryAfterSeconds) } }
+            );
+        }
 
         const response = await fetch(apiUrl, {
             method: 'POST',

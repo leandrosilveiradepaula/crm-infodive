@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
 import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
 import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { consumeDurableAiQuota } from '@/lib/ai-durable-quota';
 import { getRequestId } from '@/lib/request-context';
 import { recordOperationalEvent } from '@/lib/operational-events';
 
@@ -243,44 +244,53 @@ export async function GET(request: NextRequest) {
                             // A sincronização continua funcionando mesmo sem orçamento local de IA.
                             // No máximo três assinaturas são analisadas por sincronização; o restante usa fallback básico.
                             if (aiAnalysesRemaining > 0) {
-                                aiAnalysesRemaining -= 1;
-                                await sleep(1500);
+                                const durableQuota = await consumeDurableAiQuota({
+                                    organizationId: orgId,
+                                    scope: 'email-signature-model-call',
+                                    limit: 6,
+                                    windowSeconds: 60,
+                                });
 
-                                try {
-                                    const contactData = await parseSignatureWithGemini(email.body);
+                                if (durableQuota.allowed) {
+                                    aiAnalysesRemaining -= 1;
+                                    await sleep(1500);
 
-                                // Dados suficientes = qualquer campo com informação util além do email do remetente
-                                const hasSufficientData = contactData && (
-                                    contactData.name ||
-                                    contactData.mobile_phone ||
-                                    contactData.landline_phone ||
-                                    contactData.role ||
-                                    contactData.company ||
-                                    contactData.email
-                                );
+                                    try {
+                                        const contactData = await parseSignatureWithGemini(email.body);
 
-                                if (hasSufficientData) {
-                                    // 5. Inserir Silenciosamente a Sugestão do Novo Contato no Inbox de Revisão
-                                    const newSuggestion = {
-                                        organization_id: orgId,
-                                        name: contactData.name || email.sender.name,
-                                        email: contactData.email || email.sender.email,
-                                        phone: contactData.mobile_phone || contactData.whatsapp || contactData.landline_phone || null,
-                                        role: contactData.role || null,
-                                        company_name: contactData.company || null,
-                                        status: 'pending'
-                                    };
+                                        const hasSufficientData = contactData && (
+                                            contactData.name ||
+                                            contactData.mobile_phone ||
+                                            contactData.landline_phone ||
+                                            contactData.role ||
+                                            contactData.company ||
+                                            contactData.email
+                                        );
 
-                                    const { error: insertError } = await bgSupabase
-                                        .from('contact_suggestions')
-                                        .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
-                                    if (insertError) {
-                                        console.error('[EmailSyncRoute] contact suggestion insert failed');
+                                        if (hasSufficientData) {
+                                            const newSuggestion = {
+                                                organization_id: orgId,
+                                                name: contactData.name || email.sender.name,
+                                                email: contactData.email || email.sender.email,
+                                                phone: contactData.mobile_phone || contactData.whatsapp || contactData.landline_phone || null,
+                                                role: contactData.role || null,
+                                                company_name: contactData.company || null,
+                                                status: 'pending'
+                                            };
+
+                                            const { error: insertError } = await bgSupabase
+                                                .from('contact_suggestions')
+                                                .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
+                                            if (insertError) {
+                                                console.error('[EmailSyncRoute] contact suggestion insert failed');
+                                            }
+                                            continue;
+                                        }
+                                    } catch {
+                                        console.error('[EmailSyncRoute] signature parsing failed');
                                     }
-                                    continue; // Extraiu com IA, vai pro próximo
-                                }
-                                } catch {
-                                    console.error('[EmailSyncRoute] signature parsing failed');
+                                } else {
+                                    aiAnalysesRemaining = 0;
                                 }
                             }
 
