@@ -11,6 +11,7 @@ function record(name, ok, detail = '') {
   if (!ok) failures.push({ name, detail });
 }
 
+// Network idle alone does not guarantee visible streamed/hydrated content.
 async function visibleWithin(locator, timeout = 10_000) {
   try {
     await locator.waitFor({ state: 'visible', timeout });
