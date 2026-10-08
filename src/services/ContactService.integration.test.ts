@@ -18,6 +18,7 @@ type FakeBuilder = {
     select: (...args: unknown[]) => FakeBuilder;
     eq: (column: string, value: unknown) => FakeBuilder;
     neq: (column: string, value: unknown) => FakeBuilder;
+    in: (column: string, values: unknown[]) => FakeBuilder;
     order: (...args: unknown[]) => FakeBuilder;
     limit: (...args: unknown[]) => Promise<DbResponse>;
     insert: (payload: unknown) => FakeBuilder;
@@ -51,6 +52,7 @@ function fakeDatabase(responses: Record<string, DbResponse | DbResponse[]>) {
             select() { return builder; },
             eq(column: string, value: unknown) { state.filters.push([column, value]); return builder; },
             neq(column: string, value: unknown) { state.filters.push(['neq:' + column, value]); return builder; },
+            in(column: string, values: unknown[]) { state.filters.push(['in:' + column, values]); return builder; },
             order() { return builder; },
             limit() { return Promise.resolve(take(table, state.mode)); },
             insert(payload: unknown) { state.mode = 'insert'; state.payload = payload; return builder; },
@@ -71,6 +73,31 @@ function fakeDatabase(responses: Record<string, DbResponse | DbResponse[]>) {
 
 describe('ContactService offline tenant and mutation integrity', () => {
     beforeEach(() => vi.clearAllMocks());
+
+    it('does not hydrate a historical cross-tenant account reference', async () => {
+        const db = fakeDatabase({
+            'account_contacts:read': {
+                data: [{
+                    id: 'contact-1',
+                    organization_id: 'tenant-a',
+                    account_id: 'account-other-tenant',
+                    name: 'Contato',
+                }],
+                error: null,
+            },
+            'accounts:read': { data: [], error: null },
+        });
+
+        const result = await ContactService.getContacts('user-a', 'tenant-a');
+
+        expect(result.error).toBeNull();
+        expect(result.contacts).toEqual([
+            expect.objectContaining({ id: 'contact-1', account: null }),
+        ]);
+        const accountLookup = db.operations.find(operation => operation.table === 'accounts');
+        expect(accountLookup?.filters).toContainEqual(['organization_id', 'tenant-a']);
+        expect(accountLookup?.filters).toContainEqual(['in:id', ['account-other-tenant']]);
+    });
 
     it('does not turn an account-contact query failure into a valid empty list', async () => {
         fakeDatabase({
