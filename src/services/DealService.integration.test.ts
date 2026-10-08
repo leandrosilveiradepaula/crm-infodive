@@ -231,4 +231,17 @@ describe('DealService offline tenant and mutation integrity', () => {
         ])).rejects.toThrow('Não foi possível atualizar todos os produtos da oportunidade.');
     });
 
+    it('prevents a salesperson from reading or creating a room for someone else\'s deal', async () => {
+        const db = fakeDatabase({
+            'profiles:read': { data: { role: 'vendedor', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+        });
+        const result = await DealService.getOrCreateRoom('seller-a', 'deal-b', 'tenant-a');
+        expect(result).toMatchObject({ error: 'Acesso negado ou oportunidade não encontrada' });
+        const dealQuery = db.operations.find(operation => operation.table === 'deals');
+        expect(dealQuery?.filters).toContainEqual(['organization_id', 'tenant-a']);
+        expect(dealQuery?.filters).toContainEqual(['owner_id', 'seller-a']);
+        expect(db.operations.some(operation => operation.table === 'deal_rooms')).toBe(false);
+    });
+
 });

@@ -636,13 +636,15 @@ export class DealService {
     static async getOrCreateRoom(userId: string, dealId: string, organizationId: string): Promise<{ room?: any, error?: string }> {
         const supabase = createAdminClient();
 
-        // 1. Double check the deal belongs to the organization first (security)
-        const { data: deal, error: dealError } = await supabase
+        // Apply the same tenant and owner visibility policy used by deal details.
+        const canViewAllDeals = await this.canAccessAllDeals(supabase, userId, organizationId);
+        let dealQuery = supabase
             .from('deals')
             .select('id')
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
+            .eq('organization_id', organizationId);
+        if (!canViewAllDeals) dealQuery = dealQuery.eq('owner_id', userId);
+        const { data: deal, error: dealError } = await dealQuery.maybeSingle();
 
         if (dealError || !deal) {
             console.error('[DealService] deal room deal fetch failed');
