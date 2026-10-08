@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
+import { createAiRouteContext } from '@/lib/ai-route-observability';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -11,6 +11,7 @@ type ChatMessage = {
 };
 
 export async function POST(request: Request) {
+    const telemetry = createAiRouteContext(request, 'gemini_chat');
     let userId: string;
     let organizationId: string;
     try {
@@ -18,11 +19,13 @@ export async function POST(request: Request) {
         userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        telemetry.record('unauthorized', 401);
+        return telemetry.respond({ error: 'Unauthorized' }, 401);
     }
 
     if (!apiKey) {
-        return NextResponse.json({ error: 'Integração de IA não configurada.' }, { status: 503 });
+        telemetry.record('not_configured', 503);
+        return telemetry.respond({ error: 'Integração de IA não configurada.' }, 503);
     }
 
     let history: ChatMessage[];
@@ -44,12 +47,14 @@ export async function POST(request: Request) {
     }
 
     if (!history.some(item => item.role === 'user' && item.content.trim())) {
-        return NextResponse.json({ error: 'Pergunta inválida.' }, { status: 400 });
+        telemetry.record('invalid_request', 400);
+        return telemetry.respond({ error: 'Pergunta inválida.' }, 400);
     }
 
     const rateLimit = await guardPaidAiRequest({ scope: 'gemini-chat', organizationId, userId, limit: 10, windowMs: 60_000 });
     if (!rateLimit.allowed) {
-        return NextResponse.json({ error: 'Muitas mensagens em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+        telemetry.record(rateLimit.reason, rateLimit.status);
+        return telemetry.respond({ error: 'Muitas mensagens em pouco tempo.' }, rateLimit.status, { 'Retry-After': String(rateLimit.retryAfterSeconds) });
     }
 
     const supabase = createAdminClient();
@@ -63,7 +68,8 @@ export async function POST(request: Request) {
 
     if (error) {
         console.error('[GeminiChatRoute] deal context fetch failed');
-        return NextResponse.json({ error: 'Não foi possível carregar o contexto do CRM.' }, { status: 503 });
+        telemetry.record('context_unavailable', 503);
+        return telemetry.respond({ error: 'Não foi possível carregar o contexto do CRM.' }, 503);
     }
 
     const pipelineContext = (deals || []).map(deal =>
@@ -112,18 +118,22 @@ Responda apenas à última pergunta do usuário.`;
 
         if (!response.ok) {
             console.error('[GeminiChatRoute] provider request failed');
-            return NextResponse.json({ error: 'A integração de IA está indisponível no momento.' }, { status: 502 });
+            telemetry.record('provider_failure', 502);
+        return telemetry.respond({ error: 'A integração de IA está indisponível no momento.' }, 502);
         }
 
         const data = await response.json();
         const message = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
         if (!message) {
-            return NextResponse.json({ error: 'A integração de IA retornou uma resposta vazia.' }, { status: 502 });
+            telemetry.record('provider_empty', 502);
+            return telemetry.respond({ error: 'A integração de IA retornou uma resposta vazia.' }, 502);
         }
 
-        return NextResponse.json({ message });
+        telemetry.record('success', 200);
+        return telemetry.respond({ message });
     } catch {
         console.error('[GeminiChatRoute] provider request failed');
-        return NextResponse.json({ error: 'A integração de IA está indisponível no momento.' }, { status: 502 });
+        telemetry.record('provider_failure', 502);
+        return telemetry.respond({ error: 'A integração de IA está indisponível no momento.' }, 502);
     }
 }
