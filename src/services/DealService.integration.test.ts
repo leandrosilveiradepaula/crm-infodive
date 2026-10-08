@@ -300,4 +300,26 @@ describe('DealService offline tenant and mutation integrity', () => {
         expect(db.operations.some(op => op.table === 'deal_products' && ['update','delete'].includes(op.mode))).toBe(false);
     });
 
+    it('rejects bulk product mutation when an item belongs to an inaccessible deal', async () => {
+        const db = fakeDatabase({
+            'deal_products:read': [
+                { data: [{ id: 'item-1', deal_id: 'foreign-deal' }], error: null },
+                { data: [{ id: 'item-1', deal_id: 'foreign-deal' }], error: null },
+            ],
+            'profiles:read': [
+                { data: { role: 'vendedor', roles: [] }, error: null },
+                { data: { role: 'vendedor', roles: [] }, error: null },
+            ],
+            'deals:read': [
+                { data: null, error: null },
+                { data: null, error: null },
+            ],
+        });
+        await expect(DealService.bulkRemoveDealProducts('seller-a', ['item-1'], 'tenant-a'))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        await expect(DealService.reorderDealProducts('seller-a', 'tenant-a', [{ id: 'item-1', display_order: 1 }]))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        expect(db.operations.some(op => op.table === 'deal_products' && ['delete', 'update'].includes(op.mode))).toBe(false);
+    });
+
 });
