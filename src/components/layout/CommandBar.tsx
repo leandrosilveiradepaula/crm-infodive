@@ -1,12 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
-import { useRouter } from 'next/navigation'; // Next.js adaptation
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
     LayoutDashboard, Briefcase, Users, Plus, Sparkles, ArrowRight, Loader2
 } from 'lucide-react';
 import { useDeals } from '../../hooks/useDeals';
 import { searchGlobal } from '@/app/(dashboard)/dashboard/actions';
 import './CommandPalette.css';
+
+type GlobalSearchResults = Awaited<ReturnType<typeof searchGlobal>>;
+const stageOptions = [
+    { value: 'qualification', label: 'Qualificação' },
+    { value: 'proposal', label: 'Proposta' },
+    { value: 'negotiation', label: 'Negociação' },
+    { value: 'won', label: 'Ganha' },
+    { value: 'lost', label: 'Perdida' },
+] as const;
 
 interface CommandBarProps {
     open: boolean;
@@ -24,8 +34,10 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
 
     // Search Results State
     const [isSearching, setIsSearching] = useState(false);
-    const [foundDeals, setFoundDeals] = useState<any[]>([]);
-    const [foundCustomers, setFoundCustomers] = useState<any[]>([]);
+    const [searchError, setSearchError] = useState(false);
+    const [isMoving, setIsMoving] = useState(false);
+    const [foundDeals, setFoundDeals] = useState<GlobalSearchResults['deals']>([]);
+    const [foundCustomers, setFoundCustomers] = useState<GlobalSearchResults['customers']>([]);
 
     const router = useRouter(); // Next.js adaptation
     const { deals, updateDealStage } = useDeals();
@@ -38,39 +50,46 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
             setSelectedDealId(null);
             setFoundDeals([]);
             setFoundCustomers([]);
+            setSearchError(false);
+            setIsSearching(false);
         }
     }, [open]);
 
-    // Debounced Global Search
+    // Debounced, request-identity-safe global search.
     useEffect(() => {
-        // Only search if we are on root page (not in sub-menu) and have enough chars
-        if (activePage || search.length < 2) {
-            if (!activePage && search.length < 2) {
+        const term = search.trim();
+        if (!open || activePage || term.length < 2) {
+            if (!activePage) {
                 setFoundDeals([]);
                 setFoundCustomers([]);
             }
+            setIsSearching(false);
             return;
         }
 
+        let cancelled = false;
         const timer = setTimeout(async () => {
             setIsSearching(true);
             try {
-                const searchTerm = `%${search}%`;
-
-                const { deals, customers } = await searchGlobal(search);
+                const { deals, customers } = await searchGlobal(term);
+                if (cancelled) return;
                 setFoundDeals(deals);
                 setFoundCustomers(customers);
-
-            } catch (error) {
-                console.error("Global Search Error:", error);
+                setSearchError(false);
+            } catch {
+                if (cancelled) return;
+                setFoundDeals([]);
+                setFoundCustomers([]);
+                setSearchError(true);
             } finally {
-                setIsSearching(false);
+                if (!cancelled) setIsSearching(false);
             }
         }, 300);
-
-        return () => clearTimeout(timer);
-    }, [search, activePage]);
-
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [open, search, activePage]);
 
     const handleSelect = (callback: () => void) => {
         callback();
@@ -88,10 +107,20 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
     };
 
     const handleMoveDeal = async (stage: string) => {
-        if (selectedDealId) {
-            await updateDealStage(selectedDealId, stage);
-            // alert(`Oportunidade movida para ${stage.toUpperCase()}!`); // Removed alert for cleaner UX, or use toast
+        if (!selectedDealId || isMoving) return;
+        setIsMoving(true);
+        try {
+            const updated = await updateDealStage(selectedDealId, stage);
+            if (!updated) {
+                toast.error('Não foi possível mover a oportunidade. Tente novamente.');
+                return;
+            }
+            toast.success('Etapa da oportunidade atualizada.');
             onOpenChange(false);
+        } catch {
+            toast.error('Não foi possível mover a oportunidade. Tente novamente.');
+        } finally {
+            setIsMoving(false);
         }
     };
 
@@ -113,7 +142,12 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                 <Command.Input
                     placeholder={!activePage ? "Digite um comando ou busque..." : activePage === 'move-deal' ? "Selecione a oportunidade..." : "Selecione o estágio..."}
                     value={search}
-                    onValueChange={setSearch}
+                    onValueChange={value => {
+                        setSearch(value);
+                        setSearchError(false);
+                        setFoundDeals([]);
+                        setFoundCustomers([]);
+                    }}
                     className="command-input"
                     autoFocus
                 />
@@ -125,7 +159,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                 <Loader2 className="h-4 w-4 animate-spin" />
                                 <span>Buscando...</span>
                             </div>
-                        ) : 'Nenhum resultado encontrado.'}
+) : searchError ? 'Busca indisponível no momento. Tente novamente.' : 'Nenhum resultado encontrado.'}
                     </Command.Empty>
 
                     {/* --- ASK AI FUNCTION --- */}
@@ -221,12 +255,10 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                         <Command.Item value="nav-pipeline" onSelect={() => handleSelect(() => router.push('/pipeline'))} className="command-item">
                                             <Briefcase className="command-icon" />
                                             <span>Pipeline</span>
-                                            <kbd className="command-kbd">G P</kbd>
                                         </Command.Item>
                                         <Command.Item value="nav-customers" onSelect={() => handleSelect(() => router.push('/customers'))} className="command-item">
                                             <Users className="command-icon" />
                                             <span>Empresas</span>
-                                            <kbd className="command-kbd">G C</kbd>
                                         </Command.Item>
                                     </Command.Group>
                                 </>
@@ -262,15 +294,18 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                     {/* --- SUB-PAGE: PICK STAGE --- */}
                     {activePage === 'pick-stage' && (
                         <Command.Group heading="Selecione o estágio" className="command-group">
-                            {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map(stage => (
-                                <Command.Item key={stage} onSelect={() => handleMoveDeal(stage)} className="command-item">
-                                    <div className={`h-2 w-2 rounded-full mr-2 ${stage === 'won' ? 'bg-green-500' :
-                                        stage === 'lost' ? 'bg-red-500' :
-                                            'bg-blue-500'
-                                        }`} />
-                                    <span className="capitalize">{stage}</span>
-                                </Command.Item>
-                            ))}
+                            {stageOptions.map(stage => (
+                                <Command.Item
+                                    key={stage.value}
+                                    disabled={isMoving}
+                                    onSelect={() => void handleMoveDeal(stage.value)}
+                                    className="command-item"
+                                >
+                                    <div className={`h-2 w-2 rounded-full mr-2 ${stage.value === 'won' ? 'bg-green-500' :
+                                        stage.value === 'lost' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                                    <span>{stage.label}</span>
+                                    {isMoving && <Loader2 className="h-4 w-4 ml-auto animate-spin" aria-hidden="true" />}
+                                </Command.Item>)}
                         </Command.Group>
                     )}
 
