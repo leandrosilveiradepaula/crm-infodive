@@ -12,11 +12,12 @@ import { NotificationCenter, useNotifications } from './NotificationCenter';
 interface HeaderProps {
     onMenuClick: () => void;
     isSidebarCollapsed?: boolean;
+    isMobileMenuOpen?: boolean;
     onToggleSidebar?: () => void;
     onSearchClick?: () => void;
 }
 
-export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSearchClick }: HeaderProps) {
+export function Header({ onMenuClick, isSidebarCollapsed, isMobileMenuOpen, onToggleSidebar, onSearchClick }: HeaderProps) {
     const { theme, toggleTheme } = useTheme();
     const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
@@ -31,6 +32,8 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                     onClick={onMenuClick}
                     className="lg:hidden p-2 text-muted-foreground dark:text-muted-foreground hover:bg-muted/50 dark:hover:bg-gray-800 rounded-lg"
                     aria-label="Abrir menu principal"
+                    aria-controls="crm-primary-navigation"
+                    aria-expanded={Boolean(isMobileMenuOpen)}
                     title="Abrir menu principal"
                 >
                     <Menu className="h-6 w-6" />
@@ -41,6 +44,8 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar, onSea
                         className="p-2 text-muted-foreground hover:bg-muted/50 rounded-lg transition-all"
                         title={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
                         aria-label={isSidebarCollapsed ? "Expandir menu" : "Recolher menu"}
+                        aria-controls="crm-primary-navigation"
+                        aria-expanded={!isSidebarCollapsed}
                     >
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
