@@ -93,19 +93,19 @@ describe('automation runtime core', () => {
 
     it('rejects missing, empty and nonfinite numeric condition operands', () => {
         for (const actual of [undefined, null, '', '  ', NaN, Infinity, 'not-a-number']) {
-            expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: -1 }], { value: actual })).toBe(false);
-            expect(evaluateConditions([{ field: 'value', operator: 'less_than', value: 1 }], { value: actual })).toBe(false);
+            expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: -1, logic: 'AND' }], { value: actual })).toBe(false);
+            expect(evaluateConditions([{ field: 'value', operator: 'less_than', value: 1, logic: 'AND' }], { value: actual })).toBe(false);
         }
-        expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: '' }], { value: 5 })).toBe(false);
-        expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: 0 }], { value: '2' })).toBe(true);
+        expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: '', logic: 'AND' }], { value: 5 })).toBe(false);
+        expect(evaluateConditions([{ field: 'value', operator: 'greater_than', value: 0, logic: 'AND' }], { value: '2' })).toBe(true);
     });
 
     it('rejects empty substring conditions instead of matching everything', () => {
         for (const operator of ['contains', 'not_contains'] as const) {
-            expect(evaluateConditions([{ field: 'title', operator, value: '' }], { title: 'deal' })).toBe(false);
-            expect(evaluateConditions([{ field: 'title', operator, value: 'x' }], {})).toBe(false);
+            expect(evaluateConditions([{ field: 'title', operator, value: '', logic: 'AND' }], { title: 'deal' })).toBe(false);
+            expect(evaluateConditions([{ field: 'title', operator, value: 'x', logic: 'AND' }], {})).toBe(false);
         }
-        expect(evaluateConditions([{ field: 'title', operator: 'contains', value: 'deal' }], { title: 'new deal' })).toBe(true);
+        expect(evaluateConditions([{ field: 'title', operator: 'contains', value: 'deal', logic: 'AND' }], { title: 'new deal' })).toBe(true);
     });
 
     it('never plans disabled automations', () => {
