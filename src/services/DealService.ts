@@ -307,13 +307,19 @@ export class DealService {
     static async duplicateDeal(userId: string, dealId: string, organizationId: string): Promise<Deal> {
         const supabase = createAdminClient();
 
-        // 1. Fetch original deal
-        const { data: originalDeal, error: dealError } = await supabase
+        // 1. Fetch only a deal the current user is allowed to read.
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
+        let originalDealQuery = supabase
             .from('deals')
             .select('*')
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
+            .eq('organization_id', organizationId);
+
+        if (!isAdminOrManager) {
+            originalDealQuery = originalDealQuery.eq('owner_id', userId);
+        }
+
+        const { data: originalDeal, error: dealError } = await originalDealQuery.maybeSingle();
 
         if (dealError || !originalDeal) {
             throw new Error('Não foi possível duplicar a oportunidade.');
@@ -373,7 +379,20 @@ export class DealService {
 
             if (insertProductsError) {
                 console.error('[DealService] deal product duplication failed');
-                // Return deal even if products fail to avoid complete block
+                const { data: rolledBack, error: rollbackError } = await supabase
+                    .from('deals')
+                    .delete()
+                    .eq('id', newDeal.id)
+                    .eq('organization_id', organizationId)
+                    .select('id')
+                    .maybeSingle();
+
+                if (rollbackError || !rolledBack) {
+                    console.error('[DealService] duplicated deal rollback failed');
+                    throw new Error('Não foi possível concluir nem reverter a duplicação da oportunidade.');
+                }
+
+                throw new Error('Não foi possível duplicar os produtos da oportunidade.');
             }
         }
 
@@ -447,41 +466,66 @@ export class DealService {
     }
 
     static async removeDealProduct(userId: string, itemId: string, organizationId: string) {
+        if (typeof itemId !== 'string' || !itemId.trim()) {
+            throw new Error('Produto da oportunidade inválido.');
+        }
+
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
             .eq('id', itemId)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível remover o produto da oportunidade.');
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+
+        if (error || !deleted) throw new Error('Não foi possível remover o produto da oportunidade.');
         return true;
     }
 
     static async bulkRemoveDealProducts(userId: string, itemIds: string[], organizationId: string) {
+        const normalizedIds = [...new Set(itemIds.map(id => typeof id === 'string' ? id.trim() : '').filter(Boolean))];
+        if (!itemIds.length || normalizedIds.length !== itemIds.length) {
+            throw new Error('Lista de produtos da oportunidade inválida.');
+        }
+
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
-            .in('id', itemIds)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
+            .in('id', normalizedIds)
+            .eq('organization_id', organizationId)
+            .select('id');
+
+        const deletedIds = new Set((deleted || []).map(item => String(item.id)));
+        if (error || normalizedIds.some(id => !deletedIds.has(id))) {
+            throw new Error('Não foi possível atualizar os produtos da oportunidade.');
+        }
         return true;
     }
 
     static async reorderDealProducts(userId: string, organizationId: string, items: { id: string, display_order: number }[]) {
+        const ids = items.map(item => typeof item.id === 'string' ? item.id.trim() : '');
+        if (!items.length || ids.some(id => !id) || new Set(ids).size !== ids.length ||
+            items.some(item => !Number.isInteger(item.display_order) || item.display_order < 0)) {
+            throw new Error('Ordenação de produtos inválida.');
+        }
+
         const supabase = createAdminClient();
-        try {
-            await Promise.all(items.map(item =>
-                supabase
-                    .from('deal_products')
-                    .update({ display_order: item.display_order })
-                    .eq('id', item.id)
-                    .eq('organization_id', organizationId)
-            ));
-            return true;
-        } catch (error) {
+        const results = await Promise.all(items.map(item =>
+            supabase
+                .from('deal_products')
+                .update({ display_order: item.display_order })
+                .eq('id', item.id)
+                .eq('organization_id', organizationId)
+                .select('id')
+                .maybeSingle()
+        ));
+
+        if (results.some(result => result.error || !result.data)) {
             throw new Error('Falha ao reordenar alguns produtos');
         }
+        return true;
     }
 
     static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]): Promise<DealProduct[]> {
