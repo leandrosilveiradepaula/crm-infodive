@@ -356,7 +356,8 @@ After the account-service batch is technically green, harden ContactService in f
 2. Duplicate email/mobile checks must fail closed on database errors and avoid raw PostgREST OR-filter construction from user input.
 3. Creating or updating a contact with an account reference must verify that the account belongs to the same organization.
 4. Contact updates must apply the same duplicate constraints as creation while excluding the contact being edited.
-5. Tenant-scoped update/delete must confirm the row actually affected before returning success; add offline regression coverage.
+5. Tenant-scoped update/delete must confirm the row actually affected before returning success.
+6. Contact reads must hydrate related accounts only from the current organization so historical invalid links cannot expose another tenant's account metadata; add offline regression coverage.
 
 Authorized paths:
 - `docs/codex/CURRENT_TASK.md`
