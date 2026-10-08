@@ -141,6 +141,21 @@ describe('AccountService offline persistence integrity', () => {
         expect(inserts[1]?.payload).toEqual([oldContact]);
     });
 
+    it('updates only scalar fields explicitly supplied by the caller', async () => {
+        const db = fakeDatabase({
+            'accounts:read': { data: { id: 'account-1' }, error: null },
+            'accounts:update': { data: { id: 'account-1' }, error: null },
+        });
+
+        const result = await AccountService.updateAccount('user-a', 'tenant-a', 'account-1', {
+            city: 'porto alegre',
+        });
+
+        expect(result.success).toBe(true);
+        const update = db.operations.find(operation => operation.table === 'accounts' && operation.mode === 'update');
+        expect(update?.payload).toEqual({ city: 'Porto Alegre' });
+    });
+
     it('does not report account deletion success when no tenant-scoped row was affected', async () => {
         fakeDatabase({
             'accounts:delete': { data: null, error: null },
