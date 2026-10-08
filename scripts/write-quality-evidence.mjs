@@ -24,6 +24,9 @@ const evidence = {
     'tests',
     'build',
     'browser_smoke_desktop_mobile_keyboard_route_guard',
+    'internal_routes_auth_guard',
+    'internal_debug_data_minimization',
+    'system_chrome_browser_runtime',
     'diff_check'
   ]
 };
