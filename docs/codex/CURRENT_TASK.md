@@ -382,3 +382,5 @@ Ensure `DealService.getOrCreateRoom` enforces the same tenant-scoped role and ow
 ## Additional authorized task (2026-10-08): deal product parent access
 
 Ensure single and bulk deal-product insert paths validate the parent deal is visible to the caller under the existing tenant/owner policy before any write. Add behavioral regression for unauthorized owner; update existing bulk tests to include an authorized parent. Scope: DealService and its offline tests only. No production, migration, paid calls or RBAC changes.
+
+Additional same-batch scope: verify product parent deal ownership on single product updates and deletes, with negative offline regressions. Do not change bulk delete/reorder semantics in this increment.
