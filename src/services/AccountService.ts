@@ -231,12 +231,15 @@ export class AccountService {
                 if (contactsSnapshotError) throw contactsSnapshotError;
                 previousContacts = (contactsSnapshot || []) as Record<string, unknown>[];
 
-                const { error: deleteContactsError } = await supabase
+                const { data: deletedContacts, error: deleteContactsError } = await supabase
                     .from('account_contacts')
                     .delete()
                     .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (deleteContactsError) throw deleteContactsError;
+                    .eq('organization_id', organizationId)
+                    .select('id');
+                if (deleteContactsError || (deletedContacts || []).length !== previousContacts.length) {
+                    throw deleteContactsError || new Error('contact replacement deleted an unexpected number of rows');
+                }
 
                 if (updates.contacts.length > 0) {
                     const contactsToInsert = updates.contacts.map(contact => ({
@@ -265,12 +268,15 @@ export class AccountService {
                 if (branchesSnapshotError) throw branchesSnapshotError;
                 previousBranches = (branchesSnapshot || []) as Record<string, unknown>[];
 
-                const { error: deleteBranchesError } = await supabase
+                const { data: deletedBranches, error: deleteBranchesError } = await supabase
                     .from('account_branches')
                     .delete()
                     .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (deleteBranchesError) throw deleteBranchesError;
+                    .eq('organization_id', organizationId)
+                    .select('id');
+                if (deleteBranchesError || (deletedBranches || []).length !== previousBranches.length) {
+                    throw deleteBranchesError || new Error('branch replacement deleted an unexpected number of rows');
+                }
 
                 if (updates.branches.length > 0) {
                     const branchesToInsert = updates.branches.map(branch => ({
