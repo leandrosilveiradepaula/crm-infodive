@@ -1,8 +1,57 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { Contact } from '@/types/contact';
-import { normalizeCasing, normalizePhone } from '@/lib/string-utils';
+import { createAdminClient } from '../lib/supabase/admin';
+import { Contact } from '../types/contact';
+import { normalizeCasing, normalizePhone } from '../lib/string-utils';
 
 export class ContactService {
+    private static async assertAccountInOrganization(
+        supabase: ReturnType<typeof createAdminClient>,
+        organizationId: string,
+        accountId?: string | null,
+    ) {
+        if (!accountId) return;
+
+        const { data: account, error } = await supabase
+            .from('accounts')
+            .select('id')
+            .eq('id', accountId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+
+        if (error || !account) {
+            throw new Error('A conta vinculada ao contato é inválida.');
+        }
+    }
+
+    private static async assertUniqueContact(
+        supabase: ReturnType<typeof createAdminClient>,
+        organizationId: string,
+        values: { email?: string | null; mobilePhone?: string | null },
+        excludeId?: string,
+    ) {
+        for (const candidate of [
+            { column: 'email', value: values.email },
+            { column: 'mobile_phone', value: values.mobilePhone },
+        ]) {
+            if (!candidate.value) continue;
+
+            let query = supabase
+                .from('account_contacts')
+                .select('id')
+                .eq('organization_id', organizationId)
+                .eq(candidate.column, candidate.value);
+
+            if (excludeId) query = query.neq('id', excludeId);
+
+            const { data, error } = await query.limit(1);
+            if (error) {
+                throw new Error('Não foi possível validar a duplicidade do contato.');
+            }
+            if (data && data.length > 0) {
+                throw new Error('Já existe um contato com estes dados.');
+            }
+        }
+    }
+
     static async getContacts(userId: string, organizationId: string) {
         const supabase = createAdminClient();
         const { data, error } = await supabase
@@ -12,27 +61,27 @@ export class ContactService {
             .order('name', { ascending: true });
 
         if (error) return { contacts: [], error: 'Não foi possível carregar os contatos.' };
-        return { contacts: data as Contact[], error: null };
+        return { contacts: (data || []) as Contact[], error: null };
     }
 
-    /**
-     * Fetches all contacts for a given organization.
-     * Optionally filters by account_id — returns all if no accountId provided.
-     */
     static async getAccountContacts(userId: string, organizationId: string, accountId?: string | null) {
         const supabase = createAdminClient();
+
+        if (accountId) {
+            await this.assertAccountInOrganization(supabase, organizationId, accountId);
+        }
 
         let query = supabase
             .from('account_contacts')
             .select(`
-                id, 
-                account_id, 
-                name, 
-                email, 
-                mobile_phone, 
-                landline_phone, 
-                role, 
-                is_primary, 
+                id,
+                account_id,
+                name,
+                email,
+                mobile_phone,
+                landline_phone,
+                role,
+                is_primary,
                 account:accounts(id, name)
             `)
             .eq('organization_id', organizationId)
@@ -46,49 +95,32 @@ export class ContactService {
 
         if (error) {
             console.error('[ContactService] account contacts fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar os contatos.');
         }
         return data || [];
     }
 
     static async createContact(userId: string, organizationId: string, contact: Partial<Contact>) {
         const supabase = createAdminClient();
+        const email = typeof contact.email === 'string' ? contact.email.trim() : undefined;
+        const mobilePhone = normalizePhone(contact.mobile_phone);
 
-        const { organization_id, created_at, updated_at, account, ...contactData } = contact;
-
-        if (contactData.email || contactData.mobile_phone) {
-            let query = supabase
-                .from('account_contacts')
-                .select('id, name, email, mobile_phone')
-                .eq('organization_id', organizationId);
-
-            const conditions: string[] = [];
-            if (contactData.email) conditions.push(`email.eq.${contactData.email}`);
-            if (contactData.mobile_phone) conditions.push(`mobile_phone.eq.${contactData.mobile_phone}`);
-
-            if (conditions.length > 0) {
-                query = query.or(conditions.join(','));
-                const { data: existingContacts } = await query;
-
-                if (existingContacts && existingContacts.length > 0) {
-                    const match = existingContacts[0];
-                    if (match.email === contactData.email) {
-                        return { success: false, error: 'Já existe um contato com estes dados.' };
-                    }
-                    if (match.mobile_phone === contactData.mobile_phone) {
-                        return { success: false, error: 'Já existe um contato com estes dados.' };
-                    }
-                    return { success: false, error: 'Contato duplicado encontrado.' };
-                }
-            }
-        }
+        await this.assertAccountInOrganization(supabase, organizationId, contact.account_id);
+        await this.assertUniqueContact(supabase, organizationId, {
+            email,
+            mobilePhone,
+        });
 
         const normalizedContact = {
-            ...contactData,
-            name: normalizeCasing(contactData.name, 'name'),
-            mobile_phone: normalizePhone(contactData.mobile_phone),
-            landline_phone: normalizePhone(contactData.landline_phone),
-            organization_id: organizationId
+            name: normalizeCasing(contact.name, 'name'),
+            email: email || null,
+            mobile_phone: mobilePhone || null,
+            landline_phone: normalizePhone(contact.landline_phone) || null,
+            role: contact.role || null,
+            linkedin: contact.linkedin || null,
+            account_id: contact.account_id || null,
+            is_primary: Boolean(contact.is_primary),
+            organization_id: organizationId,
         };
 
         const { data, error } = await supabase
@@ -103,32 +135,72 @@ export class ContactService {
 
     static async updateContact(userId: string, id: string, organizationId: string, updates: Partial<Contact>) {
         const supabase = createAdminClient();
+        const normalizedUpdates: Record<string, unknown> = {};
 
-        const { organization_id: _, created_at, updated_at, account, ...cleanUpdates } = updates;
-        const normalizedUpdates = { ...cleanUpdates };
-        if (cleanUpdates.name) normalizedUpdates.name = normalizeCasing(cleanUpdates.name, 'name');
-        if (cleanUpdates.mobile_phone) normalizedUpdates.mobile_phone = normalizePhone(cleanUpdates.mobile_phone);
-        if (cleanUpdates.landline_phone) normalizedUpdates.landline_phone = normalizePhone(cleanUpdates.landline_phone);
+        if (Object.prototype.hasOwnProperty.call(updates, 'name')) {
+            normalizedUpdates.name = normalizeCasing(updates.name, 'name');
+        }
+        if (Object.prototype.hasOwnProperty.call(updates, 'email')) {
+            normalizedUpdates.email = typeof updates.email === 'string' ? updates.email.trim() : null;
+        }
+        if (Object.prototype.hasOwnProperty.call(updates, 'mobile_phone')) {
+            normalizedUpdates.mobile_phone = normalizePhone(updates.mobile_phone) || null;
+        }
+        if (Object.prototype.hasOwnProperty.call(updates, 'landline_phone')) {
+            normalizedUpdates.landline_phone = normalizePhone(updates.landline_phone) || null;
+        }
+        for (const key of ['role', 'linkedin', 'is_primary'] as const) {
+            if (Object.prototype.hasOwnProperty.call(updates, key)) {
+                normalizedUpdates[key] = updates[key] ?? null;
+            }
+        }
+        if (Object.prototype.hasOwnProperty.call(updates, 'account_id')) {
+            const accountId = updates.account_id || null;
+            await this.assertAccountInOrganization(supabase, organizationId, accountId);
+            normalizedUpdates.account_id = accountId;
+        }
 
-        const { error } = await supabase
+        if (Object.keys(normalizedUpdates).length === 0) {
+            throw new Error('Nenhuma alteração válida foi informada para o contato.');
+        }
+
+        await this.assertUniqueContact(
+            supabase,
+            organizationId,
+            {
+                email: Object.prototype.hasOwnProperty.call(normalizedUpdates, 'email')
+                    ? String(normalizedUpdates.email || '')
+                    : undefined,
+                mobilePhone: Object.prototype.hasOwnProperty.call(normalizedUpdates, 'mobile_phone')
+                    ? String(normalizedUpdates.mobile_phone || '')
+                    : undefined,
+            },
+            id,
+        );
+
+        const { data, error } = await supabase
             .from('account_contacts')
             .update(normalizedUpdates)
             .eq('id', id)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
-        if (error) throw new Error('Não foi possível atualizar o contato.');
+        if (error || !data) throw new Error('Não foi possível atualizar o contato.');
         return { success: true };
     }
 
     static async deleteContact(userId: string, id: string, organizationId: string) {
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('account_contacts')
             .delete()
             .eq('id', id)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
-        if (error) throw new Error('Não foi possível excluir o contato.');
+        if (error || !data) throw new Error('Não foi possível excluir o contato.');
         return { success: true };
     }
 }
