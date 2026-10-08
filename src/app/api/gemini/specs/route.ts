@@ -1,7 +1,7 @@
 import { requireSessionContext } from '@/lib/auth-server';
 import { GoogleGenAI } from '@google/genai';
 import { NextResponse } from 'next/server';
-import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 export async function POST(request: Request) {
     let userId: string;
@@ -25,9 +25,9 @@ export async function POST(request: Request) {
         if (!Array.isArray(products) || products.length > 100 || JSON.stringify(products).length > 100_000) {
             return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
         }
-        const rateLimit = consumeRateLimit({ scope: 'specs-ai', subject: `${organizationId}:${userId}`, limit: 5, windowMs: 60_000 });
+        const rateLimit = await guardPaidAiRequest({ scope: 'specs-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
         if (!rateLimit.allowed) {
-            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         // Prepare context for AI
