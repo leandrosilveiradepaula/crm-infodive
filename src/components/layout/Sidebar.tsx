@@ -54,7 +54,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
         <aside className={cn(
             "fixed top-0 left-0 h-full bg-sidebar text-sidebar-foreground flex flex-col transition-all duration-300 z-50",
             "lg:static border-r border-sidebar-border",
-            isMobileMenuOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0",
+            isMobileMenuOpen ? "translate-x-0 w-64 visible" : "-translate-x-full invisible lg:visible lg:translate-x-0",
             isCollapsed ? "lg:w-20" : "lg:w-64"
         )}>
             {/* Header */}
