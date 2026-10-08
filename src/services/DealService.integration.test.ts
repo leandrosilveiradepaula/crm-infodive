@@ -73,6 +73,24 @@ describe('DealService offline tenant and mutation integrity', () => {
         expect(dealQuery?.filters).toContainEqual(['owner_id', 'user-a']);
     });
 
+    it('distinguishes a failed detail query from a genuinely missing deal', async () => {
+        fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: null, error: { message: 'query failed' } },
+        });
+
+        await expect(DealService.getDealDetails('admin-a', 'deal-1', 'tenant-a'))
+            .rejects.toThrow('Não foi possível carregar a oportunidade.');
+
+        fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+        });
+
+        await expect(DealService.getDealDetails('admin-a', 'missing-deal', 'tenant-a'))
+            .resolves.toBeNull();
+    });
+
     it('does not let a salesperson duplicate a deal outside the existing owner visibility boundary', async () => {
         const db = fakeDatabase({
             'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
