@@ -36,8 +36,12 @@ for (const path of routeFiles) {
     violations.push({ file, rule: 'auth', message: 'rota paga de IA sem autenticação server-side explícita' });
   }
 
-  if (!/consumeRateLimit\s*\(/.test(source)) {
-    violations.push({ file, rule: 'rate-limit', message: 'rota paga de IA sem guard de abuso/custo' });
+  if (!/(?:consumeRateLimit|guardPaidAiRequest)\s*\(/.test(source)) {
+    violations.push({ file, rule: 'rate-limit', message: 'rota paga de IA sem guard local de abuso/custo' });
+  }
+
+  if (!/(?:consumeDurableAiQuota|guardPaidAiRequest)\s*\(/.test(source)) {
+    violations.push({ file, rule: 'durable-quota', message: 'rota paga de IA sem quota duravel/distribuida' });
   }
 }
 
@@ -49,5 +53,5 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`AI_ENDPOINT_AUDIT_OK: ${paidRoutes.length} rota(s) paga(s) coberta(s) por autenticação e guard de abuso/custo`);
+console.log(`AI_ENDPOINT_AUDIT_OK: ${paidRoutes.length} rota(s) paga(s) coberta(s) por autenticação, guard local e quota durável`);
 for (const file of paidRoutes) console.log(`AI_ENDPOINT_AUDIT_ROUTE ${file}`);
