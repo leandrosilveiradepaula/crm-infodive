@@ -169,6 +169,9 @@ describe('DealService offline tenant and mutation integrity', () => {
 
     it('does not report product deletion success when no tenant-scoped row was affected', async () => {
         fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
+            'deal_products:read': { data: { deal_id: 'deal-1' }, error: null },
             'deal_products:delete': { data: null, error: null },
         });
 
@@ -199,6 +202,9 @@ describe('DealService offline tenant and mutation integrity', () => {
     });
     it('does not allow product edit payloads to overwrite identity or tenant fields', async () => {
         const db = fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
+            'deal_products:read': { data: { deal_id: 'deal-1' }, error: null },
             'deal_products:update': { data: { id: 'item-1' }, error: null },
         });
         await DealService.updateDealProduct('user-a', 'item-1', 'tenant-a', {
@@ -264,6 +270,19 @@ describe('DealService offline tenant and mutation integrity', () => {
             expect(read.filters).toContainEqual(['owner_id', 'seller-a']);
             expect(read.filters).toContainEqual(['organization_id', 'tenant-a']);
         }
+    });
+
+    it('blocks modification or deletion of a product whose deal is not accessible', async () => {
+        const db = fakeDatabase({
+            'profiles:read': { data: { role: 'vendedor', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+            'deal_products:read': { data: { deal_id: 'other-deal' }, error: null },
+        });
+        await expect(DealService.updateDealProduct('seller-a', 'item-1', 'tenant-a', { name: 'Changed' }))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        await expect(DealService.removeDealProduct('seller-a', 'item-1', 'tenant-a'))
+            .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
+        expect(db.operations.some(op => op.table === 'deal_products' && ['update','delete'].includes(op.mode))).toBe(false);
     });
 
 });
