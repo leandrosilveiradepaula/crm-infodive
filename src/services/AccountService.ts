@@ -41,19 +41,26 @@ export class AccountService {
             throw new Error('Não foi possível carregar as contas.');
         }
 
-        return (data || []).map((acc: any) => ({
-            ...acc,
-            contacts: (acc.contacts || []).map((c: any) => ({
-                id: c.id,
-                name: c.name,
-                email: c.email,
-                mobile_phone: c.mobile_phone,
-                landline_phone: c.landline_phone,
-                role: c.role,
-                is_primary: c.is_primary
-            })),
-            tags: acc.tags || []
-        }));
+        return (data || []).map((rawAccount: unknown) => {
+            const account = rawAccount as Record<string, unknown>;
+            const rawContacts = Array.isArray(account.contacts) ? account.contacts : [];
+            return {
+                ...account,
+                contacts: rawContacts.map((rawContact: unknown) => {
+                    const contact = rawContact as Record<string, unknown>;
+                    return {
+                        id: contact.id,
+                        name: contact.name,
+                        email: contact.email,
+                        mobile_phone: contact.mobile_phone,
+                        landline_phone: contact.landline_phone,
+                        role: contact.role,
+                        is_primary: contact.is_primary
+                    };
+                }),
+                tags: Array.isArray(account.tags) ? account.tags : []
+            } as unknown as Account;
+        });
     }
 
     static async getSimpleAccounts(userId: string, organizationId: string) {
