@@ -85,8 +85,10 @@
 }
 
 .command-item[aria-selected="true"] .command-icon,
-.command-item:hover .command-icon {
-    color: white !important;
+.command-item:hover .command-icon,
+.command-item[aria-selected="true"] .text-muted-foreground,
+.command-item:hover .text-muted-foreground {
+    color: var(--sidebar-primary-foreground) !important;
 }
 
 .command-item[aria-selected="true"] .command-kbd,
@@ -106,7 +108,7 @@
 .command-kbd {
     margin-left: auto;
     padding: 2px 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-family: monospace;
     font-weight: 600;
     background: var(--muted);
