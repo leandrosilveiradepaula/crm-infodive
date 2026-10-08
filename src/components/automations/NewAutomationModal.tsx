@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     X,
     Zap,
@@ -25,6 +25,7 @@ interface NewAutomationModalProps {
 export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomationModalProps) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const submitInFlight = useRef(false);
 
     const [formData, setFormData] = useState<Partial<Automation>>({
         name: initialData?.name || '',
@@ -70,6 +71,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     };
 
     const handleSubmit = async () => {
+        if (submitInFlight.current) return;
+        submitInFlight.current = true;
         setLoading(true);
         try {
             await onSave({
@@ -82,6 +85,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         } catch {
             // Parent surface already presents the persistence error to the user.
         } finally {
+            submitInFlight.current = false;
             setLoading(false);
         }
     };
@@ -295,7 +299,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                                 </div>
                                 <p className="text-sm text-muted-foreground font-medium">
-                                    A configuração será salva como <span className="text-foreground font-bold">rascunho</span>. A ativação automática fica bloqueada até o executor real estar disponível.
+                                    {formData.enabled
+                                        ? 'O fluxo permanece ativo ao salvar. Eventos suportados podem criar tarefas automaticamente.'
+                                        : 'O fluxo será salvo pausado. Revise a configuração antes de ativá-lo na lista de automações.'}
                                 </p>
                             </div>
                         </div>
@@ -313,13 +319,14 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
                     <button
                         onClick={step === 3 ? handleSubmit : handleNext}
-                        disabled={(step === 1 && !formData.name) || (step === 3 && !(formData.actions?.length))}
+                        disabled={loading || (step === 1 && !formData.name?.trim()) || (step === 3 && !(formData.actions?.length))}
+                        aria-busy={loading}
                         className={`px-10 py-3.5 rounded-2xl font-bold flex items-center gap-2 shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] ${(step === 1 && !formData.name) || (step === 3 && !(formData.actions?.length))
                             ? 'bg-muted text-muted-foreground cursor-not-allowed shadow-none'
                             : 'bg-primary text-primary-foreground shadow-primary/40'
                             }`}
                     >
-                        {loading ? 'Criando...' : step === 3 ? (
+                        {loading ? 'Salvando...' : step === 3 ? (
                             <>Salvar Configuração <CheckCircle2 className="h-5 w-5" /></>
                         ) : (
                             <>Próximo <ArrowRight className="h-5 w-5" /></>

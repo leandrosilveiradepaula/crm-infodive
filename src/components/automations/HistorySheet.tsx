@@ -16,6 +16,7 @@ interface AutomationHistorySheetProps {
     onOpenChange: (open: boolean) => void;
     executions: AutomationExecution[];
     loading: boolean;
+    error?: string | null;
 }
 
 function statusLabel(status: AutomationExecution['status']) {
@@ -38,6 +39,7 @@ export function AutomationHistorySheet({
     onOpenChange,
     executions,
     loading,
+    error,
 }: AutomationHistorySheetProps) {
     if (!automation) return null;
 
@@ -53,7 +55,7 @@ export function AutomationHistorySheet({
                             <div>
                                 <SheetTitle className="text-2xl font-black text-foreground tracking-tight">{automation.name}</SheetTitle>
                                 <SheetDescription className="text-muted-foreground font-medium">
-                                    Execuções verificadas deste fluxo
+                                    Histórico registrado deste fluxo
                                 </SheetDescription>
                             </div>
                         </div>
@@ -63,6 +65,12 @@ export function AutomationHistorySheet({
                         {loading ? (
                             <div className="rounded-2xl border border-border bg-muted/20 p-8 text-center" role="status">
                                 Carregando histórico...
+                            </div>
+                        ) : error ? (
+                            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6" role="alert">
+                                <h4 className="font-bold text-foreground">Não foi possível carregar o histórico</h4>
+                                <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+                                <p className="mt-2 text-sm text-muted-foreground">Feche e abra o histórico para tentar novamente.</p>
                             </div>
                         ) : executions.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center">

@@ -16,6 +16,41 @@ describe('automation runtime fail-closed surface', () => {
         expect(service).not.toContain("item.status === 'running' ? 'skipped'");
     });
 
+    it('shows accurate stats instead of claiming execution is blocked or reporting a false zero percent', () => {
+        const page = readFileSync('src/app/(dashboard)/automations/client-page.tsx', 'utf8');
+        expect(page).toContain('Fluxos ativos');
+        expect(page).toContain('Fluxos pausados');
+        expect(page).toContain('Contadores persistidos');
+        expect(page).toContain("const activeCount = initialAutomations.filter(");
+        expect(page).toContain("Sem execuções registradas");
+        expect(page).toContain("        : '—';");
+        expect(page).not.toContain('value: "Bloqueada"');
+    });
+
+    it('distinguishes fetch errors from empty history and ignores stale responses', () => {
+        const page = readFileSync('src/app/(dashboard)/automations/client-page.tsx', 'utf8');
+        const history = readFileSync('src/components/automations/HistorySheet.tsx', 'utf8');
+        expect(page).toContain('setHistoryError(');
+        expect(page).toContain('setHistory([])');
+        expect(page).toContain('historyRequest.current === request');
+        expect(page).toContain('error={historyError}');
+        expect(history).toContain('role="alert"');
+        expect(history).toContain('Não foi possível carregar o histórico');
+    });
+
+    it('guards duplicated actions, network failures and modal submission with truthful status', () => {
+        const page = readFileSync('src/app/(dashboard)/automations/client-page.tsx', 'utf8');
+        const modal = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
+        expect(page).toContain('if (pendingAction.current) return');
+        expect(page).toContain('disabled={pendingActionId !== null}');
+        expect(page).toContain('Falha de conexão ao salvar');
+        expect(modal).toContain('if (submitInFlight.current) return');
+        expect(modal).toContain('aria-busy={loading}');
+        expect(modal).toContain('O fluxo permanece ativo ao salvar');
+        expect(modal).toContain('O fluxo será salvo pausado');
+        expect(modal).not.toContain('A ativação automática fica bloqueada');
+    });
+
     it('only exposes runtime-backed triggers and actions and preserves explicit enablement', () => {
         const modal = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
         const service = readFileSync('src/services/AutomationService.ts', 'utf8');

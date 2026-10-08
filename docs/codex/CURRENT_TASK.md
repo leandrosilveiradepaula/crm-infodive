@@ -162,3 +162,38 @@ production changes. Commit/PR to `product/hardening-release-candidate`
 are authorized by user's request to continue safe work. CI must pass on
 the fix PR and merge SHA before single promotion of Preview. No live
 CRM automations, migrations, credentials, or paid model calls.
+
+
+## Additional authorized task (2026-10-08): Truthful automation UX batch
+
+Following the verified #87 + #89 Preview, the user asked to keep evolving CRM
+with 4-5 related improvements per pull request. This batch covers:
+1. Remove false "automatic execution blocked" and false "0% success" when
+   no executions occurred; explain supported runtime scope without claiming
+   full production readiness.
+2. Show historical fetch errors explicitly rather than displaying an empty
+   history; preserve loading and prevent stale response from another flow.
+3. Catch action/network failures with visible toasts and block repeat in-flight
+   toggle/delete/duplicate interactions.
+4. Make modal save notice accurately reflect whether the flow remains active
+   or paused; avoid duplicate form submission, preserve the state on edit.
+5. Add UI/source regression tests for all above.
+
+Allowed changes: `docs/codex/CURRENT_TASK.md`,
+`src/app/(dashboard)/automations/client-page.tsx`,
+`src/components/automations/HistorySheet.tsx`,
+`src/components/automations/NewAutomationModal.tsx`,
+`src/lib/automation-runtime-fail-closed.test.ts`.
+No database schema/policies, service/backend semantics, credentials, live
+automation runs, paid calls, migrations or production release. Commits and a
+PR against non-prod candidate are authorized; wait for CI of exact HEAD
+before merge, CI of merge SHA before single Preview promotion. Manual merge
+to main stays mandatory.
+
+### CI follow-up: product truthfulness regression assertion
+
+CI run 37819750265 found one outdated source-contract test still requiring the
+removed 'Execução Automática / Bloqueada' presentation. Update only
+`src/lib/automation-product-truthfulness.test.ts` to assert the new truthful
+active/paused metrics and explicit absence of the misleading blocked claim.
+Do not revert the interface fix or weaken other product assertions.
