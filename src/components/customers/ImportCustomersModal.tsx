@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Upload, FileSpreadsheet, Loader2, Sparkles, CheckCircle2, AlertTriangle, X, ArrowRight, Table } from 'lucide-react';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
+import { parseExcel } from '@/utils/excelParser';
 import { bulkCreateAccounts } from '@/app/(dashboard)/customers/actions';
 import { useRouter } from 'next/navigation';
 
@@ -37,39 +37,31 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
 
         setLoading(true);
         try {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = e.target?.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                
-                // Pegar apenas as primeiras 20 linhas para a IA analisar a estrutura
-                // Mas enviar o conteúdo total se for razoável, ou chunks
-                const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                const sampleRows = rows.slice(0, 50); // Amostra de 50 linhas para IA
-                
-                const response = await fetch('/api/customers/import', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fileName: file.name,
-                        fileContent: JSON.stringify(sampleRows),
-                        contentType: file.type
-                    })
-                });
+            const rows = await parseExcel(file);
+            const sampleRows = rows.slice(0, 50);
 
-                if (!response.ok) throw new Error('Falha ao processar arquivo');
+            const response = await fetch('/api/customers/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    fileContent: JSON.stringify(sampleRows),
+                    contentType: file.type
+                })
+            });
 
-                const res = await response.json();
-                setParsedData(res.mappedData || []);
-                setStats(res.stats || null);
-                toast.success('Arquivo analisado com sucesso!');
-            };
-            reader.readAsBinaryString(file);
+            if (!response.ok) {
+                const body = await response.json().catch(() => null);
+                throw new Error(body?.error || 'Falha ao processar arquivo');
+            }
+
+            const res = await response.json();
+            setParsedData(res.mappedData || []);
+            setStats(res.stats || null);
+            toast.success('Arquivo analisado com sucesso!');
         } catch (error) {
             console.error(error);
-            toast.error('Erro ao processar planilha.');
+            toast.error(error instanceof Error ? error.message : 'Erro ao processar planilha.');
         } finally {
             setLoading(false);
         }
