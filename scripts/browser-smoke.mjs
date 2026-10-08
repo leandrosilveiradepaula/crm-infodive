@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const baseUrl = process.env.CRM_SMOKE_BASE_URL || 'http://127.0.0.1:3000';
+const browserExecutablePath = (process.env.CRM_BROWSER_EXECUTABLE_PATH || '').trim();
 const checks = [];
 const failures = [];
 
@@ -43,7 +44,10 @@ async function tabSequenceIncludes(page, expectedNames) {
   record('keyboard_tab_reaches_login_controls', ok, JSON.stringify(seen));
 }
 
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({
+  headless: true,
+  ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {}),
+});
 try {
   const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await desktop.newPage();
@@ -104,6 +108,17 @@ try {
     protectedUrl.pathname === '/login',
     JSON.stringify({ status: protectedResponse?.status() ?? null, url: page.url() }),
   );
+
+  for (const internalPath of ['/debug', '/design-preview']) {
+    const internalResponse = await page.goto(baseUrl + internalPath, { waitUntil: 'domcontentloaded' });
+    await page.waitForURL(/\/login(?:\?|$)/, { timeout: 10_000 }).catch(() => {});
+    const internalUrl = new URL(page.url());
+    record(
+      'internal_route_' + internalPath.slice(1).replaceAll('-', '_') + '_requires_auth',
+      internalUrl.pathname === '/login',
+      JSON.stringify({ path: internalPath, status: internalResponse?.status() ?? null, url: page.url() }),
+    );
+  }
 
   await desktop.close();
 

@@ -22,7 +22,11 @@ O browser smoke do CI também verifica, sem credenciais reais:
 - que um `X-Request-Id` UUID válido é preservado;
 - que um request id inválido é substituído por UUID gerado pelo servidor;
 - que API protegida sem sessão retorna `401` com request id;
+- que `/debug` e `/design-preview` continuam protegidas por autenticação e fail-closed em produção por padrão;
+- que a página de debug, mesmo quando explicitamente habilitada, não despeja IDs de usuário/tenant nem linhas brutas de clientes;
 - que viewport mobile usa largura real do dispositivo e não cria overflow horizontal.
+
+O CI usa o Chrome já presente no GitHub-hosted runner em `/usr/bin/google-chrome`, com Playwright npm fixado e download de browser desabilitado. A ausência do executável esperado falha o job; não existe fallback silencioso que pule o smoke.
 
 ## Request correlation
 

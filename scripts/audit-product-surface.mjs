@@ -62,7 +62,55 @@ function lineNumber(text, index) {
   return text.slice(0, index).split('\n').length;
 }
 
+const internalRouteContracts = [
+  {
+    path: 'src/app/debug/page.tsx',
+    required: [
+      "process.env.NODE_ENV === 'production'",
+      "process.env.ENABLE_INTERNAL_DEBUG_ROUTES !== 'true'",
+      'notFound()',
+      "select('id', { head: true, count: 'exact' })",
+    ],
+    forbidden: ["select('*')", 'session.userId}', 'session.organizationId}', 'JSON.stringify(accounts'],
+  },
+  {
+    path: 'src/app/design-preview/page.tsx',
+    required: [
+      "process.env.NODE_ENV === 'production'",
+      "process.env.ENABLE_INTERNAL_DEBUG_ROUTES !== 'true'",
+      'notFound()',
+    ],
+    forbidden: [],
+  },
+];
+
 const violations = [];
+for (const contract of internalRouteContracts) {
+  const source = readFileSync(contract.path, 'utf8');
+  for (const expected of contract.required) {
+    if (!source.includes(expected)) {
+      violations.push({
+        rule: 'internal-route-guard',
+        file: contract.path,
+        line: 1,
+        excerpt: expected,
+        message: 'Rota interna deve permanecer fail-closed em produção e sanitizada.'
+      });
+    }
+  }
+  for (const forbidden of contract.forbidden) {
+    if (source.includes(forbidden)) {
+      violations.push({
+        rule: 'internal-route-data-exposure',
+        file: contract.path,
+        line: 1,
+        excerpt: forbidden,
+        message: 'Rota interna não pode expor identificadores ou linhas de dados brutas.'
+      });
+    }
+  }
+}
+
 for (const path of walk(ROOT)) {
   const source = readFileSync(path, 'utf8');
   for (const rule of rules) {
@@ -89,4 +137,4 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log('PRODUCT_SURFACE_AUDIT_OK: nenhuma microtipografia, branding legado ou no-op conhecido encontrado');
+console.log('PRODUCT_SURFACE_AUDIT_OK: superfície sem microtipografia, branding legado, no-op conhecido ou rota interna sem guard');
