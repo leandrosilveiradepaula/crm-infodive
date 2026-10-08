@@ -22,6 +22,15 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         return () => window.removeEventListener('keydown', handleShortcut);
     }, []);
 
+    useEffect(() => {
+        if (!isMobileMenuOpen) return;
+        const closeOnEscape = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setIsMobileMenuOpen(false);
+        };
+        window.addEventListener('keydown', closeOnEscape);
+        return () => window.removeEventListener('keydown', closeOnEscape);
+    }, [isMobileMenuOpen]);
+
     return (
         <div className="flex h-screen overflow-hidden bg-muted/50 dark:bg-background transition-colors">
             <Sidebar
@@ -30,11 +39,20 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 isCollapsed={isSidebarCollapsed}
                 setIsCollapsed={setIsSidebarCollapsed}
             />
+            {isMobileMenuOpen && (
+                <button
+                    type="button"
+                    aria-label="Fechar navegação"
+                    className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
 
             <main className="flex-1 flex flex-col overflow-hidden w-full relative">
                 <Header 
                     onMenuClick={() => setIsMobileMenuOpen(true)} 
                     isSidebarCollapsed={isSidebarCollapsed}
+                    isMobileMenuOpen={isMobileMenuOpen}
                     onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                     onSearchClick={() => setIsCommandOpen(true)}
                 />

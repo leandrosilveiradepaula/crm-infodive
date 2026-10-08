@@ -399,3 +399,31 @@ Validate catalog product_id against the current tenant in single-product insert;
 ## Additional authorized task (2026-10-08): ProposalService tenant and owner boundaries
 
 Apply existing deal owner visibility to linked proposal lists, updates, deletes and creation. Fail closed on proposal read errors; verify affected rows on deletion. Preserve standalone proposal creation when no deal is supplied. Add offline regression tests. Authorized paths: this task record, ProposalService and new ProposalService.integration.test.ts. No migration, live data, RBAC change, paid call or production merge.
+
+
+## Authorized task (2026-10-08): CRM navigation and mobile usability, issue #24
+
+After reconciling the candidate SHA and the Vercel external rate limit,
+address one grouped, nonproduction UX batch:
+1. Close the mobile menu on route selection; add a real backdrop and Escape dismissal.
+2. Hide the offcanvas mobile menu from keyboard navigation when closed, without hiding desktop sidebar.
+3. Keep route labels, current-page state and the sign-out action available when the desktop sidebar is collapsed or the mobile menu opens.
+4. Recognize nested routes in primary navigation without falsely highlighting a same-prefix sibling.
+5. Improve menu toggle semantics (aria-controls/aria-expanded), keyboard focus styles and clickable target sizes.
+6. Add executable pure route-state tests and navigation wiring contract tests.
+
+Authorized paths:
+- `src/components/layout/Sidebar.tsx`
+- `src/components/layout/Header.tsx`
+- `src/components/layout/DashboardShell.tsx`
+- `src/lib/sidebar-navigation.ts` (new)
+- `src/lib/sidebar-navigation.test.ts` (new)
+- `src/lib/sidebar-navigation-contract.test.ts` (new)
+- `docs/codex/CURRENT_TASK.md`
+
+No change to customer RBAC, product features, live data, Supabase migrations,
+credentials, paid model calls or production. Use a non-CI work branch while
+assembling the batch; create one CI-enabled validation branch after the entire
+change set is ready. Since Vercel reports a build-rate-limit on the current
+candidate, no Preview retries or release merges are permitted until capacity
+and exact-SHA evidence are recovered.
