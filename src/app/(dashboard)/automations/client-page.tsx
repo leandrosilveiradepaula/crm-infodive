@@ -112,7 +112,6 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             color: "text-orange-500",
             gradient: "from-orange-50 to-white dark:from-orange-950/20",
             border: "border-orange-100 dark:border-orange-900/50",
-            onClick: () => setFilterType(filterType === 'failed' ? null : 'failed')
         }
     ];
 
@@ -129,9 +128,15 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     });
 
     const handleSave = async (automation: Partial<Automation>) => {
-        const result = automation.id
-            ? await updateAutomation(automation.id, automation)
-            : await createAutomation(automation);
+        let result: Awaited<ReturnType<typeof createAutomation>>;
+        try {
+            result = automation.id
+                ? await updateAutomation(automation.id, automation)
+                : await createAutomation(automation);
+        } catch {
+            toast.error('Falha de conexão ao salvar. Tente novamente.');
+            throw new Error('Automation save failed');
+        }
 
         if (!result.success) {
             const message = result.error || 'Não foi possível salvar a automação.';
