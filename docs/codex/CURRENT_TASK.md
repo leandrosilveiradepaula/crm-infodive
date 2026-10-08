@@ -394,3 +394,8 @@ Ensure bulk delete and reorder of deal products verify every tenant-scoped item 
 ## Additional authorized task (2026-10-08): deal product relationship guards
 
 Validate catalog product_id against the current tenant in single-product insert; never mistake the deal-product row id for a catalog product id. Validate distributor_id tenant membership on product edit. Cover foreign references with offline integration tests. Paths limited to DealService, its tests and this task record; no paid calls, migrations, live data writes, RBAC changes or production merge.
+
+
+## Additional authorized task (2026-10-08): ProposalService tenant and owner boundaries
+
+Apply existing deal owner visibility to linked proposal lists, updates, deletes and creation. Fail closed on proposal read errors; verify affected rows on deletion. Preserve standalone proposal creation when no deal is supplied. Add offline regression tests. Authorized paths: this task record, ProposalService and new ProposalService.integration.test.ts. No migration, live data, RBAC change, paid call or production merge.
