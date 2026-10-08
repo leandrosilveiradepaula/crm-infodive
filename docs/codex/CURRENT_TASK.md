@@ -319,10 +319,13 @@ After CRM PR #94 is fully verified in nonproduction Preview, harden DealService 
 3. Prevent non-manager users from duplicating opportunities they could not read under the existing owner visibility rule.
 4. If duplicated products cannot be persisted, roll back the newly created duplicate and never report a partial clone as success.
 5. Make product removal/bulk removal/reorder validate inputs, inspect Supabase errors and confirm affected tenant-scoped rows; add offline regression/contract coverage.
+6. Enforce the already-defined `deals:change_owner` permission whenever `owner_id` is mutated, and verify that the target owner profile belongs to the same organization.
 
 Authorized paths:
 - `docs/codex/CURRENT_TASK.md`
 - `src/services/DealService.ts`
 - `src/services/DealService.integration.test.ts` (new)
+- `src/app/(dashboard)/pipeline/actions.ts`
+- `src/lib/pipeline-actions-security-contract.test.ts` (new)
 
-Do not change the RBAC matrix or invent new roles/permissions, do not apply migrations, mutate live data, call paid models, expand access or merge production. Preserve the existing `deals:create` / `deals:edit` server-action policy; this batch only makes the service enforce its existing tenant/owner boundaries truthfully. CI must pass on the exact PR SHA and merge SHA before Preview promotion.
+Do not change the RBAC matrix or invent new roles/permissions, do not apply migrations, mutate live data, call paid models, expand access or merge production. Preserve the existing permissions model: ordinary deal updates require `deals:edit`, owner reassignment requires the already-defined `deals:change_owner`. CI must pass on the exact PR SHA and merge SHA before Preview promotion.
