@@ -25,7 +25,7 @@ import {
 import { NewAutomationModal } from '@/components/automations/NewAutomationModal';
 import { AutomationHistorySheet } from '@/components/automations/HistorySheet';
 import { toggleAutomation, createAutomation, deleteAutomation, updateAutomation, getAutomationHistory } from '@/app/(dashboard)/automations/actions';
-import { type Automation } from '@/types/automation';
+import { type Automation, type AutomationExecution } from '@/types/automation';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
@@ -51,7 +51,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     const [initialModalData, setInitialModalData] = useState<Partial<Automation> | undefined>(undefined);
     const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
     const [showHistory, setShowHistory] = useState(false);
-    const [history, setHistory] = useState<any[]>([]);
+    const [history, setHistory] = useState<AutomationExecution[]>([]);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [filterType, setFilterType] = useState<string | null>(null);
     const [showGallery, setShowGallery] = useState(false);
