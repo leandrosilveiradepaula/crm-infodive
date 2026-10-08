@@ -102,9 +102,9 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
             {/* Footer / User Profile */}
             <div className="p-4 border-t border-sidebar-border space-y-4">
 
-                <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "lg:justify-center" : "")}>
+                <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "lg:flex-col lg:gap-3 lg:justify-center" : "")}>
                     <div className="flex items-center gap-3 min-w-0">
-                        <Avatar>
+                        <Avatar className="shrink-0">
                             <AvatarImage src={userProfile.avatar_url || ''} />
                             <AvatarFallback>{userProfile.full_name?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
