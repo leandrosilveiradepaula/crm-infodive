@@ -214,6 +214,8 @@ describe('DealService offline tenant and mutation integrity', () => {
 
     it('fails closed when catalog verification errors before bulk insert', async () => {
         const db = fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
             'products:read': { data: null, error: { message: 'catalog unavailable' } },
         });
         await expect(DealService.bulkAddDealProducts('user-a', 'deal-1', 'tenant-a', [
@@ -224,6 +226,8 @@ describe('DealService offline tenant and mutation integrity', () => {
 
     it('rejects partial bulk inserts instead of declaring success', async () => {
         fakeDatabase({
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+            'deals:read': { data: { id: 'deal-1' }, error: null },
             'deal_products:insert': { data: [{ id: 'item-1' }], error: null },
         });
         await expect(DealService.bulkAddDealProducts('user-a', 'deal-1', 'tenant-a', [
