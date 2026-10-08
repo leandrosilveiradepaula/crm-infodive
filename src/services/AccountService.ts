@@ -41,7 +41,7 @@ export class AccountService {
             throw new Error('Não foi possível carregar as contas.');
         }
 
-        return data.map((acc: any) => ({
+        return (data || []).map((acc: any) => ({
             ...acc,
             contacts: (acc.contacts || []).map((c: any) => ({
                 id: c.id,
