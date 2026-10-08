@@ -458,10 +458,18 @@ export class DealService {
         const supabase = createAdminClient();
         await this.assertWritableDeal(supabase, userId, dealId, organizationId);
 
+        if (productData.product_id) {
+            const { data: catalogProduct, error: productError } = await supabase
+                .from('products').select('id')
+                .eq('id', productData.product_id)
+                .eq('organization_id', organizationId).maybeSingle();
+            if (productError || !catalogProduct) throw new Error('Produto de catálogo inválido para esta organização.');
+        }
+
         const payload = {
             deal_id: dealId,
             organization_id: organizationId,
-            product_id: productData.product_id || productData.id,
+            product_id: productData.product_id || null,
             name: productData.name,
             unit_price: productData.unit_price || 0,
             quantity: typeof productData.quantity === 'number' ? productData.quantity : 1,
@@ -504,6 +512,15 @@ export class DealService {
         );
         if (!Object.keys(safeUpdates).length) {
             throw new Error('Nenhuma alteração de produto válida.');
+        }
+
+        if (Object.prototype.hasOwnProperty.call(safeUpdates, 'distributor_id') && safeUpdates.distributor_id) {
+            if (typeof safeUpdates.distributor_id !== 'string') throw new Error('Distribuidor inválido.');
+            const { data: distributor, error: distributorError } = await supabase
+                .from('accounts').select('id')
+                .eq('id', safeUpdates.distributor_id)
+                .eq('organization_id', organizationId).maybeSingle();
+            if (distributorError || !distributor) throw new Error('Distribuidor inválido para esta organização.');
         }
 
         if (touchesCurrencyState) {
