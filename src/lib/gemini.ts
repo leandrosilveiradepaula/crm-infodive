@@ -225,12 +225,14 @@ export const generateFollowUpEmail = async (deal: Deal): Promise<string> => {
 };
 
 export const runCRMConsultantChat = async (
-    history: { role: string, content: string }[]
+    history: { role: string, content: string }[],
+    signal?: AbortSignal
 ): Promise<string> => {
     const response = await fetch('/api/gemini/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history })
+        body: JSON.stringify({ history }),
+        signal,
     });
 
     if (!response.ok) {

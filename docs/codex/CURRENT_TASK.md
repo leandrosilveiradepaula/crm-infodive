@@ -427,3 +427,34 @@ assembling the batch; create one CI-enabled validation branch after the entire
 change set is ready. Since Vercel reports a build-rate-limit on the current
 candidate, no Preview retries or release merges are permitted until capacity
 and exact-SHA evidence are recovered.
+
+
+## Authorized task (2026-10-08): CRM assistant reliability and keyboard accessibility, issue #24
+
+After the mobile navigation batch, resolve one cohesive nonproduction set of
+assistant-client risks without making paid requests:
+1. Match the existing Gemini chat-route history and input bounds in the client.
+2. Block duplicate sends synchronously, before React state renders, to avoid
+   accidental repeated paid requests.
+3. Abort/ignore stale requests on dismissal/unmount and prevent outdated
+   responses from mutating a newly opened conversation.
+4. Allowlist only safe, user-facing service errors; never expose raw provider
+   error strings.
+5. Provide true accessible dialog/keyboard behavior: focus, Escape dismissal,
+   tab containment, focus restoration, labeled controls and live response log.
+6. Add pure policy tests and executable source contract tests.
+
+Authorized paths:
+- `src/components/ai/AiAssistant.tsx`
+- `src/components/layout/Header.tsx`
+- `src/lib/gemini.ts`
+- `src/lib/ai-chat-ui-policy.ts` (new)
+- `src/lib/ai-chat-ui-policy.test.ts` (new)
+- `src/lib/ai-assistant-client-contract.test.ts` (new)
+- `docs/codex/CURRENT_TASK.md`
+
+Work in a non-CI branch to avoid intermediate runner/deployment churn. Do not
+call paid models, change server paid guard, modify credentials, modify customer
+data, migrations/RLS, role policy, or production. Validate one final SHA via CI.
+Vercel external build quota remains a Preview gate, not an invitation to retry
+deployments or buy a plan.
