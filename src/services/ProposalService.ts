@@ -104,7 +104,7 @@ export class ProposalService {
 
     static async deleteProposal(userId: string, id: string, organizationId: string) {
         const supabase = createAdminClient();
-        await this.assertProposalVisible(supabase, userId, organizationId);
+        await this.assertProposalVisible(supabase, userId, organizationId, id);
 
         const { data: deleted, error } = await supabase
             .from('proposals')
