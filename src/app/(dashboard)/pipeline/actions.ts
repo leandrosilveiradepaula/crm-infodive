@@ -79,7 +79,10 @@ export async function getDealDetails(dealId: string): Promise<Deal | null> {
 }
 
 export async function updateDeal(dealId: string, updates: Partial<Deal>): Promise<boolean> {
-    const { userId, organizationId } = await requirePermission('deals:edit');
+    const changesOwner = Object.prototype.hasOwnProperty.call(updates, 'owner_id');
+    const { userId, organizationId } = await requirePermission(
+        changesOwner ? 'deals:change_owner' : 'deals:edit'
+    );
     await DealService.updateDeal(userId, dealId, organizationId, updates);
     revalidatePath('/pipeline');
     return true;

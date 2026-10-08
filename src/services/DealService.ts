@@ -1,10 +1,10 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { sortProductsHierarchically } from '@/utils/productSorting';
-import { normalizeCasing } from '@/lib/string-utils';
-import { Deal, DealProduct } from '@/types/deal';
-import { Profile } from '@/types/profile';
-import { Account } from '@/types/account';
-import { Activity } from '@/types/activity';
+import { createAdminClient } from '../lib/supabase/admin';
+import { sortProductsHierarchically } from '../utils/productSorting';
+import { normalizeCasing } from '../lib/string-utils';
+import { Deal, DealProduct } from '../types/deal';
+import { Profile } from '../types/profile';
+import { Account } from '../types/account';
+import { Activity } from '../types/activity';
 import { mergeDealProductCurrencyFields, normalizeDealProductCurrencyFields } from './dealProductCurrencyPayload';
 
 export interface PipelineData {
@@ -19,20 +19,32 @@ export interface PipelineData {
  * Uses service role client + explicit organization_id filter for tenant isolation.
  */
 export class DealService {
+    private static async canAccessAllDeals(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        organizationId: string,
+    ): Promise<boolean> {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+
+        if (error || !profile) {
+            throw new Error('Não foi possível validar o acesso às oportunidades.');
+        }
+
+        return profile.role === 'admin' ||
+            profile.role === 'manager' ||
+            (profile.roles || []).some((role: string) => ['admin', 'manager'].includes(role));
+    }
 
     static async getPipelineData(userId: string, organizationId: string): Promise<PipelineData> {
         const supabase = createAdminClient();
 
-        // 1. Fetch current user profile to check role
-        const { data: currentUserProfile } = await supabase
-            .from('profiles')
-            .select('role, roles')
-            .eq('id', userId)
-            .single();
-
-        const isAdminOrManager = currentUserProfile?.role === 'admin' || 
-                               currentUserProfile?.role === 'manager' ||
-                               (currentUserProfile?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+        // 1. Resolve visibility from the current tenant only.
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
         // 2. Fetch Deals with conditional filtering
         let query = supabase
@@ -53,13 +65,19 @@ export class DealService {
 
         if (error) {
             console.error('[DealService] pipeline data fetch failed');
-            return { deals: [], profile: null, distributors: [], allAccounts: [] };
+            throw new Error('Não foi possível carregar o pipeline.');
         }
 
-        // 3. Fetch Profiles for mapping
-        const { data: allProfiles } = await supabase
+        // 3. Fetch tenant-scoped profiles for mapping.
+        const { data: allProfiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('id, full_name, avatar_url, commission_rules');
+            .select('id, full_name, avatar_url, commission_rules')
+            .eq('organization_id', organizationId);
+
+        if (profilesError) {
+            console.error('[DealService] pipeline profiles fetch failed');
+            throw new Error('Não foi possível carregar os responsáveis pelas oportunidades.');
+        }
 
         const profilesMap = (allProfiles || []).reduce((acc: Record<string, Profile>, p) => {
             acc[p.id] = p as Profile;
@@ -90,14 +108,20 @@ export class DealService {
 
         if (distError) {
             console.error('[DealService] pipeline distributors fetch failed');
+            throw new Error('Não foi possível carregar os distribuidores.');
         }
 
         // 5. Fetch all accounts (for Manufacturer mapping)
-        const { data: allAccounts } = await supabase
+        const { data: allAccounts, error: accountsError } = await supabase
             .from('accounts')
             .select('id, name, logo_url, relationship_type, account_contacts(id, name, email, mobile_phone, landline_phone, role)')
             .eq('organization_id', organizationId)
             .order('name');
+
+        if (accountsError) {
+            console.error('[DealService] pipeline accounts fetch failed');
+            throw new Error('Não foi possível carregar as contas do pipeline.');
+        }
 
         return {
             deals: finalDeals,
@@ -110,11 +134,8 @@ export class DealService {
     static async getDealDetails(userId: string, dealId: string, organizationId: string): Promise<Deal | null> {
         const supabase = createAdminClient();
 
-        // 1. Get user role
-        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
-        const isAdminOrManager = profile_role?.role === 'admin' || 
-                               profile_role?.role === 'manager' ||
-                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+        // 1. Resolve visibility from the current tenant only.
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
         // 2. Fetch deal with role-based restriction
         let query = supabase
@@ -127,52 +148,68 @@ export class DealService {
             query = query.eq('owner_id', userId);
         }
 
-        const { data: deal, error } = await query.single();
+        const { data: deal, error } = await query.maybeSingle();
 
         if (error) {
             console.error('[DealService] deal details fetch failed');
-            return null;
+            throw new Error('Não foi possível carregar a oportunidade.');
         }
+        if (!deal) return null;
 
-        const { data: products } = await supabase
+        const { data: products, error: productsError } = await supabase
             .from('deal_products')
             .select('*')
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('display_order', { ascending: true });
+        if (productsError) {
+            throw new Error('Não foi possível carregar os produtos da oportunidade.');
+        }
 
-        const { data: activities } = await supabase
+        const { data: activities, error: activitiesError } = await supabase
             .from('activities')
             .select('*')
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
+        if (activitiesError) {
+            throw new Error('Não foi possível carregar as atividades da oportunidade.');
+        }
 
         let account: Account | null = null;
         if (deal.account_id) {
-            const { data: acc } = await supabase
+            const { data: acc, error: accountError } = await supabase
                 .from('accounts')
                 .select('*')
                 .eq('id', deal.account_id)
                 .eq('organization_id', organizationId)
-                .single();
-            if (acc) {
-                const { data: contacts } = await supabase
-                    .from('account_contacts')
-                    .select('*')
-                    .eq('account_id', acc.id)
-                    .eq('organization_id', organizationId);
-                account = { ...(acc as any as Account), contacts: (contacts || []) as any };
+                .maybeSingle();
+            if (accountError || !acc) {
+                throw new Error('Não foi possível carregar a conta da oportunidade.');
             }
+
+            const { data: contacts, error: contactsError } = await supabase
+                .from('account_contacts')
+                .select('*')
+                .eq('account_id', acc.id)
+                .eq('organization_id', organizationId);
+            if (contactsError) {
+                throw new Error('Não foi possível carregar os contatos da oportunidade.');
+            }
+            account = { ...(acc as unknown as Account), contacts: (contacts || []) as Account['contacts'] };
         }
 
         let owner_profile: Profile | null = null;
         if (deal.owner_id) {
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('id, full_name, avatar_url, commission_rules')
                 .eq('id', deal.owner_id)
-                .single();
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+            if (profileError) {
+                throw new Error('Não foi possível carregar o responsável pela oportunidade.');
+            }
             if (profile) {
                 owner_profile = profile as Profile;
             }
@@ -236,10 +273,24 @@ export class DealService {
             return null;
         }
 
-        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
-        const isAdminOrManager = profile_role?.role === 'admin' || 
-                               profile_role?.role === 'manager' ||
-                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
+
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'owner_id')) {
+            if (!isAdminOrManager || typeof sanitizedUpdates.owner_id !== 'string' || !sanitizedUpdates.owner_id.trim()) {
+                throw new Error('Não foi possível alterar o responsável pela oportunidade.');
+            }
+
+            const { data: targetOwner, error: targetOwnerError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', sanitizedUpdates.owner_id)
+                .eq('organization_id', organizationId)
+                .maybeSingle();
+
+            if (targetOwnerError || !targetOwner) {
+                throw new Error('Não foi possível alterar o responsável pela oportunidade.');
+            }
+        }
 
         let query = supabase
             .from('deals')
@@ -265,10 +316,7 @@ export class DealService {
         if (newStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
         else if (newStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
 
-        const { data: profile_role } = await supabase.from('profiles').select('role, roles').eq('id', userId).single();
-        const isAdminOrManager = profile_role?.role === 'admin' || 
-                               profile_role?.role === 'manager' ||
-                               (profile_role?.roles || []).some((r: string) => ['admin', 'manager'].includes(r));
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
         let query = supabase
             .from('deals')
@@ -288,13 +336,19 @@ export class DealService {
     static async duplicateDeal(userId: string, dealId: string, organizationId: string): Promise<Deal> {
         const supabase = createAdminClient();
 
-        // 1. Fetch original deal
-        const { data: originalDeal, error: dealError } = await supabase
+        // 1. Fetch only a deal the current user is allowed to read.
+        const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
+        let originalDealQuery = supabase
             .from('deals')
             .select('*')
             .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
+            .eq('organization_id', organizationId);
+
+        if (!isAdminOrManager) {
+            originalDealQuery = originalDealQuery.eq('owner_id', userId);
+        }
+
+        const { data: originalDeal, error: dealError } = await originalDealQuery.maybeSingle();
 
         if (dealError || !originalDeal) {
             throw new Error('Não foi possível duplicar a oportunidade.');
@@ -354,7 +408,20 @@ export class DealService {
 
             if (insertProductsError) {
                 console.error('[DealService] deal product duplication failed');
-                // Return deal even if products fail to avoid complete block
+                const { data: rolledBack, error: rollbackError } = await supabase
+                    .from('deals')
+                    .delete()
+                    .eq('id', newDeal.id)
+                    .eq('organization_id', organizationId)
+                    .select('id')
+                    .maybeSingle();
+
+                if (rollbackError || !rolledBack) {
+                    console.error('[DealService] duplicated deal rollback failed');
+                    throw new Error('Não foi possível concluir nem reverter a duplicação da oportunidade.');
+                }
+
+                throw new Error('Não foi possível duplicar os produtos da oportunidade.');
             }
         }
 
@@ -428,41 +495,66 @@ export class DealService {
     }
 
     static async removeDealProduct(userId: string, itemId: string, organizationId: string) {
+        if (typeof itemId !== 'string' || !itemId.trim()) {
+            throw new Error('Produto da oportunidade inválido.');
+        }
+
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
             .eq('id', itemId)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível remover o produto da oportunidade.');
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+
+        if (error || !deleted) throw new Error('Não foi possível remover o produto da oportunidade.');
         return true;
     }
 
     static async bulkRemoveDealProducts(userId: string, itemIds: string[], organizationId: string) {
+        const normalizedIds = [...new Set(itemIds.map(id => typeof id === 'string' ? id.trim() : '').filter(Boolean))];
+        if (!itemIds.length || normalizedIds.length !== itemIds.length) {
+            throw new Error('Lista de produtos da oportunidade inválida.');
+        }
+
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('deal_products')
             .delete()
-            .in('id', itemIds)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível atualizar os produtos da oportunidade.');
+            .in('id', normalizedIds)
+            .eq('organization_id', organizationId)
+            .select('id');
+
+        const deletedIds = new Set((deleted || []).map(item => String(item.id)));
+        if (error || normalizedIds.some(id => !deletedIds.has(id))) {
+            throw new Error('Não foi possível atualizar os produtos da oportunidade.');
+        }
         return true;
     }
 
     static async reorderDealProducts(userId: string, organizationId: string, items: { id: string, display_order: number }[]) {
+        const ids = items.map(item => typeof item.id === 'string' ? item.id.trim() : '');
+        if (!items.length || ids.some(id => !id) || new Set(ids).size !== ids.length ||
+            items.some(item => !Number.isInteger(item.display_order) || item.display_order < 0)) {
+            throw new Error('Ordenação de produtos inválida.');
+        }
+
         const supabase = createAdminClient();
-        try {
-            await Promise.all(items.map(item =>
-                supabase
-                    .from('deal_products')
-                    .update({ display_order: item.display_order })
-                    .eq('id', item.id)
-                    .eq('organization_id', organizationId)
-            ));
-            return true;
-        } catch (error) {
+        const results = await Promise.all(items.map(item =>
+            supabase
+                .from('deal_products')
+                .update({ display_order: item.display_order })
+                .eq('id', item.id)
+                .eq('organization_id', organizationId)
+                .select('id')
+                .maybeSingle()
+        ));
+
+        if (results.some(result => result.error || !result.data)) {
             throw new Error('Falha ao reordenar alguns produtos');
         }
+        return true;
     }
 
     static async bulkAddDealProducts(userId: string, dealId: string, organizationId: string, products: any[]): Promise<DealProduct[]> {
