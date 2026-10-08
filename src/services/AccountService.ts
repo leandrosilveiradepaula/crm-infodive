@@ -1,6 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Account } from '@/types/account';
-import { normalizeCasing, normalizeTaxId, normalizeZip } from '@/lib/string-utils';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Account } from '../types/account';
+import { normalizeCasing, normalizeTaxId, normalizeZip } from '../lib/string-utils';
 
 export class AccountService {
     private static async cleanupCreatedAccount(
