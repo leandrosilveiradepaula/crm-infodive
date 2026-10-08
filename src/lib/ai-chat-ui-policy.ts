@@ -14,3 +14,20 @@ export function boundedChatHistory(messages: ChatHistoryItem[]): ChatHistoryItem
             content: message.content.slice(0, CHAT_INPUT_LIMIT),
         }));
 }
+
+const APPROVED_CHAT_ERRORS = new Set([
+    'Pergunta inválida.',
+    'Integração de IA não configurada.',
+    'Muitas mensagens em pouco tempo.',
+    'Não foi possível carregar o contexto do CRM.',
+    'A integração de IA está indisponível no momento.',
+    'A integração de IA retornou uma resposta vazia.',
+]);
+
+/** Do not reveal arbitrary server/provider error strings in the assistant. */
+export function readableChatError(error: unknown): string {
+    if (error instanceof Error && APPROVED_CHAT_ERRORS.has(error.message)) {
+        return error.message;
+    }
+    return 'Não foi possível consultar o assistente agora. Tente novamente.';
+}
