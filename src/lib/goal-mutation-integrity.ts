@@ -62,7 +62,7 @@ export function sanitizeScenarioWrite(input: unknown): Partial<Scenario> {
     for (const key of ['desired_margin', 'headcount', 'payroll_tax', 'revenue_goal', 'input_goal_value']) {
         if (key in fields && !numeric(fields[key])) throw new Error('Invalid scenario amount');
     }
-    if ('headcount' in fields && !Number.isInteger(fields.headcount)) throw new Error('Invalid headcount');
+    if ('headcount' in fields && !Number.isInteger(fields.headcount as number)) throw new Error('Invalid headcount');
     if ('goal_mode' in fields && !['revenue', 'profit_absolute', 'profit_percent'].includes(fields.goal_mode as string)) {
         throw new Error('Invalid goal mode');
     }
