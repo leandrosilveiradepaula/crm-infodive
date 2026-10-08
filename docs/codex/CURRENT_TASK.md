@@ -197,3 +197,34 @@ removed 'Execução Automática / Bloqueada' presentation. Update only
 `src/lib/automation-product-truthfulness.test.ts` to assert the new truthful
 active/paused metrics and explicit absence of the misleading blocked claim.
 Do not revert the interface fix or weaken other product assertions.
+
+
+## Additional authorized task (2026-10-08): Commission and campaign integrity batch
+
+After CRM Preview #90 passed exact-SHA CI, Vercel and browser evidence,
+continue autonomous safe development in a grouped 4-5-block PR. Scope:
+1. Restrict campaign creation/update to known business fields, validate
+   non-empty name, finite non-negative monetary/rate values and field types.
+2. Restrict commission payment mutation to commission-specific columns;
+   require an explicit paid/pending status and finite non-negative amount
+   for paid status; set payment timestamp server-side, clear it on reset.
+3. Require tenant-scoped affected-row evidence for campaign updates/deletes,
+   scenario deletes, and won-deal commission updates; no false success on zero rows.
+4. Throw sanitized errors on reads instead of inventing empty
+   goals/campaigns/scenarios/commission statements.
+5. Add executable pure policy regression tests and server-action source
+   assertions for the fail-closed boundaries.
+
+Allowed files:
+- `docs/codex/CURRENT_TASK.md`
+- `src/app/(dashboard)/goals-commissions/actions.ts`
+- `src/lib/commission-campaign-integrity.ts` (new)
+- `src/lib/commission-campaign-integrity.test.ts` (new)
+- `src/lib/goals-commission-integrity-contract.test.ts` (new)
+
+No new or altered RBAC role policy, schema/migration, privileged database
+access, credentials, production deployment, real financial record mutation
+or paid model calls. In particular, the rights to approve commissions
+remain unresolved in issue #61; this change does NOT close that security
+gate. Commits/PR against the nonproduction candidate are authorized,
+with exact-HEAD CI before merge and merged-SHA CI before Preview promotion.
