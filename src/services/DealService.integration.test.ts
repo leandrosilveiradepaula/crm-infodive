@@ -5,7 +5,24 @@ vi.mock('../lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminCl
 
 import { DealService } from './DealService';
 
-type DbResponse = { data: any; error: { code?: string; message?: string } | null };
+type DbResponse = { data: unknown; error: { code?: string; message?: string } | null };
+
+type FakeBuilder = {
+    select: (...args: unknown[]) => FakeBuilder;
+    eq: (column: string, value: unknown) => FakeBuilder;
+    in: (column: string, values: unknown[]) => FakeBuilder;
+    order: (...args: unknown[]) => FakeBuilder;
+    limit: (...args: unknown[]) => FakeBuilder;
+    insert: (payload: unknown) => FakeBuilder;
+    update: (payload: unknown) => FakeBuilder;
+    delete: () => FakeBuilder;
+    single: () => Promise<DbResponse>;
+    maybeSingle: () => Promise<DbResponse>;
+    then: (
+        resolve: (value: DbResponse) => unknown,
+        reject?: (reason: unknown) => unknown,
+    ) => Promise<unknown>;
+};
 type Operation = {
     table: string;
     mode: 'read' | 'insert' | 'update' | 'delete';
@@ -30,7 +47,8 @@ function fakeDatabase(responses: Record<string, DbResponse | DbResponse[]>) {
     const from = vi.fn((table: string) => {
         const state: Operation = { table, mode: 'read', filters: [] };
         operations.push(state);
-        const builder: any = {
+        let builder: FakeBuilder;
+        builder = {
             select() { return builder; },
             eq(column: string, value: unknown) { state.filters.push([column, value]); return builder; },
             in(column: string, values: unknown[]) { state.filters.push([column, values]); return builder; },
