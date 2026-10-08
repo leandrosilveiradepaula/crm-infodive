@@ -515,8 +515,8 @@ export class AccountService {
                     }
                 }
 
-                if (accData.created_at === accData.updated_at) results.created++;
-                else results.updated++;
+                if (existingAccountId) results.updated++;
+                else results.created++;
             } catch {
                 results.failed++;
                 results.errors.push('Não foi possível importar esta conta.');
