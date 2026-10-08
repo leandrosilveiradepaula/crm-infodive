@@ -256,8 +256,14 @@ describe('DealService offline tenant and mutation integrity', () => {
 
     it('blocks product inserts when the parent deal is not visible in the tenant', async () => {
         const db = fakeDatabase({
-            'profiles:read': { data: { role: 'vendedor', roles: [] }, error: null },
-            'deals:read': { data: null, error: null },
+            'profiles:read': [
+                { data: { role: 'vendedor', roles: [] }, error: null },
+                { data: { role: 'vendedor', roles: [] }, error: null },
+            ],
+            'deals:read': [
+                { data: null, error: null },
+                { data: null, error: null },
+            ],
         });
         await expect(DealService.addDealProduct('seller-a', 'deal-b', 'tenant-a', { name: 'Produto' }))
             .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
@@ -274,9 +280,18 @@ describe('DealService offline tenant and mutation integrity', () => {
 
     it('blocks modification or deletion of a product whose deal is not accessible', async () => {
         const db = fakeDatabase({
-            'profiles:read': { data: { role: 'vendedor', roles: [] }, error: null },
-            'deals:read': { data: null, error: null },
-            'deal_products:read': { data: { deal_id: 'other-deal' }, error: null },
+            'profiles:read': [
+                { data: { role: 'vendedor', roles: [] }, error: null },
+                { data: { role: 'vendedor', roles: [] }, error: null },
+            ],
+            'deals:read': [
+                { data: null, error: null },
+                { data: null, error: null },
+            ],
+            'deal_products:read': [
+                { data: { deal_id: 'other-deal' }, error: null },
+                { data: { deal_id: 'other-deal' }, error: null },
+            ],
         });
         await expect(DealService.updateDealProduct('seller-a', 'item-1', 'tenant-a', { name: 'Changed' }))
             .rejects.toThrow('Oportunidade indisponível ou sem permissão.');
