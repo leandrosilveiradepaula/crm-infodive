@@ -1,10 +1,10 @@
 {
-  "source": "npm audit on 2026-10-08 after removing vulnerable xlsx",
+  "source": "npm audit on 2026-10-08 after protobufjs/source-map-js patches",
   "policy": "Legacy baseline only; CI must fail if any severity count increases. Reduce this file only when vulnerabilities are remediated.",
   "vulnerabilities": {
-    "critical": 1,
-    "high": 8,
-    "moderate": 5,
+    "critical": 0,
+    "high": 7,
+    "moderate": 4,
     "low": 0
   }
 }
