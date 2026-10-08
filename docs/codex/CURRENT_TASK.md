@@ -372,3 +372,8 @@ After PR #97 integrated into the non-production candidate, harden product write 
 
 Authorized paths: `docs/codex/CURRENT_TASK.md`, `src/services/DealService.ts`, `src/services/DealService.integration.test.ts`.
 Do not mutate live data, change permissions/RBAC, add migrations, call paid models, deploy production, or merge the main release candidate.
+
+
+## Additional authorized task (2026-10-08): deal room visibility boundary
+
+Ensure `DealService.getOrCreateRoom` enforces the same tenant-scoped role and owner visibility as deal details before returning or creating a room. Add offline regression for a seller attempting to access another seller's deal. No schema changes, production writes, privilege changes or paid requests. Authorized paths: `docs/codex/CURRENT_TASK.md`, `src/services/DealService.ts`, `src/services/DealService.integration.test.ts`.
