@@ -71,8 +71,10 @@ export class SettingsService {
             }
             value[key] = field;
         }
-        if (!Object.keys(value).length) {
-            return { success: false, error: 'Nenhuma configuração permitida.' };
+        // The value is replaced as a whole by upsert: require the complete
+        // minimum organization identity to avoid silently erasing saved fields.
+        if (!value.name?.trim() || typeof value.support_email !== 'string') {
+            return { success: false, error: 'Configurações da organização incompletas.' };
         }
         const supabase = createAdminClient();
         const { data: persisted, error } = await supabase
