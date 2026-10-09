@@ -150,7 +150,8 @@ describe('DocumentService fail-closed offline integrity', () => {
 
     it('requires an affected metadata row after storage deletion', async () => {
         fakeDatabase({
-            'documents:read': { data: { file_path: 'tenant/deal/deal-1/a.pdf' }, error: null },
+            ...validDeal,
+            'documents:read': { data: { file_path: 'tenant/deal/deal-1/a.pdf', entity_type: 'deal', entity_id: 'deal-1' }, error: null },
             'documents:delete': { data: null, error: null },
         });
         await expect(DocumentService.deleteDocument('user', 'tenant', 'document-1'))
