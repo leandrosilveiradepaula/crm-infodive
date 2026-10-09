@@ -590,3 +590,8 @@ Prepare five related blocks for a single nonproduction PR: 1) treat lead list da
 ## Authorized task (2026-10-09): five ProposalService integrity blocks without Preview
 
 Five offline hardening blocks: 1) require tenant membership even for standalone proposals; 2) reject malformed/null lists instead of empty success; 3) validate status, signature setting, and reject no-op updates; 4) require returned persisted row on update/create; 5) validate account/lead references against current tenant and fail closed on version lookup failures. Add deterministic integration tests. Allowed paths: ProposalService.ts, ProposalService.integration.test.ts, CURRENT_TASK.md. No production, Vercel, Preview, migrations, paid models, new RBAC permissions, or live data. One coherent CI PR, then candidate-only merge on green exact SHA.
+
+
+## Authorized task (2026-10-09): five contact read and validation guards
+
+Group five nonproduction offline fixes: (1) reject null or malformed full-contact list responses instead of reporting success; (2) fail closed on null/malformed account-contact list responses; (3) fail closed on duplicate lookup errors or non-array results before inserting a contact; (4) validate contact text input types, required name and reasonable length bounds before privileged mutations; (5) validate contact IDs before update/delete and preserve zero affected row failures. Add deterministic offline integration regression tests without schema changes. Allowed files: ContactService.ts, ContactService.integration.test.ts, CURRENT_TASK.md. No expansion of permissions, production, Preview, Vercel, migrations or paid model calls. Create one coherent PR, CI green at exact SHA required for candidate-only merge.
