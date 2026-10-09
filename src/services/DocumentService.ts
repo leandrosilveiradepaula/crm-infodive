@@ -34,18 +34,24 @@ export class DocumentService {
         supabase: ReturnType<typeof createAdminClient>,
         organizationId: string,
         entityType: EntityType,
-        entityId: string
+        entityId: string,
+        userId: string,
     ): Promise<void> {
         const table = ENTITY_TABLE_MAP[entityType];
         if (!table) throw new Error('Tipo de entidade inválido.');
 
-        const { data, error } = await supabase
-            .from(table)
-            .select('id')
-            .eq('id', entityId)
-            .eq('organization_id', organizationId)
-            .single();
-
+        let query = supabase.from(table).select('id')
+            .eq('id', entityId).eq('organization_id', organizationId);
+        if (entityType === 'deal') {
+            const { data: profile, error: profileError } = await supabase.from('profiles')
+                .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+            if (profileError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
+            const roles = Array.isArray(profile.roles) ? profile.roles : [];
+            const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+                roles.some((role: unknown) => role === 'admin' || role === 'manager');
+            if (!canViewAll) query = query.eq('owner_id', userId);
+        }
+        const { data, error } = await query.maybeSingle();
         if (error || !data) throw new Error('Entidade não encontrada ou acesso negado.');
     }
 
@@ -59,7 +65,7 @@ export class DocumentService {
         entityId: string
     ): Promise<EntityDocument[]> {
         const supabase = createAdminClient();
-        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId);
+        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId, userId);
 
         if (entityType === 'account') {
             // Query 1: Account documents
@@ -154,7 +160,7 @@ export class DocumentService {
         const supabase = createAdminClient();
 
         // Validate entity ownership
-        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId);
+        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId, userId);
 
         // Unique path: documents/{orgId}/{entityType}/{entityId}/{uuid}-{name}
         const uuid = crypto.randomUUID();
@@ -218,7 +224,7 @@ export class DocumentService {
         // Validate ownership
         const { data: doc, error: docError } = await supabase
             .from('documents')
-            .select('file_path')
+            .select('file_path, entity_type, entity_id')
             .eq('id', documentId)
             .eq('organization_id', organizationId)
             .single();
@@ -226,6 +232,9 @@ export class DocumentService {
         if (docError || !doc) {
             throw new Error('Documento não encontrado ou acesso negado.');
         }
+        await this.validateEntityOwnership(
+            supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
+        );
 
         const { data, error } = await supabase.storage
             .from(BUCKET)
@@ -251,7 +260,7 @@ export class DocumentService {
         // Validate ownership and get file_path
         const { data: doc, error: docError } = await supabase
             .from('documents')
-            .select('file_path')
+            .select('file_path, entity_type, entity_id')
             .eq('id', documentId)
             .eq('organization_id', organizationId)
             .single();
@@ -259,6 +268,9 @@ export class DocumentService {
         if (docError || !doc) {
             throw new Error('Documento não encontrado ou acesso negado.');
         }
+        await this.validateEntityOwnership(
+            supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
+        );
 
         // Do not delete metadata if storage removal did not succeed.
         const { error: storageError } = await supabase.storage.from(BUCKET).remove([doc.file_path]);
