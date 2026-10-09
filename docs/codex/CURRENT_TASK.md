@@ -563,3 +563,15 @@ The same owner-visibility boundary applies to related deal documents aggregated 
 ## Authorized task (2026-10-09): document upload input validation offline
 
 Validate untrusted uploaded binary and declared size against actual byteLength, reject empty/mismatched/oversized files, and reject unusable filenames before invoking privileged Supabase Storage. Add offline negative regression tests. Allowed paths: DocumentService.ts, DocumentService.integration.test.ts, this task record. No Preview, Vercel deploy, paid calls, migrations, production merge or live writes.
+
+
+## Authorized task (2026-10-09): five-block document defense-in-depth, offline
+
+Operator authorized a consolidated five-block change on a nonproduction branch, with one CI PR and no Vercel Preview:
+1. Confirm tenant membership for every user before privileged document parent lookups, including account and contact (not just deals).
+2. Validate the storage object path is inside the document metadata tenant/entity directory before issuing a signed URL.
+3. Apply that same fail-closed path confinement before deleting anything from Storage or metadata.
+4. Validate untrusted category and description metadata before uploading; reject invalid category/non-string or excessive description.
+5. Reject pathological upload filenames (excessive length and unsafe segments) before any privileged I/O; preserve supported file types and normal names.
+
+Add deterministic offline coverage for all five blocks. Allowed paths: this task record, `src/services/DocumentService.ts`, `src/services/DocumentService.integration.test.ts`. Do not modify RBAC grants, migrations, data, credentials, paid models, Vercel, Preview ref or main. Commit only to nonproductive candidate; merge only after exact SHA CI success and review. Production merge remains human-only.
