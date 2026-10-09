@@ -18,7 +18,7 @@ export class ProductService {
             .eq('organization_id', organizationId)
             .order('name');
 
-        if (error || !data) {
+        if (error || !Array.isArray(data)) {
             console.error('[ProductService] products fetch failed');
             throw new Error('Não foi possível carregar os produtos.');
         }
