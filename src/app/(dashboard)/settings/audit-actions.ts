@@ -1,7 +1,7 @@
 'use server';
 
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requirePermission } from '@/lib/auth-server';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { requirePermission } from '../../../lib/auth-server';
 
 export interface AuditLog {
     id: string;
