@@ -516,3 +516,28 @@ Authorized paths:
 No RBAC changes, migrations, live database edits, real AI calls, Preview
 promotion during Vercel rate limiting, production merge or credential changes.
 Prepare a grouped change on a work branch and validate one head via CI.
+
+
+## Authorized task (2026-10-08): Dashboard metrics and listing integrity
+
+After the search-guard batch, close five related gaps in the dashboard read
+plane without changing the role policy already applied to deal details:
+1. Fail closed on dashboard metrics DB failures rather than presenting zero
+   revenue, empty pipeline and success-looking metrics.
+2. Resolve roles from an authenticated, tenant-scoped profile, and restrict
+   seller-visible dashboard aggregates and listings to their own deals.
+3. Fail closed on recent deal and related owner/account lookup errors instead
+   of silently presenting valid-looking missing information.
+4. Route `getDashboardDeals` through a privileged server service that
+   explicitly enforces tenant and owner visibility.
+5. Include negative offline tests for database errors, missing profile,
+   cross-owner exclusion and a server action wiring contract.
+
+Authorized paths: `src/services/DashboardService.ts`,
+`src/services/DashboardService.read-integrity.test.ts` (new),
+`src/app/(dashboard)/dashboard/actions.ts`,
+`src/lib/dashboard-read-integrity-contract.test.ts` (new),
+`src/app/(dashboard)/dashboard/error.tsx` (new), and this file.
+No new RBAC grants, migrations, live data writes, paid AI calls, Preview
+rate-limit retries or production merge. Work outside CI until grouped checks
+are ready, then validate one exact nonproduction SHA.
