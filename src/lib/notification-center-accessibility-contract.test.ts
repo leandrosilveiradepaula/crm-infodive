@@ -23,7 +23,7 @@ describe('notification center accessibility wiring', () => {
     });
 
     it('supports explicit keyboard-operable mark-as-read and removal actions', () => {
-        expect(source).toContain('onClick={() => onMarkAsRead(notification.id)}');
+        expect(source).toContain('onMarkAsRead(notification.id)');
         expect(source).toContain('Marcar como lida:');
         expect(source).toContain('onRemove(notification.id)');
         expect(source).toContain('focus-visible:outline-2');
