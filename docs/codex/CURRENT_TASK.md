@@ -563,3 +563,8 @@ The same owner-visibility boundary applies to related deal documents aggregated 
 ## Authorized task (2026-10-09): document upload input validation offline
 
 Validate untrusted uploaded binary and declared size against actual byteLength, reject empty/mismatched/oversized files, and reject unusable filenames before invoking privileged Supabase Storage. Add offline negative regression tests. Allowed paths: DocumentService.ts, DocumentService.integration.test.ts, this task record. No Preview, Vercel deploy, paid calls, migrations, production merge or live writes.
+
+
+## Authorized task (2026-10-09): five product catalog integrity blocks (offline, nonproduction)
+
+Group five fixes in one candidate PR: (1) fail closed on product list read errors and null result; (2) reject missing/invalid product name and avoid reporting successful create on null insert; (3) whitelist mutable product fields and reject identity/tenant/audit spoofing in product update; (4) verify one affected row on update/delete; (5) preserve all legacy duplicated fields, generate a collision-resistant SKU even when source SKU is empty, and require returned persisted row. Add fake Supabase offline regression tests. Authorized paths: ProductService.ts, ProductService.integration.test.ts, this task record. No schema, migrations, auth grant changes, data writes outside tests, Preview, paid model calls, or production merge. Group changes outside CI until coherent then run once on exact PR SHA.
