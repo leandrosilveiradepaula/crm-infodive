@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 
 export interface PipelineStage {
     id: string;
@@ -42,22 +42,54 @@ export class SettingsService {
             .eq('organization_id', organizationId)
             .maybeSingle();
 
-        if (error || !data) return { name: '', support_email: '' };
-        return data.value as OrgSettings;
+        if (error) throw new Error('Não foi possível carregar as configurações da organização.');
+        if (!data) return { name: '', support_email: '' };
+        const value = data.value;
+        if (!value || typeof value !== 'object' || Array.isArray(value) ||
+            (value.name !== undefined && typeof value.name !== 'string') ||
+            (value.support_email !== undefined && typeof value.support_email !== 'string')) {
+            throw new Error('Configurações da organização inválidas.');
+        }
+        return { ...value, name: value.name || '', support_email: value.support_email || '' } as OrgSettings;
     }
 
     static async saveOrgSettings(organizationId: string, settings: OrgSettings) {
+        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+            return { success: false, error: 'Configurações da organização inválidas.' };
+        }
+        const allowed = new Set([
+            'name', 'support_email', 'cnpj', 'ie', 'street', 'number', 'complement',
+            'neighborhood', 'city', 'state', 'zip', 'logo_url',
+            'primary_color', 'secondary_color',
+        ]);
+        const value: Record<string, string> = {};
+        for (const [key, field] of Object.entries(settings)) {
+            if (!allowed.has(key)) continue;
+            if (typeof field !== 'string' || field.length > 4000 ||
+                (key === 'name' && !field.trim())) {
+                return { success: false, error: 'Configurações da organização inválidas.' };
+            }
+            value[key] = field;
+        }
+        // The value is replaced as a whole by upsert: require the complete
+        // minimum organization identity to avoid silently erasing saved fields.
+        if (!value.name?.trim() || typeof value.support_email !== 'string') {
+            return { success: false, error: 'Configurações da organização incompletas.' };
+        }
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: persisted, error } = await supabase
             .from('app_settings')
             .upsert({
                 key: 'organization',
-                value: settings,
+                value,
                 organization_id: organizationId,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'organization_id,key' });
-
-        if (error) return { success: false, error: 'Não foi possível salvar as configurações da organização.' };
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,key' })
+            .select('key')
+            .maybeSingle();
+        if (error || !persisted) {
+            return { success: false, error: 'Não foi possível salvar as configurações da organização.' };
+        }
         return { success: true };
     }
 
@@ -69,31 +101,60 @@ export class SettingsService {
             .eq('organization_id', organizationId)
             .order('order_index');
 
-        if (error || !data || data.length === 0) return DEFAULT_STAGES;
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar as etapas do pipeline.');
+        if (data.length === 0) return DEFAULT_STAGES;
         return data as PipelineStage[];
     }
 
     static async savePipelineStages(organizationId: string, stages: PipelineStage[]) {
+        if (!Array.isArray(stages) || stages.length === 0 || stages.length > 30 ||
+            stages.some(s => !s || typeof s.id !== 'string' || !s.id.trim() ||
+                typeof s.name !== 'string' || !s.name.trim() || s.name.length > 100 ||
+                typeof s.color !== 'string' || !s.color.trim() || s.color.length > 80) ||
+            new Set(stages.map(s => s.id)).size !== stages.length) {
+            return { success: false, error: 'Etapas de pipeline inválidas.' };
+        }
+
         const supabase = createAdminClient();
 
         // 1. Encontrar estágios atuais para saber quais deletar
-        const { data: existingData } = await supabase
+        const { data: existingData, error: existingError } = await supabase
             .from('pipeline_stages')
             .select('id')
             .eq('organization_id', organizationId);
 
-        const existingIds = (existingData || []).map(r => r.id);
+        if (existingError || !Array.isArray(existingData)) {
+            return { success: false, error: 'Não foi possível consultar as etapas existentes.' };
+        }
+        const existingIds = existingData.map(r => r.id);
         const currentIds = stages.map(s => s.id);
+        const newIds = currentIds.filter(id => !existingIds.includes(id));
+
+        // Upsert uses ID as conflict target. Reject a caller-supplied ID
+        // that is already owned by a different tenant before any delete/upsert.
+        if (newIds.length > 0) {
+            const { data: collisions, error: collisionError } = await supabase
+                .from('pipeline_stages')
+                .select('id, organization_id')
+                .in('id', newIds);
+            if (collisionError || !Array.isArray(collisions) || collisions.some(
+                row => newIds.includes(row.id) && row.organization_id !== organizationId
+            )) {
+                return { success: false, error: 'Não foi possível validar as etapas da organização.' };
+            }
+        }
         const toDeleteIds = existingIds.filter(id => !currentIds.includes(id));
 
         // 2. Tentar deletar os que foram removidos
         if (toDeleteIds.length > 0) {
-            const { error: deleteError } = await supabase
+            const { data: deleted, error: deleteError } = await supabase
                 .from('pipeline_stages')
                 .delete()
-                .in('id', toDeleteIds);
-            
-            if (deleteError) {
+                .eq('organization_id', organizationId)
+                .in('id', toDeleteIds)
+                .select('id');
+
+            if (deleteError || !Array.isArray(deleted) || deleted.length !== toDeleteIds.length) {
                 return { 
                     success: false, 
                     error: 'Não foi possível remover algumas etapas pois elas já possuem negócios vinculados.'
@@ -110,9 +171,12 @@ export class SettingsService {
             organization_id: organizationId
         }));
 
-        const { error: upsertError } = await supabase.from('pipeline_stages').upsert(toUpsert);
-        
-        if (upsertError) return { success: false, error: 'Não foi possível salvar as etapas do pipeline.' };
+        const { data: upserted, error: upsertError } = await supabase
+            .from('pipeline_stages').upsert(toUpsert).select('id');
+
+        if (upsertError || !Array.isArray(upserted) || upserted.length !== toUpsert.length) {
+            return { success: false, error: 'Não foi possível salvar as etapas do pipeline.' };
+        }
         return { success: true };
     }
 }
