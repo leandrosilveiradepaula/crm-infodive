@@ -126,6 +126,21 @@ export class SettingsService {
         }
         const existingIds = existingData.map(r => r.id);
         const currentIds = stages.map(s => s.id);
+        const newIds = currentIds.filter(id => !existingIds.includes(id));
+
+        // Upsert uses ID as conflict target. Reject a caller-supplied ID
+        // that is already owned by a different tenant before any delete/upsert.
+        if (newIds.length > 0) {
+            const { data: collisions, error: collisionError } = await supabase
+                .from('pipeline_stages')
+                .select('id, organization_id')
+                .in('id', newIds);
+            if (collisionError || !Array.isArray(collisions) || collisions.some(
+                row => newIds.includes(row.id) && row.organization_id !== organizationId
+            )) {
+                return { success: false, error: 'Não foi possível validar as etapas da organização.' };
+            }
+        }
         const toDeleteIds = existingIds.filter(id => !currentIds.includes(id));
 
         // 2. Tentar deletar os que foram removidos
