@@ -70,6 +70,14 @@ describe('SettingsService tenant and persistence integrity', () => {
             .not.toHaveProperty('organization_id');
     });
 
+    it('refuses partial organization replacement before erasing existing mandatory fields', async () => {
+        const db = fakeDb({});
+        await expect(SettingsService.saveOrgSettings('tenant', {
+            logo_url: 'https://example.test/logo.png',
+        } as never)).resolves.toMatchObject({ success: false });
+        expect(db.operations).toHaveLength(0);
+    });
+
     it('does not report org-setting save success when no row was persisted', async () => {
         fakeDb({ 'app_settings:upsert': { data: null, error: null } });
         await expect(SettingsService.saveOrgSettings('tenant', {
