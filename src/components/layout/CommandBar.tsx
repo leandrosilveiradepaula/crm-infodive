@@ -235,7 +235,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                                         <Command.Item value="new-deal" onSelect={() => handleSelect(() => router.push('/pipeline?newDeal=true'))} className="command-item">
                                             <Plus className="command-icon text-green-500" />
                                             <span>Criar Nova Oportunidade</span>
-                                            <kbd className="command-kbd">SHIFT+C</kbd>
+                                            
                                         </Command.Item>
                                         <Command.Item value="new-customer" onSelect={() => handleSelect(() => router.push('/customers?new=true'))} className="command-item">
                                             <Users className="command-icon text-blue-500" />
