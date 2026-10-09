@@ -52,8 +52,19 @@ export class LeadService {
             !lead.company.trim() || lead.company.length > 250) {
             throw new Error('Empresa do lead inválida.');
         }
+        const fields = this.normalizedInput(lead);
         const normalizedLead = {
-            ...this.normalizedInput(lead),
+            ...fields,
+            // Preserve the legacy create defaults without copying privileged input.
+            contact_name: fields.contact_name ?? '',
+            cnpj: fields.cnpj ?? '',
+            phone: fields.phone ?? '',
+            street: fields.street ?? '',
+            neighborhood: fields.neighborhood ?? '',
+            city: fields.city ?? '',
+            state: fields.state ?? '',
+            zip: fields.zip ?? '',
+            interest: fields.interest ?? '',
             organization_id: organizationId,
         };
         const supabase = createAdminClient();
