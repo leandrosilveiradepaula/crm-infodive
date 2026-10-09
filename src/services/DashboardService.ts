@@ -2,33 +2,35 @@ import { createAdminClient } from '../lib/supabase/admin';
 import { calculateDealMetrics, calculateSalesPerformance, calculateRevenueForecast } from '../utils/analytics';
 
 export class DashboardService {
+    private static async canViewAllDeals(
+        supabase: ReturnType<typeof createAdminClient>,
+        userId: string,
+        organizationId: string,
+    ): Promise<boolean> {
+        const { data: profile, error } = await supabase.from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+        if (error || !profile) throw new Error('Não foi possível validar o acesso ao dashboard.');
+        return profile.role === 'admin' || profile.role === 'manager' ||
+            (Array.isArray(profile.roles) && profile.roles.some(
+                (role: unknown) => role === 'admin' || role === 'manager'
+            ));
+    }
     static async getDashboardMetrics(userId: string, organizationId: string) {
         const supabase = createAdminClient();
 
-        // 1. Fetch Deals – explicit org filter (admin client bypasses RLS)
-        const { data: deals, error } = await supabase
-            .from('deals')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
-
-        if (error) {
+        // The privileged DB client bypasses RLS; apply the same owner boundary
+        // as the pipeline before computing any dashboard aggregates.
+        const canViewAll = await this.canViewAllDeals(supabase, userId, organizationId);
+        let query = supabase.from('deals')
+            .select('*').eq('organization_id', organizationId);
+        if (!canViewAll) query = query.eq('owner_id', userId);
+        const { data: deals, error } = await query.order('created_at', { ascending: false });
+        if (error || !deals) {
             console.error('[DashboardService] dashboard metrics fetch failed');
-            return {
-                totalPipeline: 0,
-                weightedForecast: 0,
-                wonThisMonth: 0,
-                winRate: 0,
-                avgDealSize: 0,
-                stagnantDeals: 0,
-                totalDeals: 0,
-                wonDeals: 0,
-                lostDeals: 0,
-                healthScore: 0,
-                dealsByStage: [],
-                dealsByOwner: [],
-                monthlyRevenue: []
-            };
+            throw new Error('Não foi possível carregar os indicadores do dashboard.');
         }
 
         // 2. Fetch Owners manually
@@ -36,13 +38,13 @@ export class DashboardService {
         const profilesMap = new Map();
 
         if (ownerIds.length > 0) {
-            const { data: profiles } = await supabase
+            const { data: profiles, error: profilesError } = await supabase
                 .from('profiles')
                 .select('id, full_name')
                 .in('id', ownerIds)
                 .eq('organization_id', organizationId);
-
-            profiles?.forEach((p: any) => profilesMap.set(p.id, p.full_name));
+            if (profilesError || !profiles) throw new Error('Não foi possível carregar os responsáveis.');
+            profiles.forEach((p: { id: string; full_name: string }) => profilesMap.set(p.id, p.full_name));
         }
 
         // 3. Map Owner Names
@@ -140,16 +142,17 @@ export class DashboardService {
     static async getRecentDeals(userId: string, organizationId: string) {
         const supabase = createAdminClient();
 
-        const { data: deals, error } = await supabase
-            .from('deals')
+        const canViewAll = await this.canViewAllDeals(supabase, userId, organizationId);
+        let query = supabase.from('deals')
             .select('id, title, value, stage, created_at, owner_id, account_id')
-            .eq('organization_id', organizationId)
+            .eq('organization_id', organizationId);
+        if (!canViewAll) query = query.eq('owner_id', userId);
+        const { data: deals, error } = await query
             .order('created_at', { ascending: false })
             .limit(5);
-
-        if (error) {
+        if (error || !deals) {
             console.error('[DashboardService] recent deals fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as oportunidades recentes.');
         }
 
         // Fetch Owners and Accounts manually
@@ -160,21 +163,23 @@ export class DashboardService {
         const accountsMap = new Map();
 
         if (ownerIds.length > 0) {
-            const { data: profiles } = await supabase
+            const { data: profiles, error: profileError } = await supabase
                 .from('profiles')
                 .select('id, full_name')
                 .in('id', ownerIds)
                 .eq('organization_id', organizationId);
-            profiles?.forEach((p: any) => profilesMap.set(p.id, p.full_name));
+            if (profileError || !profiles) throw new Error('Não foi possível carregar os responsáveis.');
+            profiles.forEach((p: { id: string; full_name: string }) => profilesMap.set(p.id, p.full_name));
         }
 
         if (accountIds.length > 0) {
-            const { data: accounts } = await supabase
+            const { data: accounts, error: accountsError } = await supabase
                 .from('accounts')
                 .select('id, name')
                 .in('id', accountIds)
                 .eq('organization_id', organizationId);
-            accounts?.forEach((a: any) => accountsMap.set(a.id, a.name));
+            if (accountsError || !accounts) throw new Error('Não foi possível carregar as contas.');
+            accounts.forEach((account: { id: string; name: string }) => accountsMap.set(account.id, account.name));
         }
 
         return deals.map((d: any) => ({
@@ -185,6 +190,18 @@ export class DashboardService {
             owner_name: profilesMap.get(d.owner_id) || 'N/A',
             account_name: accountsMap.get(d.account_id) || 'N/A'
         }));
+    }
+
+    static async getDashboardDeals(userId: string, organizationId: string) {
+        const supabase = createAdminClient();
+        const canViewAll = await this.canViewAllDeals(supabase, userId, organizationId);
+        let query = supabase.from('deals')
+            .select('id, title, company, stage, value, probability, expected_close_date, won_at, created_at, owner_id')
+            .eq('organization_id', organizationId);
+        if (!canViewAll) query = query.eq('owner_id', userId);
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error || !data) throw new Error('Não foi possível carregar as oportunidades do dashboard.');
+        return data;
     }
 
     static async searchGlobal(userId: string, organizationId: string, query: string) {
