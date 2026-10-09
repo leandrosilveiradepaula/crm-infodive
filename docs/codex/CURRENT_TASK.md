@@ -483,3 +483,36 @@ Authorized files: `src/components/layout/NotificationCenter.tsx`,
 No live data mutations, Supabase or auth changes, new entitlements, paid AI
 calls, Preview quota retries, or production merge. Use a non-CI work branch
 until the grouped changes are ready for one exact-SHA validation.
+
+
+## Authorized task (2026-10-08): CRM command palette and global search integrity
+
+After the nonproduction CRM assistant batch, fix an existing functional
+contract defect and consolidate the search/move UX without touching live data:
+1. `useDeals` must treat `getPipelineData()` as a typed object and use its
+   `deals` collection, not cast the entire object into an array.
+2. Stage changes must return truthful success/failure to CommandBar; close
+   the command palette only on a confirmed server-action success.
+3. Remove the no-op legacy automation call: the server action is already
+   responsible for dispatching configurable automations.
+4. Replace unescaped raw PostgREST `.or()` interpolation with distinct
+   tenant-scoped `.ilike()` searches, preserve the owner visibility
+   boundary of the pipeline, limit input/results and deduplicate deals.
+   Fail closed on role/database errors rather than fabricating empty success.
+5. Suppress stale debounced client results and report search errors distinctly.
+6. Improve small-screen/dark-mode palette contrast and eliminate shortcut
+   hints without actual key handlers; include offline integration and source
+   contract regressions.
+
+Authorized paths:
+- `src/hooks/useDeals.ts`
+- `src/services/DashboardService.ts`
+- `src/services/DashboardService.search.integration.test.ts` (new)
+- `src/components/layout/CommandBar.tsx`
+- `src/components/layout/CommandPalette.css`
+- `src/lib/command-palette-integrity-contract.test.ts` (new)
+- `docs/codex/CURRENT_TASK.md`
+
+No RBAC changes, migrations, live database edits, real AI calls, Preview
+promotion during Vercel rate limiting, production merge or credential changes.
+Prepare a grouped change on a work branch and validate one head via CI.
