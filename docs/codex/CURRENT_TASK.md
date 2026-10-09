@@ -575,3 +575,8 @@ Operator authorized a consolidated five-block change on a nonproduction branch, 
 5. Reject pathological upload filenames (excessive length and unsafe segments) before any privileged I/O; preserve supported file types and normal names.
 
 Add deterministic offline coverage for all five blocks. Allowed paths: this task record, `src/services/DocumentService.ts`, `src/services/DocumentService.integration.test.ts`. Do not modify RBAC grants, migrations, data, credentials, paid models, Vercel, Preview ref or main. Commit only to nonproductive candidate; merge only after exact SHA CI success and review. Production merge remains human-only.
+
+
+## Authorized task (2026-10-09): five product catalog integrity blocks (offline, nonproduction)
+
+Group five fixes in one candidate PR: (1) fail closed on product list read errors and null result; (2) reject missing/invalid product name and avoid reporting successful create on null insert; (3) whitelist mutable product fields and reject identity/tenant/audit spoofing in product update; (4) verify one affected row on update/delete; (5) preserve all legacy duplicated fields, generate a collision-resistant SKU even when source SKU is empty, and require returned persisted row. Add fake Supabase offline regression tests. Authorized paths: ProductService.ts, ProductService.integration.test.ts, this task record. No schema, migrations, auth grant changes, data writes outside tests, Preview, paid model calls, or production merge. Group changes outside CI until coherent then run once on exact PR SHA.
