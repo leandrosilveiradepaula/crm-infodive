@@ -17,7 +17,7 @@ export async function getIntegrations(): Promise<Integration[]> {
         console.error('[IntegrationsActions] integrations fetch failed');
         throw new Error('Não foi possível carregar as integrações.');
     }
-    return data.map((item: Record<string, unknown>) => ({
+    return data.map((item: { id: string; name: string; provider: string; status: Integration['status']; config_json: unknown; last_sync: string | null }) => ({
         id: item.id, name: item.name, provider: item.provider,
         status: item.status, configJson: item.config_json, lastSync: item.last_sync
     }));
