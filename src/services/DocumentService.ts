@@ -155,11 +155,24 @@ export class DocumentService {
         }
     ): Promise<EntityDocument> {
         // --- Validation ---
+        if (!file || typeof file.name !== 'string' || !file.name.trim() ||
+            typeof file.type !== 'string' || !(file.arrayBuffer instanceof ArrayBuffer)) {
+            throw new Error('Arquivo inválido.');
+        }
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
             throw new Error('Tipo de arquivo não permitido.');
         }
-        if (file.size > MAX_SIZE_BYTES) {
-            throw new Error(`Arquivo muito grande. Máximo permitido: 25 MB`);
+        // The declared size is untrusted; verify it against the real payload.
+        if (!Number.isSafeInteger(file.size) || file.size <= 0 ||
+            file.arrayBuffer.byteLength !== file.size) {
+            throw new Error('Tamanho do arquivo inválido.');
+        }
+        if (file.arrayBuffer.byteLength > MAX_SIZE_BYTES) {
+            throw new Error('Arquivo muito grande. Máximo permitido: 25 MB');
+        }
+        const cleanName = file.name.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+        if (!cleanName || cleanName === '.' || cleanName === '..' || !/[a-zA-Z0-9]/.test(cleanName)) {
+            throw new Error('Nome de arquivo inválido.');
         }
 
         const supabase = createAdminClient();
@@ -169,8 +182,7 @@ export class DocumentService {
 
         // Unique path: documents/{orgId}/{entityType}/{entityId}/{uuid}-{name}
         const uuid = crypto.randomUUID();
-        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filePath = `${organizationId}/${entityType}/${entityId}/${uuid}-${safeFileName}`;
+        const filePath = `${organizationId}/${entityType}/${entityId}/${uuid}-${cleanName}`;
 
         // --- Upload to Storage ---
         const { error: storageError } = await supabase.storage
