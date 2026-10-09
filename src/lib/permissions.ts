@@ -5,21 +5,21 @@ export const ROLE_PERMISSIONS: Record<string, readonly Permission[]> = {
         'leads:view_all', 'leads:create', 'leads:edit', 'leads:delete',
         'deals:view_all', 'deals:create', 'deals:edit', 'deals:delete', 'deals:change_owner',
         'products:create', 'products:edit', 'products:delete',
-        'clients:view_all',
+        'clients:view_all', 'clients:create', 'clients:edit', 'clients:delete', 'clients:import',
         'settings:manage_users', 'settings:view_audit', 'settings:configure_pipeline',
         'integrations:manage'
     ],
     manager: [
         'leads:view_all', 'leads:create', 'leads:edit', 'leads:delete',
         'deals:view_all', 'deals:create', 'deals:edit', 'deals:delete', 'deals:change_owner',
-        'clients:view_all',
+        'clients:view_all', 'clients:create', 'clients:edit', 'clients:delete', 'clients:import',
         'settings:configure_pipeline'
     ],
     vendedor: [
         'leads:create', 'leads:edit',
         'deals:create', 'deals:edit',
         'products:create', 'products:edit', 'products:delete',
-        'clients:view_all'
+        'clients:view_all', 'clients:create', 'clients:edit', 'clients:delete', 'clients:import'
     ],
     support: [
         'clients:view_all'
