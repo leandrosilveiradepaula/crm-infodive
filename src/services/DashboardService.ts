@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { calculateDealMetrics, calculateSalesPerformance, calculateRevenueForecast } from '@/utils/analytics';
+import { createAdminClient } from '../lib/supabase/admin';
+import { calculateDealMetrics, calculateSalesPerformance, calculateRevenueForecast } from '../utils/analytics';
 
 export class DashboardService {
     static async getDashboardMetrics(userId: string, organizationId: string) {
@@ -189,26 +189,53 @@ export class DashboardService {
 
     static async searchGlobal(userId: string, organizationId: string, query: string) {
         const supabase = createAdminClient();
-        const searchTerm = `%${query}%`;
+        const normalized = typeof query === 'string' ? query.trim().slice(0, 80) : '';
+        if (normalized.length < 2) return { deals: [], customers: [] };
 
-        const [dealsRes, customersRes] = await Promise.all([
-            supabase
-                .from('deals')
-                .select('id, title, company, stage, value')
-                .eq('organization_id', organizationId)
-                .or(`title.ilike.${searchTerm},company.ilike.${searchTerm}`)
-                .limit(5),
-            supabase
-                .from('accounts')
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+        if (profileError || !profile) throw new Error('Não foi possível validar a permissão de busca.');
+        const roles = Array.isArray(profile.roles) ? profile.roles : [];
+        const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+            roles.some((role: unknown) => role === 'admin' || role === 'manager');
+
+        const searchTerm = `%${normalized}%`;
+        // The .or() grammar accepts raw PostgREST syntax and must not interpolate
+        // arbitrary user search text. Use separate parameterized ilike filters.
+        let titleQuery = supabase.from('deals')
+            .select('id, title, company, stage, value')
+            .eq('organization_id', organizationId);
+        let companyQuery = supabase.from('deals')
+            .select('id, title, company, stage, value')
+            .eq('organization_id', organizationId);
+        if (!canViewAll) {
+            titleQuery = titleQuery.eq('owner_id', userId);
+            companyQuery = companyQuery.eq('owner_id', userId);
+        }
+        const [titleRes, companyRes, customersRes] = await Promise.all([
+            titleQuery.ilike('title', searchTerm).limit(5),
+            companyQuery.ilike('company', searchTerm).limit(5),
+            supabase.from('accounts')
                 .select('id, name, segment, status')
                 .eq('organization_id', organizationId)
                 .ilike('name', searchTerm)
-                .limit(5)
+                .limit(5),
         ]);
 
-        return {
-            deals: dealsRes.data || [],
-            customers: customersRes.data || []
-        };
+        if (titleRes.error || companyRes.error || customersRes.error) {
+            console.error('[DashboardService] global search failed');
+            throw new Error('Não foi possível concluir a busca.');
+        }
+
+        const matches = [...(titleRes.data || []), ...(companyRes.data || [])];
+        const deals = matches
+            .filter((deal, index) => matches.findIndex(other => other.id === deal.id) === index)
+            .slice(0, 5);
+
+        return { deals, customers: customersRes.data || [] };
     }
 }
