@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
     revalidatePath: vi.fn(),
 }));
 
-vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
-vi.mock('@/lib/auth-server', () => ({ requirePermission: mocks.requirePermission }));
+vi.mock('./supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
+vi.mock('./auth-server', () => ({ requirePermission: mocks.requirePermission }));
 vi.mock('next/cache', () => ({ revalidatePath: mocks.revalidatePath }));
 
 import {
@@ -15,12 +15,12 @@ import {
     getApiKeys,
     removeApiKey,
     revokeApiKey,
-} from '@/app/(dashboard)/integrations/apikey-actions';
+} from '../app/(dashboard)/integrations/apikey-actions';
 import {
     createWebhook,
     getWebhooks,
     removeWebhook,
-} from '@/app/(dashboard)/integrations/webhook-actions';
+} from '../app/(dashboard)/integrations/webhook-actions';
 
 type Result = { data: unknown; error: { message?: string } | null };
 type Op = {
