@@ -511,7 +511,8 @@ plane without changing the role policy already applied to deal details:
 Authorized paths: `src/services/DashboardService.ts`,
 `src/services/DashboardService.read-integrity.test.ts` (new),
 `src/app/(dashboard)/dashboard/actions.ts`,
-`src/lib/dashboard-read-integrity-contract.test.ts` (new), and this file.
+`src/lib/dashboard-read-integrity-contract.test.ts` (new),
+`src/app/(dashboard)/dashboard/error.tsx` (new), and this file.
 No new RBAC grants, migrations, live data writes, paid AI calls, Preview
 rate-limit retries or production merge. Work outside CI until grouped checks
 are ready, then validate one exact nonproduction SHA.
