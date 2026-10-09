@@ -169,7 +169,7 @@ export class ActivityAiService {
             throw new Error('Não foi possível carregar as sugestões.');
         }
 
-        return data.map((item: any) => ({
+        return data.map((item) => ({
             id: item.id,
             organizationId: item.organization_id,
             dealId: item.deal_id,
