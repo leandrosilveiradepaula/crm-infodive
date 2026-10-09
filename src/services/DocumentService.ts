@@ -77,12 +77,17 @@ export class DocumentService {
                 .eq('entity_id', entityId);
             if (accountDocumentsError || !accDocs) throw new Error('Não foi possível carregar os documentos.');
 
-            // Query 2: Deals for this account
-            const { data: deals, error: dealsError } = await supabase
-                .from('deals')
-                .select('id, title')
-                .eq('account_id', entityId)
-                .eq('organization_id', organizationId);
+            // Query 2: Only deals the current user is allowed to see.
+            const { data: profile, error: roleError } = await supabase.from('profiles')
+                .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+            if (roleError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
+            const roles = Array.isArray(profile.roles) ? profile.roles : [];
+            const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+                roles.some((role: unknown) => role === 'admin' || role === 'manager');
+            let dealsQuery = supabase.from('deals').select('id, title')
+                .eq('account_id', entityId).eq('organization_id', organizationId);
+            if (!canViewAll) dealsQuery = dealsQuery.eq('owner_id', userId);
+            const { data: deals, error: dealsError } = await dealsQuery;
             if (dealsError || !deals) throw new Error('Não foi possível carregar os documentos.');
 
             let dealDocs: EntityDocument[] = [];
