@@ -72,13 +72,13 @@ export class ProposalService {
             throw new Error('Não foi possível carregar as propostas.');
         }
 
-        return data.map((p: any) => ({
+        return data.map((p: Record<string, unknown>) => ({
             ...p,
             createdAt: p.created_at,
             updatedAt: p.updated_at,
             dealId: p.deal_id,
             content: p.content || p.content_json,
-        })) as Proposal[];
+        })) as unknown as Proposal[];
     }
 
     static async updateProposal(userId: string, proposalId: string, organizationId: string, updates: Partial<Proposal>): Promise<Proposal> {
