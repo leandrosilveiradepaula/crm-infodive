@@ -20,11 +20,13 @@ export class ContactService {
             result[field] = input[field];
         }
         if (result.name !== undefined) {
-            if (typeof result.name !== 'string' || !result.name.trim()) throw new Error('Nome inválido.');
+            if (typeof result.name !== 'string' || !result.name.trim() || result.name.length > 250) throw new Error('Nome inválido.');
             result.name = normalizeCasing(result.name, 'name');
         }
         for (const key of ['email', 'mobile_phone', 'landline_phone', 'role'] as const) {
-            if (result[key] !== undefined && result[key] !== null && typeof result[key] !== 'string')
+            if (result[key] !== undefined && result[key] !== null &&
+                (typeof result[key] !== 'string' ||
+                 result[key].length > (key === 'email' ? 320 : key === 'role' ? 200 : 64)))
                 throw new Error('Campo de contato inválido.');
         }
         if (result.is_primary !== undefined && typeof result.is_primary !== 'boolean')
@@ -43,7 +45,7 @@ export class ContactService {
             .eq('organization_id', organizationId)
             .order('name', { ascending: true });
 
-        if (error) return { contacts: [], error: 'Não foi possível carregar os contatos.' };
+        if (error || !Array.isArray(data)) return { contacts: [], error: 'Não foi possível carregar os contatos.' };
         return { contacts: data as Contact[], error: null };
     }
 
@@ -76,11 +78,11 @@ export class ContactService {
 
         const { data, error } = await query;
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[ContactService] account contacts fetch failed');
             throw new Error('Não foi possível carregar os contatos.');
         }
-        return data || [];
+        return data;
     }
 
     static async createContact(userId: string, organizationId: string, contact: Partial<Contact>) {
@@ -95,8 +97,8 @@ export class ContactService {
             if (typeof value !== 'string' || !value.trim()) continue;
             const { data: matches, error } = await supabase.from('account_contacts')
                 .select('id').eq('organization_id', organizationId).eq(field, value).limit(1);
-            if (error) throw new Error('Não foi possível verificar contatos duplicados.');
-            if (matches?.length) return { success: false, error: 'Já existe um contato com estes dados.' };
+            if (error || !Array.isArray(matches)) throw new Error('Não foi possível verificar contatos duplicados.');
+            if (matches.length) return { success: false, error: 'Já existe um contato com estes dados.' };
         }
 
         const { data: inserted, error } = await supabase.from('account_contacts')
@@ -106,7 +108,7 @@ export class ContactService {
     }
 
     static async updateContact(userId: string, id: string, organizationId: string, updates: Partial<Contact>) {
-        if (!id?.trim()) throw new Error('Contato inválido.');
+        if (typeof id !== 'string' || !id.trim()) throw new Error('Contato inválido.');
         const supabase = createAdminClient();
         const data = this.writable(updates);
         if (!Object.keys(data).length) throw new Error('Nenhuma alteração válida.');
@@ -119,7 +121,7 @@ export class ContactService {
     }
 
     static async deleteContact(userId: string, id: string, organizationId: string) {
-        if (!id?.trim()) throw new Error('Contato inválido.');
+        if (typeof id !== 'string' || !id.trim()) throw new Error('Contato inválido.');
         const supabase = createAdminClient();
         const { data: deleted, error } = await supabase.from('account_contacts')
             .delete().eq('id', id).eq('organization_id', organizationId)
