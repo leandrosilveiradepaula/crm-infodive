@@ -209,4 +209,75 @@ describe('AccountService offline persistence integrity', () => {
             (operation.mode === 'update' || operation.mode === 'insert')
         )).toBe(false);
     });
+    it('fails closed when full-account query returns null or malformed data', async () => {
+        for (const invalid of [null, { id: 'not-an-array' }]) {
+            fakeDatabase({ 'accounts:read': { data: invalid, error: null } });
+            await expect(AccountService.getAccounts('user', 'tenant'))
+                .rejects.toThrow('Não foi possível carregar as contas.');
+        }
+    });
+
+    it('fails closed on null manufacturer and simple-account lists', async () => {
+        fakeDatabase({ 'accounts:read': { data: null, error: null } });
+        await expect(AccountService.getSimpleAccounts('user', 'tenant'))
+            .rejects.toThrow('Não foi possível carregar as contas.');
+        fakeDatabase({ 'accounts:read': { data: { invalid: true }, error: null } });
+        await expect(AccountService.getManufacturers('user', 'tenant'))
+            .rejects.toThrow('Não foi possível carregar os fabricantes.');
+    });
+
+    it('accepts genuine empty account lists', async () => {
+        fakeDatabase({ 'accounts:read': { data: [], error: null } });
+        await expect(AccountService.getAccounts('user', 'tenant')).resolves.toEqual([]);
+    });
+
+    it('rejects invalid account names and malformed children before any insert', async () => {
+        const db = fakeDatabase({});
+        await expect(AccountService.createAccount('user', 'tenant', { name: ' ' }))
+            .resolves.toMatchObject({ success: false });
+        await expect(AccountService.createAccount('user', 'tenant', {
+            name: 'Cliente',
+            contacts: [{ name: '' } as never],
+        })).resolves.toMatchObject({ success: false });
+        await expect(AccountService.createAccount('user', 'tenant', {
+            name: 'Cliente',
+            branches: null as never,
+        })).resolves.toMatchObject({ success: false });
+        expect(db.operations).toHaveLength(0);
+    });
+
+    it('rejects invalid updates before reading or deleting existing children', async () => {
+        const db = fakeDatabase({});
+        await expect(AccountService.updateAccount('user', 'tenant', 'account', {
+            contacts: { forged: true } as never,
+        })).resolves.toMatchObject({ success: false });
+        await expect(AccountService.updateAccount('user', 'tenant', 'account', {
+            name: '   ',
+        })).resolves.toMatchObject({ success: false });
+        expect(db.operations).toHaveLength(0);
+    });
+
+    it('does not delete contacts if the snapshot is unexpectedly null', async () => {
+        const db = fakeDatabase({
+            'accounts:read': { data: { id: 'account' }, error: null },
+            'account_contacts:read': { data: null, error: null },
+        });
+        await expect(AccountService.updateAccount('user', 'tenant', 'account', {
+            contacts: [],
+        })).resolves.toMatchObject({ success: false });
+        expect(db.operations.some(op => op.table === 'account_contacts' && op.mode === 'delete')).toBe(false);
+        expect(db.operations.some(op => op.table === 'accounts' && op.mode === 'update')).toBe(false);
+    });
+
+    it('does not delete branches if the snapshot is malformed', async () => {
+        const db = fakeDatabase({
+            'accounts:read': { data: { id: 'account' }, error: null },
+            'account_branches:read': { data: { invalid: true }, error: null },
+        });
+        await expect(AccountService.updateAccount('user', 'tenant', 'account', {
+            branches: [],
+        })).resolves.toMatchObject({ success: false });
+        expect(db.operations.some(op => op.table === 'account_branches' && op.mode === 'delete')).toBe(false);
+    });
+
 });
