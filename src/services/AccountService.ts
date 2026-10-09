@@ -3,6 +3,29 @@ import { type Account } from '../types/account';
 import { normalizeCasing, normalizeTaxId, normalizeZip } from '../lib/string-utils';
 
 export class AccountService {
+    private static validateAccountAggregate(
+        input: Partial<Account>,
+        requireName: boolean,
+    ): void {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) {
+            throw new Error('Dados de conta inválidos.');
+        }
+        if ((requireName || input.name !== undefined) &&
+            (typeof input.name !== 'string' || !input.name.trim() || input.name.length > 250)) {
+            throw new Error('Nome da conta inválido.');
+        }
+        for (const field of ['contacts', 'branches'] as const) {
+            const children = input[field];
+            if (children === undefined) continue;
+            if (!Array.isArray(children) || children.some(child =>
+                !child || typeof child !== 'object' ||
+                typeof child.name !== 'string' || !child.name.trim()
+            )) {
+                throw new Error('Dados de contatos ou filiais inválidos.');
+            }
+        }
+    }
+
     private static async cleanupCreatedAccount(
         supabase: ReturnType<typeof createAdminClient>,
         accountId: string,
@@ -36,12 +59,12 @@ export class AccountService {
             .eq('organization_id', organizationId)
             .order('name');
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] accounts fetch failed');
             throw new Error('Não foi possível carregar as contas.');
         }
 
-        return (data || []).map((rawAccount: unknown) => {
+        return data.map((rawAccount: unknown) => {
             const account = rawAccount as Record<string, unknown>;
             const rawContacts = Array.isArray(account.contacts) ? account.contacts : [];
             return {
@@ -72,12 +95,12 @@ export class AccountService {
             .eq('organization_id', organizationId)
             .order('name', { ascending: true });
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] accounts fetch failed');
             throw new Error('Não foi possível carregar as contas.');
         }
 
-        return data || [];
+        return data;
     }
 
     static async getManufacturers(userId: string, organizationId: string) {
@@ -90,12 +113,12 @@ export class AccountService {
             .eq('relationship_type', 'Fabricante')
             .order('name', { ascending: true });
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] manufacturers fetch failed');
             throw new Error('Não foi possível carregar os fabricantes.');
         }
 
-        return data || [];
+        return data;
     }
 
     static async createAccount(userId: string, organizationId: string, account: Partial<Account>) {
@@ -103,6 +126,7 @@ export class AccountService {
         let createdAccountId: string | null = null;
 
         try {
+            this.validateAccountAggregate(account, true);
             const { data: accData, error: accError } = await supabase
                 .from('accounts')
                 .insert([{
@@ -218,6 +242,7 @@ export class AccountService {
         };
 
         try {
+            this.validateAccountAggregate(updates, false);
             const { data: existingAccount, error: existingAccountError } = await supabase
                 .from('accounts')
                 .select('id')
@@ -235,8 +260,10 @@ export class AccountService {
                     .select('id, account_id, organization_id, name, email, mobile_phone, landline_phone, role, is_primary')
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
-                if (contactsSnapshotError) throw contactsSnapshotError;
-                previousContacts = (contactsSnapshot || []) as Record<string, unknown>[];
+                if (contactsSnapshotError || !Array.isArray(contactsSnapshot)) {
+                    throw contactsSnapshotError || new Error('contact snapshot returned invalid data');
+                }
+                previousContacts = contactsSnapshot as Record<string, unknown>[];
 
                 const { data: deletedContacts, error: deleteContactsError } = await supabase
                     .from('account_contacts')
@@ -272,8 +299,10 @@ export class AccountService {
                     .select('id, account_id, organization_id, name, zip, street, number, complement, neighborhood, city, state, cnpj, ie, payment_terms')
                     .eq('account_id', id)
                     .eq('organization_id', organizationId);
-                if (branchesSnapshotError) throw branchesSnapshotError;
-                previousBranches = (branchesSnapshot || []) as Record<string, unknown>[];
+                if (branchesSnapshotError || !Array.isArray(branchesSnapshot)) {
+                    throw branchesSnapshotError || new Error('branch snapshot returned invalid data');
+                }
+                previousBranches = branchesSnapshot as Record<string, unknown>[];
 
                 const { data: deletedBranches, error: deleteBranchesError } = await supabase
                     .from('account_branches')
