@@ -30,4 +30,23 @@ describe('permissions', () => {
     it('fails closed for unknown roles', () => {
         expect(hasPermission('unknown', [], 'clients:view_all')).toBe(false);
     });
+    it('makes support read-only for clients while preserving existing business role workflows', () => {
+        const writes = ['clients:create', 'clients:edit', 'clients:delete', 'clients:import'] as const;
+        for (const role of ['admin', 'manager', 'vendedor'] as const) {
+            expect(hasPermission(role, [], 'clients:view_all')).toBe(true);
+            for (const permission of writes) expect(hasPermission(role, [], permission)).toBe(true);
+        }
+        expect(hasPermission('support', [], 'clients:view_all')).toBe(true);
+        for (const permission of writes) {
+            expect(hasPermission('support', [], permission)).toBe(false);
+            expect(hasPermission('unknown', [], permission)).toBe(false);
+        }
+    });
+
+    it('retains multi-role and vendedor/sales mapping for client changes', () => {
+        expect(hasPermission('sales', [], 'clients:edit')).toBe(true);
+        expect(hasPermission('support', ['manager'], 'clients:create')).toBe(true);
+        expect(hasPermission('support', ['unsupported'], 'clients:delete')).toBe(false);
+    });
+
 });
