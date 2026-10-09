@@ -563,3 +563,8 @@ The same owner-visibility boundary applies to related deal documents aggregated 
 ## Authorized task (2026-10-09): document upload input validation offline
 
 Validate untrusted uploaded binary and declared size against actual byteLength, reject empty/mismatched/oversized files, and reject unusable filenames before invoking privileged Supabase Storage. Add offline negative regression tests. Allowed paths: DocumentService.ts, DocumentService.integration.test.ts, this task record. No Preview, Vercel deploy, paid calls, migrations, production merge or live writes.
+
+
+## Authorized task (2026-10-09): five lead data integrity guards, no Preview
+
+Prepare five related blocks for a single nonproduction PR: 1) treat lead list database errors and malformed null/non-array results as failures; 2) validate a lead's company before create and reject a null persisted row; 3) whitelist lead creation input to prevent caller-supplied primary keys, organization or audit fields; 4) whitelist updates, reject empty/invalid changes and require an affected tenant-scoped row; 5) verify affected tenant-scoped row for deletion. Preserve existing lead conversion semantics in this task; do not change permissions or assignment rules. Add fake Supabase regression tests. Scope limited to LeadService.ts, new LeadService.integration.test.ts, CURRENT_TASK.md. No model calls, migrations, live writes, Vercel, Preview, or production merge. Validate one product/** head only after candidate is coherent.
