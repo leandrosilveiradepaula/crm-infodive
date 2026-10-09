@@ -30,6 +30,17 @@ type Op = {
     payload?: unknown;
 };
 
+type FakeQuery = {
+    select(): FakeQuery;
+    order(): FakeQuery;
+    eq(key: string, value: unknown): FakeQuery;
+    insert(payload: unknown): FakeQuery;
+    update(payload: unknown): FakeQuery;
+    delete(): FakeQuery;
+    maybeSingle(): Promise<Result>;
+    then(ok: (value: Result) => unknown, fail?: (error: unknown) => unknown): Promise<unknown>;
+};
+
 function fakeDb(responses: Record<string, Result>) {
     const ops: Op[] = [];
     const from = vi.fn((table: string) => {
@@ -41,7 +52,7 @@ function fakeDb(responses: Record<string, Result>) {
             responses[table] ??
             { data: [], error: null };
 
-        const query: any = {
+        const query: FakeQuery = {
             select() { return query; },
             order() { return query; },
             eq(key: string, value: unknown) {
