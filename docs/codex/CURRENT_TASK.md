@@ -585,3 +585,8 @@ Group five fixes in one candidate PR: (1) fail closed on product list read error
 ## Authorized task (2026-10-09): five lead data integrity guards, no Preview
 
 Prepare five related blocks for a single nonproduction PR: 1) treat lead list database errors and malformed null/non-array results as failures; 2) validate a lead's company before create and reject a null persisted row; 3) whitelist lead creation input to prevent caller-supplied primary keys, organization or audit fields; 4) whitelist updates, reject empty/invalid changes and require an affected tenant-scoped row; 5) verify affected tenant-scoped row for deletion. Preserve existing lead conversion semantics in this task; do not change permissions or assignment rules. Add fake Supabase regression tests. Scope limited to LeadService.ts, new LeadService.integration.test.ts, CURRENT_TASK.md. No model calls, migrations, live writes, Vercel, Preview, or production merge. Validate one product/** head only after candidate is coherent.
+
+
+## Authorized task (2026-10-09): five ProposalService integrity blocks without Preview
+
+Five offline hardening blocks: 1) require tenant membership even for standalone proposals; 2) reject malformed/null lists instead of empty success; 3) validate status, signature setting, and reject no-op updates; 4) require returned persisted row on update/create; 5) validate account/lead references against current tenant and fail closed on version lookup failures. Add deterministic integration tests. Allowed paths: ProposalService.ts, ProposalService.integration.test.ts, CURRENT_TASK.md. No production, Vercel, Preview, migrations, paid models, new RBAC permissions, or live data. One coherent CI PR, then candidate-only merge on green exact SHA.
