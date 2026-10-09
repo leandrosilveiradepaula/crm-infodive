@@ -185,6 +185,7 @@ export const NotificationCenter = ({
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     onRemove(notification.id);
+                                                                    closeRef.current?.focus();
                                                                 }}
                                                                 className="rounded-md p-2 text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                                                 aria-label={`Remover notificação: ${notification.title}`}
@@ -207,7 +208,10 @@ export const NotificationCenter = ({
                                                                 {!notification.read && (
                                                                     <button
                                                                         type="button"
-                                                                        onClick={() => onMarkAsRead(notification.id)}
+                                                                        onClick={() => {
+                                                                        onMarkAsRead(notification.id);
+                                                                        closeRef.current?.focus();
+                                                                    }}
                                                                         className="rounded-md px-2 py-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                                                         aria-label={`Marcar como lida: ${notification.title}`}
                                                                     >
@@ -241,7 +245,10 @@ export const NotificationCenter = ({
                         {notifications.length > 0 && (
                             <div className="p-3 border-t border-border/50 bg-muted/50">
                                 <button
-                                    onClick={onClearAll}
+                                    onClick={() => {
+                                        onClearAll();
+                                        closePanel();
+                                    }}
                                     type="button"
                                     className="w-full rounded-md py-2 text-sm font-bold text-muted-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors"
                                 >
