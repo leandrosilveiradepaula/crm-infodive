@@ -5,8 +5,11 @@ import { SettingsService } from './SettingsService';
 
 type Result = { data: unknown; error: { message: string } | null };
 type Op = { table: string; mode: string; filters: Array<[string, unknown]>; payload?: unknown };
-function fakeDb(responses: Record<string, Result> = {}) {
+function fakeDb(responses: Record<string, Result | Result[]> = {}) {
     const operations: Op[] = [];
+    const queues = new Map(Object.entries(responses).map(([key, result]) =>
+        [key, Array.isArray(result) ? [...result] : [result]]
+    ));
     const from = vi.fn((table: string) => {
         const op: Op = { table, mode: 'read', filters: [] };
         operations.push(op);
@@ -23,9 +26,9 @@ function fakeDb(responses: Record<string, Result> = {}) {
             },
         };
         function take(): Result {
-            return responses[table + ':' + op.mode] ?? responses[table] ?? {
-                data: op.mode === 'read' ? [] : [{ id: 'saved' }], error: null,
-            };
+            const queued = queues.get(table + ':' + op.mode) ?? queues.get(table);
+            if (queued?.length) return queued.shift()!;
+            return { data: op.mode === 'read' ? [] : [{ id: 'saved' }], error: null };
         }
         return builder;
     });
@@ -99,6 +102,32 @@ describe('SettingsService tenant and persistence integrity', () => {
     it('does not delete stages when reading existing tenant stages failed', async () => {
         const db = fakeDb({
             'pipeline_stages:read': { data: null, error: { message: 'DB down' } },
+        });
+        await expect(SettingsService.savePipelineStages('tenant', [stage]))
+            .resolves.toMatchObject({ success: false });
+        expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
+    });
+
+    it('rejects a new stage ID already belonging to another tenant before writes', async () => {
+        const db = fakeDb({
+            'pipeline_stages:read': [
+                { data: [], error: null },
+                { data: [{ id: '1', organization_id: 'foreign-tenant' }], error: null },
+            ],
+        });
+        await expect(SettingsService.savePipelineStages('tenant', [stage]))
+            .resolves.toMatchObject({ success: false });
+        const reads = db.operations.filter(op => op.table === 'pipeline_stages' && op.mode === 'read');
+        expect(reads[1]?.filters).toContainEqual(['id', ['1']]);
+        expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
+    });
+
+    it('does not proceed if cross-tenant stage collision detection fails', async () => {
+        const db = fakeDb({
+            'pipeline_stages:read': [
+                { data: [], error: null },
+                { data: null, error: { message: 'DB lookup failed' } },
+            ],
         });
         await expect(SettingsService.savePipelineStages('tenant', [stage]))
             .resolves.toMatchObject({ success: false });
