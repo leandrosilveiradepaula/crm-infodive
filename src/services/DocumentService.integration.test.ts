@@ -102,11 +102,26 @@ describe('DocumentService fail-closed offline integrity', () => {
     it('does not mask a failed account-related deal or document read', async () => {
         fakeDatabase({
             'accounts:read': { data: { id: 'account-1' }, error: null },
+            'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
             'documents:read': { data: [], error: null },
             'deals:read': { data: null, error: { message: 'DB down' } },
         });
         await expect(DocumentService.getDocuments('user', 'tenant', 'account', 'account-1'))
             .rejects.toThrow('Não foi possível carregar os documentos.');
+    });
+
+    it('does not include documents from another seller deal in the account rollup', async () => {
+        const db = fakeDatabase({
+            'accounts:read': { data: { id: 'account-1' }, error: null },
+            'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
+            'documents:read': { data: [], error: null },
+            'deals:read': { data: [], error: null },
+        });
+        await expect(DocumentService.getDocuments('seller-a', 'tenant', 'account', 'account-1'))
+            .resolves.toEqual([]);
+        const relatedDeals = db.operations.find(op => op.table === 'deals');
+        expect(relatedDeals?.filters).toContainEqual(['owner_id', 'seller-a']);
+        expect(relatedDeals?.filters).toContainEqual(['organization_id', 'tenant']);
     });
 
     it('fails when an upload succeeds but metadata is absent and cleans storage', async () => {
