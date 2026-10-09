@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import type { EntityDocument, DocumentCategory, EntityType } from '@/types/document';
+import { createAdminClient } from '../lib/supabase/admin';
+import type { EntityDocument, DocumentCategory, EntityType } from '../types/document';
 
 const BUCKET = 'documents';
 const MAX_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
@@ -22,7 +22,7 @@ const ALLOWED_MIME_TYPES = [
 const ENTITY_TABLE_MAP: Record<EntityType, string> = {
     deal: 'deals',
     account: 'accounts',
-    contact: 'contacts',
+    contact: 'account_contacts',
 };
 
 export class DocumentService {
@@ -39,14 +39,14 @@ export class DocumentService {
         const table = ENTITY_TABLE_MAP[entityType];
         if (!table) throw new Error('Tipo de entidade inválido.');
 
-        const { data } = await supabase
+        const { data, error } = await supabase
             .from(table)
             .select('id')
             .eq('id', entityId)
             .eq('organization_id', organizationId)
             .single();
 
-        if (!data) throw new Error('Entidade não encontrada ou acesso negado.');
+        if (error || !data) throw new Error('Entidade não encontrada ou acesso negado.');
     }
 
     /**
@@ -59,36 +59,40 @@ export class DocumentService {
         entityId: string
     ): Promise<EntityDocument[]> {
         const supabase = createAdminClient();
+        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId);
 
         if (entityType === 'account') {
             // Query 1: Account documents
-            const { data: accDocs } = await supabase
+            const { data: accDocs, error: accountDocumentsError } = await supabase
                 .from('documents')
                 .select('*')
                 .eq('organization_id', organizationId)
                 .eq('entity_type', 'account')
                 .eq('entity_id', entityId);
+            if (accountDocumentsError || !accDocs) throw new Error('Não foi possível carregar os documentos.');
 
             // Query 2: Deals for this account
-            const { data: deals } = await supabase
+            const { data: deals, error: dealsError } = await supabase
                 .from('deals')
                 .select('id, title')
                 .eq('account_id', entityId)
                 .eq('organization_id', organizationId);
-            
+            if (dealsError || !deals) throw new Error('Não foi possível carregar os documentos.');
+
             let dealDocs: EntityDocument[] = [];
             const dealIds = deals ? deals.map(d => d.id) : [];
             const dealMap = new Map((deals || []).map(d => [d.id, d.title]));
 
             // Query 3: Documents for these deals
             if (dealIds.length > 0) {
-                const { data: dDocs } = await supabase
+                const { data: dDocs, error: dealDocumentsError } = await supabase
                     .from('documents')
                     .select('*')
                     .eq('organization_id', organizationId)
                     .eq('entity_type', 'deal')
                     .in('entity_id', dealIds);
-                if (dDocs) dealDocs = dDocs as EntityDocument[];
+                if (dealDocumentsError || !dDocs) throw new Error('Não foi possível carregar os documentos.');
+                dealDocs = dDocs as EntityDocument[];
             }
             
             // Merge and sort desc
@@ -111,12 +115,12 @@ export class DocumentService {
                 .eq('entity_id', entityId)
                 .order('created_at', { ascending: false });
 
-            if (error) {
+            if (error || !data) {
                 console.error('[DocumentService] documents fetch failed');
-                return [];
+                throw new Error('Não foi possível carregar os documentos.');
             }
 
-            return (data ?? []) as EntityDocument[];
+            return data as EntityDocument[];
         }
     }
 
@@ -190,9 +194,10 @@ export class DocumentService {
             .select()
             .single();
 
-        if (dbError) {
-            // Best-effort cleanup: remove the uploaded file
-            await supabase.storage.from(BUCKET).remove([filePath]);
+        if (dbError || !data) {
+            // Best-effort cleanup: do not report upload success without metadata.
+            const { error: cleanupError } = await supabase.storage.from(BUCKET).remove([filePath]);
+            if (cleanupError) console.error('[DocumentService] failed to clean up orphaned storage object');
             console.error('[DocumentService] document metadata insert failed');
             throw new Error('Não foi possível salvar o documento.');
         }
@@ -255,17 +260,19 @@ export class DocumentService {
             throw new Error('Documento não encontrado ou acesso negado.');
         }
 
-        // Remove from Storage
-        await supabase.storage.from(BUCKET).remove([doc.file_path]);
+        // Do not delete metadata if storage removal did not succeed.
+        const { error: storageError } = await supabase.storage.from(BUCKET).remove([doc.file_path]);
+        if (storageError) throw new Error('Não foi possível excluir o arquivo do documento.');
 
-        // Remove from DB
-        const { error: dbError } = await supabase
+        const { data: deleted, error: dbError } = await supabase
             .from('documents')
             .delete()
             .eq('id', documentId)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
-        if (dbError) {
+        if (dbError || !deleted) {
             throw new Error('Não foi possível excluir o documento.');
         }
     }

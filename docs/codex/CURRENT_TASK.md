@@ -546,3 +546,8 @@ are ready, then validate one exact nonproduction SHA.
 ## Authorized task (2026-10-09): activity service data correctness, no Preview
 
 Fix the actual quoted dueDate sort key on activity listing, reject missing/null database read results instead of reporting valid empty lists, reject null insert responses as failures, and validate blank tenant-related identifiers before any privileged lookup. Add offline regressions to existing ActivityService test suite. Scope: ActivityService.ts, ActivityService.integration.test.ts and this task record only. CI/test/build on exact SHA; no Vercel Preview builds, no database migrations, no live writes, no paid model calls, no auto-merge into main.
+
+
+## Authorized task (2026-10-09): document retrieval and storage integrity (no Preview)
+
+Repair the existing DocumentService read/write failure paths: verify the parent belongs to the tenant even on document reads; propagate errors from account/deal/document reads instead of fabricated empty lists; treat a null metadata insert as failure with best-effort cleanup; reject storage removal failure and verify the metadata row is actually deleted before reporting success. Add offline regression coverage. Scope limited to DocumentService.ts, its integration test, and this record. No migration, live writes, preview, paid calls, access widening, or production gate bypass.
