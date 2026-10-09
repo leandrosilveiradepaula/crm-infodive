@@ -137,6 +137,44 @@ describe('DocumentService fail-closed offline integrity', () => {
         expect(db.storageRemove).toHaveBeenCalledTimes(1);
     });
 
+    it('rejects spoofed size and empty payload without calling storage', async () => {
+        const db = fakeDatabase({});
+        await expect(DocumentService.uploadDocument('user', 'tenant', 'deal', 'deal-1', {
+            name: 'test.pdf', type: 'application/pdf', size: 1,
+            arrayBuffer: new ArrayBuffer(2),
+        }, {})).rejects.toThrow('Tamanho do arquivo inválido.');
+        await expect(DocumentService.uploadDocument('user', 'tenant', 'deal', 'deal-1', {
+            name: 'test.pdf', type: 'application/pdf', size: 0,
+            arrayBuffer: new ArrayBuffer(0),
+        }, {})).rejects.toThrow('Tamanho do arquivo inválido.');
+        expect(db.storageUpload).not.toHaveBeenCalled();
+        expect(db.operations).toHaveLength(0);
+    });
+
+    it('rejects oversized actual payload even when declared size matches', async () => {
+        const db = fakeDatabase({});
+        const oversized = 25 * 1024 * 1024 + 1;
+        await expect(DocumentService.uploadDocument('user', 'tenant', 'deal', 'deal-1', {
+            name: 'test.pdf', type: 'application/pdf', size: oversized,
+            arrayBuffer: new ArrayBuffer(oversized),
+        }, {})).rejects.toThrow('Arquivo muito grande.');
+        expect(db.storageUpload).not.toHaveBeenCalled();
+    });
+
+    it('rejects unusable names and missing binary payload before database access', async () => {
+        const db = fakeDatabase({});
+        await expect(DocumentService.uploadDocument('user', 'tenant', 'deal', 'deal-1', {
+            name: '../', type: 'application/pdf', size: 1,
+            arrayBuffer: new ArrayBuffer(1),
+        }, {})).rejects.toThrow('Nome de arquivo inválido.');
+        await expect(DocumentService.uploadDocument('user', 'tenant', 'deal', 'deal-1', {
+            name: 'valid.pdf', type: 'application/pdf', size: 1,
+            arrayBuffer: undefined as unknown as ArrayBuffer,
+        }, {})).rejects.toThrow('Arquivo inválido.');
+        expect(db.operations).toHaveLength(0);
+        expect(db.storageUpload).not.toHaveBeenCalled();
+    });
+
     it('never reports success or deletes metadata after storage removal fails', async () => {
         const db = fakeDatabase({
             'documents:read': { data: { file_path: 'tenant/deal/deal-1/a.pdf', entity_type: 'deal', entity_id: 'deal-1' }, error: null },
