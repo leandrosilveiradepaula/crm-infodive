@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '../../../lib/supabase/admin';
-import { UserProfile } from '../../../hooks/useUsers';
+import type { UserProfile } from '../../../hooks/useUsers';
 import { requirePermission } from '../../../lib/auth-server';
 
 export async function getUsers() {
@@ -25,7 +25,7 @@ export async function getUsers() {
         };
 
         const mapped: UserProfile[] = data.map((item: Record<string, unknown>) => ({
-            id: item.id,
+            id: String(item.id ?? ''),
             name: String(item.full_name || 'Usuário Sem Nome'),
             email: String(item.email || ((item.raw_user_meta_data as { email?: string } | null)?.email) || ''),
             phone: String(item.phone || ''),
