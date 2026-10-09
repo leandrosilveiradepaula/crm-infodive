@@ -3,6 +3,12 @@ import type { EntityDocument, DocumentCategory, EntityType } from '../types/docu
 
 const BUCKET = 'documents';
 const MAX_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_NAME_LENGTH = 180;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const VALID_DOCUMENT_CATEGORIES = new Set<DocumentCategory>([
+    'contrato', 'contrato_social', 'financeiro', 'fiscal', 'certificado',
+    'ata', 'nf', 'tecnico', 'outro',
+]);
 const ALLOWED_MIME_TYPES = [
     'application/pdf',
     'application/msword',
@@ -26,6 +32,29 @@ const ENTITY_TABLE_MAP: Record<EntityType, string> = {
 };
 
 export class DocumentService {
+    private static assertDocumentStoragePath(
+        organizationId: string,
+        entityType: EntityType,
+        entityId: string,
+        filePath: string,
+    ): void {
+        const validSegment = /^[a-zA-Z0-9_-]+$/;
+        if (![organizationId, entityType, entityId].every(
+            segment => typeof segment === 'string' && validSegment.test(segment)
+        )) throw new Error('Caminho do documento inválido.');
+
+        const prefix = `${organizationId}/${entityType}/${entityId}/`;
+        if (typeof filePath !== 'string' || !filePath.startsWith(prefix)) {
+            throw new Error('Caminho do documento inválido.');
+        }
+        const leaf = filePath.slice(prefix.length);
+        if (!leaf || leaf === '.' || leaf === '..' || leaf.includes('/') ||
+            leaf.includes('\\') || leaf.includes('..') ||
+            !/^[a-zA-Z0-9._-]+$/.test(leaf)) {
+            throw new Error('Caminho do documento inválido.');
+        }
+    }
+
     /**
      * Validate that the entity belongs to the organization.
      * Required because the documents table uses polymorphic references (no FK).
@@ -40,12 +69,15 @@ export class DocumentService {
         const table = ENTITY_TABLE_MAP[entityType];
         if (!table) throw new Error('Tipo de entidade inválido.');
 
+        // Admin client bypasses RLS, so enforce authenticated tenant membership
+        // even for account and contact parents before the privileged read.
+        const { data: profile, error: profileError } = await supabase.from('profiles')
+            .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+        if (profileError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
+
         let query = supabase.from(table).select('id')
             .eq('id', entityId).eq('organization_id', organizationId);
         if (entityType === 'deal') {
-            const { data: profile, error: profileError } = await supabase.from('profiles')
-                .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
-            if (profileError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
             const roles = Array.isArray(profile.roles) ? profile.roles : [];
             const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
                 roles.some((role: unknown) => role === 'admin' || role === 'manager');
@@ -171,8 +203,22 @@ export class DocumentService {
             throw new Error('Arquivo muito grande. Máximo permitido: 25 MB');
         }
         const cleanName = file.name.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
-        if (!cleanName || cleanName === '.' || cleanName === '..' || !/[a-zA-Z0-9]/.test(cleanName)) {
+        if (!cleanName || cleanName.length > MAX_NAME_LENGTH ||
+            cleanName === '.' || cleanName === '..' ||
+            cleanName.includes('..') || !/[a-zA-Z0-9]/.test(cleanName)) {
             throw new Error('Nome de arquivo inválido.');
+        }
+        if (meta === null || typeof meta !== 'object' || Array.isArray(meta)) {
+            throw new Error('Metadados do documento inválidos.');
+        }
+        if (meta.category !== undefined && !VALID_DOCUMENT_CATEGORIES.has(meta.category)) {
+            throw new Error('Categoria do documento inválida.');
+        }
+        if (meta.description !== undefined && (
+            typeof meta.description !== 'string' ||
+            meta.description.length > MAX_DESCRIPTION_LENGTH
+        )) {
+            throw new Error('Descrição do documento inválida.');
         }
 
         const supabase = createAdminClient();
@@ -252,6 +298,9 @@ export class DocumentService {
         await this.validateEntityOwnership(
             supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
         );
+        this.assertDocumentStoragePath(
+            organizationId, doc.entity_type as EntityType, doc.entity_id, doc.file_path,
+        );
 
         const { data, error } = await supabase.storage
             .from(BUCKET)
@@ -287,6 +336,9 @@ export class DocumentService {
         }
         await this.validateEntityOwnership(
             supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
+        );
+        this.assertDocumentStoragePath(
+            organizationId, doc.entity_type as EntityType, doc.entity_id, doc.file_path,
         );
 
         // Do not delete metadata if storage removal did not succeed.
