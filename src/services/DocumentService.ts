@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import type { EntityDocument, DocumentCategory, EntityType } from '@/types/document';
+import { createAdminClient } from '../lib/supabase/admin';
+import type { EntityDocument, DocumentCategory, EntityType } from '../types/document';
 
 const BUCKET = 'documents';
 const MAX_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
