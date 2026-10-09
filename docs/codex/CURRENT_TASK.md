@@ -551,3 +551,8 @@ Fix the actual quoted dueDate sort key on activity listing, reject missing/null 
 ## Authorized task (2026-10-09): document retrieval and storage integrity (no Preview)
 
 Repair the existing DocumentService read/write failure paths: verify the parent belongs to the tenant even on document reads; propagate errors from account/deal/document reads instead of fabricated empty lists; treat a null metadata insert as failure with best-effort cleanup; reject storage removal failure and verify the metadata row is actually deleted before reporting success. Add offline regression coverage. Scope limited to DocumentService.ts, its integration test, and this record. No migration, live writes, preview, paid calls, access widening, or production gate bypass.
+
+
+## Authorized task (2026-10-09): document deal-owner security without Preview
+
+Enforce the existing pipeline owner visibility on documents belonging to opportunities, including listing, upload, signed URL and deletion. Resolve parent entity from stored metadata for document-ID operations, and verify access before Storage actions. Preserve current account/contact tenant behavior. Add offline regression cases; no schema, credentials, paid calls, Preview builds or main merge. Paths restricted to DocumentService, its offline integration tests and task record.
