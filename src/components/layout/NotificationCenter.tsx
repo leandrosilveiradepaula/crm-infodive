@@ -1,5 +1,5 @@
 import { Bell, X, CheckCircle, AlertCircle, Clock, Info } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { unreadNotificationCount, formatNotificationTime } from '@/lib/notification-display-policy';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -33,10 +33,10 @@ export const NotificationCenter = ({
     const triggerRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
     const closeRef = useRef<HTMLButtonElement>(null);
-    const closePanel = () => {
+    const closePanel = useCallback(() => {
         setIsOpen(false);
         triggerRef.current?.focus();
-    };
+    }, []);
 
     const getIcon = (type: NotificationType) => {
         switch (type) {
@@ -83,7 +83,7 @@ export const NotificationCenter = ({
         };
         document.addEventListener('keydown', onKeyDown);
         return () => document.removeEventListener('keydown', onKeyDown);
-    }, [isOpen]);
+    }, [isOpen, closePanel]);
 
     return (
         <div className="relative">
@@ -181,6 +181,7 @@ export const NotificationCenter = ({
                                                                 {notification.title}
                                                             </h4>
                                                             <button
+                                                                type="button"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     onRemove(notification.id);
@@ -213,7 +214,7 @@ export const NotificationCenter = ({
                                                                         Marcar como lida
                                                                     </button>
                                                                 )}
-                                                            {notification.actionLabel && notification.onAction && (
+                                                                {notification.actionLabel && notification.onAction && (
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
@@ -224,7 +225,7 @@ export const NotificationCenter = ({
                                                                 >
                                                                     {notification.actionLabel}
                                                                 </button>
-                                                            )}
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
