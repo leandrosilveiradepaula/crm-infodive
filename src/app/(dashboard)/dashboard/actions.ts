@@ -3,7 +3,6 @@
 import { DashboardService } from '@/services/DashboardService';
 import { ActivityService } from '@/services/ActivityService';
 import { requireSessionContext } from '@/lib/auth-server';
-import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function getDashboardMetrics() {
     const { userId, organizationId } = await requireSessionContext();
@@ -11,15 +10,8 @@ export async function getDashboardMetrics() {
 }
 
 export async function getDashboardDeals() {
-    const { organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-    const { data, error } = await supabase
-        .from('deals')
-        .select('id, title, company, stage, value, probability, expected_close_date, won_at, created_at, owner_id')
-        .eq('organization_id', organizationId)
-        .order('created_at', { ascending: false });
-    if (error) return [];
-    return data || [];
+    const { userId, organizationId } = await requireSessionContext();
+    return await DashboardService.getDashboardDeals(userId, organizationId);
 }
 
 export async function getRecentDeals() {
