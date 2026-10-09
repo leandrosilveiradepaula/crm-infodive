@@ -169,7 +169,7 @@ export class UserService {
     }
 
     static async createInvitation(email: string, role: string, organizationId: string, invitedBy: string) {
-        if (typeof email !== 'string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || email.length > 254 ||
+        if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254 ||
             !['admin', 'manager', 'vendedor', 'sales', 'support'].includes(role)) {
             return { success: false, error: 'Convite inválido.' };
         }
