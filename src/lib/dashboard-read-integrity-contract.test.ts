@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const service = readFileSync('src/services/DashboardService.ts', 'utf8');
 const actions = readFileSync('src/app/(dashboard)/dashboard/actions.ts', 'utf8');
+const errorPage = readFileSync('src/app/(dashboard)/dashboard/error.tsx', 'utf8');
 
 describe('dashboard read security contract', () => {
     it('delegates full deal-list lookup to an owner-scoped service', () => {
@@ -18,4 +19,12 @@ describe('dashboard read security contract', () => {
         expect(service).toContain('Não foi possível carregar os responsáveis.');
         expect(service).toContain('Não foi possível carregar as contas.');
     });
+    it('renders a clear retry state without presenting unconfirmed zero values', () => {
+        expect(errorPage).toContain('role="alert"');
+        expect(errorPage).toContain('Não foi possível carregar o dashboard');
+        expect(errorPage).toContain('Os indicadores não foram atualizados.');
+        expect(errorPage).toContain('onClick={reset}');
+        expect(errorPage).not.toContain('error.message');
+    });
+
 });
