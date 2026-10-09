@@ -91,4 +91,57 @@ describe('ContactService offline integrity', () => {
         await expect(ContactService.deleteContact('u', 'missing', 'tenant'))
             .rejects.toThrow('Não foi possível excluir o contato.');
     });
+    it('does not represent malformed contact list payloads as success', async () => {
+        for (const data of [null, { invalid: true }]) {
+            database({ 'account_contacts:select': { data, error: null } });
+            await expect(ContactService.getContacts('u', 'tenant'))
+                .resolves.toMatchObject({ contacts: [], error: 'Não foi possível carregar os contatos.' });
+        }
+    });
+
+    it('rejects null account-contact responses instead of returning a valid empty array', async () => {
+        database({ 'account_contacts:select': { data: null, error: null } });
+        await expect(ContactService.getAccountContacts('u', 'tenant'))
+            .rejects.toThrow('Não foi possível carregar os contatos.');
+    });
+
+    it('permits a truly empty account-contact list', async () => {
+        database({ 'account_contacts:select': { data: [], error: null } });
+        await expect(ContactService.getAccountContacts('u', 'tenant')).resolves.toEqual([]);
+    });
+
+    it('does not insert when a duplicate search unexpectedly returns null', async () => {
+        const db = database({
+            'accounts:select': { data: { id: 'account-1' }, error: null },
+            'account_contacts:select': { data: null, error: null },
+        });
+        await expect(ContactService.createContact('u', 'tenant', {
+            name: 'Pessoa', account_id: 'account-1', email: 'a@example.com',
+        })).rejects.toThrow('Não foi possível verificar contatos duplicados.');
+        expect(db.operations.some(op => op.action === 'insert')).toBe(false);
+    });
+
+    it('rejects excessive input lengths and missing contact names before privileged lookups', async () => {
+        const db = database({});
+        await expect(ContactService.createContact('u', 'tenant', {
+            name: 'A'.repeat(251), account_id: 'account-1',
+        })).rejects.toThrow('Nome inválido.');
+        await expect(ContactService.createContact('u', 'tenant', {
+            name: 'Pessoa', account_id: 'account-1', email: 'x'.repeat(321),
+        })).rejects.toThrow('Campo de contato inválido.');
+        await expect(ContactService.createContact('u', 'tenant', {
+            name: 'Pessoa', account_id: 'account-1', role: 'x'.repeat(201),
+        })).rejects.toThrow('Campo de contato inválido.');
+        expect(db.operations).toHaveLength(0);
+    });
+
+    it('rejects invalid contact identifiers before update and delete database access', async () => {
+        const db = database({});
+        await expect(ContactService.updateContact('u', 12 as never, 'tenant', { name: 'A' }))
+            .rejects.toThrow('Contato inválido.');
+        await expect(ContactService.deleteContact('u', 12 as never, 'tenant'))
+            .rejects.toThrow('Contato inválido.');
+        expect(db.operations).toHaveLength(0);
+    });
+
 });
