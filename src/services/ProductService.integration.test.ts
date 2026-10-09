@@ -49,6 +49,9 @@ describe('ProductService offline tenant and persistence integrity', () => {
         fakeDb({ 'products:read': { data: null, error: null } });
         await expect(ProductService.getProducts('user-a', 'tenant-a'))
             .rejects.toThrow('Não foi possível carregar os produtos.');
+        fakeDb({ 'products:read': { data: { unexpected: true }, error: null } });
+        await expect(ProductService.getProducts('user-a', 'tenant-a'))
+            .rejects.toThrow('Não foi possível carregar os produtos.');
     });
 
     it('blocks invalid names before writing and does not claim null inserts succeeded', async () => {
