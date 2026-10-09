@@ -458,3 +458,28 @@ call paid models, change server paid guard, modify credentials, modify customer
 data, migrations/RLS, role policy, or production. Validate one final SHA via CI.
 Vercel external build quota remains a Preview gate, not an invitation to retry
 deployments or buy a plan.
+
+
+## Authorized task (2026-10-08): NotificationCenter mobile and keyboard UX
+
+Following CRM #24 product readiness audit, group and validate:
+1. Replace the clickable non-semantic notification row with an explicit
+   keyboard-accessible "Marcar como lida" action; preserve remove/notification
+   actions without nested interactive controls.
+2. Give the notification popover a responsive maximum width for narrow phones
+   and retain dark-mode readable borders/backgrounds.
+3. Add Escape and outside dismissal, focus entry, Tab containment and focus
+   restoration with appropriate aria-expanded/controls/dialog semantics.
+4. Improve hover/focus states and interactive button targets.
+5. Extract deterministic unread-counter/relative timestamp display policy
+   and provide unit plus source-contract regression tests.
+
+Authorized files: `src/components/layout/NotificationCenter.tsx`,
+`src/lib/notification-display-policy.ts`,
+`src/lib/notification-display-policy.test.ts`,
+`src/lib/notification-center-accessibility-contract.test.ts`, and
+`docs/codex/CURRENT_TASK.md`.
+
+No live data mutations, Supabase or auth changes, new entitlements, paid AI
+calls, Preview quota retries, or production merge. Use a non-CI work branch
+until the grouped changes are ready for one exact-SHA validation.
