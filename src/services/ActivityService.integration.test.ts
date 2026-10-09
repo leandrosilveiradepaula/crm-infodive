@@ -7,7 +7,7 @@ vi.mock('../lib/supabase/admin', () => ({ createAdminClient: mocks.createAdminCl
 import { ActivityService } from './ActivityService';
 
 type DbResponse = { data: unknown; error: { code?: string; message?: string } | null };
-type DbOperation = { table: string; mode: string; payload?: unknown; filters: [string, unknown][] };
+type DbOperation = { table: string; mode: string; payload?: unknown; filters: [string, unknown][]; orders: string[] };
 function mockDatabase(overrides: Record<string, DbResponse> = {}) {
     const queries: DbOperation[] = [];
     const response = (table: string, mode: string): DbResponse =>
@@ -16,14 +16,14 @@ function mockDatabase(overrides: Record<string, DbResponse> = {}) {
             ? { data: { id: 'row-1' }, error: null }
             : { data: [], error: null });
     const from = vi.fn((table: string) => {
-        const state: DbOperation = { table, mode: 'read', filters: [] };
+        const state: DbOperation = { table, mode: 'read', filters: [], orders: [] };
         queries.push(state);
         const builder = {
             select(_fields?: string) { return builder; },
             eq(name: string, value: unknown) { state.filters.push([name, value]); return builder; },
             neq(_name: string, _value: unknown) { return builder; },
             in(_name: string, _values: unknown[]) { return builder; },
-            order(_field: string, _options?: unknown) { return builder; },
+            order(field: string, _options?: unknown) { state.orders.push(field); return builder; },
             limit(_amount: number) { return builder; },
             insert(payload: unknown) { state.mode = 'insert'; state.payload = payload; return builder; },
             update(payload: unknown) { state.mode = 'update'; state.payload = payload; return builder; },
@@ -42,6 +42,32 @@ function mockDatabase(overrides: Record<string, DbResponse> = {}) {
 
 describe('ActivityService offline data integrity', () => {
     beforeEach(() => vi.clearAllMocks());
+
+    it('sorts activities by real dueDate column and not a quoted column name', async () => {
+        const db = mockDatabase({ activities: { data: [], error: null } });
+        await ActivityService.getActivities('user-a', 'tenant-a');
+        expect(db.queries.find(q => q.table === 'activities')?.orders).toEqual(['dueDate']);
+    });
+
+    it('rejects empty successful-looking database responses', async () => {
+        mockDatabase({ activities: { data: null, error: null } });
+        await expect(ActivityService.getActivities('user-a', 'tenant-a'))
+            .rejects.toThrow('Não foi possível carregar as atividades.');
+        await expect(ActivityService.getUpcomingTasks('user-a', 'tenant-a'))
+            .rejects.toThrow('Não foi possível carregar as tarefas próximas.');
+
+        mockDatabase({ 'activities:insert': { data: null, error: null } });
+        await expect(ActivityService.createActivity('user-a', 'tenant-a', { title: 'Contato', type: 'task' }))
+            .rejects.toThrow('Não foi possível salvar a atividade.');
+    });
+
+    it('rejects blank related record identifiers before querying', async () => {
+        const db = mockDatabase();
+        await expect(ActivityService.createActivity('user-a', 'tenant-a', {
+            title: 'Contato', dealId: '   ',
+        })).rejects.toThrow('Referência de atividade inválida.');
+        expect(db.queries).toHaveLength(0);
+    });
 
     it('does not pretend a failed activity read is a valid empty result', async () => {
         mockDatabase({ activities: { data: null, error: { message: 'database unavailable' } } });
