@@ -590,3 +590,8 @@ Prepare five related blocks for a single nonproduction PR: 1) treat lead list da
 ## Authorized task (2026-10-09): five ProposalService integrity blocks without Preview
 
 Five offline hardening blocks: 1) require tenant membership even for standalone proposals; 2) reject malformed/null lists instead of empty success; 3) validate status, signature setting, and reject no-op updates; 4) require returned persisted row on update/create; 5) validate account/lead references against current tenant and fail closed on version lookup failures. Add deterministic integration tests. Allowed paths: ProposalService.ts, ProposalService.integration.test.ts, CURRENT_TASK.md. No production, Vercel, Preview, migrations, paid models, new RBAC permissions, or live data. One coherent CI PR, then candidate-only merge on green exact SHA.
+
+
+## Authorized task (2026-10-09): five account read/aggregate correctness guards (offline)
+
+One grouped nonproduction PR with five blocks: 1) do not mistake null/malformed account list for an empty success; 2) same for lightweight accounts/manufacturers lists; 3) validate required account name and children structure before create; 4) validate account update input, replacement children and required name before any privileged read/mutation; 5) fail closed on null/malformed contact and branch snapshots before deleting existing children. Regression tests must cover absence of destructive writes and valid empty lists. Scope AccountService.ts, AccountService.integration.test.ts, CURRENT_TASK.md. No Vercel Preview, migrations, live data, paid AI or production merge. Validate one product/** SHA, merge only into nonproduction candidate with green CI.
