@@ -1,8 +1,8 @@
 'use server';
 
-import { createAdminClient } from '@/lib/supabase/admin';
-import { UserProfile } from '@/hooks/useUsers';
-import { requirePermission } from '@/lib/auth-server';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { UserProfile } from '../../../hooks/useUsers';
+import { requirePermission } from '../../../lib/auth-server';
 
 export async function getUsers() {
     const { organizationId } = await requirePermission('settings:manage_users');
@@ -24,30 +24,30 @@ export async function getUsers() {
             throw new Error('Invalid user role');
         };
 
-        const mapped: UserProfile[] = (data || []).map((item: any) => ({
+        const mapped: UserProfile[] = data.map((item: Record<string, unknown>) => ({
             id: item.id,
-            name: item.full_name || 'Usuário Sem Nome',
-            email: item.email || (item.raw_user_meta_data?.email) || '',
-            phone: item.phone || '',
-            role: mapRole(item.role), // Legacy support
-            roles: (Array.isArray(item.roles) ? item.roles : []).map((r: string) => mapRole(r)), // New multi-role
-            status: item.status || 'active',
-            lastLogin: item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 'N/A',
-            avatar: item.full_name ? item.full_name.split(' ').map((n: any) => n[0]).join('').substring(0, 2).toUpperCase() : 'U',
-            monthly_goal: item.monthly_goal || 0,
-            yearly_goal: item.yearly_goal || 0,
-            commission_rate: item.commission_rate || 0,
-            commission_rules: item.commission_rules || {
+            name: String(item.full_name || 'Usuário Sem Nome'),
+            email: String(item.email || ((item.raw_user_meta_data as { email?: string } | null)?.email) || ''),
+            phone: String(item.phone || ''),
+            role: mapRole(String(item.role ?? '')) as UserProfile['role'], // Legacy support
+            roles: (Array.isArray(item.roles) ? item.roles : []).map((r: string) => mapRole(r) as UserProfile['role']), // New multi-role
+            status: (item.status === 'active' || item.status === 'inactive' ? item.status : 'active'),
+            lastLogin: item.updated_at ? new Date(String(item.updated_at)).toLocaleDateString() : 'N/A',
+            avatar: item.full_name ? String(item.full_name).split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : 'U',
+            monthly_goal: Number(item.monthly_goal || 0),
+            yearly_goal: Number(item.yearly_goal || 0),
+            commission_rate: Number(item.commission_rate || 0),
+            commission_rules: (item.commission_rules as UserProfile['commission_rules']) || {
                 hardware: { new: 0, base: 0 },
                 software: { new: 0, base: 0 },
                 services: { new: 0, base: 0 },
                 campaigns: []
             },
-            quarterly_goals: item.quarterly_goals || { q1: 0, q2: 0, q3: 0, q4: 0 }
+            quarterly_goals: (item.quarterly_goals as UserProfile['quarterly_goals']) || { q1: 0, q2: 0, q3: 0, q4: 0 }
         }));
 
         return { success: true, data: mapped };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching users:', error);
         return { success: false, error: 'Não foi possível carregar os usuários.' };
     }
