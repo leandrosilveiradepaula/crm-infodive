@@ -622,3 +622,20 @@ Additional security invariant: before UPSERT, resolve any candidate stage IDs ab
 ## Authorized task (2026-10-09): five activity/suggestion fail-closed read blocks (offline)
 
 Batch five safeguards: (1) fail closed if inactivity deal query returns error or malformed list; (2) fail closed on preexisting automated activity lookup failure rather than creating a duplicate; (3) fail closed on last-activity lookup failure or malformed response before scheduling; (4) fail closed on suggestions query error/null/non-array instead of presenting valid empty results; (5) require verified affected suggestion row before reporting successful dismissal. Add offline Supabase-fake integration tests. Preserve current suggestion acceptance and cache semantics in this batch (future transactional work separate). Scope ActivityAiService.ts, new ActivityAiService.integration.test.ts, CURRENT_TASK.md. No production, Preview, paid model, migrations, live writes or permission widening. CI exact SHA required before nonproduction merge.
+
+
+## Authorized task (2026-10-09): five legacy integration action integrity guards, no Preview
+
+The Dev Portal still uses legacy API-key and webhook Server Actions through
+`useApiKeys` and `useWebhooks`, while the aggregated integration actions were
+already hardened in PR #123. Close that second, weaker path in one batch:
+1. Fail closed on malformed/null API-key reads while preserving legitimate empty lists.
+2. Validate API-key names and require the inserted row before returning success/data.
+3. Validate API-key identifiers and require tenant-scoped affected rows on revoke/delete.
+4. Fail closed on webhook reads, validate stored webhook payload fields, and require the inserted row.
+5. Validate webhook identifiers and require a tenant-scoped affected row before delete success.
+
+Add executable offline tests with mocked auth/Supabase. Preserve existing
+`integrations:manage` RBAC and UI contracts. No migrations, live integration
+calls, credentials, paid models, Vercel Preview, production merge, or access widening.
+Validate one exact PR SHA before candidate-only merge.
