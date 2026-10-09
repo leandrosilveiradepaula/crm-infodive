@@ -541,3 +541,8 @@ Authorized paths: `src/services/DashboardService.ts`,
 No new RBAC grants, migrations, live data writes, paid AI calls, Preview
 rate-limit retries or production merge. Work outside CI until grouped checks
 are ready, then validate one exact nonproduction SHA.
+
+
+## Authorized task (2026-10-09): document retrieval and storage integrity (no Preview)
+
+Repair the existing DocumentService read/write failure paths: verify the parent belongs to the tenant even on document reads; propagate errors from account/deal/document reads instead of fabricated empty lists; treat a null metadata insert as failure with best-effort cleanup; reject storage removal failure and verify the metadata row is actually deleted before reporting success. Add offline regression coverage. Scope limited to DocumentService.ts, its integration test, and this record. No migration, live writes, preview, paid calls, access widening, or production gate bypass.
