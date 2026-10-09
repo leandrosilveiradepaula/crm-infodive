@@ -1,5 +1,6 @@
 import { Bell, X, CheckCircle, AlertCircle, Clock, Info } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { unreadNotificationCount, formatNotificationTime } from '@/lib/notification-display-policy';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
@@ -28,7 +29,14 @@ export const NotificationCenter = ({
     onRemove
 }: NotificationCenterProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const unreadCount = notifications.filter(n => !n.read).length;
+    const unreadCount = unreadNotificationCount(notifications);
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const closePanel = () => {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+    };
 
     const getIcon = (type: NotificationType) => {
         switch (type) {
@@ -48,25 +56,46 @@ export const NotificationCenter = ({
         }
     };
 
-    const formatTime = (date: Date) => {
-        const now = new Date();
-        const diff = now.getTime() - date.getTime();
-        const minutes = Math.floor(diff / 60000);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
+    useEffect(() => {
+        if (!isOpen) return;
+        closeRef.current?.focus();
 
-        if (minutes < 1) return 'Agora';
-        if (minutes < 60) return `${minutes}m atrás`;
-        if (hours < 24) return `${hours}h atrás`;
-        return `${days}d atrás`;
-    };
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closePanel();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(panelRef.current?.querySelectorAll<HTMLButtonElement>(
+                'button:not(:disabled)'
+            ) ?? []);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [isOpen]);
 
     return (
         <div className="relative">
             {/* Bell Icon */}
             <button
+                ref={triggerRef}
+                type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2.5 text-muted-foreground hover:text-primary hover:bg-blue-50 rounded-xl transition-all duration-200 group"
+                aria-expanded={isOpen}
+                aria-controls="crm-notification-panel"
+                aria-haspopup="dialog"
+                className="relative p-2.5 text-muted-foreground hover:text-primary hover:bg-muted rounded-xl transition-all duration-200 group focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 aria-label={unreadCount > 0 ? `Abrir notificações: ${unreadCount} não lidas` : 'Abrir notificações'}
                 title="Notificações"
             >
@@ -82,18 +111,28 @@ export const NotificationCenter = ({
             {isOpen && (
                 <>
                     {/* Backdrop */}
-                    <div
+                    <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-hidden="true"
                         className="fixed inset-0 z-40"
-                        onClick={() => setIsOpen(false)}
+                        onClick={closePanel}
                     />
 
                     {/* Panel */}
-                    <div className="absolute right-0 top-full mt-2 w-96 bg-card rounded-2xl shadow-2xl border border-border/50 z-50 overflow-hidden animate-slide-up">
+                    <div
+                        id="crm-notification-panel"
+                        ref={panelRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="crm-notification-title"
+                        className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] max-w-96 bg-card text-foreground rounded-2xl shadow-2xl border border-border z-50 overflow-hidden animate-slide-up"
+                    >
                         {/* Header */}
                         <div className="p-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary to-blue-900">
                             <div className="flex items-center gap-2">
                                 <Bell className="h-5 w-5 text-white" />
-                                <h3 className="font-bold text-white">Notificações</h3>
+                                <h3 id="crm-notification-title" className="font-bold text-white">Notificações</h3>
                                 {unreadCount > 0 && (
                                     <span className="bg-card/20 text-white px-2 py-0.5 rounded-full text-xs font-bold">
                                         {unreadCount} novas
@@ -101,8 +140,10 @@ export const NotificationCenter = ({
                                 )}
                             </div>
                             <button
-                                onClick={() => setIsOpen(false)}
-                                className="text-white/70 hover:text-white transition-colors"
+                                ref={closeRef}
+                                type="button"
+                                onClick={closePanel}
+                                className="rounded-md p-2 text-white hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                                 aria-label="Fechar notificações"
                                 title="Fechar notificações"
                             >
@@ -119,7 +160,7 @@ export const NotificationCenter = ({
                                     <p className="text-muted-foreground text-sm mt-1">Você está em dia!</p>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-gray-100">
+                                <div className="divide-y divide-border">
                                     {notifications.map(notification => {
                                         const Icon = getIcon(notification.type);
                                         const colorClass = getColor(notification.type);
@@ -127,8 +168,7 @@ export const NotificationCenter = ({
                                         return (
                                             <div
                                                 key={notification.id}
-                                                className={`p-4 hover:bg-muted/50 transition-colors ${!notification.read ? 'bg-blue-50/30' : ''}`}
-                                                onClick={() => onMarkAsRead(notification.id)}
+                                                className={`p-4 transition-colors ${!notification.read ? 'bg-muted/30' : ''}`}
                                             >
                                                 <div className="flex gap-3">
                                                     <div className={`flex-shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center ${colorClass}`}>
@@ -145,7 +185,7 @@ export const NotificationCenter = ({
                                                                     e.stopPropagation();
                                                                     onRemove(notification.id);
                                                                 }}
-                                                                className="text-muted-foreground hover:text-red-600 transition-colors"
+                                                                className="rounded-md p-2 text-muted-foreground hover:text-destructive transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                                                 aria-label={`Remover notificação: ${notification.title}`}
                                                                 title="Remover notificação"
                                                             >
@@ -159,20 +199,33 @@ export const NotificationCenter = ({
 
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-xs text-muted-foreground">
-                                                                {formatTime(notification.timestamp)}
+                                                                {formatNotificationTime(notification.timestamp)}
                                                             </span>
 
+                                                            <div className="flex items-center gap-2">
+                                                                {!notification.read && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => onMarkAsRead(notification.id)}
+                                                                        className="rounded-md px-2 py-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                                                                        aria-label={`Marcar como lida: ${notification.title}`}
+                                                                    >
+                                                                        Marcar como lida
+                                                                    </button>
+                                                                )}
                                                             {notification.actionLabel && notification.onAction && (
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         notification.onAction?.();
                                                                     }}
-                                                                    className="text-xs font-bold text-primary hover:text-blue-700 transition-colors"
+                                                                    type="button"
+                                                                    className="rounded-md px-2 py-1 text-xs font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                                                                 >
                                                                     {notification.actionLabel}
                                                                 </button>
                                                             )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -188,7 +241,8 @@ export const NotificationCenter = ({
                             <div className="p-3 border-t border-border/50 bg-muted/50">
                                 <button
                                     onClick={onClearAll}
-                                    className="w-full py-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors"
+                                    type="button"
+                                    className="w-full rounded-md py-2 text-sm font-bold text-muted-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors"
                                 >
                                     Limpar todas
                                 </button>
