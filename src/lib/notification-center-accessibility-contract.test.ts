@@ -27,7 +27,7 @@ describe('notification center accessibility wiring', () => {
         expect(source).toContain('Marcar como lida:');
         expect(source).toContain('onRemove(notification.id)');
         expect(source).toContain('focus-visible:outline-2');
-        expect(source).not.toContain('onClick={() => onMarkAsRead(notification.id)}\n                                            >');
+        expect(source).toContain('closeRef.current?.focus()');
     });
 
     it('uses stable display policy helpers', () => {
