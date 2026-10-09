@@ -24,9 +24,10 @@ export class ContactService {
             result.name = normalizeCasing(result.name, 'name');
         }
         for (const key of ['email', 'mobile_phone', 'landline_phone', 'role'] as const) {
-            if (result[key] !== undefined && result[key] !== null &&
-                (typeof result[key] !== 'string' ||
-                 result[key].length > (key === 'email' ? 320 : key === 'role' ? 200 : 64)))
+            const value = result[key];
+            if (value !== undefined && value !== null &&
+                (typeof value !== 'string' ||
+                 value.length > (key === 'email' ? 320 : key === 'role' ? 200 : 64)))
                 throw new Error('Campo de contato inválido.');
         }
         if (result.is_primary !== undefined && typeof result.is_primary !== 'boolean')
