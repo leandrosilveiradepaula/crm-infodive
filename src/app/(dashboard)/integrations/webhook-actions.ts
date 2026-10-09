@@ -1,9 +1,9 @@
 'use server';
 
-import { createAdminClient } from '@/lib/supabase/admin';
-import { Webhook } from '@/hooks/useWebhooks';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { Webhook } from '../../../hooks/useWebhooks';
 import { revalidatePath } from 'next/cache';
-import { requirePermission } from '@/lib/auth-server';
+import { requirePermission } from '../../../lib/auth-server';
 
 function assertWebhookId(id: string): string {
     if (typeof id !== 'string' || !id.trim()) {
