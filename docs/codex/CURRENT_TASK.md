@@ -556,3 +556,5 @@ Repair the existing DocumentService read/write failure paths: verify the parent 
 ## Authorized task (2026-10-09): document deal-owner security without Preview
 
 Enforce the existing pipeline owner visibility on documents belonging to opportunities, including listing, upload, signed URL and deletion. Resolve parent entity from stored metadata for document-ID operations, and verify access before Storage actions. Preserve current account/contact tenant behavior. Add offline regression cases; no schema, credentials, paid calls, Preview builds or main merge. Paths restricted to DocumentService, its offline integration tests and task record.
+
+The same owner-visibility boundary applies to related deal documents aggregated under an account; account-level documents remain tenant-scoped. No Preview is required for this offline security batch.
