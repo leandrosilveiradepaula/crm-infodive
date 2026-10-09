@@ -154,7 +154,7 @@ export class DocumentService {
             description?: string;
         }
     ): Promise<EntityDocument> {
-        // --- Validation --- 
+        // --- Validation ---
         if (!file || typeof file.name !== 'string' || !file.name.trim() ||
             typeof file.type !== 'string' || !(file.arrayBuffer instanceof ArrayBuffer)) {
             throw new Error('Arquivo inválido.');
