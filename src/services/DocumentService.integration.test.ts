@@ -92,8 +92,9 @@ describe('DocumentService fail-closed offline integrity', () => {
         });
         await expect(DocumentService.getDocuments('user', 'tenant', 'contact', 'contact-1'))
             .resolves.toEqual([]);
-        expect(db.operations[0].table).toBe('account_contacts');
-        expect(db.operations[0].filters).toContainEqual(['organization_id', 'tenant']);
+        const contactRead = db.operations.find(op => op.table === 'account_contacts');
+        expect(contactRead).toBeDefined();
+        expect(contactRead?.filters).toContainEqual(['organization_id', 'tenant']);
     });
 
     it('does not present a database query failure as an empty document list', async () => {
