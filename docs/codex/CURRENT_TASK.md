@@ -541,3 +541,8 @@ Authorized paths: `src/services/DashboardService.ts`,
 No new RBAC grants, migrations, live data writes, paid AI calls, Preview
 rate-limit retries or production merge. Work outside CI until grouped checks
 are ready, then validate one exact nonproduction SHA.
+
+
+## Authorized task (2026-10-09): activity service data correctness, no Preview
+
+Fix the actual quoted dueDate sort key on activity listing, reject missing/null database read results instead of reporting valid empty lists, reject null insert responses as failures, and validate blank tenant-related identifiers before any privileged lookup. Add offline regressions to existing ActivityService test suite. Scope: ActivityService.ts, ActivityService.integration.test.ts and this task record only. CI/test/build on exact SHA; no Vercel Preview builds, no database migrations, no live writes, no paid model calls, no auto-merge into main.
