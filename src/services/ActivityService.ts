@@ -13,8 +13,8 @@ export class ActivityService {
             { table: 'deals', id: dealId },
             { table: 'accounts', id: accountId },
         ]) {
-            if (relation.id === undefined || relation.id === null || relation.id === '') continue;
-            if (typeof relation.id !== 'string') throw new Error('Referência de atividade inválida.');
+            if (relation.id === undefined || relation.id === null) continue;
+            if (typeof relation.id !== 'string' || !relation.id.trim()) throw new Error('Referência de atividade inválida.');
             const { data, error } = await supabase
                 .from(relation.table)
                 .select('id')
@@ -32,9 +32,9 @@ export class ActivityService {
             .from('activities')
             .select('*')
             .eq('organization_id', organizationId)
-            .order('"dueDate"', { ascending: true });
+            .order('dueDate', { ascending: true, nullsFirst: false });
 
-        if (error) {
+        if (error || !activitiesData) {
             console.error('[ActivityService] activities fetch failed');
             throw new Error('Não foi possível carregar as atividades.');
         }
@@ -105,7 +105,7 @@ export class ActivityService {
             throw new Error('Não foi possível carregar as tarefas próximas.');
         }
 
-        if (!data) return [];
+        if (!data) throw new Error('Não foi possível carregar as tarefas próximas.');
 
         return data.map((t) => ({
             id: t.id,
@@ -146,7 +146,7 @@ export class ActivityService {
             .select()
             .single();
 
-        if (error) throw new Error('Não foi possível salvar a atividade.');
+        if (error || !data) throw new Error('Não foi possível salvar a atividade.');
         return data;
     }
 
