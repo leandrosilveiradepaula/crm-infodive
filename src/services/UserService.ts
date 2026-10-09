@@ -97,7 +97,7 @@ export class UserService {
             dbUpdates.phone = updates.phone;
         }
         if (updates.email !== undefined) {
-            if (typeof updates.email !== 'string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(updates.email) || updates.email.length > 254) {
+            if (typeof updates.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email) || updates.email.length > 254) {
                 return { success: false, error: 'E-mail inválido.' };
             }
             dbUpdates.email = updates.email;
