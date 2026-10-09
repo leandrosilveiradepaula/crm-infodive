@@ -38,17 +38,48 @@ function fakeDatabase(results: Record<string, Response>) {
     mocks.createAdminClient.mockReturnValue({ from, storage });
     return { operations, storageRemove, storageUpload };
 }
-const validDeal = { 'deals:read': { data: { id: 'deal-1' }, error: null } };
+const validDeal = {
+    'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
+    'deals:read': { data: { id: 'deal-1' }, error: null },
+};
 
 describe('DocumentService fail-closed offline integrity', () => {
     beforeEach(() => vi.clearAllMocks());
 
     it('checks the parent entity before listing documents', async () => {
-        const db = fakeDatabase({ 'deals:read': { data: null, error: null } });
+        const db = fakeDatabase({ ...validDeal, 'deals:read': { data: null, error: null } });
         await expect(DocumentService.getDocuments('user', 'tenant', 'deal', 'foreign'))
             .rejects.toThrow('Entidade não encontrada ou acesso negado.');
         expect(db.operations.every(op => op.table !== 'documents')).toBe(true);
-        expect(db.operations[0].filters).toContainEqual(['organization_id', 'tenant']);
+        expect(db.operations.find(op => op.table === 'deals')?.filters).toContainEqual(['organization_id', 'tenant']);
+    });
+
+    it('blocks another seller from listing or uploading documents of an inaccessible deal', async () => {
+        const db = fakeDatabase({
+            'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+        });
+        await expect(DocumentService.getDocuments('seller-a', 'tenant', 'deal', 'deal-b'))
+            .rejects.toThrow('Entidade não encontrada ou acesso negado.');
+        await expect(DocumentService.uploadDocument('seller-a', 'tenant', 'deal', 'deal-b', {
+            name: 'test.pdf', type: 'application/pdf', size: 2,
+            arrayBuffer: new ArrayBuffer(2),
+        }, {})).rejects.toThrow('Entidade não encontrada ou acesso negado.');
+        expect(db.operations.filter(op => op.table === 'deals').every(op =>
+            op.filters.some(([key, value]) => key === 'owner_id' && value === 'seller-a')
+        )).toBe(true);
+        expect(db.storageUpload).not.toHaveBeenCalled();
+    });
+
+    it('blocks unauthorized document deletion before touching storage', async () => {
+        const db = fakeDatabase({
+            'documents:read': { data: { file_path: 'tenant/deal/deal-b/1.pdf', entity_type: 'deal', entity_id: 'deal-b' }, error: null },
+            'profiles:read': { data: { role: 'seller', roles: [] }, error: null },
+            'deals:read': { data: null, error: null },
+        });
+        await expect(DocumentService.deleteDocument('seller-a', 'tenant', 'doc-b'))
+            .rejects.toThrow('Entidade não encontrada ou acesso negado.');
+        expect(db.storageRemove).not.toHaveBeenCalled();
     });
 
     it('validates contact documents against the actual account_contacts table', async () => {
@@ -93,7 +124,8 @@ describe('DocumentService fail-closed offline integrity', () => {
 
     it('never reports success or deletes metadata after storage removal fails', async () => {
         const db = fakeDatabase({
-            'documents:read': { data: { file_path: 'tenant/deal/deal-1/a.pdf' }, error: null },
+            'documents:read': { data: { file_path: 'tenant/deal/deal-1/a.pdf', entity_type: 'deal', entity_id: 'deal-1' }, error: null },
+            ...validDeal,
             'storage:remove': { data: null, error: { message: 'storage down' } },
         });
         await expect(DocumentService.deleteDocument('user', 'tenant', 'document-1'))
