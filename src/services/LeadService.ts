@@ -1,8 +1,40 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { Lead } from '@/types/lead';
-import { normalizeCasing, normalizeTaxId, normalizePhone, normalizeZip } from '@/lib/string-utils';
+import { createAdminClient } from '../lib/supabase/admin';
+import { Lead } from '../types/lead';
+import { normalizeCasing, normalizeTaxId, normalizePhone, normalizeZip } from '../lib/string-utils';
 
 export class LeadService {
+    private static readonly mutableFields = new Set([
+        'company', 'contact_name', 'email', 'phone', 'status', 'interest',
+        'cnpj', 'ie', 'zip', 'street', 'number', 'complement',
+        'neighborhood', 'city', 'state', 'owner',
+    ]);
+
+    private static normalizedInput(input: Partial<Lead>): Record<string, unknown> {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) {
+            throw new Error('Dados do lead inválidos.');
+        }
+        const fields = Object.fromEntries(Object.entries(input)
+            .filter(([key]) => this.mutableFields.has(key)));
+        for (const field of ['company', 'contact_name', 'street',
+            'neighborhood', 'city', 'state', 'interest'] as const) {
+            const value = fields[field];
+            if (value !== undefined && value !== null) {
+                if (typeof value !== 'string') throw new Error('Campo do lead inválido.');
+                fields[field] = normalizeCasing(value, field === 'street' || field === 'city' ||
+                    field === 'state' || field === 'neighborhood' ? 'address' : 'name');
+            }
+        }
+        for (const field of ['cnpj', 'phone', 'zip'] as const) {
+            const value = fields[field];
+            if (value !== undefined && value !== null) {
+                if (typeof value !== 'string') throw new Error('Campo do lead inválido.');
+                fields[field] = field === 'cnpj' ? normalizeTaxId(value) :
+                    field === 'phone' ? normalizePhone(value) : normalizeZip(value);
+            }
+        }
+        return fields;
+    }
+
     static async getLeads(userId: string, organizationId: string) {
         const supabase = createAdminClient();
         const { data, error } = await supabase
@@ -11,67 +43,73 @@ export class LeadService {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        if (error) throw new Error('Não foi possível carregar os leads.');
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os leads.');
         return data as Lead[];
     }
 
     static async createLead(userId: string, organizationId: string, lead: Partial<Lead>) {
-        const supabase = createAdminClient();
+        if (!lead || typeof lead.company !== 'string' ||
+            !lead.company.trim() || lead.company.length > 250) {
+            throw new Error('Empresa do lead inválida.');
+        }
+        const fields = this.normalizedInput(lead);
         const normalizedLead = {
-            ...lead,
-            company: normalizeCasing(lead.company, 'name'),
-            contact_name: normalizeCasing(lead.contact_name, 'name'),
-            cnpj: normalizeTaxId(lead.cnpj),
-            phone: normalizePhone(lead.phone),
-            street: normalizeCasing(lead.street, 'address'),
-            neighborhood: normalizeCasing(lead.neighborhood, 'address'),
-            city: normalizeCasing(lead.city, 'address'),
-            state: normalizeCasing(lead.state, 'address'),
-            zip: normalizeZip(lead.zip),
-            interest: normalizeCasing(lead.interest, 'name'),
-            organization_id: organizationId
+            ...fields,
+            // Preserve the legacy create defaults without copying privileged input.
+            contact_name: fields.contact_name ?? '',
+            cnpj: fields.cnpj ?? '',
+            phone: fields.phone ?? '',
+            street: fields.street ?? '',
+            neighborhood: fields.neighborhood ?? '',
+            city: fields.city ?? '',
+            state: fields.state ?? '',
+            zip: fields.zip ?? '',
+            interest: fields.interest ?? '',
+            organization_id: organizationId,
         };
+        const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('leads')
             .insert([normalizedLead])
             .select()
             .single();
 
-        if (error) throw new Error('Não foi possível salvar o lead.');
+        if (error || !data) throw new Error('Não foi possível salvar o lead.');
         return data;
     }
 
     static async updateLead(userId: string, id: string, organizationId: string, updates: Partial<Lead>) {
+        if (typeof id !== 'string' || !id.trim()) throw new Error('Lead inválido.');
+        const normalizedUpdates = this.normalizedInput(updates);
+        if (!Object.keys(normalizedUpdates).length) throw new Error('Nenhuma alteração permitida.');
+        if (Object.prototype.hasOwnProperty.call(normalizedUpdates, 'company') &&
+            (typeof normalizedUpdates.company !== 'string' ||
+                !normalizedUpdates.company.trim() || normalizedUpdates.company.length > 250)) {
+            throw new Error('Empresa do lead inválida.');
+        }
         const supabase = createAdminClient();
-        const normalizedUpdates = { ...updates };
-        if (updates.company) normalizedUpdates.company = normalizeCasing(updates.company, 'name');
-        if (updates.contact_name) normalizedUpdates.contact_name = normalizeCasing(updates.contact_name, 'name');
-        if (updates.cnpj) normalizedUpdates.cnpj = normalizeTaxId(updates.cnpj);
-        if (updates.phone) normalizedUpdates.phone = normalizePhone(updates.phone);
-        if (updates.street) normalizedUpdates.street = normalizeCasing(updates.street, 'address');
-        if (updates.neighborhood) normalizedUpdates.neighborhood = normalizeCasing(updates.neighborhood, 'address');
-        if (updates.city) normalizedUpdates.city = normalizeCasing(updates.city, 'address');
-        if (updates.state) normalizedUpdates.state = normalizeCasing(updates.state, 'address');
-        if (updates.zip) normalizedUpdates.zip = normalizeZip(updates.zip);
-        if (updates.interest) normalizedUpdates.interest = normalizeCasing(updates.interest, 'name');
-
-        const { error } = await supabase
+        const { data: updated, error } = await supabase
             .from('leads')
             .update(normalizedUpdates)
             .eq('id', id)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível atualizar o lead.');
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+        if (error || !updated) throw new Error('Não foi possível atualizar o lead.');
         return true;
     }
 
     static async deleteLead(userId: string, id: string, organizationId: string) {
+        if (typeof id !== 'string' || !id.trim()) throw new Error('Lead inválido.');
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: deleted, error } = await supabase
             .from('leads')
             .delete()
             .eq('id', id)
-            .eq('organization_id', organizationId);
-        if (error) throw new Error('Não foi possível excluir o lead.');
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
+        if (error || !deleted) throw new Error('Não foi possível excluir o lead.');
         return true;
     }
 
