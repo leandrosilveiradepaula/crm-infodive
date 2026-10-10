@@ -105,20 +105,20 @@ export class DistributorOrderService {
         // 6. Extra Data (BID, Billing Type, Payment Terms)
         if (safeExtra) {
             // BID Number (Yellow highlighted area)
-            if (extraData.bidNumber) {
-                worksheet.getCell('B35').value = extraData.bidNumber;
+            if (safeExtra.bidNumber) {
+                worksheet.getCell('B35').value = safeExtra.bidNumber;
             }
 
             // Payment Terms
-            if (extraData.paymentTerms) {
-                worksheet.getCell('E30').value = extraData.paymentTerms;
+            if (safeExtra.paymentTerms) {
+                worksheet.getCell('E30').value = safeExtra.paymentTerms;
             }
 
             // Billing Selection (Mark with 'x')
-            if (extraData.billingType === 'reseller') {
+            if (safeExtra.billingType === 'reseller') {
                 worksheet.getCell('D32').value = 'X';
                 worksheet.getCell('F32').value = '';
-            } else if (extraData.billingType === 'end_user') {
+            } else if (safeExtra.billingType === 'end_user') {
                 worksheet.getCell('D32').value = '';
                 worksheet.getCell('F32').value = 'X';
             }
