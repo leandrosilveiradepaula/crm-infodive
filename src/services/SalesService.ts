@@ -148,80 +148,65 @@ export class SalesService {
      * grouped by distributor.
      */
     static async convertDealToSalesOrders(userId: string, organizationId: string, dealId: string) {
+        if (typeof userId !== 'string' || !userId.trim() ||
+            typeof dealId !== 'string' || !dealId.trim() || typeof organizationId !== 'string' || !organizationId.trim()) {
+            throw new Error('Dados de conversão inválidos.');
+        }
         const supabase = createAdminClient();
-
-        // 1. Fetch deal and its products
-        const { data: deal, error: dealError } = await supabase
-            .from('deals')
-            .select('*, deal_products(*)')
-            .eq('id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
-
-        if (dealError || !deal) throw new Error('Negócio não encontrado ou acesso negado.');
-
-        const products = deal.deal_products || [];
-        if (products.length === 0) return { success: true, message: 'No products to convert' };
-
-        // 2. Group products by distributor_id
-        const groups: Record<string, DealProduct[]> = {};
-        products.forEach((p: DealProduct) => {
-            const distId = p.distributor_id || 'none';
-            if (!groups[distId]) groups[distId] = [];
-            groups[distId].push(p);
-        });
-
-        const results = [];
-
-        // 3. Create a Sales Order for each group
-        for (const [distId, groupItems] of Object.entries(groups)) {
-            const totalValue = groupItems.reduce((sum, item: any) => sum + (item.unit_price * item.quantity), 0);
-            const billingEntity = deal.billing_type === 'direct' ? 'infodive' : 'distributor';
-
-            // Create Order
-            const { data: order, error: orderError } = await supabase
-                .from('sales_orders')
-                .insert([{
-                    deal_id: deal.id,
-                    organization_id: organizationId,
-                    distributor_id: distId === 'none' ? null : distId,
-                    status: 'pedido_gerado',
-                    billing_entity: billingEntity,
-                    total_value: totalValue,
-                    created_by: userId
-                }])
-                .select()
-                .single();
-
-            if (orderError) {
-                console.error('[SalesService] sales order creation failed');
-                continue;
-            }
-
-            // Create Items
-            const itemsToInsert = groupItems.map(item => ({
-                sales_order_id: order.id,
-                organization_id: organizationId,
-                product_sku: item.sku,
-                product_name: item.name,
-                quantity: item.quantity,
-                unit_price: item.unit_price,
-                cost: item.cost,
-                margin: item.margin,
-                external_id: item.external_id
-            }));
-
-            const { error: itemsError } = await supabase
-                .from('sales_order_items')
-                .insert(itemsToInsert);
-
-            if (itemsError) {
-                console.error('[SalesService] order item creation failed');
-            }
-
-            results.push(order);
+        const { data: deal, error: dealError } = await supabase.from('deals')
+            .select('*, deal_products(*)').eq('id', dealId)
+            .eq('organization_id', organizationId).maybeSingle();
+        if (dealError || !deal || !Array.isArray(deal.deal_products)) {
+            throw new Error('Negócio não encontrado ou acesso negado.');
         }
 
+        const products = deal.deal_products as DealProduct[];
+        if (products.length === 0) return { success: true, message: 'No products to convert' };
+        if (products.some(item => !item || typeof item.name !== 'string' || !item.name.trim() ||
+            typeof item.unit_price !== 'number' || !Number.isFinite(item.unit_price) || item.unit_price < 0 ||
+            typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0)) {
+            throw new Error('Produtos do negócio inválidos.');
+        }
+
+        // Prevent serial duplicate conversions. Concurrent requests still require
+        // a database-level lock/unique idempotency policy.
+        const { data: existing, error: existingError } = await supabase.from('sales_orders')
+            .select('id').eq('deal_id', dealId).eq('organization_id', organizationId);
+        if (existingError || !Array.isArray(existing)) throw new Error('Não foi possível verificar conversão anterior.');
+        if (existing.length > 0) throw new Error('Já existem pedidos para este negócio. Verifique antes de repetir.');
+
+        const groups: Record<string, DealProduct[]> = {};
+        for (const product of products) {
+            const distId = product.distributor_id || 'none';
+            if (!groups[distId]) groups[distId] = [];
+            groups[distId].push(product);
+        }
+        const results = [];
+        for (const [distId, groupItems] of Object.entries(groups)) {
+            const totalValue = groupItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
+            if (!Number.isFinite(totalValue)) throw new Error('Valor do pedido inválido.');
+            const billingEntity = deal.billing_type === 'direct' ? 'infodive' : 'distributor';
+            const { data: order, error: orderError } = await supabase.from('sales_orders')
+                .insert([{
+                    deal_id: deal.id, organization_id: organizationId,
+                    distributor_id: distId === 'none' ? null : distId,
+                    status: 'pedido_gerado', billing_entity: billingEntity,
+                    total_value: totalValue, created_by: userId,
+                }]).select('id').maybeSingle();
+            if (orderError || !order) throw new Error('Não foi possível criar o pedido. Conversão parcial possível.');
+            const itemsToInsert = groupItems.map(item => ({
+                sales_order_id: order.id, organization_id: organizationId,
+                product_sku: item.sku, product_name: item.name,
+                quantity: item.quantity, unit_price: item.unit_price,
+                cost: item.cost, margin: item.margin, external_id: item.external_id,
+            }));
+            const { data: inserted, error: itemsError } = await supabase.from('sales_order_items')
+                .insert(itemsToInsert).select('id');
+            if (itemsError || !Array.isArray(inserted) || inserted.length !== itemsToInsert.length) {
+                throw new Error('Não foi possível salvar todos os itens. Conversão parcial possível.');
+            }
+            results.push(order);
+        }
         return { success: true, orders: results };
     }
 
