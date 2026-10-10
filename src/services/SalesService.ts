@@ -166,10 +166,11 @@ export class SalesService {
         }
 
         const products = deal.deal_products as DealProduct[];
-        if (products.length === 0) return { success: true, message: 'No products to convert' };
+        if (products.length === 0) throw new Error('Negócio sem produtos; nenhum pedido foi criado.');
         if (products.some(item => !item || typeof item.name !== 'string' || !item.name.trim() ||
             typeof item.unit_price !== 'number' || !Number.isFinite(item.unit_price) || item.unit_price < 0 ||
-            typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0)) {
+            typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0 ||
+            (item.distributor_id != null && (typeof item.distributor_id !== 'string' || !item.distributor_id.trim())))) {
             throw new Error('Produtos do negócio inválidos.');
         }
 
@@ -180,14 +181,15 @@ export class SalesService {
         if (existingError || !Array.isArray(existing)) throw new Error('Não foi possível verificar conversão anterior.');
         if (existing.length > 0) throw new Error('Já existem pedidos para este negócio. Verifique antes de repetir.');
 
-        const groups: Record<string, DealProduct[]> = {};
+        const groups = new Map<string, DealProduct[]>();
         for (const product of products) {
             const distId = product.distributor_id || 'none';
-            if (!groups[distId]) groups[distId] = [];
-            groups[distId].push(product);
+            const group = groups.get(distId) ?? [];
+            group.push(product);
+            groups.set(distId, group);
         }
         const results = [];
-        for (const [distId, groupItems] of Object.entries(groups)) {
+        for (const [distId, groupItems] of groups) {
             const totalValue = groupItems.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
             if (!Number.isFinite(totalValue)) throw new Error('Valor do pedido inválido.');
             const billingEntity = deal.billing_type === 'direct' ? 'infodive' : 'distributor';
@@ -198,7 +200,9 @@ export class SalesService {
                     status: 'pedido_gerado', billing_entity: billingEntity,
                     total_value: totalValue, created_by: userId,
                 }]).select('id').maybeSingle();
-            if (orderError || !order) throw new Error('Não foi possível criar o pedido. Conversão parcial possível.');
+            if (orderError || !order || typeof order.id !== 'string' || !order.id.trim()) {
+                throw new Error('Não foi possível criar o pedido. Conversão parcial possível.');
+            }
             const itemsToInsert = groupItems.map(item => ({
                 sales_order_id: order.id, organization_id: organizationId,
                 product_sku: item.sku, product_name: item.name,
@@ -207,7 +211,9 @@ export class SalesService {
             }));
             const { data: inserted, error: itemsError } = await supabase.from('sales_order_items')
                 .insert(itemsToInsert).select('id');
-            if (itemsError || !Array.isArray(inserted) || inserted.length !== itemsToInsert.length) {
+            if (itemsError || !Array.isArray(inserted) || inserted.length !== itemsToInsert.length ||
+                inserted.some(row => !row || typeof row.id !== 'string' || !row.id.trim()) ||
+                new Set(inserted.map(row => row.id)).size !== itemsToInsert.length) {
                 throw new Error('Não foi possível salvar todos os itens. Conversão parcial possível.');
             }
             results.push(order);
