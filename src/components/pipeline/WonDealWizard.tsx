@@ -40,6 +40,7 @@ import { updateDealStage, uploadDealDocument, getDealDetails } from '@/app/(dash
 import { getOrgSettings as fetchOrgSettings } from '@/app/(dashboard)/settings/actions';
 import { useAuth } from '@/hooks/useAuth';
 import { type OrgSettings } from '@/services/SettingsService';
+import { wonDealCompletionMessage } from '@/lib/distributor-order-outcome';
 
 interface WonDealWizardProps {
     deal: Deal;
@@ -58,6 +59,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isDownloading, setIsDownloading] = useState(false);
     const [hasConsolidated, setHasConsolidated] = useState(false);
+    const [distributorWarning, setDistributorWarning] = useState<string | null>(null);
 
     // Comprehensive Order State
     const [formData, setFormData] = useState({
@@ -172,20 +174,26 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
         }
 
         setIsLoading(true);
+        setDistributorWarning(null);
         try {
-            // 1. Create Sales Orders in DB + Save Excel Document
-            const result = await convertDealToSalesOrdersAction(deal.id, formData) as any;
-
+            // The distributor document may fail after sales orders are persisted.
+            // Preserve the committed sale and visibly distinguish incomplete evidence.
+            const result = await convertDealToSalesOrdersAction(deal.id, formData);
             if (!result.success) {
                 throw new Error(result.error || 'Erro ao gerar pedidos');
             }
 
-            // 2. Update Deal Stage to Won (final consolidation)
             await updateDealStage(deal.id, 'won', 100);
-
-            toast.success('Parabéns! Venda consolidada e pedidos gerados.');
+            const warning = 'distributorOrderWarning' in result && typeof result.distributorOrderWarning === 'string'
+                ? result.distributorOrderWarning : null;
+            setDistributorWarning(warning);
+            if (warning) {
+                toast.warning(wonDealCompletionMessage(warning), { description: warning });
+            } else {
+                toast.success(wonDealCompletionMessage(null));
+            }
             setHasConsolidated(true);
-            setStep(4); // Move to success step
+            setStep(4);
         } catch (error: any) {
             toast.error(error.message || 'Erro ao processar fechamento');
             console.error(error);
@@ -688,11 +696,22 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                 <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-foreground">Venda Sincronizada!</h3>
+                                <h3 className="text-xl font-black text-foreground">{distributorWarning ? 'Venda registrada com pendência' : 'Venda Sincronizada!'}</h3>
                                 <p className="text-sm text-muted-foreground mt-2 px-6">
-                                    A oportunidade foi consolidada com sucesso. Os pedidos para os distribuidores já estão disponíveis no módulo de Vendas.
+                                    {distributorWarning
+                                        ? 'A venda foi registrada no CRM, mas o arquivo do distribuidor permanece pendente.'
+                                        : 'A oportunidade foi consolidada com sucesso. O pedido do distribuidor foi salvo no CRM.'}
                                 </p>
                             </div>
+
+                            {distributorWarning && (
+                                <div role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-left">
+                                    <p className="font-bold text-amber-700 dark:text-amber-300">
+                                        Pedido do distribuidor pendente
+                                    </p>
+                                    <p className="mt-2 text-sm text-foreground">{distributorWarning}</p>
+                                </div>
+                            )}
 
                             <Separator className="my-6" />
 
