@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { SettingsService } from './SettingsService';
 import { DealService } from './DealService';
+import { validateDistributorOrderExtraData, validateDistributorOrderProducts } from '../lib/distributor-order-validation';
 
 export interface DistributorOrderExtraData {
     // Basic Info
@@ -48,6 +49,16 @@ export class DistributorOrderService {
         const deal = await DealService.getDealDetails('system', dealId, organizationId);
         if (!deal) throw new Error('Não foi possível processar o pedido do distribuidor.');
 
+        // Validate all client overrides and the exact template product capacity
+        // before reading the workbook or creating any distributor-facing output.
+        const safeExtra = validateDistributorOrderExtraData(extraData) as typeof extraData;
+        const productsToFill = validateDistributorOrderProducts(safeExtra?.products ??
+            (deal.deal_products || []).map((p) => ({
+                sku: p.sku || p.name,
+                quantity: p.quantity ?? 1,
+                unitPrice: p.unit_price ?? 0,
+            })));
+
         // 2. Fetch Organization Settings
         const org = await SettingsService.getOrgSettings(organizationId);
 
@@ -66,33 +77,33 @@ export class DistributorOrderService {
         if (!worksheet) throw new Error('Não foi possível processar o pedido do distribuidor.');
 
         // 4. Fill Dealer Data (Revenda)
-        worksheet.getCell('B9').value = extraData?.dealerName || org.name || '';
-        worksheet.getCell('B10').value = extraData?.dealerCnpj || org.cnpj || '';
+        worksheet.getCell('B9').value = safeExtra?.dealerName || org.name || '';
+        worksheet.getCell('B10').value = safeExtra?.dealerCnpj || org.cnpj || '';
         worksheet.getCell('B11').value = deal.id.substring(0, 8);
 
         // 5. Fill End-User Data (Usuário Final)
-        worksheet.getCell('B14').value = extraData?.userName || deal.account?.name || '';
-        worksheet.getCell('B15').value = extraData?.userCnpj || deal.account?.cnpj || '';
-        worksheet.getCell('B16').value = extraData?.userIe || deal.account?.ie || '';
+        worksheet.getCell('B14').value = safeExtra?.userName || deal.account?.name || '';
+        worksheet.getCell('B15').value = safeExtra?.userCnpj || deal.account?.cnpj || '';
+        worksheet.getCell('B16').value = safeExtra?.userIe || deal.account?.ie || '';
 
         let defaultAddress = '';
         if (deal.account) {
             defaultAddress = `${deal.account.street || ''}, ${deal.account.number || ''} ${deal.account.complement || ''}`.trim();
         }
-        worksheet.getCell('B17').value = extraData?.userAddress || defaultAddress;
-        worksheet.getCell('B18').value = extraData?.userNeighborhood || deal.account?.neighborhood || '';
-        worksheet.getCell('E18').value = `CEP: ${extraData?.userZip || deal.account?.zip || ''}`;
-        worksheet.getCell('B19').value = extraData?.userCity || deal.account?.city || '';
-        worksheet.getCell('E19').value = `Estado: ${extraData?.userState || deal.account?.state || ''}`;
+        worksheet.getCell('B17').value = safeExtra?.userAddress || defaultAddress;
+        worksheet.getCell('B18').value = safeExtra?.userNeighborhood || deal.account?.neighborhood || '';
+        worksheet.getCell('E18').value = `CEP: ${safeExtra?.userZip || deal.account?.zip || ''}`;
+        worksheet.getCell('B19').value = safeExtra?.userCity || deal.account?.city || '';
+        worksheet.getCell('E19').value = `Estado: ${safeExtra?.userState || deal.account?.state || ''}`;
 
         // Contato info
         const primaryContact = deal.account?.contacts?.find((c) => c.is_primary) || deal.account?.contacts?.[0];
-        worksheet.getCell('B20').value = extraData?.userContact || primaryContact?.name || '';
-        worksheet.getCell('B21').value = extraData?.userPhone || primaryContact?.mobile_phone || primaryContact?.landline_phone || '';
-        worksheet.getCell('B22').value = extraData?.userEmail || primaryContact?.email || '';
+        worksheet.getCell('B20').value = safeExtra?.userContact || primaryContact?.name || '';
+        worksheet.getCell('B21').value = safeExtra?.userPhone || primaryContact?.mobile_phone || primaryContact?.landline_phone || '';
+        worksheet.getCell('B22').value = safeExtra?.userEmail || primaryContact?.email || '';
 
         // 6. Extra Data (BID, Billing Type, Payment Terms)
-        if (extraData) {
+        if (safeExtra) {
             // BID Number (Yellow highlighted area)
             if (extraData.bidNumber) {
                 worksheet.getCell('B35').value = extraData.bidNumber;
@@ -114,12 +125,6 @@ export class DistributorOrderService {
         }
 
         // 7. Fill Products (Grid starts at row 39)
-        const productsToFill = extraData?.products || (deal.deal_products || []).map((p) => ({
-            sku: p.sku || p.name,
-            quantity: p.quantity || 1,
-            unitPrice: p.unit_price || 0
-        }));
-
         // --- SURGICAL GRID CLEANING (Deep Fix) ---
         // To prevent "Shared Formula master must exist" error, we must sanitize the entire grid area
         // (B39:E46) before injecting any data, stripping all internal formula metadata from the template.
@@ -145,7 +150,7 @@ export class DistributorOrderService {
         // --- DATA INJECTION ---
         productsToFill.forEach((product, index: number) => {
             const row = 39 + index;
-            if (row > 46) return;
+            if (row > 46) throw new Error('Limite de linhas da planilha Ingram excedido.');
 
             worksheet.getCell(`B${row}`).value = product.sku;
             worksheet.getCell(`C${row}`).value = product.quantity;
