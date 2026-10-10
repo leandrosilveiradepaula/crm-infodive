@@ -9,6 +9,7 @@ import type { DocumentCategory } from '../../../types/document';
 import { SalesOrder, SalesOrderItem } from '../../../hooks/useSalesOrders';
 import { createAdminClient } from '../../../lib/supabase/admin';
 import { validateInvoiceUpload } from '../../../lib/invoice-upload-validation';
+import { parseInvoiceStoragePath } from '../../../lib/invoice-storage-access';
 
 export async function getSalesOrders(dealId?: string) {
     try {
@@ -377,21 +378,24 @@ export async function deleteSalesDocument(documentId: string) {
  */
 export async function getSignedUrlForRawPath(filePath: string) {
     const { organizationId } = await requireSessionContext();
-    
-    // Security Check: Ensure the path belongs to the user's organization
-    if (!filePath.startsWith(`${organizationId}/`)) {
-        throw new Error('Acesso negado: o arquivo não pertence à sua organização.');
+    const invoice = parseInvoiceStoragePath(organizationId, filePath);
+    if (!invoice) {
+        throw new Error('Caminho de nota fiscal inválido ou acesso negado.');
     }
-
     const supabase = createAdminClient();
-    const { data, error } = await supabase.storage
-        .from('documents')
+    const { data: order, error: orderError } = await supabase.from('sales_orders')
+        .select('id, invoice_url').eq('id', invoice.orderId)
+        .eq('organization_id', organizationId).eq('invoice_url', filePath)
+        .maybeSingle();
+    if (orderError || !order || order.id?.toLowerCase() !== invoice.orderId.toLowerCase() ||
+        order.invoice_url !== filePath) {
+        throw new Error('Nota fiscal não encontrada ou acesso negado.');
+    }
+    const { data, error } = await supabase.storage.from('documents')
         .createSignedUrl(filePath, 300);
-
     if (error || !data?.signedUrl) {
         throw new Error('Erro ao gerar link seguro para o arquivo.');
     }
-
     return data.signedUrl;
 }
 

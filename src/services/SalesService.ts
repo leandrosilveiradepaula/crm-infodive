@@ -1,4 +1,5 @@
 import { createAdminClient } from '../lib/supabase/admin';
+import { isValidInvoiceStoragePath } from '../lib/invoice-storage-access';
 import type { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
 import type { DealProduct } from '@/types/deal';
 
@@ -123,6 +124,10 @@ export class SalesService {
         const changes: Record<string, unknown> = {};
         for (const key of writable) {
             if (updates[key] !== undefined) changes[key] = updates[key];
+        }
+        if (updates.invoice_url !== undefined &&
+            !isValidInvoiceStoragePath(organizationId, id.trim(), updates.invoice_url)) {
+            throw new Error('Caminho da nota fiscal inválido.');
         }
         if (!Object.keys(changes).length) throw new Error('Nenhuma alteração válida.');
         const supabase = createAdminClient();
