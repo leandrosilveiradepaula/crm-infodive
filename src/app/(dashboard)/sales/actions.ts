@@ -1,14 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { SalesService } from '@/services/SalesService';
-import { requirePermission, requireSessionContext } from '@/lib/auth-server';
-import { DistributorOrderService } from '@/services/DistributorOrderService';
-import { DocumentService } from '@/services/DocumentService';
-import type { DocumentCategory } from '@/types/document';
-import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
-import { createAdminClient } from '@/lib/supabase/admin';
-import { validateInvoiceUpload } from '@/lib/invoice-upload-validation';
+import { SalesService } from '../../../services/SalesService';
+import { requirePermission, requireSessionContext } from '../../../lib/auth-server';
+import { DistributorOrderService } from '../../../services/DistributorOrderService';
+import { DocumentService } from '../../../services/DocumentService';
+import type { DocumentCategory } from '../../../types/document';
+import { SalesOrder, SalesOrderItem } from '../../../hooks/useSalesOrders';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { validateInvoiceUpload } from '../../../lib/invoice-upload-validation';
 
 export async function getSalesOrders(dealId?: string) {
     try {
