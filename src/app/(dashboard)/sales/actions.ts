@@ -8,6 +8,7 @@ import { DocumentService } from '@/services/DocumentService';
 import type { DocumentCategory } from '@/types/document';
 import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { validateInvoiceUpload } from '@/lib/invoice-upload-validation';
 
 export async function getSalesOrders(dealId?: string) {
     try {
@@ -73,28 +74,29 @@ export async function updateInstallmentStatusAction(installmentId: string, statu
 export async function processInvoiceAction(orderId: string, formData: FormData) {
     try {
         const { organizationId, userId } = await requirePermission('deals:edit');
-        const file = formData.get('file') as File;
+        const file = formData.get('file');
         const confirmSave = formData.get('confirmSave') === 'true';
-        if (!file) throw new Error('Arquivo não encontrado');
-
+        const check = validateInvoiceUpload(orderId, file);
+        if (!check.ok) throw new Error(check.error);
+        const invoiceFile = file as File;
         const supabase = createAdminClient();
 
-        // 1. Upload to Storage (Using 'invoices' bucket from migration)
-        const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const fileName = `${organizationId}/invoices/${orderId}_${Date.now()}.${fileExt}`;
+        // Validate order ownership with a privileged tenant-scoped query BEFORE storage writes.
+        const { data: ownedOrder, error: ownershipError } = await supabase
+            .from('sales_orders').select('id, deal_id').eq('id', orderId)
+            .eq('organization_id', organizationId).maybeSingle();
+        if (ownershipError || !ownedOrder) throw new Error('Pedido não encontrado ou acesso negado.');
 
-        const arrayBuffer = await file.arrayBuffer();
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('documents')
+        const fileExt = check.extension;
+        const fileName = `${organizationId}/invoices/${orderId}_${crypto.randomUUID()}.${fileExt}`;
+        const arrayBuffer = await invoiceFile.arrayBuffer();
+        if (arrayBuffer.byteLength !== invoiceFile.size) throw new Error('Arquivo inválido.');
+        const { error: uploadError } = await supabase.storage.from('documents')
             .upload(fileName, arrayBuffer, {
-                contentType: file.type,
-                upsert: true
+                contentType: check.contentType,
+                upsert: false
             });
-
-        if (uploadError) {
-            console.error('[SalesActions] invoice upload failed');
-            throw new Error('Não foi possível processar a operação de vendas.');
-        }
+        if (uploadError) throw new Error('Não foi possível salvar o arquivo da nota fiscal.');
 
         // 2. Extract Info
         let extractedData: any = null;
@@ -115,7 +117,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
         } else if (fileExt === 'pdf') {
             try {
                 // 1. Parse Access Key from filename (most reliable for Number/CNPJ)
-                const keyMatch = file.name.match(/\d{44}/);
+                const keyMatch = invoiceFile.name.match(/\d{44}/);
                 let extractedNumber = 'Não encontrado';
                 let extractedCNPJ = '';
 
@@ -224,12 +226,11 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
             }
 
             // 4. Register as Document
-            const { data: order } = await supabase.from('sales_orders').select('deal_id').eq('id', orderId).single();
-            if (order?.deal_id) {
-                await DocumentService.uploadDocument(userId, organizationId, 'deal', order.deal_id, {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
+            if (ownedOrder.deal_id) {
+                await DocumentService.uploadDocument(userId, organizationId, 'deal', ownedOrder.deal_id, {
+                    name: invoiceFile.name,
+                    type: invoiceFile.type,
+                    size: invoiceFile.size,
                     arrayBuffer
                 }, {
                     category: 'outro',
