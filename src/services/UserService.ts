@@ -138,32 +138,68 @@ export class UserService {
         return { success: true };
     }
 
-    static async archiveUser(userId: string, organizationId: string, newOwnerId?: string) {
-        const supabase = createAdminClient();
+    static async archiveUser(userId: string, organizationId: string, newOwnerId?: string, actorUserId?: string) {
+        // The service uses a privileged database client. Do not rely on validation
+        // in a particular caller, since multiple Server Actions can invoke it.
+        if (typeof userId !== 'string' || !userId.trim() ||
+            typeof organizationId !== 'string' || !organizationId.trim() ||
+            typeof actorUserId !== 'string' || !actorUserId.trim() ||
+            userId === actorUserId ||
+            (newOwnerId !== undefined && (typeof newOwnerId !== 'string' || !newOwnerId.trim())) ||
+            (newOwnerId && newOwnerId !== 'none' && (newOwnerId === userId || newOwnerId === actorUserId))) {
+            return { success: false, error: 'Usuário de arquivamento inválido.' };
+        }
 
+        const supabase = createAdminClient();
         try {
-            // 1. Transfer deals if requested
-            if (newOwnerId && newOwnerId !== 'none') {
-                const { error: transferError } = await supabase
-                    .from('deals')
-                    .update({ owner_id: newOwnerId })
-                    .eq('owner_id', userId)
-                    .eq('organization_id', organizationId);
-                
-                if (transferError) throw transferError;
+            const { data: target, error: targetError } = await supabase.from('profiles')
+                .select('id, status').eq('id', userId)
+                .eq('organization_id', organizationId).maybeSingle();
+            if (targetError || !target || target.status !== 'active') {
+                throw new Error('Archive target unavailable');
             }
 
-            // 2. Archive user
-            const { error: archiveError } = await supabase
-                .from('profiles')
+            if (newOwnerId && newOwnerId !== 'none') {
+                const { data: replacement, error: replacementError } = await supabase.from('profiles')
+                    .select('id, status').eq('id', newOwnerId)
+                    .eq('organization_id', organizationId).maybeSingle();
+                if (replacementError || !replacement || replacement.status !== 'active') {
+                    throw new Error('Replacement owner unavailable');
+                }
+
+                // Count the tenant-scoped records before and after transfer to
+                // detect silent no-op/partial persistence. This is NOT atomic.
+                const { data: owned, error: ownedError } = await supabase.from('deals')
+                    .select('id').eq('owner_id', userId)
+                    .eq('organization_id', organizationId);
+                if (ownedError || !Array.isArray(owned) ||
+                    owned.some(row => !row || typeof row.id !== 'string')) {
+                    throw new Error('Unable to enumerate transferred deals');
+                }
+                if (owned.length > 0) {
+                    const { data: transferred, error: transferError } = await supabase.from('deals')
+                        .update({ owner_id: newOwnerId })
+                        .eq('owner_id', userId).eq('organization_id', organizationId)
+                        .in('id', owned.map(row => row.id)).select('id');
+                    if (transferError || !Array.isArray(transferred) ||
+                        transferred.length !== owned.length ||
+                        new Set(transferred.map(row => row.id)).size !== owned.length) {
+                        throw new Error('Deal ownership transfer not persisted');
+                    }
+                }
+            }
+
+            const { data: archived, error: archiveError } = await supabase.from('profiles')
                 .update({ status: 'inactive', updated_at: new Date().toISOString() })
-                .eq('id', userId)
-                .eq('organization_id', organizationId);
-
-            if (archiveError) throw archiveError;
-
+                .eq('id', userId).eq('organization_id', organizationId)
+                .eq('status', 'active').select('id').maybeSingle();
+            if (archiveError || !archived || archived.id !== userId) {
+                throw new Error('Archive not persisted');
+            }
             return { success: true };
         } catch {
+            // A failed transfer/archive may have partial effects until the
+            // transaction RPC from issue #119 is implemented and verified.
             return { success: false, error: 'Não foi possível arquivar o usuário.' };
         }
     }

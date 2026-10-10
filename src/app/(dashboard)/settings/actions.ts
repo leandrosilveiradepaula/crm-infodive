@@ -1,9 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { UserService } from '@/services/UserService';
-import { SettingsService, type PipelineStage } from '@/services/SettingsService';
-import { requirePermission, requireSessionContext } from '@/lib/auth-server';
+import { UserService } from '../../../services/UserService';
+import { SettingsService, type PipelineStage } from '../../../services/SettingsService';
+import { requirePermission, requireSessionContext } from '../../../lib/auth-server';
 
 // ─── USERS ──────────────────────────────────────────────────────────────────
 
@@ -20,8 +20,13 @@ export async function updateUserRole(userId: string, role: string) {
 }
 
 export async function archiveUserAction(userId: string, newOwnerId?: string) {
-    const { organizationId } = await requirePermission('settings:manage_users');
-    const result = await UserService.archiveUser(userId, organizationId, newOwnerId);
+    const { organizationId, userId: actorUserId } = await requirePermission('settings:manage_users');
+    if (typeof userId !== 'string' || !userId.trim() || userId === actorUserId ||
+        (newOwnerId !== undefined && (typeof newOwnerId !== 'string' || !newOwnerId.trim())) ||
+        (newOwnerId && newOwnerId !== 'none' && (newOwnerId === userId || newOwnerId === actorUserId))) {
+        return { success: false, error: 'Usuário de arquivamento inválido.' };
+    }
+    const result = await UserService.archiveUser(userId, organizationId, newOwnerId, actorUserId);
     if (result.success) revalidatePath('/settings');
     return result;
 }
@@ -34,7 +39,22 @@ export async function updateUserProfile(userId: string, updates: {
     roles?: string[];
 }) {
     const { organizationId } = await requirePermission('settings:manage_users');
-    const result = await UserService.updateUserProfile(userId, organizationId, updates);
+    if (typeof userId !== 'string' || !userId.trim() || !updates ||
+        typeof updates !== 'object' || Array.isArray(updates) ||
+        Object.keys(updates).some(key => !['name', 'phone', 'email', 'role', 'roles'].includes(key))) {
+        return { success: false, error: 'Alteração de usuário inválida.' };
+    }
+    const normalized = {
+        ...(updates.name !== undefined ? { full_name: updates.name } : {}),
+        ...(updates.phone !== undefined ? { phone: updates.phone } : {}),
+        ...(updates.email !== undefined ? { email: updates.email } : {}),
+        ...(updates.role !== undefined ? { role: updates.role } : {}),
+        ...(updates.roles !== undefined ? { roles: updates.roles } : {}),
+    };
+    if (!Object.keys(normalized).length) {
+        return { success: false, error: 'Nenhuma alteração válida.' };
+    }
+    const result = await UserService.updateUserProfile(userId.trim(), organizationId, normalized);
     if (result.success) revalidatePath('/settings');
     return result;
 }
