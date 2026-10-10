@@ -69,6 +69,7 @@ describe('invoice upload tenant and file guards', () => {
         });
         const fd = new FormData();
         fd.set('file', new File(['%PDF-1.7\n%%EOF'], 'nota.pdf', { type: 'application/pdf' }));
+        fd.set('confirmSave', 'true');
         const result = await processInvoiceAction(orderId, fd);
         expect(result.success).toBe(false);
         expect(upload).toHaveBeenCalledWith(
