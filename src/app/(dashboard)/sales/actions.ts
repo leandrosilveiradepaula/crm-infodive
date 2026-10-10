@@ -8,7 +8,7 @@ import { DocumentService } from '../../../services/DocumentService';
 import type { DocumentCategory } from '../../../types/document';
 import { SalesOrder, SalesOrderItem } from '../../../hooks/useSalesOrders';
 import { createAdminClient } from '../../../lib/supabase/admin';
-import { validateInvoiceUpload } from '../../../lib/invoice-upload-validation';
+import { validateInvoiceUpload, validateInvoiceContent } from '../../../lib/invoice-upload-validation';
 import { parseInvoiceStoragePath } from '../../../lib/invoice-storage-access';
 import { distributorOrderWarningFor, distributorOrderDownloadErrorFor } from '../../../lib/distributor-order-outcome';
 
@@ -93,6 +93,8 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
         const fileName = `${organizationId}/invoices/${orderId}_${crypto.randomUUID()}.${fileExt}`;
         const arrayBuffer = await invoiceFile.arrayBuffer();
         if (arrayBuffer.byteLength !== invoiceFile.size) throw new Error('Arquivo inválido.');
+        const contentError = validateInvoiceContent(check.extension, arrayBuffer);
+        if (contentError) throw new Error(contentError);
         const { error: uploadError } = await supabase.storage.from('documents')
             .upload(fileName, arrayBuffer, {
                 contentType: check.contentType,
