@@ -59,7 +59,7 @@ describe('deal conversion distributor document evidence', () => {
         mocks.generateIngramHWOrder.mockRejectedValue(new Error('O pedido deve conter entre 1 e 8 produtos'));
         const result = await convertDealToSalesOrdersAction('deal-a', {});
         expect(result).toMatchObject({ success: true, distributorOrderSaved: false });
-        expect(result.distributorOrderWarning).toContain('oito produtos');
+        expect(result).toHaveProperty('distributorOrderWarning', expect.stringContaining('oito produtos'));
         expect(mocks.uploadDocument).not.toHaveBeenCalled();
     });
 
@@ -67,14 +67,14 @@ describe('deal conversion distributor document evidence', () => {
         mocks.uploadDocument.mockRejectedValue(new Error('Storage unavailable'));
         const result = await convertDealToSalesOrdersAction('deal-a');
         expect(result).toMatchObject({ success: true, distributorOrderSaved: false });
-        expect(result.distributorOrderWarning).toContain('não foi salvo');
+        expect(result).toHaveProperty('distributorOrderWarning', expect.stringContaining('não foi salvo'));
     });
 
     it('requires a persisted document ID instead of trusting a null result', async () => {
         mocks.uploadDocument.mockResolvedValue(null);
         const result = await convertDealToSalesOrdersAction('deal-a');
         expect(result).toMatchObject({ success: true, distributorOrderSaved: false });
-        expect(result.distributorOrderWarning).toBeTruthy();
+        expect(result).toHaveProperty('distributorOrderWarning', expect.any(String));
     });
 
     it('does not attempt document generation when the sales conversion itself failed', async () => {
