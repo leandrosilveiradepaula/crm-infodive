@@ -92,7 +92,6 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
     // Initialize data
     useEffect(() => {
         if (isOpen && deal) {
-            setDistributorWarning(null);
             const loadFullDetails = async () => {
                 setIsLoading(true);
                 try {
@@ -175,6 +174,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
         }
 
         setIsLoading(true);
+        setDistributorWarning(null);
         try {
             // The distributor document may fail after sales orders are persisted.
             // Preserve the committed sale and visibly distinguish incomplete evidence.
