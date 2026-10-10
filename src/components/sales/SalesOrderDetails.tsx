@@ -85,7 +85,14 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
             const result = await processInvoiceAction(order.id, formData);
 
-            if (!result.success) throw new Error(result.error);
+            if (!result.success) {
+                if ('partialSuccess' in result && result.partialSuccess) {
+                    alert(result.error || 'Nota fiscal registrada com operações pendentes. Verifique antes de reenviar.');
+                    onUpdate();
+                    return;
+                }
+                throw new Error(result.error);
+            }
 
             setInvoiceUrl(result.fileUrl!);
             // updateSalesOrder already done inside processInvoiceAction when confirmSave is true
