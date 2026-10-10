@@ -658,3 +658,19 @@ real data mutation, paid model run, or credentials.
 RLS verification against the live CRM database and atomic multi-table operations
 remain open and must not be claimed complete. Integrate only into
 `product/hardening-release-candidate` after CI on the exact PR SHA.
+
+## Additional authorized task (2026-10-10): Honest pipeline/detail reads
+
+Follow-up after deal-write validation, under the user's autonomous permission.
+Five fail-closed blocks: validate the non-error payload shape for (1) pipeline
+deals, (2) tenant profile listings, (3) distributors, (4) customer accounts,
+and (5) deal details' products, activities and contacts. A legitimately empty
+array is still allowed; null/malformed payloads must never be turned into
+successful empty UI states.
+
+Allowed files: `src/services/DealService.ts`,
+`src/services/DealService.read-integrity.test.ts`, and this task note.
+Offline regression tests and normal CRM CI are required at the exact PR SHA.
+No migrations, RLS changes, production merge, Preview, credentials, paid
+calls or real database operations. Database tenant-policy certification and
+transactional business writes remain open separate risks.
