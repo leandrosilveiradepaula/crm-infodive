@@ -95,12 +95,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
         if (arrayBuffer.byteLength !== invoiceFile.size) throw new Error('Arquivo inválido.');
         const contentError = validateInvoiceContent(check.extension, arrayBuffer);
         if (contentError) throw new Error(contentError);
-        const { error: uploadError } = await supabase.storage.from('documents')
-            .upload(fileName, arrayBuffer, {
-                contentType: check.contentType,
-                upsert: false
-            });
-        if (uploadError) throw new Error('Não foi possível salvar o arquivo da nota fiscal.');
+        // Parsing/preview must never write a Storage object.
 
         // 2. Extract Info
         let extractedData: any = null;
@@ -213,38 +208,67 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
             }
         }
 
-        // 3. Update Sales Order (ONLY if confirmSave is true)
-        if (confirmSave) {
-            const updates: any = {
+        // 3. Analysis is read-only. Only confirmed uploads may persist objects.
+        if (!confirmSave) {
+            return { success: true, saved: false, extractedData, fileUrl: null };
+        }
+
+        const { error: uploadError } = await supabase.storage.from('documents')
+            .upload(fileName, arrayBuffer, { contentType: check.contentType, upsert: false });
+        if (uploadError) throw new Error('Não foi possível salvar o arquivo da nota fiscal.');
+
+        let invoiceLinkedToOrder = false;
+        try {
+            const updates: Record<string, unknown> = {
                 status: 'nf_emitida',
                 invoice_url: fileName,
-                billed_at: new Date().toISOString()
+                billed_at: new Date().toISOString(),
             };
-
             if (extractedData?.number) updates.tax_invoice_number = extractedData.number;
 
             await SalesService.updateSalesOrder(organizationId, orderId, updates);
+            invoiceLinkedToOrder = true;
 
             if (extractedData?.boletos && extractedData.boletos.length > 0) {
                 await SalesService.createInstallments(organizationId, orderId, extractedData.boletos);
             }
-
-            // 4. Register as Document
             if (ownedOrder.deal_id) {
                 await DocumentService.uploadDocument(userId, organizationId, 'deal', ownedOrder.deal_id, {
                     name: invoiceFile.name,
                     type: invoiceFile.type,
                     size: invoiceFile.size,
-                    arrayBuffer
+                    arrayBuffer,
                 }, {
                     category: 'outro',
-                    description: `Nota Fiscal do pedido ${orderId}`
+                    description: `Nota Fiscal do pedido ${orderId}`,
                 });
             }
+        } catch {
+            if (!invoiceLinkedToOrder) {
+                // The failed DB mutation did not reference the Storage object.
+                // Remove the orphan best effort, but never report a false save.
+                try {
+                    const { error: cleanupError } = await supabase.storage.from('documents').remove([fileName]);
+                    if (cleanupError) console.error('[SalesActions] failed to clean up unlinked invoice');
+                } catch {
+                    console.error('[SalesActions] invoice cleanup request failed');
+                }
+                return { success: false, saved: false, error: 'Não foi possível registrar a nota fiscal no pedido.' };
+            }
+            // This is NOT atomic: the invoice is referenced by the sales order,
+            // but an installment or document copy may have failed.
             revalidatePath('/sales');
+            return {
+                success: false,
+                saved: true,
+                partialSuccess: true,
+                fileUrl: fileName,
+                error: 'Nota fiscal registrada, mas houve falha em operações complementares. Verifique antes de reenviar.',
+            };
         }
 
-        return { success: true, extractedData, fileUrl: fileName };
+        revalidatePath('/sales');
+        return { success: true, saved: true, extractedData, fileUrl: fileName };
     } catch {
         console.error('[SalesActions] invoice processing failed');
         return { success: false, error: 'Não foi possível processar a operação de vendas.' };

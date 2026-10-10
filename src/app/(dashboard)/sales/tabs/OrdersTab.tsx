@@ -205,6 +205,12 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                         toast.warning('PDF analisado, mas não foi possível extrair dados automaticamente.');
                     }
                 }
+            } else if ('partialSuccess' in result && result.partialSuccess) {
+                toast.warning(result.error || 'Nota fiscal registrada parcialmente. Verifique antes de reenviar.');
+                setIsUploadModalOpen(false);
+                setCapturedData(null);
+                setInvoiceFile(null);
+                await onReload();
             } else {
                 toast.error('Erro ao processar NF: ' + result.error);
             }
