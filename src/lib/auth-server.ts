@@ -1,22 +1,15 @@
-import { headers } from 'next/headers';
 import { getSession } from './session';
 import { createAdminClient } from './supabase/admin';
 import { hasPermission } from './permissions';
 import type { Permission } from '@/types/auth';
 
 /**
- * Reads the X-User-Id header injected by middleware.
- * Acts as a fast-path security layer for API routes.
+ * An incoming identity header is not a trusted authentication primitive.
+ * Always resolve the user from a verified session and current tenant profile.
  */
 export async function requireUserId(): Promise<string> {
-    const headersList = await headers();
-    const headerUserId = headersList.get('X-User-Id');
-
-    if (!headerUserId) {
-        throw new Error('Unauthorized API Access: Missing X-User-Id header');
-    }
-
-    return headerUserId;
+    const { userId } = await requireSessionContext();
+    return userId;
 }
 
 /**
@@ -47,7 +40,7 @@ export async function requireSessionContext(): Promise<{ userId: string; organiz
         throw new Error('Unauthorized: Profile not found or database error.');
     }
 
-    if (profile.status === 'inactive') {
+    if (profile.status !== 'active') {
         throw new Error('Unauthorized: This account has been deactivated. Contact your administrator.');
     }
 
@@ -74,7 +67,7 @@ export async function requirePermission(permission: Permission): Promise<{ userI
         .eq('organization_id', organizationId)
         .single();
 
-    if (error || !profile || profile.status === 'inactive') {
+    if (error || !profile || profile.status !== 'active') {
         throw new Error('Forbidden: active profile required');
     }
 
