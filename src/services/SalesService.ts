@@ -67,36 +67,50 @@ export class SalesService {
     }
 
     static async createSalesOrder(organizationId: string, order: Partial<SalesOrder>, items: Partial<SalesOrderItem>[]) {
-        const supabase = createAdminClient();
-
-        // 1. Create Order
-        const { data: orderData, error: orderError } = await supabase
-            .from('sales_orders')
-            .insert([{
-                ...order,
-                organization_id: organizationId,
-                status: order.status || 'pedido_gerado'
-            }])
-            .select()
-            .single();
-
-        if (orderError) throw new Error('Não foi possível salvar os dados de vendas.');
-
-        // 2. Create Items
-        if (items && items.length > 0) {
-            const itemsToInsert = items.map(item => ({
-                ...item,
-                sales_order_id: orderData.id,
-                organization_id: organizationId
-            }));
-
-            const { error: itemsError } = await supabase
-                .from('sales_order_items')
-                .insert(itemsToInsert);
-
-            if (itemsError) throw new Error('Não foi possível salvar os dados de vendas.');
+        if (!order || typeof order !== 'object' || Array.isArray(order) ||
+            typeof order.deal_id !== 'string' || !order.deal_id.trim() ||
+            !Array.isArray(items) || items.length === 0 || items.length > 250 ||
+            items.some(item => !item || typeof item.product_name !== 'string' || !item.product_name.trim() ||
+                typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0 ||
+                typeof item.unit_price !== 'number' || !Number.isFinite(item.unit_price) || item.unit_price < 0)) {
+            throw new Error('Dados do pedido inválidos.');
         }
+        const supabase = createAdminClient();
+        const { data: deal, error: dealError } = await supabase.from('deals')
+            .select('id').eq('id', order.deal_id).eq('organization_id', organizationId).maybeSingle();
+        if (dealError || !deal) throw new Error('Negócio não encontrado ou acesso negado.');
 
+        // Only explicit writable fields may enter privileged inserts.
+        const orderPayload = {
+            deal_id: order.deal_id,
+            organization_id: organizationId,
+            status: 'pedido_gerado',
+            billing_entity: order.billing_entity,
+            distributor_id: order.distributor_id,
+            total_value: items.reduce((sum, item) => sum + item.unit_price! * item.quantity!, 0),
+        };
+        if (!Number.isFinite(orderPayload.total_value)) throw new Error('Valor do pedido inválido.');
+
+        const { data: orderData, error: orderError } = await supabase.from('sales_orders')
+            .insert([orderPayload]).select('id').maybeSingle();
+        if (orderError || !orderData) throw new Error('Não foi possível salvar os dados de vendas.');
+
+        const itemsToInsert = items.map(item => ({
+            sales_order_id: orderData.id,
+            organization_id: organizationId,
+            product_sku: item.product_sku,
+            product_name: item.product_name,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            cost: item.cost,
+            margin: item.margin,
+            external_id: item.external_id,
+        }));
+        const { data: insertedItems, error: itemsError } = await supabase.from('sales_order_items')
+            .insert(itemsToInsert).select('id');
+        if (itemsError || !Array.isArray(insertedItems) || insertedItems.length !== itemsToInsert.length) {
+            throw new Error('Não foi possível salvar todos os itens do pedido.');
+        }
         return orderData;
     }
 
@@ -216,31 +230,35 @@ export class SalesService {
     }
 
     static async createInstallments(organizationId: string, orderId: string, installments: { dueDate: string; amount: number }[]) {
-        const supabase = createAdminClient();
-
-        const itemsToInsert = installments.map(inst => {
-            // Convert DD/MM/YYYY or YYYY-MM-DD to ISO date string or valid Date string for postgres
+        if (typeof orderId !== 'string' || !orderId.trim() || !Array.isArray(installments) ||
+            installments.length === 0 || installments.length > 120 ||
+            installments.some(inst => !inst || typeof inst.dueDate !== 'string' ||
+                typeof inst.amount !== 'number' || !Number.isFinite(inst.amount) || inst.amount <= 0)) {
+            throw new Error('Parcelas inválidas.');
+        }
+        const normalized = installments.map(inst => {
             let isoDate = inst.dueDate;
-            if (isoDate.includes('/')) {
-                const parts = isoDate.split('/');
-                isoDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(isoDate)) {
+                const [day, month, year] = isoDate.split('/');
+                isoDate = `${year}-${month}-${day}`;
             }
-
-            return {
-                organization_id: organizationId,
-                sales_order_id: orderId,
-                due_date: isoDate,
-                amount: inst.amount,
-                status: 'pending'
-            };
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate) ||
+                Number.isNaN(Date.parse(isoDate)) ||
+                new Date(`${isoDate}T00:00:00Z`).toISOString().slice(0, 10) !== isoDate) {
+                throw new Error('Data de parcela inválida.');
+            }
+            return { organization_id: organizationId, sales_order_id: orderId,
+                due_date: isoDate, amount: inst.amount, status: 'pending' };
         });
-
-        const { data, error } = await supabase
-            .from('sales_order_installments')
-            .insert(itemsToInsert)
-            .select();
-
-        if (error) throw new Error('Não foi possível salvar os dados de vendas.');
+        const supabase = createAdminClient();
+        const { data: ownedOrder, error: ownershipError } = await supabase.from('sales_orders')
+            .select('id').eq('id', orderId).eq('organization_id', organizationId).maybeSingle();
+        if (ownershipError || !ownedOrder) throw new Error('Pedido não encontrado ou acesso negado.');
+        const { data, error } = await supabase.from('sales_order_installments')
+            .insert(normalized).select('id');
+        if (error || !Array.isArray(data) || data.length !== normalized.length) {
+            throw new Error('Não foi possível salvar todas as parcelas.');
+        }
         return data;
     }
 
@@ -273,7 +291,7 @@ export class SalesService {
             .eq('organization_id', organizationId)
             .order('due_date', { ascending: true });
 
-        if (error) throw new Error('Não foi possível carregar os dados de vendas.');
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os dados de vendas.');
         return data;
     }
 }
