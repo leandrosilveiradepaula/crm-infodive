@@ -363,7 +363,7 @@ export class DealService {
         const checkedStage = validateDealStage(newStage);
         const checkedProbability = probability === undefined ? undefined : validateDealProbability(probability);
         const supabase = createAdminClient();
-        const updates: any = { stage: checkedStage };
+        const updates: { stage: string; probability?: number; won_at?: string; lost_at?: string } = { stage: checkedStage };
 
         if (checkedProbability !== undefined) updates.probability = checkedProbability;
         if (checkedStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
