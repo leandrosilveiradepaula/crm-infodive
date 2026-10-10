@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import type { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
 import type { DealProduct } from '@/types/deal';
 
@@ -21,7 +21,7 @@ export class SalesService {
         }
 
         const { data, error } = await query;
-        if (error) throw new Error('Não foi possível carregar os dados de vendas.');
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os dados de vendas.');
 
         // Fetch profiles for the users (either via created_by or deal's owner_id)
         let profilesMap: Record<string, { full_name: string; commission_rules: any }> = {};
@@ -33,11 +33,13 @@ export class SalesService {
             });
 
             if (userIds.size > 0) {
-                const { data: profiles } = await supabase
+                const { data: profiles, error: profilesError } = await supabase
                     .from('profiles')
                     .select('id, full_name, commission_rules')
-                    .in('id', Array.from(userIds));
+                    .in('id', Array.from(userIds))
+                    .eq('organization_id', organizationId);
                 
+                if (profilesError || !Array.isArray(profiles)) throw new Error('Não foi possível carregar os perfis de vendas.');
                 if (profiles) {
                     profilesMap = (profiles as any[]).reduce((acc, p) => {
                         acc[p.id] = p;
@@ -99,28 +101,31 @@ export class SalesService {
     }
 
     static async updateSalesOrder(organizationId: string, id: string, updates: Partial<SalesOrder>) {
+        if (typeof id !== 'string' || !id.trim() || !updates || typeof updates !== 'object' || Array.isArray(updates)) {
+            throw new Error('Pedido inválido.');
+        }
+        const writable = ['status', 'tax_invoice_number', 'billing_entity', 'payment_status', 'commission_status',
+            'total_value', 'invoice_url', 'billed_at', 'shipped_at', 'delivered_at'] as const;
+        const changes: Record<string, unknown> = {};
+        for (const key of writable) {
+            if (updates[key] !== undefined) changes[key] = updates[key];
+        }
+        if (!Object.keys(changes).length) throw new Error('Nenhuma alteração válida.');
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('sales_orders')
-            .update(updates)
-            .eq('id', id)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
-
-        if (error) throw new Error('Não foi possível atualizar os dados de vendas.');
+        const { data, error } = await supabase.from('sales_orders').update(changes)
+            .eq('id', id.trim()).eq('organization_id', organizationId)
+            .select().maybeSingle();
+        if (error || !data) throw new Error('Não foi possível atualizar os dados de vendas.');
         return data;
     }
 
     static async deleteSalesOrder(organizationId: string, id: string) {
+        if (typeof id !== 'string' || !id.trim()) throw new Error('Pedido inválido.');
         const supabase = createAdminClient();
-        const { error } = await supabase
-            .from('sales_orders')
-            .delete()
-            .eq('id', id)
-            .eq('organization_id', organizationId);
-
-        if (error) throw new Error('Não foi possível excluir os dados de vendas.');
+        const { data, error } = await supabase.from('sales_orders').delete()
+            .eq('id', id.trim()).eq('organization_id', organizationId)
+            .select('id').maybeSingle();
+        if (error || !data) throw new Error('Não foi possível excluir os dados de vendas.');
         return true;
     }
 
@@ -240,16 +245,15 @@ export class SalesService {
     }
 
     static async updateInstallmentStatus(organizationId: string, installmentId: string, newStatus: string) {
+        if (typeof installmentId !== 'string' || !installmentId.trim() ||
+            !['pending', 'paid', 'cancelled', 'overdue'].includes(newStatus)) {
+            throw new Error('Parcela ou situação inválida.');
+        }
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('sales_order_installments')
-            .update({ status: newStatus })
-            .eq('id', installmentId)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
-
-        if (error) throw new Error('Não foi possível atualizar os dados de vendas.');
+        const { data, error } = await supabase.from('sales_order_installments')
+            .update({ status: newStatus }).eq('id', installmentId.trim())
+            .eq('organization_id', organizationId).select().maybeSingle();
+        if (error || !data) throw new Error('Não foi possível atualizar os dados de vendas.');
         return data;
     }
 
