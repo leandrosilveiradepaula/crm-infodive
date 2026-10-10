@@ -1,4 +1,5 @@
 import { createAdminClient } from '../lib/supabase/admin';
+import { requireDealIdentity, validateDealTitle, validateDealMoney, validateDealProbability, validateDealStage, validateDealReference } from '../lib/deal-write-validation';
 import { sortProductsHierarchically } from '../utils/productSorting';
 import { normalizeCasing } from '../lib/string-utils';
 import { Deal, DealProduct } from '../types/deal';
@@ -225,28 +226,50 @@ export class DealService {
     }
 
     static async createDeal(userId: string, organizationId: string, dealData: Partial<Deal>): Promise<Deal> {
+        requireDealIdentity(userId, organizationId);
+        if (!dealData || typeof dealData !== 'object' || Array.isArray(dealData)) {
+            throw new Error('Dados da oportunidade inválidos.');
+        }
+        const title = validateDealTitle(dealData.title);
+        const value = validateDealMoney(dealData.value ?? 0);
+        const probability = validateDealProbability(dealData.probability ?? 20);
+        const stage = validateDealStage(dealData.stage ?? 'qualification');
+        const accountId = validateDealReference(dealData.account_id);
         const supabase = createAdminClient();
+        if (accountId) {
+            const { data: account, error: accountError } = await supabase.from('accounts')
+                .select('id').eq('id', accountId).eq('organization_id', organizationId).maybeSingle();
+            if (accountError || !account || account.id !== accountId) {
+                throw new Error('Conta não encontrada na organização.');
+            }
+        }
 
         const payload = {
-            title: normalizeCasing(dealData.title || '', 'title'),
-            account_id: dealData.account_id || null,
+            title: normalizeCasing(title, 'title'),
+            account_id: accountId,
             owner_id: userId,
             owner: dealData.owner || 'Me',
             company: normalizeCasing(dealData.company || '', 'name') || null,
-            value: dealData.value || 0,
-            stage: dealData.stage || 'qualification',
-            probability: dealData.probability || 20,
+            value,
+            stage,
+            probability,
             expected_close_date: dealData.expected_close_date || null,
             description: dealData.description || null,
             organization_id: organizationId
         };
 
         const { data, error } = await supabase.from('deals').insert([payload]).select().single();
-        if (error) throw new Error('Não foi possível salvar a oportunidade.');
+        if (error || !data || typeof data.id !== 'string' || !data.id.trim()) {
+            throw new Error('Não foi possível salvar a oportunidade.');
+        }
         return data as Deal;
     }
 
     static async updateDeal(userId: string, dealId: string, organizationId: string, updates: Partial<Deal>): Promise<Deal | null> {
+        requireDealIdentity(userId, organizationId, dealId);
+        if (!updates || typeof updates !== 'object' || Array.isArray(updates)) {
+            throw new Error('Alterações da oportunidade inválidas.');
+        }
         const supabase = createAdminClient();
 
         // Valid columns for the 'deals' table
@@ -269,8 +292,35 @@ export class DealService {
         }, {} as Record<string, any>);
 
         if (Object.keys(sanitizedUpdates).length === 0) {
-            console.warn('⚠️ No valid columns provided for deal update');
-            return null;
+            throw new Error('Nenhuma alteração válida para a oportunidade.');
+        }
+
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'title')) {
+            sanitizedUpdates.title = normalizeCasing(validateDealTitle(sanitizedUpdates.title), 'title');
+        }
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'value')) {
+            sanitizedUpdates.value = validateDealMoney(sanitizedUpdates.value);
+        }
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'commission_deduction')) {
+            sanitizedUpdates.commission_deduction = validateDealMoney(sanitizedUpdates.commission_deduction);
+        }
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'probability')) {
+            sanitizedUpdates.probability = validateDealProbability(sanitizedUpdates.probability);
+        }
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'stage')) {
+            sanitizedUpdates.stage = validateDealStage(sanitizedUpdates.stage);
+        }
+        if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'account_id')) {
+            const accountId = validateDealReference(sanitizedUpdates.account_id);
+            sanitizedUpdates.account_id = accountId;
+            if (accountId) {
+                const { data: account, error: accountError } = await supabase.from('accounts')
+                    .select('id').eq('id', accountId)
+                    .eq('organization_id', organizationId).maybeSingle();
+                if (accountError || !account || account.id !== accountId) {
+                    throw new Error('Conta não encontrada na organização.');
+                }
+            }
         }
 
         const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
@@ -282,12 +332,12 @@ export class DealService {
 
             const { data: targetOwner, error: targetOwnerError } = await supabase
                 .from('profiles')
-                .select('id')
+                .select('id, status')
                 .eq('id', sanitizedUpdates.owner_id)
                 .eq('organization_id', organizationId)
                 .maybeSingle();
 
-            if (targetOwnerError || !targetOwner) {
+            if (targetOwnerError || !targetOwner || targetOwner.status !== 'active') {
                 throw new Error('Não foi possível alterar o responsável pela oportunidade.');
             }
         }
@@ -304,17 +354,20 @@ export class DealService {
 
         const { data, error } = await query.select().single();
 
-        if (error) throw new Error('Não foi possível atualizar a oportunidade.');
+        if (error || !data || data.id !== dealId) throw new Error('Não foi possível atualizar a oportunidade.');
         return data as Deal;
     }
 
     static async updateDealStage(userId: string, dealId: string, organizationId: string, newStage: string, probability?: number) {
+        requireDealIdentity(userId, organizationId, dealId);
+        const checkedStage = validateDealStage(newStage);
+        const checkedProbability = probability === undefined ? undefined : validateDealProbability(probability);
         const supabase = createAdminClient();
-        const updates: any = { stage: newStage };
+        const updates: { stage: string; probability?: number; won_at?: string; lost_at?: string } = { stage: checkedStage };
 
-        if (probability !== undefined) updates.probability = probability;
-        if (newStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
-        else if (newStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
+        if (checkedProbability !== undefined) updates.probability = checkedProbability;
+        if (checkedStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
+        else if (checkedStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
 
         const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
@@ -329,7 +382,9 @@ export class DealService {
         }
 
         const { data, error } = await query.select().single();
-        if (error) throw new Error('Não foi possível atualizar a etapa da oportunidade.');
+        if (error || !data || data.id !== dealId || data.stage !== checkedStage) {
+            throw new Error('Não foi possível atualizar a etapa da oportunidade.');
+        }
         return data;
     }
 
