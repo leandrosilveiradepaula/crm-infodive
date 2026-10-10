@@ -10,6 +10,7 @@ import { SalesOrder, SalesOrderItem } from '../../../hooks/useSalesOrders';
 import { createAdminClient } from '../../../lib/supabase/admin';
 import { validateInvoiceUpload } from '../../../lib/invoice-upload-validation';
 import { parseInvoiceStoragePath } from '../../../lib/invoice-storage-access';
+import { distributorOrderWarningFor, distributorOrderDownloadErrorFor } from '../../../lib/distributor-order-outcome';
 
 export async function getSalesOrders(dealId?: string) {
     try {
@@ -252,37 +253,42 @@ export async function convertDealToSalesOrdersAction(dealId: string, extraData?:
     try {
         const { userId, organizationId } = await requirePermission('deals:edit');
 
-        // 1. Convert Deal to Sales Orders (Internal Records)
+        // Database sales orders and the distributor workbook are separate
+        // operations. Do not treat Excel generation as part of an atomic write.
         const result = await SalesService.convertDealToSalesOrders(userId, organizationId, dealId);
+        let distributorOrderSaved = false;
+        let distributorDocumentId: string | null = null;
+        let distributorOrderWarning: string | null = null;
 
-        // 2. Automatically Generate and Save Distributor Excel Order
         try {
-            const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(dealId, organizationId, extraData);
-
-            await DocumentService.uploadDocument(
-                userId,
-                organizationId,
-                'deal',
-                dealId,
+            const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(
+                dealId, organizationId, extraData,
+            );
+            const saved = await DocumentService.uploadDocument(
+                userId, organizationId, 'deal', dealId,
                 {
                     name: fileName,
                     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     size: buffer.length,
-                    arrayBuffer: buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer,
+                    arrayBuffer: buffer.buffer.slice(
+                        buffer.byteOffset, buffer.byteOffset + buffer.byteLength,
+                    ) as ArrayBuffer,
                 },
-                {
-                    category: 'outro',
-                    description: 'Pedido gerado automaticamente no fechamento.'
-                }
+                { category: 'outro', description: 'Pedido gerado automaticamente no fechamento.' },
             );
-        } catch {
-            console.error('[SalesActions] distributor order generation failed');
-            // Non-blocking for the transaction
+            if (!saved || typeof saved.id !== 'string' || !saved.id.trim()) {
+                throw new Error('Distributor workbook evidence not persisted');
+            }
+            distributorOrderSaved = true;
+            distributorDocumentId = saved.id;
+        } catch (error: unknown) {
+            console.error('[SalesActions] distributor order generation or document persistence failed');
+            distributorOrderWarning = distributorOrderWarningFor(error);
         }
 
         revalidatePath('/sales');
         revalidatePath('/pipeline');
-        return result;
+        return { ...result, distributorOrderSaved, distributorDocumentId, distributorOrderWarning };
     } catch {
         console.error('[SalesActions] deal conversion failed');
         return { success: false, error: 'Não foi possível processar a operação de vendas.' };
@@ -297,9 +303,9 @@ export async function downloadDistributorOrderAction(dealId: string, extraData?:
         // Convert Buffer to base64 for transfer
         const base64 = buffer.toString('base64');
         return { success: true, base64, fileName };
-    } catch {
+    } catch (error: unknown) {
         console.error('[SalesActions] distributor order download failed');
-        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
+        return { success: false, error: distributorOrderDownloadErrorFor(error) };
     }
 }
 
