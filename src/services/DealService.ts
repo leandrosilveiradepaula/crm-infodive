@@ -64,7 +64,7 @@ export class DealService {
 
         const { data: deals, error } = await query.order('created_at', { ascending: false });
 
-        if (error) {
+        if (error || !Array.isArray(deals)) {
             console.error('[DealService] pipeline data fetch failed');
             throw new Error('Não foi possível carregar o pipeline.');
         }
@@ -75,7 +75,7 @@ export class DealService {
             .select('id, full_name, avatar_url, commission_rules')
             .eq('organization_id', organizationId);
 
-        if (profilesError) {
+        if (profilesError || !Array.isArray(allProfiles)) {
             console.error('[DealService] pipeline profiles fetch failed');
             throw new Error('Não foi possível carregar os responsáveis pelas oportunidades.');
         }
@@ -107,7 +107,7 @@ export class DealService {
             .eq('relationship_type', 'Distribuidor')
             .order('name');
 
-        if (distError) {
+        if (distError || !Array.isArray(distributors)) {
             console.error('[DealService] pipeline distributors fetch failed');
             throw new Error('Não foi possível carregar os distribuidores.');
         }
@@ -119,7 +119,7 @@ export class DealService {
             .eq('organization_id', organizationId)
             .order('name');
 
-        if (accountsError) {
+        if (accountsError || !Array.isArray(allAccounts)) {
             console.error('[DealService] pipeline accounts fetch failed');
             throw new Error('Não foi possível carregar as contas do pipeline.');
         }
@@ -163,7 +163,7 @@ export class DealService {
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('display_order', { ascending: true });
-        if (productsError) {
+        if (productsError || !Array.isArray(products)) {
             throw new Error('Não foi possível carregar os produtos da oportunidade.');
         }
 
@@ -173,7 +173,7 @@ export class DealService {
             .eq('deal_id', dealId)
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
-        if (activitiesError) {
+        if (activitiesError || !Array.isArray(activities)) {
             throw new Error('Não foi possível carregar as atividades da oportunidade.');
         }
 
@@ -194,7 +194,7 @@ export class DealService {
                 .select('*')
                 .eq('account_id', acc.id)
                 .eq('organization_id', organizationId);
-            if (contactsError) {
+            if (contactsError || !Array.isArray(contacts)) {
                 throw new Error('Não foi possível carregar os contatos da oportunidade.');
             }
             account = { ...(acc as unknown as Account), contacts: (contacts || []) as Account['contacts'] };
