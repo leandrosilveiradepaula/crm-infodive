@@ -160,7 +160,7 @@ describe('DealService offline tenant and mutation integrity', () => {
         });
 
         await expect(DealService.duplicateDeal('admin-a', 'deal-1', 'tenant-a'))
-            .rejects.toThrow('Não foi possível duplicar os produtos da oportunidade.');
+            .rejects.toThrow('Não foi possível duplicar todos os produtos da oportunidade.');
 
         const rollback = db.operations.find(operation => operation.table === 'deals' && operation.mode === 'delete');
         expect(rollback?.filters).toContainEqual(['id', 'deal-copy']);
