@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { type SalesOrder } from '../../hooks/useSalesOrders';
 import { getSalesOrders, getSignedUrlForRawPath } from '@/app/(dashboard)/sales/actions';
 import { toast } from 'sonner';
@@ -16,10 +16,13 @@ import {
     Filter
 } from 'lucide-react';
 import { SalesOrderDetails } from './SalesOrderDetails';
+import { salesOrderMatchesFilter, validateSalesOrderList } from '../../lib/sales-order-list-integrity';
 
 export const SalesOrderList: React.FC = () => {
     const [orders, setOrders] = useState<SalesOrder[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const loadVersion = useRef(0);
     const [selectedOrder, setSelectedOrder] = useState<SalesOrder | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -29,14 +32,22 @@ export const SalesOrderList: React.FC = () => {
     }, []);
 
     const loadOrders = async () => {
+        const version = ++loadVersion.current;
         setLoading(true);
+        setError(null);
         try {
             const result = await getSalesOrders();
-            if (result.success && result.data) {
-                setOrders(result.data as SalesOrder[]);
+            if (!result.success) throw new Error('Não foi possível consultar pedidos de venda.');
+            const rows = validateSalesOrderList(result.data);
+            if (version === loadVersion.current) setOrders(rows);
+        } catch {
+            if (version === loadVersion.current) {
+                // A failure is not a genuine empty list and must not leave stale totals.
+                setOrders([]);
+                setError('Falha ao carregar os pedidos. Tente novamente.');
             }
         } finally {
-            setLoading(false);
+            if (version === loadVersion.current) setLoading(false);
         }
     };
 
@@ -71,16 +82,8 @@ export const SalesOrderList: React.FC = () => {
         }).format(value);
     };
 
-    const filteredOrders = orders.filter(order => {
-        const matchesSearch =
-            order.deal?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.deal?.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.id.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-    });
+    const filteredOrders = orders.filter(order =>
+        salesOrderMatchesFilter(order, searchTerm, statusFilter));
 
     return (
         <div className="h-full flex flex-col bg-background text-foreground p-5 overflow-hidden">
@@ -99,7 +102,7 @@ export const SalesOrderList: React.FC = () => {
                         <div>
                             <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'pedido_gerado').length}
+                                {error ? '—' : orders.filter(o => o.status === 'pedido_gerado').length}
                             </p>
                         </div>
                     </div>
@@ -110,7 +113,7 @@ export const SalesOrderList: React.FC = () => {
                         <div>
                             <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'nf_emitida').length}
+                                {error ? '—' : orders.filter(o => o.status === 'nf_emitida').length}
                             </p>
                         </div>
                     </div>
@@ -121,7 +124,7 @@ export const SalesOrderList: React.FC = () => {
                         <div>
                             <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'entregue').length}
+                                {error ? '—' : orders.filter(o => o.status === 'entregue').length}
                             </p>
                         </div>
                     </div>
@@ -166,6 +169,18 @@ export const SalesOrderList: React.FC = () => {
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                ) : error ? (
+                    <div role="alert" className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 text-center">
+                        <AlertCircle className="h-10 w-10 text-destructive" aria-hidden="true" />
+                        <p className="font-semibold text-foreground">{error}</p>
+                        <button
+                            type="button"
+                            onClick={() => void loadOrders()}
+                            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
+                        >
+                            Tentar novamente
+                        </button>
                     </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
