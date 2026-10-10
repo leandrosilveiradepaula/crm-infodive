@@ -639,3 +639,22 @@ Add executable offline tests with mocked auth/Supabase. Preserve existing
 `integrations:manage` RBAC and UI contracts. No migrations, live integration
 calls, credentials, paid models, Vercel Preview, production merge, or access widening.
 Validate one exact PR SHA before candidate-only merge.
+
+## Additional authorized task (2026-10-10): Deal write and stage integrity
+
+User reaffirmed autonomous CRM hardening with five substantive blocks per PR.
+Non-production candidate scope:
+1. Validate deal creation title, monetary amounts, stage, and probability; preserve explicit zero.
+2. Resolve referenced customer account against the current tenant before privileged writes.
+3. Reject empty, invalid-financial and invalid-stage deal updates; never confirm a no-op.
+4. Require an active, tenant-scoped target owner before reassignment.
+5. Validate stage changes and confirm that a matching row was persisted.
+
+Allowed files: `src/services/DealService.ts`, `src/lib/deal-write-validation.ts`,
+`src/services/DealService.write-integrity.test.ts`, and this task record.
+Validation through existing CRM CI: TypeScript, lint, offline tests, build, browser smoke.
+No production merge, Preview, migration, new permission, third-party call,
+real data mutation, paid model run, or credentials.
+RLS verification against the live CRM database and atomic multi-table operations
+remain open and must not be claimed complete. Integrate only into
+`product/hardening-release-candidate` after CI on the exact PR SHA.
