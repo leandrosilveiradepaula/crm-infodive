@@ -12,6 +12,10 @@ function withRequestId<T extends NextResponse>(response: T, requestId: string): 
 
 export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers)
+    // Never forward client-supplied identity or service credential headers.
+    // Recreate them exclusively from the authenticated server session below.
+    requestHeaders.delete('X-User-Id')
+    requestHeaders.delete('X-Supabase-Token')
     const requestId = getRequestId(requestHeaders.get('X-Request-Id'))
     requestHeaders.set('X-Request-Id', requestId)
 

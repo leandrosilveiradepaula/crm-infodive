@@ -43,7 +43,7 @@ export async function login(formData: FormData) {
         .eq('id', data.user.id)
         .single();
 
-    if (profileError || !profile || profile.status === 'inactive' || !profile.organization_id) {
+    if (profileError || !profile || profile.status !== 'active' || !profile.organization_id) {
         await supabase.auth.signOut();
         return { error: 'Não foi possível validar o acesso desta conta.' };
     }
