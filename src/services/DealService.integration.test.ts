@@ -210,7 +210,7 @@ describe('DealService offline tenant and mutation integrity', () => {
             'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
             'deals:read': { data: { id: 'deal-1' }, error: null },
             'deal_products:read': { data: { deal_id: 'deal-1' }, error: null },
-            'deal_products:update': { data: { id: 'item-1' }, error: null },
+            'deal_products:update': { data: { id: 'item-1', organization_id: 'tenant-a' }, error: null },
         });
         await DealService.updateDealProduct('user-a', 'item-1', 'tenant-a', {
             name: 'Produto seguro',
