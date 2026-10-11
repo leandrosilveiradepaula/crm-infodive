@@ -674,3 +674,23 @@ Offline regression tests and normal CRM CI are required at the exact PR SHA.
 No migrations, RLS changes, production merge, Preview, credentials, paid
 calls or real database operations. Database tenant-policy certification and
 transactional business writes remain open separate risks.
+
+## Additional authorized task (2026-10-10): Pipeline stage save integrity
+
+Five blocks, under explicit autonomous CRM authorization:
+1. Reject invalid stage names/colors, duplicate normalized names and invalid organization context.
+2. Convert the UI's unsaved fallback stage IDs (1..5) into genuine UUIDs before
+   persisting them in the UUID database column.
+3. Fail closed on malformed existing stages and suspicious collision responses.
+4. Require exact tenant-scoped deleted ID evidence rather than a matching count only.
+5. Require exact upsert ID evidence rather than a matching count only.
+
+Allowed code: `src/services/SettingsService.ts`,
+`src/services/SettingsService.integration.test.ts`,
+`src/services/SettingsService.stage-integrity.test.ts`, and this task record.
+Run CI offline tests/lint/TypeScript/build/browser smoke on the exact PR SHA.
+No Preview, database migration, SQL RPC, privileged access expansion,
+production merge or real record mutation. **Important residual risk:** the
+delete+upsert pipeline stage replacement remains non-atomic and cannot be
+certified concurrent-safe without a PostgreSQL transaction and live DB tests
+(issue #125). Never mark that issue resolved from this batch.

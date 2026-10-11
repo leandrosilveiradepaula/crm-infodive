@@ -28,6 +28,10 @@ function fakeDb(responses: Record<string, Result | Result[]> = {}) {
         function take(): Result {
             const queued = queues.get(table + ':' + op.mode) ?? queues.get(table);
             if (queued?.length) return queued.shift()!;
+            if (op.mode === 'upsert' && table === 'pipeline_stages') {
+                const rows = op.payload as Array<{ id: string }>;
+                return { data: rows.map(row => ({ id: row.id })), error: null };
+            }
             return { data: op.mode === 'read' ? [] : [{ id: 'saved' }], error: null };
         }
         return builder;
@@ -126,7 +130,7 @@ describe('SettingsService tenant and persistence integrity', () => {
         await expect(SettingsService.savePipelineStages('tenant', [stage]))
             .resolves.toMatchObject({ success: false });
         const reads = db.operations.filter(op => op.table === 'pipeline_stages' && op.mode === 'read');
-        expect(reads[1]?.filters).toContainEqual(['id', ['1']]);
+        expect(reads[1]?.filters).toContainEqual(['id', [expect.stringMatching(/^[0-9a-f-]{36}$/i)]]);
         expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
     });
 
@@ -147,7 +151,7 @@ describe('SettingsService tenant and persistence integrity', () => {
             'pipeline_stages:read': { data: [{ id: 'old' }], error: null },
             'pipeline_stages:delete': { data: [], error: null },
         });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
+        await expect(SettingsService.savePipelineStages('tenant', [{ ...stage, id: '22222222-2222-4222-8222-222222222222' }]))
             .resolves.toMatchObject({ success: false });
         const deletion = db.operations.find(op => op.mode === 'delete');
         expect(deletion?.filters).toContainEqual(['organization_id', 'tenant']);
@@ -165,11 +169,11 @@ describe('SettingsService tenant and persistence integrity', () => {
 
         const db = fakeDb({
             'pipeline_stages:read': { data: [], error: null },
-            'pipeline_stages:upsert': { data: [{ id: '1' }], error: null },
         });
         await expect(SettingsService.savePipelineStages('tenant', [stage]))
             .resolves.toMatchObject({ success: true });
         expect(db.operations.find(op => op.mode === 'upsert')?.payload)
-            .toEqual([{ id: '1', name: 'Qualificação', color: '#abcdef', order_index: 0, organization_id: 'tenant' }]);
+            .toEqual([{ id: expect.stringMatching(/^[0-9a-f-]{36}$/i),
+                name: 'Qualificação', color: '#abcdef', order_index: 0, organization_id: 'tenant' }]);
     });
 });
