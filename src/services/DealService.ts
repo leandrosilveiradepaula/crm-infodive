@@ -389,94 +389,76 @@ export class DealService {
     }
 
     static async duplicateDeal(userId: string, dealId: string, organizationId: string): Promise<Deal> {
+        requireDealIdentity(userId, organizationId, dealId);
         const supabase = createAdminClient();
 
-        // 1. Fetch only a deal the current user is allowed to read.
         const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
-        let originalDealQuery = supabase
-            .from('deals')
-            .select('*')
-            .eq('id', dealId)
-            .eq('organization_id', organizationId);
-
-        if (!isAdminOrManager) {
-            originalDealQuery = originalDealQuery.eq('owner_id', userId);
-        }
-
+        let originalDealQuery = supabase.from('deals').select('*')
+            .eq('id', dealId).eq('organization_id', organizationId);
+        if (!isAdminOrManager) originalDealQuery = originalDealQuery.eq('owner_id', userId);
         const { data: originalDeal, error: dealError } = await originalDealQuery.maybeSingle();
-
-        if (dealError || !originalDeal) {
+        if (dealError || !originalDeal || originalDeal.id !== dealId) {
             throw new Error('Não foi possível duplicar a oportunidade.');
         }
 
-        // 2. Fetch original products
         const { data: originalProducts, error: productsError } = await supabase
-            .from('deal_products')
-            .select('*')
-            .eq('deal_id', dealId)
-            .eq('organization_id', organizationId);
-
-        if (productsError) {
-            throw new Error('Não foi possível duplicar os produtos da oportunidade.');
+            .from('deal_products').select('*')
+            .eq('deal_id', dealId).eq('organization_id', organizationId);
+        if (productsError || !Array.isArray(originalProducts) ||
+            originalProducts.some(p => !p || typeof p.id !== 'string' || !p.id.trim() ||
+                p.deal_id !== dealId || p.organization_id !== organizationId)) {
+            throw new Error('Não foi possível validar os produtos da oportunidade.');
         }
 
-        // 3. Prepare duplicated deal data
         const { id, created_at, updated_at, ...baseDealData } = originalDeal;
-
         const duplicatedDealPayload = {
             ...baseDealData,
-            title: `Cópia de ${originalDeal.title}`,
-            owner_id: userId, // Current user becomes the owner of the copy
-            won_at: null,
-            lost_at: null,
-            loss_reason: null,
-            days_in_stage: 0,
-            organization_id: organizationId // Explicit SaaS Multitenant attribution
-            // Stage remains the same as requested, and other relation IDs remain untouched
+            title: validateDealTitle('Cópia de ' + originalDeal.title),
+            owner_id: userId,
+            won_at: null, lost_at: null, loss_reason: null,
+            days_in_stage: 0, organization_id: organizationId,
         };
-
         const { data: newDeal, error: insertDealError } = await supabase
-            .from('deals')
-            .insert([duplicatedDealPayload])
-            .select()
-            .single();
-
-        if (insertDealError || !newDeal) {
-            throw new Error('Não foi possível duplicar a oportunidade.');
+            .from('deals').insert([duplicatedDealPayload]).select().single();
+        if (insertDealError || !newDeal || typeof newDeal.id !== 'string' ||
+            !newDeal.id.trim() || newDeal.id === dealId ||
+            newDeal.organization_id !== organizationId) {
+            throw new Error('Não foi possível confirmar a cópia da oportunidade.');
         }
 
-        // 4. Duplicate Products if any
-        if (originalProducts && originalProducts.length > 0) {
+        if (originalProducts.length > 0) {
             const duplicatedProductsPayload = originalProducts.map(p => {
                 const { id, created_at, updated_at, ...baseProductData } = p;
                 return {
                     ...baseProductData,
                     ...normalizeDealProductCurrencyFields(p),
-                    deal_id: newDeal.id, // Link to the newly duplicated deal
-                    organization_id: organizationId // Explicit SaaS Multitenant attribution
+                    deal_id: newDeal.id, organization_id: organizationId,
                 };
             });
 
-            const { error: insertProductsError } = await supabase
-                .from('deal_products')
-                .insert(duplicatedProductsPayload);
-
-            if (insertProductsError) {
-                console.error('[DealService] deal product duplication failed');
-                const { data: rolledBack, error: rollbackError } = await supabase
-                    .from('deals')
-                    .delete()
-                    .eq('id', newDeal.id)
-                    .eq('organization_id', organizationId)
-                    .select('id')
-                    .maybeSingle();
-
-                if (rollbackError || !rolledBack) {
-                    console.error('[DealService] duplicated deal rollback failed');
+            const { data: inserted, error: insertProductsError } = await supabase
+                .from('deal_products').insert(duplicatedProductsPayload).select('id');
+            const insertedIds = Array.isArray(inserted) ?
+                inserted.map(p => p && typeof p.id === 'string' ? p.id : '') : [];
+            const allPersisted = !insertProductsError &&
+                insertedIds.length === duplicatedProductsPayload.length &&
+                insertedIds.every(id => Boolean(id.trim())) &&
+                new Set(insertedIds).size === duplicatedProductsPayload.length;
+            if (!allPersisted) {
+                // Compensating delete, not an atomic transaction. If this also
+                // fails, the duplicated data must be inspected and reconciled.
+                console.error('[DealService] product duplication not fully persisted');
+                try {
+                    const { data: rolledBack, error: rollbackError } = await supabase
+                        .from('deals').delete().eq('id', newDeal.id)
+                        .eq('organization_id', organizationId).select('id').maybeSingle();
+                    if (rollbackError || rolledBack?.id !== newDeal.id) {
+                        throw new Error('Rollback did not affect the duplicated deal');
+                    }
+                } catch {
                     throw new Error('Não foi possível concluir nem reverter a duplicação da oportunidade.');
                 }
-
-                throw new Error('Não foi possível duplicar os produtos da oportunidade.');
+                throw new Error('Não foi possível duplicar todos os produtos da oportunidade.');
             }
         }
 

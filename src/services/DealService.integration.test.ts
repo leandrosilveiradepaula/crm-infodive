@@ -153,14 +153,14 @@ describe('DealService offline tenant and mutation integrity', () => {
         const db = fakeDatabase({
             'profiles:read': { data: { role: 'admin', roles: [] }, error: null },
             'deals:read': { data: { id: 'deal-1', title: 'Original', owner_id: 'user-x', organization_id: 'tenant-a' }, error: null },
-            'deal_products:read': { data: [{ id: 'product-row-1', name: 'Produto' }], error: null },
-            'deals:insert': { data: { id: 'deal-copy', title: 'Cópia de Original' }, error: null },
+            'deal_products:read': { data: [{ id: 'product-row-1', name: 'Produto', deal_id: 'deal-1', organization_id: 'tenant-a' }], error: null },
+            'deals:insert': { data: { id: 'deal-copy', title: 'Cópia de Original', organization_id: 'tenant-a' }, error: null },
             'deal_products:insert': { data: null, error: { message: 'insert failed' } },
             'deals:delete': { data: { id: 'deal-copy' }, error: null },
         });
 
         await expect(DealService.duplicateDeal('admin-a', 'deal-1', 'tenant-a'))
-            .rejects.toThrow('Não foi possível duplicar os produtos da oportunidade.');
+            .rejects.toThrow('Não foi possível duplicar todos os produtos da oportunidade.');
 
         const rollback = db.operations.find(operation => operation.table === 'deals' && operation.mode === 'delete');
         expect(rollback?.filters).toContainEqual(['id', 'deal-copy']);
