@@ -44,6 +44,14 @@ export class AutomationRuntimeService {
         }
 
         const automations = await AutomationService.getAutomations(userId, organizationId);
+        if (!Array.isArray(automations) || automations.some(automation =>
+            !automation || typeof automation.id !== 'string' || !automation.id.trim() ||
+            !automation.trigger || typeof automation.trigger.type !== 'string')) {
+            throw new Error('automation definitions unavailable');
+        }
+        if (new Set(automations.map(automation => automation.id)).size !== automations.length) {
+            throw new Error('duplicate automation definitions');
+        }
         const active = automations.filter((automation) => automation.enabled && automation.trigger.type === event.type);
         const results: RuntimeResult[] = [];
 
@@ -69,7 +77,7 @@ export class AutomationRuntimeService {
             .select('id')
             .maybeSingle();
 
-        if (persistenceError || !data) {
+        if (persistenceError || !data || data.id !== executionId) {
             throw new Error('automation execution finalization failed');
         }
     }
@@ -108,8 +116,10 @@ export class AutomationRuntimeService {
             throw new Error('automation execution claim failed');
         }
 
-        const executionId = String(claimed?.id || '');
-        if (!executionId) throw new Error('automation execution id missing');
+        const executionId = claimed?.id;
+        if (typeof executionId !== 'string' || !executionId.trim()) {
+            throw new Error('automation execution id missing');
+        }
 
         if (!plan.matched) {
             await this.incrementCounters(automation.id, organizationId, 'skipped');
@@ -123,7 +133,7 @@ export class AutomationRuntimeService {
                 const title = String(action.config.title || automation.name || 'Tarefa automática').trim();
                 if (!title) throw new Error('automation task title is required');
 
-                await ActivityService.createActivity(userId, organizationId, {
+                const createdTask = await ActivityService.createActivity(userId, organizationId, {
                     type: 'task',
                     title,
                     description: action.config.description ? String(action.config.description) : automation.description,
@@ -133,6 +143,9 @@ export class AutomationRuntimeService {
                     assignedTo: userId,
                     source: 'automation',
                 });
+                if (!createdTask || typeof createdTask.id !== 'string' || !createdTask.id.trim()) {
+                    throw new Error('automation task not persisted');
+                }
             }
 
             await this.finalizeExecution(executionId, organizationId, 'success', null);

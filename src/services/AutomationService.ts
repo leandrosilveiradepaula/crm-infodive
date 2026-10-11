@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import { type Automation, type AutomationExecution, type EmailTemplate } from '@/types/automation';
 import { sanitizeAutomationWrite, assertSupportedAutomation } from './automationMutationPolicy';
 
@@ -11,7 +11,7 @@ export class AutomationService {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AutomationService] automations fetch failed');
             throw new Error('Não foi possível carregar as automações.');
         }
