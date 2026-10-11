@@ -1,4 +1,5 @@
 import { createAdminClient } from '../lib/supabase/admin';
+import { validateDealProductWrite } from '../lib/deal-product-write-validation';
 import { requireDealIdentity, validateDealTitle, validateDealMoney, validateDealProbability, validateDealStage, validateDealReference } from '../lib/deal-write-validation';
 import { sortProductsHierarchically } from '../utils/productSorting';
 import { normalizeCasing } from '../lib/string-utils';
@@ -492,6 +493,8 @@ export class DealService {
     }
 
     static async addDealProduct(userId: string, dealId: string, organizationId: string, productData: Partial<DealProduct>): Promise<DealProduct> {
+        requireDealIdentity(userId, organizationId, dealId);
+        validateDealProductWrite(productData, true);
         const supabase = createAdminClient();
         await this.assertWritableDeal(supabase, userId, dealId, organizationId);
 
@@ -501,6 +504,15 @@ export class DealService {
                 .eq('id', productData.product_id)
                 .eq('organization_id', organizationId).maybeSingle();
             if (productError || !catalogProduct) throw new Error('Produto de catálogo inválido para esta organização.');
+        }
+
+        if (productData.distributor_id) {
+            const { data: distributor, error: distributorError } = await supabase.from('accounts')
+                .select('id').eq('id', productData.distributor_id)
+                .eq('organization_id', organizationId).maybeSingle();
+            if (distributorError || !distributor || distributor.id !== productData.distributor_id) {
+                throw new Error('Distribuidor inválido para esta organização.');
+            }
         }
 
         const payload = {
@@ -526,11 +538,16 @@ export class DealService {
         };
 
         const { data, error } = await supabase.from('deal_products').insert([payload]).select().single();
-        if (error) throw new Error('Não foi possível adicionar o produto à oportunidade.');
+        if (error || !data || typeof data.id !== 'string' || !data.id.trim() ||
+            data.deal_id !== dealId || data.organization_id !== organizationId) {
+            throw new Error('Não foi possível confirmar a criação do produto da oportunidade.');
+        }
         return data as DealProduct;
     }
 
     static async updateDealProduct(userId: string, itemId: string, organizationId: string, updates: Partial<DealProduct>): Promise<DealProduct> {
+        requireDealIdentity(userId, organizationId, itemId);
+        validateDealProductWrite(updates, false);
         const supabase = createAdminClient();
         await this.assertWritableProduct(supabase, userId, itemId, organizationId);
         const currencyKeys: Array<keyof DealProduct> = ['is_usd', 'usd_cost', 'exchange_rate', 'present_in_usd'];
@@ -585,7 +602,9 @@ export class DealService {
             .eq('organization_id', organizationId)
             .select()
             .single();
-        if (error) throw new Error('Não foi possível atualizar o produto da oportunidade.');
+        if (error || !data || data.id !== itemId || data.organization_id !== organizationId) {
+            throw new Error('Não foi possível atualizar o produto da oportunidade.');
+        }
         return data as DealProduct;
     }
 
@@ -604,7 +623,9 @@ export class DealService {
             .select('id')
             .maybeSingle();
 
-        if (error || !deleted) throw new Error('Não foi possível remover o produto da oportunidade.');
+        if (error || !deleted || deleted.id !== itemId) {
+            throw new Error('Não foi possível remover o produto da oportunidade.');
+        }
         return true;
     }
 
