@@ -151,7 +151,7 @@ describe('SettingsService tenant and persistence integrity', () => {
             'pipeline_stages:read': { data: [{ id: 'old' }], error: null },
             'pipeline_stages:delete': { data: [], error: null },
         });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
+        await expect(SettingsService.savePipelineStages('tenant', [{ ...stage, id: '22222222-2222-4222-8222-222222222222' }]))
             .resolves.toMatchObject({ success: false });
         const deletion = db.operations.find(op => op.mode === 'delete');
         expect(deletion?.filters).toContainEqual(['organization_id', 'tenant']);

@@ -67,6 +67,13 @@ describe('pipeline stages fail-closed persistence', () => {
         expect(x.operations.every(op => op.mode === 'read')).toBe(true);
     });
 
+    it('refuses stale placeholder IDs after another session persisted real stages', async () => {
+        const x = db({ 'pipeline_stages:read': { data: [{ id: uuid }], error: null } });
+        await expect(SettingsService.savePipelineStages('tenant-a', [initial]))
+            .resolves.toMatchObject({ success: false });
+        expect(x.operations.every(op => op.mode === 'read')).toBe(true);
+    });
+
     it('rejects an unexpected collision result even when it names the current tenant', async () => {
         const x = db({ 'pipeline_stages:read': [
             { data: [], error: null },
@@ -85,8 +92,9 @@ describe('pipeline stages fail-closed persistence', () => {
             ],
             'pipeline_stages:delete': { data: [{ id: 'wrong' }], error: null },
         });
-        await expect(SettingsService.savePipelineStages('tenant-a', [initial]))
-            .resolves.toMatchObject({ success: false });
+        await expect(SettingsService.savePipelineStages('tenant-a', [
+            { ...initial, id: '22222222-2222-4222-8222-222222222222' },
+        ])).resolves.toMatchObject({ success: false });
         expect(x.operations.some(op => op.mode === 'upsert')).toBe(false);
         expect(x.operations.find(op => op.mode === 'delete')?.filters)
             .toContainEqual(['organization_id', 'tenant-a']);

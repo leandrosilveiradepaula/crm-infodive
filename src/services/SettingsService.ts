@@ -142,6 +142,11 @@ export class SettingsService {
             new Set(existingData.map(row => row.id)).size !== existingData.length) {
             return { success: false, error: 'Etapas existentes inválidas.' };
         }
+        if (existingData.length > 0 && stages.some(stage => defaultIds.has(stage.id))) {
+            // A fallback stage list is an initial/unsaved UI representation.
+            // Never overwrite persisted stages with regenerated IDs from a stale tab.
+            return { success: false, error: 'Etapas alteradas por outra sessão. Recarregue antes de salvar.' };
+        }
         const existingIds = existingData.map(r => r.id);
         const currentIds = prepared.map(s => s.id);
         const newIds = currentIds.filter(id => !existingIds.includes(id));
