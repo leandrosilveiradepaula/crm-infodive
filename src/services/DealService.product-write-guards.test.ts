@@ -95,8 +95,9 @@ describe('deal product mutation integrity', () => {
             { name: 'Widget', quantity: 1, unit_price: 10 })).resolves.toMatchObject({ id: 'item-a' });
         await expect(DealService.updateDealProduct('actor-a', 'item-a', 'tenant-a',
             { name: 'Novo nome', unit_price: 0 })).resolves.toMatchObject({ id: 'item-a' });
-        expect(db.operations.filter(o => o.mode === 'insert' || o.mode === 'update'))
-            .every(o => o.filters.some(([k,v]) => k === 'organization_id' && v === 'tenant-a') ||
-                o.mode === 'insert')).toBe(true);
+        expect(db.operations.filter(o => o.mode === 'insert' || o.mode === 'update')
+            .every(o => o.mode === 'insert' ||
+                o.filters.some(([key, value]) => key === 'organization_id' && value === 'tenant-a')))
+            .toBe(true);
     });
 });
