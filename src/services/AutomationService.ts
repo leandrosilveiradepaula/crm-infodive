@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import { type Automation, type AutomationExecution, type EmailTemplate } from '@/types/automation';
 import { sanitizeAutomationWrite, assertSupportedAutomation } from './automationMutationPolicy';
 
