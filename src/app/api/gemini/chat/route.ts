@@ -1,5 +1,6 @@
 import { requireSessionContext } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAiDealScope } from '@/lib/ai-deal-scope';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 import { createAiRouteContext } from '@/lib/ai-route-observability';
 
@@ -51,6 +52,16 @@ export async function POST(request: Request) {
         return telemetry.respond({ error: 'Pergunta inválida.' }, 400);
     }
 
+    // Sales staff may only send their own deal context to an external LLM.
+    // Support and unknown roles are denied before consuming paid quota.
+    let canViewAll: boolean;
+    try {
+        ({ canViewAll } = await getAiDealScope(userId, organizationId));
+    } catch {
+        telemetry.record('forbidden_context', 403);
+        return telemetry.respond({ error: 'Forbidden' }, 403);
+    }
+
     const rateLimit = await guardPaidAiRequest({ scope: 'gemini-chat', organizationId, userId, limit: 10, windowMs: 60_000 });
     if (!rateLimit.allowed) {
         telemetry.record(rateLimit.reason, rateLimit.status);
@@ -58,10 +69,12 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminClient();
-    const { data: deals, error } = await supabase
+    let dealQuery = supabase
         .from('deals')
         .select('title, company, value, stage, probability, days_in_stage, expected_close_date, next_step')
-        .eq('organization_id', organizationId)
+        .eq('organization_id', organizationId);
+    if (!canViewAll) dealQuery = dealQuery.eq('owner_id', userId);
+    const { data: deals, error } = await dealQuery
         .not('stage', 'in', '("won","lost")')
         .order('value', { ascending: false })
         .limit(30);

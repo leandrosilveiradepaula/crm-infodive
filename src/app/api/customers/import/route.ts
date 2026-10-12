@@ -1,13 +1,27 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: Request) {
+    // The browser import wizard is not an authorization boundary. Deny before
+    // parsing user files, touching quota state or invoking a paid AI provider.
+    let userId: string;
+    let organizationId: string;
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        ({ userId, organizationId } = await requirePermission('clients:import'));
+    } catch (error) {
+        const forbidden = error instanceof Error && error.message.includes('Forbidden');
+        return NextResponse.json({ error: forbidden ? 'Forbidden' : 'Unauthorized' }, { status: forbidden ? 403 : 401 });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+        return NextResponse.json({ error: 'Integração de IA não configurada.' }, { status: 503 });
+    }
+
+    try {
         const { fileName, fileContent, contentType } = await req.json();
 
         if (!fileContent) {
