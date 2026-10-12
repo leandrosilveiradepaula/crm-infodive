@@ -28,7 +28,10 @@ export function configuredBoardStages(configured: PipelineStage[], deals: Pick<D
         // Terminal states stay system-controlled, never driven by a display name.
         if (normal(stage.name) === 'ganho' || normal(stage.name) === 'fechado ganho' ||
             normal(stage.name) === 'perdido') continue;
-        const id = translated?.key || stage.name.trim();
+        // Persisted custom stages use their immutable UUID, not an editable label.
+        // The synthetic defaults have non-UUID IDs and keep legacy statuses.
+        const id = translated?.key || (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stage.id)
+            ? stage.id : stage.name.trim());
         if (!id || seen.has(id) || id === 'won' || id === 'lost') continue;
         seen.add(id);
         custom.push({ id, title: stage.name, color: 'border-primary', bg: 'bg-primary/5',
@@ -55,5 +58,5 @@ export function configuredBoardStages(configured: PipelineStage[], deals: Pick<D
 }
 export function isConfiguredMove(target: string, configured: PipelineStage[]): boolean {
     if (target === 'won' || target === 'lost') return true;
-    return configuredBoardStages(configured, []).some(s => s.id === target);
+    return configuredBoardStages(configured, []).some(s => s.id === target && !s.historical);
 }

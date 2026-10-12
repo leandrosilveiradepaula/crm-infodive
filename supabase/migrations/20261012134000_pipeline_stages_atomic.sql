@@ -81,15 +81,40 @@ BEGIN
   v_count:=v_count+1;
  END LOOP;
 
- -- Deal.stage is TEXT and Kanban currently has a separate fixed semantic set.
- -- Do not silently detach any deals from an existing stage on delete/rename.
- IF EXISTS(
+ -- Custom deal.stage values are immutable stage UUIDs; older deals can
+ -- still contain editable names and the legacy English status keys. Reject a
+ -- delete whenever any reference exists. Reject a rename only when name/legacy
+ -- references would become detached; UUID-linked deals survive safe renames.
+ IF EXISTS (
  SELECT 1 FROM public.pipeline_stages old
  WHERE old.organization_id=p_org_id
-   AND NOT EXISTS(SELECT 1 FROM pg_temp.pipeline_requested_stages requested
-     WHERE requested.id=old.id AND requested.name=old.name)
-   AND EXISTS(SELECT 1 FROM public.deals d
-     WHERE d.organization_id=p_org_id AND d.stage=old.name)
+   AND (
+     (NOT EXISTS (
+       SELECT 1 FROM pg_temp.pipeline_requested_stages requested
+       WHERE requested.id=old.id
+     ) AND EXISTS (
+       SELECT 1 FROM public.deals d
+       WHERE d.organization_id=p_org_id AND (
+         d.stage=old.id::text OR d.stage=old.name
+         OR (lower(old.name)='qualificação' AND d.stage='qualification')
+         OR (lower(old.name)='proposta' AND d.stage='proposal')
+         OR (lower(old.name)='negociação' AND d.stage='negotiation')
+       )
+     ))
+     OR
+     (EXISTS (
+       SELECT 1 FROM pg_temp.pipeline_requested_stages requested
+       WHERE requested.id=old.id AND requested.name IS DISTINCT FROM old.name
+     ) AND EXISTS (
+       SELECT 1 FROM public.deals d
+       WHERE d.organization_id=p_org_id AND (
+         d.stage=old.name
+         OR (lower(old.name)='qualificação' AND d.stage='qualification')
+         OR (lower(old.name)='proposta' AND d.stage='proposal')
+         OR (lower(old.name)='negociação' AND d.stage='negotiation')
+       )
+     ))
+   )
  )
  THEN RAISE EXCEPTION 'Existing deals still use changed stage' USING ERRCODE='23503'; END IF;
 

@@ -25,6 +25,32 @@ BEGIN
  '[{"id":"11111111-1111-4111-8111-111111111111","name":"Qualificação","color":"#123456"},
  {"id":"33333333-3333-4333-8333-333333333333","name":"Nova","color":"#abcdef"}]');
  IF r.revision<>1 THEN RAISE EXCEPTION 'revision wrong'; END IF;
+ -- The legacy English status must block rename, not only Portuguese labels.
+ INSERT INTO public.deals(organization_id,stage) VALUES
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','qualification'),
+ ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','33333333-3333-4333-8333-333333333333');
+ BEGIN
+ PERFORM public.replace_pipeline_stages_atomic(
+ 'cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
+ '[{"id":"11111111-1111-4111-8111-111111111111","name":"Prospecção","color":"#123456"},
+ {"id":"33333333-3333-4333-8333-333333333333","name":"Nova","color":"#abcdef"}]');
+ RAISE EXCEPTION 'rename detached legacy qualification deal';
+ EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+ BEGIN
+ PERFORM public.replace_pipeline_stages_atomic(
+ 'cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
+ '[{"id":"11111111-1111-4111-8111-111111111111","name":"Qualificação","color":"#123456"}]');
+ RAISE EXCEPTION 'delete detached UUID-linked deal';
+ EXCEPTION WHEN foreign_key_violation THEN NULL; END;
+ SELECT * INTO r FROM public.replace_pipeline_stages_atomic(
+ 'cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',1,
+ '[{"id":"11111111-1111-4111-8111-111111111111","name":"Qualificação","color":"#123456"},
+ {"id":"33333333-3333-4333-8333-333333333333","name":"Etapa Renomeada","color":"#abcdef"}]');
+ IF r.revision<>2 THEN RAISE EXCEPTION 'UUID-linked rename failed'; END IF;
+ IF NOT EXISTS (SELECT 1 FROM public.deals d
+ WHERE d.organization_id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+ AND d.stage='33333333-3333-4333-8333-333333333333')
+ THEN RAISE EXCEPTION 'Rename changed durable deal reference'; END IF;
  BEGIN
  PERFORM public.replace_pipeline_stages_atomic(
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',0,

@@ -32,3 +32,22 @@ describe('historical stage safety', () => {
   expect(isConfiguredMove('qualification',[])).toBe(true);
  });
 });
+
+describe('durable IDs across editable stage renames', () => {
+ const stable='55555555-5555-4555-8555-555555555555';
+ it('writes the same UUID when a custom stage name changes', () => {
+  const before=configuredBoardStages([stage(stable,'Descoberta')],[]);
+  const after=configuredBoardStages([stage(stable,'Análise técnica')],[{stage:stable}]);
+  expect(before[0].id).toBe(stable);
+  expect(after[0].id).toBe(stable);
+  expect(after[0].title).toBe('Análise técnica');
+  expect(after.filter(s=>s.id===stable)).toHaveLength(1);
+  expect(isConfiguredMove(stable,[stage(stable,'Análise técnica')])).toBe(true);
+  expect(isConfiguredMove('Descoberta',[stage(stable,'Análise técnica')])).toBe(false);
+ });
+ it('keeps legacy name-based deals visible in a separate historical column', () => {
+  const cols=configuredBoardStages([stage(stable,'Nova etapa')],[{stage:'Etapa antiga'}]);
+  expect(cols.map(s=>s.id)).toEqual([stable,'Etapa antiga','won','lost']);
+  expect(cols.find(s=>s.id==='Etapa antiga')?.historical).toBe(true);
+ });
+});

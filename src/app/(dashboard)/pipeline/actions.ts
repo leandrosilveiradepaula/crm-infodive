@@ -59,6 +59,10 @@ export async function updateDealStage(dealId: string, newStage: string, probabil
 
 export async function createDeal(deal: Partial<Deal>): Promise<Deal> {
     const { userId, organizationId } = await requirePermission('deals:create');
+    const configured = await SettingsService.getPipelineStages(organizationId);
+    if (!isConfiguredMove(deal?.stage ?? 'qualification', configured)) {
+        throw new Error('Etapa inválida para criar uma oportunidade nesta organização.');
+    }
     const result = await DealService.createDeal(userId, organizationId, deal);
     const automationEventId = randomUUID();
     await AutomationRuntimeService.executeEvent(userId, organizationId, {
@@ -89,6 +93,12 @@ export async function updateDeal(dealId: string, updates: Partial<Deal>): Promis
     const { userId, organizationId } = await requirePermission(
         changesOwner ? 'deals:change_owner' : 'deals:edit'
     );
+    if (Object.prototype.hasOwnProperty.call(updates, 'stage')) {
+        const configured = await SettingsService.getPipelineStages(organizationId);
+        if (!isConfiguredMove(updates.stage as string, configured)) {
+            throw new Error('Etapa inválida para esta organização.');
+        }
+    }
     await DealService.updateDeal(userId, dealId, organizationId, updates);
     revalidatePath('/pipeline');
     return true;
