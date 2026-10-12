@@ -42,13 +42,13 @@ BEGIN
     RAISE EXCEPTION 'Account name or create version missing' USING ERRCODE='22023';
    END IF;
    INSERT INTO public.accounts(organization_id,name)
-   VALUES(p_org_id,p_fields->>'name') RETURNING id,aggregate_revision INTO v_id,v_revision;
+   VALUES(p_org_id,p_fields->>'name') RETURNING public.accounts.id,public.accounts.aggregate_revision INTO v_id,v_revision;
  ELSE
    IF p_expected_revision IS NULL OR p_expected_revision<1 THEN
      RAISE EXCEPTION 'Expected revision mandatory' USING ERRCODE='22023';
    END IF;
-   SELECT id,aggregate_revision INTO v_id,v_revision FROM public.accounts
-   WHERE id=p_account_id AND organization_id=p_org_id FOR UPDATE;
+   SELECT a.id,a.aggregate_revision INTO v_id,v_revision FROM public.accounts AS a
+   WHERE a.id=p_account_id AND a.organization_id=p_org_id FOR UPDATE;
    IF NOT FOUND THEN RAISE EXCEPTION 'Account not found in tenant' USING ERRCODE='P0002'; END IF;
    IF v_revision<>p_expected_revision THEN
      RAISE EXCEPTION 'Stale aggregate revision' USING ERRCODE='40001';
@@ -73,7 +73,7 @@ BEGIN
  relationship_type=CASE WHEN p_fields ? 'relationship_type' THEN p_fields->>'relationship_type' ELSE relationship_type END,
  logo_url=CASE WHEN p_fields ? 'logo_url' THEN p_fields->>'logo_url' ELSE logo_url END,
  payment_terms=CASE WHEN p_fields ? 'payment_terms' THEN p_fields->>'payment_terms' ELSE payment_terms END,
- aggregate_revision=aggregate_revision+CASE WHEN p_account_id IS NULL THEN 0 ELSE 1 END
+ aggregate_revision=public.accounts.aggregate_revision+CASE WHEN p_account_id IS NULL THEN 0 ELSE 1 END
  WHERE id=v_id AND organization_id=p_org_id
  RETURNING public.accounts.aggregate_revision INTO v_revision;
 
