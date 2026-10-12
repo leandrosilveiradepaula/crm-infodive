@@ -114,71 +114,50 @@ export class LeadService {
     }
 
     static async convertLeadToDeal(userId: string, organizationId: string, leadId: string, conversionData: Partial<Lead>) {
+        // This is intentionally a single database operation. Never fall back to
+        // multiple PostgREST writes: a missing migration must fail closed.
+        const isUuid = (value: unknown): value is string =>
+            typeof value === 'string' &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+        if (![userId, organizationId, leadId].every(isUuid)) {
+            throw new Error('Identificadores inválidos para conversão.');
+        }
+
+        const normalized = this.normalizedInput(conversionData);
+        // Status/ownership are determined by the server and the database.
+        delete normalized.status;
+        delete normalized.owner;
+        for (const key of ['company', 'contact_name'] as const) {
+            if (Object.prototype.hasOwnProperty.call(normalized, key) &&
+                (typeof normalized[key] !== 'string' ||
+                    !(normalized[key] as string).trim() ||
+                    (normalized[key] as string).length > 250)) {
+                throw new Error('Dados obrigatórios da conversão inválidos.');
+            }
+        }
+
         const supabase = createAdminClient();
+        const { data, error } = await supabase.rpc('convert_lead_to_deal_atomic', {
+            p_actor_id: userId,
+            p_org_id: organizationId,
+            p_lead_id: leadId,
+            p_input: normalized,
+        });
+        if (error || !Array.isArray(data) || data.length !== 1) {
+            throw new Error('Não foi possível converter o lead. Nenhuma conversão foi confirmada.');
+        }
+        const row = data[0];
+        if (!row || !isUuid(row.account_id) || !isUuid(row.contact_id) ||
+            !isUuid(row.deal_id) || typeof row.replayed !== 'boolean') {
+            throw new Error('Resposta de conversão inválida; confirme o estado no servidor.');
+        }
 
-        // 1. Update Lead Status
-        const { error: leadError } = await supabase
-            .from('leads')
-            .update({ ...conversionData, status: 'Convertido' })
-            .eq('id', leadId)
-            .eq('organization_id', organizationId);
-
-        if (leadError) throw new Error('Não foi possível converter o lead.');
-
-        // 2. Create Account
-        const accountData = {
-            organization_id: organizationId,
-            name: normalizeCasing(conversionData.company, 'name'),
-            cnpj: normalizeTaxId(conversionData.cnpj),
-            ie: conversionData.ie,
-            zip: normalizeZip(conversionData.zip),
-            street: normalizeCasing(conversionData.street, 'address'),
-            number: conversionData.number,
-            complement: conversionData.complement,
-            neighborhood: normalizeCasing(conversionData.neighborhood, 'address'),
-            city: normalizeCasing(conversionData.city, 'address'),
-            state: normalizeCasing(conversionData.state, 'address'),
-            industry: normalizeCasing(conversionData.interest, 'name') || 'Novos Negócios',
-            status: 'Ativo'
+        return {
+            success: true,
+            accountId: row.account_id as string,
+            contactId: row.contact_id as string,
+            dealId: row.deal_id as string,
+            replayed: row.replayed as boolean,
         };
-
-        const { data: newAccount, error: accError } = await supabase
-            .from('accounts')
-            .insert([accountData])
-            .select()
-            .single();
-
-        if (accError) throw new Error('Não foi possível converter o lead.');
-
-        // 3. Create Contact for Account
-        const contactData = {
-            organization_id: organizationId,
-            account_id: newAccount.id,
-            name: normalizeCasing(conversionData.contact_name, 'name'),
-            email: conversionData.email,
-            mobile_phone: normalizePhone(conversionData.phone),
-            role: 'Contato Comercial',
-            is_primary: true
-        };
-
-        const { error: contactError } = await supabase.from('account_contacts').insert([contactData]);
-        if (contactError) console.error('[LeadService] contact creation failed');
-
-        // 4. Create Deal
-        const dealData = {
-            organization_id: organizationId,
-            title: `Oportunidade: ${conversionData.interest || 'Novos Produtos'}`,
-            account_id: newAccount.id,
-            status: 'qualification',
-            value: 10000,
-            probability: 30,
-            close_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            owner_id: userId
-        };
-
-        const { error: dealError } = await supabase.from('deals').insert([dealData]);
-        if (dealError) throw new Error('Não foi possível converter o lead.');
-
-        return { success: true };
     }
 }
