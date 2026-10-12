@@ -98,82 +98,10 @@ describe('SettingsService tenant and persistence integrity', () => {
             .rejects.toThrow('Não foi possível carregar as etapas do pipeline.');
     });
 
-    it('rejects duplicate, empty, malformed or excessive stages before database writes', async () => {
-        const db = fakeDb({});
-        for (const input of [
-            [], [stage, stage],
-            [{ ...stage, name: ' ' }],
-            Array.from({ length: 31 }, (_, i) => ({ ...stage, id: String(i) })),
-        ]) {
-            await expect(SettingsService.savePipelineStages('tenant', input))
-                .resolves.toMatchObject({ success: false });
-        }
-        expect(db.operations).toHaveLength(0);
-    });
-
-    it('does not delete stages when reading existing tenant stages failed', async () => {
-        const db = fakeDb({
-            'pipeline_stages:read': { data: null, error: { message: 'DB down' } },
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
-            .resolves.toMatchObject({ success: false });
-        expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
-    });
-
-    it('rejects a new stage ID already belonging to another tenant before writes', async () => {
-        const db = fakeDb({
-            'pipeline_stages:read': [
-                { data: [], error: null },
-                { data: [{ id: '1', organization_id: 'foreign-tenant' }], error: null },
-            ],
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
-            .resolves.toMatchObject({ success: false });
-        const reads = db.operations.filter(op => op.table === 'pipeline_stages' && op.mode === 'read');
-        expect(reads[1]?.filters).toContainEqual(['id', [expect.stringMatching(/^[0-9a-f-]{36}$/i)]]);
-        expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
-    });
-
-    it('does not proceed if cross-tenant stage collision detection fails', async () => {
-        const db = fakeDb({
-            'pipeline_stages:read': [
-                { data: [], error: null },
-                { data: null, error: { message: 'DB lookup failed' } },
-            ],
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
-            .resolves.toMatchObject({ success: false });
-        expect(db.operations.every(op => op.mode !== 'delete' && op.mode !== 'upsert')).toBe(true);
-    });
-
-    it('scopes deletion by tenant and rejects missing deleted rows', async () => {
-        const db = fakeDb({
-            'pipeline_stages:read': { data: [{ id: 'old' }], error: null },
-            'pipeline_stages:delete': { data: [], error: null },
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [{ ...stage, id: '22222222-2222-4222-8222-222222222222' }]))
-            .resolves.toMatchObject({ success: false });
-        const deletion = db.operations.find(op => op.mode === 'delete');
-        expect(deletion?.filters).toContainEqual(['organization_id', 'tenant']);
-        expect(deletion?.filters).toContainEqual(['id', ['old']]);
-        expect(db.operations.every(op => op.mode !== 'upsert')).toBe(true);
-    });
-
-    it('requires all pipeline upserts to return persisted rows', async () => {
-        fakeDb({
-            'pipeline_stages:read': { data: [], error: null },
-            'pipeline_stages:upsert': { data: [], error: null },
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
-            .resolves.toMatchObject({ success: false });
-
-        const db = fakeDb({
-            'pipeline_stages:read': { data: [], error: null },
-        });
-        await expect(SettingsService.savePipelineStages('tenant', [stage]))
-            .resolves.toMatchObject({ success: true });
-        expect(db.operations.find(op => op.mode === 'upsert')?.payload)
-            .toEqual([{ id: expect.stringMatching(/^[0-9a-f-]{36}$/i),
-                name: 'Qualificação', color: '#abcdef', order_index: 0, organization_id: 'tenant' }]);
+    it('fails closed without a verified version and does not write any stage rows', async () => {
+        const db = fakeDb();
+        const result = await SettingsService.savePipelineStages('tenant', [stage]);
+        expect(result.success).toBe(false);
+        expect(db.operations.filter(op => op.mode === 'upsert' || op.mode === 'delete')).toEqual([]);
     });
 });

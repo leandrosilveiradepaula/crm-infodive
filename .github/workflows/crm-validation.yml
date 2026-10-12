@@ -202,3 +202,35 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f scripts/tests/account-aggregate-schema.sql
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261012010500_atomic_account_aggregate.sql
           psql -v ON_ERROR_STOP=1 -f scripts/tests/account-aggregate-atomic.sql
+
+  pipeline-transaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crm_pipeline_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 8
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: crm_pipeline_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify atomic pipeline stages with PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f scripts/tests/pipeline-atomic-schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261012134000_pipeline_stages_atomic.sql
+          psql -v ON_ERROR_STOP=1 -f scripts/tests/pipeline-atomic.sql
