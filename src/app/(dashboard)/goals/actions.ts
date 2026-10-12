@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requireSessionContext, requirePermission } from '@/lib/auth-server';
 import { revalidatePath } from 'next/cache';
 import { Campaign, Scenario, UserGoalData } from '@/types/goal';
 import { sanitizeGoalWrite, sanitizeScenarioWrite, validateGoalDistribution } from '@/lib/goal-mutation-integrity';
@@ -39,7 +39,7 @@ export async function getUsersWithGoals() {
 }
 
 export async function updateUserGoals(userId: string, data: Partial<UserGoalData>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('deals:view_all');
     try {
         const safe = sanitizeGoalWrite(data);
         const supabase = createAdminClient();
@@ -135,7 +135,7 @@ export async function applyScenarioToGoals(
     scenarioId: string,
     customWeights?: { user_id: string; weight: number }[]
 ) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:view_all');
     const supabase = createAdminClient();
 
     const { data: scenario, error: scenarioError } = await supabase

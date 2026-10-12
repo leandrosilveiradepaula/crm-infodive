@@ -14,7 +14,9 @@ describe('goals and commission server integrity contracts', () => {
     it('does not hide a failing read as an empty valid dataset', () => {
         for (const name of ['getUsersWithGoals', 'getCampaigns', 'getScenarios', 'getCommissionDeals']) {
             const body = bodyOf(name);
-            expect(body).toContain("requireSessionContext()");
+            // A permission check enforces current RBAC after validating the session.
+            expect(body).toContain("requirePermission('deals:edit')");
+            expect(body.indexOf("requirePermission('deals:edit')")).toBeLessThan(body.indexOf(".from('"));
             expect(body).not.toContain('if (error) return []');
             expect(body).toContain('throw new Error(');
             expect(body).toContain(".eq('organization_id', organizationId)");
