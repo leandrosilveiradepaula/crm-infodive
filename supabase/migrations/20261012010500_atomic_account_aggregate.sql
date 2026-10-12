@@ -85,7 +85,7 @@ BEGIN
        RAISE EXCEPTION 'Invalid contact payload' USING ERRCODE='22023';
      END IF;
    END LOOP;
-   DELETE FROM public.account_contacts WHERE account_id=v_id AND organization_id=p_org_id;
+   DELETE FROM public.account_contacts AS c WHERE c.account_id=v_id AND c.organization_id=p_org_id;
    INSERT INTO public.account_contacts(account_id,organization_id,name,email,mobile_phone,landline_phone,role,is_primary)
    SELECT v_id,p_org_id,x->>'name',x->>'email',x->>'mobile_phone',x->>'landline_phone',
           x->>'role',COALESCE((x->>'is_primary')::boolean,false)
@@ -99,7 +99,7 @@ BEGIN
        RAISE EXCEPTION 'Invalid branch payload' USING ERRCODE='22023';
      END IF;
    END LOOP;
-   DELETE FROM public.account_branches WHERE account_id=v_id AND organization_id=p_org_id;
+   DELETE FROM public.account_branches AS b WHERE b.account_id=v_id AND b.organization_id=p_org_id;
    INSERT INTO public.account_branches(account_id,organization_id,name,zip,street,number,complement,
     neighborhood,city,state,cnpj,ie,payment_terms)
    SELECT v_id,p_org_id,x->>'name',x->>'zip',x->>'street',x->>'number',x->>'complement',
