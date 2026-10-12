@@ -1,5 +1,6 @@
 import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { getAiDealScope } from '@/lib/ai-deal-scope';
 import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 import { createAiRouteContext } from '@/lib/ai-route-observability';
 import { parseDealDiagnosis } from '@/lib/deal-diagnosis-validation';
@@ -31,15 +32,46 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { deal, activities } = await request.json();
-        if (!deal || typeof deal !== 'object' || Array.isArray(deal) ||
-            typeof deal.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(deal.id)) {
+        const body = await request.json();
+        const requestedDeal = body?.deal;
+        if (!requestedDeal || typeof requestedDeal !== 'object' || Array.isArray(requestedDeal) ||
+            typeof requestedDeal.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedDeal.id)) {
             telemetry.record('invalid_request', 400);
             return telemetry.respond({ error: 'Oportunidade inválida.' }, 400);
         }
-        if (JSON.stringify({ deal, activities }).length > 100_000) {
+        if (JSON.stringify(body).length > 100_000) {
             telemetry.record('payload_too_large', 413);
             return telemetry.respond({ error: 'Payload too large' }, 413);
+        }
+
+        // Never send browser-supplied deal fields or activities to the provider.
+        // Resolve both directly from the tenant-scoped database before paid quota.
+        const supabase = createAdminClient();
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        let dealQuery = supabase.from('deals')
+            .select('id, title, company, value, stage, days_in_stage, probability, owner_id')
+            .eq('id', requestedDeal.id)
+            .eq('organization_id', organizationId);
+        if (!canViewAll) dealQuery = dealQuery.eq('owner_id', userId);
+        const { data: deal, error: dealError } = await dealQuery.maybeSingle();
+        if (dealError) {
+            telemetry.record('context_unavailable', 503);
+            return telemetry.respond({ error: 'Não foi possível validar a oportunidade.' }, 503);
+        }
+        if (!deal) {
+            telemetry.record('deal_not_found', 404);
+            return telemetry.respond({ error: 'Oportunidade não encontrada.' }, 404);
+        }
+        const { data: activities, error: activitiesError } = await supabase
+            .from('activities')
+            .select('created_at, type, title')
+            .eq('deal_id', deal.id)
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: false })
+            .limit(15);
+        if (activitiesError || !Array.isArray(activities)) {
+            telemetry.record('context_unavailable', 503);
+            return telemetry.respond({ error: 'Não foi possível validar as atividades.' }, 503);
         }
 
         const rateLimit = await guardPaidAiRequest({ scope: 'analyze-deal-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
@@ -61,7 +93,7 @@ Sua missão é atuar como um "Deal Doctor" (Médico de Oportunidades), analisand
 
 DADOS DA OPORTUNIDADE:
 - Título: ${deal.title}
-- Cliente: ${deal.company_name || 'Não informado'}
+- Cliente: ${deal.company || 'Não informado'}
 - Valor: ${formatCurrency(deal.value)}
 - Estágio Atual: ${deal.stage}
 - Dias totais no Pipeline: ${deal.days_in_stage || 0} dias
@@ -168,8 +200,7 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
         }
 
         // PostgREST may return no error when zero rows were updated.
-        const supabase = createAdminClient();
-        const { data: updatedDeal, error: updateError } = await supabase
+        let updateQuery = supabase
             .from('deals')
             .update({
                 health_score: validated.healthScore,
@@ -178,7 +209,10 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
                 last_analysis_at: new Date().toISOString()
             })
             .eq('id', deal.id)
-            .eq('organization_id', organizationId)
+            .eq('organization_id', organizationId);
+        // A deal may be transferred while the external model is running.
+        if (!canViewAll) updateQuery = updateQuery.eq('owner_id', userId);
+        const { data: updatedDeal, error: updateError } = await updateQuery
             .select('id')
             .maybeSingle();
 

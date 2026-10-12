@@ -47,7 +47,8 @@ describe('paid AI route guards', () => {
     const signature = readFileSync('src/app/api/gemini/parse-signature/route.ts', 'utf8');
     const specs = readFileSync('src/app/api/gemini/specs/route.ts', 'utf8');
 
-    expect(analyze).toContain("JSON.stringify({ deal, activities }).length > 100_000");
+    expect(analyze).toContain("JSON.stringify(body).length > 100_000");
+    expect(analyze).not.toContain('const { deal, activities } = await request.json()');
     expect(enrich).toContain("company.length > 500");
     expect(extract).toContain("imageData.length > 12_000_000");
     expect(signature).toContain("signature.length > 20_000");
