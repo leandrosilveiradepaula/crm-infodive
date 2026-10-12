@@ -122,4 +122,38 @@ describe('deal write and stage integrity', () => {
             description: 'Valid description',
         })).rejects.toThrow('Não foi possível atualizar');
     });
+
+    it('does not leave stale closure timestamps after a stage move', async () => {
+        const x = fakeDb();
+        await DealService.updateDealStage('actor-a', 'deal-a', 'tenant-a', 'qualification', 30);
+        const op = x.ops.find(row => row.table === 'deals' && row.action === 'update');
+        expect(op?.payload).toMatchObject({
+            stage: 'qualification', probability: 30, won_at: null, lost_at: null,
+        });
+    });
+
+    it('uses canonical closure state when creating a Won deal', async () => {
+        const x = fakeDb();
+        await DealService.createDeal('actor-a', 'tenant-a', {
+            title: 'Ganha', stage: 'won', probability: 25,
+        });
+        const op = x.ops.find(row => row.table === 'deals' && row.action === 'insert');
+        expect(op?.payload).toEqual([expect.objectContaining({
+            stage: 'won', probability: 100, lost_at: null,
+            won_at: expect.any(String),
+        })]);
+    });
+
+    it('enforces canonical closure state via ordinary deal editing', async () => {
+        const x = fakeDb();
+        await DealService.updateDeal('actor-a', 'deal-a', 'tenant-a', {
+            stage: 'lost', probability: 80, won_at: 'forged', lost_at: 'forged',
+        });
+        const op = x.ops.find(row => row.table === 'deals' && row.action === 'update');
+        expect(op?.payload).toMatchObject({
+            stage: 'lost', probability: 0, won_at: null,
+            lost_at: expect.any(String),
+        });
+    });
+
 });
