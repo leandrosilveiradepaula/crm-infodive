@@ -138,3 +138,35 @@ jobs:
               description: success ? 'CRM quality gates passed' : 'CRM quality gates failed',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
+
+  lead-transaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: crm_transaction_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 8
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: crm_transaction_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify PostgreSQL atomic rollback, tenancy and replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql -v ON_ERROR_STOP=1 -f scripts/tests/lead-conversion-schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261011180000_atomic_lead_conversion.sql
+          psql -v ON_ERROR_STOP=1 -f scripts/tests/lead-conversion-atomic.sql
