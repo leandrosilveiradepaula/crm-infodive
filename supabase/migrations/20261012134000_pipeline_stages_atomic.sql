@@ -105,8 +105,8 @@ BEGIN
  GET DIAGNOSTICS v_count=ROW_COUNT;
  IF v_count<>(SELECT count(*) FROM pg_temp.pipeline_requested_stages)
  THEN RAISE EXCEPTION 'Pipeline stage write mismatch' USING ERRCODE='40001'; END IF;
- UPDATE public.pipeline_stage_revisions SET revision=revision+1
- WHERE organization_id=p_org_id RETURNING pipeline_stage_revisions.revision INTO v_revision;
+ UPDATE public.pipeline_stage_revisions AS r SET revision=r.revision+1
+ WHERE r.organization_id=p_org_id RETURNING r.revision INTO v_revision;
  RETURN QUERY SELECT v_revision;
 END;
 $fn$;

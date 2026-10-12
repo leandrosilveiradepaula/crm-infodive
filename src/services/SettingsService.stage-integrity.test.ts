@@ -40,6 +40,13 @@ describe('pipeline stage transactional service boundary', () => {
       expect(result.success).toBe(false);
    }
  });
+ it('rejects malformed organization identifiers before contacting the database', async () => {
+   await expect(SettingsService.getPipelineStageSnapshot(actor,'invalid-org'))
+     .rejects.toThrow('identificar a organização');
+   await expect(SettingsService.savePipelineStages(org,[current],2,'invalid-user'))
+     .resolves.toMatchObject({success:false});
+   expect(mocks.rpc).not.toHaveBeenCalled();
+ });
  it('returns explicit conflict and refuses duplicate and malformed stage values', async () => {
    mocks.rpc.mockResolvedValueOnce({data:null,error:{code:'40001'}});
    await expect(SettingsService.savePipelineStages(org,[current],2,actor))
