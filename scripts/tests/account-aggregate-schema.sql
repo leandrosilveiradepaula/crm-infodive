@@ -28,3 +28,5 @@ CREATE TABLE public.contact_references (contact_id uuid REFERENCES public.accoun
 CREATE TABLE public.branch_references (branch_id uuid REFERENCES public.account_branches(id) ON DELETE RESTRICT);
 INSERT INTO public.profiles VALUES
 ('cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','active');
+
+GRANT SELECT, INSERT ON public.contact_references, public.branch_references TO service_role;
