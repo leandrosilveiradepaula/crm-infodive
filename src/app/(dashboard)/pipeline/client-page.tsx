@@ -359,7 +359,7 @@ export const PipelineClientPage = ({ initialDeals, configuredStages, userProfile
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
                                             {!isConfiguredMove(stage.id, configuredStages) && (
-                                                <span className="text-[10px] text-muted-foreground" title="Etapa histórica; não aceita novos negócios">Somente histórico</span>
+                                                <span className="text-xs text-muted-foreground" title="Etapa histórica; não aceita novos negócios">Somente histórico</span>
                                             )}
                                             <div className="flex gap-2 mt-1">
                                                 <span className="text-xs bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
