@@ -154,6 +154,12 @@ export class AccountService {
                 const record: Record<string, unknown> = {};
                 for (const key of keys) {
                     if (raw[key] === undefined) continue;
+                    if (key === 'id') {
+                        // Generated modal IDs are temporary; real UUIDs belong to existing children.
+                        if (typeof raw.id !== 'string' || !raw.id.trim()) throw new Error('ID de filho inválido.');
+                        if (this.isUuid(raw.id)) record.id = raw.id;
+                        continue;
+                    }
                     if (key === 'is_primary') {
                         if (typeof raw[key] !== 'boolean') throw new Error('Indicador principal inválido.');
                     } else if (raw[key] !== null &&
@@ -168,10 +174,10 @@ export class AccountService {
         return {
             fields,
             contacts: serializeChildren(input.contacts, [
-                'name', 'email', 'mobile_phone', 'landline_phone', 'role', 'is_primary',
+                'id', 'name', 'email', 'mobile_phone', 'landline_phone', 'role', 'is_primary',
             ]),
             branches: serializeChildren(input.branches, [
-                'name', 'zip', 'street', 'number', 'complement', 'neighborhood',
+                'id', 'name', 'zip', 'street', 'number', 'complement', 'neighborhood',
                 'city', 'state', 'cnpj', 'ie', 'payment_terms',
             ]),
         };
@@ -236,6 +242,10 @@ export class AccountService {
                 p_contacts: input.contacts,
                 p_branches: input.branches,
             });
+            if (error?.code === '40001') {
+                return { success: false, conflict: true,
+                    error: 'Esta empresa foi alterada por outra pessoa. Recarregue antes de salvar novamente.' };
+            }
             if (error || !this.validRpcRow(data) || data[0].account_id !== id) {
                 throw new Error('account RPC did not confirm update');
             }

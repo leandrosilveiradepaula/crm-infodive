@@ -1,7 +1,7 @@
 BEGIN;
 SET LOCAL ROLE service_role;
 DO $t$
-DECLARE a record; n integer; rev bigint;
+DECLARE a record; n integer; rev bigint; cid uuid; bid uuid;
 BEGIN
  SELECT * INTO a FROM public.upsert_account_aggregate_atomic(
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
@@ -24,11 +24,16 @@ BEGIN
  IF rev<>1 THEN RAISE EXCEPTION 'Partial revision update'; END IF;
  SELECT count(*) INTO n FROM public.account_contacts WHERE account_id=a.account_id AND name='Original';
  IF n<>1 THEN RAISE EXCEPTION 'Old contacts were not restored by rollback'; END IF;
+ SELECT id INTO cid FROM public.account_contacts WHERE account_id=a.account_id;
+ SELECT id INTO bid FROM public.account_branches WHERE account_id=a.account_id;
+ INSERT INTO public.contact_references(contact_id) VALUES(cid);
+ INSERT INTO public.branch_references(branch_id) VALUES(bid);
  SELECT * INTO a FROM public.upsert_account_aggregate_atomic(
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',a.account_id,1,
  '{"city":"Porto Alegre"}',
- '[{"name":"Novo"}]'::jsonb,NULL);
+ jsonb_build_array(jsonb_build_object('id',cid,'name','Novo')),
+ jsonb_build_array(jsonb_build_object('id',bid,'name','Filial Atualizada')));
  IF a.aggregate_revision<>2 THEN RAISE EXCEPTION 'Revision not incremented'; END IF;
  BEGIN
  PERFORM public.upsert_account_aggregate_atomic(
@@ -38,7 +43,10 @@ BEGIN
  EXCEPTION WHEN serialization_failure THEN NULL;
  END;
  SELECT count(*) INTO n FROM public.account_contacts WHERE account_id=a.account_id AND name='Novo';
- IF n<>1 THEN RAISE EXCEPTION 'Contact replacement inconsistent'; END IF;
+ IF n<>1 OR NOT EXISTS(SELECT 1 FROM public.contact_references WHERE contact_id=cid)
+  OR NOT EXISTS(SELECT 1 FROM public.branch_references WHERE branch_id=bid)
+  OR NOT EXISTS(SELECT 1 FROM public.account_branches WHERE id=bid AND name='Filial Atualizada')
+  THEN RAISE EXCEPTION 'Child ID / FK preservation failed'; END IF;
  BEGIN
  PERFORM public.upsert_account_aggregate_atomic(
  'cccccccc-cccc-4ccc-8ccc-cccccccccccc',

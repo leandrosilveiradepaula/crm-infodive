@@ -16,8 +16,10 @@ DECLARE
  v_revision bigint;
  v_key text;
  v_item jsonb;
- v_has_contact boolean;
- v_has_branch boolean;
+ v_contact_id uuid;
+ v_branch_id uuid;
+ v_contact_keep uuid[] := ARRAY[]::uuid[];
+ v_branch_keep uuid[] := ARRAY[]::uuid[];
 BEGIN
  IF p_actor_id IS NULL OR p_org_id IS NULL OR p_fields IS NULL OR
     jsonb_typeof(p_fields) <> 'object' OR length(p_fields::text)>20000 OR
@@ -41,8 +43,20 @@ BEGIN
    IF p_expected_revision IS NOT NULL OR NULLIF(btrim(p_fields->>'name'),'') IS NULL THEN
     RAISE EXCEPTION 'Account name or create version missing' USING ERRCODE='22023';
    END IF;
-   INSERT INTO public.accounts(organization_id,name)
-   VALUES(p_org_id,p_fields->>'name') RETURNING public.accounts.id,public.accounts.aggregate_revision INTO v_id,v_revision;
+   INSERT INTO public.accounts (
+     organization_id,name,cnpj,ie,segment,status,zip,street,number,
+     complement,neighborhood,city,state,tags,relationship_type,logo_url,payment_terms
+   ) VALUES (
+     p_org_id,p_fields->>'name',p_fields->>'cnpj',p_fields->>'ie',
+     p_fields->>'segment',COALESCE(p_fields->>'status','Ativo'),
+     p_fields->>'zip',p_fields->>'street',p_fields->>'number',
+     p_fields->>'complement',p_fields->>'neighborhood',p_fields->>'city',
+     p_fields->>'state',
+     CASE WHEN p_fields ? 'tags' THEN ARRAY(SELECT jsonb_array_elements_text(p_fields->'tags'))
+          ELSE ARRAY[]::text[] END,
+     COALESCE(p_fields->>'relationship_type','Cliente'),
+     p_fields->>'logo_url',p_fields->>'payment_terms'
+   ) RETURNING public.accounts.id, public.accounts.aggregate_revision INTO v_id,v_revision;
  ELSE
    IF p_expected_revision IS NULL OR p_expected_revision<1 THEN
      RAISE EXCEPTION 'Expected revision mandatory' USING ERRCODE='22023';
@@ -77,34 +91,115 @@ BEGIN
  WHERE id=v_id AND organization_id=p_org_id
  RETURNING public.accounts.aggregate_revision INTO v_revision;
 
+ -- Validate all child IDs and ownership before replacing any part of either
+ -- collection. The account row is locked through FOR UPDATE above.
  IF p_contacts IS NOT NULL THEN
    FOR v_item IN SELECT value FROM jsonb_array_elements(p_contacts) LOOP
-     IF jsonb_typeof(v_item)<>'object' OR NULLIF(btrim(v_item->>'name'),'') IS NULL OR
-       EXISTS(SELECT 1 FROM jsonb_object_keys(v_item) k WHERE k <> ALL(ARRAY[
-       'name','email','mobile_phone','landline_phone','role','is_primary'])) THEN
-       RAISE EXCEPTION 'Invalid contact payload' USING ERRCODE='22023';
+     IF jsonb_typeof(v_item)<>'object' OR NULLIF(btrim(v_item->>'name'),'') IS NULL
+       OR EXISTS(SELECT 1 FROM jsonb_object_keys(v_item) AS k
+          WHERE k <> ALL(ARRAY['id','name','email','mobile_phone','landline_phone','role','is_primary']))
+       OR (v_item ? 'is_primary' AND jsonb_typeof(v_item->'is_primary')<>'boolean')
+     THEN RAISE EXCEPTION 'Invalid contact payload' USING ERRCODE='22023'; END IF;
+     IF v_item ? 'id' THEN
+       IF jsonb_typeof(v_item->'id') <> 'string'
+          OR (v_item->>'id') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+       THEN RAISE EXCEPTION 'Invalid contact ID' USING ERRCODE='22023'; END IF;
+       v_contact_id := (v_item->>'id')::uuid;
+       IF v_contact_id = ANY(v_contact_keep) THEN
+         RAISE EXCEPTION 'Duplicate contact ID' USING ERRCODE='22023';
+       END IF;
+       PERFORM 1 FROM public.account_contacts c
+          WHERE c.id=v_contact_id AND c.account_id=v_id AND c.organization_id=p_org_id;
+       IF NOT FOUND THEN RAISE EXCEPTION 'Contact outside account' USING ERRCODE='P0002'; END IF;
+       v_contact_keep := array_append(v_contact_keep,v_contact_id);
      END IF;
    END LOOP;
-   DELETE FROM public.account_contacts AS c WHERE c.account_id=v_id AND c.organization_id=p_org_id;
-   INSERT INTO public.account_contacts(account_id,organization_id,name,email,mobile_phone,landline_phone,role,is_primary)
-   SELECT v_id,p_org_id,x->>'name',x->>'email',x->>'mobile_phone',x->>'landline_phone',
-          x->>'role',COALESCE((x->>'is_primary')::boolean,false)
-   FROM jsonb_array_elements(p_contacts) x;
  END IF;
+
  IF p_branches IS NOT NULL THEN
    FOR v_item IN SELECT value FROM jsonb_array_elements(p_branches) LOOP
-     IF jsonb_typeof(v_item)<>'object' OR NULLIF(btrim(v_item->>'name'),'') IS NULL OR
-       EXISTS(SELECT 1 FROM jsonb_object_keys(v_item) k WHERE k <> ALL(ARRAY[
-       'name','zip','street','number','complement','neighborhood','city','state','cnpj','ie','payment_terms'])) THEN
-       RAISE EXCEPTION 'Invalid branch payload' USING ERRCODE='22023';
+     IF jsonb_typeof(v_item)<>'object' OR NULLIF(btrim(v_item->>'name'),'') IS NULL
+       OR EXISTS(SELECT 1 FROM jsonb_object_keys(v_item) AS k
+          WHERE k <> ALL(ARRAY['id','name','zip','street','number','complement',
+          'neighborhood','city','state','cnpj','ie','payment_terms']))
+     THEN RAISE EXCEPTION 'Invalid branch payload' USING ERRCODE='22023'; END IF;
+     IF v_item ? 'id' THEN
+       IF jsonb_typeof(v_item->'id') <> 'string'
+         OR (v_item->>'id') !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+       THEN RAISE EXCEPTION 'Invalid branch ID' USING ERRCODE='22023'; END IF;
+       v_branch_id := (v_item->>'id')::uuid;
+       IF v_branch_id = ANY(v_branch_keep) THEN
+         RAISE EXCEPTION 'Duplicate branch ID' USING ERRCODE='22023';
+       END IF;
+       PERFORM 1 FROM public.account_branches b
+         WHERE b.id=v_branch_id AND b.account_id=v_id AND b.organization_id=p_org_id;
+       IF NOT FOUND THEN RAISE EXCEPTION 'Branch outside account' USING ERRCODE='P0002'; END IF;
+       v_branch_keep := array_append(v_branch_keep,v_branch_id);
      END IF;
    END LOOP;
-   DELETE FROM public.account_branches AS b WHERE b.account_id=v_id AND b.organization_id=p_org_id;
-   INSERT INTO public.account_branches(account_id,organization_id,name,zip,street,number,complement,
-    neighborhood,city,state,cnpj,ie,payment_terms)
-   SELECT v_id,p_org_id,x->>'name',x->>'zip',x->>'street',x->>'number',x->>'complement',
-          x->>'neighborhood',x->>'city',x->>'state',x->>'cnpj',x->>'ie',x->>'payment_terms'
-   FROM jsonb_array_elements(p_branches) x;
+ END IF;
+
+ IF p_contacts IS NOT NULL THEN
+   -- Retained rows update in place. Missing rows may be deleted only when
+   -- foreign keys allow it; FK failure aborts the WHOLE transaction.
+   DELETE FROM public.account_contacts c
+      WHERE c.account_id=v_id AND c.organization_id=p_org_id
+        AND NOT(c.id=ANY(v_contact_keep));
+   FOR v_item IN SELECT value FROM jsonb_array_elements(p_contacts) LOOP
+     IF v_item ? 'id' THEN
+       v_contact_id := (v_item->>'id')::uuid;
+       UPDATE public.account_contacts c SET
+         name=v_item->>'name',
+         email=CASE WHEN v_item ? 'email' THEN v_item->>'email' ELSE c.email END,
+         mobile_phone=CASE WHEN v_item ? 'mobile_phone' THEN v_item->>'mobile_phone' ELSE c.mobile_phone END,
+         landline_phone=CASE WHEN v_item ? 'landline_phone' THEN v_item->>'landline_phone' ELSE c.landline_phone END,
+         role=CASE WHEN v_item ? 'role' THEN v_item->>'role' ELSE c.role END,
+         is_primary=CASE WHEN v_item ? 'is_primary'
+           THEN (v_item->>'is_primary')::boolean ELSE c.is_primary END
+         WHERE c.id=v_contact_id AND c.account_id=v_id AND c.organization_id=p_org_id;
+     ELSE
+       INSERT INTO public.account_contacts(
+          account_id,organization_id,name,email,mobile_phone,landline_phone,role,is_primary
+       ) VALUES (
+          v_id,p_org_id,v_item->>'name',v_item->>'email',v_item->>'mobile_phone',
+          v_item->>'landline_phone',v_item->>'role',COALESCE((v_item->>'is_primary')::boolean,false)
+       );
+     END IF;
+   END LOOP;
+ END IF;
+
+ IF p_branches IS NOT NULL THEN
+   DELETE FROM public.account_branches b
+      WHERE b.account_id=v_id AND b.organization_id=p_org_id
+        AND NOT(b.id=ANY(v_branch_keep));
+   FOR v_item IN SELECT value FROM jsonb_array_elements(p_branches) LOOP
+     IF v_item ? 'id' THEN
+       v_branch_id := (v_item->>'id')::uuid;
+       UPDATE public.account_branches b SET
+         name=v_item->>'name',
+         zip=CASE WHEN v_item ? 'zip' THEN v_item->>'zip' ELSE b.zip END,
+         street=CASE WHEN v_item ? 'street' THEN v_item->>'street' ELSE b.street END,
+         number=CASE WHEN v_item ? 'number' THEN v_item->>'number' ELSE b.number END,
+         complement=CASE WHEN v_item ? 'complement' THEN v_item->>'complement' ELSE b.complement END,
+         neighborhood=CASE WHEN v_item ? 'neighborhood' THEN v_item->>'neighborhood' ELSE b.neighborhood END,
+         city=CASE WHEN v_item ? 'city' THEN v_item->>'city' ELSE b.city END,
+         state=CASE WHEN v_item ? 'state' THEN v_item->>'state' ELSE b.state END,
+         cnpj=CASE WHEN v_item ? 'cnpj' THEN v_item->>'cnpj' ELSE b.cnpj END,
+         ie=CASE WHEN v_item ? 'ie' THEN v_item->>'ie' ELSE b.ie END,
+         payment_terms=CASE WHEN v_item ? 'payment_terms'
+           THEN v_item->>'payment_terms' ELSE b.payment_terms END
+         WHERE b.id=v_branch_id AND b.account_id=v_id AND b.organization_id=p_org_id;
+     ELSE
+       INSERT INTO public.account_branches(
+         account_id,organization_id,name,zip,street,number,complement,
+         neighborhood,city,state,cnpj,ie,payment_terms
+       ) VALUES (
+         v_id,p_org_id,v_item->>'name',v_item->>'zip',v_item->>'street',
+         v_item->>'number',v_item->>'complement',v_item->>'neighborhood',
+         v_item->>'city',v_item->>'state',v_item->>'cnpj',v_item->>'ie',v_item->>'payment_terms'
+       );
+     END IF;
+   END LOOP;
  END IF;
  RETURN QUERY SELECT v_id,v_revision;
 END;

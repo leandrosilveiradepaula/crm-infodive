@@ -42,3 +42,29 @@ describe('Account aggregate atomic RPC (#119)', () => {
   }));
  });
 });
+
+describe('stable child IDs and revision conflicts', () => {
+ beforeEach(() => {
+  vi.clearAllMocks();
+  mocks.createAdminClient.mockReturnValue({ rpc: mocks.rpc });
+  mocks.rpc.mockResolvedValue({data:[{account_id:id,aggregate_revision:2}],error:null});
+ });
+ it('retains UUIDs for persisted contacts and branches, never temporary IDs', async () => {
+  const childId='22222222-2222-4222-8222-222222222222';
+  const result=await AccountService.updateAccount(user,tenant,id,{
+   aggregate_revision:1,
+   contacts:[{id:childId,name:'Persistido',is_primary:true},{id:'temp-123',name:'Novo',is_primary:false}],
+   branches:[{id:childId,name:'Filial',zip:''}],
+  });
+  expect(result.success).toBe(true);
+  expect(mocks.rpc).toHaveBeenCalledWith('upsert_account_aggregate_atomic',expect.objectContaining({
+   p_contacts:[{id:childId,name:'Persistido',is_primary:true},{name:'Novo',is_primary:false}],
+   p_branches:[{id:childId,name:'Filial',zip:''}],
+  }));
+ });
+ it('reports stale concurrent updates explicitly without success', async () => {
+  mocks.rpc.mockResolvedValueOnce({data:null,error:{code:'40001',message:'stale revision'}});
+  const result=await AccountService.updateAccount(user,tenant,id,{aggregate_revision:1,city:'Porto Alegre'});
+  expect(result).toMatchObject({success:false,conflict:true});
+ });
+});
