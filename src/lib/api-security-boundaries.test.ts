@@ -44,7 +44,7 @@ describe('AI authorization contract', () => {
         const source = readFileSync('src/app/api/gemini/chat/route.ts','utf8');
         expect(source).toContain('await getAiDealScope(userId, organizationId)');
         expect(source).toContain("if (!canViewAll) dealQuery = dealQuery.eq('owner_id', userId)");
-        expect(source.indexOf("getAiDealScope(userId, organizationId)")).toBeLessThan(source.indexOf("guardPaidAiRequest"));
+        expect(source.indexOf("getAiDealScope(userId, organizationId)")).toBeLessThan(source.indexOf("const rateLimit = await guardPaidAiRequest"));
     });
     it('never accepts client-provided commercial facts for AI diagnosis', () => {
         const source = readFileSync('src/app/api/gemini/analyze-deal/route.ts','utf8');
@@ -52,7 +52,7 @@ describe('AI authorization contract', () => {
         expect(source).toContain("if (!canViewAll) updateQuery = updateQuery.eq('owner_id', userId)");
         expect(source).toContain(".eq('deal_id', deal.id)");
         expect(source).toContain(".eq('organization_id', organizationId)");
-        expect(source.indexOf("const { data: deal, error: dealError }")).toBeLessThan(source.indexOf('guardPaidAiRequest'));
+        expect(source.indexOf("const { data: deal, error: dealError }")).toBeLessThan(source.indexOf("const rateLimit = await guardPaidAiRequest"));
         expect(source).not.toContain('const { deal, activities } = await request.json()');
     });
 });
