@@ -26,27 +26,6 @@ export class AccountService {
         }
     }
 
-    private static async cleanupCreatedAccount(
-        supabase: ReturnType<typeof createAdminClient>,
-        accountId: string,
-        organizationId: string,
-    ): Promise<boolean> {
-        const [contactsResult, branchesResult] = await Promise.all([
-            supabase.from('account_contacts').delete().eq('account_id', accountId).eq('organization_id', organizationId),
-            supabase.from('account_branches').delete().eq('account_id', accountId).eq('organization_id', organizationId),
-        ]);
-
-        const { data: deletedAccount, error: accountError } = await supabase
-            .from('accounts')
-            .delete()
-            .eq('id', accountId)
-            .eq('organization_id', organizationId)
-            .select('id')
-            .maybeSingle();
-
-        return !contactsResult.error && !branchesResult.error && !accountError && Boolean(deletedAccount);
-    }
-
     static async getAccounts(userId: string, organizationId: string): Promise<Account[]> {
         const supabase = createAdminClient();
         const { data, error } = await supabase
@@ -121,265 +100,152 @@ export class AccountService {
         return data;
     }
 
+    private static readonly aggregateFields = [
+        'name', 'cnpj', 'ie', 'segment', 'status', 'zip', 'street',
+        'number', 'complement', 'neighborhood', 'city', 'state',
+        'tags', 'relationship_type', 'logo_url', 'payment_terms',
+    ] as const;
+
+    private static prepareAggregate(input: Partial<Account>, requireName: boolean) {
+        this.validateAccountAggregate(input, requireName);
+        const fields: Record<string, unknown> = {};
+        const casing = new Set(['name', 'segment']);
+        const address = new Set(['street', 'neighborhood', 'city', 'state']);
+        for (const key of this.aggregateFields) {
+            if (!Object.prototype.hasOwnProperty.call(input, key)) continue;
+            const value = input[key];
+            if (value === undefined) continue;
+            if (key === 'tags') {
+                if (!Array.isArray(value) || value.length > 50 ||
+                    value.some(tag => typeof tag !== 'string' || tag.length > 120)) {
+                    throw new Error('Etiquetas inválidas.');
+                }
+                fields.tags = value;
+                continue;
+            }
+            if (value !== null && typeof value !== 'string') {
+                throw new Error('Campo da conta inválido.');
+            }
+            if (typeof value === 'string' && value.length > 500) {
+                throw new Error('Campo da conta excede o limite.');
+            }
+            fields[key] = typeof value !== 'string' ? value :
+                casing.has(key) ? normalizeCasing(value, 'name') :
+                address.has(key) ? normalizeCasing(value, 'address') :
+                key === 'cnpj' ? normalizeTaxId(value) :
+                key === 'zip' ? normalizeZip(value) : value;
+        }
+        if (requireName) {
+            fields.status ??= 'Ativo';
+            fields.relationship_type ??= 'Cliente';
+            fields.tags ??= [];
+        }
+        if (fields.status !== undefined &&
+            fields.status !== 'Ativo' && fields.status !== 'Inativo') {
+            throw new Error('Status da conta inválido.');
+        }
+
+        const serializeChildren = (children: Account['contacts'] | Account['branches'] | undefined,
+            keys: readonly string[]): Record<string, unknown>[] | null => {
+            if (children === undefined) return null;
+            if (children.length > 100) throw new Error('Limite de registros relacionados excedido.');
+            return children.map(child => {
+                const raw = child as unknown as Record<string, unknown>;
+                const record: Record<string, unknown> = {};
+                for (const key of keys) {
+                    if (raw[key] === undefined) continue;
+                    if (key === 'is_primary') {
+                        if (typeof raw[key] !== 'boolean') throw new Error('Indicador principal inválido.');
+                    } else if (raw[key] !== null &&
+                        (typeof raw[key] !== 'string' || (raw[key] as string).length > 500)) {
+                        throw new Error('Dados de contatos ou filiais inválidos.');
+                    }
+                    record[key] = raw[key];
+                }
+                return record;
+            });
+        };
+        return {
+            fields,
+            contacts: serializeChildren(input.contacts, [
+                'name', 'email', 'mobile_phone', 'landline_phone', 'role', 'is_primary',
+            ]),
+            branches: serializeChildren(input.branches, [
+                'name', 'zip', 'street', 'number', 'complement', 'neighborhood',
+                'city', 'state', 'cnpj', 'ie', 'payment_terms',
+            ]),
+        };
+    }
+
+    private static isUuid(value: unknown): value is string {
+        return typeof value === 'string' &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    }
+
+    private static validRpcRow(data: unknown): data is { account_id: string; aggregate_revision: number }[] {
+        return Array.isArray(data) && data.length === 1 &&
+            Boolean(data[0]) && this.isUuid(data[0].account_id) &&
+            Number.isSafeInteger(data[0].aggregate_revision) &&
+            data[0].aggregate_revision > 0;
+    }
+
     static async createAccount(userId: string, organizationId: string, account: Partial<Account>) {
-        const supabase = createAdminClient();
-        let createdAccountId: string | null = null;
-
         try {
-            this.validateAccountAggregate(account, true);
-            const { data: accData, error: accError } = await supabase
-                .from('accounts')
-                .insert([{
-                    organization_id: organizationId,
-                    name: normalizeCasing(account.name, 'name'),
-                    cnpj: normalizeTaxId(account.cnpj),
-                    ie: account.ie,
-                    segment: normalizeCasing(account.segment, 'name'),
-                    status: account.status || 'Ativo',
-                    zip: normalizeZip(account.zip),
-                    street: normalizeCasing(account.street, 'address'),
-                    number: account.number,
-                    complement: account.complement,
-                    neighborhood: normalizeCasing(account.neighborhood, 'address'),
-                    city: normalizeCasing(account.city, 'address'),
-                    state: normalizeCasing(account.state, 'address'),
-                    tags: account.tags || [],
-                    relationship_type: account.relationship_type || 'Cliente',
-                    logo_url: account.logo_url || null,
-                    payment_terms: account.payment_terms || null
-                }])
-                .select()
-                .single();
-
-            if (accError || !accData) throw accError || new Error('account insert returned no row');
-            createdAccountId = accData.id;
-
-            if (account.contacts && account.contacts.length > 0) {
-                const contactsToInsert = account.contacts.map(contact => ({
-                    account_id: createdAccountId,
-                    organization_id: organizationId,
-                    name: contact.name,
-                    email: contact.email,
-                    mobile_phone: contact.mobile_phone,
-                    landline_phone: contact.landline_phone,
-                    role: contact.role,
-                    is_primary: contact.is_primary
-                }));
-                const { error: contactsError } = await supabase.from('account_contacts').insert(contactsToInsert);
-                if (contactsError) throw contactsError;
+            if (!this.isUuid(userId) || !this.isUuid(organizationId)) {
+                throw new Error('Identificadores de conta inválidos.');
             }
-
-            if (account.branches && account.branches.length > 0) {
-                const branchesToInsert = account.branches.map(branch => ({
-                    account_id: createdAccountId,
-                    organization_id: organizationId,
-                    name: branch.name,
-                    zip: branch.zip,
-                    street: branch.street,
-                    number: branch.number,
-                    complement: branch.complement,
-                    neighborhood: branch.neighborhood,
-                    city: branch.city,
-                    state: branch.state,
-                    cnpj: branch.cnpj,
-                    ie: branch.ie,
-                    payment_terms: branch.payment_terms
-                }));
-                const { error: branchesError } = await supabase.from('account_branches').insert(branchesToInsert);
-                if (branchesError) throw branchesError;
-            }
-
-            return { success: true, data: accData };
+            const input = this.prepareAggregate(account, true);
+            // All three tables commit or roll back in one database transaction.
+            const { data, error } = await createAdminClient().rpc('upsert_account_aggregate_atomic', {
+                p_actor_id: userId,
+                p_org_id: organizationId,
+                p_account_id: null,
+                p_expected_revision: null,
+                p_fields: input.fields,
+                p_contacts: input.contacts ?? [],
+                p_branches: input.branches ?? [],
+            });
+            if (error || !this.validRpcRow(data)) throw new Error('account RPC did not confirm persistence');
+            return { success: true, data: { id: data[0].account_id, aggregate_revision: data[0].aggregate_revision } };
         } catch {
-            console.error('[AccountService] account creation failed');
-            if (createdAccountId) {
-                const rolledBack = await this.cleanupCreatedAccount(supabase, createdAccountId, organizationId);
-                if (!rolledBack) console.error('[AccountService] account creation rollback failed');
-            }
+            console.error('[AccountService] atomic account creation failed');
             return { success: false, error: 'Não foi possível salvar a conta.' };
         }
     }
 
     static async updateAccount(userId: string, organizationId: string, id: string, updates: Partial<Account>) {
-        const supabase = createAdminClient();
-        let previousContacts: Record<string, unknown>[] | null = null;
-        let previousBranches: Record<string, unknown>[] | null = null;
-
-        const restoreChildren = async (): Promise<boolean> => {
-            let restored = true;
-
-            if (previousContacts) {
-                const { error: deleteContactsError } = await supabase
-                    .from('account_contacts')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (deleteContactsError) restored = false;
-                if (!deleteContactsError && previousContacts.length > 0) {
-                    const { error: restoreContactsError } = await supabase
-                        .from('account_contacts')
-                        .insert(previousContacts);
-                    if (restoreContactsError) restored = false;
-                }
-            }
-
-            if (previousBranches) {
-                const { error: deleteBranchesError } = await supabase
-                    .from('account_branches')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (deleteBranchesError) restored = false;
-                if (!deleteBranchesError && previousBranches.length > 0) {
-                    const { error: restoreBranchesError } = await supabase
-                        .from('account_branches')
-                        .insert(previousBranches);
-                    if (restoreBranchesError) restored = false;
-                }
-            }
-
-            return restored;
-        };
-
         try {
-            this.validateAccountAggregate(updates, false);
-            const { data: existingAccount, error: existingAccountError } = await supabase
-                .from('accounts')
-                .select('id')
-                .eq('id', id)
-                .eq('organization_id', organizationId)
-                .maybeSingle();
-
-            if (existingAccountError || !existingAccount) {
-                throw existingAccountError || new Error('account not found');
+            if (![userId, organizationId, id].every(this.isUuid)) {
+                throw new Error('Identificadores de conta inválidos.');
             }
-
-            if (updates.contacts !== undefined) {
-                const { data: contactsSnapshot, error: contactsSnapshotError } = await supabase
-                    .from('account_contacts')
-                    .select('id, account_id, organization_id, name, email, mobile_phone, landline_phone, role, is_primary')
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (contactsSnapshotError || !Array.isArray(contactsSnapshot)) {
-                    throw contactsSnapshotError || new Error('contact snapshot returned invalid data');
-                }
-                previousContacts = contactsSnapshot as Record<string, unknown>[];
-
-                const { data: deletedContacts, error: deleteContactsError } = await supabase
-                    .from('account_contacts')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId)
-                    .select('id');
-                if (deleteContactsError || (deletedContacts || []).length !== previousContacts.length) {
-                    throw deleteContactsError || new Error('contact replacement deleted an unexpected number of rows');
-                }
-
-                if (updates.contacts.length > 0) {
-                    const contactsToInsert = updates.contacts.map(contact => ({
-                        account_id: id,
-                        organization_id: organizationId,
-                        name: contact.name,
-                        email: contact.email,
-                        mobile_phone: contact.mobile_phone,
-                        landline_phone: contact.landline_phone,
-                        role: contact.role,
-                        is_primary: contact.is_primary
-                    }));
-                    const { error: contactsInsertError } = await supabase
-                        .from('account_contacts')
-                        .insert(contactsToInsert);
-                    if (contactsInsertError) throw contactsInsertError;
-                }
+            if (!Number.isSafeInteger(updates?.aggregate_revision) ||
+                (updates.aggregate_revision ?? 0) < 1) {
+                throw new Error('Revisão da conta obrigatória.');
             }
-
-            if (updates.branches !== undefined) {
-                const { data: branchesSnapshot, error: branchesSnapshotError } = await supabase
-                    .from('account_branches')
-                    .select('id, account_id, organization_id, name, zip, street, number, complement, neighborhood, city, state, cnpj, ie, payment_terms')
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-                if (branchesSnapshotError || !Array.isArray(branchesSnapshot)) {
-                    throw branchesSnapshotError || new Error('branch snapshot returned invalid data');
-                }
-                previousBranches = branchesSnapshot as Record<string, unknown>[];
-
-                const { data: deletedBranches, error: deleteBranchesError } = await supabase
-                    .from('account_branches')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId)
-                    .select('id');
-                if (deleteBranchesError || (deletedBranches || []).length !== previousBranches.length) {
-                    throw deleteBranchesError || new Error('branch replacement deleted an unexpected number of rows');
-                }
-
-                if (updates.branches.length > 0) {
-                    const branchesToInsert = updates.branches.map(branch => ({
-                        account_id: id,
-                        organization_id: organizationId,
-                        name: branch.name,
-                        zip: branch.zip,
-                        street: branch.street,
-                        number: branch.number,
-                        complement: branch.complement,
-                        neighborhood: branch.neighborhood,
-                        city: branch.city,
-                        state: branch.state,
-                        cnpj: branch.cnpj,
-                        ie: branch.ie,
-                        payment_terms: branch.payment_terms
-                    }));
-                    const { error: branchesInsertError } = await supabase
-                        .from('account_branches')
-                        .insert(branchesToInsert);
-                    if (branchesInsertError) throw branchesInsertError;
-                }
+            const input = this.prepareAggregate(updates, false);
+            if (!Object.keys(input.fields).length &&
+                input.contacts === null && input.branches === null) {
+                throw new Error('Nenhuma alteração informada.');
             }
-
-            const accountUpdates: Record<string, unknown> = {};
-            const setIfPresent = (key: keyof Account, value: unknown) => {
-                if (Object.prototype.hasOwnProperty.call(updates, key)) accountUpdates[key] = value;
-            };
-            setIfPresent('name', normalizeCasing(updates.name, 'name'));
-            setIfPresent('cnpj', normalizeTaxId(updates.cnpj));
-            setIfPresent('ie', updates.ie);
-            setIfPresent('segment', normalizeCasing(updates.segment, 'name'));
-            setIfPresent('status', updates.status);
-            setIfPresent('zip', normalizeZip(updates.zip));
-            setIfPresent('street', normalizeCasing(updates.street, 'address'));
-            setIfPresent('number', updates.number);
-            setIfPresent('complement', updates.complement);
-            setIfPresent('neighborhood', normalizeCasing(updates.neighborhood, 'address'));
-            setIfPresent('city', normalizeCasing(updates.city, 'address'));
-            setIfPresent('state', normalizeCasing(updates.state, 'address'));
-            setIfPresent('tags', updates.tags);
-            setIfPresent('relationship_type', updates.relationship_type);
-            setIfPresent('logo_url', updates.logo_url);
-            setIfPresent('payment_terms', updates.payment_terms);
-
-            if (Object.keys(accountUpdates).length > 0) {
-                const { data: updatedAccount, error: accError } = await supabase
-                    .from('accounts')
-                    .update(accountUpdates)
-                    .eq('id', id)
-                    .eq('organization_id', organizationId)
-                    .select('id')
-                    .maybeSingle();
-
-                if (accError || !updatedAccount) {
-                    throw accError || new Error('account update returned no row');
-                }
+            const { data, error } = await createAdminClient().rpc('upsert_account_aggregate_atomic', {
+                p_actor_id: userId,
+                p_org_id: organizationId,
+                p_account_id: id,
+                p_expected_revision: updates.aggregate_revision,
+                p_fields: input.fields,
+                p_contacts: input.contacts,
+                p_branches: input.branches,
+            });
+            if (error || !this.validRpcRow(data) || data[0].account_id !== id) {
+                throw new Error('account RPC did not confirm update');
             }
-
-            return { success: true };
+            return { success: true, aggregate_revision: data[0].aggregate_revision };
         } catch {
-            console.error('[AccountService] account update failed');
-            if (previousContacts || previousBranches) {
-                const restored = await restoreChildren();
-                if (!restored) console.error('[AccountService] account child restoration failed');
-            }
-            return { success: false, error: 'Não foi possível atualizar a conta.' };
+            console.error('[AccountService] atomic account update failed or revision stale');
+            return {
+                success: false,
+                error: 'Não foi possível atualizar a conta. Recarregue os dados antes de tentar novamente.',
+            };
         }
     }
 

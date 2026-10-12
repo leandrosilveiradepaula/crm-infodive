@@ -159,16 +159,17 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
         setLoading(true);
 
         try {
-            if (customer) {
-                await updateAccount(customer.id, formData);
-            } else {
-                await createAccount(formData);
+            const result = customer
+                ? await updateAccount(customer.id, { ...formData, aggregate_revision: customer.aggregate_revision })
+                : await createAccount(formData);
+            if (!result.success) {
+                throw new Error(result.error || 'Não foi possível salvar a empresa.');
             }
             onOpenChange(false);
             router.refresh();
         } catch (error) {
             console.error('Error saving customer:', error);
-            alert('Erro ao salvar empresa.');
+            alert(error instanceof Error ? error.message : 'Erro ao salvar empresa.');
         } finally {
             setLoading(false);
         }
