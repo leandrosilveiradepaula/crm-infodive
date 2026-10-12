@@ -18,3 +18,17 @@ describe('configured pipeline board contract',()=>{
   expect(isConfiguredMove('Aprovação', [stage('a','Aprovação')])).toBe(true);
  });
 });
+describe('historical stage safety', () => {
+ it('marks historical-only columns without offering them as a valid move target', () => {
+  const config=[stage('1','Descoberta')];
+  const stages=configuredBoardStages(config,[{stage:'descontinuada'}]);
+  expect(stages.find(s=>s.id==='descontinuada')?.historical).toBe(true);
+  expect(isConfiguredMove('descontinuada',config)).toBe(false);
+  expect(isConfiguredMove('Descoberta',config)).toBe(true);
+ });
+ it('provides a valid default active stage when no configuration has been stored', () => {
+  const stages=configuredBoardStages([],[]);
+  expect(stages.slice(0,3).map(s=>s.id)).toEqual(['qualification','proposal','negotiation']);
+  expect(isConfiguredMove('qualification',[])).toBe(true);
+ });
+});

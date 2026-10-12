@@ -8,6 +8,7 @@ export interface BoardStage {
     color: string;
     bg: string;
     probability?: number;
+    historical?: boolean;
 }
 export const TERMINAL_STAGES: BoardStage[] = [
     { id: 'won', title: 'Ganho', color: 'border-success', bg: 'bg-success/5', probability: 100 },
@@ -41,7 +42,7 @@ export function configuredBoardStages(configured: PipelineStage[], deals: Pick<D
         const title = id === 'qualification' ? 'Qualificação (legado)' :
             id === 'proposal' ? 'Proposta (legado)' :
             id === 'negotiation' ? 'Negociação (legado)' : id + ' (histórico)';
-        custom.push({ id, title, color: 'border-muted-foreground', bg: 'bg-muted/20' });
+        custom.push({ id, title, color: 'border-muted-foreground', bg: 'bg-muted/20', historical: true });
     }
     if (!custom.length) {
         custom.push(...[

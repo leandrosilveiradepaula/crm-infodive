@@ -22,7 +22,8 @@ interface DealFormModalProps {
 
 export function DealFormModal({ open, onOpenChange, deal, configuredStages }: DealFormModalProps) {
     const router = useRouter();
-    const stageOptions = configuredStages ? configuredBoardStages(configuredStages, deal ? [deal] : []) : null;
+    const stageOptions = configuredBoardStages(configuredStages ?? [], deal ? [deal] : []);
+    const defaultStage = stageOptions.find(stage => stage.id !== 'won' && stage.id !== 'lost')?.id ?? 'qualification';
     const [loading, setLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
 
@@ -31,7 +32,7 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
         account_id: deal?.account_id || '',
         company: deal?.company || '',
         value: deal?.value || 0,
-        stage: deal?.stage || 'qualification',
+        stage: deal?.stage || defaultStage,
         probability: deal?.probability || 20,
         expected_close_date: deal?.expected_close_date || '',
         description: deal?.description || ''
@@ -45,7 +46,7 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
                 account_id: deal?.account_id || '',
                 company: deal?.company || '',
                 value: deal?.value || 0,
-                stage: deal?.stage || 'qualification',
+                stage: deal?.stage || defaultStage,
                 probability: deal?.probability || 20,
                 expected_close_date: deal?.expected_close_date || '',
                 description: deal?.description || ''
@@ -55,7 +56,7 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
             // Fetch accounts when modal opens
             getAccounts().then(data => setAccounts(data));
         }
-    }, [deal, open]);
+    }, [deal, open, defaultStage]);
 
     const isEditing = !!deal;
 
@@ -182,9 +183,9 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
                                                 <SelectValue placeholder="Selecione o estágio" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-popover border-border text-popover-foreground rounded-xl">
-                                                {stageOptions ? stageOptions.map(stage => (
+                                                {stageOptions.map(stage => (
                                                     <SelectItem key={stage.id} value={stage.id}>{stage.title}</SelectItem>
-                                                )) : <SelectItem value="qualification">Qualificação</SelectItem>}
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>

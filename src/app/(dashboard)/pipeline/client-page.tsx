@@ -20,7 +20,7 @@ import { FilterBar } from '@/components/layout/FilterBar';
 import { DollarSign, Sparkles } from 'lucide-react';
 import { Deal } from '@/types/deal';
 import type { PipelineStage } from '@/services/SettingsService';
-import { configuredBoardStages } from '@/lib/pipeline-board-stages';
+import { configuredBoardStages, isConfiguredMove } from '@/lib/pipeline-board-stages';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 
@@ -358,6 +358,9 @@ export const PipelineClientPage = ({ initialDeals, configuredStages, userProfile
                                     <div className={`p-4 rounded-t-2xl border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
+                                            {!isConfiguredMove(stage.id, configuredStages) && (
+                                                <span className="text-[10px] text-muted-foreground" title="Etapa histórica; não aceita novos negócios">Somente histórico</span>
+                                            )}
                                             <div className="flex gap-2 mt-1">
                                                 <span className="text-xs bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
                                                 <span className="text-xs text-primary font-bold">{formatCompact(totalStageValue)}</span>
@@ -365,7 +368,7 @@ export const PipelineClientPage = ({ initialDeals, configuredStages, userProfile
                                         </div>
                                     </div>
 
-                                    <Droppable droppableId={stage.id}>
+                                    <Droppable droppableId={stage.id} isDropDisabled={!isConfiguredMove(stage.id, configuredStages)}>
                                         {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
