@@ -21,6 +21,7 @@ import { DollarSign, Sparkles } from 'lucide-react';
 import { Deal } from '@/types/deal';
 import type { PipelineStage } from '@/services/SettingsService';
 import { configuredBoardStages, isConfiguredMove } from '@/lib/pipeline-board-stages';
+import { rollbackOptimisticStageMove } from '@/lib/pipeline-optimistic-move';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 
@@ -175,25 +176,29 @@ export const PipelineClientPage = ({ initialDeals, configuredStages, userProfile
         const dealId = draggableId;
         const newStage = destination.droppableId;
         const targetStageConfig = boardStages.find(s => s.id === newStage);
+        const previousDeal = deals.find(d => d.id === dealId);
         const newProbability = targetStageConfig ? targetStageConfig.probability : undefined;
 
-        if (!targetStageConfig) {
+        if (!targetStageConfig || !previousDeal || !isConfiguredMove(newStage, configuredStages)) {
             toast.error('Etapa de destino inválida. Recarregue o pipeline.');
             return;
         }
         // Optimistic Update
-        const updatedDeals = deals.map(d =>
+        setDeals(current => current.map(d =>
             d.id === dealId ? { ...d, stage: newStage, probability: newProbability ?? d.probability } : d
-        );
-        setDeals(updatedDeals);
+        ));
 
         try {
             await updateDealStage(dealId, newStage, newProbability);
             toast.success('Oportunidade atualizada!');
         } catch (error) {
             console.error(error);
-            toast.error('Erro ao atualizar oportunidade.');
-            setDeals(initialDeals); // Revert on error
+            toast.error('Não foi possível atualizar a oportunidade. Dados atualizados no servidor.');
+            // Revert just the failed move, not other deals or concurrent UI changes.
+            setDeals(current => rollbackOptimisticStageMove(current, previousDeal, newStage));
+        } finally {
+            // Reconcile authoritative stage, probability and close timestamps.
+            router.refresh();
         }
     };
 

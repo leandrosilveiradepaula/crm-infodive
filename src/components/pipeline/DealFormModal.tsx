@@ -33,7 +33,7 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
         company: deal?.company || '',
         value: deal?.value || 0,
         stage: deal?.stage || defaultStage,
-        probability: deal?.probability || 20,
+        probability: deal?.probability ?? 20,
         expected_close_date: deal?.expected_close_date || '',
         description: deal?.description || ''
     });
@@ -47,7 +47,7 @@ export function DealFormModal({ open, onOpenChange, deal, configuredStages }: De
                 company: deal?.company || '',
                 value: deal?.value || 0,
                 stage: deal?.stage || defaultStage,
-                probability: deal?.probability || 20,
+                probability: deal?.probability ?? 20,
                 expected_close_date: deal?.expected_close_date || '',
                 description: deal?.description || ''
             });

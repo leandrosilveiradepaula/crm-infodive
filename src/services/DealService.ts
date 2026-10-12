@@ -1,5 +1,6 @@
 import { createAdminClient } from '../lib/supabase/admin';
 import { validateDealProductWrite } from '../lib/deal-product-write-validation';
+import { stageLifecyclePatch } from '../lib/deal-stage-lifecycle';
 import { requireDealIdentity, validateDealTitle, validateDealMoney, validateDealProbability, validateDealStage, validateDealReference } from '../lib/deal-write-validation';
 import { sortProductsHierarchically } from '../utils/productSorting';
 import { normalizeCasing } from '../lib/string-utils';
@@ -252,8 +253,7 @@ export class DealService {
             owner: dealData.owner || 'Me',
             company: normalizeCasing(dealData.company || '', 'name') || null,
             value,
-            stage,
-            probability,
+            ...stageLifecyclePatch(stage, probability),
             expected_close_date: dealData.expected_close_date || null,
             description: dealData.description || null,
             organization_id: organizationId
@@ -310,6 +310,10 @@ export class DealService {
         }
         if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'stage')) {
             sanitizedUpdates.stage = validateDealStage(sanitizedUpdates.stage);
+            Object.assign(sanitizedUpdates, stageLifecyclePatch(
+                sanitizedUpdates.stage,
+                sanitizedUpdates.probability,
+            ));
         }
         if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'account_id')) {
             const accountId = validateDealReference(sanitizedUpdates.account_id);
@@ -364,11 +368,7 @@ export class DealService {
         const checkedStage = validateDealStage(newStage);
         const checkedProbability = probability === undefined ? undefined : validateDealProbability(probability);
         const supabase = createAdminClient();
-        const updates: { stage: string; probability?: number; won_at?: string; lost_at?: string } = { stage: checkedStage };
-
-        if (checkedProbability !== undefined) updates.probability = checkedProbability;
-        if (checkedStage === 'won') { updates.won_at = new Date().toISOString(); updates.probability = 100; }
-        else if (checkedStage === 'lost') { updates.lost_at = new Date().toISOString(); updates.probability = 0; }
+        const updates = stageLifecyclePatch(checkedStage, checkedProbability);
 
         const isAdminOrManager = await this.canAccessAllDeals(supabase, userId, organizationId);
 
