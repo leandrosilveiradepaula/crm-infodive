@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { requirePermission, requireSessionContext } from '@/lib/auth-server';
 
 import { DealService } from '@/services/DealService';
+import { SettingsService } from '@/services/SettingsService';
+import { isConfiguredMove } from '@/lib/pipeline-board-stages';
 import { ProposalService } from '@/services/ProposalService';
 import { AccountService } from '@/services/AccountService';
 import { ContactService } from '@/services/ContactService';
@@ -31,6 +33,10 @@ export async function getAccountContacts(accountId?: string | null): Promise<Con
 
 export async function updateDealStage(dealId: string, newStage: string, probability?: number, dealTitle?: string) {
     const { userId, organizationId } = await requirePermission('deals:edit');
+    const stages = await SettingsService.getPipelineStages(organizationId);
+    if (!isConfiguredMove(newStage, stages)) {
+        throw new Error('Etapa de destino não pertence ao pipeline da organização.');
+    }
     await DealService.updateDealStage(userId, dealId, organizationId, newStage, probability);
     const automationEventId = randomUUID();
     await AutomationRuntimeService.executeEvent(userId, organizationId, {

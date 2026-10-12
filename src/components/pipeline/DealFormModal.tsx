@@ -8,6 +8,8 @@ import { createDeal, updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import { getAccounts } from '@/app/(dashboard)/pipeline/actions';
 import { Loader2, Target, Calendar, AlignLeft, ChevronRight, Building2 } from 'lucide-react';
 import { type Deal } from '@/types/deal';
+import type { PipelineStage } from '@/services/SettingsService';
+import { configuredBoardStages } from '@/lib/pipeline-board-stages';
 import { useRouter } from 'next/navigation';
 import { ThemeInput, ThemeLabel, ThemeSectionHeader, ThemePanel, ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 
@@ -15,10 +17,13 @@ interface DealFormModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     deal?: Deal | null; // If provided, edit mode
+    configuredStages?: PipelineStage[];
 }
 
-export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) {
+export function DealFormModal({ open, onOpenChange, deal, configuredStages }: DealFormModalProps) {
     const router = useRouter();
+    const stageOptions = configuredBoardStages(configuredStages ?? [], deal ? [deal] : []);
+    const defaultStage = stageOptions.find(stage => stage.id !== 'won' && stage.id !== 'lost')?.id ?? 'qualification';
     const [loading, setLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
 
@@ -27,7 +32,7 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
         account_id: deal?.account_id || '',
         company: deal?.company || '',
         value: deal?.value || 0,
-        stage: deal?.stage || 'qualification',
+        stage: deal?.stage || defaultStage,
         probability: deal?.probability || 20,
         expected_close_date: deal?.expected_close_date || '',
         description: deal?.description || ''
@@ -41,7 +46,7 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                 account_id: deal?.account_id || '',
                 company: deal?.company || '',
                 value: deal?.value || 0,
-                stage: deal?.stage || 'qualification',
+                stage: deal?.stage || defaultStage,
                 probability: deal?.probability || 20,
                 expected_close_date: deal?.expected_close_date || '',
                 description: deal?.description || ''
@@ -51,7 +56,7 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
             // Fetch accounts when modal opens
             getAccounts().then(data => setAccounts(data));
         }
-    }, [deal, open]);
+    }, [deal, open, defaultStage]);
 
     const isEditing = !!deal;
 
@@ -178,11 +183,9 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                                                 <SelectValue placeholder="Selecione o estágio" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-popover border-border text-popover-foreground rounded-xl">
-                                                <SelectItem value="qualification">Qualificação</SelectItem>
-                                                <SelectItem value="proposal">Proposta</SelectItem>
-                                                <SelectItem value="negotiation">Negociação</SelectItem>
-                                                <SelectItem value="won">Ganho</SelectItem>
-                                                <SelectItem value="lost">Perdido</SelectItem>
+                                                {stageOptions.map(stage => (
+                                                    <SelectItem key={stage.id} value={stage.id}>{stage.title}</SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>

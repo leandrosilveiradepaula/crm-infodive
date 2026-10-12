@@ -19,25 +19,22 @@ import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DollarSign, Sparkles } from 'lucide-react';
 import { Deal } from '@/types/deal';
+import type { PipelineStage } from '@/services/SettingsService';
+import { configuredBoardStages, isConfiguredMove } from '@/lib/pipeline-board-stages';
 import { Profile } from '@/types/profile';
 import { Account } from '@/types/account';
 
 interface PipelineClientPageProps {
     initialDeals: Deal[];
+    configuredStages: PipelineStage[];
     userProfile: Profile | null;
     distributors: Account[];
     allAccounts: Account[];
 }
 
-const DEFAULT_STAGES = [
-    { id: 'qualification', title: 'Qualificação', color: 'border-info', bg: 'bg-info/5', probability: 30 },
-    { id: 'proposal', title: 'Proposta', color: 'border-teal-500', bg: 'bg-teal-500/5', probability: 50 },
-    { id: 'negotiation', title: 'Negociação', color: 'border-warning', bg: 'bg-warning/5', probability: 75 },
-    { id: 'won', title: 'Ganho', color: 'border-success', bg: 'bg-success/5', probability: 100 },
-    { id: 'lost', title: 'Perdido', color: 'border-destructive', bg: 'bg-destructive/5', probability: 0 }
-];
 
-export const PipelineClientPage = ({ initialDeals, userProfile, distributors, allAccounts }: PipelineClientPageProps) => {
+
+export const PipelineClientPage = ({ initialDeals, configuredStages, userProfile, distributors, allAccounts }: PipelineClientPageProps) => {
     const [deals, setDeals] = useState<Deal[]>(initialDeals);
     const [isBrowser, setIsBrowser] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -112,23 +109,24 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         });
     }, [deals, searchTerm, ownerFilter, selectedQuarters]);
 
+    const boardStages = useMemo(() => configuredBoardStages(configuredStages, deals), [configuredStages, deals]);
+
     // Group by Stage
     const columns = useMemo(() => {
         const cols: Record<string, Deal[]> = {};
-        DEFAULT_STAGES.forEach(s => cols[s.id] = []);
+        boardStages.forEach(s => cols[s.id] = []);
 
         filteredDeals.forEach(deal => {
             const stage = deal.stage || 'qualification';
             if (cols[stage]) {
                 cols[stage].push(deal);
             } else {
-                // Fallback for unknown stages
-                if (!cols['qualification']) cols['qualification'] = [];
-                cols['qualification'].push(deal);
+                // Unknown states stay visible, never silently reclassified.
+                cols[stage] = [deal];
             }
         });
         return cols;
-    }, [filteredDeals]);
+    }, [filteredDeals, boardStages]);
 
     // Metrics Logic (Now computes based ONLY on filtered deals so the Top Cards match the Quarter)
     const metrics = useMemo(() => {
@@ -176,9 +174,13 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
 
         const dealId = draggableId;
         const newStage = destination.droppableId;
-        const targetStageConfig = DEFAULT_STAGES.find(s => s.id === newStage);
+        const targetStageConfig = boardStages.find(s => s.id === newStage);
         const newProbability = targetStageConfig ? targetStageConfig.probability : undefined;
 
+        if (!targetStageConfig) {
+            toast.error('Etapa de destino inválida. Recarregue o pipeline.');
+            return;
+        }
         // Optimistic Update
         const updatedDeals = deals.map(d =>
             d.id === dealId ? { ...d, stage: newStage, probability: newProbability ?? d.probability } : d
@@ -347,7 +349,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-x-auto pb-4">
                     <div className="flex space-x-4 h-full min-w-max">
-                        {DEFAULT_STAGES.map(stage => {
+                        {boardStages.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
@@ -356,6 +358,9 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                     <div className={`p-4 rounded-t-2xl border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
                                         <div>
                                             <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
+                                            {!isConfiguredMove(stage.id, configuredStages) && (
+                                                <span className="text-xs text-muted-foreground" title="Etapa histórica; não aceita novos negócios">Somente histórico</span>
+                                            )}
                                             <div className="flex gap-2 mt-1">
                                                 <span className="text-xs bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
                                                 <span className="text-xs text-primary font-bold">{formatCompact(totalStageValue)}</span>
@@ -363,7 +368,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                         </div>
                                     </div>
 
-                                    <Droppable droppableId={stage.id}>
+                                    <Droppable droppableId={stage.id} isDropDisabled={!isConfiguredMove(stage.id, configuredStages)}>
                                         {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
@@ -394,6 +399,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             {/* New Deal Modal */}
             <DealFormModal
                 open={showNewDealModal}
+                configuredStages={configuredStages}
                 onOpenChange={setShowNewDealModal}
             />
 
