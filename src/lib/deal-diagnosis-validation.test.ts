@@ -27,7 +27,8 @@ describe('deal diagnosis validation', () => {
 
   it('keeps persistence downstream from validation and fails closed', () => {
     const source = readFileSync('src/app/api/gemini/analyze-deal/route.ts', 'utf8');
-    expect(source.indexOf('parseDealDiagnosis(diagnosis)')).toBeLessThan(source.indexOf(".from('deals')"));
+    // Deal reads precede model invocation; only the UPDATE must follow validation.
+    expect(source.indexOf('parseDealDiagnosis(diagnosis)')).toBeLessThan(source.indexOf(".update({"));
     expect(source).toContain("telemetry.record('invalid_provider_output', 502)");
     expect(source).toContain("telemetry.record('persistence_failure', 503)");
     expect(source).toContain('health_score: validated.healthScore');
@@ -36,7 +37,7 @@ describe('deal diagnosis validation', () => {
     expect(source).toContain(".eq('organization_id', organizationId)");
     expect(source).toContain('.maybeSingle()');
     expect(source).toContain("telemetry.record('deal_not_found', 404)");
-    expect(source.indexOf('typeof deal.id')).toBeLessThan(source.indexOf('await guardPaidAiRequest('));
+    expect(source.indexOf('typeof requestedDeal.id')).toBeLessThan(source.indexOf('await guardPaidAiRequest('));
     expect(source).toContain("telemetry.record('invalid_request', 400)");
   });
 });

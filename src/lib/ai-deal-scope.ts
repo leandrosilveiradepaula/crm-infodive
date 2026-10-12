@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { hasPermission } from '@/lib/permissions';
+import { createAdminClient } from './supabase/admin';
+import { hasPermission } from './permissions';
 
 /**
  * Role-aware read boundary for all AI deal context. The service-role key
