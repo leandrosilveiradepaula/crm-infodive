@@ -95,9 +95,14 @@ export async function getPipelineStages(): Promise<PipelineStage[]> {
     return await SettingsService.getPipelineStages(organizationId);
 }
 
-export async function savePipelineStages(stages: PipelineStage[]) {
-    const { organizationId } = await requirePermission('settings:configure_pipeline');
-    const result = await SettingsService.savePipelineStages(organizationId, stages);
+export async function getPipelineStageSnapshot() {
+    const { organizationId, userId } = await requireSessionContext();
+    return await SettingsService.getPipelineStageSnapshot(userId, organizationId);
+}
+
+export async function savePipelineStages(stages: PipelineStage[], expectedRevision: number) {
+    const { organizationId, userId } = await requirePermission('settings:configure_pipeline');
+    const result = await SettingsService.savePipelineStages(organizationId, stages, expectedRevision, userId);
     if (result.success) {
         revalidatePath('/settings');
         revalidatePath('/pipeline');
