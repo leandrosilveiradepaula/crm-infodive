@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
-    createAdminClient: vi.fn(), requirePermission: vi.fn(), requireSessionContext: vi.fn(),
+    createAdminClient: vi.fn(), requirePermission: vi.fn(), requireSessionContext: vi.fn(), getAiDealScope: vi.fn(),
 }));
 vi.mock('./supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
+vi.mock('./ai-deal-scope', () => ({ getAiDealScope: mocks.getAiDealScope }));
 vi.mock('./auth-server', () => ({
     requirePermission: mocks.requirePermission, requireSessionContext: mocks.requireSessionContext,
 }));
@@ -20,6 +21,7 @@ function fakeDb(results: Record<string, Result>) {
             select() { return q; },
             eq(k: string, v: unknown) { op.filters.push([k, v]); return q; },
             order() { return q; },
+            in(k: string, v: unknown) { op.filters.push([k, v]); return q; },
             insert(payload: unknown) { op.mode = 'insert'; op.payload = payload; return q; },
             update(payload: unknown) { op.mode = 'update'; op.payload = payload; return q; },
             maybeSingle() { return Promise.resolve(value()); },
@@ -33,7 +35,8 @@ function fakeDb(results: Record<string, Result>) {
 describe('purchase order tenant and persistence integrity', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.requirePermission.mockResolvedValue({ organizationId: 'tenant-a' });
+        mocks.requirePermission.mockResolvedValue({ organizationId: 'tenant-a', userId: 'actor-a' });
+        mocks.getAiDealScope.mockResolvedValue({ canViewAll: true });
         mocks.requireSessionContext.mockResolvedValue({ organizationId: 'tenant-a' });
     });
     it('rejects malformed list but retains a genuine empty result', async () => {
@@ -62,6 +65,45 @@ describe('purchase order tenant and persistence integrity', () => {
         const write = db.ops.find(op => op.mode === 'update');
         expect(write?.payload).toEqual({ notes: 'ok' });
         expect(write?.filters).toContainEqual(['organization_id', 'tenant-a']);
+    });
+    it('filters purchase list to only the caller owned sales orders', async () => {
+        mocks.getAiDealScope.mockResolvedValue({ canViewAll: false });
+        const db = fakeDb({
+            deals: { data: [{ id: 'owned-deal' }], error: null },
+            sales_orders: { data: [{ id: 'owned-order' }], error: null },
+            purchase_orders: { data: [], error: null },
+        });
+        const result = await getPurchaseOrders();
+        expect(result.success).toBe(true);
+        const order = db.ops.find(op => op.table === 'purchase_orders');
+        expect(order?.filters).toContainEqual(['organization_id', 'tenant-a']);
+        expect(order?.filters).toContainEqual(['sales_order_id', ['owned-order']]);
+    });
+    it('fails closed for empty or unavailable owner scope', async () => {
+        mocks.getAiDealScope.mockResolvedValue({ canViewAll: false });
+        const db = fakeDb({ deals: { data: null, error: null } });
+        await expect(getPurchaseOrders()).resolves.toMatchObject({ success: false });
+        expect(db.ops.some(op => op.table === 'purchase_orders')).toBe(false);
+    });
+    it('rejects a distributor branch from another tenant before the write', async () => {
+        const db = fakeDb({ account_branches: { data: null, error: null } });
+        await expect(createPurchaseOrder({ distributor_id: 'dist-a', distributor_branch_id: 'branch-foreign' }))
+            .resolves.toMatchObject({ success: false });
+        const op = db.ops.find(o => o.table === 'account_branches');
+        expect(op?.filters).toContainEqual(['organization_id', 'tenant-a']);
+        expect(op?.filters).toContainEqual(['account_id', 'dist-a']);
+        expect(db.ops.some(op => op.mode === 'insert')).toBe(false);
+    });
+    it('does not let a seller update a purchase order for another sales owner', async () => {
+        mocks.getAiDealScope.mockResolvedValue({ canViewAll: false });
+        const db = fakeDb({
+            deals: { data: [{ id: 'owned-deal' }], error: null },
+            sales_orders: { data: [{ id: 'owned-order' }], error: null },
+            'purchase_orders:update': { data: null, error: null },
+        });
+        await expect(updatePurchaseOrder('some-po', { notes: 'Update' })).resolves.toMatchObject({ success: false });
+        const write = db.ops.find(op => op.mode === 'update');
+        expect(write?.filters).toContainEqual(['sales_order_id', ['owned-order']]);
     });
     it('requires a persisted row before reporting a successful creation', async () => {
         const db = fakeDb({ 'purchase_orders:insert': { data: null, error: null } });
