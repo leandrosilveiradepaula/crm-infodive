@@ -8,6 +8,8 @@ import { createDeal, updateDeal } from '@/app/(dashboard)/pipeline/actions';
 import { getAccounts } from '@/app/(dashboard)/pipeline/actions';
 import { Loader2, Target, Calendar, AlignLeft, ChevronRight, Building2 } from 'lucide-react';
 import { type Deal } from '@/types/deal';
+import type { PipelineStage } from '@/services/SettingsService';
+import { configuredBoardStages } from '@/lib/pipeline-board-stages';
 import { useRouter } from 'next/navigation';
 import { ThemeInput, ThemeLabel, ThemeSectionHeader, ThemePanel, ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 
@@ -15,10 +17,12 @@ interface DealFormModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     deal?: Deal | null; // If provided, edit mode
+    configuredStages?: PipelineStage[];
 }
 
-export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) {
+export function DealFormModal({ open, onOpenChange, deal, configuredStages }: DealFormModalProps) {
     const router = useRouter();
+    const stageOptions = configuredStages ? configuredBoardStages(configuredStages, deal ? [deal] : []) : null;
     const [loading, setLoading] = useState(false);
     const [accounts, setAccounts] = useState<{ id: string, name: string }[]>([]);
 
@@ -178,11 +182,9 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                                                 <SelectValue placeholder="Selecione o estágio" />
                                             </SelectTrigger>
                                             <SelectContent className="bg-popover border-border text-popover-foreground rounded-xl">
-                                                <SelectItem value="qualification">Qualificação</SelectItem>
-                                                <SelectItem value="proposal">Proposta</SelectItem>
-                                                <SelectItem value="negotiation">Negociação</SelectItem>
-                                                <SelectItem value="won">Ganho</SelectItem>
-                                                <SelectItem value="lost">Perdido</SelectItem>
+                                                {stageOptions ? stageOptions.map(stage => (
+                                                    <SelectItem key={stage.id} value={stage.id}>{stage.title}</SelectItem>
+                                                )) : <SelectItem value="qualification">Qualificação</SelectItem>}
                                             </SelectContent>
                                         </Select>
                                     </div>
