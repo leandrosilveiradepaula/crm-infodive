@@ -6,6 +6,7 @@ CREATE TABLE public.pipeline_stages(id uuid PRIMARY KEY DEFAULT gen_random_uuid(
 CREATE TABLE public.deals(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),organization_id uuid NOT NULL,stage text);
 GRANT USAGE ON SCHEMA public TO service_role;
 GRANT SELECT ON public.profiles,public.deals TO service_role;
+GRANT INSERT ON public.deals TO service_role;
 GRANT SELECT,INSERT,UPDATE,DELETE ON public.pipeline_stages TO service_role;
 INSERT INTO public.profiles VALUES
 ('cccccccc-cccc-4ccc-8ccc-cccccccccccc','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','active');
