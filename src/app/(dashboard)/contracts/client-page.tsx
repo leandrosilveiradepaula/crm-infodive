@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     FileText, Plus, Search,
     CheckCircle2, Clock, Eye, Pencil, Download, TrendingUp
@@ -34,6 +34,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const [editingDraft, setEditingDraft] = useState<Contract | null>(null);
     const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+    const creatingLock = useRef(false);
     const [creationOptions, setCreationOptions] = useState<{requiresDeal: boolean;deals: {id: string;title: string;company: string}[]} | null>(null);
     const [chosenDeal, setChosenDeal] = useState('');
     const [draftTitle, setDraftTitle] = useState('');
@@ -48,6 +49,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     });
 
     const handleCreateContract = async () => {
+        if (creatingLock.current) return;
+        creatingLock.current = true;
         if (creationOptions === null) {
             setIsCreating(true);
             setCreationError(null);
@@ -58,16 +61,19 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 setCreationError('Não foi possível consultar as oportunidades autorizadas.');
             } finally {
                 setIsCreating(false);
+                creatingLock.current = false;
             }
             return;
         }
         const selected = creationOptions.deals.find(item => item.id === chosenDeal);
         if (creationOptions.requiresDeal && !selected) {
             setCreationError('Selecione uma oportunidade para este contrato.');
+            creatingLock.current = false;
             return;
         }
         if ((!selected || !selected.company.trim()) && !draftCompany.trim()) {
             setCreationError('Informe a empresa contratante.');
+            creatingLock.current = false;
             return;
         }
         setIsCreating(true);
@@ -91,6 +97,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             setCreationError('Não foi possível salvar o contrato. Confira os dados e tente novamente.');
         } finally {
             setIsCreating(false);
+            creatingLock.current = false;
         }
     };
 
@@ -143,6 +150,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             >
                 <Button
                     onClick={handleCreateContract}
+                    aria-busy={isCreating}
                     disabled={isCreating || (creationOptions !== null && creationOptions.requiresDeal && creationOptions.deals.length === 0)}
                     className="bg-primary hover:bg-primary/90 font-bold text-white h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
                 >
@@ -269,7 +277,9 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                                 <FileText className="h-4 w-4" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-black text-foreground group-hover:text-primary transition-colors cursor-pointer tracking-tight" onClick={() => handleViewContract(contract)}>{contract.title}</p>
+                                                <button type="button" className="text-left text-sm font-black text-foreground group-hover:text-primary hover:underline focus-visible:underline transition-colors tracking-tight"
+                                                    aria-label={`Visualizar contrato: ${contract.title}`}
+                                                    onClick={() => handleViewContract(contract)}>{contract.title}</button>
                                                 <p className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">{contract.type}</p>
                                             </div>
                                         </div>
@@ -298,10 +308,12 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                         </div>
                                     </td>
                                     <td className="py-3 px-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 duration-200">
+                                        <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-70 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
                                             <button
-                                                className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors border border-transparent hover:border-border"
+                                                type="button"
+                                                className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary rounded-xl transition-colors border border-transparent hover:border-border"
                                                 title="Visualizar"
+                                                aria-label={`Visualizar contrato: ${contract.title}`}
                                                 onClick={() => handleViewContract(contract)}
                                             >
                                                 <Eye className="h-4 w-4" />
@@ -311,7 +323,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                                     type="button"
                                                     className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl"
                                                     title="Editar rascunho"
-                                                    aria-label="Editar rascunho"
+                                                    aria-label={`Editar rascunho: ${contract.title}`}
                                                     onClick={() => handleEditDraft(contract)}
                                                 >
                                                     <Pencil className="h-4 w-4" />
@@ -337,10 +349,13 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <div className="p-12">
                         <PremiumEmptyState 
                             icon={FileText}
-                            title="Nenhum Contrato"
-                            description="Você ainda não possui contratos gerados ou nenhum corresponde aos filtros atuais."
-                            actionLabel="Novo Contrato"
-                            onAction={handleCreateContract}
+                            title={contracts.length === 0 ? 'Nenhum contrato cadastrado' : 'Nenhum resultado para os filtros'}
+                            description={contracts.length === 0
+                                ? 'Você ainda não possui contratos cadastrados.'
+                                : 'Ajuste o título, a empresa ou o status para localizar outros contratos.'}
+                            {...(contracts.length === 0 && creationOptions === null && !isCreating
+                                ? { actionLabel: 'Novo Contrato', onAction: handleCreateContract }
+                                : {})}
                         />
                     </div>
                 )}
