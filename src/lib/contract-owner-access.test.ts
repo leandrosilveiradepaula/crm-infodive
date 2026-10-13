@@ -57,11 +57,12 @@ describe('contract tenant and owner boundaries', () => {
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
     });
     it('guards authorized deletes by original deal link and demands a DB receipt', async () => {
-        const calls=fixture({contracts:{data:{id:'contract-a',deal_id:deal,proposal_id:null},error:null},deals:{data:{id:deal},error:null},'contracts:delete':{data:null,error:null}});
+        const calls=fixture({contracts:{data:{id:'contract-a',deal_id:deal,proposal_id:null,status:'draft'},error:null},deals:{data:{id:deal},error:null},'contracts:delete':{data:null,error:null}});
         await expect(ContractService.deleteContract(org,'contract-a',owner)).rejects.toThrow();
         const deletion=calls.find(c=>c.mode==='delete');
         expect(deletion?.filters).toContainEqual(['organization_id',org]);
         expect(deletion?.filters).toContainEqual(['deal_id',deal]);
+        expect(deletion?.filters).toContainEqual(['status','draft']);
     });
     it('never exposes deal options outside the authenticated seller scope', async () => {
         const calls = fixture({ deals: { data: [{ id: deal, title: 'Oportunidade A', company: 'Cliente A' }], error: null } });

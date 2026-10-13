@@ -110,8 +110,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const getStatusLabel = (status: string) => {
         switch (status) {
             case 'draft': return 'Rascunho';
-            case 'sent': return 'Enviado';
-            case 'viewed': return 'Visualizado';
+            case 'sent': return 'Enviado (não verificado)';
+            case 'viewed': return 'Visualizado (não verificado)';
             case 'signed': return 'Assinado (não verificado)';
             case 'declined': return 'Declinado';
             default: return status;
@@ -123,7 +123,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             {/* Header */}
             <PageHeader 
                 title="Gestão de Contratos" 
-                description="Gerencie, envie e assine contratos digitalmente."
+                description="Consulte contratos cadastrados e organize rascunhos. Assinatura eletrônica ainda indisponível."
             >
                 <Button
                     onClick={handleCreateContract}
@@ -166,25 +166,25 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 {
                     label: "Total de Contratos",
                     value: contracts.length,
-                    description: "Documentos totais",
+                    description: "Registros cadastrados",
                     icon: FileText,
                     color: "text-primary",
                     gradient: "from-primary/5 to-white dark:from-primary/10",
                     border: "border-primary/10"
                 },
                 {
-                    label: "Aguardando",
+                    label: "Marcados como enviados",
                     value: contracts.filter(c => ['sent', 'viewed'].includes(c.status)).length,
-                    description: "Pendente de assinatura",
+                    description: "Status legado, sem confirmação de envio",
                     icon: Clock,
                     color: "text-amber-600 dark:text-amber-400",
                     gradient: "from-amber-50 to-white dark:from-amber-950/20",
                     border: "border-amber-100 dark:border-amber-900/50"
                 },
                 {
-                    label: "Assinados",
+                    label: "Marcados como assinados",
                     value: contracts.filter(c => c.status === 'signed').length,
-                    description: "Concluídos",
+                    description: "Sem evidência verificada de assinatura",
                     icon: CheckCircle2,
                     color: "text-emerald-600 dark:text-emerald-400",
                     gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
@@ -195,7 +195,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     value: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(
                         contracts.reduce((acc, c) => acc + (c.value || 0), 0)
                     ),
-                    description: "Volume financeiro",
+                    description: "Soma dos valores cadastrados",
                     icon: TrendingUp,
                     color: "text-blue-600 dark:text-blue-400",
                     gradient: "from-blue-50 to-white dark:from-blue-950/20",
@@ -224,7 +224,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         <option value="draft" className="bg-popover text-popover-foreground">Rascunho</option>
                         <option value="sent" className="bg-popover text-popover-foreground">Enviado</option>
                         <option value="viewed" className="bg-popover text-popover-foreground">Visualizado</option>
-                        <option value="signed" className="bg-popover text-popover-foreground">Assinado</option>
+                        <option value="signed" className="bg-popover text-popover-foreground">Assinado (não verificado)</option>
                     </ThemeSelect>
                 </div>
             </FilterBar>

@@ -10,12 +10,14 @@ describe('contract persistence hardening', () => {
     expect(modal).not.toContain("console.log('Saving contract'");
   });
 
-  it('removes vendor-specific hardcoded branding from generated contracts', () => {
+  it('removes all company-specific hardcoded branding from unsigned contract drafts', () => {
     const builder = readFileSync('src/components/contracts/ContractBuilder.tsx', 'utf8');
     expect(builder).not.toContain('IBM BRASIL');
     expect(builder).not.toContain('IBM Global Services');
     expect(builder).not.toContain('IBM / Lenovo');
-    expect(builder).toContain('INFODIVE');
+    expect(builder).not.toContain('CONTRATADA: INFODIVE');
+    expect(builder).toContain('persistedContractText(contract?.content_json)');
+    expect(builder).not.toContain('Este contrato entra em vigor na data de sua assinatura');
     expect(builder).not.toMatch(/text-\[(?:8|9|10|11)px\]/);
   });
 

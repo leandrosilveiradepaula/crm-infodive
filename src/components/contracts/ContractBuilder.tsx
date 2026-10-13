@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { Deal } from '../../types/deal';
+import { persistedContractText } from '@/lib/contract-content';
 
 // Assuming Contract type definition or creating a placeholder
 export interface Contract {
@@ -27,28 +28,8 @@ interface ContractBuilderProps {
 
 export const ContractBuilder = ({ deal, contract, onSave, onClose }: ContractBuilderProps) => {
     const [title, setTitle] = useState(contract?.title || `Contrato de Prestação de Serviços - ${deal.company}`);
-    const [content, setContent] = useState<string>(
-        contract?.content_json ? JSON.parse(JSON.stringify(contract.content_json)).text :
-            `CONTRATO DE PRESTAÇÃO DE SERVIÇOS E FORNECIMENTO DE PRODUTOS
+    const [content, setContent] = useState<string>(persistedContractText(contract?.content_json) ?? '');
 
-IDENTIFICAÇÃO DAS PARTES
-
-CONTRATANTE: ${deal.company}, representada por ${deal.contact_name || '[NOME DO RESPONSÁVEL]'}, doravante denominada CONTRATANTE.
-
-CONTRATADA: INFODIVE, doravante denominada CONTRATADA.
-
-1. DO OBJETO
-1.1. O presente contrato tem como objeto o fornecimento dos produtos e serviços descritos na Proposta Comercial #${deal.id.slice(0, 8)}, anexa a este instrumento.
-1.2. Valor Total do Contrato: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}
-
-2. DO PRAZO
-2.1. O presente contrato entra em vigor na data de sua assinatura e terá validade de 12 (doze) meses.
-
-3. DO PAGAMENTO
-3.1. O pagamento será realizado conforme condições estabelecidas na Proposta Comercial.
-
-E, por estarem assim justos e contratados, firmam o presente instrumento.`
-    );
 
     return (
         <div className="flex flex-col h-full bg-background rounded-[40px] overflow-hidden border border-border shadow-2xl animate-in zoom-in-95 duration-300">
@@ -80,7 +61,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                         <div className="flex justify-center mb-6">
                             <div className="w-12 h-1 bg-primary rounded-full"></div>
                         </div>
-                        <h1 className="text-3xl font-black text-foreground uppercase tracking-[0.3em] mb-4">Contrato Comercial</h1>
+                        <h1 className="text-3xl font-black text-foreground uppercase tracking-[0.3em] mb-4">Rascunho de contrato</h1>
                         <input
                             value={title}
                             onChange={e => setTitle(e.target.value)}
@@ -117,7 +98,7 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
                         Descartar
                     </button>
                     <button
-                        onClick={() => onSave({ title, content_json: { text: content } as any, status: 'draft' })}
+                        onClick={() => onSave({ title, company: deal.company, dealId: deal.id, content_json: { text: content }, status: 'draft' })}
                         className="px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest bg-muted text-foreground border border-border hover:bg-muted/80 transition-all shadow-xl"
                     >
                         Salvar Rascunho
