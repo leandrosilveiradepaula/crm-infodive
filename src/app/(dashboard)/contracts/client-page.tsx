@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     FileText, Plus, Search, Filter,
     CheckCircle2, Clock, PenTool, Eye, Download, TrendingUp
@@ -24,7 +24,8 @@ interface ContractsClientPageProps {
 
 export function ContractsClientPage({ initialContracts }: ContractsClientPageProps) {
     const router = useRouter();
-    const [contracts, setContracts] = useState<Contract[]>(initialContracts); // Optimistic state possible
+    const [contracts, setContracts] = useState<Contract[]>(initialContracts);
+    useEffect(() => setContracts(initialContracts), [initialContracts]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
 
@@ -65,7 +66,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             setCreationError('Selecione uma oportunidade para este contrato.');
             return;
         }
-        if (creationDeals.length === 0 && !draftCompany.trim()) {
+        if ((!selected || !selected.company.trim()) && !draftCompany.trim()) {
             setCreationError('Informe a empresa contratante.');
             return;
         }
@@ -176,6 +177,10 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     ) : (
                         <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
                             value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante" />
+                    )}
+                    {creationDeals.length > 0 && creationDeals.some(item => item.id === chosenDeal && !item.company.trim()) && (
+                        <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
+                            value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante obrigatória" />
                     )}
                     <button type="button" className="text-sm underline" onClick={() => {setCreationDeals(null);setCreationError(null);}}>Cancelar</button>
                 </div>
