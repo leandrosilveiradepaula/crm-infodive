@@ -11,6 +11,10 @@ function fixture(outcomes: Record<string, Outcome>) {
         const call: Call = { table, mode: 'read', filters: [] }; calls.push(call);
         const q = {
             select() { return q; },
+            then(resolve: (value: Outcome) => unknown, reject?: (reason: unknown) => unknown) {
+                return Promise.resolve(outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null })
+                    .then(resolve, reject);
+            },
             eq(k: string, v: unknown) { call.filters.push([k, v]); return q; },
             in(k: string, v: unknown) { call.filters.push([k, v]); return q; },
             order() { return Promise.resolve(outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null }); },
