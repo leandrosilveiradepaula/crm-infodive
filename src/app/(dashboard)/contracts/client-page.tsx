@@ -6,7 +6,7 @@ import {
     CheckCircle2, Clock, PenTool, Eye, Download, TrendingUp
 } from 'lucide-react';
 import { type Contract } from '@/types/contract';
-import { updateContract, createContract } from '@/app/(dashboard)/contracts/actions';
+import { updateContract, createContract, getContractCreationDeals } from '@/app/(dashboard)/contracts/actions';
 import { ContractViewer } from '@/components/contracts/ContractViewer';
 import { SignatureModal } from '@/components/contracts/SignatureModal';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,7 @@ interface ContractsClientPageProps {
 
 export function ContractsClientPage({ initialContracts }: ContractsClientPageProps) {
     const router = useRouter();
-    const [contracts, setContracts] = useState<Contract[]>(initialContracts); // Optimistic state possible
+    const contracts = initialContracts;
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
 
@@ -33,6 +33,11 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [isSignatureOpen, setIsSignatureOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [creationOptions, setCreationOptions] = useState<{requiresDeal: boolean;deals: {id: string;title: string;company: string}[]} | null>(null);
+    const [chosenDeal, setChosenDeal] = useState('');
+    const [draftTitle, setDraftTitle] = useState('');
+    const [draftCompany, setDraftCompany] = useState('');
+    const [creationError, setCreationError] = useState<string | null>(null);
 
     const filteredContracts = contracts.filter(contract => {
         const matchesSearch = contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,23 +47,49 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     });
 
     const handleCreateContract = async () => {
+        if (creationOptions === null) {
+            setIsCreating(true);
+            setCreationError(null);
+            try {
+                const options = await getContractCreationDeals();
+                setCreationOptions(options);
+            } catch {
+                setCreationError('Não foi possível consultar as oportunidades autorizadas.');
+            } finally {
+                setIsCreating(false);
+            }
+            return;
+        }
+        const selected = creationOptions.deals.find(item => item.id === chosenDeal);
+        if (creationOptions.requiresDeal && !selected) {
+            setCreationError('Selecione uma oportunidade para este contrato.');
+            return;
+        }
+        if ((!selected || !selected.company.trim()) && !draftCompany.trim()) {
+            setCreationError('Informe a empresa contratante.');
+            return;
+        }
         setIsCreating(true);
-        const newDraft: Partial<Contract> = {
-            title: 'Novo Contrato (Rascunho)',
-            company: 'Cliente a definir',
-            value: 0,
-            status: 'draft',
-            type: 'service'
-        };
-
-        const res = await createContract(newDraft);
-        setIsCreating(false);
-
-        if (res.success && res.data) {
-            // In full impl, open viewer/editor immediately
+        setCreationError(null);
+        try {
+            const res = await createContract({
+                title: draftTitle.trim() || 'Novo Contrato (Rascunho)',
+                company: selected?.company || draftCompany.trim(),
+                dealId: selected?.id,
+                value: 0,
+                status: 'draft',
+                type: 'service'
+            });
+            if (!res.success) throw new Error('Persistência recusada');
+            setCreationOptions(null);
+            setChosenDeal('');
+            setDraftTitle('');
+            setDraftCompany('');
             router.refresh();
-        } else {
-            alert('Erro ao criar contrato');
+        } catch {
+            setCreationError('Não foi possível salvar o contrato. Confira os dados e tente novamente.');
+        } finally {
+            setIsCreating(false);
         }
     };
 
@@ -123,14 +154,40 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             >
                 <Button
                     onClick={handleCreateContract}
-                    disabled={isCreating}
+                    disabled={isCreating || (creationOptions !== null && creationOptions.requiresDeal && creationOptions.deals.length === 0)}
                     className="bg-primary hover:bg-primary/90 font-bold text-white h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
                 >
                     <Plus className="h-4 w-4" />
-                    {isCreating ? 'Criando...' : 'Novo Contrato'}
+                    {isCreating ? 'Processando...' : creationOptions === null ? 'Novo Contrato' : 'Salvar Rascunho'}
                 </Button>
             </PageHeader>
 
+            {creationOptions !== null && (
+                <div className="rounded-2xl border border-border bg-card p-4 space-y-3" role="region" aria-label="Novo contrato">
+                    <h2 className="font-semibold">Dados do novo contrato</h2>
+                    <input aria-label="Título do contrato" className="w-full rounded-lg border border-border bg-background p-2"
+                        value={draftTitle} onChange={event => setDraftTitle(event.target.value)} placeholder="Título (opcional)" />
+                    {creationOptions.requiresDeal && creationOptions.deals.length === 0 && (
+                        <p role="alert" className="text-sm text-destructive">Não existem oportunidades autorizadas para vincular ao contrato.</p>
+                    )}
+                    {creationOptions.requiresDeal ? (
+                        <select aria-label="Oportunidade vinculada" className="w-full rounded-lg border border-border bg-background p-2"
+                            value={chosenDeal} onChange={event => setChosenDeal(event.target.value)}>
+                            <option value="">Selecione uma oportunidade autorizada</option>
+                            {creationOptions.deals.map(item => <option key={item.id} value={item.id}>{item.title} — {item.company || 'Empresa não informada'}</option>)}
+                        </select>
+                    ) : (
+                        <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
+                            value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante" />
+                    )}
+                    {creationOptions.requiresDeal && creationOptions.deals.some(item => item.id === chosenDeal && !item.company.trim()) && (
+                        <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
+                            value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante obrigatória" />
+                    )}
+                    <button type="button" className="text-sm underline" onClick={() => {setCreationOptions(null);setCreationError(null);}}>Cancelar</button>
+                </div>
+            )}
+            {creationError && <p role="alert" className="text-sm text-destructive">{creationError}</p>}
             {/* KPI Cards */}
             <StatsGrid items={[
                 {
@@ -270,8 +327,10 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                                 <PenTool className="h-4 w-4" />
                                             </button>
                                             <button
-                                                className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-colors border border-transparent hover:border-primary/20"
-                                                title="Baixar PDF"
+                                                disabled
+                                                className="p-2.5 text-muted-foreground opacity-40 rounded-xl"
+                                                title="PDF indisponível: documento ainda não gerado"
+                                                aria-label="PDF indisponível"
                                             >
                                                 <Download className="h-4 w-4" />
                                             </button>
@@ -288,7 +347,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                             icon={FileText}
                             title="Nenhum Contrato"
                             description="Você ainda não possui contratos gerados ou nenhum corresponde aos filtros atuais."
-                            actionLabel="Novo Contato"
+                            actionLabel="Novo Contrato"
                             onAction={handleCreateContract}
                         />
                     </div>

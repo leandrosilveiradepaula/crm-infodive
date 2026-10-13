@@ -11,7 +11,7 @@ export async function getContracts(): Promise<Contract[]> {
         const { userId, organizationId } = await requirePermission('deals:edit');
         const { canViewAll } = await getAiDealScope(userId, organizationId);
         const data = await ContractService.getContracts(organizationId, canViewAll ? undefined : userId);
-        return data.map((item: any) => ({
+        return data.map((item) => ({
             id: item.id,
             title: item.title,
             company: item.company_name,
@@ -29,8 +29,16 @@ export async function getContracts(): Promise<Contract[]> {
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');
-        return [];
+        throw new Error('Não foi possível carregar os contratos. Tente novamente.');
     }
+}
+
+export async function getContractCreationDeals(): Promise<{ requiresDeal: boolean; deals: { id: string; title: string; company: string }[] }> {
+    const { userId, organizationId } = await requirePermission('deals:edit');
+    const { canViewAll } = await getAiDealScope(userId, organizationId);
+    if (canViewAll) return { requiresDeal: false, deals: [] };
+    const deals = await ContractService.getOwnedContractDealOptions(organizationId, userId);
+    return { requiresDeal: true, deals };
 }
 
 export async function createContract(contract: Partial<Contract>) {
