@@ -22,8 +22,8 @@ describe('contract persistence hardening', () => {
   it('keeps contract creation tenant-scoped on the server', () => {
     const actions = readFileSync('src/app/(dashboard)/contracts/actions.ts', 'utf8');
     const service = readFileSync('src/services/ContractService.ts', 'utf8');
-    expect(actions).toContain('requireSessionContext');
-    expect(actions).toContain('ContractService.createContract(organizationId, contract)');
+    expect(actions).toContain("requirePermission('deals:edit')");
+    expect(actions).toContain('ContractService.createContract(organizationId, contract, canViewAll ? undefined : userId)');
     expect(service).toContain('organization_id: organizationId');
   });
 });

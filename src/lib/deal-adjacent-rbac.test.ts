@@ -39,9 +39,10 @@ describe('deal-adjacent mutation RBAC', () => {
     expect(functionBody(source, 'updatePurchaseOrder')).toContain("requirePermission('deals:edit')");
   });
 
-  it('protects contract mutations while leaving reads session-scoped', () => {
+  it('protects contract reads and mutations with RBAC and tenant deal scope', () => {
     const source = readFileSync('src/app/(dashboard)/contracts/actions.ts', 'utf8');
-    expect(functionBody(source, 'getContracts')).toContain('requireSessionContext()');
+    expect(functionBody(source, 'getContracts')).toContain("requirePermission('deals:edit')");
+    expect(functionBody(source, 'getContracts')).toContain('getAiDealScope(userId, organizationId)');
     expect(functionBody(source, 'createContract')).toContain("requirePermission('deals:edit')");
     expect(functionBody(source, 'updateContract')).toContain("requirePermission('deals:edit')");
     expect(functionBody(source, 'deleteContract')).toContain("requirePermission('deals:edit')");
