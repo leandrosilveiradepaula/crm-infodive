@@ -41,6 +41,13 @@ function validateContractFields(contract: Partial<Contract>, creating: boolean) 
     if (contract.company !== undefined && (typeof contract.company !== 'string' || !contract.company.trim() || contract.company.length > 500)) throw new Error('Empresa inválida.');
     if (contract.value !== undefined && (typeof contract.value !== 'number' || !Number.isFinite(contract.value) || contract.value < 0)) throw new Error('Valor inválido.');
     if (contract.status !== undefined && !['draft', 'sent', 'viewed', 'signed', 'declined'].includes(contract.status)) throw new Error('Situação inválida.');
+    // A name or image is not verified identity, consent, or a signed document.
+    // Preserve legacy rows for reading; refuse new signature evidence until an
+    // auditable signing mechanism and its human-approved requirements exist.
+    if (contract.status === 'signed' || contract.signature_image !== undefined ||
+        contract.signerName !== undefined || contract.signerRole !== undefined) {
+        throw new Error('Assinatura eletrônica indisponível: evidência verificável não configurada.');
+    }
     if (contract.type !== undefined && !['service', 'nda', 'sales'].includes(contract.type)) throw new Error('Tipo inválido.');
     for (const value of [contract.dealId, contract.proposalId]) {
         if (value !== undefined && (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value))) {

@@ -1,121 +1,64 @@
-import { X, Download, Printer } from 'lucide-react';
+import { X, FileText } from 'lucide-react';
+import type { Contract } from '@/types/contract';
+import { persistedContractText } from '@/lib/contract-content';
 
 interface ContractViewerProps {
     isOpen: boolean;
     onClose: () => void;
-    onSignClick: () => void;
-    contract: any;
+    contract: Contract;
 }
 
-export const ContractViewer = ({ isOpen, onClose, onSignClick, contract }: ContractViewerProps) => {
-    if (!isOpen || !contract) return null;
+export const ContractViewer = ({ isOpen, onClose, contract }: ContractViewerProps) => {
+    if (!isOpen) return null;
+    const text = persistedContractText(contract.content_json);
+    const signedInLegacyRecord = contract.status === 'signed';
 
     return (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-card rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in-0 zoom-in-95 duration-200">
-
-                {/* Header */}
-                <div className="bg-muted px-6 py-4 flex justify-between items-center shadow-md">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 bg-card/10 rounded-lg flex items-center justify-center">
-                            <span className="font-bold text-lg">PDF</span>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg leading-tight">{contract.title}</h3>
-                            <p className="text-white/60 text-xs">{contract.company} • {contract.createdAt}</p>
-                        </div>
+            <section role="dialog" aria-modal="true" aria-labelledby="contract-view-title"
+                className="relative bg-card rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                <header className="bg-muted/50 border-b border-border px-5 py-4 flex justify-between items-center gap-4">
+                    <div className="min-w-0">
+                        <h2 id="contract-view-title" className="font-bold text-lg text-foreground break-words">{contract.title}</h2>
+                        <p className="text-sm text-muted-foreground">Dados cadastrados • {contract.company}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <button className="p-2 hover:bg-card/10 rounded-lg transition-colors" title="Imprimir"><Printer className="h-5 w-5" /></button>
-                        <button className="p-2 hover:bg-card/10 rounded-lg transition-colors" title="Baixar"><Download className="h-5 w-5" /></button>
-                        <div className="w-px h-6 bg-card/20 mx-1"></div>
-                        <button onClick={onClose} className="p-2 hover:bg-card/10 rounded-lg transition-colors"><X className="h-5 w-5" /></button>
+                    <button type="button" onClick={onClose} aria-label="Fechar contrato"
+                        className="rounded-lg p-2 hover:bg-background text-foreground">
+                        <X className="h-5 w-5" />
+                    </button>
+                </header>
+                <div className="overflow-y-auto p-5 md:p-8 space-y-5">
+                    {signedInLegacyRecord && (
+                        <p role="status" className="text-sm rounded-lg border border-border bg-muted/40 p-3">
+                            Este contrato está marcado como assinado no cadastro, mas a identidade, a integridade
+                            do documento e a data da assinatura não foram verificadas pelo CRM.
+                        </p>
+                    )}
+                    <div className="text-sm text-muted-foreground space-y-1">
+                        <p>ID: {contract.id}</p>
+                        <p>Tipo cadastrado: {contract.type}</p>
+                        <p>Estado cadastrado: {contract.status}</p>
                     </div>
+                    <div className="border border-border rounded-xl p-5 bg-background">
+                        <h3 className="font-semibold flex items-center gap-2 mb-3">
+                            <FileText className="h-4 w-4" /> Texto armazenado
+                        </h3>
+                        {text === null ? (
+                            <p role="status" className="text-muted-foreground text-sm">
+                                Este contrato não possui texto de documento armazenado.
+                                Nenhuma cláusula ou assinatura foi gerada automaticamente.
+                            </p>
+                        ) : (
+                            <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">{text}</div>
+                        )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        Esta visualização mostra apenas os dados salvos. Não é um PDF certificado,
+                        documento assinado ou comprovante de validade jurídica.
+                    </p>
                 </div>
-
-                {/* Body - MOCK PDF */}
-                <div className="flex-1 bg-muted/50 overflow-y-auto p-8 flex justify-center">
-                    <div className="bg-card shadow-lg w-full max-w-3xl min-h-[1000px] p-12 text-foreground leading-relaxed font-serif relative">
-                        {/* Mock Content */}
-                        <div className="text-center mb-12">
-                            <h1 className="text-3xl font-bold uppercase tracking-widest mb-2">Contrato de Prestação de Serviços</h1>
-                            <p className="text-muted-foreground italic">No. {contract.id?.toUpperCase() || 'DRAFT'}</p>
-                        </div>
-
-                        <div className="space-y-6 text-justify">
-                            <p>
-                                <strong>CONTRATANTE:</strong> {contract.company}, pessoa jurídica de direito privado...
-                            </p>
-                            <p>
-                                <strong>CONTRATADA:</strong> NEXUS TECNOLOGIA LTDA, inscrita no CNPJ sob o nº...
-                            </p>
-
-                            <h4 className="font-bold uppercase mt-8 border-b border-gray-300 pb-2">Cláusula Primeira - Do Objeto</h4>
-                            <p>
-                                O presente instrumento tem como objeto a prestação de serviços de Consultoria e Tecnologia, conforme proposta comercial anexa...
-                            </p>
-
-                            <h4 className="font-bold uppercase mt-8 border-b border-gray-300 pb-2">Cláusula Segunda - Dos Valores</h4>
-                            <p>
-                                Pelos serviços prestados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(contract.value)}</strong>.
-                            </p>
-
-                            <h4 className="font-bold uppercase mt-8 border-b border-gray-300 pb-2">Cláusula Terceira - Da Vigência</h4>
-                            <p>
-                                Este contrato entra em vigor na data de sua assinatura e terá vigência de 12 (doze) meses.
-                            </p>
-
-                            {/* Watermark/Status if signed */}
-                            {contract.status === 'signed' && (
-                                <div className="absolute bottom-40 right-20 border-4 border-green-600 text-green-600 rounded-xl px-4 py-2 opacity-80 -rotate-12 transform">
-                                    <p className="font-black text-4xl uppercase">Assinado</p>
-                                    <p className="font-bold text-sm text-center">Digitalmente em {new Date().toLocaleDateString()}</p>
-                                </div>
-                            )}
-
-                            {/* Signature Section */}
-                            <div className="mt-32 flex justify-between px-10">
-                                <div className="text-center">
-                                    <div className="w-56 border-t border-black mb-2 relative">
-                                        {/* Mock Previous Signature */}
-                                        <span className="absolute -top-10 left-0 right-0 font-cursive text-2xl">João Silva</span>
-                                    </div>
-                                    <p className="text-sm font-bold">NEXUS TECNOLOGIA LTDA</p>
-                                </div>
-                                <div className="text-center">
-                                    <div className="w-56 border-t border-black mb-2 relative">
-                                        {contract.signerName && (
-                                            <span className="absolute -top-10 left-0 right-0 font-cursive text-2xl italic text-primary">
-                                                {contract.signerName}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-sm font-bold uppercase">{contract.company}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Page Number */}
-                        <div className="absolute bottom-8 right-12 text-muted-foreground text-xs">Página 1 de 1</div>
-                    </div>
-                </div>
-
-                {/* Footer Action */}
-                {contract.status !== 'signed' && (
-                    <div className="bg-card border-t border-border p-4 flex justify-between items-center px-8 z-10">
-                        <div className="text-sm text-muted-foreground">
-                            Ao assinar, você concorda com os <a href="#" className="text-primary underline font-bold">Termos de Uso</a> & <a href="#" className="text-primary underline font-bold">Política de Privacidade</a>.
-                        </div>
-                        <button
-                            onClick={onSignClick}
-                            className="bg-primary text-white font-bold py-3 px-8 rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 text-lg"
-                        >
-                            Assinar Documento
-                        </button>
-                    </div>
-                )}
-            </div>
+            </section>
         </div>
     );
 };
