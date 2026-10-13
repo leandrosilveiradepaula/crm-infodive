@@ -54,7 +54,11 @@ export const useContracts = () => {
 
     const deleteContract = async (id: string) => {
         try {
-            const result = await deleteContractAction(id);
+            const current = contracts.find(contract => contract.id === id);
+            if (!current || current.status !== 'draft' || !current.updatedAt) {
+                throw new Error('Rascunho ausente ou desatualizado. Recarregue os contratos.');
+            }
+            const result = await deleteContractAction(id, current.updatedAt);
             if (!result.success) throw new Error(result.error || 'Não foi possível excluir o contrato.');
             setError(null);
             await fetchContracts();
