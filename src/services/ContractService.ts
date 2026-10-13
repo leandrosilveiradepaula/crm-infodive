@@ -36,7 +36,9 @@ async function assertProposalReference(db: Admin, orgId: string, proposalId: str
 function validateContractFields(contract: Partial<Contract>, creating: boolean) {
     if (!contract || typeof contract !== 'object' || Array.isArray(contract)) throw new Error('Contrato inválido.');
     if (creating && (typeof contract.title !== 'string' || !contract.title.trim())) throw new Error('Título obrigatório.');
-    if (contract.title !== undefined && (typeof contract.title !== 'string' || contract.title.length > 500)) throw new Error('Título inválido.');
+    if (creating && (typeof contract.company !== 'string' || !contract.company.trim())) throw new Error('Empresa obrigatória.');
+    if (contract.title !== undefined && (typeof contract.title !== 'string' || !contract.title.trim() || contract.title.length > 500)) throw new Error('Título inválido.');
+    if (contract.company !== undefined && (typeof contract.company !== 'string' || !contract.company.trim() || contract.company.length > 500)) throw new Error('Empresa inválida.');
     if (contract.value !== undefined && (typeof contract.value !== 'number' || !Number.isFinite(contract.value) || contract.value < 0)) throw new Error('Valor inválido.');
     if (contract.status !== undefined && !['draft', 'sent', 'viewed', 'signed', 'declined'].includes(contract.status)) throw new Error('Situação inválida.');
     if (contract.type !== undefined && !['service', 'nda', 'sales'].includes(contract.type)) throw new Error('Tipo inválido.');
@@ -57,6 +59,22 @@ async function existingContract(db: Admin, orgId: string, id: string, ownerId?: 
 }
 
 export class ContractService {
+    /** Seller creation choices must be derived from server-owned tenant and user identity. */
+    static async getOwnedContractDealOptions(organizationId: string, ownerId: string) {
+        if (!organizationId || !ownerId) throw new Error('Acesso negado às oportunidades.');
+        const db = createAdminClient();
+        const { data, error } = await db.from('deals')
+            .select('id,title,company')
+            .eq('organization_id', organizationId)
+            .eq('owner_id', ownerId)
+            .order('created_at', { ascending: false });
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar as oportunidades autorizadas.');
+        if (data.some(item => typeof item?.id !== 'string' || typeof item?.title !== 'string')) {
+            throw new Error('Dados inválidos das oportunidades.');
+        }
+        return data.map(item => ({ id: item.id, title: item.title, company: typeof item.company === 'string' ? item.company : '' }));
+    }
+
     static async getContracts(organizationId: string, ownerId?: string) {
         const db = createAdminClient();
         let visibleIds: string[] | undefined;
