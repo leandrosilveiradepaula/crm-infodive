@@ -27,6 +27,12 @@ describe('contract creation and read integrity', () => {
         expect(client).toContain('const contracts = initialContracts;');
         expect(client).toContain("if (!res.success) throw");
     });
+    it('does not expose unverified signature creation', () => {
+        expect(client).not.toContain('handleSignContract');
+        expect(client).not.toContain('SignatureModal');
+        expect(client).not.toContain('title="Assinar"');
+        expect(client).toContain('Assinado (não verificado)');
+    });
     it('does not expose a fake downloadable PDF action', () => {
         expect(client).toContain('PDF indisponível: documento ainda não gerado');
         expect(client).toContain('actionLabel="Novo Contrato"');
