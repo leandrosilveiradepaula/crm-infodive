@@ -1,8 +1,9 @@
 import { createAdminClient } from '../lib/supabase/admin';
 import { type Contract } from '@/types/contract';
+import { validatePersistedDraftText } from '../lib/contract-content';
 
 type Admin = ReturnType<typeof createAdminClient>;
-type ContractLink = { id: string; deal_id: string | null; proposal_id: string | null };
+type ContractLink = { id: string; deal_id: string | null; proposal_id: string | null; status: string };
 
 /** Privileged reads always filter by tenant; sellers only see their owned deals. */
 async function ownedDealIds(db: Admin, orgId: string, ownerId: string) {
@@ -40,7 +41,7 @@ function validateContractFields(contract: Partial<Contract>, creating: boolean) 
     if (contract.title !== undefined && (typeof contract.title !== 'string' || !contract.title.trim() || contract.title.length > 500)) throw new Error('Título inválido.');
     if (contract.company !== undefined && (typeof contract.company !== 'string' || !contract.company.trim() || contract.company.length > 500)) throw new Error('Empresa inválida.');
     if (contract.value !== undefined && (typeof contract.value !== 'number' || !Number.isFinite(contract.value) || contract.value < 0)) throw new Error('Valor inválido.');
-    if (contract.status !== undefined && !['draft', 'sent', 'viewed', 'signed', 'declined'].includes(contract.status)) throw new Error('Situação inválida.');
+    if (contract.status !== undefined && contract.status !== 'draft') throw new Error('Somente rascunhos podem ser criados ou editados até a implantação de um fluxo verificável.');
     // A name or image is not verified identity, consent, or a signed document.
     // Preserve legacy rows for reading; refuse new signature evidence until an
     // auditable signing mechanism and its human-approved requirements exist.
@@ -49,6 +50,7 @@ function validateContractFields(contract: Partial<Contract>, creating: boolean) 
         throw new Error('Assinatura eletrônica indisponível: evidência verificável não configurada.');
     }
     if (contract.type !== undefined && !['service', 'nda', 'sales'].includes(contract.type)) throw new Error('Tipo inválido.');
+    if (contract.content_json !== undefined) validatePersistedDraftText(contract.content_json);
     for (const value of [contract.dealId, contract.proposalId]) {
         if (value !== undefined && (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value))) {
             throw new Error('Referência inválida.');
@@ -59,9 +61,10 @@ function validateContractFields(contract: Partial<Contract>, creating: boolean) 
 async function existingContract(db: Admin, orgId: string, id: string, ownerId?: string): Promise<ContractLink> {
     if (typeof id !== 'string' || !id.trim()) throw new Error('Contrato inválido.');
     const { data, error } = await db.from('contracts')
-        .select('id,deal_id,proposal_id').eq('id', id).eq('organization_id', orgId).maybeSingle();
+        .select('id,deal_id,proposal_id,status').eq('id', id).eq('organization_id', orgId).maybeSingle();
     if (error || !data) throw new Error('Contrato não encontrado.');
     if (ownerId) await assertDealReference(db, orgId, data.deal_id, ownerId);
+    if (data.status !== 'draft') throw new Error('Este contrato não é um rascunho editável.');
     return data as ContractLink;
 }
 
@@ -106,7 +109,7 @@ export class ContractService {
             title: contract.title,
             company_name: contract.company,
             value: contract.value,
-            status: contract.status || 'draft',
+            status: 'draft',
             type: contract.type || 'service',
             signer_name: contract.signerName,
             signer_role: contract.signerRole,
@@ -143,7 +146,7 @@ export class ContractService {
         if (updates.signature_image !== undefined) fields.signature_image = updates.signature_image;
         if (!Object.keys(fields).length) throw new Error('Nenhuma alteração válida.');
         fields.updated_at = new Date().toISOString();
-        let query = db.from('contracts').update(fields).eq('id', id).eq('organization_id', organizationId);
+        let query = db.from('contracts').update(fields).eq('id', id).eq('organization_id', organizationId).eq('status', 'draft');
         if (ownerId) query = query.eq('deal_id', current.deal_id);
         const { data, error } = await query.select('id').maybeSingle();
         if (error || !data) throw new Error('Não foi possível atualizar o contrato.');
@@ -153,7 +156,7 @@ export class ContractService {
     static async deleteContract(organizationId: string, id: string, ownerId?: string) {
         const db = createAdminClient();
         const current = await existingContract(db, organizationId, id, ownerId);
-        let query = db.from('contracts').delete().eq('id', id).eq('organization_id', organizationId);
+        let query = db.from('contracts').delete().eq('id', id).eq('organization_id', organizationId).eq('status', 'draft');
         if (ownerId) query = query.eq('deal_id', current.deal_id);
         const { data, error } = await query.select('id').maybeSingle();
         if (error || !data) throw new Error('Não foi possível excluir o contrato.');
