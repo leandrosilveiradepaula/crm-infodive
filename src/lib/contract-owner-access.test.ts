@@ -82,6 +82,13 @@ describe('contract tenant and owner boundaries', () => {
         await expect(ContractService.createContract(org, {title: 'Rascunho', company: '   '})).rejects.toThrow();
         expect(calls.find(call => call.mode === 'insert')).toBeUndefined();
     });
+    it('refuses legacy signature fields or signed status before any write', async () => {
+        const calls = fixture({});
+        await expect(ContractService.createContract(org, {title:'A',company:'ACME',status:'signed'})).rejects.toThrow();
+        await expect(ContractService.createContract(org, {title:'A',company:'ACME',signerName:'Claimed signer'})).rejects.toThrow();
+        await expect(ContractService.updateContract(org, 'id', {signature_image:'data:image/png;base64,AA=='})).rejects.toThrow();
+        expect(calls.find(c=>c.mode==='insert'||c.mode==='update')).toBeUndefined();
+    });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
         await expect(ContractService.createContract(org,{title:'X',company:'ACME',value:NaN})).rejects.toThrow();

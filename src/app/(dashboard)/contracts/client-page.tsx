@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import {
-    FileText, Plus, Search, Filter,
-    CheckCircle2, Clock, PenTool, Eye, Download, TrendingUp
+    FileText, Plus, Search,
+    CheckCircle2, Clock, Eye, Download, TrendingUp
 } from 'lucide-react';
 import { type Contract } from '@/types/contract';
-import { updateContract, createContract, getContractCreationDeals } from '@/app/(dashboard)/contracts/actions';
+import { createContract, getContractCreationDeals } from '@/app/(dashboard)/contracts/actions';
 import { ContractViewer } from '@/components/contracts/ContractViewer';
-import { SignatureModal } from '@/components/contracts/SignatureModal';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +30,6 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     // Modal States
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
-    const [isSignatureOpen, setIsSignatureOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [creationOptions, setCreationOptions] = useState<{requiresDeal: boolean;deals: {id: string;title: string;company: string}[]} | null>(null);
     const [chosenDeal, setChosenDeal] = useState('');
@@ -98,31 +96,6 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
         setIsViewerOpen(true);
     };
 
-    const handleSignContract = async (signature: string) => {
-        if (!selectedContract) return;
-
-        const updates: Partial<Contract> = {
-            status: 'signed',
-        };
-
-        if (signature.startsWith('data:image')) {
-            updates.signature_image = signature;
-        } else {
-            updates.signerName = signature;
-        }
-
-        const res = await updateContract(selectedContract.id, updates);
-
-        if (res.success) {
-            setSelectedContract(prev => prev ? { ...prev, ...updates } : null);
-            setIsSignatureOpen(false);
-            setIsViewerOpen(false);
-            router.refresh(); // Refresh to update list
-        } else {
-            alert('Erro ao assinar contrato.');
-        }
-    };
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'draft': return 'bg-muted/30 text-muted-foreground border-border/50';
@@ -139,7 +112,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             case 'draft': return 'Rascunho';
             case 'sent': return 'Enviado';
             case 'viewed': return 'Visualizado';
-            case 'signed': return 'Assinado';
+            case 'signed': return 'Assinado (não verificado)';
             case 'declined': return 'Declinado';
             default: return status;
         }
@@ -316,16 +289,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-2.5 text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition-colors border border-transparent hover:border-emerald-500/20"
-                                                title="Assinar"
-                                                onClick={() => {
-                                                    setSelectedContract(contract);
-                                                    setIsSignatureOpen(true);
-                                                }}
-                                            >
-                                                <PenTool className="h-4 w-4" />
-                                            </button>
+
                                             <button
                                                 disabled
                                                 className="p-2.5 text-muted-foreground opacity-40 rounded-xl"
@@ -360,19 +324,9 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         isOpen={isViewerOpen}
                         onClose={() => setIsViewerOpen(false)}
                         contract={selectedContract}
-                        onSignClick={() => {
-                            // Close viewer, open signer
-                            // setIsViewerOpen(false); // Can keep open if we want overlay, but simpler to swap
-                            setIsSignatureOpen(true);
-                        }}
                     />
 
-                    <SignatureModal
-                        isOpen={isSignatureOpen}
-                        onClose={() => setIsSignatureOpen(false)}
-                        onSign={handleSignContract}
-                        contractTitle={selectedContract.title}
-                    />
+
                 </>
             )}
         </div>
