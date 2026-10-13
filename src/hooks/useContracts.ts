@@ -33,12 +33,19 @@ export const useContracts = () => {
 
     const updateContract = async (id: string, updates: Partial<Contract>) => {
         try {
-            const result = await updateContractAction(id, updates);
-            if (!result.success) throw new Error(result.error);
+            // Never fall back to a blind write. The revision must be the one
+            // observed in this hook's most recently fetched contracts.
+            const current = contracts.find(contract => contract.id === id);
+            if (!current || current.status !== 'draft' || !current.updatedAt) {
+                throw new Error('Rascunho ausente ou desatualizado. Recarregue os contratos.');
+            }
+            const result = await updateContractAction(id, updates, current.updatedAt);
+            if (!result.success) throw new Error(result.error || 'Falha ao salvar o rascunho.');
+            setError(null);
             await fetchContracts();
             return true;
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Falha ao salvar o rascunho.');
             return false;
         }
     };
