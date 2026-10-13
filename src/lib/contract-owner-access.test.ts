@@ -47,7 +47,7 @@ describe('contract tenant and owner boundaries', () => {
     });
     it('rejects a proposal linked to a different deal', async () => {
         const calls=fixture({deals:{data:{id:deal},error:null},proposals:{data:null,error:null}});
-        await expect(ContractService.createContract(org,{title:'Contrato',dealId:deal,proposalId:proposal},owner)).rejects.toThrow();
+        await expect(ContractService.createContract(org,{title:'Contrato',company:'ACME',dealId:deal,proposalId:proposal},owner)).rejects.toThrow();
         expect(calls.find(c=>c.mode==='insert')).toBeUndefined();
         expect(calls.find(c=>c.table==='proposals')?.filters).toContainEqual(['deal_id',deal]);
     });
