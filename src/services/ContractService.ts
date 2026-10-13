@@ -59,12 +59,13 @@ async function existingContract(db: Admin, orgId: string, id: string, ownerId?: 
 export class ContractService {
     static async getContracts(organizationId: string, ownerId?: string) {
         const db = createAdminClient();
-        let query = db.from('contracts').select('*').eq('organization_id', organizationId);
+        let visibleIds: string[] | undefined;
         if (ownerId) {
-            const ids = await ownedDealIds(db, organizationId, ownerId);
-            if (!ids.length) return [];
-            query = query.in('deal_id', ids);
+            visibleIds = await ownedDealIds(db, organizationId, ownerId);
+            if (!visibleIds.length) return [];
         }
+        let query = db.from('contracts').select('*').eq('organization_id', organizationId);
+        if (visibleIds) query = query.in('deal_id', visibleIds);
         const { data, error } = await query.order('created_at', { ascending: false });
         if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os contratos.');
         return data;
