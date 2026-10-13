@@ -28,7 +28,7 @@ function fixture(outcomes: Record<string, Outcome>) {
     mocks.createAdminClient.mockReturnValue({ from });
     return calls;
 }
-const org='tenant-a',owner='seller-a',deal='11111111-1111-4111-8111-111111111111',proposal='22222222-2222-4222-8222-222222222222';
+const org='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',owner='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',deal='11111111-1111-4111-8111-111111111111',proposal='22222222-2222-4222-8222-222222222222';
 describe('contract tenant and owner boundaries', () => {
     beforeEach(() => vi.clearAllMocks());
     it('filters seller reads to owned deal IDs and never broadens an empty scope', async () => {
@@ -52,13 +52,13 @@ describe('contract tenant and owner boundaries', () => {
         expect(calls.find(c=>c.table==='proposals')?.filters).toContainEqual(['deal_id',deal]);
     });
     it('refuses edits to a contract not owned by the caller', async () => {
-        const calls=fixture({contracts:{data:{id:'contract-a',deal_id:deal,proposal_id:null},error:null},deals:{data:null,error:null}});
-        await expect(ContractService.updateContract(org,'contract-a',{status:'signed'},owner)).rejects.toThrow();
+        const calls=fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null},error:null},deals:{data:null,error:null}});
+        await expect(ContractService.updateContract(org,'33333333-3333-4333-8333-333333333333',{status:'signed'},owner)).rejects.toThrow();
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
     });
     it('guards authorized deletes by original deal link and demands a DB receipt', async () => {
-        const calls=fixture({contracts:{data:{id:'contract-a',deal_id:deal,proposal_id:null,status:'draft'},error:null},deals:{data:{id:deal},error:null},'contracts:delete':{data:null,error:null}});
-        await expect(ContractService.deleteContract(org,'contract-a',owner)).rejects.toThrow();
+        const calls=fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null,status:'draft'},error:null},deals:{data:{id:deal},error:null},'contracts:delete':{data:null,error:null}});
+        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner)).rejects.toThrow();
         const deletion=calls.find(c=>c.mode==='delete');
         expect(deletion?.filters).toContainEqual(['organization_id',org]);
         expect(deletion?.filters).toContainEqual(['deal_id',deal]);
@@ -87,17 +87,17 @@ describe('contract tenant and owner boundaries', () => {
         const calls = fixture({});
         await expect(ContractService.createContract(org, {title:'A',company:'ACME',status:'signed'})).rejects.toThrow();
         await expect(ContractService.createContract(org, {title:'A',company:'ACME',signerName:'Claimed signer'})).rejects.toThrow();
-        await expect(ContractService.updateContract(org, 'id', {signature_image:'data:image/png;base64,AA=='})).rejects.toThrow();
+        await expect(ContractService.updateContract(org, '77777777-7777-4777-8777-777777777777', {signature_image:'data:image/png;base64,AA=='})).rejects.toThrow();
         expect(calls.find(c=>c.mode==='insert'||c.mode==='update')).toBeUndefined();
     });
     it('saves a tenant-owned draft against an exact revision and demands matching receipt', async () => {
         const revision = '2026-10-13T10:00:00.000Z';
         const calls = fixture({
-            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            contracts: {data:{id:'44444444-4444-4444-8444-444444444444',deal_id:deal,proposal_id:null,status:'draft'},error:null},
             deals: {data:{id:deal},error:null},
-            'contracts:update': {data:{id:'draft-1'},error:null}
+            'contracts:update': {data:{id:'44444444-4444-4444-8444-444444444444'},error:null}
         });
-        await expect(ContractService.updateContract(org,'draft-1',{title:'Novo texto',content_json:{text:'Termos'}},owner,revision)).resolves.toEqual({id:'draft-1'});
+        await expect(ContractService.updateContract(org,'44444444-4444-4444-8444-444444444444',{title:'Novo texto',content_json:{text:'Termos'}},owner,revision)).resolves.toEqual({id:'44444444-4444-4444-8444-444444444444'});
         const write = calls.find(c=>c.mode==='update');
         expect(write?.filters).toContainEqual(['organization_id',org]);
         expect(write?.filters).toContainEqual(['status','draft']);
@@ -106,26 +106,52 @@ describe('contract tenant and owner boundaries', () => {
     });
     it('fails closed on stale revision, missing receipt, forged receipt or malformed timestamp', async () => {
         let calls = fixture({
-            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            contracts: {data:{id:'44444444-4444-4444-8444-444444444444',deal_id:deal,proposal_id:null,status:'draft'},error:null},
             deals: {data:{id:deal},error:null},
             'contracts:update': {data:null,error:null}
         });
-        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        await expect(ContractService.updateContract(org,'44444444-4444-4444-8444-444444444444',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
         expect(calls.some(c=>c.mode==='update')).toBe(true);
         calls = fixture({
-            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            contracts: {data:{id:'44444444-4444-4444-8444-444444444444',deal_id:deal,proposal_id:null,status:'draft'},error:null},
             deals: {data:{id:deal},error:null},
-            'contracts:update': {data:{id:'other'},error:null}
+            'contracts:update': {data:{id:'66666666-6666-4666-8666-666666666666'},error:null}
         });
-        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        await expect(ContractService.updateContract(org,'44444444-4444-4444-8444-444444444444',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
         calls = fixture({});
-        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'invalid-date')).rejects.toThrow();
+        await expect(ContractService.updateContract(org,'44444444-4444-4444-8444-444444444444',{title:'Atualização'},owner,'invalid-date')).rejects.toThrow();
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
     });
     it('rejects changes to legacy non-drafts without writing', async () => {
-        const calls = fixture({contracts:{data:{id:'historic',deal_id:deal,proposal_id:null,status:'signed'},error:null}});
-        await expect(ContractService.updateContract(org,'historic',{title:'Alteração'},undefined,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        const calls = fixture({contracts:{data:{id:'55555555-5555-4555-8555-555555555555',deal_id:deal,proposal_id:null,status:'signed'},error:null}});
+        await expect(ContractService.updateContract(org,'55555555-5555-4555-8555-555555555555',{title:'Alteração'},undefined,'2026-10-13T10:00:00Z')).rejects.toThrow();
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
+    });
+    it('rejects malformed owned deal ID responses without silently hiding contracts', async () => {
+        fixture({deals:{data:[{id:'not-a-uuid'}],error:null}});
+        await expect(ContractService.getContracts(org,owner)).rejects.toThrow();
+    });
+    it('rejects privileged contracts from a different tenant or with malformed shape', async () => {
+        const wrongTenant={id:'88888888-8888-4888-8888-888888888888',organization_id:'99999999-9999-4999-8999-999999999999',title:'A',company_name:'ACME',status:'draft',type:'service'};
+        fixture({contracts:{data:[wrongTenant],error:null}});
+        await expect(ContractService.getContracts(org)).rejects.toThrow();
+        fixture({contracts:{data:[{...wrongTenant,organization_id:org,title:null}],error:null}});
+        await expect(ContractService.getContracts(org)).rejects.toThrow();
+    });
+    it('rejects a forged creation receipt and a forged deletion receipt', async () => {
+        const calls=fixture({'contracts:insert':{data:{id:'invalid'},error:null}});
+        await expect(ContractService.createContract(org,{title:'A',company:'ACME'})).rejects.toThrow();
+        expect(calls.some(c=>c.mode==='insert')).toBe(true);
+        fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            deals:{data:{id:deal},error:null},
+            'contracts:delete':{data:{id:'66666666-6666-4666-8666-666666666666'},error:null}});
+        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner)).rejects.toThrow();
+    });
+    it('rejects missing tenant identity before privileged queries', async () => {
+        const calls=fixture({});
+        await expect(ContractService.getContracts('tenant-a')).rejects.toThrow();
+        await expect(ContractService.createContract('tenant-a',{title:'A',company:'ACME'})).rejects.toThrow();
+        expect(calls).toHaveLength(0);
     });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
