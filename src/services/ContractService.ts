@@ -31,13 +31,15 @@ function validateReadRows(rows: unknown, organizationId: string, ownedIds?: stri
 async function ownedDealRows(
     db: Admin, orgId: string, ownerId: string, includeDetails: boolean
 ): Promise<Array<{ id: string; title?: string; company?: string | null }>> {
+    // A static projection preserves Supabase's row inference in TypeScript.
+    // ID-only callers discard unused fields before returning to consumers.
     const PAGE_SIZE = 200;
     const MAX_PAGES = 50;
     const rows: Array<{ id: string; title?: string; company?: string | null }> = [];
     const seen = new Set<string>();
     for (let page = 0; page < MAX_PAGES; page++) {
         const { data, error } = await db.from('deals')
-            .select(includeDetails ? 'id,title,company' : 'id')
+            .select('id,title,company')
             .eq('organization_id', orgId).eq('owner_id', ownerId)
             .order('created_at', { ascending: false })
             .order('id', { ascending: false })
