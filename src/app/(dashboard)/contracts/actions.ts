@@ -1,14 +1,16 @@
 'use server';
 
-import { requirePermission, requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
+import { getAiDealScope } from '@/lib/ai-deal-scope';
 import { ContractService } from '@/services/ContractService';
 import { revalidatePath } from 'next/cache';
 import { type Contract } from '@/types/contract';
 
 export async function getContracts(): Promise<Contract[]> {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.getContracts(organizationId);
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        const data = await ContractService.getContracts(organizationId, canViewAll ? undefined : userId);
         return data.map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -33,8 +35,9 @@ export async function getContracts(): Promise<Contract[]> {
 
 export async function createContract(contract: Partial<Contract>) {
     try {
-        const { organizationId } = await requirePermission('deals:edit');
-        const data = await ContractService.createContract(organizationId, contract);
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        const data = await ContractService.createContract(organizationId, contract, canViewAll ? undefined : userId);
         revalidatePath('/contracts');
         return { success: true, data };
     } catch {
@@ -45,8 +48,9 @@ export async function createContract(contract: Partial<Contract>) {
 
 export async function updateContract(id: string, updates: Partial<Contract>) {
     try {
-        const { organizationId } = await requirePermission('deals:edit');
-        await ContractService.updateContract(organizationId, id, updates);
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.updateContract(organizationId, id, updates, canViewAll ? undefined : userId);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
@@ -57,8 +61,9 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
 
 export async function deleteContract(id: string) {
     try {
-        const { organizationId } = await requirePermission('deals:edit');
-        await ContractService.deleteContract(organizationId, id);
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.deleteContract(organizationId, id, canViewAll ? undefined : userId);
         revalidatePath('/contracts');
         return { success: true };
     } catch {

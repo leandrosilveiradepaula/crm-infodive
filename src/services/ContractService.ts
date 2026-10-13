@@ -1,22 +1,81 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import { type Contract } from '@/types/contract';
 
-export class ContractService {
-    static async getContracts(organizationId: string) {
-        const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('contracts')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+type Admin = ReturnType<typeof createAdminClient>;
+type ContractLink = { id: string; deal_id: string | null; proposal_id: string | null };
 
-        if (error) throw new Error('Não foi possível carregar os contratos.');
+/** Privileged reads always filter by tenant; sellers only see their owned deals. */
+async function ownedDealIds(db: Admin, orgId: string, ownerId: string) {
+    const { data, error } = await db.from('deals')
+        .select('id').eq('organization_id', orgId).eq('owner_id', ownerId);
+    if (error || !Array.isArray(data)) throw new Error('Não foi possível validar as oportunidades.');
+    return data.map(item => item.id).filter((id): id is string => typeof id === 'string');
+}
+
+async function assertDealReference(db: Admin, orgId: string, dealId: string | undefined | null, ownerId?: string) {
+    if (!dealId) {
+        if (ownerId) throw new Error('O contrato deve estar vinculado a uma oportunidade autorizada.');
+        return;
+    }
+    const query = db.from('deals').select('id').eq('id', dealId).eq('organization_id', orgId);
+    if (ownerId) query.eq('owner_id', ownerId);
+    const { data, error } = await query.maybeSingle();
+    if (error || !data) throw new Error('Oportunidade inválida ou acesso negado.');
+}
+
+async function assertProposalReference(db: Admin, orgId: string, proposalId: string | undefined | null, dealId: string | undefined | null) {
+    if (!proposalId) return;
+    // A proposal can only be attached to the contract for its own deal.
+    if (!dealId) throw new Error('Proposta sem oportunidade vinculada.');
+    const { data, error } = await db.from('proposals').select('id')
+        .eq('id', proposalId).eq('deal_id', dealId)
+        .eq('organization_id', orgId).maybeSingle();
+    if (error || !data) throw new Error('Proposta inválida para esta oportunidade.');
+}
+
+function validateContractFields(contract: Partial<Contract>, creating: boolean) {
+    if (!contract || typeof contract !== 'object' || Array.isArray(contract)) throw new Error('Contrato inválido.');
+    if (creating && (typeof contract.title !== 'string' || !contract.title.trim())) throw new Error('Título obrigatório.');
+    if (contract.title !== undefined && (typeof contract.title !== 'string' || contract.title.length > 500)) throw new Error('Título inválido.');
+    if (contract.value !== undefined && (typeof contract.value !== 'number' || !Number.isFinite(contract.value) || contract.value < 0)) throw new Error('Valor inválido.');
+    if (contract.status !== undefined && !['draft', 'sent', 'viewed', 'signed', 'declined'].includes(contract.status)) throw new Error('Situação inválida.');
+    if (contract.type !== undefined && !['service', 'nda', 'sales'].includes(contract.type)) throw new Error('Tipo inválido.');
+    for (const value of [contract.dealId, contract.proposalId]) {
+        if (value !== undefined && (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value))) {
+            throw new Error('Referência inválida.');
+        }
+    }
+}
+
+async function existingContract(db: Admin, orgId: string, id: string, ownerId?: string): Promise<ContractLink> {
+    if (typeof id !== 'string' || !id.trim()) throw new Error('Contrato inválido.');
+    const { data, error } = await db.from('contracts')
+        .select('id,deal_id,proposal_id').eq('id', id).eq('organization_id', orgId).maybeSingle();
+    if (error || !data) throw new Error('Contrato não encontrado.');
+    if (ownerId) await assertDealReference(db, orgId, data.deal_id, ownerId);
+    return data as ContractLink;
+}
+
+export class ContractService {
+    static async getContracts(organizationId: string, ownerId?: string) {
+        const db = createAdminClient();
+        let visibleIds: string[] | undefined;
+        if (ownerId) {
+            visibleIds = await ownedDealIds(db, organizationId, ownerId);
+            if (!visibleIds.length) return [];
+        }
+        let query = db.from('contracts').select('*').eq('organization_id', organizationId);
+        if (visibleIds) query = query.in('deal_id', visibleIds);
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os contratos.');
         return data;
     }
 
-    static async createContract(organizationId: string, contract: Partial<Contract>) {
-        const supabase = createAdminClient();
-        
+    static async createContract(organizationId: string, contract: Partial<Contract>, ownerId?: string) {
+        validateContractFields(contract, true);
+        const db = createAdminClient();
+        await assertDealReference(db, organizationId, contract.dealId, ownerId);
+        await assertProposalReference(db, organizationId, contract.proposalId, contract.dealId);
         const dbData = {
             organization_id: organizationId,
             title: contract.title,
@@ -29,59 +88,50 @@ export class ContractService {
             deal_id: contract.dealId,
             proposal_id: contract.proposalId,
             content_json: contract.content_json,
-            signature_image: contract.signature_image
+            signature_image: contract.signature_image,
         };
-
-        const { data, error } = await supabase
-            .from('contracts')
-            .insert([dbData])
-            .select()
-            .single();
-
-        if (error) throw new Error('Não foi possível salvar o contrato.');
+        const { data, error } = await db.from('contracts')
+            .insert([dbData]).select('id').maybeSingle();
+        if (error || !data) throw new Error('Não foi possível salvar o contrato.');
         return data;
     }
 
-    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>) {
-        const supabase = createAdminClient();
-        
-        const dbUpdates: any = {
-            updated_at: new Date().toISOString()
-        };
-
-        if (updates.title !== undefined) dbUpdates.title = updates.title;
-        if (updates.company !== undefined) dbUpdates.company_name = updates.company;
-        if (updates.value !== undefined) dbUpdates.value = updates.value;
-        if (updates.status !== undefined) dbUpdates.status = updates.status;
-        if (updates.type !== undefined) dbUpdates.type = updates.type;
-        if (updates.signerName !== undefined) dbUpdates.signer_name = updates.signerName;
-        if (updates.signerRole !== undefined) dbUpdates.signer_role = updates.signerRole;
-        if (updates.dealId !== undefined) dbUpdates.deal_id = updates.dealId;
-        if (updates.proposalId !== undefined) dbUpdates.proposal_id = updates.proposalId;
-        if (updates.content_json !== undefined) dbUpdates.content_json = updates.content_json;
-        if (updates.signature_image !== undefined) dbUpdates.signature_image = updates.signature_image;
-
-        const { data, error } = await supabase
-            .from('contracts')
-            .update(dbUpdates)
-            .eq('id', id)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
-
-        if (error) throw new Error('Não foi possível atualizar o contrato.');
+    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>, ownerId?: string) {
+        validateContractFields(updates, false);
+        const db = createAdminClient();
+        const current = await existingContract(db, organizationId, id, ownerId);
+        const dealId = updates.dealId ?? current.deal_id;
+        const proposalId = updates.proposalId ?? current.proposal_id;
+        await assertDealReference(db, organizationId, dealId, ownerId);
+        await assertProposalReference(db, organizationId, proposalId, dealId);
+        const fields: Record<string, unknown> = {};
+        if (updates.title !== undefined) fields.title = updates.title;
+        if (updates.company !== undefined) fields.company_name = updates.company;
+        if (updates.value !== undefined) fields.value = updates.value;
+        if (updates.status !== undefined) fields.status = updates.status;
+        if (updates.type !== undefined) fields.type = updates.type;
+        if (updates.signerName !== undefined) fields.signer_name = updates.signerName;
+        if (updates.signerRole !== undefined) fields.signer_role = updates.signerRole;
+        if (updates.dealId !== undefined) fields.deal_id = updates.dealId;
+        if (updates.proposalId !== undefined) fields.proposal_id = updates.proposalId;
+        if (updates.content_json !== undefined) fields.content_json = updates.content_json;
+        if (updates.signature_image !== undefined) fields.signature_image = updates.signature_image;
+        if (!Object.keys(fields).length) throw new Error('Nenhuma alteração válida.');
+        fields.updated_at = new Date().toISOString();
+        let query = db.from('contracts').update(fields).eq('id', id).eq('organization_id', organizationId);
+        if (ownerId) query = query.eq('deal_id', current.deal_id);
+        const { data, error } = await query.select('id').maybeSingle();
+        if (error || !data) throw new Error('Não foi possível atualizar o contrato.');
         return data;
     }
 
-    static async deleteContract(organizationId: string, id: string) {
-        const supabase = createAdminClient();
-        const { error } = await supabase
-            .from('contracts')
-            .delete()
-            .eq('id', id)
-            .eq('organization_id', organizationId);
-
-        if (error) throw new Error('Não foi possível excluir o contrato.');
+    static async deleteContract(organizationId: string, id: string, ownerId?: string) {
+        const db = createAdminClient();
+        const current = await existingContract(db, organizationId, id, ownerId);
+        let query = db.from('contracts').delete().eq('id', id).eq('organization_id', organizationId);
+        if (ownerId) query = query.eq('deal_id', current.deal_id);
+        const { data, error } = await query.select('id').maybeSingle();
+        if (error || !data) throw new Error('Não foi possível excluir o contrato.');
         return true;
     }
 }
