@@ -45,7 +45,7 @@ function validateContractFields(contract: Partial<Contract>, creating: boolean) 
     // A name or image is not verified identity, consent, or a signed document.
     // Preserve legacy rows for reading; refuse new signature evidence until an
     // auditable signing mechanism and its human-approved requirements exist.
-    if (contract.status === 'signed' || contract.signature_image !== undefined ||
+    if (contract.signature_image !== undefined ||
         contract.signerName !== undefined || contract.signerRole !== undefined) {
         throw new Error('Assinatura eletrônica indisponível: evidência verificável não configurada.');
     }
