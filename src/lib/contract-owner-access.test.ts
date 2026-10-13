@@ -63,11 +63,30 @@ describe('contract tenant and owner boundaries', () => {
         expect(deletion?.filters).toContainEqual(['organization_id',org]);
         expect(deletion?.filters).toContainEqual(['deal_id',deal]);
     });
+    it('never exposes deal options outside the authenticated seller scope', async () => {
+        const calls = fixture({ deals: { data: [{ id: deal, title: 'Oportunidade A', company: 'Cliente A' }], error: null } });
+        await expect(ContractService.getOwnedContractDealOptions(org, owner)).resolves.toEqual([
+            { id: deal, title: 'Oportunidade A', company: 'Cliente A' }
+        ]);
+        const query = calls.find(call => call.table === 'deals');
+        expect(query?.filters).toContainEqual(['organization_id', org]);
+        expect(query?.filters).toContainEqual(['owner_id', owner]);
+    });
+    it('rejects a failed eligible deal query instead of inventing an empty choice list', async () => {
+        fixture({ deals: { data: null, error: null } });
+        await expect(ContractService.getOwnedContractDealOptions(org, owner)).rejects.toThrow();
+    });
+    it('rejects contracts with missing required company before the database write', async () => {
+        const calls = fixture({});
+        await expect(ContractService.createContract(org, {title: 'Rascunho'})).rejects.toThrow();
+        await expect(ContractService.createContract(org, {title: 'Rascunho', company: '   '})).rejects.toThrow();
+        expect(calls.find(call => call.mode === 'insert')).toBeUndefined();
+    });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
-        await expect(ContractService.createContract(org,{title:'X',value:NaN})).rejects.toThrow();
-        await expect(ContractService.createContract(org,{title:'X',dealId:'foreign'})).rejects.toThrow();
-        await expect(ContractService.createContract(org,{title:'X',status:'forged' as never})).rejects.toThrow();
+        await expect(ContractService.createContract(org,{title:'X',company:'ACME',value:NaN})).rejects.toThrow();
+        await expect(ContractService.createContract(org,{title:'X',company:'ACME',dealId:'foreign'})).rejects.toThrow();
+        await expect(ContractService.createContract(org,{title:'X',company:'ACME',status:'forged' as never})).rejects.toThrow();
         expect(calls.find(c=>c.mode==='insert')).toBeUndefined();
     });
 });
