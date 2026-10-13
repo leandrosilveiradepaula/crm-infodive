@@ -12,8 +12,9 @@ export const useContracts = () => {
             setLoading(true);
             const data = await getContracts();
             setContracts(data);
-        } catch (err: any) {
-            setError(err.message);
+            setError(null);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Não foi possível carregar os contratos.');
         } finally {
             setLoading(false);
         }
@@ -22,11 +23,12 @@ export const useContracts = () => {
     const addContract = async (contract: Partial<Contract>) => {
         try {
             const result = await createContractAction(contract);
-            if (!result.success) throw new Error(result.error);
+            if (!result.success) throw new Error(result.error || 'Não foi possível criar o contrato.');
+            setError(null);
             await fetchContracts();
             return result.data;
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Não foi possível criar o contrato.');
             return null;
         }
     };
@@ -53,11 +55,12 @@ export const useContracts = () => {
     const deleteContract = async (id: string) => {
         try {
             const result = await deleteContractAction(id);
-            if (!result.success) throw new Error(result.error);
+            if (!result.success) throw new Error(result.error || 'Não foi possível excluir o contrato.');
+            setError(null);
             await fetchContracts();
             return true;
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Não foi possível excluir o contrato.');
             return false;
         }
     };
