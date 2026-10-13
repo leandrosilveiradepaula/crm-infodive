@@ -127,6 +127,32 @@ describe('contract tenant and owner boundaries', () => {
         await expect(ContractService.updateContract(org,'55555555-5555-4555-8555-555555555555',{title:'Alteração'},undefined,'2026-10-13T10:00:00Z')).rejects.toThrow();
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
     });
+    it('rejects malformed owned deal ID responses without silently hiding contracts', async () => {
+        fixture({deals:{data:[{id:'not-a-uuid'}],error:null}});
+        await expect(ContractService.getContracts(org,owner)).rejects.toThrow();
+    });
+    it('rejects privileged contracts from a different tenant or with malformed shape', async () => {
+        const wrongTenant={id:'88888888-8888-4888-8888-888888888888',organization_id:'99999999-9999-4999-8999-999999999999',title:'A',company_name:'ACME',status:'draft',type:'service'};
+        fixture({contracts:{data:[wrongTenant],error:null}});
+        await expect(ContractService.getContracts(org)).rejects.toThrow();
+        fixture({contracts:{data:[{...wrongTenant,organization_id:org,title:null}],error:null}});
+        await expect(ContractService.getContracts(org)).rejects.toThrow();
+    });
+    it('rejects a forged creation receipt and a forged deletion receipt', async () => {
+        const calls=fixture({'contracts:insert':{data:{id:'invalid'},error:null}});
+        await expect(ContractService.createContract(org,{title:'A',company:'ACME'})).rejects.toThrow();
+        expect(calls.some(c=>c.mode==='insert')).toBe(true);
+        fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            deals:{data:{id:deal},error:null},
+            'contracts:delete':{data:{id:'66666666-6666-4666-8666-666666666666'},error:null}});
+        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner)).rejects.toThrow();
+    });
+    it('rejects missing tenant identity before privileged queries', async () => {
+        const calls=fixture({});
+        await expect(ContractService.getContracts('tenant-a')).rejects.toThrow();
+        await expect(ContractService.createContract('tenant-a',{title:'A',company:'ACME'})).rejects.toThrow();
+        expect(calls).toHaveLength(0);
+    });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
         await expect(ContractService.createContract(org,{title:'X',company:'ACME',value:NaN})).rejects.toThrow();
