@@ -3,7 +3,7 @@ const mocks = vi.hoisted(() => ({ createAdminClient: vi.fn() }));
 vi.mock('./supabase/admin', () => ({ createAdminClient: mocks.createAdminClient }));
 import { ContractService } from '../services/ContractService';
 
-type Outcome = { data: any; error: any };
+type Outcome = { data: unknown; error: unknown };
 type Call = { table: string; mode: string; filters: [string, unknown][]; payload?: unknown };
 function fixture(outcomes: Record<string, Outcome>) {
     const calls: Call[] = [];
@@ -63,7 +63,7 @@ describe('contract tenant and owner boundaries', () => {
         const calls=fixture({});
         await expect(ContractService.createContract(org,{title:'X',value:NaN})).rejects.toThrow();
         await expect(ContractService.createContract(org,{title:'X',dealId:'foreign'})).rejects.toThrow();
-        await expect(ContractService.createContract(org,{title:'X',status:'forged' as any})).rejects.toThrow();
+        await expect(ContractService.createContract(org,{title:'X',status:'forged' as never})).rejects.toThrow();
         expect(calls.find(c=>c.mode==='insert')).toBeUndefined();
     });
 });
