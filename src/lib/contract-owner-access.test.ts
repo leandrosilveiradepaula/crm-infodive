@@ -90,6 +90,43 @@ describe('contract tenant and owner boundaries', () => {
         await expect(ContractService.updateContract(org, 'id', {signature_image:'data:image/png;base64,AA=='})).rejects.toThrow();
         expect(calls.find(c=>c.mode==='insert'||c.mode==='update')).toBeUndefined();
     });
+    it('saves a tenant-owned draft against an exact revision and demands matching receipt', async () => {
+        const revision = '2026-10-13T10:00:00.000Z';
+        const calls = fixture({
+            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            deals: {data:{id:deal},error:null},
+            'contracts:update': {data:{id:'draft-1'},error:null}
+        });
+        await expect(ContractService.updateContract(org,'draft-1',{title:'Novo texto',content_json:{text:'Termos'}},owner,revision)).resolves.toEqual({id:'draft-1'});
+        const write = calls.find(c=>c.mode==='update');
+        expect(write?.filters).toContainEqual(['organization_id',org]);
+        expect(write?.filters).toContainEqual(['status','draft']);
+        expect(write?.filters).toContainEqual(['deal_id',deal]);
+        expect(write?.filters).toContainEqual(['updated_at',revision]);
+    });
+    it('fails closed on stale revision, missing receipt, forged receipt or malformed timestamp', async () => {
+        let calls = fixture({
+            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            deals: {data:{id:deal},error:null},
+            'contracts:update': {data:null,error:null}
+        });
+        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        expect(calls.some(c=>c.mode==='update')).toBe(true);
+        calls = fixture({
+            contracts: {data:{id:'draft-1',deal_id:deal,proposal_id:null,status:'draft'},error:null},
+            deals: {data:{id:deal},error:null},
+            'contracts:update': {data:{id:'other'},error:null}
+        });
+        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        calls = fixture({});
+        await expect(ContractService.updateContract(org,'draft-1',{title:'Atualização'},owner,'invalid-date')).rejects.toThrow();
+        expect(calls.find(c=>c.mode==='update')).toBeUndefined();
+    });
+    it('rejects changes to legacy non-drafts without writing', async () => {
+        const calls = fixture({contracts:{data:{id:'historic',deal_id:deal,proposal_id:null,status:'signed'},error:null}});
+        await expect(ContractService.updateContract(org,'historic',{title:'Alteração'},undefined,'2026-10-13T10:00:00Z')).rejects.toThrow();
+        expect(calls.find(c=>c.mode==='update')).toBeUndefined();
+    });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
         await expect(ContractService.createContract(org,{title:'X',company:'ACME',value:NaN})).rejects.toThrow();
