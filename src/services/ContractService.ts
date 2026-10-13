@@ -11,7 +11,7 @@ function validateTenant(organizationId: string, ownerId?: string) {
         throw new Error('Contexto de organização ou usuário inválido.');
     }
 }
-function validateReadRows(rows: unknown, organizationId: string, ownedIds?: string[]) {
+function validateReadRows(rows: unknown, organizationId: string, ownerId?: string) {
     if (!Array.isArray(rows)) throw new Error('Resposta inválida de contratos.');
     for (const row of rows) {
         if (!row || !validId(row.id) || row.organization_id !== organizationId ||
@@ -19,7 +19,11 @@ function validateReadRows(rows: unknown, organizationId: string, ownedIds?: stri
             typeof row.company_name !== 'string' || !row.company_name.trim() ||
             !['draft','sent','viewed','signed','declined'].includes(row.status) ||
             !['service','nda','sales'].includes(row.type) ||
-            (ownedIds !== undefined && (!validId(row.deal_id) || !ownedIds.includes(row.deal_id)))) {
+            (ownerId !== undefined && (!validId(row.deal_id) ||
+                !row.authorized_deal || Array.isArray(row.authorized_deal) ||
+                row.authorized_deal.id !== row.deal_id ||
+                row.authorized_deal.owner_id !== ownerId ||
+                row.authorized_deal.organization_id !== organizationId))) {
             throw new Error('Resposta inválida de contratos.');
         }
     }
@@ -56,10 +60,6 @@ async function ownedDealRows(
         if (data.length < PAGE_SIZE) return rows;
     }
     throw new Error('Limite de oportunidades excedido: consulta incompleta.');
-}
-
-async function ownedDealIds(db: Admin, orgId: string, ownerId: string) {
-    return (await ownedDealRows(db, orgId, ownerId, false)).map(item => item.id);
 }
 
 async function assertDealReference(db: Admin, orgId: string, dealId: string | undefined | null, ownerId?: string) {
@@ -137,11 +137,8 @@ export class ContractService {
     static async getContracts(organizationId: string, ownerId?: string) {
         validateTenant(organizationId, ownerId);
         const db = createAdminClient();
-        let visibleIds: string[] | undefined;
-        if (ownerId) {
-            visibleIds = await ownedDealIds(db, organizationId, ownerId);
-            if (!visibleIds.length) return [];
-        }
+        // A server-side foreign-key inner join restricts contracts before pagination.
+        // Avoid a client-generated IN list of every owned deal (which can overflow URLs).
         // PostgREST can cap responses (commonly 1000 rows). Never treat a truncated
         // list as complete: fetch bounded windows with a deterministic tie-breaker.
         const PAGE_SIZE = 200;
@@ -149,14 +146,19 @@ export class ContractService {
         const rows: Array<{ id: string; organization_id: string; title: string; company_name: string; value: number | null; status: Contract['status']; type: Contract['type']; signer_name: string | null; signer_role: string | null; deal_id: string | null; proposal_id: string | null; created_at: string; updated_at: string; content_json: unknown; signature_image: string | null }> = [];
         const seen = new Set<string>();
         for (let page = 0; page < MAX_PAGES; page++) {
-            let query = db.from('contracts').select('*').eq('organization_id', organizationId);
-            if (visibleIds) query = query.in('deal_id', visibleIds);
+            const query = ownerId
+                ? db.from('contracts')
+                    .select('*,authorized_deal:deals!contracts_deal_id_fkey!inner(id,owner_id,organization_id)')
+                    .eq('organization_id', organizationId)
+                    .eq('authorized_deal.owner_id', ownerId)
+                    .eq('authorized_deal.organization_id', organizationId)
+                : db.from('contracts').select('*').eq('organization_id', organizationId);
             const { data, error } = await query.order('created_at', { ascending: false })
                 .order('id', { ascending: false })
                 .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
             if (error) throw new Error('Não foi possível carregar os contratos.');
             if (!Array.isArray(data)) throw new Error('Resposta inválida de contratos.');
-            validateReadRows(data, organizationId, visibleIds);
+            validateReadRows(data, organizationId, ownerId);
             for (const item of data) {
                 const id = item.id as string;
                 if (seen.has(id)) throw new Error('Duplicidade ou paginação inconsistente de contratos.');
