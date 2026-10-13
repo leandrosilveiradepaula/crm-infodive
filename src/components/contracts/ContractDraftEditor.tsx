@@ -67,13 +67,13 @@ export function ContractDraftEditor({ contract, onClose, onSaved }: ContractDraf
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <label className="block text-sm font-medium">
                         Título
-                        <input value={title} onChange={event => setTitle(event.target.value)}
+                        <input aria-label="Título do rascunho" value={title} onChange={event => setTitle(event.target.value)}
                             maxLength={500} required disabled={saving}
                             className="mt-2 w-full rounded-lg border border-border bg-background p-3" />
                     </label>
                     <label className="block text-sm font-medium">
                         Conteúdo do rascunho
-                        <textarea value={text} onChange={event => setText(event.target.value)}
+                        <textarea aria-label="Conteúdo do rascunho" value={text} onChange={event => setText(event.target.value)}
                             maxLength={100000} rows={12} required disabled={saving}
                             placeholder="Escreva o conteúdo. Nenhuma cláusula é inserida automaticamente."
                             className="mt-2 w-full rounded-lg border border-border bg-background p-3 font-mono text-sm" />
