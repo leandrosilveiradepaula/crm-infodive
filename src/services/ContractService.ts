@@ -27,12 +27,39 @@ function validateReadRows(rows: unknown, organizationId: string, ownedIds?: stri
 
 
 /** Privileged reads always filter by tenant; sellers only see their owned deals. */
+/** Bounded, deterministic reads avoid silent Supabase/PostgREST default truncation. */
+async function ownedDealRows(
+    db: Admin, orgId: string, ownerId: string, includeDetails: boolean
+): Promise<Array<{ id: string; title?: string; company?: string | null }>> {
+    // A static projection preserves Supabase's row inference in TypeScript.
+    // ID-only callers discard unused fields before returning to consumers.
+    const PAGE_SIZE = 200;
+    const MAX_PAGES = 50;
+    const rows: Array<{ id: string; title?: string; company?: string | null }> = [];
+    const seen = new Set<string>();
+    for (let page = 0; page < MAX_PAGES; page++) {
+        const { data, error } = await db.from('deals')
+            .select('id,title,company')
+            .eq('organization_id', orgId).eq('owner_id', ownerId)
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false })
+            .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível consultar as oportunidades autorizadas.');
+        for (const row of data) {
+            if (!row || !validId(row.id) || seen.has(row.id) ||
+                (includeDetails && (typeof row.title !== 'string' || !row.title.trim()))) {
+                throw new Error('Resposta inconsistente de oportunidades autorizadas.');
+            }
+            seen.add(row.id);
+            rows.push(row);
+        }
+        if (data.length < PAGE_SIZE) return rows;
+    }
+    throw new Error('Limite de oportunidades excedido: consulta incompleta.');
+}
+
 async function ownedDealIds(db: Admin, orgId: string, ownerId: string) {
-    const { data, error } = await db.from('deals')
-        .select('id').eq('organization_id', orgId).eq('owner_id', ownerId);
-    if (error || !Array.isArray(data)) throw new Error('Não foi possível validar as oportunidades.');
-    if (data.some(item => !item || !validId(item.id))) throw new Error('Oportunidades inválidas na consulta.');
-    return data.map(item => item.id as string);
+    return (await ownedDealRows(db, orgId, ownerId, false)).map(item => item.id);
 }
 
 async function assertDealReference(db: Admin, orgId: string, dealId: string | undefined | null, ownerId?: string) {
@@ -100,16 +127,11 @@ export class ContractService {
         if (!organizationId || !ownerId) throw new Error('Acesso negado às oportunidades.');
         validateTenant(organizationId, ownerId);
         const db = createAdminClient();
-        const { data, error } = await db.from('deals')
-            .select('id,title,company')
-            .eq('organization_id', organizationId)
-            .eq('owner_id', ownerId)
-            .order('created_at', { ascending: false });
-        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar as oportunidades autorizadas.');
-        if (data.some(item => !validId(item?.id) || typeof item?.title !== 'string')) {
-            throw new Error('Dados inválidos das oportunidades.');
-        }
-        return data.map(item => ({ id: item.id, title: item.title, company: typeof item.company === 'string' ? item.company : '' }));
+        const data = await ownedDealRows(db, organizationId, ownerId, true);
+        return data.map(item => ({
+            id: item.id, title: item.title as string,
+            company: typeof item.company === 'string' ? item.company : ''
+        }));
     }
 
     static async getContracts(organizationId: string, ownerId?: string) {
