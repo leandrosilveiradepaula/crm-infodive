@@ -110,6 +110,7 @@ export const ContractBuilder = ({ deal, contract, onSave, onClose }: ContractBui
 
                     <label htmlFor="deal-contract-company" className="block text-sm font-semibold text-foreground mb-2">Empresa contratante</label>
                     <input
+                        aria-label="Empresa contratante"
                         id="deal-contract-company"
                         value={company}
                         maxLength={500}
