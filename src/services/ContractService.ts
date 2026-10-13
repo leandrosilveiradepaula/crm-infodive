@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import { type Contract } from '@/types/contract';
 
 type Admin = ReturnType<typeof createAdminClient>;
