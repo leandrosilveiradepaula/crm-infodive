@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import {
     FileText, Plus, Search,
-    CheckCircle2, Clock, Eye, Pencil, Download, TrendingUp
+    AlertTriangle, Clock, Eye, Pencil, Download, TrendingUp
 } from 'lucide-react';
 import { type Contract } from '@/types/contract';
 import { createContract, getContractCreationDeals } from '@/app/(dashboard)/contracts/actions';
@@ -48,12 +48,36 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
         return matchesSearch && matchesStatus;
     });
 
+    const resetCreationForm = () => {
+        setCreationOptions(null);
+        setChosenDeal('');
+        setDraftTitle('');
+        setDraftCompany('');
+        setCreationError(null);
+    };
+
+    const formatCreatedDate = (value: string) => {
+        const timestamp = Date.parse(value);
+        return Number.isFinite(timestamp)
+            ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(timestamp))
+            : 'Data não disponível';
+    };
+
+    const getContractTypeLabel = (value: Contract['type']) => {
+        switch (value) {
+            case 'service': return 'Prestação de serviços';
+            case 'nda': return 'Confidencialidade';
+            case 'sales': return 'Vendas';
+        }
+    };
+
     const handleCreateContract = async () => {
         if (creatingLock.current) return;
         creatingLock.current = true;
         if (creationOptions === null) {
             setIsCreating(true);
             setCreationError(null);
+            setSaveFeedback(null);
             try {
                 const options = await getContractCreationDeals();
                 setCreationOptions(options);
@@ -88,10 +112,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 type: 'service'
             });
             if (!res.success) throw new Error('Persistência recusada');
-            setCreationOptions(null);
-            setChosenDeal('');
-            setDraftTitle('');
-            setDraftCompany('');
+            resetCreationForm();
+            setSaveFeedback('Rascunho criado e salvo. A listagem será atualizada.');
             router.refresh();
         } catch {
             setCreationError('Não foi possível salvar o contrato. Confira os dados e tente novamente.');
@@ -122,9 +144,9 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'draft': return 'bg-muted/30 text-muted-foreground border-border/50';
-            case 'sent': return 'bg-info/10 text-info border-info/20';
-            case 'viewed': return 'bg-stage-proposal/10 text-stage-proposal border-stage-proposal/20';
-            case 'signed': return 'bg-success/10 text-success border-success/20';
+            case 'sent':
+            case 'viewed':
+            case 'signed': return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20';
             case 'declined': return 'bg-destructive/10 text-destructive border-destructive/20';
             default: return 'bg-muted/30 text-muted-foreground';
         }
@@ -181,7 +203,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
                             value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante obrigatória" />
                     )}
-                    <button type="button" className="text-sm underline" onClick={() => {setCreationOptions(null);setCreationError(null);}}>Cancelar</button>
+                    <button type="button" disabled={isCreating} className="text-sm underline disabled:opacity-50"
+                        onClick={resetCreationForm}>Cancelar</button>
                 </div>
             )}
             {creationError && <p role="alert" className="text-sm text-destructive">{creationError}</p>}
@@ -210,10 +233,10 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     label: "Marcados como assinados",
                     value: contracts.filter(c => c.status === 'signed').length,
                     description: "Sem evidência verificada de assinatura",
-                    icon: CheckCircle2,
-                    color: "text-emerald-600 dark:text-emerald-400",
-                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-                    border: "border-emerald-100 dark:border-emerald-900/50"
+                    icon: AlertTriangle,
+                    color: "text-amber-600 dark:text-amber-400",
+                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
+                    border: "border-amber-100 dark:border-amber-900/50"
                 },
                 {
                     label: "Valor Total",
@@ -270,7 +293,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         </thead>
                         <tbody className="divide-y divide-border">
                             {filteredContracts.map(contract => (
-                                <tr key={contract.id} className="transition-all duration-300 group hover:bg-muted/50 cursor-pointer border-l-2 border-l-transparent hover:border-l-primary">
+                                <tr key={contract.id} aria-label={`Contrato: ${contract.title}, ${contract.company}`} className="transition-all duration-300 group hover:bg-muted/50 border-l-2 border-l-transparent hover:border-l-primary">
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all">
@@ -280,7 +303,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                                 <button type="button" className="text-left text-sm font-black text-foreground group-hover:text-primary hover:underline focus-visible:underline transition-colors tracking-tight"
                                                     aria-label={`Visualizar contrato: ${contract.title}`}
                                                     onClick={() => handleViewContract(contract)}>{contract.title}</button>
-                                                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">{contract.type}</p>
+                                                <p className="text-xs text-muted-foreground uppercase tracking-wider mt-0.5">{getContractTypeLabel(contract.type)}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -296,14 +319,14 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                     </td>
                                     <td className="py-3 px-4">
                                         <span className={`px-2 py-0.5 rounded text-xs font-black border ${getStatusColor(contract.status)} uppercase tracking-widest flex items-center w-fit gap-1.5`}>
-                                            {contract.status === 'signed' && <CheckCircle2 className="h-3 w-3" />}
+                                            {contract.status === 'signed' && <AlertTriangle className="h-3 w-3" aria-hidden="true" />}
                                             {contract.status === 'sent' && <Clock className="h-3 w-3" />}
                                             {getStatusLabel(contract.status)}
                                         </span>
                                     </td>
                                     <td className="py-3 px-4">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-bold text-foreground">{new Date(contract.createdAt).toLocaleDateString('pt-BR')}</span>
+                                            <span className="text-sm font-bold text-foreground">{formatCreatedDate(contract.createdAt)}</span>
                                             <span className="text-xs text-muted-foreground uppercase tracking-wider">Criado em</span>
                                         </div>
                                     </td>
