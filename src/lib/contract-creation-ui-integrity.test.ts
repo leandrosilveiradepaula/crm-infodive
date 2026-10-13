@@ -35,6 +35,7 @@ describe('contract creation and read integrity', () => {
     });
     it('does not expose a fake downloadable PDF action', () => {
         expect(client).toContain('PDF indisponível: documento ainda não gerado');
-        expect(client).toContain('actionLabel="Novo Contrato"');
+        expect(client).toContain("actionLabel: 'Novo Contrato'");
+        expect(client).toContain('contracts.length === 0 && creationOptions === null && !isCreating');
     });
 });
