@@ -2,7 +2,8 @@
 
 import { createAdminClient } from '../../../lib/supabase/admin';
 import type { PurchaseOrder } from '../../../hooks/usePurchaseOrders';
-import { requirePermission, requireSessionContext } from '../../../lib/auth-server';
+import { requirePermission } from '../../../lib/auth-server';
+import { getAiDealScope } from '../../../lib/ai-deal-scope';
 
 const STATUS = ['draft', 'sent', 'confirmed', 'delivered', 'cancelled'] as const;
 const FIELDS = ['sales_order_id', 'distributor_id', 'distributor_branch_id', 'status', 'expected_delivery_date', 'tracking_code', 'notes'] as const;
@@ -36,15 +37,53 @@ async function assertTenantReference(supabase: ReturnType<typeof createAdminClie
     if (error || !data) throw new Error('Invalid purchase order reference');
 }
 
+
+/**
+ * Purchase orders reference commercial sales orders. The privileged client
+ * bypasses RLS, so visibility follows the same deal owner scope as Sales.
+ * null means organization-wide visibility; [] means no matching orders.
+ */
+async function visibleSalesOrderIds(
+    supabase: ReturnType<typeof createAdminClient>, userId: string, organizationId: string,
+): Promise<string[] | null> {
+    const { canViewAll } = await getAiDealScope(userId, organizationId);
+    if (canViewAll) return null;
+    const { data: deals, error: dealsError } = await supabase.from('deals')
+        .select('id').eq('organization_id', organizationId).eq('owner_id', userId);
+    if (dealsError || !Array.isArray(deals)) throw new Error('Deal visibility unavailable');
+    const dealIds = deals.map(d => d.id).filter((id): id is string => typeof id === 'string');
+    if (dealIds.length === 0) return [];
+    const { data: orders, error: ordersError } = await supabase.from('sales_orders')
+        .select('id').eq('organization_id', organizationId).in('deal_id', dealIds);
+    if (ordersError || !Array.isArray(orders)) throw new Error('Sales visibility unavailable');
+    return orders.map(o => o.id).filter((id): id is string => typeof id === 'string');
+}
+
+/** Ensure the branch belongs to the chosen distributor in the same tenant. */
+async function assertDistributorBranch(
+    supabase: ReturnType<typeof createAdminClient>,
+    branchId: string, distributorId: string | undefined, organizationId: string,
+): Promise<void> {
+    if (!distributorId) throw new Error('Distributor required for branch');
+    const { data, error } = await supabase.from('account_branches').select('id')
+        .eq('id', branchId).eq('account_id', distributorId)
+        .eq('organization_id', organizationId).maybeSingle();
+    if (error || !data) throw new Error('Invalid distributor branch');
+}
+
 export async function getPurchaseOrders() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId, userId } = await requirePermission('deals:edit');
     const supabase = createAdminClient();
     try {
-        const { data, error } = await supabase.from('purchase_orders').select(`
+        const allowedIds = await visibleSalesOrderIds(supabase, userId, organizationId);
+        if (allowedIds !== null && allowedIds.length === 0) return { success: true, data: [] };
+        let query = supabase.from('purchase_orders').select(`
             *,
             distributor:accounts!purchase_orders_distributor_id_fkey(name),
             sales_order:sales_orders(id,total_value,deal:deals(title))
-        `).eq('organization_id', organizationId).order('created_at', { ascending: false });
+        `).eq('organization_id', organizationId);
+        if (allowedIds !== null) query = query.in('sales_order_id', allowedIds);
+        const { data, error } = await query.order('created_at', { ascending: false });
         if (error || !Array.isArray(data)) throw new Error('Invalid purchase order list');
         return { success: true, data };
     } catch {
@@ -53,12 +92,19 @@ export async function getPurchaseOrders() {
 }
 
 export async function createPurchaseOrder(po: Partial<PurchaseOrder>) {
-    const { organizationId } = await requirePermission('deals:create');
+    const { organizationId, userId } = await requirePermission('deals:create');
     try {
         const values = validatePurchaseOrderInput(po, true);
         const supabase = createAdminClient();
+        const allowedIds = await visibleSalesOrderIds(supabase, userId, organizationId);
+        if (allowedIds !== null && (!values.sales_order_id || !allowedIds.includes(values.sales_order_id))) {
+            throw new Error('Sales order not authorized');
+        }
         if (values.sales_order_id) await assertTenantReference(supabase, 'sales_orders', values.sales_order_id, organizationId);
         if (values.distributor_id) await assertTenantReference(supabase, 'accounts', values.distributor_id, organizationId);
+        if (values.distributor_branch_id) await assertDistributorBranch(
+            supabase, values.distributor_branch_id, values.distributor_id, organizationId,
+        );
         const { data, error } = await supabase.from('purchase_orders')
             .insert([{ ...values, organization_id: organizationId }]).select('*').maybeSingle();
         if (error || !data) throw new Error('Purchase order not persisted');
@@ -69,16 +115,46 @@ export async function createPurchaseOrder(po: Partial<PurchaseOrder>) {
 }
 
 export async function updatePurchaseOrder(id: string, updates: Partial<PurchaseOrder>) {
-    const { organizationId } = await requirePermission('deals:edit');
+    const { organizationId, userId } = await requirePermission('deals:edit');
     try {
         if (typeof id !== 'string' || !id.trim()) throw new Error('Invalid ID');
         const values = validatePurchaseOrderInput(updates, false);
         const supabase = createAdminClient();
-        if (values.sales_order_id) await assertTenantReference(supabase, 'sales_orders', values.sales_order_id, organizationId);
+        const allowedIds = await visibleSalesOrderIds(supabase, userId, organizationId);
+        if (allowedIds !== null && allowedIds.length === 0) throw new Error('No authorized sales orders');
+        if (values.sales_order_id) {
+            if (allowedIds !== null && !allowedIds.includes(values.sales_order_id)) throw new Error('Sales order not authorized');
+            await assertTenantReference(supabase, 'sales_orders', values.sales_order_id, organizationId);
+        }
         if (values.distributor_id) await assertTenantReference(supabase, 'accounts', values.distributor_id, organizationId);
-        const { data, error } = await supabase.from('purchase_orders').update(values)
-            .eq('id', id.trim()).eq('organization_id', organizationId)
-            .select('*').maybeSingle();
+        if (values.distributor_id && !values.distributor_branch_id) {
+            // A new distributor must never inherit a branch from the old one.
+            let current = supabase.from('purchase_orders')
+                .select('distributor_id,distributor_branch_id')
+                .eq('id', id.trim()).eq('organization_id', organizationId);
+            if (allowedIds !== null) current = current.in('sales_order_id', allowedIds);
+            const { data: existing, error: readError } = await current.maybeSingle();
+            if (readError || !existing) throw new Error('Purchase order not accessible');
+            if (existing.distributor_id !== values.distributor_id && existing.distributor_branch_id) {
+                throw new Error('Select a branch of the new distributor');
+            }
+        }
+        if (values.distributor_branch_id) {
+            let distributorId = values.distributor_id;
+            if (!distributorId) {
+                let current = supabase.from('purchase_orders').select('distributor_id')
+                    .eq('id', id.trim()).eq('organization_id', organizationId);
+                if (allowedIds !== null) current = current.in('sales_order_id', allowedIds);
+                const { data: existing, error: readError } = await current.maybeSingle();
+                if (readError || !existing) throw new Error('Purchase order not accessible');
+                distributorId = existing.distributor_id;
+            }
+            await assertDistributorBranch(supabase, values.distributor_branch_id, distributorId, organizationId);
+        }
+        let updateQuery = supabase.from('purchase_orders').update(values)
+            .eq('id', id.trim()).eq('organization_id', organizationId);
+        if (allowedIds !== null) updateQuery = updateQuery.in('sales_order_id', allowedIds);
+        const { data, error } = await updateQuery.select('*').maybeSingle();
         if (error || !data) throw new Error('Purchase order not updated');
         return { success: true, data };
     } catch {

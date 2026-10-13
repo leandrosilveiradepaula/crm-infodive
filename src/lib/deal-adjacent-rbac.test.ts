@@ -29,9 +29,12 @@ describe('deal-adjacent mutation RBAC', () => {
     expect(functionBody(source, 'deleteProposalAction')).toContain("requirePermission('deals:edit')");
   });
 
-  it('protects purchase order mutations while leaving reads session-scoped', () => {
+  it('requires RBAC and owner-scoped purchase order reads before privileged queries', () => {
     const source = readFileSync('src/app/(dashboard)/purchases/purchase-orders-actions.ts', 'utf8');
-    expect(functionBody(source, 'getPurchaseOrders')).toContain('requireSessionContext()');
+    const read = functionBody(source, 'getPurchaseOrders');
+    expect(read).toContain("requirePermission('deals:edit')");
+    expect(read).toContain('visibleSalesOrderIds(supabase, userId, organizationId)');
+    expect(read).toContain("query.in('sales_order_id', allowedIds)");
     expect(functionBody(source, 'createPurchaseOrder')).toContain("requirePermission('deals:create')");
     expect(functionBody(source, 'updatePurchaseOrder')).toContain("requirePermission('deals:edit')");
   });
