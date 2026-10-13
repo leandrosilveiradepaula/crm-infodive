@@ -33,11 +33,12 @@ export async function getContracts(): Promise<Contract[]> {
     }
 }
 
-export async function getContractCreationDeals(): Promise<{ id: string; title: string; company: string }[]> {
+export async function getContractCreationDeals(): Promise<{ requiresDeal: boolean; deals: { id: string; title: string; company: string }[] }> {
     const { userId, organizationId } = await requirePermission('deals:edit');
     const { canViewAll } = await getAiDealScope(userId, organizationId);
-    if (canViewAll) return [];
-    return ContractService.getOwnedContractDealOptions(organizationId, userId);
+    if (canViewAll) return { requiresDeal: false, deals: [] };
+    const deals = await ContractService.getOwnedContractDealOptions(organizationId, userId);
+    return { requiresDeal: true, deals };
 }
 
 export async function createContract(contract: Partial<Contract>) {

@@ -13,12 +13,14 @@ describe('contract creation and read integrity', () => {
     it('derives seller deal choices from authenticated server-side identity', () => {
         expect(actions).toContain("requirePermission('deals:edit')");
         expect(actions).toContain('getOwnedContractDealOptions(organizationId, userId)');
+        expect(actions).toContain('requiresDeal: true');
         expect(service).toContain(".eq('owner_id', ownerId)");
     });
     it('collects the mandatory seller deal reference rather than posting unlinked contracts', () => {
         expect(client).toContain('getContractCreationDeals()');
         expect(client).toContain("dealId: selected?.id");
         expect(client).toContain('Selecione uma oportunidade para este contrato.');
+        expect(client).toContain('Não existem oportunidades autorizadas para vincular ao contrato.');
     });
     it('surfaces save failures and synchronizes server-refreshed contracts', () => {
         expect(client).toContain('role="alert"');

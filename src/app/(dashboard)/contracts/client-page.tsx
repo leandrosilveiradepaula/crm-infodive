@@ -33,7 +33,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [isSignatureOpen, setIsSignatureOpen] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [creationDeals, setCreationDeals] = useState<{id: string;title: string;company: string}[] | null>(null);
+    const [creationOptions, setCreationOptions] = useState<{requiresDeal: boolean;deals: {id: string;title: string;company: string}[]} | null>(null);
     const [chosenDeal, setChosenDeal] = useState('');
     const [draftTitle, setDraftTitle] = useState('');
     const [draftCompany, setDraftCompany] = useState('');
@@ -47,12 +47,12 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     });
 
     const handleCreateContract = async () => {
-        if (creationDeals === null) {
+        if (creationOptions === null) {
             setIsCreating(true);
             setCreationError(null);
             try {
                 const options = await getContractCreationDeals();
-                setCreationDeals(options);
+                setCreationOptions(options);
             } catch {
                 setCreationError('Não foi possível consultar as oportunidades autorizadas.');
             } finally {
@@ -60,8 +60,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             }
             return;
         }
-        const selected = creationDeals.find(item => item.id === chosenDeal);
-        if (creationDeals.length > 0 && !selected) {
+        const selected = creationOptions.deals.find(item => item.id === chosenDeal);
+        if (creationOptions.requiresDeal && !selected) {
             setCreationError('Selecione uma oportunidade para este contrato.');
             return;
         }
@@ -81,7 +81,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 type: 'service'
             });
             if (!res.success) throw new Error('Persistência recusada');
-            setCreationDeals(null);
+            setCreationOptions(null);
             setChosenDeal('');
             setDraftTitle('');
             setDraftCompany('');
@@ -154,34 +154,37 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             >
                 <Button
                     onClick={handleCreateContract}
-                    disabled={isCreating}
+                    disabled={isCreating || (creationOptions !== null && creationOptions.requiresDeal && creationOptions.deals.length === 0)}
                     className="bg-primary hover:bg-primary/90 font-bold text-white h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
                 >
                     <Plus className="h-4 w-4" />
-                    {isCreating ? 'Processando...' : creationDeals === null ? 'Novo Contrato' : 'Salvar Rascunho'}
+                    {isCreating ? 'Processando...' : creationOptions === null ? 'Novo Contrato' : 'Salvar Rascunho'}
                 </Button>
             </PageHeader>
 
-            {creationDeals !== null && (
+            {creationOptions !== null && (
                 <div className="rounded-2xl border border-border bg-card p-4 space-y-3" role="region" aria-label="Novo contrato">
                     <h2 className="font-semibold">Dados do novo contrato</h2>
                     <input aria-label="Título do contrato" className="w-full rounded-lg border border-border bg-background p-2"
                         value={draftTitle} onChange={event => setDraftTitle(event.target.value)} placeholder="Título (opcional)" />
-                    {creationDeals.length ? (
+                    {creationOptions.requiresDeal && creationOptions.deals.length === 0 && (
+                        <p role="alert" className="text-sm text-destructive">Não existem oportunidades autorizadas para vincular ao contrato.</p>
+                    )}
+                    {creationOptions.requiresDeal ? (
                         <select aria-label="Oportunidade vinculada" className="w-full rounded-lg border border-border bg-background p-2"
                             value={chosenDeal} onChange={event => setChosenDeal(event.target.value)}>
                             <option value="">Selecione uma oportunidade autorizada</option>
-                            {creationDeals.map(item => <option key={item.id} value={item.id}>{item.title} — {item.company || 'Empresa não informada'}</option>)}
+                            {creationOptions.deals.map(item => <option key={item.id} value={item.id}>{item.title} — {item.company || 'Empresa não informada'}</option>)}
                         </select>
                     ) : (
                         <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
                             value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante" />
                     )}
-                    {creationDeals.length > 0 && creationDeals.some(item => item.id === chosenDeal && !item.company.trim()) && (
+                    {creationOptions.requiresDeal && creationOptions.deals.some(item => item.id === chosenDeal && !item.company.trim()) && (
                         <input aria-label="Empresa contratante" className="w-full rounded-lg border border-border bg-background p-2"
                             value={draftCompany} onChange={event => setDraftCompany(event.target.value)} placeholder="Empresa contratante obrigatória" />
                     )}
-                    <button type="button" className="text-sm underline" onClick={() => {setCreationDeals(null);setCreationError(null);}}>Cancelar</button>
+                    <button type="button" className="text-sm underline" onClick={() => {setCreationOptions(null);setCreationError(null);}}>Cancelar</button>
                 </div>
             )}
             {creationError && <p role="alert" className="text-sm text-destructive">{creationError}</p>}
