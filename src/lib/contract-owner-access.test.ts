@@ -17,7 +17,7 @@ function fixture(outcomes: Record<string, Outcome>) {
             },
             eq(k: string, v: unknown) { call.filters.push([k, v]); return q; },
             in(k: string, v: unknown) { call.filters.push([k, v]); return q; },
-            order() { return table === 'contracts' ? q : Promise.resolve(outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null }); },
+            order() { return q; },
             range(start: number, end: number) {
                 const outcome = outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null };
                 return Promise.resolve({ ...outcome, data: Array.isArray(outcome.data) ? outcome.data.slice(start, end + 1) : outcome.data });
@@ -174,6 +174,28 @@ describe('contract tenant and owner boundaries', () => {
         const rows = Array.from({length: 201},()=>row);
         fixture({contracts:{data:rows,error:null}});
         await expect(ContractService.getContracts(org)).rejects.toThrow();
+    });
+    it('retrieves every owned deal ID across pages without broadening seller scope', async () => {
+        const ids = Array.from({length: 205}, (_,i) =>
+            `${String(i+1).padStart(8,'0')}-1111-4111-8111-111111111111`);
+        const calls = fixture({deals:{data:ids.map(id=>({id})),error:null},contracts:{data:[],error:null}});
+        await expect(ContractService.getContracts(org,owner)).resolves.toEqual([]);
+        expect(calls.filter(c=>c.table==='deals')).toHaveLength(2);
+        expect(calls.find(c=>c.table==='contracts')?.filters).toContainEqual(['deal_id',ids]);
+        for (const call of calls.filter(c=>c.table==='deals')) {
+            expect(call.filters).toContainEqual(['organization_id',org]);
+            expect(call.filters).toContainEqual(['owner_id',owner]);
+        }
+    });
+    it('retrieves owned deal choices across pages and detects conflicting duplicate IDs', async () => {
+        const deals = Array.from({length: 205},(_,i)=>({
+            id:`${String(i+1).padStart(8,'0')}-2222-4222-8222-222222222222`,
+            title:'Oportunidade', company:'Cliente'
+        }));
+        fixture({deals:{data:deals,error:null}});
+        expect(await ContractService.getOwnedContractDealOptions(org,owner)).toHaveLength(205);
+        fixture({deals:{data:Array.from({length:201},()=>deals[0]),error:null}});
+        await expect(ContractService.getOwnedContractDealOptions(org,owner)).rejects.toThrow();
     });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});
