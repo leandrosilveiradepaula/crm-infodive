@@ -140,8 +140,13 @@ describe('contract tenant and owner boundaries', () => {
         await expect(ContractService.updateContract(org,'55555555-5555-4555-8555-555555555555',{title:'Alteração'},undefined,'2026-10-13T10:00:00Z')).rejects.toThrow();
         expect(calls.find(c=>c.mode==='update')).toBeUndefined();
     });
-    it('rejects malformed owned deal ID responses without silently hiding contracts', async () => {
-        fixture({deals:{data:[{id:'not-a-uuid'}],error:null}});
+    it('rejects malformed joined deal identifiers instead of hiding contract corruption', async () => {
+        fixture({contracts:{data:[{
+            id:'88888888-8888-4888-8888-888888888888',
+            organization_id:org, title:'Rascunho', company_name:'Cliente',
+            status:'draft', type:'service', deal_id:'not-a-uuid',
+            authorized_deal:{id:'not-a-uuid',owner_id:owner,organization_id:org}
+        }],error:null}});
         await expect(ContractService.getContracts(org,owner)).rejects.toThrow();
     });
     it('rejects privileged contracts from a different tenant or with malformed shape', async () => {
