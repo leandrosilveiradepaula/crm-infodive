@@ -18,14 +18,14 @@ export async function getContracts(): Promise<Contract[]> {
             value: item.value || 0,
             status: item.status,
             type: item.type,
-            signerName: item.signer_name,
-            signerRole: item.signer_role,
-            dealId: item.deal_id,
-            proposalId: item.proposal_id,
+            signerName: item.signer_name ?? undefined,
+            signerRole: item.signer_role ?? undefined,
+            dealId: item.deal_id ?? undefined,
+            proposalId: item.proposal_id ?? undefined,
             createdAt: item.created_at,
             updatedAt: item.updated_at,
             content_json: item.content_json,
-            signature_image: item.signature_image
+            signature_image: item.signature_image ?? undefined
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');

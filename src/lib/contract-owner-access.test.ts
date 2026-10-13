@@ -17,7 +17,11 @@ function fixture(outcomes: Record<string, Outcome>) {
             },
             eq(k: string, v: unknown) { call.filters.push([k, v]); return q; },
             in(k: string, v: unknown) { call.filters.push([k, v]); return q; },
-            order() { return Promise.resolve(outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null }); },
+            order() { return table === 'contracts' ? q : Promise.resolve(outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null }); },
+            range(start: number, end: number) {
+                const outcome = outcomes[table + ':' + call.mode] ?? outcomes[table] ?? { data: [], error: null };
+                return Promise.resolve({ ...outcome, data: Array.isArray(outcome.data) ? outcome.data.slice(start, end + 1) : outcome.data });
+            },
             insert(payload: unknown) { call.mode = 'insert'; call.payload = payload; return q; },
             update(payload: unknown) { call.mode = 'update'; call.payload = payload; return q; },
             delete() { call.mode = 'delete'; return q; },
@@ -152,6 +156,24 @@ describe('contract tenant and owner boundaries', () => {
         await expect(ContractService.getContracts('tenant-a')).rejects.toThrow();
         await expect(ContractService.createContract('tenant-a',{title:'A',company:'ACME'})).rejects.toThrow();
         expect(calls).toHaveLength(0);
+    });
+    it('reads consecutive pages, orders by timestamp and id, and returns complete rows', async () => {
+        const rows = Array.from({length: 205}, (_, i) => ({
+            id: `${String(i + 1).padStart(8,'0')}-1111-4111-8111-111111111111`,
+            organization_id: org, title: 'Contrato', company_name: 'Cliente',
+            status: 'draft', type: 'service'
+        }));
+        const calls = fixture({contracts:{data:rows,error:null}});
+        const result = await ContractService.getContracts(org);
+        expect(result).toHaveLength(205);
+        expect(calls.filter(c=>c.table==='contracts')).toHaveLength(2);
+    });
+    it('rejects duplicate or inconsistent pages rather than reporting success', async () => {
+        const row = {id:'88888888-8888-4888-8888-888888888888', organization_id:org,
+            title:'Contrato', company_name:'Cliente', status:'draft', type:'service'};
+        const rows = Array.from({length: 201},()=>row);
+        fixture({contracts:{data:rows,error:null}});
+        await expect(ContractService.getContracts(org)).rejects.toThrow();
     });
     it('rejects malformed amounts, references, status, and empty edits before any write', async () => {
         const calls=fixture({});

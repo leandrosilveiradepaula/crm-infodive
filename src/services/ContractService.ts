@@ -120,12 +120,31 @@ export class ContractService {
             visibleIds = await ownedDealIds(db, organizationId, ownerId);
             if (!visibleIds.length) return [];
         }
-        let query = db.from('contracts').select('*').eq('organization_id', organizationId);
-        if (visibleIds) query = query.in('deal_id', visibleIds);
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw new Error('Não foi possível carregar os contratos.');
-        validateReadRows(data, organizationId, visibleIds);
-        return data;
+        // PostgREST can cap responses (commonly 1000 rows). Never treat a truncated
+        // list as complete: fetch bounded windows with a deterministic tie-breaker.
+        const PAGE_SIZE = 200;
+        const MAX_PAGES = 50;
+        const rows: Array<{ id: string; organization_id: string; title: string; company_name: string; value: number | null; status: Contract['status']; type: Contract['type']; signer_name: string | null; signer_role: string | null; deal_id: string | null; proposal_id: string | null; created_at: string; updated_at: string; content_json: unknown; signature_image: string | null }> = [];
+        const seen = new Set<string>();
+        for (let page = 0; page < MAX_PAGES; page++) {
+            let query = db.from('contracts').select('*').eq('organization_id', organizationId);
+            if (visibleIds) query = query.in('deal_id', visibleIds);
+            const { data, error } = await query.order('created_at', { ascending: false })
+                .order('id', { ascending: false })
+                .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+            if (error) throw new Error('Não foi possível carregar os contratos.');
+            if (!Array.isArray(data)) throw new Error('Resposta inválida de contratos.');
+            validateReadRows(data, organizationId, visibleIds);
+            for (const item of data) {
+                const id = item.id as string;
+                if (seen.has(id)) throw new Error('Duplicidade ou paginação inconsistente de contratos.');
+                seen.add(id);
+                // validateReadRows checked both enum memberships before narrowing their types.
+                rows.push({ ...item, status: item.status as Contract['status'], type: item.type as Contract['type'] });
+            }
+            if (data.length < PAGE_SIZE) return rows;
+        }
+        throw new Error('Limite de listagem excedido. Refine a consulta de contratos.');
     }
 
     static async createContract(organizationId: string, contract: Partial<Contract>, ownerId?: string) {
