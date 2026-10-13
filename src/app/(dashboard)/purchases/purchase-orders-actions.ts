@@ -127,6 +127,18 @@ export async function updatePurchaseOrder(id: string, updates: Partial<PurchaseO
             await assertTenantReference(supabase, 'sales_orders', values.sales_order_id, organizationId);
         }
         if (values.distributor_id) await assertTenantReference(supabase, 'accounts', values.distributor_id, organizationId);
+        if (values.distributor_id && !values.distributor_branch_id) {
+            // A new distributor must never inherit a branch from the old one.
+            let current = supabase.from('purchase_orders')
+                .select('distributor_id,distributor_branch_id')
+                .eq('id', id.trim()).eq('organization_id', organizationId);
+            if (allowedIds !== null) current = current.in('sales_order_id', allowedIds);
+            const { data: existing, error: readError } = await current.maybeSingle();
+            if (readError || !existing) throw new Error('Purchase order not accessible');
+            if (existing.distributor_id !== values.distributor_id && existing.distributor_branch_id) {
+                throw new Error('Select a branch of the new distributor');
+            }
+        }
         if (values.distributor_branch_id) {
             let distributorId = values.distributor_id;
             if (!distributorId) {

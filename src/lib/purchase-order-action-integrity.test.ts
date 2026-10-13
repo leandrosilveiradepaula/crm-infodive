@@ -94,6 +94,33 @@ describe('purchase order tenant and persistence integrity', () => {
         expect(op?.filters).toContainEqual(['account_id', 'dist-a']);
         expect(db.ops.some(op => op.mode === 'insert')).toBe(false);
     });
+    it('rejects distributor changes that silently retain an unrelated branch', async () => {
+        const db = fakeDb({
+            accounts: { data: { id: 'dist-new' }, error: null },
+            purchase_orders: {
+                data: { distributor_id: 'dist-old', distributor_branch_id: 'branch-old' }, error: null,
+            },
+        });
+        await expect(updatePurchaseOrder('po-a', { distributor_id: 'dist-new' }))
+            .resolves.toMatchObject({ success: false });
+        expect(db.ops.some(op => op.mode === 'update')).toBe(false);
+        const read = db.ops.find(op => op.table === 'purchase_orders');
+        expect(read?.filters).toContainEqual(['organization_id', 'tenant-a']);
+    });
+    it('allows a distributor replacement when the new branch belongs to the chosen account', async () => {
+        const db = fakeDb({
+            accounts: { data: { id: 'dist-new' }, error: null },
+            account_branches: { data: { id: 'branch-new' }, error: null },
+            'purchase_orders:update': { data: { id: 'po-a' }, error: null },
+        });
+        await expect(updatePurchaseOrder('po-a', {
+            distributor_id: 'dist-new', distributor_branch_id: 'branch-new',
+        })).resolves.toMatchObject({ success: true });
+        const write = db.ops.find(op => op.mode === 'update');
+        expect(write?.payload).toMatchObject({
+            distributor_id: 'dist-new', distributor_branch_id: 'branch-new',
+        });
+    });
     it('does not let a seller update a purchase order for another sales owner', async () => {
         mocks.getAiDealScope.mockResolvedValue({ canViewAll: false });
         const db = fakeDb({
