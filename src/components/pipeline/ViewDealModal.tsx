@@ -804,25 +804,28 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <ContractBuilder
                                 deal={deal}
                                 onClose={() => setShowContractBuilder(false)}
-                                onSave={async (contract, signature) => {
-                                    const result = await createContract({
-                                        ...contract,
-                                        company: contract.company || deal.company,
-                                        value: contract.value ?? deal.value,
-                                        dealId: contract.dealId || deal.id,
-                                        type: contract.type || 'service',
-                                        signature_image: signature || contract.signature_image
-                                    });
-
-                                    if (!result.success) {
-                                        toast.error(result.error || 'Não foi possível salvar o contrato.');
-                                        return;
+                                onSave={async (contract) => {
+                                    try {
+                                        const result = await createContract({
+                                            ...contract,
+                                            company: contract.company,
+                                            value: contract.value ?? deal.value,
+                                            dealId: deal.id,
+                                            type: contract.type || 'service',
+                                            status: 'draft',
+                                        });
+                                        if (!result.success) {
+                                            toast.error(result.error || 'Não foi possível salvar o rascunho.');
+                                            return false;
+                                        }
+                                        setShowContractBuilder(false);
+                                        router.refresh();
+                                        toast.success('Rascunho do contrato salvo com sucesso.');
+                                        return true;
+                                    } catch {
+                                        toast.error('Falha de comunicação ao salvar o rascunho.');
+                                        return false;
                                     }
-
-                                    setShowContractBuilder(false);
-                                    toast.success(contract.status === 'signed'
-                                        ? 'Contrato assinado e salvo com sucesso.'
-                                        : 'Rascunho do contrato salvo com sucesso.');
                                 }}
                             />
                         </div>
