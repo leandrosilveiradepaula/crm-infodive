@@ -71,11 +71,12 @@ describe('contract tenant and owner boundaries', () => {
     });
     it('guards authorized deletes by original deal link and demands a DB receipt', async () => {
         const calls=fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null,status:'draft'},error:null},deals:{data:{id:deal},error:null},'contracts:delete':{data:null,error:null}});
-        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner)).rejects.toThrow();
+        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
         const deletion=calls.find(c=>c.mode==='delete');
         expect(deletion?.filters).toContainEqual(['organization_id',org]);
         expect(deletion?.filters).toContainEqual(['deal_id',deal]);
         expect(deletion?.filters).toContainEqual(['status','draft']);
+        expect(deletion?.filters).toContainEqual(['updated_at','2026-10-13T10:00:00Z']);
     });
     it('never exposes deal options outside the authenticated seller scope', async () => {
         const calls = fixture({ deals: { data: [{ id: deal, title: 'Oportunidade A', company: 'Cliente A' }], error: null } });
@@ -163,7 +164,7 @@ describe('contract tenant and owner boundaries', () => {
         fixture({contracts:{data:{id:'33333333-3333-4333-8333-333333333333',deal_id:deal,proposal_id:null,status:'draft'},error:null},
             deals:{data:{id:deal},error:null},
             'contracts:delete':{data:{id:'66666666-6666-4666-8666-666666666666'},error:null}});
-        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner)).rejects.toThrow();
+        await expect(ContractService.deleteContract(org,'33333333-3333-4333-8333-333333333333',owner,'2026-10-13T10:00:00Z')).rejects.toThrow();
     });
     it('rejects missing tenant identity before privileged queries', async () => {
         const calls=fixture({});
