@@ -293,7 +293,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                         </thead>
                         <tbody className="divide-y divide-border">
                             {filteredContracts.map(contract => (
-                                <tr key={contract.id} className="transition-all duration-300 group hover:bg-muted/50 border-l-2 border-l-transparent hover:border-l-primary">
+                                <tr key={contract.id} aria-label={`Contrato: ${contract.title}, ${contract.company}`} className="transition-all duration-300 group hover:bg-muted/50 border-l-2 border-l-transparent hover:border-l-primary">
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all">
