@@ -124,7 +124,10 @@ export class ContractService {
         return data;
     }
 
-    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>, ownerId?: string) {
+    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>, ownerId?: string, expectedUpdatedAt?: string) {
+        if (expectedUpdatedAt !== undefined && (typeof expectedUpdatedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(expectedUpdatedAt) || Number.isNaN(Date.parse(expectedUpdatedAt)))) {
+            throw new Error('Versão inválida do rascunho.');
+        }
         validateContractFields(updates, false);
         const db = createAdminClient();
         const current = await existingContract(db, organizationId, id, ownerId);
@@ -148,8 +151,9 @@ export class ContractService {
         fields.updated_at = new Date().toISOString();
         let query = db.from('contracts').update(fields).eq('id', id).eq('organization_id', organizationId).eq('status', 'draft');
         if (ownerId) query = query.eq('deal_id', current.deal_id);
+        if (expectedUpdatedAt !== undefined) query = query.eq('updated_at', expectedUpdatedAt);
         const { data, error } = await query.select('id').maybeSingle();
-        if (error || !data) throw new Error('Não foi possível atualizar o contrato.');
+        if (error || !data || data.id !== id) throw new Error('Não foi possível atualizar o rascunho: estado alterado ou versão desatualizada.');
         return data;
     }
 

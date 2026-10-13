@@ -67,6 +67,29 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
     }
 }
 
+/** Save an already-existing draft using the exact revision observed by the editor. */
+export async function saveContractDraft(id: string, title: string, text: string, expectedUpdatedAt: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        if (typeof id !== 'string' || !id.trim() || typeof title !== 'string' ||
+            typeof text !== 'string' || typeof expectedUpdatedAt !== 'string' || !expectedUpdatedAt) {
+            throw new Error('Rascunho inválido.');
+        }
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.updateContract(
+            organizationId, id,
+            { title: title.trim(), content_json: { text }, status: 'draft' },
+            canViewAll ? undefined : userId,
+            expectedUpdatedAt
+        );
+        revalidatePath('/contracts');
+        return { success: true };
+    } catch {
+        console.error('[ContractsActions] draft save failed');
+        return { success: false, error: 'Não foi possível salvar. Recarregue a lista; o rascunho pode ter sido alterado.' };
+    }
+}
+
 export async function deleteContract(id: string) {
     try {
         const { userId, organizationId } = await requirePermission('deals:edit');

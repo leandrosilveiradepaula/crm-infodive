@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import {
     FileText, Plus, Search,
-    CheckCircle2, Clock, Eye, Download, TrendingUp
+    CheckCircle2, Clock, Eye, Pencil, Download, TrendingUp
 } from 'lucide-react';
 import { type Contract } from '@/types/contract';
 import { createContract, getContractCreationDeals } from '@/app/(dashboard)/contracts/actions';
 import { ContractViewer } from '@/components/contracts/ContractViewer';
+import { ContractDraftEditor } from '@/components/contracts/ContractDraftEditor';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,8 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     // Modal States
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [editingDraft, setEditingDraft] = useState<Contract | null>(null);
+    const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [creationOptions, setCreationOptions] = useState<{requiresDeal: boolean;deals: {id: string;title: string;company: string}[]} | null>(null);
     const [chosenDeal, setChosenDeal] = useState('');
@@ -94,6 +97,19 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
     const handleViewContract = (contract: Contract) => {
         setSelectedContract(contract);
         setIsViewerOpen(true);
+    };
+
+    const handleEditDraft = (contract: Contract) => {
+        if (contract.status !== 'draft') return;
+        setIsViewerOpen(false);
+        setSaveFeedback(null);
+        setEditingDraft(contract);
+    };
+
+    const handleDraftSaved = () => {
+        setEditingDraft(null);
+        setSaveFeedback('Rascunho salvo. A listagem será atualizada.');
+        router.refresh();
     };
 
     const getStatusColor = (status: string) => {
@@ -161,6 +177,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 </div>
             )}
             {creationError && <p role="alert" className="text-sm text-destructive">{creationError}</p>}
+            {saveFeedback && <p role="status" className="text-sm text-success">{saveFeedback}</p>}
             {/* KPI Cards */}
             <StatsGrid items={[
                 {
@@ -289,6 +306,17 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
+                                            {contract.status === 'draft' && (
+                                                <button
+                                                    type="button"
+                                                    className="p-2.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl"
+                                                    title="Editar rascunho"
+                                                    aria-label="Editar rascunho"
+                                                    onClick={() => handleEditDraft(contract)}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                            )}
 
                                             <button
                                                 disabled
@@ -318,6 +346,10 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 )}
             </div>
 
+            {editingDraft && (
+                <ContractDraftEditor key={editingDraft.id + editingDraft.updatedAt} contract={editingDraft}
+                    onClose={() => setEditingDraft(null)} onSaved={handleDraftSaved} />
+            )}
             {selectedContract && (
                 <>
                     <ContractViewer
