@@ -231,11 +231,12 @@ export class ContractService {
         return data;
     }
 
-    static async deleteContract(organizationId: string, id: string, ownerId?: string) {
+    static async deleteContract(organizationId: string, id: string, ownerId?: string, expectedUpdatedAt?: string) {
+        if (!expectedUpdatedAt || !/^\d{4}-\d{2}-\d{2}T/.test(expectedUpdatedAt) || Number.isNaN(Date.parse(expectedUpdatedAt))) throw new Error('Versão obrigatória para exclusão.');
         validateTenant(organizationId, ownerId);
         const db = createAdminClient();
         const current = await existingContract(db, organizationId, id, ownerId);
-        let query = db.from('contracts').delete().eq('id', id).eq('organization_id', organizationId).eq('status', 'draft');
+        let query = db.from('contracts').delete().eq('id', id).eq('organization_id', organizationId).eq('status', 'draft').eq('updated_at', expectedUpdatedAt);
         if (ownerId) query = query.eq('deal_id', current.deal_id);
         const { data, error } = await query.select('id').maybeSingle();
         if (error || !data || data.id !== id) throw new Error('Não foi possível excluir o contrato.');

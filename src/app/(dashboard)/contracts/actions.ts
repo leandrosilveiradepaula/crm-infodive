@@ -95,11 +95,11 @@ export async function saveContractDraft(id: string, title: string, text: string,
     }
 }
 
-export async function deleteContract(id: string) {
+export async function deleteContract(id: string, expectedUpdatedAt: string) {
     try {
         const { userId, organizationId } = await requirePermission('deals:edit');
         const { canViewAll } = await getAiDealScope(userId, organizationId);
-        await ContractService.deleteContract(organizationId, id, canViewAll ? undefined : userId);
+        await ContractService.deleteContract(organizationId, id, canViewAll ? undefined : userId, expectedUpdatedAt);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
