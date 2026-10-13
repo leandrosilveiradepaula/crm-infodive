@@ -22,7 +22,7 @@ describe('contract creation and read integrity', () => {
     });
     it('surfaces save failures and synchronizes server-refreshed contracts', () => {
         expect(client).toContain('role="alert"');
-        expect(client).toContain('useEffect(() => setContracts(initialContracts), [initialContracts])');
+        expect(client).toContain('const contracts = initialContracts;');
         expect(client).toContain("if (!res.success) throw");
     });
     it('does not expose a fake downloadable PDF action', () => {

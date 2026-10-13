@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
     FileText, Plus, Search, Filter,
     CheckCircle2, Clock, PenTool, Eye, Download, TrendingUp
@@ -24,8 +24,7 @@ interface ContractsClientPageProps {
 
 export function ContractsClientPage({ initialContracts }: ContractsClientPageProps) {
     const router = useRouter();
-    const [contracts, setContracts] = useState<Contract[]>(initialContracts);
-    useEffect(() => setContracts(initialContracts), [initialContracts]);
+    const contracts = initialContracts;
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
 
