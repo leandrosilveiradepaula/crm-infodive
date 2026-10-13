@@ -54,11 +54,16 @@ export async function createContract(contract: Partial<Contract>) {
     }
 }
 
-export async function updateContract(id: string, updates: Partial<Contract>) {
+export async function updateContract(id: string, updates: Partial<Contract>, expectedUpdatedAt: string) {
     try {
+        if (typeof expectedUpdatedAt !== 'string' || !expectedUpdatedAt ||
+            typeof id !== 'string' || !id.trim()) {
+            return { success: false, error: 'Versão do rascunho obrigatória. Atualize a lista antes de salvar.' };
+        }
+        // All generic updates must observe the same concurrency guard as the draft editor.
         const { userId, organizationId } = await requirePermission('deals:edit');
         const { canViewAll } = await getAiDealScope(userId, organizationId);
-        await ContractService.updateContract(organizationId, id, updates, canViewAll ? undefined : userId);
+        await ContractService.updateContract(organizationId, id, updates, canViewAll ? undefined : userId, expectedUpdatedAt);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
