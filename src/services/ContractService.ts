@@ -120,12 +120,29 @@ export class ContractService {
             visibleIds = await ownedDealIds(db, organizationId, ownerId);
             if (!visibleIds.length) return [];
         }
-        let query = db.from('contracts').select('*').eq('organization_id', organizationId);
-        if (visibleIds) query = query.in('deal_id', visibleIds);
-        const { data, error } = await query.order('created_at', { ascending: false });
-        if (error) throw new Error('Não foi possível carregar os contratos.');
-        validateReadRows(data, organizationId, visibleIds);
-        return data;
+        // PostgREST can cap responses (commonly 1000 rows). Never treat a truncated
+        // list as complete: fetch bounded windows with a deterministic tie-breaker.
+        const PAGE_SIZE = 200;
+        const MAX_PAGES = 50;
+        const rows: Record<string, unknown>[] = [];
+        const seen = new Set<string>();
+        for (let page = 0; page < MAX_PAGES; page++) {
+            let query = db.from('contracts').select('*').eq('organization_id', organizationId);
+            if (visibleIds) query = query.in('deal_id', visibleIds);
+            const { data, error } = await query.order('created_at', { ascending: false })
+                .order('id', { ascending: false })
+                .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+            if (error) throw new Error('Não foi possível carregar os contratos.');
+            validateReadRows(data, organizationId, visibleIds);
+            for (const item of data as Record<string, unknown>[]) {
+                const id = item.id as string;
+                if (seen.has(id)) throw new Error('Duplicidade ou paginação inconsistente de contratos.');
+                seen.add(id);
+                rows.push(item);
+            }
+            if (data.length < PAGE_SIZE) return rows;
+        }
+        throw new Error('Limite de listagem excedido. Refine a consulta de contratos.');
     }
 
     static async createContract(organizationId: string, contract: Partial<Contract>, ownerId?: string) {
