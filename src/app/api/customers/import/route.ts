@@ -1,16 +1,39 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 export async function POST(req: Request) {
+    // The browser import wizard is not an authorization boundary. Deny before
+    // parsing user files, touching quota state or invoking a paid AI provider.
+    let userId: string;
+    let organizationId: string;
     try {
-        const { organizationId } = await requireSessionContext();
+        ({ userId, organizationId } = await requirePermission('clients:import'));
+    } catch (error) {
+        const forbidden = error instanceof Error && error.message.includes('Forbidden');
+        return NextResponse.json({ error: forbidden ? 'Forbidden' : 'Unauthorized' }, { status: forbidden ? 403 : 401 });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+        return NextResponse.json({ error: 'Integração de IA não configurada.' }, { status: 503 });
+    }
+
+    try {
         const { fileName, fileContent, contentType } = await req.json();
 
         if (!fileContent) {
             return NextResponse.json({ error: 'Conteúdo do arquivo é obrigatório' }, { status: 400 });
+        }
+        if (typeof fileContent !== 'string' || fileContent.length > 200_000) {
+            return NextResponse.json({ error: 'Conteúdo do arquivo excede o limite permitido' }, { status: 413 });
+        }
+
+        const rateLimit = await guardPaidAiRequest({ scope: 'customers-import-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            return NextResponse.json({ error: 'Muitas análises em pouco tempo. Tente novamente em instantes.' }, { status: rateLimit.status, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } });
         }
 
         const model = genAI.getGenerativeModel({ 

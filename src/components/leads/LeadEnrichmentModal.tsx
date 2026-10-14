@@ -6,12 +6,11 @@ import { toast } from 'sonner';
 interface LeadEnrichmentModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onEnrich: (data: any) => void;
     initialCompany?: string;
     initialWebsite?: string;
 }
 
-export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany = '', initialWebsite = '' }: LeadEnrichmentModalProps) => {
+export const LeadEnrichmentModal = ({ isOpen, onClose, initialCompany = '', initialWebsite = '' }: LeadEnrichmentModalProps) => {
     const [company, setCompany] = useState(initialCompany);
     const [website, setWebsite] = useState(initialWebsite);
     const [loading, setLoading] = useState(false);
@@ -49,10 +48,22 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
         }
     };
 
-    const handleApply = () => {
-        if (result) {
-            onEnrich(result);
-            onClose();
+    const handleCopyInsights = async () => {
+        if (!result) return;
+
+        const content = [
+            result.summary ? `Resumo: ${result.summary}` : '',
+            Array.isArray(result.tags) && result.tags.length ? `Tags: ${result.tags.join(', ')}` : '',
+            Array.isArray(result.talking_points) && result.talking_points.length
+                ? `Pontos de conversa:\n- ${result.talking_points.join('\n- ')}`
+                : ''
+        ].filter(Boolean).join('\n\n');
+
+        try {
+            await navigator.clipboard.writeText(content);
+            toast.success('Insights copiados para a área de transferência.');
+        } catch {
+            toast.error('Não foi possível copiar os insights.');
         }
     };
 
@@ -69,11 +80,11 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                                 <Sparkles className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-foreground tracking-tight">Prospecting Agent</h2>
-                                <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mt-0.5">Powered by Gemini 2.1</p>
+                                <h2 className="text-xl font-black text-foreground tracking-tight">Pesquisa de Leads</h2>
+                                <p className="text-xs text-primary font-black uppercase tracking-[0.2em] mt-0.5">Análise assistida por IA</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-teal-100 dark:hover:bg-card/5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-teal-100 dark:hover:bg-card/5 rounded-full text-muted-foreground hover:text-foreground transition-colors" aria-label="Fechar pesquisa de leads" title="Fechar">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
@@ -149,7 +160,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
                                     {result.tags?.map((tag: string, i: number) => (
-                                        <span key={i} className="px-3 py-1.5 bg-stage-proposal/10 text-stage-proposal text-[10px] font-black uppercase tracking-wider rounded-lg border border-stage-proposal/20">
+                                        <span key={i} className="px-3 py-1.5 bg-stage-proposal/10 text-stage-proposal text-xs font-black uppercase tracking-wider rounded-lg border border-stage-proposal/20">
                                             {tag}
                                         </span>
                                     ))}
@@ -165,7 +176,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                                 <ul className="space-y-2">
                                     {result.talking_points?.map((point: string, i: number) => (
                                         <li key={i} className="flex gap-3 text-sm text-muted-foreground bg-muted/30 p-4 rounded-2xl border border-border font-medium">
-                                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center text-[10px] font-black border border-success/20">
+                                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center text-xs font-black border border-success/20">
                                                 {i + 1}
                                             </span>
                                             {point}
@@ -187,11 +198,11 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                             Voltar
                         </button>
                         <button
-                                                            onClick={handleApply}
-                                                            className="flex-1 py-4 bg-primary text-white font-black rounded-xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 uppercase text-[10px] tracking-[0.2em] active:scale-95"
+                                                            onClick={handleCopyInsights}
+                                                            className="flex-1 py-4 bg-primary text-white font-black rounded-xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 uppercase text-xs tracking-[0.2em] active:scale-95"
                                                         >
                                                             <Check className="h-4 w-4" />
-                                                            Aplicar Dados
+                                                            Copiar Insights
                                                         </button>
                     </div>
                 )}

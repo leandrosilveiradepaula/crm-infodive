@@ -61,16 +61,16 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
                                 if (active && payload && payload.length) {
                                     return (
                                         <div className="glass-card p-4 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{label}</p>
+                                            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">{label}</p>
                                             <div className="space-y-1">
                                                 <div className="flex justify-between gap-8 items-center">
-                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Volume (R$):</span>
+                                                    <span className="text-xs font-bold text-muted-foreground uppercase">Volume (R$):</span>
                                                     <span className="text-sm font-black text-foreground">
                                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payload[0].value as number)}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between gap-8 items-center">
-                                                    <span className="text-[10px] font-bold text-primary uppercase">Oportunidades:</span>
+                                                    <span className="text-xs font-bold text-primary uppercase">Oportunidades:</span>
                                                     <span className="text-sm font-black text-primary">{payload[0].payload.deals}</span>
                                                 </div>
                                             </div>

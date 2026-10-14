@@ -1,4 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { randomUUID } from 'node:crypto';
+import { createAdminClient } from '../lib/supabase/admin';
 
 export interface PipelineStage {
     id: string;
@@ -42,22 +43,54 @@ export class SettingsService {
             .eq('organization_id', organizationId)
             .maybeSingle();
 
-        if (error || !data) return { name: '', support_email: '' };
-        return data.value as OrgSettings;
+        if (error) throw new Error('Não foi possível carregar as configurações da organização.');
+        if (!data) return { name: '', support_email: '' };
+        const value = data.value;
+        if (!value || typeof value !== 'object' || Array.isArray(value) ||
+            (value.name !== undefined && typeof value.name !== 'string') ||
+            (value.support_email !== undefined && typeof value.support_email !== 'string')) {
+            throw new Error('Configurações da organização inválidas.');
+        }
+        return { ...value, name: value.name || '', support_email: value.support_email || '' } as OrgSettings;
     }
 
     static async saveOrgSettings(organizationId: string, settings: OrgSettings) {
+        if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+            return { success: false, error: 'Configurações da organização inválidas.' };
+        }
+        const allowed = new Set([
+            'name', 'support_email', 'cnpj', 'ie', 'street', 'number', 'complement',
+            'neighborhood', 'city', 'state', 'zip', 'logo_url',
+            'primary_color', 'secondary_color',
+        ]);
+        const value: Record<string, string> = {};
+        for (const [key, field] of Object.entries(settings)) {
+            if (!allowed.has(key)) continue;
+            if (typeof field !== 'string' || field.length > 4000 ||
+                (key === 'name' && !field.trim())) {
+                return { success: false, error: 'Configurações da organização inválidas.' };
+            }
+            value[key] = field;
+        }
+        // The value is replaced as a whole by upsert: require the complete
+        // minimum organization identity to avoid silently erasing saved fields.
+        if (!value.name?.trim() || typeof value.support_email !== 'string') {
+            return { success: false, error: 'Configurações da organização incompletas.' };
+        }
         const supabase = createAdminClient();
-        const { error } = await supabase
+        const { data: persisted, error } = await supabase
             .from('app_settings')
             .upsert({
                 key: 'organization',
-                value: settings,
+                value,
                 organization_id: organizationId,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'organization_id,key' });
-
-        if (error) return { success: false, error: 'Não foi possível salvar as configurações da organização.' };
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'organization_id,key' })
+            .select('key')
+            .maybeSingle();
+        if (error || !persisted) {
+            return { success: false, error: 'Não foi possível salvar as configurações da organização.' };
+        }
         return { success: true };
     }
 
@@ -69,50 +102,94 @@ export class SettingsService {
             .eq('organization_id', organizationId)
             .order('order_index');
 
-        if (error || !data || data.length === 0) return DEFAULT_STAGES;
+        if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar as etapas do pipeline.');
+        if (data.length === 0) return DEFAULT_STAGES;
         return data as PipelineStage[];
     }
 
-    static async savePipelineStages(organizationId: string, stages: PipelineStage[]) {
-        const supabase = createAdminClient();
+    // One stable database snapshot avoids publishing a stale UI revision.
+    static async getPipelineStageSnapshot(userId: string, organizationId: string):
+        Promise<{ revision: number; stages: PipelineStage[] }> {
+        if (!this.isUuid(userId) || !this.isUuid(organizationId)) {
+            throw new Error('Não foi possível identificar a organização.');
+        }
+        const { data, error } = await createAdminClient().rpc('get_pipeline_stage_snapshot_atomic', {
+            p_actor_id: userId,
+            p_org_id: organizationId,
+        });
+        if (error || !Array.isArray(data) || data.length !== 1 ||
+            !Number.isSafeInteger(data[0]?.revision) || data[0].revision < 0 ||
+            !Array.isArray(data[0]?.stages) ||
+            data[0].stages.some((stage: unknown) => !stage || typeof stage !== 'object' ||
+                !this.isUuid((stage as PipelineStage).id))) {
+            throw new Error('Não foi possível verificar a versão das etapas do pipeline.');
+        }
+        return {
+            revision: data[0].revision as number,
+            stages: data[0].stages.length ? data[0].stages as PipelineStage[] : DEFAULT_STAGES,
+        };
+    }
 
-        // 1. Encontrar estágios atuais para saber quais deletar
-        const { data: existingData } = await supabase
-            .from('pipeline_stages')
-            .select('id')
-            .eq('organization_id', organizationId);
+    private static isUuid(value: unknown): value is string {
+        return typeof value === 'string' &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    }
 
-        const existingIds = (existingData || []).map(r => r.id);
-        const currentIds = stages.map(s => s.id);
-        const toDeleteIds = existingIds.filter(id => !currentIds.includes(id));
-
-        // 2. Tentar deletar os que foram removidos
-        if (toDeleteIds.length > 0) {
-            const { error: deleteError } = await supabase
-                .from('pipeline_stages')
-                .delete()
-                .in('id', toDeleteIds);
-            
-            if (deleteError) {
-                return { 
-                    success: false, 
-                    error: 'Não foi possível remover algumas etapas pois elas já possuem negócios vinculados.'
-                };
-            }
+    static async savePipelineStages(
+        organizationId: string,
+        stages: PipelineStage[],
+        expectedRevision?: number | null,
+        userId?: string,
+    ) {
+        if (!this.isUuid(userId) || !this.isUuid(organizationId) ||
+            !Number.isSafeInteger(expectedRevision) || (expectedRevision ?? -1) < 0 ||
+            !Array.isArray(stages) || stages.length === 0 || stages.length > 30 ||
+            stages.some(stage => !stage || typeof stage.id !== 'string' ||
+                typeof stage.name !== 'string' || !stage.name.trim() ||
+                stage.name.length > 100 ||
+                typeof stage.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(stage.color)) ||
+            new Set(stages.map(s => s.id)).size !== stages.length ||
+            new Set(stages.map(s => s.name.trim().toLocaleLowerCase('pt-BR'))).size !== stages.length) {
+            return { success: false, error: 'Etapas inválidas ou revisão ausente. Recarregue a tela.' };
         }
 
-        // 3. Fazer o UPSERT dos estágios que ficaram
-        const toUpsert = stages.map((s, idx) => ({
-            id: s.id, // O ID deve ser mantido se já existir ou criado se for UUID novo
-            name: s.name,
-            color: s.color,
-            order_index: idx,
-            organization_id: organizationId
+        // The default-stage IDs are presentation-only. All persisted IDs are UUID.
+        const defaultIds = new Set(DEFAULT_STAGES.map(stage => stage.id));
+        if (stages.some(stage => !defaultIds.has(stage.id) && !this.isUuid(stage.id))) {
+            return { success: false, error: 'Identificador de etapa inválido. Recarregue a tela.' };
+        }
+        const prepared = stages.map(stage => ({
+            id: defaultIds.has(stage.id) ? randomUUID() : stage.id,
+            name: stage.name.trim(),
+            color: stage.color,
         }));
-
-        const { error: upsertError } = await supabase.from('pipeline_stages').upsert(toUpsert);
-        
-        if (upsertError) return { success: false, error: 'Não foi possível salvar as etapas do pipeline.' };
-        return { success: true };
+        try {
+            const { data, error } = await createAdminClient().rpc('replace_pipeline_stages_atomic', {
+                p_actor_id: userId,
+                p_org_id: organizationId,
+                p_expected_revision: expectedRevision,
+                p_stages: prepared,
+            });
+            if (error?.code === '40001') {
+                return {
+                    success: false, conflict: true,
+                    error: 'As etapas foram alteradas em outra sessão. Recarregue antes de salvar.',
+                };
+            }
+            if (error?.code === '23503') {
+                return {
+                    success: false,
+                    error: 'Não é possível remover ou renomear etapas com negócios existentes. Preserve o histórico.',
+                };
+            }
+            if (error || !Array.isArray(data) || data.length !== 1 ||
+                !Number.isSafeInteger(data[0]?.revision) ||
+                data[0].revision !== (expectedRevision as number) + 1) {
+                return { success: false, error: 'O banco não confirmou a gravação das etapas.' };
+            }
+            return { success: true, revision: data[0].revision as number };
+        } catch {
+            return { success: false, error: 'Não foi possível salvar as etapas do pipeline.' };
+        }
     }
 }

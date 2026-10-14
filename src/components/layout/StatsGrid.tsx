@@ -37,7 +37,7 @@ export function StatsGrid({ items }: StatsGridProps) {
 
                         {/* Content */}
                         <div className="flex items-center justify-between mb-3 relative z-10">
-                            <h3 className={`text-[9px] font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
+                            <h3 className={`text-xs font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
                                 {stat.label}
                             </h3>
                             <div className={`p-1.5 rounded-xl bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
@@ -48,7 +48,7 @@ export function StatsGrid({ items }: StatsGridProps) {
                             <p className="text-xl font-black text-foreground tracking-tighter truncate">
                                 {stat.value}
                             </p>
-                            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
                                 {stat.description}
                             </p>
                         </div>

@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getPipelineData, updateDealStage as updateDealStageAction, createDeal as createDealAction, updateDeal as updateDealAction, duplicateDealEntry } from '@/app/(dashboard)/pipeline/actions';
-import { checkAutomations } from '@/lib/automations';
-import { PRODUCT_CATEGORIES } from '@/lib/constants';
 
 import type { Deal, DealProduct as ProductItem } from '@/types/deal';
 
@@ -26,7 +24,8 @@ export const useDeals = () => {
         try {
             setLoading(true);
             const data = await getPipelineData();
-            setDeals(data as any as Deal[]);
+            setDeals(data.deals);
+            setError(null);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -82,17 +81,6 @@ export const useDeals = () => {
             // Refresh local state from database to ensure consistency
             await fetchDeals();
 
-            // Automation Hook
-            if (updates.stage) {
-                checkAutomations({
-                    type: 'deal_moved',
-                    payload: {
-                        dealId: id,
-                        to: updates.stage
-                    }
-                });
-            }
-
             return true;
         } catch (err: any) {
             // If database update fails, revert by fetching fresh data
@@ -117,22 +105,15 @@ export const useDeals = () => {
         }
     };
 
-    const updateDealStage = async (id: string, newStage: string) => {
+    const updateDealStage = async (id: string, newStage: string): Promise<boolean> => {
         try {
+            // The server action is authoritative and already dispatches configurable automations.
             await updateDealStageAction(id, newStage);
             await fetchDeals();
-
-            // Run Automation
-            checkAutomations({
-                type: 'deal_moved',
-                payload: {
-                    dealId: id,
-                    to: newStage
-                }
-            });
-
-        } catch (err: any) {
-            setError(err.message);
+            return true;
+        } catch {
+            setError('Não foi possível atualizar a etapa da oportunidade.');
+            return false;
         }
     };
 

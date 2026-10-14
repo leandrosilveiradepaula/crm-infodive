@@ -1,7 +1,7 @@
 'use server';
 
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { requirePermission } from '../../../lib/auth-server';
 
 export interface AuditLog {
     id: string;
@@ -14,7 +14,7 @@ export interface AuditLog {
 }
 
 export async function getAuditLogs(): Promise<AuditLog[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:view_audit');
     const supabase = createAdminClient();
 
     try {
@@ -24,44 +24,20 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
             .eq('organization_id', organizationId)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error || !Array.isArray(data)) throw new Error('Audit rows unavailable');
 
-        return data.map((item: any) => ({
-            id: item.id,
-            user: item.user_name,
-            action: item.action,
-            details: item.details,
-            category: item.category as any,
-            timestamp: item.created_at,
-            ip: item.ip_address || '0.0.0.0'
+        return data.map((item: Record<string, unknown>) => ({
+            id: String(item.id ?? ''),
+            user: String(item.user_name ?? ''),
+            action: String(item.action ?? ''),
+            details: String(item.details ?? ''),
+            category: (['auth', 'system', 'security', 'lead', 'deal'].includes(String(item.category)) ? item.category : 'system') as AuditLog['category'],
+            timestamp: String(item.created_at ?? ''),
+            ip: String(item.ip_address ?? 'Não informado')
         }));
     } catch (error) {
         console.error('Error fetching audit logs:', error);
-        return [];
-    }
-}
-
-export async function createAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>) {
-    const { organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
-    try {
-        const { error } = await supabase
-            .from('audit_logs')
-            .insert([{
-                user_name: log.user,
-                action: log.action,
-                details: log.details,
-                category: log.category,
-                ip_address: log.ip,
-                organization_id: organizationId
-            }]);
-
-        if (error) throw error;
-        return { success: true };
-    } catch (error: any) {
-        console.error('Error adding audit log:', error);
-        return { success: false, error: error.message };
+        throw new Error('Não foi possível carregar os registros de auditoria.');
     }
 }
 

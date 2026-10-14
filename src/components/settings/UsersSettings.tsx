@@ -155,12 +155,12 @@ export function UsersSettings() {
                                                 <p className="text-sm font-black text-foreground tracking-tight">{user.name}</p>
                                                 <div className="flex flex-wrap gap-1.5 mt-0.5">
                                                     {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role, idx) => (
-                                                        <Badge key={idx} className={`text-[9px] border font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${ROLE_COLORS[role] || ROLE_COLORS.sales}`}>
+                                                        <Badge key={idx} className={`text-xs border font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${ROLE_COLORS[role] || ROLE_COLORS.sales}`}>
                                                             {ROLE_LABELS[role] || role}
                                                         </Badge>
                                                     ))}
                                                     {user.status === 'inactive' && (
-                                                        <Badge className="text-[9px] border font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 border-red-500/20">
+                                                        <Badge className="text-xs border font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 border-red-500/20">
                                                             Arquivado
                                                         </Badge>
                                                     )}
@@ -172,7 +172,7 @@ export function UsersSettings() {
 
                                     <div className="flex items-center gap-6">
                                         <div className="hidden lg:flex flex-col items-end gap-1">
-                                            <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest">Último Acesso</p>
+                                            <p className="text-xs uppercase font-bold text-muted-foreground tracking-widest">Último Acesso</p>
                                             <div className="flex items-center gap-1.5 text-xs text-foreground">
                                                 <Clock className="h-3 w-3 text-muted-foreground" />
                                                 <span>{user.lastLogin}</span>

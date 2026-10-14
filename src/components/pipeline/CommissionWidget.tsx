@@ -25,7 +25,7 @@ export const CommissionWidget = ({ projectedCommission, guaranteedCommission, co
                         <TrendingUp className="h-4 w-4 text-info" />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black text-info uppercase tracking-widest leading-none mb-1">Minha Meta</p>
+                        <p className="text-xs font-black text-info uppercase tracking-widest leading-none mb-1">Minha Meta</p>
                         <div className={`transition-all duration-500 ${isVisible ? 'blur-0' : 'blur-md select-none'}`}>
                             <p className="text-sm font-black text-foreground">{formatValue(projectedCommission)}</p>
                         </div>
@@ -38,7 +38,7 @@ export const CommissionWidget = ({ projectedCommission, guaranteedCommission, co
                         <ShieldCheck className="h-4 w-4 text-success" />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black text-success uppercase tracking-widest leading-none mb-1">Garantido</p>
+                        <p className="text-xs font-black text-success uppercase tracking-widest leading-none mb-1">Garantido</p>
                         <div className={`transition-all duration-500 ${isVisible ? 'blur-0' : 'blur-md select-none'}`}>
                             <p className="text-sm font-black text-foreground">{formatValue(guaranteedCommission)}</p>
                         </div>
@@ -47,7 +47,7 @@ export const CommissionWidget = ({ projectedCommission, guaranteedCommission, co
 
                 {/* Rate Badge */}
                 <div className="px-4 py-2 bg-muted rounded-xl border border-border hidden 2xl:block">
-                    <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none mb-1">Margem Média</p>
+                    <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest leading-none mb-1">Margem Média</p>
                     <p className="text-xs text-foreground font-black">{commissionRate.toFixed(1)}%</p>
                 </div>
 

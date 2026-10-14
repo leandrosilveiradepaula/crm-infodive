@@ -161,7 +161,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                         <div>
                             <DialogTitle className="text-xl font-bold text-foreground">Gerador de Propostas IA</DialogTitle>
                             <div className="flex items-center gap-2">
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Configuração Estratégica: {deal.company}</p>
+                                <p className="text-xs text-blue-500 font-black uppercase tracking-widest mt-0.5">Configuração Estratégica: {deal.company}</p>
                                 {status === 'analyzing_ai' && <Badge variant="secondary" className="bg-teal-500/10 text-teal-400 border-teal-500/20 animate-pulse"><Sparkles className="h-3 w-3 mr-1" /> Analisando Deal...</Badge>}
                                 {status === 'capturing_pages' && <Badge variant="secondary" className="bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Renderizando Páginas...</Badge>}
                             </div>
@@ -202,7 +202,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                         className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                         placeholder="Ex: Proposta de Infraestrutura e Licenciamento"
                                     />
-                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Este título aparecerá em destaque na capa do PDF.</p>
+                                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Este título aparecerá em destaque na capa do PDF.</p>
                                 </div>
                             </div>
 
@@ -330,7 +330,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                             {objectives.map((obj, i) => (
                                                 <div key={i} className="p-4 bg-card border border-border rounded-xl space-y-3">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center">{obj.number}</span>
+                                                        <span className="text-xs font-black bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center">{obj.number}</span>
                                                         <input
                                                             value={obj.title}
                                                             onChange={(e) => {
@@ -349,7 +349,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                                             setObjectives(newObjs);
                                                         }}
                                                         rows={2}
-                                                        className="w-full bg-muted/30 border-none rounded-lg p-2 text-[11px] focus:ring-0 resize-none"
+                                                        className="w-full bg-muted/30 border-none rounded-lg p-2 text-xs focus:ring-0 resize-none"
                                                     />
                                                 </div>
                                             ))}

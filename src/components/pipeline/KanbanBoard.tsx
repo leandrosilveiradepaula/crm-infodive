@@ -98,7 +98,7 @@ export function KanbanBoard({ initialDeals, onDealClick }: KanbanBoardProps) {
                                             <div className={`h-2 w-2 rounded-full bg-${column.color}`} />
                                             <h3 className="font-black text-sm text-foreground uppercase tracking-wider">{column.title}</h3>
                                         </div>
-                                        <span className="text-[10px] font-bold text-muted-foreground mt-1 ml-4 uppercase tracking-widest">{columnDeals.length} Oportunidades</span>
+                                        <span className="text-xs font-bold text-muted-foreground mt-1 ml-4 uppercase tracking-widest">{columnDeals.length} Oportunidades</span>
                                     </div>
 
                                     <div className={`

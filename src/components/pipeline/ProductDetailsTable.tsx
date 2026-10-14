@@ -67,7 +67,7 @@ const SubItemEditor = ({
                         <div key={idx} className="bg-card border border-border rounded-lg p-4 flex gap-3 items-start group hover:border-primary/50 transition-colors shadow-sm">
                             <div className="grid grid-cols-12 gap-3 flex-1">
                                 <div className="col-span-3">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">SKU</label>
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">SKU</label>
                                     <input
                                         type="text"
                                         value={item.sku}
@@ -77,7 +77,7 @@ const SubItemEditor = ({
                                     />
                                 </div>
                                 <div className="col-span-12 md:col-span-5">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Descrição</label>
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Descrição</label>
                                     <input
                                         type="text"
                                         value={item.description}
@@ -87,7 +87,7 @@ const SubItemEditor = ({
                                     />
                                 </div>
                                 <div className="col-span-6 md:col-span-2">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Qtd</label>
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Qtd</label>
                                     <input
                                         type="number"
                                         value={item.quantity}
@@ -96,7 +96,7 @@ const SubItemEditor = ({
                                     />
                                 </div>
                                 <div className="col-span-6 md:col-span-2">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Custo Unit</label>
+                                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Custo Unit</label>
                                     <ThemeCurrencyInput
                                         value={item.unit_price}
                                         onChange={(e) => handleUpdateItem(idx, 'unit_price', Number(e.target.value))}
@@ -127,7 +127,7 @@ const SubItemEditor = ({
 
                 <div className="p-5 border-t border-border bg-muted/10 flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">Custo Total Consolidado</p>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-wide">Custo Total Consolidado</p>
                         <p className="text-xl font-bold text-primary">
                             {formatCurrency(totalCost)}
                         </p>
@@ -178,7 +178,7 @@ const BundleRenderer = ({ jsonString, isEditingEnabled, onUpdate }: { jsonString
                 {expanded && (
                     <div className="pl-2 border-l-2 border-border space-y-1">
                         {items.map((item: any, idx: number) => (
-                            <div key={idx} className="text-[10px] text-muted-foreground flex justify-between gap-4">
+                            <div key={idx} className="text-xs text-muted-foreground flex justify-between gap-4">
                                 <span className="flex-1 truncate">{item.quantity}x {item.description}</span>
                                 <span className="font-mono text-muted-foreground/70">{item.sku}</span>
                             </div>
@@ -321,7 +321,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                             <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40">SKU/PartNumber</th>
                             <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                                 Descrição
-                                <span className="ml-1 text-primary/60 normal-case font-normal text-[10px]">(+ nome na proposta)</span>
+                                <span className="ml-1 text-primary/60 normal-case font-normal text-xs">(+ nome na proposta)</span>
                             </th>
                             <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Qtd</th>
 
@@ -401,7 +401,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                             <div className="space-y-2">
                                                 {/* IBM/Catalog name - read-only reference */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Nome Técnico (IBM)</label>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Nome Técnico (IBM)</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-muted/30 border border-input rounded-md px-3 py-1.5 text-xs text-muted-foreground outline-none font-mono cursor-not-allowed"
@@ -412,7 +412,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 </div>
                                                 {/* Friendly display name for proposal */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-primary uppercase tracking-wider block mb-1">📄 Nome na Proposta</label>
+                                                    <label className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">📄 Nome na Proposta</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-background border border-primary/30 rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/50"
@@ -427,7 +427,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 </div>
                                                 {/* Original description field */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Descrição Interna</label>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1">Descrição Interna</label>
                                                     <input
                                                         type="text"
                                                         className="w-full bg-background border border-input rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
@@ -468,7 +468,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                         {detail.display_name ? (
                                                             <>
                                                                 <p className="text-sm font-semibold text-foreground">{detail.display_name}</p>
-                                                                <p className="text-[10px] text-muted-foreground/60 font-mono truncate" title={detail.name}>{detail.name}</p>
+                                                                <p className="text-xs text-muted-foreground/60 font-mono truncate" title={detail.name}>{detail.name}</p>
                                                             </>
                                                         ) : (
                                                             <p className="text-sm text-muted-foreground">{detail.description || detail.name || '---'}</p>
@@ -537,7 +537,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                             <p className={`text-sm font-bold ${isBidMode ? 'text-primary' : 'text-emerald-600 dark:text-emerald-400'}`}>
                                                 {formatCurrency(lineTotal)}
                                             </p>
-                                            <span className="text-[10px] text-muted-foreground uppercase">Total Venda</span>
+                                            <span className="text-xs text-muted-foreground uppercase">Total Venda</span>
                                         </div>
                                     </td>
 

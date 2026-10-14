@@ -47,5 +47,6 @@ export interface Account {
     logo_url?: string;
     payment_terms?: string;
     description?: string;
+    aggregate_revision?: number;
     created_at?: string;
 }

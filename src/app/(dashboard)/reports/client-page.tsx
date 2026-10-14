@@ -113,7 +113,7 @@ export function ReportsClientPage() {
                             <select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4"
+                                className="bg-transparent text-xs font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4"
                             >
                                 {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -125,7 +125,7 @@ export function ReportsClientPage() {
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                className={`px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -140,7 +140,7 @@ export function ReportsClientPage() {
                                                 prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                        className={`px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                                     >
                                         {q}
                                     </button>
@@ -151,11 +151,11 @@ export function ReportsClientPage() {
 
                     {/* Status Pill */}
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Status:</span>
+                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest shrink-0">Status:</span>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
+                            className="bg-transparent text-xs font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
                         >
                             <option value="all">Todos</option>
                             <option value="qualification">Qualificação</option>
@@ -168,11 +168,11 @@ export function ReportsClientPage() {
 
                     {/* Faturamento Pill */}
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Faturamento:</span>
+                        <span className="text-xs font-black text-muted-foreground uppercase tracking-widest shrink-0">Faturamento:</span>
                         <select
                             value={billingFilter}
                             onChange={(e) => setBillingFilter(e.target.value)}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
+                            className="bg-transparent text-xs font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
                         >
                             <option value="all">Todos</option>
                             {allBillingTypes.map(type => (
@@ -189,7 +189,7 @@ export function ReportsClientPage() {
                         <ThemeSelect
                             value={sellerFilter}
                             onChange={(e) => setSellerFilter(e.target.value)}
-                            className="h-11 rounded-full bg-muted/30 border-border text-[10px] uppercase font-black tracking-widest"
+                            className="h-11 rounded-full bg-muted/30 border-border text-xs uppercase font-black tracking-widest"
                         >
                             <option value="all">Vendedor: Todos</option>
                             {allSellers.map(seller => (
@@ -203,7 +203,7 @@ export function ReportsClientPage() {
                         className="h-11 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center gap-2 transition-all group shrink-0"
                     >
                         <Download className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">CSV</span>
+                        <span className="text-xs font-black uppercase tracking-widest">CSV</span>
                     </button>
                 </div>
             </FilterBar>
@@ -313,7 +313,7 @@ export function ReportsClientPage() {
                             <Target className="h-4 w-4 text-primary" />
                             Detalhamento das Oportunidades
                         </h3>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
                             {mappedDeals.length} resultados encontrados para os filtros atuais
                         </p>
                     </div>
@@ -323,11 +323,11 @@ export function ReportsClientPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-border">
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Oportunidade</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Vendedor</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="pb-4 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor</th>
+                                <th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Oportunidade</th>
+                                <th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
+                                <th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Vendedor</th>
+                                <th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="pb-4 text-right text-xs font-black text-muted-foreground uppercase tracking-widest">Valor</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -335,7 +335,7 @@ export function ReportsClientPage() {
                                 <tr key={deal.id} className="group hover:bg-muted/30 transition-colors">
                                     <td className="py-2.5">
                                         <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter opacity-70">
+                                        <p className="text-xs text-muted-foreground uppercase font-black tracking-tighter opacity-70">
                                             {new Date(deal.created_at).toLocaleDateString()}
                                         </p>
                                     </td>
@@ -344,14 +344,14 @@ export function ReportsClientPage() {
                                     </td>
                                     <td className="py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                                                 {deal.owner?.charAt(0)}
                                             </div>
                                             <span className="text-sm text-foreground/80">{deal.owner}</span>
                                         </div>
                                     </td>
                                     <td className="py-4">
-                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                        <span className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${
                                             deal.stage === 'won' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                                             deal.stage === 'lost' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
                                             'bg-primary/10 text-primary border-primary/20'
@@ -364,7 +364,7 @@ export function ReportsClientPage() {
                                     </td>
                                     <td className="py-4 text-right">
                                         <p className="font-bold text-foreground">{formatCurrency(deal.value)}</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold">{deal.probability}% Prob.</p>
+                                        <p className="text-xs text-muted-foreground font-bold">{deal.probability}% Prob.</p>
                                     </td>
                                 </tr>
                             ))}

@@ -30,17 +30,17 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, chang
                     <Icon className={`h-4.5 w-4.5 ${colorClass.replace('bg-', 'text-')}`} />
                 </div>
                 {change && (
-                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'} uppercase tracking-widest`}>
+                    <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'} uppercase tracking-widest`}>
                         {change}
                     </span>
                 )}
             </div>
 
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 leading-none">{title}</p>
+            <p className="text-xs font-black text-muted-foreground uppercase tracking-widest opacity-60 leading-none">{title}</p>
             <h3 className="text-2xl font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
 
             {subtitle && (
-                <p className="text-[10px] text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight opacity-70">
+                <p className="text-xs text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight opacity-70">
                     <span className="w-1 h-1 rounded-full bg-primary/40"></span>
                     {subtitle}
                 </p>

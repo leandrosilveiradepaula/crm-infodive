@@ -3,7 +3,7 @@ import SalesList from './SalesList';
 import { PageHeader } from '@/components/layout/PageHeader';
 
 export const metadata = {
-    title: 'Vendas | CRM Next Gen',
+    title: 'Vendas | CRM Infodive',
     description: 'Gerenciamento de pedidos e ciclo de vida de vendas.',
 };
 

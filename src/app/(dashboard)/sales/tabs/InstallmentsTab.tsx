@@ -170,21 +170,21 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-amber-500/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-amber-500/10 group-hover:scale-110 transition-transform"><Clock className="w-4 h-4 text-amber-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">A Receber</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">A Receber</span>
                     </div>
                     <div className="text-2xl font-black text-foreground">{formatCurrency(totalPending)}</div>
                 </div>
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-rose-500/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-rose-500/10 group-hover:scale-110 transition-transform"><AlertTriangle className="w-4 h-4 text-rose-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Vencidas</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Vencidas</span>
                     </div>
                     <div className={`text-2xl font-black ${totalOverdue > 0 ? 'text-rose-500' : 'text-foreground'}`}>{formatCurrency(totalOverdue)}</div>
                 </div>
                 <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-emerald-500/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
                         <div className="p-2 rounded-xl bg-emerald-500/10 group-hover:scale-110 transition-transform"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recebido</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Recebido</span>
                     </div>
                     <div className="text-2xl font-black text-emerald-500">{formatCurrency(totalPaid)}</div>
                 </div>
@@ -207,7 +207,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === f
+                            className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${filter === f
                                 ? 'bg-background text-primary shadow-sm border border-border'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                                 }`}
@@ -221,7 +221,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                     <DialogTrigger asChild>
                         <Button variant="outline" className="h-10 gap-2 border-primary/20 hover:bg-primary/5 text-primary group rounded-xl">
                             <Sparkles className="w-3.5 h-3.5 transition-transform group-hover:scale-110" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Reconciliação IA</span>
+                            <span className="text-xs font-black uppercase tracking-widest">Reconciliação IA</span>
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl bg-card border-border shadow-2xl rounded-[2rem]">
@@ -235,7 +235,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                             <p className="text-xs text-muted-foreground font-medium">Cole o texto do extrato bancário para que a IA Watson cruze os dados automaticamente.</p>
                             <Textarea 
                                 placeholder="Ex: 10/05 PIX RECEBIDO - JOAO SILVA R$ 1.500,00..." 
-                                className="min-h-[200px] bg-background/50 text-[11px] font-mono leading-relaxed rounded-2xl border-border focus:ring-primary/20"
+                                className="min-h-[200px] bg-background/50 text-xs font-mono leading-relaxed rounded-2xl border-border focus:ring-primary/20"
                                 value={statementText}
                                 onChange={(e) => setStatementText(e.target.value)}
                             />
@@ -243,16 +243,16 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                             {aiMatches.length > 0 && (
                                 <div className="border border-border rounded-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                                     <div className="bg-muted/50 p-3 border-b border-border">
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sugestões Encontradas</h4>
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Sugestões Encontradas</h4>
                                     </div>
                                     <div className="max-h-[200px] overflow-y-auto p-3 space-y-2 custom-scrollbar">
                                         {aiMatches.map((match, idx) => (
                                             <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 transition-all">
                                                 <div className="flex flex-col gap-0.5">
-                                                    <span className="text-[11px] font-black text-foreground">{match.statement_entry}</span>
-                                                    <span className="text-[10px] text-muted-foreground font-medium">{match.reason}</span>
+                                                    <span className="text-xs font-black text-foreground">{match.statement_entry}</span>
+                                                    <span className="text-xs text-muted-foreground font-medium">{match.reason}</span>
                                                 </div>
-                                                <Badge variant="outline" className={`text-[9px] font-black ${match.confidence > 0.85 ? 'border-emerald-500/30 text-emerald-500 bg-emerald-500/5' : 'border-amber-500/30 text-amber-500 bg-amber-500/5'}`}>
+                                                <Badge variant="outline" className={`text-xs font-black ${match.confidence > 0.85 ? 'border-emerald-500/30 text-emerald-500 bg-emerald-500/5' : 'border-amber-500/30 text-amber-500 bg-amber-500/5'}`}>
                                                     {Math.round(match.confidence * 100)}% Match
                                                 </Badge>
                                             </div>
@@ -262,16 +262,16 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                             )}
 
                             <div className="flex justify-end gap-3 pt-6 border-t border-border mt-4">
-                                <Button variant="ghost" onClick={() => setIsAIOpen(false)} className="text-[10px] font-black uppercase tracking-widest">Cancelar</Button>
+                                <Button variant="ghost" onClick={() => setIsAIOpen(false)} className="text-xs font-black uppercase tracking-widest">Cancelar</Button>
                                 {aiMatches.length > 0 ? (
-                                    <Button onClick={applyAIMatches} className="text-[10px] font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 h-11 px-8 rounded-xl shadow-lg shadow-emerald-500/20">
+                                    <Button onClick={applyAIMatches} className="text-xs font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 h-11 px-8 rounded-xl shadow-lg shadow-emerald-500/20">
                                         Confirmar e Baixar {aiMatches.filter(m => m.confidence > 0.8).length} Parcelas
                                     </Button>
                                 ) : (
                                     <Button 
                                         onClick={handleAIReconcile} 
                                         disabled={isAnalyzing || !statementText.trim()}
-                                        className="text-[10px] font-black uppercase tracking-widest gap-2 bg-primary hover:bg-primary/90 h-11 px-8 rounded-xl shadow-lg shadow-primary/20"
+                                        className="text-xs font-black uppercase tracking-widest gap-2 bg-primary hover:bg-primary/90 h-11 px-8 rounded-xl shadow-lg shadow-primary/20"
                                     >
                                         {isAnalyzing ? <div className="animate-spin rounded-full h-3 w-3 border-2 border-white/30 border-t-white" /> : <Sparkles className="w-4 h-4" />}
                                         {isAnalyzing ? 'Analisando...' : 'Analisar com Watson IA'}
@@ -295,11 +295,11 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                     className="border-muted-foreground/30 data-[state=checked]:bg-primary rounded-md"
                                 />
                             </TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Status</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Cliente / Origem</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Valor</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Vencimento</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Ações</TableHead>
+                            <TableHead className="text-xs font-black uppercase tracking-widest text-muted-foreground py-5">Status</TableHead>
+                            <TableHead className="text-xs font-black uppercase tracking-widest text-muted-foreground py-5">Cliente / Origem</TableHead>
+                            <TableHead className="text-xs font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Valor</TableHead>
+                            <TableHead className="text-xs font-black uppercase tracking-widest text-muted-foreground py-5">Vencimento</TableHead>
+                            <TableHead className="text-xs font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -338,7 +338,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                         <TableCell className="py-5">
                                             <Badge 
                                                 variant="outline" 
-                                                className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
+                                                className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
                                                     i.status === 'paid' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' : 
                                                     isOverdue ? 'bg-rose-500/5 text-rose-500 border-rose-500/20' : 
                                                     'bg-amber-500/5 text-amber-500 border-amber-500/20'
@@ -350,14 +350,14 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                         <TableCell className="py-5">
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-black text-foreground tracking-tight group-hover:text-primary transition-colors">{i.customerName}</span>
-                                                <span className="text-[10px] text-muted-foreground font-black uppercase mt-0.5">{i.dealTitle}</span>
+                                                <span className="text-xs text-muted-foreground font-black uppercase mt-0.5">{i.dealTitle}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-5 text-right">
                                             <span className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(i.amount)}</span>
                                         </TableCell>
                                         <TableCell className="py-5">
-                                            <div className={`flex items-center gap-2 text-[10px] font-black tracking-tighter uppercase ${isOverdue ? 'text-rose-500' : 'text-muted-foreground'}`}>
+                                            <div className={`flex items-center gap-2 text-xs font-black tracking-tighter uppercase ${isOverdue ? 'text-rose-500' : 'text-muted-foreground'}`}>
                                                 <Calendar className="w-4 h-4 opacity-50" />
                                                 {new Date(i.due_date).toLocaleDateString()}
                                             </div>
@@ -398,17 +398,17 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                 <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 duration-500">
                     <div className="bg-foreground text-background px-8 py-5 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex items-center gap-10 border border-white/10 ring-8 ring-background/10 backdrop-blur-3xl">
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">Selecionados</span>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">Selecionados</span>
                             <span className="text-sm font-black">{selectedIds.length} parcelas</span>
                         </div>
                         <div className="h-10 w-px bg-white/10" />
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40">Valor Total</span>
+                            <span className="text-xs font-black uppercase tracking-[0.2em] opacity-40">Valor Total</span>
                             <span className="text-xl font-black tracking-tighter text-emerald-400">{formatCurrency(totalSelectedValue)}</span>
                         </div>
                         <Button
                             onClick={handleBatchPay}
-                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[11px] px-10 h-14 rounded-2xl shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all"
+                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-xs px-10 h-14 rounded-2xl shadow-lg shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all"
                         >
                             Confirmar Pagamento
                         </Button>

@@ -99,7 +99,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                 <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Tipo de Ativo *
                             </label>
                             <ThemeSelect
@@ -112,7 +112,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                             </ThemeSelect>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Status *
                             </label>
                             <ThemeSelect
@@ -128,7 +128,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Fabricante *
                             </label>
                             <ThemeInput
@@ -139,7 +139,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Modelo / Título *
                             </label>
                             <ThemeInput
@@ -152,7 +152,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                             Nº de Série ou Chave de Licença
                         </label>
                         <ThemeInput
@@ -164,7 +164,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Data de Aquisição
                             </label>
                             <ThemeInput
@@ -174,7 +174,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 Validade da Garantia
                             </label>
                             <ThemeInput
@@ -186,7 +186,7 @@ export function CustomerAssetModal({ open, onOpenChange, asset, accountId, contr
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                             Coberto pelo Contrato
                         </label>
                         <ThemeSelect

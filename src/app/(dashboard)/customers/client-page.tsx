@@ -18,6 +18,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
+import { accountsToCsv } from '@/utils/customerCsv';
 
 interface CustomersClientPageProps {
     initialAccounts: Account[];
@@ -82,8 +83,18 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     };
 
     const handleExportCSV = () => {
-        // Todo implementation
-        alert("Exporting CSV...");
+        const csv = accountsToCsv(filteredAccounts);
+        const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const date = new Date().toISOString().slice(0, 10);
+
+        link.href = url;
+        link.download = `empresas-${date}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
     };
 
     const clearFilters = () => {
@@ -224,7 +235,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     {(searchTerm || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos') && (
-                        <Button variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors">
+                        <Button variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors" aria-label="Limpar filtros" title="Limpar filtros">
                             <X className="h-5 w-5" />
                         </Button>
                     )}

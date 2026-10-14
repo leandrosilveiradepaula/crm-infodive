@@ -99,7 +99,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
             {/* Dias da semana */}
             <div className="grid grid-cols-7 gap-2 mb-4 border-b border-border/50 pb-4">
                 {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                    <div key={day} className="text-center text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div key={day} className="text-center text-xs font-black text-muted-foreground uppercase tracking-widest">
                         {day}
                     </div>
                 ))}
@@ -133,7 +133,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                         key={activity.id}
                                         onClick={() => onActivityClick(activity)}
                                         className={`
-                                            text-[10px] px-2 py-1.5 rounded-lg truncate font-black uppercase tracking-wider cursor-pointer border transition-all hover:scale-[1.02] active:scale-95
+                                            text-xs px-2 py-1.5 rounded-lg truncate font-black uppercase tracking-wider cursor-pointer border transition-all hover:scale-[1.02] active:scale-95
                                             ${activity.type === 'meeting' ? 'bg-stage-proposal/10 text-stage-proposal border-stage-proposal/20 hover:bg-stage-proposal/20' : ''}
                                             ${activity.type === 'call' ? 'bg-success/10 text-success border-success/20 hover:bg-success/20' : ''}
                                             ${activity.type === 'task' ? 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20' : ''}
@@ -147,7 +147,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                     </div>
                                 ))}
                                 {dayActivities.length > 3 && (
-                                    <div className="text-[9px] text-muted-foreground font-black uppercase tracking-widest px-2 pt-1 opacity-60">
+                                    <div className="text-xs text-muted-foreground font-black uppercase tracking-widest px-2 pt-1 opacity-60">
                                         +{dayActivities.length - 3} mais
                                     </div>
                                 )}
@@ -159,23 +159,23 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
 
             {/* Legenda */}
             <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-border">
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
                     <div className="w-2.5 h-2.5 rounded-full bg-stage-proposal/20 border border-stage-proposal/30"></div>
                     <span className="text-muted-foreground">Reunião</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
                     <div className="w-2.5 h-2.5 rounded-full bg-success/20 border border-success/30"></div>
                     <span className="text-muted-foreground">Ligação</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
                     <div className="w-2.5 h-2.5 rounded-full bg-warning/20 border border-warning/30"></div>
                     <span className="text-muted-foreground">Tarefa</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary/20 border border-primary/30"></div>
                     <span className="text-muted-foreground">Email</span>
                 </div>
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
                     <div className="w-2.5 h-2.5 rounded-full bg-muted border border-border"></div>
                     <span className="text-muted-foreground">Nota</span>
                 </div>

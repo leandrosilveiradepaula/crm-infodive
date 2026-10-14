@@ -18,19 +18,19 @@ export const TopPerformersWidget = ({ data }: TopPerformersWidgetProps) => {
                 {data.slice(0, 5).map((performer, i) => (
                     <div key={i} className="flex items-center justify-between p-2.5 bg-muted/20 rounded-xl border border-border/50 hover:border-primary/20 transition-all group cursor-pointer active:scale-[0.98]">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-[10px] font-black shadow-lg shadow-primary/20">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-black shadow-lg shadow-primary/20">
                                 {performer.owner.split(' ').map(n => n[0]).join('').slice(0, 2)}
                             </div>
                             <div>
                                 <p className="text-[13px] font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors">{performer.owner}</p>
-                                <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1 opacity-60 leading-none">{performer.count} deals</p>
+                                <p className="text-xs text-muted-foreground font-black uppercase tracking-widest mt-1 opacity-60 leading-none">{performer.count} deals</p>
                             </div>
                         </div>
                         <div className="text-right">
                             <p className="text-[13px] font-black text-foreground tracking-tighter leading-none mb-1">
                                 {formatCompact(performer.value)}
                             </p>
-                            <p className="text-[9px] text-success font-black uppercase tracking-widest opacity-80 leading-none">{performer.won} ganhos</p>
+                            <p className="text-xs text-success font-black uppercase tracking-widest opacity-80 leading-none">{performer.won} ganhos</p>
                         </div>
                     </div>
                 ))}

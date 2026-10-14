@@ -1,11 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
-import { Bot, Send, X, Sparkles, TrendingUp, AlertTriangle, ChevronRight, Loader2 } from 'lucide-react';
-import { mockAiHistory, mockInsights, type AiMessage } from '@/data/mockAiData';
-import { useDeals } from '@/hooks/useDeals';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Bot, Send, X, Loader2 } from 'lucide-react';
 import { runCRMConsultantChat } from '@/lib/gemini';
+import { boundedChatHistory, CHAT_INPUT_LIMIT, readableChatError } from '@/lib/ai-chat-ui-policy';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+interface AiMessage {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+    timestamp: string;
+}
 
 interface AiAssistantProps {
     isOpen: boolean;
@@ -13,172 +19,187 @@ interface AiAssistantProps {
     initialQuery?: string | null;
 }
 
+const initialMessages: AiMessage[] = [{
+    id: 'welcome',
+    role: 'assistant',
+    content: 'Olá! Posso analisar informações do seu pipeline e ajudar com perguntas sobre oportunidades e próximos passos.',
+    timestamp: new Date().toISOString(),
+}];
+
 export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps) => {
-    const { deals, loading } = useDeals();
-    const [messages, setMessages] = useState<AiMessage[]>(mockAiHistory);
+    const [messages, setMessages] = useState<AiMessage[]>(initialMessages);
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const inFlight = useRef(false);
+    const activeRequest = useRef<AbortController | null>(null);
+    const requestGeneration = useRef(0);
+    const handledInitialQuery = useRef<string | null>(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    const dismiss = useCallback(() => {
+        requestGeneration.current += 1;
+        activeRequest.current?.abort();
+        activeRequest.current = null;
+        inFlight.current = false;
+        setIsTyping(false);
+        onClose();
+    }, [onClose]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, isOpen]);
+    const handleSend = useCallback(async (queryOverride?: string) => {
+        const content = (queryOverride ?? inputValue).trim().slice(0, CHAT_INPUT_LIMIT);
+        // The synchronous ref blocks duplicate paid requests before React rerenders.
+        if (!isOpen || !content || inFlight.current) return;
 
-    // Handle Initial Query from Command Bar
-    useEffect(() => {
-        if (isOpen && initialQuery) {
-            setInputValue(initialQuery);
-            // Small timeout to allow state update before sending
-            const timer = setTimeout(() => {
-                handleSend(initialQuery);
-            }, 100);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen, initialQuery]);
-
-    const buildContext = () => {
-        if (!deals || deals.length === 0) return "Nenhum deal encontrado no CRM.";
-        const dealContext = deals.slice(0, 15).map(d =>
-            `- Deal: **${d.title}** (${d.company})\n  Valor: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(d.value)}\n  Estágio: ${d.stage}\n  Probabilidade: ${d.probability}%\n  Dias no estágio: ${d.days_in_stage}\n  Fechamento: ${d.expected_close_date || 'N/A'}`
-        ).join('\n');
-
-        return `TOTAL DE DEALS: ${deals.length}\nVALOR TOTAL NO PIPELINE: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deals.reduce((acc, d) => acc + d.value, 0))}\n\nLISTA DE DEALS RECENTES:\n${dealContext}`;
-    };
-
-    const handleSend = async (queryOverride?: string) => {
-        const textToSend = queryOverride || inputValue;
-        if (!textToSend.trim()) return;
-
-        const newUserMsg: AiMessage = {
-            id: Date.now().toString(),
+        inFlight.current = true;
+        const generation = ++requestGeneration.current;
+        const controller = new AbortController();
+        activeRequest.current = controller;
+        const newMessage: AiMessage = {
+            id: String(Date.now()),
             role: 'user',
-            content: textToSend,
-            timestamp: new Date().toISOString()
+            content,
+            timestamp: new Date().toISOString(),
         };
-
-        setMessages(prev => [...prev, newUserMsg]);
+        setMessages(previous => [...previous, newMessage]);
         setInputValue('');
         setIsTyping(true);
 
         try {
-            const context = buildContext();
-
-            // Format history for the AI function (remove IDs and timestamps)
-            const historyForAi = messages.map(m => ({ role: m.role, content: m.content }));
-
-            const responseText = await runCRMConsultantChat([...historyForAi, { role: 'user', content: newUserMsg.content }], context);
-
-            const botResponse: AiMessage = {
-                id: (Date.now() + 1).toString(),
+            const history = boundedChatHistory([...messages, newMessage]);
+            const response = await runCRMConsultantChat(history, controller.signal);
+            if (controller.signal.aborted || generation !== requestGeneration.current) return;
+            setMessages(previous => [...previous, {
+                id: String(Date.now()) + '-response',
                 role: 'assistant',
-                content: responseText,
-                timestamp: new Date().toISOString()
-            };
-            setMessages(prev => [...prev, botResponse]);
+                content: response,
+                timestamp: new Date().toISOString(),
+            }]);
         } catch (error) {
-            console.error("Erro no chat AI:", error);
-            const errorResponse: AiMessage = {
-                id: (Date.now() + 1).toString(),
+            if (controller.signal.aborted || generation !== requestGeneration.current) return;
+            console.error('[AiAssistant] chat request failed');
+            setMessages(previous => [...previous, {
+                id: String(Date.now()) + '-error',
                 role: 'assistant',
-                content: "Desculpe, tive um problema ao analisar seus dados. Tente novamente em instantes.",
-                timestamp: new Date().toISOString()
-            };
-            setMessages(prev => [...prev, errorResponse]);
+                content: readableChatError(error),
+                timestamp: new Date().toISOString(),
+            }]);
         } finally {
-            setIsTyping(false);
+            if (generation === requestGeneration.current) {
+                activeRequest.current = null;
+                inFlight.current = false;
+                setIsTyping(false);
+            }
         }
-    };
+    }, [inputValue, isOpen, messages]);
+
+    useEffect(() => {
+        if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages, isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            handledInitialQuery.current = null;
+            return;
+        }
+        if (!initialQuery || handledInitialQuery.current === initialQuery) return;
+        handledInitialQuery.current = initialQuery;
+        const timer = setTimeout(() => void handleSend(initialQuery), 100);
+        return () => clearTimeout(timer);
+    }, [isOpen, initialQuery, handleSend]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const previouslyFocused = document.activeElement;
+        closeButtonRef.current?.focus();
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                dismiss();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+                'button:not(:disabled), input:not(:disabled), [tabindex]:not([tabindex="-1"])'
+            ) ?? []);
+            if (!focusable.length) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+            if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
+        };
+    }, [isOpen, dismiss]);
+
+    useEffect(() => () => {
+        requestGeneration.current += 1;
+        activeRequest.current?.abort();
+    }, []);
 
     if (!isOpen) return null;
 
     return (
         <>
-            {/* Backdrop for mobile */}
-            <div
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-                onClick={onClose}
+            <button
+                type="button"
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden"
+                aria-label="Fechar assistente"
+                onClick={dismiss}
             />
-
-            {/* Sidebar */}
-            <div className={cn(
-                "fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-border flex flex-col",
-                isOpen ? 'translate-x-0' : 'translate-x-full'
-            )}>
-                {/* Header */}
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="crm-assistant-title"
+                className={cn(
+                    'fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background shadow-2xl z-50 border-l border-border flex flex-col',
+                )}
+            >
                 <div className="p-4 border-b border-primary bg-primary text-primary-foreground flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-primary-foreground/10 rounded-lg">
-                            <Bot className="h-6 w-6 text-primary-foreground" />
+                            <Bot className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-lg">IBM Watson AI</h2>
-                            <p className="text-xs text-primary-foreground/80 flex items-center gap-1">
-                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                                Online e pronto para ajudar
+                            <h2 id="crm-assistant-title" className="font-bold text-lg">Assistente do CRM</h2>
+                            <p className="text-xs text-primary-foreground/80">
+                                Usa a integração de IA configurada no ambiente
                             </p>
                         </div>
                     </div>
                     <Button
-                        onClick={onClose}
+                        ref={closeButtonRef}
+                        type="button"
+                        onClick={dismiss}
                         variant="ghost"
                         size="icon"
                         className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/10"
-                        title="Fechar Watson AI"
+                        title="Fechar assistente"
+                        aria-label="Fechar assistente"
                     >
-                        <X className="h-6 w-6" />
+                        <X className="h-6 w-6" aria-hidden="true" />
                     </Button>
                 </div>
 
-                {/* Insights Section */}
-                <div className="p-4 bg-muted/30 border-b border-border">
-                    <h3 className="text-xs font-bold text-muted-foreground uppercase mb-3 flex items-center gap-2">
-                        <Sparkles className="h-3 w-3 text-primary" />
-                        Insights Prioritários
-                    </h3>
-                    <div className="space-y-3">
-                        {mockInsights.map(insight => (
-                            <div key={insight.id} className="bg-card p-3 rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-                                <div className="flex justify-between items-start mb-1">
-                                    <div className="flex items-center gap-2">
-                                        {insight.type === 'opportunity' && <TrendingUp className="h-4 w-4 text-emerald-500" />}
-                                        {insight.type === 'risk' && <AlertTriangle className="h-4 w-4 text-destructive" />}
-                                        <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
-                                            {insight.title}
-                                        </span>
-                                    </div>
-                                    {insight.score && (
-                                        <span className={cn(
-                                            "text-xs font-bold px-1.5 py-0.5 rounded",
-                                            insight.score > 70 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-destructive/10 text-destructive'
-                                        )}>
-                                            {insight.score}
-                                        </span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                    {insight.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Chat Area */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background">
-                    {messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background" role="log" aria-live="polite" aria-label="Conversa do assistente">
+                    {messages.map(msg => (
+                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={cn(
-                                "max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+                                'max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm',
                                 msg.role === 'user'
                                     ? 'bg-primary text-primary-foreground rounded-tr-none'
-                                    : 'bg-muted text-foreground rounded-tl-none'
+                                    : 'bg-muted text-foreground rounded-tl-none',
                             )}>
                                 {msg.content}
                             </div>
@@ -187,7 +208,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                     {isTyping && (
                         <div className="flex justify-start">
                             <div className="bg-muted p-4 rounded-2xl rounded-tl-none flex items-center gap-2">
-                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                                 <span className="text-xs text-muted-foreground font-medium">Analisando CRM...</span>
                             </div>
                         </div>
@@ -195,27 +216,35 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Area */}
                 <div className="p-4 border-t border-border bg-background">
                     <div className="relative flex items-center">
                         <Input
                             type="text"
+                            maxLength={CHAT_INPUT_LIMIT}
+                            aria-label="Pergunta para o assistente"
                             value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            placeholder="Faça uma pergunta sobre seus leads..."
+                            onChange={event => setInputValue(event.target.value)}
+                            onKeyDown={event => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    void handleSend();
+                                }
+                            }}
+                            placeholder="Faça uma pergunta sobre suas oportunidades..."
                             className="w-full pr-12 bg-muted/50 border-input focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground"
                         />
                         <button
-                            onClick={() => handleSend()}
+                            type="button"
+                            onClick={() => void handleSend()}
                             disabled={!inputValue.trim() || isTyping}
-                            className="absolute right-2 p-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors"
+                            className="absolute right-2 p-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                            aria-label="Enviar pergunta"
                         >
-                            <Send className="h-4 w-4" />
+                            <Send className="h-4 w-4" aria-hidden="true" />
                         </button>
                     </div>
-                    <p className="text-center text-[10px] text-muted-foreground mt-2">
-                        O Watson AI pode cometer erros. Verifique informações importantes.
+                    <p className="text-center text-xs text-muted-foreground mt-2">
+                        Respostas de IA podem conter erros. Confirme informações importantes no CRM.
                     </p>
                 </div>
             </div>

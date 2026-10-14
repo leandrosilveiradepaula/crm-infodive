@@ -18,8 +18,14 @@ export type Permission =
     | 'products:edit'
     | 'products:delete'
     | 'clients:view_all'
+    | 'clients:create'
+    | 'clients:edit'
+    | 'clients:delete'
+    | 'clients:import'
     | 'settings:manage_users'
-    | 'settings:configure_pipeline';
+    | 'settings:view_audit'
+    | 'settings:configure_pipeline'
+    | 'integrations:manage';
 
 export interface AuthContextType {
     user: { id: string; email?: string } | null;

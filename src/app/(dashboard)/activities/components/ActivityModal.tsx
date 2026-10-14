@@ -69,7 +69,7 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                         <h2 className="text-2xl font-black text-white tracking-tight">
                             {activity ? 'Editar Atividade' : 'Nova Atividade'}
                         </h2>
-                        <p className="text-white/80 text-[10px] mt-1 font-black uppercase tracking-[0.2em]">
+                        <p className="text-white/80 text-xs mt-1 font-black uppercase tracking-[0.2em]">
                             {activity ? 'Visualizar e editar detalhes' : 'Agendar nova tarefa ou reunião'}
                         </p>
                     </div>

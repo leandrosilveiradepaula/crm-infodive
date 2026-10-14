@@ -76,12 +76,6 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
         setIsEnrichOpen(true);
     };
 
-    const onEnrichSubmit = (data: any) => {
-        // Here you would typically update the lead in the backend using the enriched data
-        console.log('Enriched Data:', data);
-        // For visual feedback, we could assume we updated it locally
-    };
-
     const handleDelete = async (lead: Lead) => {
         if (confirm(`Tem certeza que deseja apagar o lead "${lead.contact_name}"?`)) {
             await deleteLead(lead.id);
@@ -239,7 +233,6 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                 <LeadEnrichmentModal
                     isOpen={isEnrichOpen}
                     onClose={handleCloseEnrich}
-                    onEnrich={onEnrichSubmit}
                     initialCompany={selectedLead.company}
                     initialWebsite={''} // Add website if avail on lead
                 />

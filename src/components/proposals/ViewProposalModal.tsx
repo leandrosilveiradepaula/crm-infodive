@@ -192,7 +192,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     <StatusIcon className="h-2.5 w-2.5" /> {statusInfo.label}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-4 mt-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                            <div className="flex items-center gap-4 mt-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                                 <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
                                     <User className="h-3 w-3 text-primary" />
                                     <span className="truncate max-w-[200px]">{pseudoDeal.company}</span>
@@ -256,7 +256,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 <FileText className="h-8 w-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
                                                 <div className="absolute bottom-3 left-0 w-full text-center">
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">{label}</span>
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">{label}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -278,7 +278,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
                                         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-black/10 rounded-full blur-2xl" />
 
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-6 flex items-center gap-2">
+                                        <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-6 flex items-center gap-2">
                                             <ShieldCheck className="w-3.5 h-3.5" />
                                             Resumo Financeiro
                                         </p>
@@ -289,7 +289,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 <span className="text-xl font-bold">{formatCurrency(proposal.subtotal)}</span>
                                             </div>
                                             <div className="pt-2">
-                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Total Oportunidade</p>
+                                                <p className="text-xs font-black uppercase tracking-widest opacity-80 mb-2">Total Oportunidade</p>
                                                 <div className="flex justify-between items-baseline">
                                                     <span className="text-4xl font-black tracking-tight">{formatCurrency(proposal.total)}</span>
                                                     <span className="text-sm font-bold opacity-80 uppercase tracking-widest">BRL</span>
@@ -416,7 +416,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     {/* Status Control */}
                                     <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
                                         <div className="space-y-3">
-                                            <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1 flex items-center gap-2">
+                                            <label className="text-xs uppercase font-bold text-muted-foreground tracking-wider px-1 flex items-center gap-2">
                                                 <div className="h-1 w-1 bg-gray-400 rounded-full" />
                                                 Controle de Status
                                             </label>
@@ -454,11 +454,11 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                     </div>
                                                 </SelectTrigger>
                                                 <SelectContent className="font-bold">
-                                                    <SelectItem value={PROPOSAL_STATUS.DRAFT} className="text-muted-foreground uppercase text-[10px]">Draft (Rascunho)</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.SENT} className="text-primary uppercase text-[10px]">Enviada</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.VIEWED} className="text-stage-proposal uppercase text-[10px]">Visualizada</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.SIGNED} className="text-success uppercase text-[10px]">Assinada (Aceite Manual)</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.REJECTED} className="text-destructive uppercase text-[10px]">Rejeitada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.DRAFT} className="text-muted-foreground uppercase text-xs">Draft (Rascunho)</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.SENT} className="text-primary uppercase text-xs">Enviada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.VIEWED} className="text-stage-proposal uppercase text-xs">Visualizada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.SIGNED} className="text-success uppercase text-xs">Assinada (Aceite Manual)</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.REJECTED} className="text-destructive uppercase text-xs">Rejeitada</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>

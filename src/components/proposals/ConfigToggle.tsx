@@ -23,7 +23,7 @@ export function ConfigToggle({ label, description, icon: Icon, checked, onChange
                 </div>
                 <div>
                     <p className={`font-bold text-sm transition-colors ${checked ? 'text-primary' : 'text-foreground'}`}>{label}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{description}</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight">{description}</p>
                 </div>
             </div>
             <div className={`

@@ -25,11 +25,11 @@ export function LeadsTable({ leads, onEdit, onDelete, onConvert }: LeadsTablePro
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contato</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">Empresa</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">E-mail</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Status</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Interesse</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest">Contato</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">Empresa</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">E-mail</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Status</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Interesse</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
@@ -49,7 +49,7 @@ export function LeadsTable({ leads, onEdit, onDelete, onConvert }: LeadsTablePro
                                     </div>
                                     <div>
                                         <p className="font-bold text-foreground text-sm leading-tight">{lead.contact_name}</p>
-                                        {lead.phone && <p className="text-[10px] text-muted-foreground">{lead.phone}</p>}
+                                        {lead.phone && <p className="text-xs text-muted-foreground">{lead.phone}</p>}
                                     </div>
                                 </div>
                             </td>
@@ -61,7 +61,7 @@ export function LeadsTable({ leads, onEdit, onDelete, onConvert }: LeadsTablePro
                             </td>
                             <td className="px-4 py-3 hidden sm:table-cell">
                                 <span className={cn(
-                                    'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide',
+                                    'px-2 py-0.5 rounded-full text-xs font-black uppercase tracking-wide',
                                     statusColors[lead.status] || 'bg-muted text-muted-foreground'
                                 )}>
                                     {lead.status}
