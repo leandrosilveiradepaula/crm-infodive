@@ -7,9 +7,11 @@ on:
       - 'security/**'
       - 'ops/**'
       - 'product/**'
+      - 'factory/change-set-*'
   pull_request:
     branches:
       - main
+      - 'preview/**'
 
 concurrency:
   group: crm-validation-${{ github.workflow }}-${{ github.ref }}
