@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
       - main
+      - 'preview/**'
 
 concurrency:
   group: crm-validation-${{ github.workflow }}-${{ github.ref }}
