@@ -120,14 +120,22 @@ export class SettingsService {
         if (error || !Array.isArray(data) || data.length !== 1 ||
             !Number.isSafeInteger(data[0]?.revision) || data[0].revision < 0 ||
             !Array.isArray(data[0]?.stages) ||
-            data[0].stages.some((stage: unknown) => !stage || typeof stage !== 'object' ||
-                !this.isUuid((stage as PipelineStage).id))) {
+            data[0].stages.some((stage: unknown) => !this.isPipelineStage(stage))) {
             throw new Error('Não foi possível verificar a versão das etapas do pipeline.');
         }
         return {
             revision: data[0].revision as number,
             stages: data[0].stages.length ? data[0].stages as PipelineStage[] : DEFAULT_STAGES,
         };
+    }
+
+    private static isPipelineStage(value: unknown): value is PipelineStage {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+        const stage = value as PipelineStage;
+        return this.isUuid(stage.id) &&
+            typeof stage.name === 'string' && !!stage.name.trim() && stage.name.length <= 100 &&
+            typeof stage.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(stage.color) &&
+            Number.isSafeInteger(stage.order_index) && stage.order_index >= 0;
     }
 
     private static isUuid(value: unknown): value is string {
