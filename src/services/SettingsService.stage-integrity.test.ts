@@ -47,6 +47,7 @@ describe('pipeline stage transactional service boundary', () => {
     });
 
     it.each([
+        ['missing stage id', { name: 'Qualificação', color: '#abcdef', order_index: 0 }],
         ['missing name', { id, color: '#abcdef', order_index: 0 }],
         ['non-text name', { id, name: 1, color: '#abcdef', order_index: 0 }],
         ['blank name', { id, name: '   ', color: '#abcdef', order_index: 0 }],
