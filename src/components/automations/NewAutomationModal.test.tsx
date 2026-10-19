@@ -18,7 +18,7 @@ test('modal keeps condition data through steps and refuses invalid conditions be
     assert.match(modalSource, /setConditionError/);
     assert.match(modalSource, /if \(submitInFlight\.current\) return/);
     assert.match(modalSource, /await onSave\(/);
-    assert.match(modalSource, /The parent reports persistence failures; retain every local field for retry/);
+    assert.match(modalSource, /setSaveError\(error instanceof Error/);
 });
 
 test('modal exposes only runtime-confirmed condition operators and valueless semantics', () => {
