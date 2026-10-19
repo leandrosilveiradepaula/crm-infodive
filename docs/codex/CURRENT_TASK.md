@@ -694,3 +694,34 @@ production merge or real record mutation. **Important residual risk:** the
 delete+upsert pipeline stage replacement remains non-atomic and cannot be
 certified concurrent-safe without a PostgreSQL transaction and live DB tests
 (issue #125). Never mark that issue resolved from this batch.
+
+
+## Tarefa autorizada (2026-10-19): condições de Automações — piloto Factory
+
+Origem: demanda autorizada pelo operador, CRM issue #33, Factory continuation request ID 6e4a30f2-0a79-4786-8cce-c27c1db86425. Este é um novo trabalho da Factory, distinto das tarefas históricas e sem ampliação da autorização anterior para RPCs.
+
+Objetivo: implementar no modal realmente utilizado NewAutomationModal edição segura, validação local e persistência de condições conforme o runtime existente.
+
+### Arquivos de escrita permitidos, exclusivamente
+
+- docs/codex/CURRENT_TASK.md
+- src/components/automations/NewAutomationModal.tsx
+- src/lib/automation-builder-input.ts (se necessário)
+- src/lib/automation-builder-input.test.ts (se necessário)
+- src/components/automations/NewAutomationModal.test.tsx (se necessário)
+
+AGENTS.md, src/types/automation.ts, src/services/automationRuntimeCore.ts, src/app/(dashboard)/automations/client-page.tsx e demais contratos podem ser consultados, mas não modificados neste trabalho. AutomationBuilder.tsx fica fora do escopo.
+
+### Cinco blocos e critérios de aceite
+
+1. Editor de condições no fluxo ativo com campo, operador e valor, combinados por AND/OR; zero condições continua válido.
+2. Valores numéricos (incluindo 0), operadores sem valor e demais formatos devem respeitar os tipos e a semântica já disponíveis, com validação local antes de salvar.
+3. Preservar as condições ao navegar, editar e duplicar, transmitindo-as pelo payload existente. Filtro opcional de estágio para deal_moved e título de create_task somente se o contrato atual demonstrar suporte.
+4. Bloquear double-submit, manter dados após falhas e não relatar salvamento bem-sucedido sem resposta confirmada.
+5. Criar testes determinísticos de serialização, operadores, edição/duplicação e erro; CI com typecheck, lint, testes e build no SHA exato. Verificar Preview/browser quando aplicável.
+
+### Commits e PRs autorizados
+
+Commits e abertura de PR são autorizados apenas nos arquivos acima, em branch isolada baseada no SHA congelado pela Factory. Integrar exclusivamente à branch não produtiva preview/hardening-release-candidate após CI/review/verificações aplicáveis. A main do CRM não pode ser atualizada automaticamente, nem o runtime pode executar merge de produção.
+
+Proibidas mudanças de RPC, funções SQL, migrations, schema, RLS, RBAC, autenticação, credenciais, runtime de automação, persistência server-side, permissões, dados externos ou produção. Não comprar créditos nem gastar modelos para sondagem. AGENTS.md permanece obrigatório. Reportar SHA, diff, testes reais, CI, PR e evidências de Preview sem alegar conclusão antecipada.
