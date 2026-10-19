@@ -36,6 +36,7 @@ function draftsFromConditions(conditions: Condition[] | undefined): ConditionDra
         operator: condition.operator,
         value: condition.value,
         logic: condition.logic,
+        valueKind: typeof condition.value === 'number' ? 'number' : 'text',
     }));
 }
 
@@ -43,6 +44,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [conditionError, setConditionError] = useState<string | null>(null);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const submitInFlight = useRef(false);
     const [conditions, setConditions] = useState<ConditionDraft[]>(() => draftsFromConditions(initialData?.conditions));
     const [formData, setFormData] = useState<Partial<Automation>>({
@@ -72,7 +74,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     };
     const addCondition = () => {
         setConditionError(null);
-        setConditions((current) => [...current, { field: '', operator: 'equals', value: '', logic: 'AND' }]);
+        setConditions((current) => [...current, { field: '', operator: 'equals', value: '', logic: 'AND', valueKind: 'text' }]);
     };
     const removeCondition = (index: number) => {
         setConditionError(null);
@@ -85,6 +87,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
     const handleSubmit = async () => {
         if (submitInFlight.current) return;
+        setSaveError(null);
 
         let serializedConditions: Condition[];
         try {
@@ -106,8 +109,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 successCount: initialData?.successCount || 0,
                 failureCount: initialData?.failureCount || 0,
             });
-        } catch {
-            // The parent reports persistence failures; retain every local field for retry.
+        } catch (error) {
+            // The parent also displays a toast; retain all fields and show an inline retryable error.
+            setSaveError(error instanceof Error && error.message ? error.message : 'Não foi possível salvar a automação.');
         } finally {
             submitInFlight.current = false;
             setLoading(false);
@@ -149,6 +153,25 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                             <div className="space-y-3">{triggerTypes.map((type) => <button type="button" key={type.id} onClick={() => setFormData({ ...formData, trigger: { type: type.id, config: {} } })} className={`w-full text-left p-4 rounded-xl border ${formData.trigger?.type === type.id ? 'bg-primary/10 border-primary/40' : 'bg-muted/50 border-transparent'}`}>
                                 <h4 className="font-black">{type.label}</h4><p className="text-sm text-muted-foreground mt-0.5">{type.desc}</p>
                             </button>)}</div>
+                            {formData.trigger?.type === 'deal_moved' && (
+                                <label className="block mt-4 text-sm text-muted-foreground">
+                                    Estágio de destino (opcional)
+                                    <input
+                                        type="text"
+                                        aria-label="Estágio de destino"
+                                        placeholder="ID ou nome do estágio"
+                                        className="mt-2 w-full bg-card rounded-lg px-3 py-2"
+                                        value={formData.trigger.config.stage ?? ''}
+                                        onChange={(event) => setFormData((previous) => ({
+                                            ...previous,
+                                            trigger: {
+                                                type: previous.trigger?.type ?? 'deal_moved',
+                                                config: { ...previous.trigger?.config, stage: event.target.value },
+                                            },
+                                        }))}
+                                    />
+                                </label>
+                            )}
                         </section>
 
                         <section className="border-t border-border pt-6">
@@ -166,7 +189,25 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             {index > 0 && <select aria-label={`Lógica da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.logic)} onChange={(event) => updateCondition(index, { logic: event.target.value })}><option value="AND">E (AND)</option><option value="OR">OU (OR)</option></select>}
                                             <input aria-label={`Campo da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2 sm:col-span-1" placeholder="ex.: deal.value" value={typeof condition.field === 'string' ? condition.field : ''} onChange={(event) => updateCondition(index, { field: event.target.value })} />
                                             <select aria-label={`Operador da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.operator)} onChange={(event) => updateCondition(index, { operator: event.target.value, value: VALUELESS_CONDITION_OPERATORS.has(event.target.value as ConditionOperator) ? undefined : condition.value })}>{CONDITION_OPERATORS.map((operator) => <option key={operator} value={operator}>{conditionOperatorLabels[operator]}</option>)}</select>
-                                            {!valueless && <input aria-label={`Valor da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" placeholder="Valor" value={condition.value === undefined || condition.value === null ? '' : String(condition.value)} onChange={(event) => updateCondition(index, { value: event.target.value })} />}
+                                            {!valueless && (condition.operator === 'equals' || condition.operator === 'not_equals') && (
+                                                <select
+                                                    aria-label={`Tipo de valor da condição ${index + 1}`}
+                                                    value={condition.valueKind ?? 'text'}
+                                                    onChange={(event) => updateCondition(index, { valueKind: event.target.value as 'text' | 'number' })}
+                                                    className="bg-card rounded-lg px-3 py-2"
+                                                >
+                                                    <option value="text">Texto</option>
+                                                    <option value="number">Número</option>
+                                                </select>
+                                            )}
+                                            {!valueless && <input
+                                                aria-label={`Valor da condição ${index + 1}`}
+                                                className="bg-card rounded-lg px-3 py-2"
+                                                placeholder="Valor"
+                                                inputMode={condition.valueKind === 'number' || condition.operator === 'greater_than' || condition.operator === 'less_than' ? 'decimal' : 'text'}
+                                                value={condition.value === undefined || condition.value === null ? '' : String(condition.value)}
+                                                onChange={(event) => updateCondition(index, { value: event.target.value })}
+                                            />}
                                         </div>
                                     </div>;
                                 })}
@@ -175,6 +216,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                     </div>}
 
                     {step === 3 && <div className="space-y-6">
+                        {saveError && <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{saveError}</p>}
                         <div className="flex items-center justify-between"><label className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">O que deve acontecer?</label><button type="button" onClick={addAction} className="flex items-center gap-2 text-primary text-xs font-black"><Plus className="h-4 w-4" />Adicionar ação</button></div>
                         {formData.actions?.map((action, index) => <div key={index} className="bg-muted/30 p-5 rounded-xl border border-border relative">
                             <button type="button" aria-label={`Remover ação ${index + 1}`} onClick={() => setFormData({ ...formData, actions: (formData.actions || []).filter((_, itemIndex) => itemIndex !== index) })} className="absolute top-5 right-5 text-muted-foreground hover:text-destructive"><Trash2 className="h-5 w-5" /></button>

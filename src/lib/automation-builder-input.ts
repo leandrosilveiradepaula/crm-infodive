@@ -31,6 +31,8 @@ export interface ConditionDraft {
     operator: unknown;
     value?: unknown;
     logic: unknown;
+    /** Used for equals/not_equals so textual '0' stays distinct from numeric 0. */
+    valueKind?: 'text' | 'number';
 }
 
 export function isSafeConditionField(field: unknown): field is string {
@@ -49,12 +51,16 @@ function isConditionOperator(operator: unknown): operator is ConditionOperator {
     return typeof operator === 'string' && CONDITION_OPERATORS.includes(operator as ConditionOperator);
 }
 
-function normalizeComparableValue(operator: ConditionOperator, value: unknown): unknown {
-    if (NUMERIC_CONDITION_OPERATORS.has(operator)) {
+function normalizeComparableValue(
+    operator: ConditionOperator, value: unknown, valueKind?: 'text' | 'number'
+): unknown {
+    if (NUMERIC_CONDITION_OPERATORS.has(operator) ||
+        ((operator === 'equals' || operator === 'not_equals') && valueKind === 'number')) {
         if (typeof value === 'number' && Number.isFinite(value)) return value;
         if (typeof value !== 'string' || !value.trim()) return undefined;
 
-        const normalized = Number(value);
+        // Allow a single Brazilian decimal comma without accepting thousands formatting.
+        const normalized = Number(value.trim().replace(',', '.'));
         return Number.isFinite(normalized) ? normalized : undefined;
     }
 
@@ -79,7 +85,7 @@ export function normalizeAutomationConditions(input: unknown): Condition[] {
             throw new Error(`Condição ${index + 1} inválida.`);
         }
 
-        const { field, operator, value, logic } = draft as ConditionDraft;
+        const { field, operator, value, logic, valueKind } = draft as ConditionDraft;
         if (!isSafeConditionField(field)) {
             throw new Error(`Selecione um campo seguro na condição ${index + 1}.`);
         }
@@ -89,13 +95,16 @@ export function normalizeAutomationConditions(input: unknown): Condition[] {
         if (!isLogicOperator(logic)) {
             throw new Error(`Selecione AND ou OR na condição ${index + 1}.`);
         }
+        if (valueKind !== undefined && valueKind !== 'number' && valueKind !== 'text') {
+            throw new Error(`Selecione um tipo de valor válido na condição ${index + 1}.`);
+        }
 
         const normalizedField = field.trim();
         if (VALUELESS_CONDITION_OPERATORS.has(operator)) {
             return { field: normalizedField, operator, logic } as Condition;
         }
 
-        const normalizedValue = normalizeComparableValue(operator, value);
+        const normalizedValue = normalizeComparableValue(operator, value, valueKind);
         if (normalizedValue === undefined) {
             throw new Error(`Informe um valor compatível na condição ${index + 1}.`);
         }

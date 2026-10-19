@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import test from 'node:test';
+import { test } from 'vitest';
 
 const modalSource = readFileSync(resolve(process.cwd(), 'src/components/automations/NewAutomationModal.tsx'), 'utf8');
 
@@ -26,4 +26,18 @@ test('modal exposes only runtime-confirmed condition operators and valueless sem
     assert.match(modalSource, /VALUELESS_CONDITION_OPERATORS\.has/);
     assert.match(modalSource, /E \(AND\)/);
     assert.match(modalSource, /OU \(OR\)/);
+});
+
+test('supported deal-moved stage filter and typed equality are available to the editor', () => {
+    assert.match(modalSource, /Estágio de destino/);
+    assert.match(modalSource, /Tipo de valor da condição/);
+    assert.match(modalSource, /valueKind/);
+    assert.match(modalSource, /inputMode=/);
+});
+
+test('save errors are visible without discarding draft inputs', () => {
+    assert.match(modalSource, /setSaveError/);
+    assert.match(modalSource, /saveError &&/);
+    assert.match(modalSource, /role="alert"/);
+    assert.match(modalSource, /setFormData/);
 });

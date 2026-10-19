@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import { test } from 'vitest';
 import { isSafeConditionField, normalizeAutomationConditions } from './automation-builder-input';
+import { evaluateConditions } from '../services/automationRuntimeCore';
 
 test('normalizes supported condition operators and preserves explicit zero', () => {
     assert.deepEqual(normalizeAutomationConditions([
@@ -42,5 +43,30 @@ test('rejects unsafe paths, unsupported operators, invalid logic, and missing re
     ]));
     assert.throws(() => normalizeAutomationConditions([
         { field: 'stage', operator: 'contains', value: '   ', logic: 'AND' },
+    ]));
+});
+
+test('numeric and textual equality remain distinct through actual runtime evaluation', () => {
+    const numeric = normalizeAutomationConditions([
+        { field: 'deal.value', operator: 'equals', value: '0', logic: 'AND', valueKind: 'number' },
+    ]);
+    const textual = normalizeAutomationConditions([
+        { field: 'deal.value', operator: 'equals', value: '0', logic: 'AND', valueKind: 'text' },
+    ]);
+    assert.equal(numeric[0].value, 0);
+    assert.equal(textual[0].value, '0');
+    assert.equal(evaluateConditions(numeric, { deal: { value: 0 } }), true);
+    assert.equal(evaluateConditions(textual, { deal: { value: 0 } }), false);
+    assert.equal(evaluateConditions(textual, { deal: { value: '0' } }), true);
+});
+
+test('rejects malformed numeric inputs and invalid value type hints', () => {
+    for (const value of ['', 'not a number', 'Infinity']) {
+        assert.throws(() => normalizeAutomationConditions([
+            { field: 'deal.value', operator: 'equals', value, valueKind: 'number', logic: 'AND' },
+        ]));
+    }
+    assert.throws(() => normalizeAutomationConditions([
+        { field: 'deal.value', operator: 'equals', value: '1', valueKind: 'float', logic: 'AND' },
     ]));
 });
