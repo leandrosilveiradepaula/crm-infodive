@@ -5,7 +5,7 @@ import {
     X, Zap, ArrowRight, ArrowLeft, Bell, RefreshCw, UserPlus, Settings,
     CheckCircle2, Plus, Trash2,
 } from 'lucide-react';
-import type { Action, ActionType, Automation, Condition, TriggerType } from '@/types/automation';
+import type { Action, ActionType, Automation, Condition, ConditionOperator, TriggerType } from '@/types/automation';
 import {
     CONDITION_OPERATORS,
     VALUELESS_CONDITION_OPERATORS,
@@ -159,13 +159,13 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                             {conditionError && <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{conditionError}</p>}
                             <div className="space-y-3 mt-4">
                                 {conditions.map((condition, index) => {
-                                    const valueless = VALUELESS_CONDITION_OPERATORS.has(condition.operator as any);
+                                    const valueless = VALUELESS_CONDITION_OPERATORS.has(condition.operator as ConditionOperator);
                                     return <div key={index} className="rounded-xl border border-border bg-muted/30 p-4">
                                         <div className="flex items-center justify-between mb-3"><span className="text-xs font-bold text-muted-foreground">{index === 0 ? 'SE' : condition.logic === 'OR' ? 'OU' : 'E'}</span><button type="button" aria-label={`Remover condição ${index + 1}`} onClick={() => removeCondition(index)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button></div>
                                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                             {index > 0 && <select aria-label={`Lógica da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.logic)} onChange={(event) => updateCondition(index, { logic: event.target.value })}><option value="AND">E (AND)</option><option value="OR">OU (OR)</option></select>}
                                             <input aria-label={`Campo da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2 sm:col-span-1" placeholder="ex.: deal.value" value={typeof condition.field === 'string' ? condition.field : ''} onChange={(event) => updateCondition(index, { field: event.target.value })} />
-                                            <select aria-label={`Operador da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.operator)} onChange={(event) => updateCondition(index, { operator: event.target.value, value: VALUELESS_CONDITION_OPERATORS.has(event.target.value as any) ? undefined : condition.value })}>{CONDITION_OPERATORS.map((operator) => <option key={operator} value={operator}>{conditionOperatorLabels[operator]}</option>)}</select>
+                                            <select aria-label={`Operador da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.operator)} onChange={(event) => updateCondition(index, { operator: event.target.value, value: VALUELESS_CONDITION_OPERATORS.has(event.target.value as ConditionOperator) ? undefined : condition.value })}>{CONDITION_OPERATORS.map((operator) => <option key={operator} value={operator}>{conditionOperatorLabels[operator]}</option>)}</select>
                                             {!valueless && <input aria-label={`Valor da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" placeholder="Valor" value={condition.value === undefined || condition.value === null ? '' : String(condition.value)} onChange={(event) => updateCondition(index, { value: event.target.value })} />}
                                         </div>
                                     </div>;
