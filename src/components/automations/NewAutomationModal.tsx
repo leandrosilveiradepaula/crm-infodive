@@ -10,7 +10,8 @@ import {
     CONDITION_OPERATORS,
     VALUELESS_CONDITION_OPERATORS,
     type ConditionDraft,
-    normalizeAutomationConditions,
+    conditionFieldsForTrigger,
+    normalizeConditionsForTrigger,
 } from '@/lib/automation-builder-input';
 
 interface NewAutomationModalProps {
@@ -67,6 +68,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         { id: 'deal_moved', label: 'Oportunidade Movida', desc: 'Quando uma oportunidade mudar de estágio' },
     ];
     const actionTypes: { id: ActionType; label: string }[] = [{ id: 'create_task', label: 'Criar Tarefa' }];
+    const supportedConditionFields = conditionFieldsForTrigger(formData.trigger?.type);
 
     const updateCondition = (index: number, patch: Partial<ConditionDraft>) => {
         setConditionError(null);
@@ -91,7 +93,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
         let serializedConditions: Condition[];
         try {
-            serializedConditions = normalizeAutomationConditions(conditions);
+            serializedConditions = normalizeConditionsForTrigger(conditions, formData.trigger?.type);
         } catch (error) {
             setConditionError(error instanceof Error ? error.message : 'Condições inválidas.');
             setStep(2);
@@ -176,7 +178,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
                         <section className="border-t border-border pt-6">
                             <div className="flex items-center justify-between gap-4 mb-2">
-                                <div><h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Condições opcionais</h3><p className="text-sm text-muted-foreground mt-2">Sem condições, todo evento deste gatilho é elegível.</p></div>
+                                <div><h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em]">Condições opcionais</h3><p className="text-sm text-muted-foreground mt-2">Sem condições, todo evento deste gatilho é elegível. Selecione um campo recebido pelo evento para evitar regras impossíveis.</p></div>
                                 <button type="button" onClick={addCondition} className="flex items-center gap-2 text-primary text-xs font-black"><Plus className="h-4 w-4" />Adicionar condição</button>
                             </div>
                             {conditionError && <p role="alert" className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{conditionError}</p>}
@@ -187,7 +189,10 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                         <div className="flex items-center justify-between mb-3"><span className="text-xs font-bold text-muted-foreground">{index === 0 ? 'SE' : condition.logic === 'OR' ? 'OU' : 'E'}</span><button type="button" aria-label={`Remover condição ${index + 1}`} onClick={() => removeCondition(index)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button></div>
                                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                                             {index > 0 && <select aria-label={`Lógica da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.logic)} onChange={(event) => updateCondition(index, { logic: event.target.value })}><option value="AND">E (AND)</option><option value="OR">OU (OR)</option></select>}
-                                            <input aria-label={`Campo da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2 sm:col-span-1" placeholder="ex.: deal.value" value={typeof condition.field === 'string' ? condition.field : ''} onChange={(event) => updateCondition(index, { field: event.target.value })} />
+                                            <select aria-label={`Campo da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2 sm:col-span-1" value={typeof condition.field === 'string' ? condition.field : ''} onChange={(event) => updateCondition(index, { field: event.target.value })}>
+                                                <option value="">Selecione um campo</option>
+                                                {supportedConditionFields.map((field) => <option key={field.value} value={field.value}>{field.label}</option>)}
+                                            </select>
                                             <select aria-label={`Operador da condição ${index + 1}`} className="bg-card rounded-lg px-3 py-2" value={String(condition.operator)} onChange={(event) => updateCondition(index, { operator: event.target.value, value: VALUELESS_CONDITION_OPERATORS.has(event.target.value as ConditionOperator) ? undefined : condition.value })}>{CONDITION_OPERATORS.map((operator) => <option key={operator} value={operator}>{conditionOperatorLabels[operator]}</option>)}</select>
                                             {!valueless && (condition.operator === 'equals' || condition.operator === 'not_equals') && (
                                                 <select
