@@ -7,7 +7,7 @@ const modalSource = readFileSync(resolve(process.cwd(), 'src/components/automati
 
 test('condition editor initializes existing conditions and serializes them before save', () => {
     assert.match(modalSource, /draftsFromConditions\(initialData\?\.conditions\)/);
-    assert.match(modalSource, /normalizeAutomationConditions\(conditions\)/);
+    assert.match(modalSource, /normalizeConditionsForTrigger\(conditions, formData\.trigger\?\.type\)/);
     assert.match(modalSource, /conditions: serializedConditions/);
     assert.match(modalSource, /Adicionar condição/);
     assert.match(modalSource, /Remover condição/);
@@ -40,4 +40,20 @@ test('save errors are visible without discarding draft inputs', () => {
     assert.match(modalSource, /saveError &&/);
     assert.match(modalSource, /role="alert"/);
     assert.match(modalSource, /setFormData/);
+});
+
+
+test('condition field selector is sourced from the active event contract', () => {
+    assert.match(modalSource, /conditionFieldsForTrigger\(formData\.trigger\?\.type\)/);
+    assert.match(modalSource, /supportedConditionFields\.map/);
+    assert.match(modalSource, /Selecione um campo/);
+    assert.doesNotMatch(modalSource, /placeholder="ex\.: deal\.value"/);
+});
+
+test('edit and duplicate preserve the existing condition payload path', () => {
+    const page = readFileSync(resolve(process.cwd(), 'src/app/(dashboard)/automations/client-page.tsx'), 'utf8');
+    assert.match(page, /conditions: automation\.conditions/);
+    assert.match(page, /initialData=\{initialModalData\}/);
+    assert.match(modalSource, /draftsFromConditions\(initialData\?\.conditions\)/);
+    assert.match(modalSource, /conditions: serializedConditions/);
 });

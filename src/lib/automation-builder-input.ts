@@ -1,4 +1,4 @@
-import type { Condition, ConditionOperator, LogicOperator } from '@/types/automation';
+import type { Condition, ConditionOperator, LogicOperator, TriggerType } from '@/types/automation';
 
 export const CONDITION_OPERATORS: readonly ConditionOperator[] = [
     'equals',
@@ -116,4 +116,46 @@ export function normalizeAutomationConditions(input: unknown): Condition[] {
             logic,
         };
     });
+}
+
+type RuntimeConditionTrigger = Extract<TriggerType, 'deal_created' | 'deal_moved'>;
+export type RuntimeConditionField = { value: string; label: string };
+
+/**
+ * The actual events in pipeline/actions.ts supply flat fields (not
+ * "deal.value"). Stage movement does not supply monetary value.
+ */
+const EVENT_CONDITION_FIELDS: Readonly<Record<RuntimeConditionTrigger, readonly RuntimeConditionField[]>> = {
+    deal_created: [
+        { value: 'title', label: 'Título da oportunidade' },
+        { value: 'stage', label: 'Etapa da oportunidade' },
+        { value: 'value', label: 'Valor da oportunidade' },
+    ],
+    deal_moved: [
+        { value: 'title', label: 'Título da oportunidade' },
+        { value: 'stage', label: 'Etapa de destino' },
+    ],
+};
+
+export function conditionFieldsForTrigger(trigger: unknown): readonly RuntimeConditionField[] {
+    if (trigger === 'deal_created') return EVENT_CONDITION_FIELDS.deal_created;
+    if (trigger === 'deal_moved') return EVENT_CONDITION_FIELDS.deal_moved;
+    return [];
+}
+
+/**
+ * Reject conditions referring to absent event fields before persisting.
+ * This only constrains the editor, never widens the runtime or database.
+ */
+export function normalizeConditionsForTrigger(drafts: unknown, trigger: unknown): Condition[] {
+    const fields = conditionFieldsForTrigger(trigger);
+    if (!fields.length) throw new Error('Selecione um gatilho de automação suportado.');
+    const conditions = normalizeAutomationConditions(drafts);
+    conditions.forEach((condition, index) => {
+        if (!fields.some((field) => field.value === condition.field)) {
+            throw new Error('O campo "' + condition.field +
+                '" não está disponível no evento selecionado (condição ' + (index + 1) + ').');
+        }
+    });
+    return conditions;
 }
