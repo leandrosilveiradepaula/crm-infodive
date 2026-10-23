@@ -725,3 +725,36 @@ AGENTS.md, src/types/automation.ts, src/services/automationRuntimeCore.ts, src/a
 Commits e abertura de PR são autorizados apenas nos arquivos acima, em branch isolada baseada no SHA congelado pela Factory. Integrar exclusivamente à branch não produtiva preview/hardening-release-candidate após CI/review/verificações aplicáveis. A main do CRM não pode ser atualizada automaticamente, nem o runtime pode executar merge de produção.
 
 Proibidas mudanças de RPC, funções SQL, migrations, schema, RLS, RBAC, autenticação, credenciais, runtime de automação, persistência server-side, permissões, dados externos ou produção. Não comprar créditos nem gastar modelos para sondagem. AGENTS.md permanece obrigatório. Reportar SHA, diff, testes reais, CI, PR e evidências de Preview sem alegar conclusão antecipada.
+
+## Tarefa autorizada (2026-10-23): integridade do diagnóstico de oportunidades — CRM issue #24 / piloto Factory
+
+**Origem autenticada:** pedido específico do operador na Factory issue #1055, comentário OWNER #6352504189, `/factory-start crm-infodive`, para auditar e corrigir lacunas reais da **CRM issue #24**. A aprovação desta seção pelo merge na branch não produtiva `preview/hardening-release-candidate` constitui a atualização explícita de escopo exigida por `AGENTS.md`. Não se deve confundir a autorização anterior para a issue #33 com este trabalho. Não converter requisitos gerais de #24 em autorização para editar arquivos arbitrários.
+
+**Evidências no candidato congelado** `184adae8ecf246790f51d9dc01e7145d14c6b458` (código real, não testes executados nesta proposta):
+
+- `src/lib/gemini.ts`: `analyzeDeal` omite `deal.id` no POST para `/api/gemini/analyze-deal` e, ao receber HTTP não-2xx, fabrica análise local com `healthScore` 8/5/3 e status/tendência.
+- `src/app/api/gemini/analyze-deal/route.ts`: valida `body.deal.id` como UUID antes de trabalhar e obtém dados confiáveis do banco por `organization_id`, autorização e escopo de usuário. Esse caminho já faz parse/validação de modelo e só persiste um resultado aceito. Não relaxar a validação para compensar o cliente incorreto.
+- `src/components/pipeline/ai/DealDoctorFinal.tsx` recebe esse fallback como análise bem-sucedida, representa `healthScore/100` e chama `onAnalysisComplete`. O callback no `ViewDealModal.tsx` atualiza o estado visual de saúde da oportunidade, apesar da falha. Foram identificados logs de análise e do objeto da oportunidade que devem ser retirados do fluxo alterado.
+- As correções antigas de mocks, navegação, branding, hook legado e editor de condições já presentes em #56 não são escopo para retrabalho. O restante da auditoria ampla de responsividade e acessibilidade exige evidência de navegador, não suposição.
+
+### Escopo de escrita permitido exclusivamente para esta tarefa
+
+1. `docs/codex/CURRENT_TASK.md` — apenas registrar progresso e evidência desta autorização.
+2. `src/lib/gemini.ts` — corrigir contrato do POST, evitar fallback que fabrica escore/estado e expor falha legível sem dados sensíveis.
+3. `src/components/pipeline/ai/DealDoctorFinal.tsx` — preservar estado de erro e não sinalizar análise concluída quando o backend falhar; remover logs de payload/resposta de IA.
+4. `src/components/pipeline/ViewDealModal.tsx` — impedir propagação de dados de diagnóstico não confirmados e retirar logs detalhados dessa integração; preservar o comportamento da oportunidade quando análise válida.
+5. `src/lib/ai-deal-diagnosis-truthfulness.test.ts` (novo, se necessário) e `src/components/pipeline/ai/DealDoctorFinal.test.tsx` (novo, se necessário) — regressões determinísticas locais dos mesmos contratos.
+
+**Somente leitura (nunca modificar nesta tarefa):** `AGENTS.md`, `src/app/api/gemini/analyze-deal/route.ts`, `src/lib/deal-diagnosis-validation.ts`, `src/types/deal.ts`, `src/components/pipeline/ai/AIDealSummaryHeader.tsx`, `src/components/pipeline/ai/RiskRadar.tsx` e arquivos de configuração. Caso um defeito adicional seja comprovado fora da lista de escrita, registrar evidência e tratar como novo escopo explícito, não expandir automaticamente.
+
+### Cinco blocos verificáveis
+
+1. **Contrato e segurança:** enviar apenas o identificador `deal.id` (UUID) exigido pelo endpoint de análise; nunca depender de `title`, `company` ou atividades informadas pelo browser para autorizar contexto. Preservar escopo tenant e autorização server-side existentes.
+2. **Falha verdadeira:** HTTP 4xx/5xx, rede interrompida, resposta malformada e API indisponível não podem produzir `healthScore`, tendência, status saudável ou recomendações apresentadas como análise concluída. Não invocar provedores pagos em testes.
+3. **Interface honesta:** erro visível, retry explícito, preservação da oportunidade original e ausência de `onAnalysisComplete`/atualização de estado quando falhar; somente resposta de análise confirmada pode atualizar o painel. Remover logs que possam expor dados de negócio ou resposta do modelo.
+4. **Regressão offline:** cobrir POST contendo ID, tratamento HTTP/rede/resposta inválida, sucesso válido e ausência de fallback fabricado; incluir teste de comportamento do componente somente quando possível no harness existente, sem instalar dependências novas por conveniência.
+5. **Entrega e governança:** validar diff estritamente no escopo, typecheck/lint/testes/build, CI nativa no SHA final e Preview/browser quando aplicável. Reportar o que de fato executou. Criar PR apenas contra branch não produtiva `preview/hardening-release-candidate`, não contra `main`; seguir controle de SHA/repin do Control Plane antes de nova execução. Nunca declarar product readiness global por esta correção.
+
+### Autorizações e proibições
+
+Commits e PRs ficam autorizados **somente após esta seção integrar a branch candidata por revisão/merge**, e apenas nos cinco grupos de arquivos permitidos acima. Proibidos merge de produção, bypass de gates, alteração de permissões/RBAC/RLS, RPC/migration/schema, criação de serviço pago, mudanças em Vercel/n8n, compra de créditos, reexecução de benchmark, testes pagos de sondagem, force-push, retorno de mocks e retomar tarefas históricas. Usar ferramentas determinísticas e testes offline primeiro. A Factory deve continuar até CI/Review/Preview aplicável/`awaiting_release` e parar antes do merge de produção.
