@@ -11,6 +11,17 @@ import { FilterBar } from '@/components/layout/FilterBar';
 
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 
+type ReportDeal = {
+    id: string;
+    title: string;
+    created_at: string;
+    company: string;
+    owner?: string;
+    stage: string;
+    value: number;
+    probability: number;
+};
+
 export function ReportsClientPage() {
     const {
         stats, mappedDeals, searchTerm, setSearchTerm, sellerFilter, setSellerFilter,
@@ -118,8 +129,8 @@ export function ReportsClientPage() {
             <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <div className="flex justify-between items-center mb-6"><div><h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-1"><Target aria-hidden="true" className="h-4 w-4 text-primary" />Detalhamento das Oportunidades</h3><p className="text-xs text-muted-foreground uppercase tracking-wider font-bold">{mappedDeals.length} resultados encontrados para os filtros atuais</p></div></div>
                 <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-border"><th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Oportunidade</th><th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Empresa</th><th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Vendedor</th><th className="pb-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Status</th><th className="pb-4 text-right text-xs font-black text-muted-foreground uppercase tracking-widest">Valor</th></tr></thead><tbody className="divide-y divide-border">
-                    {mappedDeals.map((deal: any) => <tr key={deal.id} className="group hover:bg-muted/30 transition-colors"><td className="py-2.5"><p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p><p className="text-xs text-muted-foreground uppercase font-black tracking-tighter opacity-70">{new Date(deal.created_at).toLocaleDateString()}</p></td><td className="py-4"><span className="text-sm text-foreground/80">{deal.company}</span></td><td className="py-4"><div className="flex items-center gap-2"><div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{deal.owner?.charAt(0)}</div><span className="text-sm text-foreground/80">{deal.owner}</span></div></td><td className="py-4"><span className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${deal.stage === 'won' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : deal.stage === 'lost' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>{deal.stage === 'qualification' ? 'Qualificação' : deal.stage === 'proposal' ? 'Proposta' : deal.stage === 'negotiation' ? 'Negociação' : deal.stage === 'won' ? 'Ganhou' : 'Perdeu'}</span></td><td className="py-4 text-right"><p className="font-bold text-foreground">{formatCurrency(deal.value)}</p><p className="text-xs text-muted-foreground font-bold">{deal.probability}% Prob.</p></td></tr>)}
-                    {mappedDeals.length === 0 && <tr><td colSpan={5} className="py-20 text-center"><p role="status" aria-live="polite" className="text-sm text-muted-foreground">Nenhuma oportunidade encontrada para estes filtros.</p></td></tr>}
+                    {mappedDeals.map((deal: ReportDeal) => <tr key={deal.id} aria-label={`Oportunidade ${deal.title}`} className="group hover:bg-muted/30 transition-colors"><td className="py-2.5"><p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p><p className="text-xs text-muted-foreground uppercase font-black tracking-tighter opacity-70">{new Date(deal.created_at).toLocaleDateString()}</p></td><td className="py-4"><span className="text-sm text-foreground/80">{deal.company}</span></td><td className="py-4"><div className="flex items-center gap-2"><div aria-label={`Vendedor ${deal.owner || 'Desconhecido'}`} className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{deal.owner?.charAt(0)}</div><span className="text-sm text-foreground/80">{deal.owner}</span></div></td><td className="py-4"><span className={`px-2 py-1 rounded-full text-xs font-black uppercase tracking-widest border ${deal.stage === 'won' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : deal.stage === 'lost' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-primary/10 text-primary border-primary/20'}`}>{deal.stage === 'qualification' ? 'Qualificação' : deal.stage === 'proposal' ? 'Proposta' : deal.stage === 'negotiation' ? 'Negociação' : deal.stage === 'won' ? 'Ganhou' : 'Perdeu'}</span></td><td className="py-4 text-right"><p className="font-bold text-foreground">{formatCurrency(deal.value)}</p><p className="text-xs text-muted-foreground font-bold">{deal.probability}% Prob.</p></td></tr>)}
+                    {mappedDeals.length === 0 && <tr aria-label="Nenhuma oportunidade encontrada"><td colSpan={5} className="py-20 text-center"><p role="status" aria-live="polite" className="text-sm text-muted-foreground">Nenhuma oportunidade encontrada para estes filtros.</p></td></tr>}
                 </tbody></table></div>
             </div>
         </div>
