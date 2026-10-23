@@ -68,10 +68,11 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const bundle = fs.readFileSync(require.resolve('pptxgenjs'), 'utf8');
-          if (/require\\(['\"]image-size['\"]\\)|from ['\"]image-size['\"]/.test(bundle)) {
+          if (bundle.includes("require('image-size')") || bundle.includes('from "image-size"')) {
             throw new Error('pptxgenjs started importing image-size: override needs review');
           }
-          if (require('image-size/package.json').version !== '2.0.4') {
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          if (lock.packages['node_modules/image-size']?.version !== '2.0.4') {
             throw new Error('image-size 2.0.4 override not honored');
           }
           console.log('IMAGE_SIZE_OVERRIDE_VERIFIED');
