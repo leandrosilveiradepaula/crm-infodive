@@ -769,3 +769,12 @@ O operador autorizou explicitamente corrigir as vulnerabilidades de dependência
 - `docs/codex/CURRENT_TASK.md`: documentar decisões e a evidência de CI da correção de segurança.
 
 O bloqueio `Dependency audit regression guard` é obrigatório. Não alterar `config/dependency-audit-baseline.json`, `scripts/audit-dependencies.mjs`, credenciais, migrations, RLS/RBAC, workflows de produção ou qualquer arquivo de produto fora da lista autorizada anteriormente. Se a correção não superar o gate mantendo esta lista de escrita, relatar o impeditivo em vez de burlar a proteção. O escopo de correção funcional do diagnóstico de oportunidades permanece o da seção anterior, sem alterações de produção.
+
+
+### Evidência de remediação de dependências (23/10/2026, sem modelo pago)
+
+- Orquestração determinística do lockfile feita em `Temporary CRM dependency lock repair`, [run #39898072095](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/39898072095), concluída com sucesso. Último commit do pacote gerado pelo npm: `c7d2224092d2c26cd273ed17fe90f340003d9c51`.
+- `next` e `eslint-config-next` atualizados do `16.4.0` para `16.4.2`; `pptxgenjs` preservado em `4.0.1` com override determinístico `image-size: 2.0.4`. Isso corrige a vulnerabilidade transitiva sem perder as correções funcionais do PptxGenJS 4.0.1.
+- `npm install --package-lock-only --ignore-scripts`, `npm audit fix --package-lock-only --ignore-scripts` e `npm ci --ignore-scripts` concluídos no Actions Node 22. O scanner `node scripts/audit-dependencies.mjs` do CRM reportou `critical=0`, `high=0`, `moderate=2`, `low=0`, sem alterar o baseline. O script validou que `image-size` 2.0.4 foi resolvido no lock e não é importado no bundle principal do `pptxgenjs`.
+- Smoke de funcionalidade: `PPTX_SMOKE_OK bytes=44756` — geração real de arquivo PPTX em memória. Esta evidência **não** substitui a CI completa nem valida todas as jornadas autenticadas.
+- O workflow temporário usado para gerar o lockfile foi **removido no mesmo candidato** antes de qualquer merge; nenhuma nova autorização de token, mudança de configuração de produção, gasto de IA ou Preview manual. Os testes de CI no HEAD **final** ainda devem ser avaliados.
