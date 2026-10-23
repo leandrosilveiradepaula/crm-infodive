@@ -786,3 +786,25 @@ O bloqueio `Dependency audit regression guard` é obrigatório. Não alterar `co
 - Removido o fallback que gerava scores artificiais 8/5/3 e conclusão falsa quando a API falhava. HTTP não-2xx, exceção de rede, JSON inválido ou diagnóstico fora de contrato propagam erro seguro, sem atualizar status/tendência/fatores de risco.
 - `DealDoctorFinal` preserva erro visível e não chama `onAnalysisComplete` no caminho de falha; remove logs com payload do negócio. `ViewDealModal` continua atualizando o estado visual somente em resposta à análise válida/confirmada.
 - Regressões offline em `src/lib/ai-deal-diagnosis-truthfulness.test.ts`; concluir apenas após o GitHub Actions `CRM validation` (TS/lint/audit/test/build/browser) verde no SHA exato. Nenhuma chamada paga de IA está incluída.
+
+
+## Tarefa autorizada (2026-10-23): corrigir diagnóstico operacional do Preview — CRM issue #23
+
+**Origem:** orientação do operador no projeto Esteira de Desenvolvimento em 23/10/2026: deixar de repetir o bloqueio HTTP 503 e implementar solução verificável, sem operar produção nem acessar secrets fora do runtime. O código já provou que o Preview do SHA `29f6e26a34ebd2be3e0af1fae9a131778c4eed38` serve `/login` (200) e retorna `/api/health` 503 com `configuration: ok`, `database: failed`. O Preview anterior mostra a mesma falha. O CRM Supabase `mpmhmjepmmpxbsmekldf` não está acessível na conexão Supabase atual; isso não autoriza mudar o projeto-alvo, credenciais ou RLS.
+
+### Escrita autorizada (somente estes arquivos)
+
+- `docs/codex/CURRENT_TASK.md` — registro desta tarefa e testes reais.
+- `src/app/api/health/route.ts` — reduzir trabalho desnecessário do readiness SELECT e registrar a classificação objetiva do erro em log **server-side** com código permitido, preservando resposta pública mínima e o retorno 503 verdadeiro enquanto houver falha.
+- `src/lib/health-readiness-diagnostics.ts` — classificador puro, sem segredos, sem rede, com enumeração fechada por códigos PostgREST/status conhecidos.
+- `src/lib/health-readiness-diagnostics.test.ts` — regressões offline: 401/403, PGRST205/42P01, exceção de transporte, desconhecidos, DB válido e ausência de vazamento de mensagens/chaves.
+
+Não editar `src/lib/supabase/admin.ts`, `src/lib/operational-events.ts`, rotas de negócio, middleware, esquema, RLS/RBAC, migrations, `.env`, workflows, `vercel.json` nem componentes. **Sem** var de ambiente nova, redistribuição de credenciais, tokens em logs, debug público detalhado, chamada paga de IA, benchmark 63 ou deployment de produção.
+
+### Resultado exigido
+
+1. Identificar razão de health por categoria não sensível via telemetria restrita do Vercel, mantendo `/api/health` público com apenas estados `ok/failed`, requestId e latência.
+2. Evitar `count: exact` num endpoint de readiness: fazer HEAD limitada sem varredura global, preservando falha para tabela/credencial inválida.
+3. Provar ausência de dados do provedor, SQL, URLs privadas ou mensagens de exceção no log e resposta. Testes TypeScript, lint, Vitest, build e CI nativa exata; Preview Vercel só depois do merge em `preview/hardening-release-candidate`.
+4. Se o erro exigir troca de chave, acesso ao projeto Supabase ou migration, parar nesse gate externo **com categoria comprovada**, sem fingir que foi corrigido. Corrigir no próprio código somente problemas sustentados pela evidência.
+5. Commits e PR autorizados na branch de desenvolvimento desta tarefa, com merge exclusivo na branch `preview/hardening-release-candidate` após CI; a `main` e PR #56 permanecem sob gate humano. Esta tarefa substitui outras tarefas históricas como escopo ativo e não as reabre.
