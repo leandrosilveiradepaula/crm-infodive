@@ -728,7 +728,7 @@ Proibidas mudanças de RPC, funções SQL, migrations, schema, RLS, RBAC, autent
 
 ## Tarefa autorizada (2026-10-23): integridade do diagnóstico de oportunidades — CRM issue #24 / piloto Factory
 
-**Origem autenticada:** pedido específico do operador na Factory issue #1055, comentário OWNER #6352504189, `/factory-start crm-infodive`, para auditar e corrigir lacunas reais da **CRM issue #24**. A aprovação desta seção pelo merge na branch não produtiva `preview/hardening-release-candidate` constitui a atualização explícita de escopo exigida por `AGENTS.md`. Não se deve confundir a autorização anterior para a issue #33 com este trabalho. Não converter requisitos gerais de #24 em autorização para editar arquivos arbitrários.
+**Origem autenticada:** pedido específico do operador na registro de entrada da Factory #1055, comentário OWNER #6352504189, `/factory-start crm-infodive`, para auditar e corrigir lacunas reais da **CRM issue #24**. A aprovação desta seção pelo merge na branch não produtiva `preview/hardening-release-candidate` constitui a atualização explícita de escopo exigida por `AGENTS.md`. Não se deve confundir a autorização anterior para a tarefa anterior #33 com este trabalho. Não converter requisitos gerais de #24 em autorização para editar arquivos arbitrários.
 
 **Evidências no candidato congelado** `184adae8ecf246790f51d9dc01e7145d14c6b458` (código real, não testes executados nesta proposta):
 
