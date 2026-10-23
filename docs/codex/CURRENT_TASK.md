@@ -4,9 +4,9 @@ Este documento contém **somente a tarefa vigente**. O histórico integral anter
 
 O histórico é material de auditoria e **não concede autorizações de escrita novas**, não reabre tarefas antigas, não substitui os gates atuais nem prova que a Prova 1 terminou. Antes de trabalhar, verificar `AGENTS.md` e a seção ativa abaixo no mesmo SHA.
 
-## Tarefa ativa (23/10/2026) — Prova 1 da Factory: filtros acessíveis em Relatórios (#24)
+## Tarefa autorizada (2026-10-23): Prova 1 da Factory — filtros acessíveis em Relatórios (CRM issue #24)
 
-**Autorização do operador:** comentário OWNER no CRM #24, id 6371354929, em
+**Autorização do operador:** CRM issue #24, comentário OWNER id 6371354929, em
 https://github.com/leandrosilveiradepaula/crm-infodive/issues/24#issuecomment-6371354929.
 É trabalho **real do CRM** para certificar uma única jornada da AI Product Factory,
 não benchmark artificial nem replay das execuções anteriores. Esta seção substitui
