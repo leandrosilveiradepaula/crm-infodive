@@ -60,3 +60,9 @@ quando etapa legítima exigir, sob reserva e ledger real do Control Plane.
 Não forçar reparos de CI, não criar Preview repetitivo nem reabrir backlog
 antigo. Se Preview remoto ou CRM Supabase ficar indisponível, registrar
 `blocked_external_dependency` com evidência exata em vez de alegar PASS.
+
+### Evidência factual desta alteração
+
+- Candidato identificado no pacote de contexto: branch `factory/cs-bd46da70/reports-filter-accessibility`, com base exata informada `0a663e83668bbc3ba9f2f34ef0ca6ffe51709ae7`.
+- Escopo de escrita usado: esta documentação, `src/app/(dashboard)/reports/client-page.tsx` e `src/lib/reports-filter-accessibility.test.ts`.
+- Nenhuma validação, commit, PR, integração, Preview ou publicação é registrada nesta alteração.
