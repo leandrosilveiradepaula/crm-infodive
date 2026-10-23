@@ -808,3 +808,60 @@ Não editar `src/lib/supabase/admin.ts`, `src/lib/operational-events.ts`, rotas 
 3. Provar ausência de dados do provedor, SQL, URLs privadas ou mensagens de exceção no log e resposta. Testes TypeScript, lint, Vitest, build e CI nativa exata; Preview Vercel só depois do merge em `preview/hardening-release-candidate`.
 4. Se o erro exigir troca de chave, acesso ao projeto Supabase ou migration, parar nesse gate externo **com categoria comprovada**, sem fingir que foi corrigido. Corrigir no próprio código somente problemas sustentados pela evidência.
 5. Commits e PR autorizados na branch de desenvolvimento desta tarefa, com merge exclusivo na branch `preview/hardening-release-candidate` após CI; a `main` e PR #56 permanecem sob gate humano. Esta tarefa substitui outras tarefas históricas como escopo ativo e não as reabre.
+
+## Tarefa ativa (23/10/2026) — Prova 1 da Factory: filtros acessíveis em Relatórios (#24)
+
+**Autorização do operador:** comentário OWNER no CRM #24, id 6371354929, em
+https://github.com/leandrosilveiradepaula/crm-infodive/issues/24#issuecomment-6371354929.
+É trabalho **real do CRM** para certificar uma única jornada da AI Product Factory,
+não benchmark artificial nem replay das execuções anteriores. Esta seção substitui
+a tarefa ativa anterior para novos commits, sem reabrir issues históricas.
+
+### Base e objetivo
+
+Base autorizada: `preview/hardening-release-candidate`, SHA
+`f0f45cb39bf1b462202baa942e67250fe0841f91` (ou candidato mais novo
+repinado com a política server-side já autorizada e CI nativa SHA-exata).
+
+Implementar acessibilidade funcional dos filtros de Relatórios & Insights,
+atualmente com controles sem nomes acessíveis, seleção de trimestres sem
+`aria-pressed` e estado de carregamento sem status semântico. Preservar
+filtros, buscas, estados, resultados, exportação e contratos de negócio.
+
+### Limite explícito de escrita
+
+- `docs/codex/CURRENT_TASK.md` — registrar evidência e a identidade do candidato.
+- `src/app/(dashboard)/reports/client-page.tsx` — controles e estados.
+- `src/lib/reports-filter-accessibility.test.ts` (novo) e/ou
+  `src/lib/reports-accessibility.test.ts` (novo) — regressões determinísticas.
+- `scripts/browser-smoke.mjs` — somente prova de teclado e responsividade
+  de Relatórios, se o harness existente permitir sem atalhos.
+
+Não editar outros arquivos sem nova autorização OWNER explícita. Não alterar
+schema/migrations, RLS/RBAC/auth, API, relatórios financeiros, integrações,
+credenciais, n8n, Vercel ou workflow de CI.
+
+### Definition of Done de produto e Factory
+
+1. Busca, ano, status, faturamento e vendedor com rótulos associados e verificáveis.
+2. Trimestres e opção Tempo Todo expondo seleção/estado de forma semântica;
+   navegação por teclado e foco visível, sem afetar o comportamento existente.
+3. Loading/empty/error anunciados adequadamente, sem inventar resultados.
+4. Testes offline executáveis e regressão de interação/teclado onde possível;
+   TypeScript, lint, Vitest, build e browser smoke originais preservados.
+5. **Implementação precisa sair da própria Factory:** Start OWNER legítimo,
+   Product Stage, backlog, Work Unit e commit/PR criados pelo runtime Direct
+   com identidade de run/change set, CI SHA-exata, review e Preview validado
+   quando aplicável. A prova fecha em `awaiting_release`; não há merge de
+   produção e nenhuma ação retroativa em Change Sets antigos.
+
+Commits e PR da implementação são autorizados **somente** em branch não
+produtiva com destino `preview/hardening-release-candidate`. Integração nessa
+branch pode ser automática após todas as provas exigidas, desde que não
+publique produção. Merge da PR #56 para `main` continua gate humano.
+
+Não executar modelo pago para readiness/smoke/sondagem. Chamadas pagas somente
+quando etapa legítima exigir, sob reserva e ledger real do Control Plane.
+Não forçar reparos de CI, não criar Preview repetitivo nem reabrir backlog
+antigo. Se Preview remoto ou CRM Supabase ficar indisponível, registrar
+`blocked_external_dependency` com evidência exata em vez de alegar PASS.
