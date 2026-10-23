@@ -26,4 +26,12 @@ describe('Reports filter accessibility', () => {
         expect(reportsPage).toContain('Carregando relatórios');
         expect(reportsPage).toContain('Nenhuma oportunidade encontrada para estes filtros.');
     });
+
+    it('gives report table controls accessible names without using an explicit any', () => {
+        expect(reportsPage).toContain('type ReportDeal = {');
+        expect(reportsPage).toContain('mappedDeals.map((deal: ReportDeal)');
+        expect(reportsPage).toContain('aria-label={`Oportunidade ${deal.title}`}');
+        expect(reportsPage).toContain('aria-label={`Vendedor ${deal.owner || \'Desconhecido\'}`}');
+        expect(reportsPage).toContain('aria-label="Nenhuma oportunidade encontrada"');
+    });
 });
