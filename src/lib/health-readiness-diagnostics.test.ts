@@ -11,6 +11,7 @@ describe('database readiness — closed and non-sensitive error classification',
         [{ code: '42P01', message: 'missing internal table' }, 404, 'db_schema_unavailable'],
         [{ code: '08006', message: 'postgres connection details' }, 503, 'db_transport_unavailable'],
         [new TypeError('failed to fetch with private endpoint'), 0, 'db_transport_unavailable'],
+        [{ message: 'fetch failed without provider code' }, 0, 'db_transport_unavailable'],
         [{ code: 'unexpected', message: 'access_key=secret' }, 400, 'db_query_failed'],
     ] as const)('classifies a provider failure without forwarding raw text', (error, status, expected) => {
         expect(classifyReadinessFailure(error, status)).toBe(expected);

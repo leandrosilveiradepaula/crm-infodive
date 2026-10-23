@@ -31,6 +31,8 @@ export function classifyReadinessFailure(
         code === '08001' || code === '57P03' || code === '53300' || code === '57014') {
         return 'db_transport_unavailable';
     }
+    // supabase-js/PostgREST reports status 0 for transport exceptions.
+    if (httpStatus === 0) return 'db_transport_unavailable';
     if (httpStatus === 401) return 'db_credential_rejected';
     if (httpStatus === 403) return 'db_access_denied';
     if (typeof httpStatus === 'number' && httpStatus >= 500) return 'db_transport_unavailable';
