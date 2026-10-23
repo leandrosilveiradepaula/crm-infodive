@@ -42,12 +42,40 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --save-exact --no-audit --no-fund next@16.4.2 eslint-config-next@16.4.2 pptxgenjs@4.0.0
+          # image-size v1 is an unused declared pptxgenjs runtime dependency.
+          # Override it with upstream's patched v2 instead of losing v4.0.1 fixes.
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'package.json';
+          const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const overrides = pkg.overrides || {};
+          if (overrides['image-size'] && overrides['image-size'] !== '2.0.4') {
+            throw new Error('unexpected image-size override');
+          }
+          pkg.overrides = { ...overrides, 'image-size': '2.0.4' };
+          fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts --save-exact --no-audit --no-fund next@16.4.2 eslint-config-next@16.4.2 pptxgenjs@4.0.1
           # Resolve semver-compatible transitive fixes only; an unfixable
           # advisory is not permission to weaken the existing audit gate.
           npm audit fix --package-lock-only --ignore-scripts --no-fund || true
           npm ci --ignore-scripts --no-audit --no-fund
           node scripts/audit-dependencies.mjs
+          # Enforce zero critical/high advisory counts for this security patch,
+          # rather than merely falling back to the legacy allowances.
+          node -e "const a=require('./artifacts/dependency-audit.json');if(a.counts.critical!==0||a.counts.high!==0)process.exit(1)"
+          # Prove pptxgenjs currently does not import the overridden parser.
+          node <<'NODE'
+          const fs = require('node:fs');
+          const bundle = fs.readFileSync(require.resolve('pptxgenjs'), 'utf8');
+          if (/require\\(['\"]image-size['\"]\\)|from ['\"]image-size['\"]/.test(bundle)) {
+            throw new Error('pptxgenjs started importing image-size: override needs review');
+          }
+          if (require('image-size/package.json').version !== '2.0.4') {
+            throw new Error('image-size 2.0.4 override not honored');
+          }
+          console.log('IMAGE_SIZE_OVERRIDE_VERIFIED');
+          NODE
           # Ensure the security-only patch release still creates real PPTX.
           node <<'NODE'
           (async () => {
