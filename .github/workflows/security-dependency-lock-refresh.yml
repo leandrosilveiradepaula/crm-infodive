@@ -1,0 +1,77 @@
+name: Temporary CRM dependency lock repair
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ['preview/**']
+
+# This file is NEVER intended to be merged into main/preview. The branch
+# and pull request are hard-gated to a single same-repository owner work item.
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: >-
+      github.repository == 'leandrosilveiradepaula/crm-infodive' &&
+      github.event.pull_request.number == 187 &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.ref == 'preview/hardening-release-candidate' &&
+      github.event.pull_request.head.ref == 'factory/crm24-ai-diagnosis-scope-handoff'
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify immutable scope before registry access
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REPOSITORY}" = "leandrosilveiradepaula/crm-infodive"
+          test "${{ github.event.pull_request.number }}" = "187"
+          test "${{ github.event.pull_request.head.ref }}" = "factory/crm24-ai-diagnosis-scope-handoff"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Regenerate lock using npm registry with scripts disabled
+        id: regenerate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --save-exact --no-audit --no-fund next@16.4.2 eslint-config-next@16.4.2
+          # Resolve semver-compatible transitive fixes only; an unfixable
+          # advisory is not permission to weaken the existing audit gate.
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
+          npm ci --ignore-scripts --no-audit --no-fund
+          node scripts/audit-dependencies.mjs
+          git diff --check
+          test -z "$(git diff --name-only -- . ':!package.json' ':!package-lock.json')"
+          git diff --stat -- package.json package-lock.json
+      - name: Push only regenerated dependency manifest and lockfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "Already repaired, no commit required."
+            exit 0
+          fi
+          test "$(git ls-remote origin refs/heads/factory/crm24-ai-diagnosis-scope-handoff | cut -f1)" = "${{ github.event.pull_request.head.sha }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix(security): update Next.js and semver-safe npm dependency lock"
+          git push origin HEAD:refs/heads/factory/crm24-ai-diagnosis-scope-handoff
+      - name: Preserve safe audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: temporary-crm-dependency-audit-${{ github.run_id }}
+          path: |
+            package.json
+            artifacts/dependency-audit.json
+          if-no-files-found: warn
+          retention-days: 5

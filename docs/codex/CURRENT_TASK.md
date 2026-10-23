@@ -758,3 +758,14 @@ Proibidas mudanças de RPC, funções SQL, migrations, schema, RLS, RBAC, autent
 ### Autorizações e proibições
 
 Commits e PRs ficam autorizados **somente após esta seção integrar a branch candidata por revisão/merge**, e apenas nos cinco grupos de arquivos permitidos acima. Proibidos merge de produção, bypass de gates, alteração de permissões/RBAC/RLS, RPC/migration/schema, criação de serviço pago, mudanças em Vercel/n8n, compra de créditos, reexecução de benchmark, testes pagos de sondagem, force-push, retorno de mocks e retomar tarefas históricas. Usar ferramentas determinísticas e testes offline primeiro. A Factory deve continuar até CI/Review/Preview aplicável/`awaiting_release` e parar antes do merge de produção.
+
+
+## Autorização complementar de segurança — 23/10/2026 (OWNER)
+
+O operador autorizou explicitamente corrigir as vulnerabilidades de dependências que bloquearam a PR #187, incluindo Next.js e o lockfile, **sem relaxar o auditor de segurança e sem publicar em produção**. Esta autorização acrescenta, exclusivamente para a remediação de segurança, os arquivos de escrita abaixo ao escopo ativo da CRM issue #24:
+
+- `package.json` e `package-lock.json`: atualizar Next.js 16.4.0 para o patch 16.4.2 e `eslint-config-next` correspondente; resolver vulnerabilidades adicionais por atualizações compatíveis e com provenance npm verificável. Nenhuma instalação paga, auto-compra ou atualização major deliberada sem evidência de compatibilidade.
+- `.github/workflows/security-dependency-lock-refresh.yml` (TEMPORÁRIO): job de geração de lockfile no Actions, estritamente na PR #187 e branch não produtiva, sem acesso a segredos; removê-lo do diff antes de tornar a PR mergeável, e verificar que não entrou em `main`.
+- `docs/codex/CURRENT_TASK.md`: documentar decisões e a evidência de CI da correção de segurança.
+
+O bloqueio `Dependency audit regression guard` é obrigatório. Não alterar `config/dependency-audit-baseline.json`, `scripts/audit-dependencies.mjs`, credenciais, migrations, RLS/RBAC, workflows de produção ou qualquer arquivo de produto fora da lista autorizada anteriormente. Se a correção não superar o gate mantendo esta lista de escrita, relatar o impeditivo em vez de burlar a proteção. O escopo de correção funcional do diagnóstico de oportunidades permanece o da seção anterior, sem alterações de produção.
