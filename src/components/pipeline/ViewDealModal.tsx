@@ -683,17 +683,14 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     deal={deal}
                                     onClose={() => setShowDealDoctor(false)}
                                     onAnalysisComplete={(analysis) => {
-                                        console.log('[ViewDealModal-Sidebar] Analysis Completed:', analysis);
-                                        setDeal(prev => {
-                                            const newDeal = {
-                                                ...prev,
-                                                health_score: analysis.healthScore,
-                                                health_trend: analysis.trend,
-                                                risk_factors: analysis.riskFactors
-                                            };
-                                            console.log('[ViewDealModal-Sidebar] Updating Deal State:', newDeal);
-                                            return newDeal;
-                                        });
+                                        // The backend has already validated and persisted
+                                        // this diagnosis before the callback can run.
+                                        setDeal(prev => ({
+                                            ...prev,
+                                            health_score: analysis.healthScore,
+                                            health_trend: analysis.trend,
+                                            risk_factors: analysis.riskFactors,
+                                        }));
                                     }}
                                 />
                                 <div className="h-px bg-card/5"></div>

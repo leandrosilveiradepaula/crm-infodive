@@ -778,3 +778,11 @@ O bloqueio `Dependency audit regression guard` é obrigatório. Não alterar `co
 - `npm install --package-lock-only --ignore-scripts`, `npm audit fix --package-lock-only --ignore-scripts` e `npm ci --ignore-scripts` concluídos no Actions Node 22. O scanner `node scripts/audit-dependencies.mjs` do CRM reportou `critical=0`, `high=0`, `moderate=2`, `low=0`, sem alterar o baseline. O script validou que `image-size` 2.0.4 foi resolvido no lock e não é importado no bundle principal do `pptxgenjs`.
 - Smoke de funcionalidade: `PPTX_SMOKE_OK bytes=44756` — geração real de arquivo PPTX em memória. Esta evidência **não** substitui a CI completa nem valida todas as jornadas autenticadas.
 - O workflow temporário usado para gerar o lockfile foi **removido no mesmo candidato** antes de qualquer merge; nenhuma nova autorização de token, mudança de configuração de produção, gasto de IA ou Preview manual. Os testes de CI no HEAD **final** ainda devem ser avaliados.
+
+
+### Implementação candidata — integridade do diagnóstico (23/10/2026)
+
+- O cliente passa a enviar exclusivamente `deal.id` à API server-side existente; `src/app/api/gemini/analyze-deal/route.ts` permanece intocado com a validação UUID, autorização e contexto tenant-scoped originais.
+- Removido o fallback que gerava scores artificiais 8/5/3 e conclusão falsa quando a API falhava. HTTP não-2xx, exceção de rede, JSON inválido ou diagnóstico fora de contrato propagam erro seguro, sem atualizar status/tendência/fatores de risco.
+- `DealDoctorFinal` preserva erro visível e não chama `onAnalysisComplete` no caminho de falha; remove logs com payload do negócio. `ViewDealModal` continua atualizando o estado visual somente em resposta à análise válida/confirmada.
+- Regressões offline em `src/lib/ai-deal-diagnosis-truthfulness.test.ts`; concluir apenas após o GitHub Actions `CRM validation` (TS/lint/audit/test/build/browser) verde no SHA exato. Nenhuma chamada paga de IA está incluída.

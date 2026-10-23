@@ -20,23 +20,17 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
     };
 
     const handleAnalyze = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
             const result = await analyzeDeal(deal);
-            console.log('[DealDoctorFinal] Analysis result:', result);
             setAnalysis(result);
-            console.log('[DealDoctorFinal] Checking onAnalysisComplete:', typeof onAnalysisComplete);
-
-            if (onAnalysisComplete) {
-                console.log('[DealDoctorFinal] Calling onAnalysisComplete...');
-                onAnalysisComplete(result);
-                console.log('[DealDoctorFinal] Called onAnalysisComplete.');
-            } else {
-                console.warn('[DealDoctorFinal] onAnalysisComplete prop is missing!');
-            }
-        } catch (err: any) {
-            setError(err.message || 'Erro ao analisar deal');
+            // Only a server-confirmed and structurally validated diagnosis may
+            // update the opportunity's visual health state.
+            onAnalysisComplete?.(result);
+        } catch {
+            setAnalysis(null);
+            setError('Não foi possível concluir o diagnóstico. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -55,7 +49,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
         }
     };
 
-    if (!analysis && !loading) {
+    if (!analysis && !loading && !error) {
         return (
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-all relative group">
                 <div className="flex items-start gap-5">
