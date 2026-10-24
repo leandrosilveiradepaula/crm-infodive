@@ -66,13 +66,13 @@ export const HistoryTab = ({ deal }: HistoryTabProps) => {
                             <div className="space-y-1">
                                 <div className="flex items-center justify-between">
                                     <h4 className="text-sm font-bold text-foreground">{item.title}</h4>
-                                    <span className="text-[10px] text-muted-foreground font-mono">
+                                    <span className="text-xs text-muted-foreground font-mono">
                                         {formatDistanceToNow(new Date(item.date), { addSuffix: true, locale: ptBR })}
                                     </span>
                                 </div>
                                 <p className="text-xs text-muted-foreground">{item.description}</p>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-[10px] bg-muted/50 border border-border px-2 py-0.5 rounded text-muted-foreground flex items-center gap-1">
+                                    <span className="text-xs bg-muted/50 border border-border px-2 py-0.5 rounded text-muted-foreground flex items-center gap-1">
                                         <User className="w-3 h-3" />
                                         {item.user}
                                     </span>

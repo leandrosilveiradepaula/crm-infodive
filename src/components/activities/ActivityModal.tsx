@@ -184,7 +184,7 @@ export function ActivityModal({ isOpen, onClose, onSave, onDelete, activity }: A
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Account Link */}
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Cliente</Label>
+                                <Label className="text-xs font-bold text-muted-foreground uppercase px-1">Cliente</Label>
                                 <div className="relative">
                                     <select
                                         className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary transition-all text-sm text-foreground hover:bg-muted/50 appearance-none"
@@ -202,7 +202,7 @@ export function ActivityModal({ isOpen, onClose, onSave, onDelete, activity }: A
 
                             {/* Deal Link */}
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-bold text-muted-foreground uppercase px-1">Oportunidade (Deal)</Label>
+                                <Label className="text-xs font-bold text-muted-foreground uppercase px-1">Oportunidade (Deal)</Label>
                                 <div className="relative">
                                     <select
                                         className="w-full px-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary transition-all text-sm text-foreground hover:bg-muted/50 appearance-none"

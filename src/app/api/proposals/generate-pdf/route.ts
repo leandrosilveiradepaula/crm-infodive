@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { renderToBuffer } from '@react-pdf/renderer';
 import React from 'react';
@@ -8,7 +8,7 @@ import type { SectionId, EditableTexts, EditorConfig } from '@/hooks/useProposal
 
 export async function POST(request: Request) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
         const body = await request.json();
         const {
@@ -179,6 +179,9 @@ export async function POST(request: Request) {
         });
     } catch (error: any) {
         console.error('[ProposalGeneratePdfRoute] pdf generation failed');
+        if (error?.message?.includes('Forbidden')) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
         if (error?.message?.includes('Unauthorized') || error?.message?.includes('session')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

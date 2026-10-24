@@ -55,13 +55,13 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                        <DropdownMenuItem onClick={() => onEdit(product)} className="hover:bg-muted cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5 transition-colors focus:bg-muted outline-none">
+                        <DropdownMenuItem onClick={() => onEdit(product)} className="hover:bg-muted cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5 transition-colors focus:bg-muted outline-none">
                             <Edit className="mr-2 h-3 w-3" /> Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDuplicate(product)} className="hover:bg-muted cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                        <DropdownMenuItem onClick={() => onDuplicate(product)} className="hover:bg-muted cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                             <Copy className="mr-2 h-3 w-3" /> Duplicar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onDelete(product.id)} className="text-destructive hover:bg-destructive/10 cursor-pointer text-[10px] font-bold uppercase tracking-wide py-1.5">
+                        <DropdownMenuItem onClick={() => onDelete(product.id)} className="text-destructive hover:bg-destructive/10 cursor-pointer text-xs font-bold uppercase tracking-wide py-1.5">
                             <Trash2 className="mr-2 h-3 w-3" /> Excluir
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -75,9 +75,9 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
                     </Badge>
                 </div>
                 <h3 className="font-bold text-foreground text-sm mb-0.5 truncate tracking-tight group-hover:text-primary transition-colors">{product.name}</h3>
-                <p className="text-[9px] text-primary font-mono mb-2 font-bold tracking-wider">{product.sku}</p>
+                <p className="text-xs text-primary font-mono mb-2 font-bold tracking-wider">{product.sku}</p>
 
-                <p className="text-[11px] text-muted-foreground line-clamp-2 min-h-[32px] leading-relaxed font-medium">{product.description}</p>
+                <p className="text-xs text-muted-foreground line-clamp-2 min-h-[32px] leading-relaxed font-medium">{product.description}</p>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-1.5 relative z-10">

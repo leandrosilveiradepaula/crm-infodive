@@ -1,13 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { SalesService } from '@/services/SalesService';
-import { requireSessionContext } from '@/lib/auth-server';
-import { DistributorOrderService } from '@/services/DistributorOrderService';
-import { DocumentService } from '@/services/DocumentService';
-import type { DocumentCategory } from '@/types/document';
-import { SalesOrder, SalesOrderItem } from '@/hooks/useSalesOrders';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { SalesService } from '../../../services/SalesService';
+import { requirePermission, requireSessionContext } from '../../../lib/auth-server';
+import { DistributorOrderService } from '../../../services/DistributorOrderService';
+import { DocumentService } from '../../../services/DocumentService';
+import type { DocumentCategory } from '../../../types/document';
+import { SalesOrder, SalesOrderItem } from '../../../hooks/useSalesOrders';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { validateInvoiceUpload, validateInvoiceContent } from '../../../lib/invoice-upload-validation';
+import { parseInvoiceStoragePath } from '../../../lib/invoice-storage-access';
+import { distributorOrderWarningFor, distributorOrderDownloadErrorFor } from '../../../lib/distributor-order-outcome';
 
 export async function getSalesOrders(dealId?: string) {
     try {
@@ -22,7 +25,7 @@ export async function getSalesOrders(dealId?: string) {
 
 export async function createSalesOrder(order: Partial<SalesOrder>, items: Partial<SalesOrderItem>[]) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:create');
         const data = await SalesService.createSalesOrder(organizationId, order, items);
         revalidatePath('/sales');
         return { success: true, data };
@@ -34,7 +37,7 @@ export async function createSalesOrder(order: Partial<SalesOrder>, items: Partia
 
 export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:edit');
         const data = await SalesService.updateSalesOrder(organizationId, id, updates);
         revalidatePath('/sales');
         return { success: true, data };
@@ -46,7 +49,7 @@ export async function updateSalesOrder(id: string, updates: Partial<SalesOrder>)
 
 export async function deleteSalesOrder(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('deals:delete');
         await SalesService.deleteSalesOrder(organizationId, id);
         revalidatePath('/sales');
         return { success: true };
@@ -58,7 +61,7 @@ export async function deleteSalesOrder(id: string) {
 
 export async function updateInstallmentStatusAction(installmentId: string, status: string) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
         if (!userId || !organizationId) throw new Error('Unauthorized');
 
         await SalesService.updateInstallmentStatus(organizationId, installmentId, status);
@@ -72,29 +75,27 @@ export async function updateInstallmentStatusAction(installmentId: string, statu
 
 export async function processInvoiceAction(orderId: string, formData: FormData) {
     try {
-        const { organizationId, userId } = await requireSessionContext();
-        const file = formData.get('file') as File;
+        const { organizationId, userId } = await requirePermission('deals:edit');
+        const file = formData.get('file');
         const confirmSave = formData.get('confirmSave') === 'true';
-        if (!file) throw new Error('Arquivo não encontrado');
-
+        const check = validateInvoiceUpload(orderId, file);
+        if (!check.ok) throw new Error(check.error);
+        const invoiceFile = file as File;
         const supabase = createAdminClient();
 
-        // 1. Upload to Storage (Using 'invoices' bucket from migration)
-        const fileExt = file.name.split('.').pop()?.toLowerCase();
-        const fileName = `${organizationId}/invoices/${orderId}_${Date.now()}.${fileExt}`;
+        // Validate order ownership with a privileged tenant-scoped query BEFORE storage writes.
+        const { data: ownedOrder, error: ownershipError } = await supabase
+            .from('sales_orders').select('id, deal_id').eq('id', orderId)
+            .eq('organization_id', organizationId).maybeSingle();
+        if (ownershipError || !ownedOrder) throw new Error('Pedido não encontrado ou acesso negado.');
 
-        const arrayBuffer = await file.arrayBuffer();
-        const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('documents')
-            .upload(fileName, arrayBuffer, {
-                contentType: file.type,
-                upsert: true
-            });
-
-        if (uploadError) {
-            console.error('[SalesActions] invoice upload failed');
-            throw new Error('Não foi possível processar a operação de vendas.');
-        }
+        const fileExt = check.extension;
+        const fileName = `${organizationId}/invoices/${orderId}_${crypto.randomUUID()}.${fileExt}`;
+        const arrayBuffer = await invoiceFile.arrayBuffer();
+        if (arrayBuffer.byteLength !== invoiceFile.size) throw new Error('Arquivo inválido.');
+        const contentError = validateInvoiceContent(check.extension, arrayBuffer);
+        if (contentError) throw new Error(contentError);
+        // Parsing/preview must never write a Storage object.
 
         // 2. Extract Info
         let extractedData: any = null;
@@ -115,7 +116,7 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
         } else if (fileExt === 'pdf') {
             try {
                 // 1. Parse Access Key from filename (most reliable for Number/CNPJ)
-                const keyMatch = file.name.match(/\d{44}/);
+                const keyMatch = invoiceFile.name.match(/\d{44}/);
                 let extractedNumber = 'Não encontrado';
                 let extractedCNPJ = '';
 
@@ -207,39 +208,67 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
             }
         }
 
-        // 3. Update Sales Order (ONLY if confirmSave is true)
-        if (confirmSave) {
-            const updates: any = {
+        // 3. Analysis is read-only. Only confirmed uploads may persist objects.
+        if (!confirmSave) {
+            return { success: true, saved: false, extractedData, fileUrl: null };
+        }
+
+        const { error: uploadError } = await supabase.storage.from('documents')
+            .upload(fileName, arrayBuffer, { contentType: check.contentType, upsert: false });
+        if (uploadError) throw new Error('Não foi possível salvar o arquivo da nota fiscal.');
+
+        let invoiceLinkedToOrder = false;
+        try {
+            const updates: Record<string, unknown> = {
                 status: 'nf_emitida',
                 invoice_url: fileName,
-                billed_at: new Date().toISOString()
+                billed_at: new Date().toISOString(),
             };
-
             if (extractedData?.number) updates.tax_invoice_number = extractedData.number;
 
             await SalesService.updateSalesOrder(organizationId, orderId, updates);
+            invoiceLinkedToOrder = true;
 
             if (extractedData?.boletos && extractedData.boletos.length > 0) {
                 await SalesService.createInstallments(organizationId, orderId, extractedData.boletos);
             }
-
-            // 4. Register as Document
-            const { data: order } = await supabase.from('sales_orders').select('deal_id').eq('id', orderId).single();
-            if (order?.deal_id) {
-                await DocumentService.uploadDocument(userId, organizationId, 'deal', order.deal_id, {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    arrayBuffer
+            if (ownedOrder.deal_id) {
+                await DocumentService.uploadDocument(userId, organizationId, 'deal', ownedOrder.deal_id, {
+                    name: invoiceFile.name,
+                    type: invoiceFile.type,
+                    size: invoiceFile.size,
+                    arrayBuffer,
                 }, {
                     category: 'outro',
-                    description: `Nota Fiscal do pedido ${orderId}`
+                    description: `Nota Fiscal do pedido ${orderId}`,
                 });
             }
+        } catch {
+            if (!invoiceLinkedToOrder) {
+                // The failed DB mutation did not reference the Storage object.
+                // Remove the orphan best effort, but never report a false save.
+                try {
+                    const { error: cleanupError } = await supabase.storage.from('documents').remove([fileName]);
+                    if (cleanupError) console.error('[SalesActions] failed to clean up unlinked invoice');
+                } catch {
+                    console.error('[SalesActions] invoice cleanup request failed');
+                }
+                return { success: false, saved: false, error: 'Não foi possível registrar a nota fiscal no pedido.' };
+            }
+            // This is NOT atomic: the invoice is referenced by the sales order,
+            // but an installment or document copy may have failed.
             revalidatePath('/sales');
+            return {
+                success: false,
+                saved: true,
+                partialSuccess: true,
+                fileUrl: fileName,
+                error: 'Nota fiscal registrada, mas houve falha em operações complementares. Verifique antes de reenviar.',
+            };
         }
 
-        return { success: true, extractedData, fileUrl: fileName };
+        revalidatePath('/sales');
+        return { success: true, saved: true, extractedData, fileUrl: fileName };
     } catch {
         console.error('[SalesActions] invoice processing failed');
         return { success: false, error: 'Não foi possível processar a operação de vendas.' };
@@ -248,39 +277,44 @@ export async function processInvoiceAction(orderId: string, formData: FormData) 
 
 export async function convertDealToSalesOrdersAction(dealId: string, extraData?: any) {
     try {
-        const { userId, organizationId } = await requireSessionContext();
+        const { userId, organizationId } = await requirePermission('deals:edit');
 
-        // 1. Convert Deal to Sales Orders (Internal Records)
+        // Database sales orders and the distributor workbook are separate
+        // operations. Do not treat Excel generation as part of an atomic write.
         const result = await SalesService.convertDealToSalesOrders(userId, organizationId, dealId);
+        let distributorOrderSaved = false;
+        let distributorDocumentId: string | null = null;
+        let distributorOrderWarning: string | null = null;
 
-        // 2. Automatically Generate and Save Distributor Excel Order
         try {
-            const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(dealId, organizationId, extraData);
-
-            await DocumentService.uploadDocument(
-                userId,
-                organizationId,
-                'deal',
-                dealId,
+            const { buffer, fileName } = await DistributorOrderService.generateIngramHWOrder(
+                dealId, organizationId, extraData,
+            );
+            const saved = await DocumentService.uploadDocument(
+                userId, organizationId, 'deal', dealId,
                 {
                     name: fileName,
                     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     size: buffer.length,
-                    arrayBuffer: buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer,
+                    arrayBuffer: buffer.buffer.slice(
+                        buffer.byteOffset, buffer.byteOffset + buffer.byteLength,
+                    ) as ArrayBuffer,
                 },
-                {
-                    category: 'outro',
-                    description: 'Pedido gerado automaticamente no fechamento.'
-                }
+                { category: 'outro', description: 'Pedido gerado automaticamente no fechamento.' },
             );
-        } catch {
-            console.error('[SalesActions] distributor order generation failed');
-            // Non-blocking for the transaction
+            if (!saved || typeof saved.id !== 'string' || !saved.id.trim()) {
+                throw new Error('Distributor workbook evidence not persisted');
+            }
+            distributorOrderSaved = true;
+            distributorDocumentId = saved.id;
+        } catch (error: unknown) {
+            console.error('[SalesActions] distributor order generation or document persistence failed');
+            distributorOrderWarning = distributorOrderWarningFor(error);
         }
 
         revalidatePath('/sales');
         revalidatePath('/pipeline');
-        return result;
+        return { ...result, distributorOrderSaved, distributorDocumentId, distributorOrderWarning };
     } catch {
         console.error('[SalesActions] deal conversion failed');
         return { success: false, error: 'Não foi possível processar a operação de vendas.' };
@@ -295,9 +329,9 @@ export async function downloadDistributorOrderAction(dealId: string, extraData?:
         // Convert Buffer to base64 for transfer
         const base64 = buffer.toString('base64');
         return { success: true, base64, fileName };
-    } catch {
+    } catch (error: unknown) {
         console.error('[SalesActions] distributor order download failed');
-        return { success: false, error: 'Não foi possível processar a operação de vendas.' };
+        return { success: false, error: distributorOrderDownloadErrorFor(error) };
     }
 }
 
@@ -330,7 +364,7 @@ export async function getSalesOrderDocuments(dealId: string) {
  * Upload a document for a sales order (stored under the deal entity).
  */
 export async function uploadSalesOrderDocument(dealId: string, formData: FormData) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
 
     const file = formData.get('file') as File | null;
     if (!file) throw new Error('Nenhum arquivo enviado.');
@@ -364,7 +398,7 @@ export async function getSalesDocumentSignedUrl(documentId: string) {
  * Delete a document linked to a sales order.
  */
 export async function deleteSalesDocument(documentId: string) {
-    const { userId, organizationId } = await requireSessionContext();
+    const { userId, organizationId } = await requirePermission('deals:edit');
     await DocumentService.deleteDocument(userId, organizationId, documentId);
     revalidatePath('/sales');
     return true;
@@ -376,21 +410,24 @@ export async function deleteSalesDocument(documentId: string) {
  */
 export async function getSignedUrlForRawPath(filePath: string) {
     const { organizationId } = await requireSessionContext();
-    
-    // Security Check: Ensure the path belongs to the user's organization
-    if (!filePath.startsWith(`${organizationId}/`)) {
-        throw new Error('Acesso negado: o arquivo não pertence à sua organização.');
+    const invoice = parseInvoiceStoragePath(organizationId, filePath);
+    if (!invoice) {
+        throw new Error('Caminho de nota fiscal inválido ou acesso negado.');
     }
-
     const supabase = createAdminClient();
-    const { data, error } = await supabase.storage
-        .from('documents')
+    const { data: order, error: orderError } = await supabase.from('sales_orders')
+        .select('id, invoice_url').eq('id', invoice.orderId)
+        .eq('organization_id', organizationId).eq('invoice_url', filePath)
+        .maybeSingle();
+    if (orderError || !order || order.id?.toLowerCase() !== invoice.orderId.toLowerCase() ||
+        order.invoice_url !== filePath) {
+        throw new Error('Nota fiscal não encontrada ou acesso negado.');
+    }
+    const { data, error } = await supabase.storage.from('documents')
         .createSignedUrl(filePath, 300);
-
     if (error || !data?.signedUrl) {
         throw new Error('Erro ao gerar link seguro para o arquivo.');
     }
-
     return data.signedUrl;
 }
 

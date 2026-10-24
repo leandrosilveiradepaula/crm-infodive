@@ -79,10 +79,10 @@ export function ViewAccountModal({ open, onOpenChange, account, onEdit }: ViewAc
                         <div>
                             <div className="flex items-center gap-3">
                                 <h2 className="text-xl font-bold text-foreground tracking-tight">{account.name}</h2>
-                                <Badge variant="outline" className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 ${statusColors[account.status] || statusColors.Ativo}`}>
+                                <Badge variant="outline" className={`text-xs font-black uppercase tracking-wider px-2 py-0.5 ${statusColors[account.status] || statusColors.Ativo}`}>
                                     {account.status || 'Ativo'}
                                 </Badge>
-                                <Badge variant="outline" className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 border-0 ${relationshipColors[account.relationship_type || 'Cliente'] || relationshipColors.Outro}`}>
+                                <Badge variant="outline" className={`text-xs font-black uppercase tracking-wider px-2 py-0.5 border-0 ${relationshipColors[account.relationship_type || 'Cliente'] || relationshipColors.Outro}`}>
                                     {account.relationship_type || 'Cliente'}
                                 </Badge>
                             </div>
@@ -132,10 +132,10 @@ export function ViewAccountModal({ open, onOpenChange, account, onEdit }: ViewAc
                                     <tab.icon className="w-4 h-4" />
                                     {tab.label}
                                     {tab.id === 'contacts' && account.contacts?.length > 0 && (
-                                        <span className="ml-1 text-[9px] bg-primary/20 px-1.5 py-0.5 rounded-full">{account.contacts.length}</span>
+                                        <span className="ml-1 text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">{account.contacts.length}</span>
                                     )}
                                     {tab.id === 'branches' && account.branches?.length > 0 && (
-                                        <span className="ml-1 text-[9px] bg-primary/20 px-1.5 py-0.5 rounded-full">{account.branches.length}</span>
+                                        <span className="ml-1 text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">{account.branches.length}</span>
                                     )}
                                 </TabsTrigger>
                             ))}
@@ -282,11 +282,11 @@ function ContactCard({ contact }: { contact: AccountContact }) {
                     </div>
                     <div>
                         <p className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{contact.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{contact.role || 'Contato'}</p>
+                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider">{contact.role || 'Contato'}</p>
                     </div>
                 </div>
                 {contact.is_primary && (
-                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-[9px] font-black uppercase">
+                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20 text-xs font-black uppercase">
                         Principal
                     </Badge>
                 )}
@@ -324,14 +324,14 @@ function BranchCard({ branch }: { branch: AccountBranch }) {
                 </div>
                 <div>
                     <p className="text-sm font-bold text-foreground group-hover:text-stage-proposal transition-colors">{branch.name}</p>
-                    {branch.cnpj && <p className="text-[10px] text-muted-foreground font-mono">{branch.cnpj}</p>}
+                    {branch.cnpj && <p className="text-xs text-muted-foreground font-mono">{branch.cnpj}</p>}
                 </div>
             </div>
             <div className="space-y-1.5 pt-3 border-t border-border text-xs text-muted-foreground">
                 <p>{branch.street}{branch.number ? `, ${branch.number}` : ''}{branch.complement ? ` - ${branch.complement}` : ''}</p>
                 <p>{branch.neighborhood} — {branch.city}/{branch.state}</p>
-                {branch.zip && <p className="font-mono text-[10px]">CEP: {branch.zip}</p>}
-                {branch.ie && <p className="font-mono text-[10px]">IE: {branch.ie}</p>}
+                {branch.zip && <p className="font-mono text-xs">CEP: {branch.zip}</p>}
+                {branch.ie && <p className="font-mono text-xs">IE: {branch.ie}</p>}
             </div>
         </div>
     );

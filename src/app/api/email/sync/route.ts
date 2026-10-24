@@ -4,6 +4,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
 import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
+import { consumeRateLimit } from '@/lib/ai-rate-limit';
+import { consumeDurableAiQuota } from '@/lib/ai-durable-quota';
+import { getRequestId } from '@/lib/request-context';
+import { recordOperationalEvent } from '@/lib/operational-events';
 
 // Delay helper to throttle Gemini API calls and avoid rate limits
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -95,12 +99,18 @@ Retorne SOMENTE o JSON, sem markdown, sem código, sem texto adicional.`;
 }
 
 export async function GET(request: NextRequest) {
+    const startedAt = Date.now();
+    const requestId = getRequestId(request.headers.get('X-Request-Id'));
+
     // 1. Auth guard (iron-session)
+    let userId: string;
     let organizationId: string;
     try {
         const ctx = await requireSessionContext();
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'unauthorized', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -108,6 +118,7 @@ export async function GET(request: NextRequest) {
     const providerToken = request.cookies.get('crm_provider_token')?.value;
 
     if (!providerToken) {
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'provider_token_missing', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
         return NextResponse.json({ error: 'Not authenticated or missing provider token. Please sign in with Office 365.' }, { status: 401 });
     }
 
@@ -141,15 +152,18 @@ export async function GET(request: NextRequest) {
                     });
                 } catch {
                     console.error('[EmailSyncRoute] token refresh failed');
+                    recordOperationalEvent({ area: 'email', operation: 'token_refresh', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
                     return NextResponse.json({ error: 'Session expired. Please reconnect your Office 365 account.' }, { status: 401 });
                 }
             } else {
+                recordOperationalEvent({ area: 'email', operation: 'token_refresh', outcome: 'refresh_token_missing', requestId, durationMs: Date.now() - startedAt, statusCode: 401 });
                 return NextResponse.json({ error: 'Sessão da Microsoft expirada. Conecte sua conta novamente.' }, { status: 401 });
             }
         }
 
         if (!response.ok) {
             console.error('[EmailSyncRoute] graph sync failed');
+            recordOperationalEvent({ area: 'integration', operation: 'microsoft_graph_sync', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: response.status });
             throw new Error('Microsoft Graph sync failed');
         }
 
@@ -173,14 +187,19 @@ export async function GET(request: NextRequest) {
         // --- INÍCIO DA AUTOMAÇÃO DE CADASTRO DE CONTATOS (FIRE-AND-FORGET) ---
         // Não prendemos o await aqui para não travar o carregamento da lista de e-mails no frontend.
         const orgId = organizationId;
+        const aiRateLimit = consumeRateLimit({ scope: 'email-sync-signature-ai', subject: `${organizationId}:${userId}`, limit: 2, windowMs: 60_000 });
+        let aiAnalysesRemaining = aiRateLimit.allowed ? 3 : 0;
 
         if (orgId && emails.length > 0) {
             // 1. Isolar remetentes únicos
             const uniqueSenders = Array.from(new Set(emails.map((e) => e.sender.email).filter(Boolean)));
 
             if (uniqueSenders.length > 0) {
+                recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'scheduled', requestId, count: uniqueSenders.length });
                 // Dispara logica em background
                 Promise.resolve().then(async () => {
+                    const backgroundStartedAt = Date.now();
+                    let processedCount = 0;
                     try {
                         const bgSupabase = createAdminClient();
 
@@ -188,12 +207,14 @@ export async function GET(request: NextRequest) {
                         const { data: existingContacts } = await bgSupabase
                             .from('account_contacts')
                             .select('email')
+                            .eq('organization_id', orgId)
                             .in('email', uniqueSenders);
 
                         // 2.5 Verificar quem está na BLOCKLIST (Ignorados pelo Usuário)
                         const { data: blacklistedContacts } = await bgSupabase
                             .from('contact_blacklists')
                             .select('email')
+                            .eq('organization_id', orgId)
                             .in('email', uniqueSenders);
 
                         const existingEmailsArray = [
@@ -211,6 +232,7 @@ export async function GET(request: NextRequest) {
                         for (const email of unknownEmails) {
                             if (processedUnknowns.has(email.sender.email)) continue;
                             processedUnknowns.add(email.sender.email);
+                            processedCount += 1;
 
                             if (!email.body || email.body.length < 20) {
                                 continue; // Evita emails vazios
@@ -219,44 +241,57 @@ export async function GET(request: NextRequest) {
                             // 4. Chama o SDK do Gemini DIRETAMENTE (sem fetch interno)
                             // Fetch interno seria bloqueado pelo middleware de auth do Next.js
 
-                            // Delay entre chamadas para evitar rate limit
-                            await sleep(1500);
+                            // A sincronização continua funcionando mesmo sem orçamento local de IA.
+                            // No máximo três assinaturas são analisadas por sincronização; o restante usa fallback básico.
+                            if (aiAnalysesRemaining > 0) {
+                                const durableQuota = await consumeDurableAiQuota({
+                                    organizationId: orgId,
+                                    scope: 'email-signature-model-call',
+                                    limit: 6,
+                                    windowSeconds: 60,
+                                });
 
-                            try {
-                                const contactData = await parseSignatureWithGemini(email.body);
+                                if (durableQuota.allowed) {
+                                    aiAnalysesRemaining -= 1;
+                                    await sleep(1500);
 
-                                // Dados suficientes = qualquer campo com informação util além do email do remetente
-                                const hasSufficientData = contactData && (
-                                    contactData.name ||
-                                    contactData.mobile_phone ||
-                                    contactData.landline_phone ||
-                                    contactData.role ||
-                                    contactData.company ||
-                                    contactData.email
-                                );
+                                    try {
+                                        const contactData = await parseSignatureWithGemini(email.body);
 
-                                if (hasSufficientData) {
-                                    // 5. Inserir Silenciosamente a Sugestão do Novo Contato no Inbox de Revisão
-                                    const newSuggestion = {
-                                        organization_id: orgId,
-                                        name: contactData.name || email.sender.name,
-                                        email: contactData.email || email.sender.email,
-                                        phone: contactData.mobile_phone || contactData.whatsapp || contactData.landline_phone || null,
-                                        role: contactData.role || null,
-                                        company_name: contactData.company || null,
-                                        status: 'pending'
-                                    };
+                                        const hasSufficientData = contactData && (
+                                            contactData.name ||
+                                            contactData.mobile_phone ||
+                                            contactData.landline_phone ||
+                                            contactData.role ||
+                                            contactData.company ||
+                                            contactData.email
+                                        );
 
-                                    const { error: insertError } = await bgSupabase
-                                        .from('contact_suggestions')
-                                        .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
-                                    if (insertError) {
-                                        console.error('[EmailSyncRoute] contact suggestion insert failed');
+                                        if (hasSufficientData) {
+                                            const newSuggestion = {
+                                                organization_id: orgId,
+                                                name: contactData.name || email.sender.name,
+                                                email: contactData.email || email.sender.email,
+                                                phone: contactData.mobile_phone || contactData.whatsapp || contactData.landline_phone || null,
+                                                role: contactData.role || null,
+                                                company_name: contactData.company || null,
+                                                status: 'pending'
+                                            };
+
+                                            const { error: insertError } = await bgSupabase
+                                                .from('contact_suggestions')
+                                                .upsert([newSuggestion], { onConflict: 'organization_id, email', ignoreDuplicates: true });
+                                            if (insertError) {
+                                                console.error('[EmailSyncRoute] contact suggestion insert failed');
+                                            }
+                                            continue;
+                                        }
+                                    } catch {
+                                        console.error('[EmailSyncRoute] signature parsing failed');
                                     }
-                                    continue; // Extraiu com IA, vai pro próximo
+                                } else {
+                                    aiAnalysesRemaining = 0;
                                 }
-                            } catch {
-                                console.error('[EmailSyncRoute] signature parsing failed');
                             }
 
                             // 6. FALLBACK: Se falhou a IA ou ela retornou vazio, insere o basico que temos
@@ -275,8 +310,10 @@ export async function GET(request: NextRequest) {
                             }
                         }
 
+                        recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'success', requestId, durationMs: Date.now() - backgroundStartedAt, count: processedCount });
                     } catch {
                         console.error('[EmailSyncRoute] background signature extraction failed');
+                        recordOperationalEvent({ area: 'email', operation: 'contact_suggestion_background', outcome: 'failure', requestId, durationMs: Date.now() - backgroundStartedAt, count: processedCount });
                     }
                 });
             }
@@ -312,10 +349,12 @@ export async function GET(request: NextRequest) {
             }
         }
 
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'success', requestId, durationMs: Date.now() - startedAt, statusCode: 200, count: frontEndEmails.length });
         return finalResponse;
 
     } catch {
         console.error('[EmailSyncRoute] email sync failed');
+        recordOperationalEvent({ area: 'email', operation: 'sync', outcome: 'failure', requestId, durationMs: Date.now() - startedAt, statusCode: 500 });
         return NextResponse.json({ error: 'Não foi possível sincronizar os emails.' }, { status: 500 });
     }
 }

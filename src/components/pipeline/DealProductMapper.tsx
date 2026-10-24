@@ -62,7 +62,7 @@ export const DealProductMapper: React.FC<DealProductMapperProps> = ({
                             <div>
                                 <p className="text-sm font-bold text-foreground">{label}</p>
                                 {isRequired(field) && (
-                                    <p className="text-[10px] text-yellow-500 font-bold uppercase tracking-wider">Obrigatório</p>
+                                    <p className="text-xs text-yellow-500 font-bold uppercase tracking-wider">Obrigatório</p>
                                 )}
                             </div>
                         </div>
@@ -96,7 +96,7 @@ export const DealProductMapper: React.FC<DealProductMapperProps> = ({
                             <thead>
                                 <tr className="border-b border-border">
                                     {Object.entries(mapping).filter(([_, value]) => value).map(([field, _]) => (
-                                        <th key={field} className="px-3 py-2 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                        <th key={field} className="px-3 py-2 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">
                                             {FIELD_LABELS[field as keyof typeof FIELD_LABELS]}
                                         </th>
                                     ))}

@@ -17,11 +17,11 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nome</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">E-mail</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Telefone</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Empresa</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cargo</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest">Nome</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">E-mail</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Telefone</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Empresa</th>
+                        <th className="text-left px-4 py-3 text-xs font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cargo</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
@@ -44,7 +44,7 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                             >
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-[10px] font-black text-white shadow-sm">
+                                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-xs font-black text-white shadow-sm">
                                             {initials}
                                         </div>
                                         <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{contact.name}</p>

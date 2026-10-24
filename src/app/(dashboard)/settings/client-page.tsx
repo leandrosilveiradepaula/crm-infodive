@@ -53,7 +53,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Logo Upload */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Logo da Empresa</Label>
+                    <Label className="uppercase tracking-[0.2em] text-xs font-black text-muted-foreground">Logo da Empresa</Label>
                     <div className="flex items-center gap-6 p-5 bg-muted/20 border-2 border-dashed border-border rounded-2xl group hover:border-primary/50 transition-all">
                         <div className="h-20 w-20 bg-card rounded-xl border border-border flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform">
                             {form.logo_url ? (
@@ -63,20 +63,20 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest border-border hover:bg-muted">
+                            <Button variant="outline" size="sm" className="font-bold uppercase text-xs tracking-widest border-border hover:bg-muted">
                                 Alterar Logo
                             </Button>
-                            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">PNG ou SVG. Máx 2MB.</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">PNG ou SVG. Máx 2MB.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Brand Colors */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Cores da Marca</Label>
+                    <Label className="uppercase tracking-[0.2em] text-xs font-black text-muted-foreground">Cores da Marca</Label>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
+                            <Label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color" 
@@ -88,7 +88,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             </div>
                         </div>
                         <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
+                            <Label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color" 
@@ -147,7 +147,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Razão Social / Nome Fantasia</Label>
+                    <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Razão Social / Nome Fantasia</Label>
                     <div className="relative group">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -159,7 +159,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Email Institucional</Label>
+                    <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Email Institucional</Label>
                     <div className="relative group">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -174,7 +174,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CNPJ</Label>
+                    <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">CNPJ</Label>
                     <Input
                         value={form.cnpj || ''}
                         onChange={e => setForm({ ...form, cnpj: e.target.value })}
@@ -183,7 +183,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
+                    <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
                     <Input
                         value={form.ie || ''}
                         onChange={e => setForm({ ...form, ie: e.target.value })}
@@ -196,7 +196,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             <Separator className="bg-border/50" />
 
             <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                <h4 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
                     <span className="w-6 h-[1px] bg-border" />
                     Endereço Sede
                     <span className="flex-1 h-[1px] bg-border" />
@@ -204,7 +204,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <div className="md:col-span-2 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CEP</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">CEP</Label>
                         <Input
                             value={form.zip || ''}
                             onChange={e => setForm({ ...form, zip: e.target.value })}
@@ -213,7 +213,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="md:col-span-3 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Logradouro</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Logradouro</Label>
                         <Input
                             value={form.street || ''}
                             onChange={e => setForm({ ...form, street: e.target.value })}
@@ -221,7 +221,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="md:col-span-1 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nº</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Nº</Label>
                         <Input
                             value={form.number || ''}
                             onChange={e => setForm({ ...form, number: e.target.value })}
@@ -232,7 +232,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Bairro</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Bairro</Label>
                         <Input
                             value={form.neighborhood || ''}
                             onChange={e => setForm({ ...form, neighborhood: e.target.value })}
@@ -240,7 +240,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Cidade</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">Cidade</Label>
                         <Input
                             value={form.city || ''}
                             onChange={e => setForm({ ...form, city: e.target.value })}
@@ -248,7 +248,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">UF</Label>
+                        <Label className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em]">UF</Label>
                         <Input
                             value={form.state || ''}
                             onChange={e => setForm({ ...form, state: e.target.value })}
@@ -279,7 +279,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                 <div className="flex items-center justify-between p-4 bg-muted/10 rounded-xl border border-border">
                     <div className="space-y-0.5">
                         <Label className="text-sm text-foreground font-bold">Modo Escuro / Claro</Label>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
                     </div>
                     <Switch
                         checked={mounted && theme === 'dark'}

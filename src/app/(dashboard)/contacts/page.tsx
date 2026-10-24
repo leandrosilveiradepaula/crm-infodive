@@ -4,7 +4,7 @@ import { ContactsClientPage } from './client-page';
 import { LoadingSpinner } from '@/components/ui/loading-spinner'; // Ensure this exists or use standard loader
 
 export const metadata = {
-    title: 'Contatos | CRM Next Gen',
+    title: 'Contatos | CRM Infodive',
 };
 
 export default async function ContactsPage() {

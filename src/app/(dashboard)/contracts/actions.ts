@@ -1,40 +1,51 @@
 'use server';
 
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
+import { getAiDealScope } from '@/lib/ai-deal-scope';
 import { ContractService } from '@/services/ContractService';
 import { revalidatePath } from 'next/cache';
 import { type Contract } from '@/types/contract';
 
 export async function getContracts(): Promise<Contract[]> {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.getContracts(organizationId);
-        return data.map((item: any) => ({
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        const data = await ContractService.getContracts(organizationId, canViewAll ? undefined : userId);
+        return data.map((item) => ({
             id: item.id,
             title: item.title,
             company: item.company_name,
             value: item.value || 0,
             status: item.status,
             type: item.type,
-            signerName: item.signer_name,
-            signerRole: item.signer_role,
-            dealId: item.deal_id,
-            proposalId: item.proposal_id,
+            signerName: item.signer_name ?? undefined,
+            signerRole: item.signer_role ?? undefined,
+            dealId: item.deal_id ?? undefined,
+            proposalId: item.proposal_id ?? undefined,
             createdAt: item.created_at,
             updatedAt: item.updated_at,
             content_json: item.content_json,
-            signature_image: item.signature_image
+            signature_image: item.signature_image ?? undefined
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');
-        return [];
+        throw new Error('Não foi possível carregar os contratos. Tente novamente.');
     }
+}
+
+export async function getContractCreationDeals(): Promise<{ requiresDeal: boolean; deals: { id: string; title: string; company: string }[] }> {
+    const { userId, organizationId } = await requirePermission('deals:edit');
+    const { canViewAll } = await getAiDealScope(userId, organizationId);
+    if (canViewAll) return { requiresDeal: false, deals: [] };
+    const deals = await ContractService.getOwnedContractDealOptions(organizationId, userId);
+    return { requiresDeal: true, deals };
 }
 
 export async function createContract(contract: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.createContract(organizationId, contract);
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        const data = await ContractService.createContract(organizationId, contract, canViewAll ? undefined : userId);
         revalidatePath('/contracts');
         return { success: true, data };
     } catch {
@@ -43,10 +54,16 @@ export async function createContract(contract: Partial<Contract>) {
     }
 }
 
-export async function updateContract(id: string, updates: Partial<Contract>) {
+export async function updateContract(id: string, updates: Partial<Contract>, expectedUpdatedAt: string) {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.updateContract(organizationId, id, updates);
+        if (typeof expectedUpdatedAt !== 'string' || !expectedUpdatedAt ||
+            typeof id !== 'string' || !id.trim()) {
+            return { success: false, error: 'Versão do rascunho obrigatória. Atualize a lista antes de salvar.' };
+        }
+        // All generic updates must observe the same concurrency guard as the draft editor.
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.updateContract(organizationId, id, updates, canViewAll ? undefined : userId, expectedUpdatedAt);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
@@ -55,10 +72,34 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
     }
 }
 
-export async function deleteContract(id: string) {
+/** Save an already-existing draft using the exact revision observed by the editor. */
+export async function saveContractDraft(id: string, title: string, text: string, expectedUpdatedAt: string): Promise<{ success: boolean; error?: string }> {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.deleteContract(organizationId, id);
+        if (typeof id !== 'string' || !id.trim() || typeof title !== 'string' ||
+            typeof text !== 'string' || typeof expectedUpdatedAt !== 'string' || !expectedUpdatedAt) {
+            throw new Error('Rascunho inválido.');
+        }
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.updateContract(
+            organizationId, id,
+            { title: title.trim(), content_json: { text }, status: 'draft' },
+            canViewAll ? undefined : userId,
+            expectedUpdatedAt
+        );
+        revalidatePath('/contracts');
+        return { success: true };
+    } catch {
+        console.error('[ContractsActions] draft save failed');
+        return { success: false, error: 'Não foi possível salvar. Recarregue a lista; o rascunho pode ter sido alterado.' };
+    }
+}
+
+export async function deleteContract(id: string, expectedUpdatedAt: string) {
+    try {
+        const { userId, organizationId } = await requirePermission('deals:edit');
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        await ContractService.deleteContract(organizationId, id, canViewAll ? undefined : userId, expectedUpdatedAt);
         revalidatePath('/contracts');
         return { success: true };
     } catch {

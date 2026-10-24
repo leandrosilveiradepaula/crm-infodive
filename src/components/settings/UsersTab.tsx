@@ -81,7 +81,7 @@ export const UsersTab = () => {
                 </div>
                 <button
                     onClick={() => setShowInviteModal(true)}
-                    className="w-full sm:w-auto bg-primary text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full sm:w-auto bg-primary text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
                 >
                     <Plus className="h-4 w-4" /> Novo Usuário
                 </button>
@@ -96,10 +96,10 @@ export const UsersTab = () => {
                     <table className="w-full">
                         <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="text-left py-3 px-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
-                                <th className="text-left py-3 px-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">Função</th>
-                                <th className="text-left py-3 px-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="text-right py-3 px-6 text-[9px] font-black text-muted-foreground uppercase tracking-widest">Ações</th>
+                                <th className="text-left py-3 px-6 text-xs font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
+                                <th className="text-left py-3 px-6 text-xs font-black text-muted-foreground uppercase tracking-widest">Função</th>
+                                <th className="text-left py-3 px-6 text-xs font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="text-right py-3 px-6 text-xs font-black text-muted-foreground uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -112,7 +112,7 @@ export const UsersTab = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[13px] font-bold text-foreground leading-tight">{user.name}</p>
-                                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight opacity-70">
+                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold uppercase tracking-tight opacity-70">
                                                     <Mail className="h-2.5 w-2.5" /> {user.email}
                                                 </div>
                                             </div>
@@ -121,7 +121,7 @@ export const UsersTab = () => {
                                     <td className="py-3 px-6">
                                         <div className="flex flex-wrap gap-1.5">
                                             {(user.roles && user.roles.length > 0 ? user.roles : [user.role]).map((role, idx) => (
-                                                <span key={idx} className={`px-2 py-0.5 rounded-lg text-[9px] font-black border capitalize flex items-center w-fit gap-1.5 tracking-wider shadow-sm ${getRoleBadge(role)}`}>
+                                                <span key={idx} className={`px-2 py-0.5 rounded-lg text-xs font-black border capitalize flex items-center w-fit gap-1.5 tracking-wider shadow-sm ${getRoleBadge(role)}`}>
                                                     <ShieldAlert className="h-2.5 w-2.5" />
                                                     {role}
                                                 </span>
@@ -129,7 +129,7 @@ export const UsersTab = () => {
                                         </div>
                                     </td>
                                     <td className="py-3 px-6">
-                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-bold border ${user.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-bold border ${user.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
                                             <span className={`w-1.5 h-1.5 rounded-full ${user.status === 'active' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-red-400'}`}></span>
                                             {user.status === 'active' ? 'Ativo' : 'Inativo'}
                                         </span>

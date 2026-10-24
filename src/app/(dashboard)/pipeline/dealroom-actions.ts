@@ -1,7 +1,8 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
+import { DealService } from '@/services/DealService';
 
 export interface DealRoom {
     id: string;
@@ -13,44 +14,34 @@ export interface DealRoom {
     created_at: string;
 }
 
+/**
+ * Reuse the canonical owner/tenant guard in DealService. Never duplicate
+ * privileged lookups here: they can accidentally disclose access tokens.
+ */
 export async function getOrCreateDealRoom(dealId: string) {
-    const { organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
+    const { organizationId, userId } = await requirePermission('deals:edit');
+    if (typeof dealId !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dealId)) {
+        return { success: false, error: 'Identificador de oportunidade inválido.' };
+    }
     try {
-        const { data: existing } = await supabase
-            .from('deal_rooms')
-            .select('*')
-            .eq('deal_id', dealId)
-            .eq('organization_id', organizationId)
-            .single();
-
-        if (existing) {
-            return { success: true, data: existing };
+        const result = await DealService.getOrCreateRoom(userId, dealId, organizationId);
+        if (!result.room || result.error) {
+            return { success: false, error: 'Não foi possível acessar a sala desta oportunidade.' };
         }
-
-        const { data: newRoom, error: createError } = await supabase
-            .from('deal_rooms')
-            .insert([{ deal_id: dealId, organization_id: organizationId }])
-            .select()
-            .single();
-
-        if (createError) throw createError;
-        return { success: true, data: newRoom };
-    } catch (error: unknown) {
-        const dealRoomError = error as { code?: string; name?: string; message?: string };
-        console.error('Deal room creation failed', {
-            operation: 'dealroom.get_or_create',
-            status: 'failed',
-            errorCode: dealRoomError?.code || dealRoomError?.name || 'dealroom_get_or_create_failed',
-        });
-        return { success: false, error: dealRoomError.message };
+        return { success: true, data: result.room };
+    } catch {
+        return { success: false, error: 'Não foi possível acessar a sala desta oportunidade.' };
     }
 }
 
 export async function fetchPublicRoomData(token: string) {
-    // We use Admin Client here because this is a public route protected by access_token.
-    // Standard anon client might fail due to RLS or session context in Server Actions.
+    // Bearer tokens are capabilities, never session credentials. Reject malformed
+    // input before any privileged RPC and do not echo tokens into logs.
+    if (typeof token !== 'string' || token.length < 16 || token.length > 256 ||
+        !/^[A-Za-z0-9_.~-]+$/.test(token)) {
+        return { success: false, error: 'Sala não encontrada.' };
+    }
     const supabase = createAdminClient();
     try {
         const { data, error } = await supabase.rpc('get_deal_room_by_token', {
@@ -67,6 +58,9 @@ export async function fetchPublicRoomData(token: string) {
             throw error;
         }
 
+        if (!data || (Array.isArray(data) && data.length === 0)) {
+            return { success: false, error: 'Sala não encontrada.' };
+        }
         return { success: true, data };
     } catch (error: unknown) {
         const publicRoomError = error as { code?: string; name?: string; message?: string };
@@ -75,6 +69,6 @@ export async function fetchPublicRoomData(token: string) {
             status: 'failed',
             errorCode: publicRoomError?.code || publicRoomError?.name || 'dealroom_public_fetch_failed',
         });
-        return { success: false, error: publicRoomError.message || 'Erro interno ao recuperar dados da sala' };
+        return { success: false, error: 'Não foi possível recuperar dados da sala.' };
     }
 }

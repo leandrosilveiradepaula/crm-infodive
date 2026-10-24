@@ -1,8 +1,14 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import type { EntityDocument, DocumentCategory, EntityType } from '@/types/document';
+import { createAdminClient } from '../lib/supabase/admin';
+import type { EntityDocument, DocumentCategory, EntityType } from '../types/document';
 
 const BUCKET = 'documents';
 const MAX_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_NAME_LENGTH = 180;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const VALID_DOCUMENT_CATEGORIES = new Set<DocumentCategory>([
+    'contrato', 'contrato_social', 'financeiro', 'fiscal', 'certificado',
+    'ata', 'nf', 'tecnico', 'outro',
+]);
 const ALLOWED_MIME_TYPES = [
     'application/pdf',
     'application/msword',
@@ -22,10 +28,33 @@ const ALLOWED_MIME_TYPES = [
 const ENTITY_TABLE_MAP: Record<EntityType, string> = {
     deal: 'deals',
     account: 'accounts',
-    contact: 'contacts',
+    contact: 'account_contacts',
 };
 
 export class DocumentService {
+    private static assertDocumentStoragePath(
+        organizationId: string,
+        entityType: EntityType,
+        entityId: string,
+        filePath: string,
+    ): void {
+        const validSegment = /^[a-zA-Z0-9_-]+$/;
+        if (![organizationId, entityType, entityId].every(
+            segment => typeof segment === 'string' && validSegment.test(segment)
+        )) throw new Error('Caminho do documento inválido.');
+
+        const prefix = `${organizationId}/${entityType}/${entityId}/`;
+        if (typeof filePath !== 'string' || !filePath.startsWith(prefix)) {
+            throw new Error('Caminho do documento inválido.');
+        }
+        const leaf = filePath.slice(prefix.length);
+        if (!leaf || leaf === '.' || leaf === '..' || leaf.includes('/') ||
+            leaf.includes('\\') || leaf.includes('..') ||
+            !/^[a-zA-Z0-9._-]+$/.test(leaf)) {
+            throw new Error('Caminho do documento inválido.');
+        }
+    }
+
     /**
      * Validate that the entity belongs to the organization.
      * Required because the documents table uses polymorphic references (no FK).
@@ -34,19 +63,28 @@ export class DocumentService {
         supabase: ReturnType<typeof createAdminClient>,
         organizationId: string,
         entityType: EntityType,
-        entityId: string
+        entityId: string,
+        userId: string,
     ): Promise<void> {
         const table = ENTITY_TABLE_MAP[entityType];
         if (!table) throw new Error('Tipo de entidade inválido.');
 
-        const { data } = await supabase
-            .from(table)
-            .select('id')
-            .eq('id', entityId)
-            .eq('organization_id', organizationId)
-            .single();
+        // Admin client bypasses RLS, so enforce authenticated tenant membership
+        // even for account and contact parents before the privileged read.
+        const { data: profile, error: profileError } = await supabase.from('profiles')
+            .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+        if (profileError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
 
-        if (!data) throw new Error('Entidade não encontrada ou acesso negado.');
+        let query = supabase.from(table).select('id')
+            .eq('id', entityId).eq('organization_id', organizationId);
+        if (entityType === 'deal') {
+            const roles = Array.isArray(profile.roles) ? profile.roles : [];
+            const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+                roles.some((role: unknown) => role === 'admin' || role === 'manager');
+            if (!canViewAll) query = query.eq('owner_id', userId);
+        }
+        const { data, error } = await query.maybeSingle();
+        if (error || !data) throw new Error('Entidade não encontrada ou acesso negado.');
     }
 
     /**
@@ -59,36 +97,45 @@ export class DocumentService {
         entityId: string
     ): Promise<EntityDocument[]> {
         const supabase = createAdminClient();
+        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId, userId);
 
         if (entityType === 'account') {
             // Query 1: Account documents
-            const { data: accDocs } = await supabase
+            const { data: accDocs, error: accountDocumentsError } = await supabase
                 .from('documents')
                 .select('*')
                 .eq('organization_id', organizationId)
                 .eq('entity_type', 'account')
                 .eq('entity_id', entityId);
+            if (accountDocumentsError || !accDocs) throw new Error('Não foi possível carregar os documentos.');
 
-            // Query 2: Deals for this account
-            const { data: deals } = await supabase
-                .from('deals')
-                .select('id, title')
-                .eq('account_id', entityId)
-                .eq('organization_id', organizationId);
-            
+            // Query 2: Only deals the current user is allowed to see.
+            const { data: profile, error: roleError } = await supabase.from('profiles')
+                .select('role, roles').eq('id', userId).eq('organization_id', organizationId).maybeSingle();
+            if (roleError || !profile) throw new Error('Não foi possível validar o acesso ao documento.');
+            const roles = Array.isArray(profile.roles) ? profile.roles : [];
+            const canViewAll = profile.role === 'admin' || profile.role === 'manager' ||
+                roles.some((role: unknown) => role === 'admin' || role === 'manager');
+            let dealsQuery = supabase.from('deals').select('id, title')
+                .eq('account_id', entityId).eq('organization_id', organizationId);
+            if (!canViewAll) dealsQuery = dealsQuery.eq('owner_id', userId);
+            const { data: deals, error: dealsError } = await dealsQuery;
+            if (dealsError || !deals) throw new Error('Não foi possível carregar os documentos.');
+
             let dealDocs: EntityDocument[] = [];
             const dealIds = deals ? deals.map(d => d.id) : [];
             const dealMap = new Map((deals || []).map(d => [d.id, d.title]));
 
             // Query 3: Documents for these deals
             if (dealIds.length > 0) {
-                const { data: dDocs } = await supabase
+                const { data: dDocs, error: dealDocumentsError } = await supabase
                     .from('documents')
                     .select('*')
                     .eq('organization_id', organizationId)
                     .eq('entity_type', 'deal')
                     .in('entity_id', dealIds);
-                if (dDocs) dealDocs = dDocs as EntityDocument[];
+                if (dealDocumentsError || !dDocs) throw new Error('Não foi possível carregar os documentos.');
+                dealDocs = dDocs as EntityDocument[];
             }
             
             // Merge and sort desc
@@ -111,12 +158,12 @@ export class DocumentService {
                 .eq('entity_id', entityId)
                 .order('created_at', { ascending: false });
 
-            if (error) {
+            if (error || !data) {
                 console.error('[DocumentService] documents fetch failed');
-                return [];
+                throw new Error('Não foi possível carregar os documentos.');
             }
 
-            return (data ?? []) as EntityDocument[];
+            return data as EntityDocument[];
         }
     }
 
@@ -140,22 +187,48 @@ export class DocumentService {
         }
     ): Promise<EntityDocument> {
         // --- Validation ---
+        if (!file || typeof file.name !== 'string' || !file.name.trim() ||
+            typeof file.type !== 'string' || !(file.arrayBuffer instanceof ArrayBuffer)) {
+            throw new Error('Arquivo inválido.');
+        }
         if (!ALLOWED_MIME_TYPES.includes(file.type)) {
             throw new Error('Tipo de arquivo não permitido.');
         }
-        if (file.size > MAX_SIZE_BYTES) {
-            throw new Error(`Arquivo muito grande. Máximo permitido: 25 MB`);
+        // The declared size is untrusted; verify it against the real payload.
+        if (!Number.isSafeInteger(file.size) || file.size <= 0 ||
+            file.arrayBuffer.byteLength !== file.size) {
+            throw new Error('Tamanho do arquivo inválido.');
+        }
+        if (file.arrayBuffer.byteLength > MAX_SIZE_BYTES) {
+            throw new Error('Arquivo muito grande. Máximo permitido: 25 MB');
+        }
+        const cleanName = file.name.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+        if (!cleanName || cleanName.length > MAX_NAME_LENGTH ||
+            cleanName === '.' || cleanName === '..' ||
+            cleanName.includes('..') || !/[a-zA-Z0-9]/.test(cleanName)) {
+            throw new Error('Nome de arquivo inválido.');
+        }
+        if (meta === null || typeof meta !== 'object' || Array.isArray(meta)) {
+            throw new Error('Metadados do documento inválidos.');
+        }
+        if (meta.category !== undefined && !VALID_DOCUMENT_CATEGORIES.has(meta.category)) {
+            throw new Error('Categoria do documento inválida.');
+        }
+        if (meta.description !== undefined && (
+            typeof meta.description !== 'string' ||
+            meta.description.length > MAX_DESCRIPTION_LENGTH
+        )) {
+            throw new Error('Descrição do documento inválida.');
         }
 
         const supabase = createAdminClient();
 
         // Validate entity ownership
-        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId);
+        await this.validateEntityOwnership(supabase, organizationId, entityType, entityId, userId);
 
         // Unique path: documents/{orgId}/{entityType}/{entityId}/{uuid}-{name}
         const uuid = crypto.randomUUID();
-        const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filePath = `${organizationId}/${entityType}/${entityId}/${uuid}-${safeFileName}`;
+        const filePath = `${organizationId}/${entityType}/${entityId}/${uuid}-${cleanName}`;
 
         // --- Upload to Storage ---
         const { error: storageError } = await supabase.storage
@@ -190,9 +263,10 @@ export class DocumentService {
             .select()
             .single();
 
-        if (dbError) {
-            // Best-effort cleanup: remove the uploaded file
-            await supabase.storage.from(BUCKET).remove([filePath]);
+        if (dbError || !data) {
+            // Best-effort cleanup: do not report upload success without metadata.
+            const { error: cleanupError } = await supabase.storage.from(BUCKET).remove([filePath]);
+            if (cleanupError) console.error('[DocumentService] failed to clean up orphaned storage object');
             console.error('[DocumentService] document metadata insert failed');
             throw new Error('Não foi possível salvar o documento.');
         }
@@ -213,7 +287,7 @@ export class DocumentService {
         // Validate ownership
         const { data: doc, error: docError } = await supabase
             .from('documents')
-            .select('file_path')
+            .select('file_path, entity_type, entity_id')
             .eq('id', documentId)
             .eq('organization_id', organizationId)
             .single();
@@ -221,6 +295,12 @@ export class DocumentService {
         if (docError || !doc) {
             throw new Error('Documento não encontrado ou acesso negado.');
         }
+        await this.validateEntityOwnership(
+            supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
+        );
+        this.assertDocumentStoragePath(
+            organizationId, doc.entity_type as EntityType, doc.entity_id, doc.file_path,
+        );
 
         const { data, error } = await supabase.storage
             .from(BUCKET)
@@ -246,7 +326,7 @@ export class DocumentService {
         // Validate ownership and get file_path
         const { data: doc, error: docError } = await supabase
             .from('documents')
-            .select('file_path')
+            .select('file_path, entity_type, entity_id')
             .eq('id', documentId)
             .eq('organization_id', organizationId)
             .single();
@@ -254,18 +334,26 @@ export class DocumentService {
         if (docError || !doc) {
             throw new Error('Documento não encontrado ou acesso negado.');
         }
+        await this.validateEntityOwnership(
+            supabase, organizationId, doc.entity_type as EntityType, doc.entity_id, userId,
+        );
+        this.assertDocumentStoragePath(
+            organizationId, doc.entity_type as EntityType, doc.entity_id, doc.file_path,
+        );
 
-        // Remove from Storage
-        await supabase.storage.from(BUCKET).remove([doc.file_path]);
+        // Do not delete metadata if storage removal did not succeed.
+        const { error: storageError } = await supabase.storage.from(BUCKET).remove([doc.file_path]);
+        if (storageError) throw new Error('Não foi possível excluir o arquivo do documento.');
 
-        // Remove from DB
-        const { error: dbError } = await supabase
+        const { data: deleted, error: dbError } = await supabase
             .from('documents')
             .delete()
             .eq('id', documentId)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
-        if (dbError) {
+        if (dbError || !deleted) {
             throw new Error('Não foi possível excluir o documento.');
         }
     }

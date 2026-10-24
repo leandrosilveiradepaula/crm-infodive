@@ -24,7 +24,7 @@ export const HealthWidget = ({ metrics }: HealthWidgetProps) => {
                         <span className={`text-4xl font-black tracking-tighter ${metrics.healthScore > 7 ? 'text-emerald-400' : metrics.healthScore > 4 ? 'text-amber-400' : 'text-lenovo-red'}`}>
                             {metrics.healthScore}
                         </span>
-                        <div className="mb-1.5 text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Score / 10</div>
+                        <div className="mb-1.5 text-xs text-muted-foreground font-black uppercase tracking-[0.2em] opacity-60">Score / 10</div>
                     </div>
                     <div className="w-full bg-card/5 h-3 rounded-full overflow-hidden">
                         <div

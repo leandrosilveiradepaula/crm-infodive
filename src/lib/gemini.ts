@@ -1,4 +1,5 @@
 import { PRODUCT_CATEGORIES, DEAL_HEALTH_STATUS } from './constants';
+import { parseDealDiagnosis } from './deal-diagnosis-validation';
 
 export interface ProductExtraction {
     sku: string;
@@ -130,99 +131,80 @@ import type { Deal } from '@/types/deal';
  * Analisa o deal e fornece insights de saúde e recomendações
  */
 export const analyzeDeal = async (deal: Deal): Promise<DealAnalysis> => {
+    // Server-side authorization and tenant-scoped context are authoritative.
+    // Never transmit client-supplied deal attributes or activities as AI context.
+    let response: Response;
     try {
-        const response = await fetch('/api/gemini/analyze-deal', {
+        response = await fetch('/api/gemini/analyze-deal', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                deal: {
-                    title: deal.title,
-                    company_name: deal.company,
-                    value: deal.value,
-                    stage: deal.stage,
-                    days_in_stage: deal.days_in_stage,
-                    probability: deal.probability
-                },
-                activities: deal.deal_activities || []
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ deal: { id: deal.id } }),
         });
-
-        if (!response.ok) {
-            await response.json().catch(() => ({}));
-            throw new Error('Não foi possível concluir a operação com IA.');
-        }
-
-        const analysis = await response.json();
-
-        return analysis;
-
     } catch {
-        console.error('[GeminiLib] deal analysis fallback used');
-
-        // Fallback para lógica local em caso de erro da API
-        const activitiesCount = deal.deal_activities?.length || 0;
-        // @ts-ignore
-        const lastActivityDate = deal.deal_activities?.[0]?.created_at;
-        const daysSinceLastActivity = lastActivityDate
-            ? Math.floor((Date.now() - new Date(lastActivityDate).getTime()) / (1000 * 60 * 60 * 24))
-            : 999;
-
-        const daysInStage = deal.days_in_stage || 0;
-        const status = daysInStage > 30 || daysSinceLastActivity > 14
-            ? 'urgent'
-            : daysInStage > 14 || daysSinceLastActivity > 7
-                ? 'at_risk'
-                : 'healthy';
-
-        const healthScore = status === 'healthy' ? 8 : status === 'at_risk' ? 5 : 3;
-
-        return {
-            status,
-            healthScore,
-            trend: status === 'healthy' ? 'improving' : status === 'at_risk' ? 'stable' : 'declining',
-            riskFactors: [
-                'Análise offline (API indisponível)',
-                'Dados podem estar desatualizados'
-            ],
-            insights: [
-                `Deal está há ${daysInStage} dias no estágio "${deal.stage}"`,
-                activitiesCount > 0 ? `${activitiesCount} atividades registradas` : 'Nenhuma atividade registrada',
-                'Fallback: Análise offline (API indisponível)'
-            ],
-            recommendations: [
-                'Verificar conexão com internet',
-                'Tentar novamente em instantes',
-                'Revisar dados manualmente'
-            ],
-            nextSteps: [
-                'Contatar suporte se o erro persistir',
-                'Atualizar status do deal'
-            ]
-        };
+        throw new Error('Não foi possível concluir o diagnóstico. Tente novamente.');
     }
+
+    if (!response.ok) {
+        // Do not display arbitrary error bodies or invent local health scores.
+        throw new Error('Não foi possível concluir o diagnóstico. Tente novamente.');
+    }
+
+    let result: unknown;
+    try {
+        result = await response.json();
+    } catch {
+        throw new Error('A integração de IA retornou uma análise inválida.');
+    }
+
+    const validated = parseDealDiagnosis(result);
+    if (!validated) {
+        throw new Error('A integração de IA retornou uma análise inválida.');
+    }
+    return validated;
 };
 
 export const generateFollowUpEmail = async (deal: Deal): Promise<string> => {
-    // Mock implementation - TODO: migrate to backend API for full AI capabilities
-    return `Olá ${deal.contact_name || 'equipe'},
+    const response = await fetch('/api/gemini/follow-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealId: deal.id })
+    });
 
-Espero que estejam bem!
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Não foi possível gerar o e-mail de follow-up.');
+    }
 
-Gostaria de fazer um follow-up sobre nossa proposta de ${deal.title} no valor de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.value)}.
+    const payload = await response.json();
+    if (!payload.email || typeof payload.email !== 'string') {
+        throw new Error('A integração de IA retornou uma resposta inválida.');
+    }
 
-Estamos à disposição para esclarecer qualquer dúvida e ajustar a proposta conforme necessário.
-
-Aguardo seu retorno.
-
-Atenciosamente,
-Equipe IBM/Lenovo`;
+    return payload.email;
 };
 
-export const runCRMConsultantChat = async (history: { role: string, content: string }[], context: string): Promise<string> => {
-    // Mock chat response - TODO: migrate to backend for full AI chat capabilities
-    return "Olá! Sou o Watson AI. Para habilitar respostas inteligentes, configure a integração com o backend. Por enquanto, você pode usar o Command Bar (Ctrl+K) para buscar informações do CRM.";
+export const runCRMConsultantChat = async (
+    history: { role: string, content: string }[],
+    signal?: AbortSignal
+): Promise<string> => {
+    const response = await fetch('/api/gemini/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history }),
+        signal,
+    });
+
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || 'Não foi possível consultar o assistente.');
+    }
+
+    const payload = await response.json();
+    if (!payload.message || typeof payload.message !== 'string') {
+        throw new Error('A integração de IA retornou uma resposta inválida.');
+    }
+
+    return payload.message;
 };
 
 /**

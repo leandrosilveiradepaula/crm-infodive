@@ -128,7 +128,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                         </div>
                         {product ? 'Editar Produto' : 'Novo Produto'}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2 relative z-10">
+                    <DialogDescription className="text-muted-foreground text-xs font-black uppercase tracking-[0.2em] mt-2 relative z-10">
                         Gerencie as especificações técnicas do seu catálogo
                     </DialogDescription>
                 </DialogHeader>
@@ -160,7 +160,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                         <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border border-border/50">
                             <div className="space-y-0.5">
                                 <ThemeLabel className="mb-0">Exibir SKU na Proposta</ThemeLabel>
-                                <p className="text-[10px] text-muted-foreground">O SKU/Partnumber será visível na tabela de investimentos da proposta PDF e no portal.</p>
+                                <p className="text-xs text-muted-foreground">O SKU/Partnumber será visível na tabela de investimentos da proposta PDF e no portal.</p>
                             </div>
                             <Switch
                                 checked={formData.show_sku_on_proposal !== false}
@@ -314,7 +314,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-xs tracking-widest flex items-center gap-2">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (

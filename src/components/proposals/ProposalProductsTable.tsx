@@ -20,7 +20,7 @@ export function ProposalProductsTable({ productsList }: ProposalProductsTablePro
                         <div key={idx} className="flex justify-between items-center p-4 bg-muted/50 rounded-xl border border-border/50 hover:border-blue-200 transition-colors">
                             <div className="flex-1">
                                 <p className="text-sm font-bold text-foreground">{product.name || 'Produto'}</p>
-                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-1">Qty: {product.quantity || 1}</p>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wide mt-1">Qty: {product.quantity || 1}</p>
                             </div>
                             <div className="text-right">
                                 <p className="text-base font-black text-primary">

@@ -20,23 +20,17 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
     };
 
     const handleAnalyze = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            setError(null);
             const result = await analyzeDeal(deal);
-            console.log('[DealDoctorFinal] Analysis result:', result);
             setAnalysis(result);
-            console.log('[DealDoctorFinal] Checking onAnalysisComplete:', typeof onAnalysisComplete);
-
-            if (onAnalysisComplete) {
-                console.log('[DealDoctorFinal] Calling onAnalysisComplete...');
-                onAnalysisComplete(result);
-                console.log('[DealDoctorFinal] Called onAnalysisComplete.');
-            } else {
-                console.warn('[DealDoctorFinal] onAnalysisComplete prop is missing!');
-            }
-        } catch (err: any) {
-            setError(err.message || 'Erro ao analisar deal');
+            // Only a server-confirmed and structurally validated diagnosis may
+            // update the opportunity's visual health state.
+            onAnalysisComplete?.(result);
+        } catch {
+            setAnalysis(null);
+            setError('Não foi possível concluir o diagnóstico. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -55,7 +49,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
         }
     };
 
-    if (!analysis && !loading) {
+    if (!analysis && !loading && !error) {
         return (
             <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-all relative group">
                 <div className="flex items-start gap-5">
@@ -144,7 +138,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                                     }`}>
                                     {analysis.healthScore}/100
                                 </span>
-                                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
                                     {statusConfig.label}
                                 </span>
                             </div>
@@ -216,7 +210,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         <ul className="space-y-2">
                             {analysis.nextSteps.map((step, i) => (
                                 <li key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold">
                                         {i + 1}
                                     </span>
                                     <span className="text-sm text-foreground font-medium">{step}</span>

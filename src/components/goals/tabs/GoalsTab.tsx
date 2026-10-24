@@ -121,7 +121,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Visão Geral de Metas</h2>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
@@ -133,7 +133,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
                             aria-label="Selecionar ano"
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
+                            className="bg-transparent text-xs font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -145,7 +145,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                     <div className="flex gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedPeriod('all')}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Tempo Todo
                         </button>
@@ -161,7 +161,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     key={tab.id}
                                     aria-label={`Filtrar por ${tab.label}`}
                                     onClick={() => setSelectedPeriod(tab.id as any)}
-                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
+                                    className={`relative px-4 py-1 rounded-lg text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
                                         ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                         }`}
@@ -221,20 +221,20 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                         <table className="w-full">
                             <thead className="bg-muted/10 border-b border-border">
                                 <tr>
-                                    <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
-                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
+                                    <th className="text-left py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
+                                    <th className="text-center py-3 px-3 text-xs font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
                                         {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
                                     </th>
-                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
+                                    <th className="text-center py-3 px-3 text-xs font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
                                         Realizado
                                     </th>
-                                    <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
+                                    <th className="text-right py-3 px-4 text-xs font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
                                     {selectedPeriod === 'all' && (
                                         <>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q1</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q2</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q3</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q4</th>
+                                            <th className="text-center py-3 px-2 text-xs font-bold text-muted-foreground">Q1</th>
+                                            <th className="text-center py-3 px-2 text-xs font-bold text-muted-foreground">Q2</th>
+                                            <th className="text-center py-3 px-2 text-xs font-bold text-muted-foreground">Q3</th>
+                                            <th className="text-center py-3 px-2 text-xs font-bold text-muted-foreground">Q4</th>
                                         </>
                                     )}
                                 </tr>
@@ -253,7 +253,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-foreground text-sm">{(user as any).name || 'Usuário'}</p>
-                                                    <p className="text-[10px] text-muted-foreground font-medium uppercase">{user.dealCount} Vendas</p>
+                                                    <p className="text-xs text-muted-foreground font-medium uppercase">{user.dealCount} Vendas</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -268,7 +268,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                                 hasError={hasError}
                                             />
                                             {hasError && (
-                                                <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">
+                                                <span className="text-xs text-red-500 font-bold whitespace-nowrap">
                                                     {((user.yearly_goal || 0) - quarterlyTotal) > 0 
                                                         ? `Faltam ${formatCurrency((user.yearly_goal || 0) - quarterlyTotal)}`
                                                         : `Sobram ${formatCurrency(Math.abs((user.yearly_goal || 0) - quarterlyTotal))}`
@@ -299,16 +299,16 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         {selectedPeriod === 'all' && (
                                             <>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
+                                                    <GoalInput className="w-16 text-xs" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
+                                                    <GoalInput className="w-16 text-xs" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
+                                                    <GoalInput className="w-16 text-xs" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
+                                                    <GoalInput className="w-16 text-xs" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
                                                 </td>
                                             </>
                                         )}

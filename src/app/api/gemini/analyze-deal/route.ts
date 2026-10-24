@@ -1,6 +1,9 @@
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { NextResponse } from 'next/server';
+import { getAiDealScope } from '@/lib/ai-deal-scope';
+import { guardPaidAiRequest } from '@/lib/paid-ai-guard';
+import { createAiRouteContext } from '@/lib/ai-route-observability';
+import { parseDealDiagnosis } from '@/lib/deal-diagnosis-validation';
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -11,20 +14,71 @@ type DealActivity = {
 };
 
 export async function POST(request: Request) {
+    const telemetry = createAiRouteContext(request, 'gemini_analyze_deal');
+    let userId: string;
     let organizationId: string;
     try {
-        const ctx = await requireSessionContext();
+        const ctx = await requirePermission('deals:edit');
+        userId = ctx.userId;
         organizationId = ctx.organizationId;
     } catch {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        telemetry.record('unauthorized', 401);
+        return telemetry.respond({ error: 'Unauthorized' }, 401);
     }
 
     if (!apiKey) {
-        return NextResponse.json({ error: 'Server configuration error: GEMINI_API_KEY missing' }, { status: 500 });
+        telemetry.record('not_configured', 503);
+        return telemetry.respond({ error: 'Integração de IA não configurada.' }, 503);
     }
 
     try {
-        const { deal, activities } = await request.json();
+        const body = await request.json();
+        const requestedDeal = body?.deal;
+        if (!requestedDeal || typeof requestedDeal !== 'object' || Array.isArray(requestedDeal) ||
+            typeof requestedDeal.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedDeal.id)) {
+            telemetry.record('invalid_request', 400);
+            return telemetry.respond({ error: 'Oportunidade inválida.' }, 400);
+        }
+        if (JSON.stringify(body).length > 100_000) {
+            telemetry.record('payload_too_large', 413);
+            return telemetry.respond({ error: 'Payload too large' }, 413);
+        }
+
+        // Never send browser-supplied deal fields or activities to the provider.
+        // Resolve both directly from the tenant-scoped database before paid quota.
+        const supabase = createAdminClient();
+        const { canViewAll } = await getAiDealScope(userId, organizationId);
+        let dealQuery = supabase.from('deals')
+            .select('id, title, company, value, stage, days_in_stage, probability, owner_id')
+            .eq('id', requestedDeal.id)
+            .eq('organization_id', organizationId);
+        if (!canViewAll) dealQuery = dealQuery.eq('owner_id', userId);
+        const { data: deal, error: dealError } = await dealQuery.maybeSingle();
+        if (dealError) {
+            telemetry.record('context_unavailable', 503);
+            return telemetry.respond({ error: 'Não foi possível validar a oportunidade.' }, 503);
+        }
+        if (!deal) {
+            telemetry.record('deal_not_found', 404);
+            return telemetry.respond({ error: 'Oportunidade não encontrada.' }, 404);
+        }
+        const { data: activities, error: activitiesError } = await supabase
+            .from('activities')
+            .select('created_at, type, title')
+            .eq('deal_id', deal.id)
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: false })
+            .limit(15);
+        if (activitiesError || !Array.isArray(activities)) {
+            telemetry.record('context_unavailable', 503);
+            return telemetry.respond({ error: 'Não foi possível validar as atividades.' }, 503);
+        }
+
+        const rateLimit = await guardPaidAiRequest({ scope: 'analyze-deal-ai', organizationId, userId, limit: 5, windowMs: 60_000 });
+        if (!rateLimit.allowed) {
+            telemetry.record(rateLimit.reason, rateLimit.status);
+            return telemetry.respond({ error: 'Muitas análises em pouco tempo.' }, rateLimit.status, { 'Retry-After': String(rateLimit.retryAfterSeconds) });
+        }
 
         // Format currency for Brazilian Real
         const formatCurrency = (value: number) => {
@@ -39,7 +93,7 @@ Sua missão é atuar como um "Deal Doctor" (Médico de Oportunidades), analisand
 
 DADOS DA OPORTUNIDADE:
 - Título: ${deal.title}
-- Cliente: ${deal.company_name || 'Não informado'}
+- Cliente: ${deal.company || 'Não informado'}
 - Valor: ${formatCurrency(deal.value)}
 - Estágio Atual: ${deal.stage}
 - Dias totais no Pipeline: ${deal.days_in_stage || 0} dias
@@ -139,32 +193,44 @@ IMPORTANT: Responda APENAS com o JSON. Não adicione texto antes ou depois.
             }
         }
 
-        // Persist analysis to database
-        if (diagnosis && deal.id) {
-            console.log('[GeminiAnalyzeDealRoute] deal analysis persistence started');
-            const supabase = createAdminClient();
-            const { error: updateError } = await supabase
-                .from('deals')
-                .update({
-                    health_score: diagnosis.healthScore,
-                    health_trend: diagnosis.trend,
-                    risk_factors: diagnosis.riskFactors,
-                    last_analysis_at: new Date().toISOString()
-                })
-                .eq('id', deal.id)
-                .eq('organization_id', organizationId);
-
-            if (updateError) {
-                console.error('[GeminiAnalyzeDealRoute] deal analysis persistence failed');
-            } else {
-                console.log('[GeminiAnalyzeDealRoute] deal analysis persistence succeeded');
-            }
+        const validated = parseDealDiagnosis(diagnosis);
+        if (!validated) {
+            telemetry.record('invalid_provider_output', 502);
+            return telemetry.respond({ error: 'A análise retornou dados inválidos.' }, 502);
         }
 
-        return NextResponse.json(diagnosis);
+        // PostgREST may return no error when zero rows were updated.
+        let updateQuery = supabase
+            .from('deals')
+            .update({
+                health_score: validated.healthScore,
+                health_trend: validated.trend,
+                risk_factors: validated.riskFactors,
+                last_analysis_at: new Date().toISOString()
+            })
+            .eq('id', deal.id)
+            .eq('organization_id', organizationId);
+        // A deal may be transferred while the external model is running.
+        if (!canViewAll) updateQuery = updateQuery.eq('owner_id', userId);
+        const { data: updatedDeal, error: updateError } = await updateQuery
+            .select('id')
+            .maybeSingle();
+
+        if (updateError) {
+            telemetry.record('persistence_failure', 503);
+            return telemetry.respond({ error: 'Não foi possível salvar a análise.' }, 503);
+        }
+        if (!updatedDeal) {
+            telemetry.record('deal_not_found', 404);
+            return telemetry.respond({ error: 'Oportunidade não encontrada.' }, 404);
+        }
+
+        telemetry.record('success', 200);
+        return telemetry.respond(validated);
 
     } catch {
         console.error('[GeminiAnalyzeDealRoute] deal analysis failed');
-        return NextResponse.json({ error: 'Não foi possível analisar o negócio.' }, { status: 500 });
+        telemetry.record('failure', 500);
+        return telemetry.respond({ error: 'Não foi possível analisar o negócio.' }, 500);
     }
 }

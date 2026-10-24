@@ -101,7 +101,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                     <h4 className="font-bold text-foreground text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
                                         {deal.title}
                                     </h4>
-                                    <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground truncate opacity-80">
+                                    <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground truncate opacity-80">
                                         <ShoppingBag className="h-3 w-3 shrink-0" />
                                         <span>{deal.company || 'Cliente Desconhecido'}</span>
                                     </div>
@@ -111,7 +111,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                 {deal.next_step && (
                                     <div className="px-2 py-1.5 bg-primary/5 rounded-lg border border-primary/10 flex items-center gap-1.5">
                                         <div className="h-1 w-1 rounded-full bg-primary shrink-0 animate-pulse" />
-                                        <p className="text-[9px] text-primary font-bold leading-tight uppercase tracking-tight flex-1 truncate">
+                                        <p className="text-xs text-primary font-bold leading-tight uppercase tracking-tight flex-1 truncate">
                                             {deal.next_step}
                                         </p>
                                     </div>
@@ -127,7 +127,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
 
                                     {/* Owner Bubble - Overlapping or singular */}
                                     <div className={`
-                                        h-6 w-6 rounded-full flex items-center justify-center text-[9px] font-black text-white shadow-md ring-2 ring-card
+                                        h-6 w-6 rounded-full flex items-center justify-center text-xs font-black text-white shadow-md ring-2 ring-card
                                         ${deal.owner === 'Leandro Silveira' ? 'bg-primary' : 'bg-info'}
                                     `} title={`Responsável: ${deal.owner || 'N/A'}`}>
                                         {(deal.owner || 'LS').substring(0, 2).toUpperCase()}
@@ -138,7 +138,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center px-0.5">
                                         <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">Probabilidade</span>
-                                        <span className={`text-[9px] font-black ${deal.probability > 70 ? 'text-success' : 'text-primary'}`}>
+                                        <span className={`text-xs font-black ${deal.probability > 70 ? 'text-success' : 'text-primary'}`}>
                                             {deal.probability}%
                                         </span>
                                     </div>
@@ -156,11 +156,11 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                     {daysInStage > 0 && (
                                         <div className="flex items-center gap-1 opacity-60">
                                             <Clock className="h-2.5 w-2.5 text-muted-foreground" />
-                                            <span className="text-[9px] font-bold text-muted-foreground">{daysInStage}d na etapa</span>
+                                            <span className="text-xs font-bold text-muted-foreground">{daysInStage}d na etapa</span>
                                         </div>
                                     )}
                                     {deal.expected_close_date && (
-                                        <div className="text-[9px] text-muted-foreground font-bold flex items-center gap-1 opacity-60">
+                                        <div className="text-xs text-muted-foreground font-bold flex items-center gap-1 opacity-60">
                                             <Calendar className="h-2.5 w-2.5" />
                                             <span>{new Date(deal.expected_close_date).toLocaleDateString('pt-BR')}</span>
                                         </div>

@@ -41,18 +41,18 @@ export const ConversionFunnel = ({ data }: ConversionFunnelProps) => {
                                 const data = payload[0].payload;
                                 return (
                                     <div className="glass-card p-4 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{data.stage}</p>
+                                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2">{data.stage}</p>
                                         <div className="space-y-1">
                                             <div className="flex justify-between gap-8 items-center">
-                                                <span className="text-[10px] font-bold text-muted-foreground uppercase">Quantidade:</span>
+                                                <span className="text-xs font-bold text-muted-foreground uppercase">Quantidade:</span>
                                                 <span className="text-sm font-black text-foreground">{data.count}</span>
                                             </div>
                                             <div className="flex justify-between gap-8 items-center">
-                                                <span className="text-[10px] font-bold text-muted-foreground uppercase">Valor:</span>
+                                                <span className="text-xs font-bold text-muted-foreground uppercase">Valor:</span>
                                                 <span className="text-sm font-black text-foreground">{formatCurrency(data.value, { compact: true })}</span>
                                             </div>
                                             <div className="flex justify-between gap-8 items-center py-1 border-t border-border mt-1">
-                                                <span className="text-[10px] font-bold text-primary uppercase">Conversão:</span>
+                                                <span className="text-xs font-bold text-primary uppercase">Conversão:</span>
                                                 <span className="text-xs font-black text-primary">{data.conversionRate.toFixed(1)}%</span>
                                             </div>
                                         </div>
@@ -74,7 +74,7 @@ export const ConversionFunnel = ({ data }: ConversionFunnelProps) => {
             <div className="mt-8 grid grid-cols-4 gap-2">
                 {data.map((stage, index) => (
                     <div key={stage.stage} className="relative text-center">
-                        <div className="text-[10px] text-muted-foreground font-bold uppercase mb-1 truncate px-1">
+                        <div className="text-xs text-muted-foreground font-bold uppercase mb-1 truncate px-1">
                             {stage.stage}
                         </div>
                         <div
@@ -85,7 +85,7 @@ export const ConversionFunnel = ({ data }: ConversionFunnelProps) => {
                             {stage.count}
                         </div>
                         {index > 0 && (
-                            <div className="absolute -left-1 top-6 text-[10px] font-bold text-primary bg-primary/10 px-1 rounded border border-primary/20">
+                            <div className="absolute -left-1 top-6 text-xs font-bold text-primary bg-primary/10 px-1 rounded border border-primary/20">
                                 {stage.conversionRate.toFixed(0)}%
                             </div>
                         )}

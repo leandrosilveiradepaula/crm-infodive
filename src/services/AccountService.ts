@@ -1,8 +1,31 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Account } from '@/types/account';
-import { normalizeCasing, normalizeTaxId, normalizeZip } from '@/lib/string-utils';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Account } from '../types/account';
+import { normalizeCasing, normalizeTaxId, normalizeZip } from '../lib/string-utils';
 
 export class AccountService {
+    private static validateAccountAggregate(
+        input: Partial<Account>,
+        requireName: boolean,
+    ): void {
+        if (!input || typeof input !== 'object' || Array.isArray(input)) {
+            throw new Error('Dados de conta inválidos.');
+        }
+        if ((requireName || input.name !== undefined) &&
+            (typeof input.name !== 'string' || !input.name.trim() || input.name.length > 250)) {
+            throw new Error('Nome da conta inválido.');
+        }
+        for (const field of ['contacts', 'branches'] as const) {
+            const children = input[field];
+            if (children === undefined) continue;
+            if (!Array.isArray(children) || children.some(child =>
+                !child || typeof child !== 'object' ||
+                typeof child.name !== 'string' || !child.name.trim()
+            )) {
+                throw new Error('Dados de contatos ou filiais inválidos.');
+            }
+        }
+    }
+
     static async getAccounts(userId: string, organizationId: string): Promise<Account[]> {
         const supabase = createAdminClient();
         const { data, error } = await supabase
@@ -15,24 +38,31 @@ export class AccountService {
             .eq('organization_id', organizationId)
             .order('name');
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] accounts fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as contas.');
         }
 
-        return data.map((acc: any) => ({
-            ...acc,
-            contacts: (acc.contacts || []).map((c: any) => ({
-                id: c.id,
-                name: c.name,
-                email: c.email,
-                mobile_phone: c.mobile_phone,
-                landline_phone: c.landline_phone,
-                role: c.role,
-                is_primary: c.is_primary
-            })),
-            tags: acc.tags || []
-        }));
+        return data.map((rawAccount: unknown) => {
+            const account = rawAccount as Record<string, unknown>;
+            const rawContacts = Array.isArray(account.contacts) ? account.contacts : [];
+            return {
+                ...account,
+                contacts: rawContacts.map((rawContact: unknown) => {
+                    const contact = rawContact as Record<string, unknown>;
+                    return {
+                        id: contact.id,
+                        name: contact.name,
+                        email: contact.email,
+                        mobile_phone: contact.mobile_phone,
+                        landline_phone: contact.landline_phone,
+                        role: contact.role,
+                        is_primary: contact.is_primary
+                    };
+                }),
+                tags: Array.isArray(account.tags) ? account.tags : []
+            } as unknown as Account;
+        });
     }
 
     static async getSimpleAccounts(userId: string, organizationId: string) {
@@ -44,12 +74,12 @@ export class AccountService {
             .eq('organization_id', organizationId)
             .order('name', { ascending: true });
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] accounts fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as contas.');
         }
 
-        return data || [];
+        return data;
     }
 
     static async getManufacturers(userId: string, organizationId: string) {
@@ -62,179 +92,184 @@ export class AccountService {
             .eq('relationship_type', 'Fabricante')
             .order('name', { ascending: true });
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[AccountService] manufacturers fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar os fabricantes.');
         }
 
-        return data || [];
+        return data;
+    }
+
+    private static readonly aggregateFields = [
+        'name', 'cnpj', 'ie', 'segment', 'status', 'zip', 'street',
+        'number', 'complement', 'neighborhood', 'city', 'state',
+        'tags', 'relationship_type', 'logo_url', 'payment_terms',
+    ] as const;
+
+    private static prepareAggregate(input: Partial<Account>, requireName: boolean) {
+        this.validateAccountAggregate(input, requireName);
+        const fields: Record<string, unknown> = {};
+        const casing = new Set(['name', 'segment']);
+        const address = new Set(['street', 'neighborhood', 'city', 'state']);
+        for (const key of this.aggregateFields) {
+            if (!Object.prototype.hasOwnProperty.call(input, key)) continue;
+            const value = input[key];
+            if (value === undefined) continue;
+            if (key === 'tags') {
+                if (!Array.isArray(value) || value.length > 50 ||
+                    value.some(tag => typeof tag !== 'string' || tag.length > 120)) {
+                    throw new Error('Etiquetas inválidas.');
+                }
+                fields.tags = value;
+                continue;
+            }
+            if (value !== null && typeof value !== 'string') {
+                throw new Error('Campo da conta inválido.');
+            }
+            if (typeof value === 'string' && value.length > 500) {
+                throw new Error('Campo da conta excede o limite.');
+            }
+            fields[key] = typeof value !== 'string' ? value :
+                casing.has(key) ? normalizeCasing(value, 'name') :
+                address.has(key) ? normalizeCasing(value, 'address') :
+                key === 'cnpj' ? normalizeTaxId(value) :
+                key === 'zip' ? normalizeZip(value) : value;
+        }
+        if (requireName) {
+            fields.status ??= 'Ativo';
+            fields.relationship_type ??= 'Cliente';
+            fields.tags ??= [];
+        }
+        if (fields.status !== undefined &&
+            fields.status !== 'Ativo' && fields.status !== 'Inativo') {
+            throw new Error('Status da conta inválido.');
+        }
+
+        const serializeChildren = (children: Account['contacts'] | Account['branches'] | undefined,
+            keys: readonly string[]): Record<string, unknown>[] | null => {
+            if (children === undefined) return null;
+            if (children.length > 100) throw new Error('Limite de registros relacionados excedido.');
+            return children.map(child => {
+                const raw = child as unknown as Record<string, unknown>;
+                const record: Record<string, unknown> = {};
+                for (const key of keys) {
+                    if (raw[key] === undefined) continue;
+                    if (key === 'id') {
+                        // Generated modal IDs are temporary; real UUIDs belong to existing children.
+                        if (typeof raw.id !== 'string' || !raw.id.trim()) throw new Error('ID de filho inválido.');
+                        if (this.isUuid(raw.id)) record.id = raw.id;
+                        continue;
+                    }
+                    if (key === 'is_primary') {
+                        if (typeof raw[key] !== 'boolean') throw new Error('Indicador principal inválido.');
+                    } else if (raw[key] !== null &&
+                        (typeof raw[key] !== 'string' || (raw[key] as string).length > 500)) {
+                        throw new Error('Dados de contatos ou filiais inválidos.');
+                    }
+                    record[key] = raw[key];
+                }
+                return record;
+            });
+        };
+        return {
+            fields,
+            contacts: serializeChildren(input.contacts, [
+                'id', 'name', 'email', 'mobile_phone', 'landline_phone', 'role', 'is_primary',
+            ]),
+            branches: serializeChildren(input.branches, [
+                'id', 'name', 'zip', 'street', 'number', 'complement', 'neighborhood',
+                'city', 'state', 'cnpj', 'ie', 'payment_terms',
+            ]),
+        };
+    }
+
+    private static isUuid(value: unknown): value is string {
+        return typeof value === 'string' &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    }
+
+    private static validRpcRow(data: unknown): data is { account_id: string; aggregate_revision: number }[] {
+        return Array.isArray(data) && data.length === 1 &&
+            Boolean(data[0]) && this.isUuid(data[0].account_id) &&
+            Number.isSafeInteger(data[0].aggregate_revision) &&
+            data[0].aggregate_revision > 0;
     }
 
     static async createAccount(userId: string, organizationId: string, account: Partial<Account>) {
-        const supabase = createAdminClient();
-
         try {
-            const { data: accData, error: accError } = await supabase
-                .from('accounts')
-                .insert([{
-                    organization_id: organizationId,
-                    name: normalizeCasing(account.name, 'name'),
-                    cnpj: normalizeTaxId(account.cnpj),
-                    ie: account.ie,
-                    segment: normalizeCasing(account.segment, 'name'),
-                    status: account.status || 'Ativo',
-                    zip: normalizeZip(account.zip),
-                    street: normalizeCasing(account.street, 'address'),
-                    number: account.number,
-                    complement: account.complement,
-                    neighborhood: normalizeCasing(account.neighborhood, 'address'),
-                    city: normalizeCasing(account.city, 'address'),
-                    state: normalizeCasing(account.state, 'address'),
-                    tags: account.tags || [],
-                    relationship_type: account.relationship_type || 'Cliente',
-                    logo_url: account.logo_url || null,
-                    payment_terms: account.payment_terms || null
-                }])
-                .select()
-                .single();
-
-            if (accError) throw accError;
-            const newAccId = accData.id;
-
-            if (account.contacts && account.contacts.length > 0) {
-                const contactsToInsert = account.contacts.map(c => ({
-                    account_id: newAccId,
-                    organization_id: organizationId,
-                    name: c.name,
-                    email: c.email,
-                    mobile_phone: c.mobile_phone,
-                    landline_phone: c.landline_phone,
-                    role: c.role,
-                    is_primary: c.is_primary
-                }));
-                await supabase.from('account_contacts').insert(contactsToInsert);
+            if (!this.isUuid(userId) || !this.isUuid(organizationId)) {
+                throw new Error('Identificadores de conta inválidos.');
             }
-
-            if (account.branches && account.branches.length > 0) {
-                const branchesToInsert = account.branches.map(b => ({
-                    account_id: newAccId,
-                    organization_id: organizationId,
-                    name: b.name,
-                    zip: b.zip,
-                    street: b.street,
-                    number: b.number,
-                    complement: b.complement,
-                    neighborhood: b.neighborhood,
-                    city: b.city,
-                    state: b.state,
-                    cnpj: b.cnpj,
-                    ie: b.ie,
-                    payment_terms: b.payment_terms
-                }));
-                await supabase.from('account_branches').insert(branchesToInsert);
-            }
-
-            return { success: true, data: accData };
+            const input = this.prepareAggregate(account, true);
+            // All three tables commit or roll back in one database transaction.
+            const { data, error } = await createAdminClient().rpc('upsert_account_aggregate_atomic', {
+                p_actor_id: userId,
+                p_org_id: organizationId,
+                p_account_id: null,
+                p_expected_revision: null,
+                p_fields: input.fields,
+                p_contacts: input.contacts ?? [],
+                p_branches: input.branches ?? [],
+            });
+            if (error || !this.validRpcRow(data)) throw new Error('account RPC did not confirm persistence');
+            return { success: true, data: { id: data[0].account_id, aggregate_revision: data[0].aggregate_revision } };
         } catch {
-            console.error('[AccountService] account creation failed');
+            console.error('[AccountService] atomic account creation failed');
             return { success: false, error: 'Não foi possível salvar a conta.' };
         }
     }
 
     static async updateAccount(userId: string, organizationId: string, id: string, updates: Partial<Account>) {
-        const supabase = createAdminClient();
-
         try {
-            const { error: accError } = await supabase
-                .from('accounts')
-                .update({
-                    name: normalizeCasing(updates.name, 'name'),
-                    cnpj: normalizeTaxId(updates.cnpj),
-                    ie: updates.ie,
-                    segment: normalizeCasing(updates.segment, 'name'),
-                    status: updates.status,
-                    zip: normalizeZip(updates.zip),
-                    street: normalizeCasing(updates.street, 'address'),
-                    number: updates.number,
-                    complement: updates.complement,
-                    neighborhood: normalizeCasing(updates.neighborhood, 'address'),
-                    city: normalizeCasing(updates.city, 'address'),
-                    state: normalizeCasing(updates.state, 'address'),
-                    tags: updates.tags,
-                    relationship_type: updates.relationship_type,
-                    logo_url: updates.logo_url,
-                    payment_terms: updates.payment_terms
-                })
-                .eq('id', id)
-                .eq('organization_id', organizationId);
-
-            if (accError) throw accError;
-
-            if (updates.contacts) {
-                await supabase
-                    .from('account_contacts')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-
-                if (updates.contacts.length > 0) {
-                    const contactsToInsert = updates.contacts.map(c => ({
-                        account_id: id,
-                        organization_id: organizationId,
-                        name: c.name,
-                        email: c.email,
-                        mobile_phone: c.mobile_phone,
-                        landline_phone: c.landline_phone,
-                        role: c.role,
-                        is_primary: c.is_primary
-                    }));
-                    await supabase.from('account_contacts').insert(contactsToInsert);
-                }
+            if (![userId, organizationId, id].every(this.isUuid)) {
+                throw new Error('Identificadores de conta inválidos.');
             }
-
-            if (updates.branches) {
-                await supabase
-                    .from('account_branches')
-                    .delete()
-                    .eq('account_id', id)
-                    .eq('organization_id', organizationId);
-
-                if (updates.branches.length > 0) {
-                    const branchesToInsert = updates.branches.map(b => ({
-                        account_id: id,
-                        organization_id: organizationId,
-                        name: b.name,
-                        zip: b.zip,
-                        street: b.street,
-                        number: b.number,
-                        complement: b.complement,
-                        neighborhood: b.neighborhood,
-                        city: b.city,
-                        state: b.state,
-                        cnpj: b.cnpj,
-                        ie: b.ie,
-                        payment_terms: b.payment_terms
-                    }));
-                    await supabase.from('account_branches').insert(branchesToInsert);
-                }
+            if (!Number.isSafeInteger(updates?.aggregate_revision) ||
+                (updates.aggregate_revision ?? 0) < 1) {
+                throw new Error('Revisão da conta obrigatória.');
             }
-
-            return { success: true };
+            const input = this.prepareAggregate(updates, false);
+            if (!Object.keys(input.fields).length &&
+                input.contacts === null && input.branches === null) {
+                throw new Error('Nenhuma alteração informada.');
+            }
+            const { data, error } = await createAdminClient().rpc('upsert_account_aggregate_atomic', {
+                p_actor_id: userId,
+                p_org_id: organizationId,
+                p_account_id: id,
+                p_expected_revision: updates.aggregate_revision,
+                p_fields: input.fields,
+                p_contacts: input.contacts,
+                p_branches: input.branches,
+            });
+            if (error?.code === '40001') {
+                return { success: false, conflict: true,
+                    error: 'Esta empresa foi alterada por outra pessoa. Recarregue antes de salvar novamente.' };
+            }
+            if (error || !this.validRpcRow(data) || data[0].account_id !== id) {
+                throw new Error('account RPC did not confirm update');
+            }
+            return { success: true, aggregate_revision: data[0].aggregate_revision };
         } catch {
-            console.error('[AccountService] account update failed');
-            return { success: false, error: 'Não foi possível atualizar a conta.' };
+            console.error('[AccountService] atomic account update failed or revision stale');
+            return {
+                success: false,
+                error: 'Não foi possível atualizar a conta. Recarregue os dados antes de tentar novamente.',
+            };
         }
     }
 
     static async deleteAccount(userId: string, organization_id: string, id: string) {
         const supabase = createAdminClient();
         try {
-            const { error } = await supabase
+            const { data: deleted, error } = await supabase
                 .from('accounts')
                 .delete()
                 .eq('id', id)
-                .eq('organization_id', organization_id);
-            if (error) throw error;
+                .eq('organization_id', organization_id)
+                .select('id')
+                .maybeSingle();
+            if (error || !deleted) throw error || new Error('account deletion returned no row');
             return { success: true };
         } catch {
             console.error('[AccountService] account deletion failed');
@@ -242,7 +277,7 @@ export class AccountService {
         }
     }
 
-    static async bulkCreateAccounts(userId: string, organizationId: string, accounts: any[]) {
+    static async bulkCreateAccounts(userId: string, organizationId: string, accounts: unknown[]) {
         const supabase = createAdminClient();
         const results = {
             created: 0,
@@ -251,60 +286,142 @@ export class AccountService {
             errors: [] as string[]
         };
 
-        for (const account of accounts) {
+        for (const rawAccount of accounts) {
             try {
-                // 1. Upsert Account by CNPJ
+                if (!rawAccount || typeof rawAccount !== 'object' || Array.isArray(rawAccount)) {
+                    throw new Error('invalid account import row');
+                }
+                const account = rawAccount as Record<string, unknown>;
+                const accountName = typeof account.name === 'string' ? account.name : '';
+                const accountCnpj = typeof account.cnpj === 'string' ? account.cnpj : '';
+                const normalizedCnpj = normalizeTaxId(accountCnpj);
+                const contacts = Array.isArray(account.contacts) ? account.contacts : [];
+
+                let existingAccountId: string | null = null;
+                if (normalizedCnpj) {
+                    const { data: existingAccount, error: existingAccountError } = await supabase
+                        .from('accounts')
+                        .select('id')
+                        .eq('cnpj', normalizedCnpj)
+                        .eq('organization_id', organizationId)
+                        .maybeSingle();
+                    if (existingAccountError) throw existingAccountError;
+                    existingAccountId = existingAccount ? String(existingAccount.id) : null;
+                }
+
+                for (const rawContact of contacts) {
+                    if (!rawContact || typeof rawContact !== 'object' || Array.isArray(rawContact)) {
+                        throw new Error('invalid account contact import row');
+                    }
+                    const contact = rawContact as Record<string, unknown>;
+                    const email = typeof contact.email === 'string' && contact.email.trim()
+                        ? contact.email.trim()
+                        : null;
+                    if (!email) continue;
+
+                    const { data: existingContact, error: contactLookupError } = await supabase
+                        .from('account_contacts')
+                        .select('id, account_id')
+                        .eq('email', email)
+                        .eq('organization_id', organizationId)
+                        .maybeSingle();
+                    if (contactLookupError) throw contactLookupError;
+                    if (existingContact && (!existingAccountId || String(existingContact.account_id) !== existingAccountId)) {
+                        throw new Error('contact email already belongs to another account');
+                    }
+                }
+
                 const { data: accData, error: accError } = await supabase
                     .from('accounts')
                     .upsert({
                         organization_id: organizationId,
-                        name: normalizeCasing(account.name, 'name'),
-                        cnpj: normalizeTaxId(account.cnpj),
+                        name: normalizeCasing(accountName, 'name'),
+                        cnpj: normalizedCnpj,
                         ie: account.ie || null,
-                        segment: normalizeCasing(account.segment, 'name') || 'Outros',
+                        segment: normalizeCasing(typeof account.segment === 'string' ? account.segment : '', 'name') || 'Outros',
                         status: account.status || 'Ativo',
-                        zip: normalizeZip(account.zip) || null,
-                        street: normalizeCasing(account.street, 'address') || null,
+                        zip: normalizeZip(typeof account.zip === 'string' ? account.zip : '') || null,
+                        street: normalizeCasing(typeof account.street === 'string' ? account.street : '', 'address') || null,
                         number: account.number || null,
                         complement: account.complement || null,
-                        neighborhood: normalizeCasing(account.neighborhood, 'address') || null,
-                        city: normalizeCasing(account.city, 'address') || null,
-                        state: normalizeCasing(account.state, 'address') || null,
+                        neighborhood: normalizeCasing(typeof account.neighborhood === 'string' ? account.neighborhood : '', 'address') || null,
+                        city: normalizeCasing(typeof account.city === 'string' ? account.city : '', 'address') || null,
+                        state: normalizeCasing(typeof account.state === 'string' ? account.state : '', 'address') || null,
                         relationship_type: account.relationship_type || 'Cliente'
                     }, { onConflict: 'cnpj, organization_id' })
                     .select()
                     .single();
 
-                if (accError) throw accError;
+                if (accError || !accData) throw accError || new Error('account upsert returned no row');
 
-                const accId = accData.id;
-                
-                // Determine if it was an update or create (simplified check)
-                if (accData.created_at === accData.updated_at) results.created++;
-                else results.updated++;
+                const accId = String(accData.id);
+                for (const rawContact of contacts) {
+                    if (!rawContact || typeof rawContact !== 'object' || Array.isArray(rawContact)) {
+                        throw new Error('invalid account contact import row');
+                    }
+                    const contact = rawContact as Record<string, unknown>;
+                    const email = typeof contact.email === 'string' && contact.email.trim()
+                        ? contact.email.trim()
+                        : null;
+                    const contactPayload = {
+                        account_id: accId,
+                        organization_id: organizationId,
+                        name: typeof contact.name === 'string' ? contact.name : '',
+                        email,
+                        mobile_phone: contact.mobile_phone || null,
+                        landline_phone: contact.landline_phone || null,
+                        role: contact.role || null,
+                        is_primary: Boolean(contact.is_primary)
+                    };
 
-                // 2. Handle Contacts
-                if (account.contacts && account.contacts.length > 0) {
-                    for (const contact of account.contacts) {
-                        // Upsert Contact by Email (if exists) or just insert
-                        const contactPayload = {
-                            account_id: accId,
-                            organization_id: organizationId,
-                            name: contact.name,
-                            email: contact.email || null,
-                            mobile_phone: contact.mobile_phone || null,
-                            landline_phone: contact.landline_phone || null,
-                            role: contact.role || null,
-                            is_primary: !!contact.is_primary
-                        };
+                    if (email) {
+                        const { data: existingContact, error: contactLookupError } = await supabase
+                            .from('account_contacts')
+                            .select('id, account_id')
+                            .eq('email', email)
+                            .eq('organization_id', organizationId)
+                            .maybeSingle();
+                        if (contactLookupError) throw contactLookupError;
 
-                        if (contact.email) {
-                            await supabase.from('account_contacts').upsert(contactPayload, { onConflict: 'email, organization_id' });
+                        if (existingContact && String(existingContact.account_id) !== accId) {
+                            throw new Error('contact email already belongs to another account');
+                        }
+
+                        if (existingContact) {
+                            const { data: updatedContact, error: contactUpdateError } = await supabase
+                                .from('account_contacts')
+                                .update(contactPayload)
+                                .eq('id', existingContact.id)
+                                .eq('organization_id', organizationId)
+                                .select('id')
+                                .maybeSingle();
+                            if (contactUpdateError || !updatedContact) {
+                                throw contactUpdateError || new Error('contact update returned no row');
+                            }
                         } else {
-                            await supabase.from('account_contacts').insert(contactPayload);
+                            const { data: insertedContact, error: contactInsertError } = await supabase
+                                .from('account_contacts')
+                                .insert(contactPayload)
+                                .select('id')
+                                .maybeSingle();
+                            if (contactInsertError || !insertedContact) {
+                                throw contactInsertError || new Error('contact insert returned no row');
+                            }
+                        }
+                    } else {
+                        const { data: insertedContact, error: contactInsertError } = await supabase
+                            .from('account_contacts')
+                            .insert(contactPayload)
+                            .select('id')
+                            .maybeSingle();
+                        if (contactInsertError || !insertedContact) {
+                            throw contactInsertError || new Error('contact insert returned no row');
                         }
                     }
                 }
+
+                if (existingAccountId) results.updated++;
+                else results.created++;
             } catch {
                 results.failed++;
                 results.errors.push('Não foi possível importar esta conta.');
@@ -313,4 +430,5 @@ export class AccountService {
 
         return results;
     }
+
 }
