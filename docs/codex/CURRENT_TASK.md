@@ -1,68 +1,43 @@
 # CURRENT_TASK.md — autorização ativa da AI Product Factory
 
-Este documento contém **somente a tarefa vigente**. O histórico integral anterior foi preservado byte a byte em `docs/codex/archive/CURRENT_TASK_FULL_BEFORE_PROOF1_2026-10-23.md` (blob imutável Git `bcc9dd5368b461dfb6b34b604a8cc4b1ef966e00`, origem `0f1815264cc832e77fb81f5ff6859205aed7082d`).
+Este documento registra **somente a tarefa vigente** no CRM. O histórico da tarefa anterior de Relatórios & Insights está preservado integralmente no Git no blob `d5ef70fa250c150c9b9ed3c5eba2045d19ff2069` do commit `463a37d93cd19ef3335ef6dd4c2421761de4f230` (`docs/codex/CURRENT_TASK.md`). O arquivo de arquivo `docs/codex/archive/CURRENT_TASK_FULL_BEFORE_PROOF1_2026-10-23.md` preserva o histórico anterior. Nenhum histórico concede autorização de escrita atual.
 
-O histórico é material de auditoria e **não concede autorizações de escrita novas**, não reabre tarefas antigas, não substitui os gates atuais nem prova que a Prova 1 terminou. Antes de trabalhar, verificar `AGENTS.md` e a seção ativa abaixo no mesmo SHA.
+## Tarefa autorizada (24/10/2026) — Prova 2 da Factory: entrada do Service Desk no CRM
 
-## Tarefa autorizada (2026-10-23): Prova 1 da Factory — filtros acessíveis em Relatórios (CRM issue #24)
+- Fonte da decisão arquitetural: operador determinou que Service Desk é **módulo do CRM InfoDive**, aproveitando infraestrutura GitHub/Vercel/Supabase existente. Não criar projeto ou Vercel separado.
+- Issue funcional/critério de aceite: https://github.com/leandrosilveiradepaula/crm-infodive/issues/194
+- Escopo técnico registrado sob a identidade OWNER: https://github.com/leandrosilveiradepaula/crm-infodive/issues/194#issuecomment-6390960882
+- Origem do trabalho: **novo** Start OWNER na Factory, na issue operacional #1055, com auditoria e geração atual. A PR original do Service Desk #10 permanece evidência histórica falhada em navegador, sem transferência de status.
+- Base autorizada: branch `preview/hardening-release-candidate` no SHA `463a37d93cd19ef3335ef6dd4c2421761de4f230`, ou sucessor **explicitamente repinado** no Control Plane após validação nativa exata do CRM. PR base humana de Preview #56; não usar `main` como base de implementação.
+- Restrição de arquitetura: sessão existente do CRM com `getSession()` e `organizationId`; não copiar `tenant_id` nem banco/auth do repositório Service Desk.
 
-**Autorização do operador:** CRM issue #24, comentário OWNER id 6371354929, em
-https://github.com/leandrosilveiradepaula/crm-infodive/issues/24#issuecomment-6371354929.
-É trabalho **real do CRM** para certificar uma única jornada da AI Product Factory,
-não benchmark artificial nem replay das execuções anteriores. Esta seção substitui
-a tarefa ativa anterior para novos commits, sem reabrir issues históricas.
+### Objetivo funcional delimitado
 
-### Base e objetivo
+Implementar uma **entrada real de navegação** para o futuro módulo Service Desk: link acessível no menu do CRM e rota protegida `/service-desk` que usa a sessão atual para admitir apenas usuários autenticados com `userId` e `organizationId` confiáveis. A página deve informar honestamente que **abrir e consultar chamados ainda não estão habilitados** enquanto o backend não for integrado. Não criar/listar tickets falsos, não simular sucesso de API, não exibir identificadores internos de organização e não colocar botões sem ação.
 
-Base autorizada: `preview/hardening-release-candidate`, SHA
-`f0f45cb39bf1b462202baa942e67250fe0841f91` (ou candidato mais novo
-repinado com a política server-side já autorizada e CI nativa SHA-exata).
+A Factory precisa implementar o código por sua própria rota de execução após Discovery/Product Spec/Planning e backlog real. A documentação de entrada produzida pelo operador não é implementação do módulo nem evidencia de Preview.
 
-Implementar acessibilidade funcional dos filtros de Relatórios & Insights,
-atualmente com controles sem nomes acessíveis, seleção de trimestres sem
-`aria-pressed` e estado de carregamento sem status semântico. Preservar
-filtros, buscas, estados, resultados, exportação e contratos de negócio.
+### Escopo máximo de escrita
 
-### Limite explícito de escrita
+1. `src/components/layout/Sidebar.tsx` — link e semântica de navegação mobile/collapsed.
+2. `src/app/(dashboard)/service-desk/page.tsx` — rota protegida reutilizando infraestrutura existente (arquivo novo).
+3. `src/lib/service-desk/entry-guard.ts` — guard puro opcional, sem credenciais (arquivo novo).
+4. `src/lib/service-desk/entry-guard.test.ts` — testes determinísticos de admissão e ausência de autorização (arquivo novo).
+5. `docs/codex/CURRENT_TASK.md` — apenas identidade/recibos do candidato, se necessário.
 
-- `docs/codex/CURRENT_TASK.md` — registrar evidência e a identidade do candidato.
-- `src/app/(dashboard)/reports/client-page.tsx` — controles e estados.
-- `src/lib/reports-filter-accessibility.test.ts` (novo) e/ou
-  `src/lib/reports-accessibility.test.ts` (novo) — regressões determinísticas.
-- `scripts/browser-smoke.mjs` — somente prova de teclado e responsividade
-  de Relatórios, se o harness existente permitir sem atalhos.
+**Não tocar** outros arquivos: especialmente migrations/schema Supabase, RLS, RBAC, autenticação/sessão existente, APIs/integrações, dependências, templates, n8n, CI/workflows, secrets, Vercel config, pipelines, vendas, cálculos e dados de produção. Não introduzir novas variáveis de ambiente. Sem gravação no Supabase em nenhum ambiente. Se a funcionalidade exigir ampliar escopo ou acesso, parar com blocker explícito, sem permissão implícita.
 
-Não editar outros arquivos sem nova autorização OWNER explícita. Não alterar
-schema/migrations, RLS/RBAC/auth, API, relatórios financeiros, integrações,
-credenciais, n8n, Vercel ou workflow de CI.
+### Critérios de aceite da implementação da Factory
 
-### Definition of Done de produto e Factory
+1. Entrada no menu principal navegável, rotulada e acessível; `aria-current`, foco visível, menu recolhido e mobile preservados.
+2. Rota `/service-desk` usando `getSession` do CRM e falhando fechada para `!isLoggedIn`, `!userId` ou `!organizationId`; sem aceitar identificação de organização de query string, corpo HTTP ou browser. Não alterar login.
+3. Estado de indisponibilidade funcional explícito e verdadeiro para abertura/listagem de tickets, sem dados fictícios nem CTA inerte.
+4. Testes determinísticos do guard e navegação; `npm ci`, TypeScript, lint, `npm test`, build e browser smoke CRM sem relaxar checks existentes.
+5. Start OWNER auditado, Product Stage, backlog, execução Direct/roteamento pela Factory, código/commit/PR atribuídos ao runtime, CI exata, reviews e Preview SHA-exato com evidência legítima. Caso não haja sessão autenticada de homologação, declarar blocker de browser, nunca simular PASS.
+6. Release em produção continua **exclusivamente gate humano**. Integração na branch de Preview pode ocorrer somente após gates legítimos e não autoriza merge da PR #56 para `main`.
 
-1. Busca, ano, status, faturamento e vendedor com rótulos associados e verificáveis.
-2. Trimestres e opção Tempo Todo expondo seleção/estado de forma semântica;
-   navegação por teclado e foco visível, sem afetar o comportamento existente.
-3. Loading/empty/error anunciados adequadamente, sem inventar resultados.
-4. Testes offline executáveis e regressão de interação/teclado onde possível;
-   TypeScript, lint, Vitest, build e browser smoke originais preservados.
-5. **Implementação precisa sair da própria Factory:** Start OWNER legítimo,
-   Product Stage, backlog, Work Unit e commit/PR criados pelo runtime Direct
-   com identidade de run/change set, CI SHA-exata, review e Preview validado
-   quando aplicável. A prova fecha em `awaiting_release`; não há merge de
-   produção e nenhuma ação retroativa em Change Sets antigos.
+### Governança e custo
 
-Commits e PR da implementação são autorizados **somente** em branch não
-produtiva com destino `preview/hardening-release-candidate`. Integração nessa
-branch pode ser automática após todas as provas exigidas, desde que não
-publique produção. Merge da PR #56 para `main` continua gate humano.
+Commits/PRs de **código** estão autorizados apenas dentro dos paths acima, em branch não produtiva com PR para `preview/hardening-release-candidate`, **executados pela Factory**, não manualmente pelo ChatGPT. Sem benchmarks, sem paid probes, sem nova compra ou alteração de orçamento. Gates e reserva reais prevalecem.
 
-Não executar modelo pago para readiness/smoke/sondagem. Chamadas pagas somente
-quando etapa legítima exigir, sob reserva e ledger real do Control Plane.
-Não forçar reparos de CI, não criar Preview repetitivo nem reabrir backlog
-antigo. Se Preview remoto ou CRM Supabase ficar indisponível, registrar
-`blocked_external_dependency` com evidência exata em vez de alegar PASS.
-
-### Evidência factual desta alteração
-
-- Candidato identificado no pacote de contexto: branch `factory/cs-bd46da70/reports-filter-accessibility`, com base exata informada `0a663e83668bbc3ba9f2f34ef0ca6ffe51709ae7`.
-- Escopo de escrita usado: esta documentação, `src/app/(dashboard)/reports/client-page.tsx` e `src/lib/reports-filter-accessibility.test.ts`.
-- Nenhuma validação, commit, PR, integração, Preview ou publicação é registrada nesta alteração.
+Este arquivo substitui a tarefa anterior para **novas** jornadas; não modifica runs, Change Sets ou evidências históricas da Prova 1. Não confundir uma landing page modular validada com Service Desk comercial pronto. A Prova 2 segue aberta até todos os gates válidos.
