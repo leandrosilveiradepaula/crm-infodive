@@ -7,7 +7,7 @@ const header = readFileSync('src/components/layout/Header.tsx', 'utf8');
 
 describe('sidebar / mobile navigation contract', () => {
     it('closes the mobile menu after every primary route selection', () => {
-        expect((sidebar.match(/onNavigate=\{closeMobileMenu\}/g) ?? []).length).toBe(16);
+        expect((sidebar.match(/onNavigate=\{closeMobileMenu\}/g) ?? []).length).toBe(17);
         expect(sidebar).toContain('onClick={onNavigate}');
         expect(sidebar).toContain('onClick={closeMobileMenu}');
     });
