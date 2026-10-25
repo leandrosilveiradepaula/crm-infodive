@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth/session';
 import { decideServiceDeskEntry } from '@/lib/service-desk/entry-guard';
 
 export default async function ServiceDeskPage() {
