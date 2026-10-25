@@ -15,6 +15,7 @@ import {
     Scroll,
     Truck,
     Inbox,
+    Headphones,
     Zap,
     PieChart,
     Package,
@@ -87,6 +88,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                 <NavItem href="/contracts" icon={Scroll} label="Contratos" isActive={isSidebarNavActive(pathname, '/contracts')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
                 <NavItem href="/sales" icon={Truck} label="Vendas" isActive={isSidebarNavActive(pathname, '/sales')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
                 <NavItem href="/inbox" icon={Inbox} label="Inbox" isActive={isSidebarNavActive(pathname, '/inbox')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
+                <NavItem href="/service-desk" icon={Headphones} label="Service Desk" isActive={isSidebarNavActive(pathname, '/service-desk')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
                 <NavItem href="/automations" icon={Zap} label="Automações" isActive={isSidebarNavActive(pathname, '/automations')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
                 <NavItem href="/reports" icon={PieChart} label="Relatórios" isActive={isSidebarNavActive(pathname, '/reports')} collapsed={isCollapsed} onNavigate={closeMobileMenu} />
 
@@ -101,7 +103,6 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
 
             {/* Footer / User Profile */}
             <div className="p-4 border-t border-sidebar-border space-y-4">
-
                 <div className={cn("flex items-center justify-between transition-all w-full", isCollapsed ? "lg:flex-col lg:gap-3 lg:justify-center" : "")}>
                     <div className="flex items-center gap-3 min-w-0">
                         <Avatar className="shrink-0">
@@ -109,9 +110,9 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                             <AvatarFallback>{userProfile.full_name?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
                         <div className={cn("overflow-hidden", isCollapsed && "lg:sr-only")}>
-                                <p className="text-sm font-bold text-sidebar-foreground leading-none truncate">{userProfile.full_name}</p>
-                                <p className="text-xs text-sidebar-foreground/70 mt-1 truncate capitalize">{userProfile.role}</p>
-                            </div>
+                            <p className="text-sm font-bold text-sidebar-foreground leading-none truncate">{userProfile.full_name}</p>
+                            <p className="text-xs text-sidebar-foreground/70 mt-1 truncate capitalize">{userProfile.role}</p>
+                        </div>
                     </div>
 
                     <button
