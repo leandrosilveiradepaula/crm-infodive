@@ -52,22 +52,22 @@ export function CustomerCard({ customer, onEdit, onDelete, onView }: CustomerCar
 
             <div className="flex-1 relative z-10">
                 <h3 className="font-bold text-foreground text-sm mb-0.5 truncate tracking-tight group-hover:text-primary transition-colors">{customer.name}</h3>
-                <p className="text-[10px] text-muted-foreground mb-2 flex items-center font-bold uppercase tracking-wide">
+                <p className="text-xs text-muted-foreground mb-2 flex items-center font-bold uppercase tracking-wide">
                     <User className="h-3 w-3 mr-1.5 opacity-50 text-primary" />
                     <span className="truncate">{primaryContact.name}</span>
                     {customer.contacts.length > 1 && <span className="ml-1.5 text-[8px] px-1 py-0.5 bg-muted text-muted-foreground rounded border border-border">+{customer.contacts.length - 1}</span>}
                 </p>
 
                 <div className="space-y-1.5 pt-2.5 border-t border-border">
-                    <div className="flex items-center text-[9px] text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
+                    <div className="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
                         <Mail className="h-3 w-3 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
                         <span className="truncate max-w-[180px]" title={primaryContact.email}>{primaryContact.email || '---'}</span>
                     </div>
-                    <div className="flex items-center text-[9px] text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
+                    <div className="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
                         <Phone className="h-3 w-3 mr-2 text-muted-foreground group-hover:text-emerald-500 transition-colors" />
                         {primaryContact.mobile_phone || primaryContact.landline_phone || '---'}
                     </div>
-                    <div className="flex items-center text-[9px] text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
+                    <div className="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider group-hover:text-foreground transition-colors">
                         <MapPin className="h-3 w-3 mr-2 text-muted-foreground group-hover:text-teal-500 transition-colors" />
                         <span className="truncate">{customer.city || '---'}, {customer.state || '-'}</span>
                     </div>

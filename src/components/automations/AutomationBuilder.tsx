@@ -60,7 +60,7 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                 type: config.triggerType,
                 config: config.triggerConfig
             },
-            conditions: [], // Simplification: Skipping conditions for now
+            conditions: [], // Este construtor expõe apenas gatilho + ações; condições não fazem parte desta superfície.
             actions: config.actions,
             executionCount: 0,
             successCount: 0,

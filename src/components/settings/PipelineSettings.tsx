@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getPipelineStages, savePipelineStages } from '@/app/(dashboard)/settings/actions';
+import { getPipelineStageSnapshot, savePipelineStages } from '@/app/(dashboard)/settings/actions';
 import type { PipelineStage } from '@/services/SettingsService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,14 +13,22 @@ import { toast } from 'sonner';
 
 export function PipelineSettings() {
     const [stages, setStages] = useState<PipelineStage[]>([]);
+    const [revision, setRevision] = useState<number | null>(null);
+    const [loadError, setLoadError] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
     const fetchStages = async () => {
         setLoading(true);
         try {
-            const data = await getPipelineStages();
-            setStages(data);
+            const snapshot = await getPipelineStageSnapshot();
+            setStages(snapshot.stages);
+            setRevision(snapshot.revision);
+            setLoadError(false);
+        } catch {
+            setLoadError(true);
+            setRevision(null);
+            toast.error('Não foi possível carregar a versão atual das etapas.');
         } finally {
             setLoading(false);
         }
@@ -31,12 +39,16 @@ export function PipelineSettings() {
     }, []);
 
     const handleSave = async () => {
+        if (revision === null || loadError) {
+            toast.error('Recarregue as etapas antes de salvar.');
+            return;
+        }
         if (stages.some(s => !s.name.trim())) {
             toast.error('Todas as etapas precisam ter um nome.');
             return;
         }
         setSaving(true);
-        const result = await savePipelineStages(stages);
+        const result = await savePipelineStages(stages, revision);
         setSaving(false);
         if (result.success) {
             toast.success('Etapas do pipeline salvas com sucesso!');
@@ -67,7 +79,7 @@ export function PipelineSettings() {
                     </div>
                     <div>
                         <h3 className="text-lg font-black text-foreground tracking-tight">Estágios do Pipeline</h3>
-                        <p className="text-xs text-muted-foreground font-medium">Personalize as etapas do seu processo de vendas.</p>
+                        <p className="text-xs text-muted-foreground font-medium">Configuração de etapas. O quadro de negócios ainda utiliza etapas fixas.</p>
                     </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={fetchStages} disabled={loading} className="text-muted-foreground hover:bg-muted h-9 w-9 rounded-xl">
@@ -106,7 +118,7 @@ export function PipelineSettings() {
                                     placeholder="Nome da etapa"
                                 />
 
-                                <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
+                                <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
                                     #{index + 1}
                                 </span>
 
@@ -129,7 +141,7 @@ export function PipelineSettings() {
                     </Button>
 
                     <div className="flex justify-end pt-4 border-t border-border">
-                        <Button onClick={handleSave} disabled={saving || loading} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/10">
+                        <Button onClick={handleSave} disabled={saving || loading || revision === null || loadError} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/10">
                             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
                             Salvar Etapas
                         </Button>

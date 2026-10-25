@@ -204,7 +204,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-fit h-8 text-[10px] uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
+                            className="w-fit h-8 text-xs uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
                             onClick={() => setShowAllContacts(true)}
                         >
                             <Search className="w-3 h-3 mr-1.5" /> Buscar em todos os contatos
@@ -221,7 +221,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-fit h-8 text-[10px] uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
+                            className="w-fit h-8 text-xs uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
                             onClick={() => setShowAllContacts(true)}
                         >
                             <Search className="w-3 h-3 mr-1.5" /> Buscar em todos os contatos
@@ -238,11 +238,11 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                     <div className="bg-card border border-primary/30 bg-primary/5 shadow-sm rounded-2xl p-5 flex flex-col md:flex-row gap-4 mb-6 relative">
                         <div className="flex-1 space-y-2.5">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] uppercase tracking-wider font-bold text-primary">Selecionar Contato</Label>
+                                <Label className="text-xs uppercase tracking-wider font-bold text-primary">Selecionar Contato</Label>
                                 {deal?.account_id && (
                                     <button
                                         onClick={() => setShowAllContacts(!showAllContacts)}
-                                        className="text-[9px] uppercase font-black text-primary/60 hover:text-primary transition-colors underline decoration-dotted"
+                                        className="text-xs uppercase font-black text-primary/60 hover:text-primary transition-colors underline decoration-dotted"
                                     >
                                         {showAllContacts ? 'Filtrar por empresa' : 'Ver todos'}
                                     </button>
@@ -270,7 +270,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                         </div>
 
                         <div className="flex-1 space-y-2.5">
-                            <Label className="text-[10px] uppercase tracking-wider font-bold text-primary">Papel no Negócio</Label>
+                            <Label className="text-xs uppercase tracking-wider font-bold text-primary">Papel no Negócio</Label>
                             <Input
                                 type="text"
                                 className="w-full h-11 bg-background border-border/60 rounded-lg placeholder:text-muted-foreground/40"
@@ -329,7 +329,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                         <h4 className="font-bold text-foreground text-sm truncate">{contact.name}</h4>
                                         {stakeholder.role && (
-                                            <span className={`inline-flex text-[10px] px-2.5 py-1 rounded-md font-semibold tracking-wide border w-fit ${stakeholder.isPrimary ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-foreground border-border/50'}`}>
+                                            <span className={`inline-flex text-xs px-2.5 py-1 rounded-md font-semibold tracking-wide border w-fit ${stakeholder.isPrimary ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-foreground border-border/50'}`}>
                                                 {stakeholder.role}
                                             </span>
                                         )}

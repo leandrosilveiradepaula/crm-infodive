@@ -1,7 +1,7 @@
 import { ReportsClientPage } from './client-page';
 
 export const metadata = {
-    title: 'Relatórios | CRM Next Gen',
+    title: 'Relatórios | CRM Infodive',
 };
 
 export default function ReportsPage() {

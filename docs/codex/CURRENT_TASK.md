@@ -1,64 +1,43 @@
-# CURRENT_TASK.md
+# CURRENT_TASK.md — autorização ativa da AI Product Factory
 
-## Status
-Active
+Este documento registra **somente a tarefa vigente** no CRM. O histórico da tarefa anterior de Relatórios & Insights está preservado integralmente no Git no blob `d5ef70fa250c150c9b9ed3c5eba2045d19ff2069` do commit `463a37d93cd19ef3335ef6dd4c2421761de4f230` (`docs/codex/CURRENT_TASK.md`). O arquivo de arquivo `docs/codex/archive/CURRENT_TASK_FULL_BEFORE_PROOF1_2026-10-23.md` preserva o histórico anterior. Nenhum histórico concede autorização de escrita atual.
 
-## Objective
-Corrigir o gap confirmado em 2026-10-01: `addDealProduct` nao deve inventar `exchange_rate=5.0` quando a taxa nao foi informada.
+## Tarefa autorizada (24/10/2026) — Prova 2 da Factory: entrada do Service Desk no CRM
 
-O usuario autorizou explicitamente a continuidade deste trabalho pela AI Product Factory.
+- Fonte da decisão arquitetural: operador determinou que Service Desk é **módulo do CRM InfoDive**, aproveitando infraestrutura GitHub/Vercel/Supabase existente. Não criar projeto ou Vercel separado.
+- Issue funcional/critério de aceite: https://github.com/leandrosilveiradepaula/crm-infodive/issues/194
+- Escopo técnico registrado sob a identidade OWNER: https://github.com/leandrosilveiradepaula/crm-infodive/issues/194#issuecomment-6390960882
+- Origem do trabalho: **novo** Start OWNER na Factory, na issue operacional #1055, com auditoria e geração atual. A PR original do Service Desk #10 permanece evidência histórica falhada em navegador, sem transferência de status.
+- Base autorizada: branch `preview/hardening-release-candidate` no SHA `463a37d93cd19ef3335ef6dd4c2421761de4f230`, ou sucessor **explicitamente repinado** no Control Plane após validação nativa exata do CRM. PR base humana de Preview #56; não usar `main` como base de implementação.
+- Restrição de arquitetura: sessão existente do CRM com `getSession()` e `organizationId`; não copiar `tenant_id` nem banco/auth do repositório Service Desk.
 
-## Allowed scope
-- `docs/codex/CURRENT_TASK.md`
-- `src/services/DealService.ts`
-- `test/present-in-usd-core.test.ts`
-- `.github/workflows/crm-validation.yml` (somente para executar os checks obrigatorios deste PR)
-- `src/app/api/gemini/enrich/route.ts` (somente para remover a exigencia de GEMINI_API_KEY durante o build; a key continua obrigatoria em runtime)
-- `src/app/api/gemini/extract/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/specs/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/parse-company/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/parse-signature/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/debug/page.tsx` (somente para impedir uso de service role durante prerender/build e manter acesso privilegiado condicionado a sessao em runtime)
+### Objetivo funcional delimitado
 
-## CI blocker discovered
-- O primeiro CI real do PR passou TypeScript e 92 testes, mas `next build` falhou ao importar rotas Gemini que instanciavam clientes no escopo de modulo sem `GEMINI_API_KEY`.
-- A auditoria confirmou o mesmo padrao em `enrich`, `extract`, `specs`, `parse-company` e `parse-signature`.
-- A correcao autorizada e limitada a instanciar o cliente apenas no runtime da requisicao, depois de validar a variavel de ambiente.
-- Nenhuma credencial sera adicionada ao CI ou ao repositorio.
-- O terceiro CI revelou `/debug` prerenderizando sem sessao e chamando `createAdminClient()`, o que exige `SUPABASE_SERVICE_ROLE_KEY` durante o build. A correcao autorizada e tornar a pagina dinamica e criar o cliente privilegiado somente quando houver sessao valida.
+Implementar uma **entrada real de navegação** para o futuro módulo Service Desk: link acessível no menu do CRM e rota protegida `/service-desk` que usa a sessão atual para admitir apenas usuários autenticados com `userId` e `organizationId` confiáveis. A página deve informar honestamente que **abrir e consultar chamados ainda não estão habilitados** enquanto o backend não for integrado. Não criar/listar tickets falsos, não simular sucesso de API, não exibir identificadores internos de organização e não colocar botões sem ação.
 
-## Required behavior
-- taxa ausente permanece ausente/null-safe;
-- taxa explicita, inclusive zero, e preservada;
-- `deal.value` e comissao nao mudam;
-- nenhuma migration ou schema change;
-- patch minimo e geral.
+A Factory precisa implementar o código por sua própria rota de execução após Discovery/Product Spec/Planning e backlog real. A documentação de entrada produzida pelo operador não é implementação do módulo nem evidencia de Preview.
 
-## Validation
-- `npx tsc --noEmit`
-- `npm test`
-- `npm run build`
-- `git diff --check`
+### Escopo máximo de escrita
 
-## Commit / PR
-Commit e PR estao autorizados. A continuidade foi reafirmada pelo usuario em 2026-10-01. E autorizado adicionar um workflow minimo de CI no escopo acima apenas para executar os checks obrigatorios deste PR. Auto-merge continua proibido. Producao permanece sob gate humano.
+1. `src/components/layout/Sidebar.tsx` — link e semântica de navegação mobile/collapsed.
+2. `src/app/(dashboard)/service-desk/page.tsx` — rota protegida reutilizando infraestrutura existente (arquivo novo).
+3. `src/lib/service-desk/entry-guard.ts` — guard puro opcional, sem credenciais (arquivo novo).
+4. `src/lib/service-desk/entry-guard.test.ts` — testes determinísticos de admissão e ausência de autorização (arquivo novo).
+5. `docs/codex/CURRENT_TASK.md` — apenas identidade/recibos do candidato, se necessário.
 
-## External side effects
-Sem deploy, migration, mutacao de dados externos, secrets ou alteracoes de auth/RBAC.
+**Não tocar** outros arquivos: especialmente migrations/schema Supabase, RLS, RBAC, autenticação/sessão existente, APIs/integrações, dependências, templates, n8n, CI/workflows, secrets, Vercel config, pipelines, vendas, cálculos e dados de produção. Não introduzir novas variáveis de ambiente. Sem gravação no Supabase em nenhum ambiente. Se a funcionalidade exigir ampliar escopo ou acesso, parar com blocker explícito, sem permissão implícita.
 
-## Additional authorized task (2026-10-02): Reduce Vercel deployment usage
+### Critérios de aceite da implementação da Factory
 
-Objective: reduce automatic Preview deployments while CRM and AI Product Factory are worked in parallel.
+1. Entrada no menu principal navegável, rotulada e acessível; `aria-current`, foco visível, menu recolhido e mobile preservados.
+2. Rota `/service-desk` usando `getSession` do CRM e falhando fechada para `!isLoggedIn`, `!userId` ou `!organizationId`; sem aceitar identificação de organização de query string, corpo HTTP ou browser. Não alterar login.
+3. Estado de indisponibilidade funcional explícito e verdadeiro para abertura/listagem de tickets, sem dados fictícios nem CTA inerte.
+4. Testes determinísticos do guard e navegação; `npm ci`, TypeScript, lint, `npm test`, build e browser smoke CRM sem relaxar checks existentes.
+5. Start OWNER auditado, Product Stage, backlog, execução Direct/roteamento pela Factory, código/commit/PR atribuídos ao runtime, CI exata, reviews e Preview SHA-exato com evidência legítima. Caso não haja sessão autenticada de homologação, declarar blocker de browser, nunca simular PASS.
+6. Release em produção continua **exclusivamente gate humano**. Integração na branch de Preview pode ocorrer somente após gates legítimos e não autoriza merge da PR #56 para `main`.
 
-Confirmed Factory controls:
-- `apps/console/vercel.json` disables Vercel Git deployments for ordinary branches and enables only `main` and `preview/**`.
-- Factory Preview promotions previously created the `preview/pr-N` ref at the base commit and then moved it to the candidate, potentially creating two deployments per promotion. Factory PR #573 removed that extra base deployment and made repeated promotion of the same SHA a no-op.
+### Governança e custo
 
-Allowed additional CRM scope:
-- `vercel.json` at the repository root only, with `git.deploymentEnabled` set to disable ordinary branches, preserve production on `main`, and allow explicit final-candidate branches under `preview/**`.
-- `docs/codex/CURRENT_TASK.md` to record this scope.
-- No application code, credentials, dashboard-only settings, data, or schema changes.
+Commits/PRs de **código** estão autorizados apenas dentro dos paths acima, em branch não produtiva com PR para `preview/hardening-release-candidate`, **executados pela Factory**, não manualmente pelo ChatGPT. Sem benchmarks, sem paid probes, sem nova compra ou alteração de orçamento. Gates e reserva reais prevalecem.
 
-Operating rule: run the required CI on working branches; create or update one `preview/pr-N` ref only after the exact PR candidate is final and its required checks are green. Do not create a base-commit preview first. Merge to `main` only for a release-ready batch. `ignoreCommand` cancellations are not quota savings because Vercel counts canceled ignored deployments.
-
-Commit, PR, and merge for this narrowly scoped configuration change are authorized by the user's existing project authorization. The merge is expected to trigger one production deployment to install the policy; no other deployment or migration is authorized by this task.
+Este arquivo substitui a tarefa anterior para **novas** jornadas; não modifica runs, Change Sets ou evidências históricas da Prova 1. Não confundir uma landing page modular validada com Service Desk comercial pronto. A Prova 2 segue aberta até todos os gates válidos.

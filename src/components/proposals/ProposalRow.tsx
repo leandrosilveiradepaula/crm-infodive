@@ -37,17 +37,17 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-1.5">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none">
+                            <span className="text-xs font-black uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none">
                                 #{proposal.number}
                             </span>
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border flex items-center gap-1 leading-none ${status.color}`}>
+                            <span className={`text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border flex items-center gap-1 leading-none ${status.color}`}>
                                 <StatusIcon className="h-2.5 w-2.5" /> {status.label}
                             </span>
                         </div>
                         <h4 className="text-sm font-bold text-foreground mb-1 group-hover:text-primary transition-colors truncate tracking-tight">
                             {proposal.title}
                         </h4>
-                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground font-black uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 {new Date(proposal.createdAt).toLocaleDateString('pt-BR')}
@@ -64,7 +64,7 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
 
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right">
-                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-black mb-0.5 opacity-60">
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-black mb-0.5 opacity-60">
                             Valor Total
                         </p>
                         <p className="text-xl font-black text-foreground group-hover:text-primary transition-colors tracking-tighter">

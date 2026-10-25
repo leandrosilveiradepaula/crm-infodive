@@ -140,7 +140,7 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
                                         {msg.details && (
-                                            <div className="mt-2 pt-2 border-t border-border text-[10px] opacity-70">
+                                            <div className="mt-2 pt-2 border-t border-border text-xs opacity-70">
                                                 {msg.details}
                                             </div>
                                         )}
@@ -148,7 +148,7 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
 
                                     {/* Meta */}
                                     <div className="flex items-center gap-2 mt-1.5 px-1">
-                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                        <span className="text-xs text-muted-foreground font-medium">
                                             {msg.senderName} • {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                         {msg.direction === 'outbound' && (
@@ -165,11 +165,11 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
             {/* Input Area */}
             <div className="p-4 bg-card border-t border-border">
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Responder via:</span>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-[10px] font-bold border border-green-200 dark:border-green-500/20 hover:bg-green-500/20 transition-colors">
+                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Responder via:</span>
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-xs font-bold border border-green-200 dark:border-green-500/20 hover:bg-green-500/20 transition-colors">
                         <MessageCircle className="h-3 w-3" /> WhatsApp
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-primary dark:text-blue-400 rounded-lg text-[10px] font-bold border border-blue-200 dark:border-blue-500/20 hover:bg-blue-500/20 transition-colors">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-primary dark:text-blue-400 rounded-lg text-xs font-bold border border-blue-200 dark:border-blue-500/20 hover:bg-blue-500/20 transition-colors">
                         <Mail className="h-3 w-3" /> Email
                     </button>
                 </div>

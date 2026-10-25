@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { type SalesOrder } from '../../hooks/useSalesOrders';
 import { getSalesOrders, getSignedUrlForRawPath } from '@/app/(dashboard)/sales/actions';
 import { toast } from 'sonner';
@@ -16,10 +16,13 @@ import {
     Filter
 } from 'lucide-react';
 import { SalesOrderDetails } from './SalesOrderDetails';
+import { salesOrderMatchesFilter, validateSalesOrderList } from '../../lib/sales-order-list-integrity';
 
 export const SalesOrderList: React.FC = () => {
     const [orders, setOrders] = useState<SalesOrder[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const loadVersion = useRef(0);
     const [selectedOrder, setSelectedOrder] = useState<SalesOrder | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -29,14 +32,22 @@ export const SalesOrderList: React.FC = () => {
     }, []);
 
     const loadOrders = async () => {
+        const version = ++loadVersion.current;
         setLoading(true);
+        setError(null);
         try {
             const result = await getSalesOrders();
-            if (result.success && result.data) {
-                setOrders(result.data as SalesOrder[]);
+            if (!result.success) throw new Error('Não foi possível consultar pedidos de venda.');
+            const rows = validateSalesOrderList(result.data);
+            if (version === loadVersion.current) setOrders(rows);
+        } catch {
+            if (version === loadVersion.current) {
+                // A failure is not a genuine empty list and must not leave stale totals.
+                setOrders([]);
+                setError('Falha ao carregar os pedidos. Tente novamente.');
             }
         } finally {
-            setLoading(false);
+            if (version === loadVersion.current) setLoading(false);
         }
     };
 
@@ -71,16 +82,8 @@ export const SalesOrderList: React.FC = () => {
         }).format(value);
     };
 
-    const filteredOrders = orders.filter(order => {
-        const matchesSearch =
-            order.deal?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.deal?.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.id.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-
-        return matchesSearch && matchesStatus;
-    });
+    const filteredOrders = orders.filter(order =>
+        salesOrderMatchesFilter(order, searchTerm, statusFilter));
 
     return (
         <div className="h-full flex flex-col bg-background text-foreground p-5 overflow-hidden">
@@ -89,7 +92,7 @@ export const SalesOrderList: React.FC = () => {
                     <h1 className="text-2xl font-bold text-foreground">
                         Pedidos de Venda
                     </h1>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Gestão de entregas e faturamento</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Gestão de entregas e faturamento</p>
                 </div>
                 <div className="flex gap-2">
                     <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
@@ -97,9 +100,9 @@ export const SalesOrderList: React.FC = () => {
                             <Clock className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
+                            <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'pedido_gerado').length}
+                                {error ? '—' : orders.filter(o => o.status === 'pedido_gerado').length}
                             </p>
                         </div>
                     </div>
@@ -108,9 +111,9 @@ export const SalesOrderList: React.FC = () => {
                             <DollarSign className="h-4 w-4 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
+                            <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'nf_emitida').length}
+                                {error ? '—' : orders.filter(o => o.status === 'nf_emitida').length}
                             </p>
                         </div>
                     </div>
@@ -119,9 +122,9 @@ export const SalesOrderList: React.FC = () => {
                             <Truck className="h-4 w-4 text-teal-500" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
+                            <p className="text-xs text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
                             <p className="text-base font-black leading-tight">
-                                {orders.filter(o => o.status === 'entregue').length}
+                                {error ? '—' : orders.filter(o => o.status === 'entregue').length}
                             </p>
                         </div>
                     </div>
@@ -167,6 +170,18 @@ export const SalesOrderList: React.FC = () => {
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
+                ) : error ? (
+                    <div role="alert" className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 text-center">
+                        <AlertCircle className="h-10 w-10 text-destructive" aria-hidden="true" />
+                        <p className="font-semibold text-foreground">{error}</p>
+                        <button
+                            type="button"
+                            onClick={() => void loadOrders()}
+                            className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold hover:bg-muted"
+                        >
+                            Tentar novamente
+                        </button>
+                    </div>
                 ) : filteredOrders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                         <Package className="h-16 w-16 mb-4 opacity-20" />
@@ -176,12 +191,12 @@ export const SalesOrderList: React.FC = () => {
                     <table className="w-full">
                         <thead className="bg-muted sticky top-0 z-10">
                             <tr>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">ID / Data</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Cliente / Deal</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor Total</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">NF-e</th>
-                                <th className="px-4 py-3 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">Ações</th>
+                                <th className="px-4 py-3 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">ID / Data</th>
+                                <th className="px-4 py-3 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">Cliente / Deal</th>
+                                <th className="px-4 py-3 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">Valor Total</th>
+                                <th className="px-4 py-3 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="px-4 py-3 text-left text-xs font-black text-muted-foreground uppercase tracking-widest">NF-e</th>
+                                <th className="px-4 py-3 text-right text-xs font-black text-muted-foreground uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -193,7 +208,7 @@ export const SalesOrderList: React.FC = () => {
                                 >
                                     <td className="px-4 py-3 whitespace-nowrap border-r border-border/10">
                                         <div className="text-[13px] font-black text-foreground leading-none">#{order.id.slice(0, 8)}</div>
-                                        <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 font-bold">
+                                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1 font-bold">
                                             <Calendar className="h-3 w-3" />
                                             {new Date(order.created_at).toLocaleDateString('pt-BR')}
                                         </div>
@@ -202,7 +217,7 @@ export const SalesOrderList: React.FC = () => {
                                         <div className="text-[13px] font-bold text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors leading-none">
                                             {order.deal?.customer?.name || 'Cliente N/A'}
                                         </div>
-                                        <div className="text-[11px] text-muted-foreground mt-1 truncate max-w-[250px] font-medium opacity-80">
+                                        <div className="text-xs text-muted-foreground mt-1 truncate max-w-[250px] font-medium opacity-80">
                                             {order.deal?.title}
                                         </div>
                                     </td>
@@ -212,7 +227,7 @@ export const SalesOrderList: React.FC = () => {
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                                             {getStatusLabel(order.status)}
                                         </span>
                                     </td>
@@ -231,13 +246,13 @@ export const SalesOrderList: React.FC = () => {
                                                         toast.error(err.message || 'Erro ao abrir arquivo');
                                                     }
                                                 }}
-                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider transition-colors focus:outline-none"
+                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors focus:outline-none"
                                             >
                                                 <FileText className="h-3.5 w-3.5" />
                                                 Visualizar
                                             </button>
                                         ) : (
-                                            <span className="text-[11px] text-muted-foreground italic font-medium">Pendente</span>
+                                            <span className="text-xs text-muted-foreground italic font-medium">Pendente</span>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-right">

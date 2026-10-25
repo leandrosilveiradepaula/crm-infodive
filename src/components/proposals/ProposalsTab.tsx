@@ -95,7 +95,7 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
                                 {status.label}
                             </span>
                             {status.id !== null && status.count > 0 && (
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusFilter === status.id ? 'bg-white/80' : 'bg-background'} ${status.color}`}>
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${statusFilter === status.id ? 'bg-white/80' : 'bg-background'} ${status.color}`}>
                                     {status.count}
                                 </span>
                             )}

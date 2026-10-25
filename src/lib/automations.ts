@@ -1,6 +1,6 @@
-
-// Dummy automations for legacy compatibility
-export const checkAutomations = async (data: any) => {
-    console.log('[Automations] legacy automation triggered');
-    return true;
+// Legacy compatibility hook. The old implementation returned true without
+// executing any automation, which could make callers believe work happened.
+export const checkAutomations = async (_data: unknown): Promise<boolean> => {
+    console.warn('[Automations] legacy compatibility hook is disabled; use AutomationService-backed flows');
+    return false;
 };

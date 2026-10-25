@@ -23,7 +23,7 @@ export async function getAccountsDropdown() {
 
 export async function createActivity(activity: Partial<Activity>) {
     const { userId, organizationId } = await requireSessionContext();
-    const data = await ActivityService.createActivity(userId, organizationId, activity);
+    const data = await ActivityService.createActivity(userId, organizationId, { ...activity, source: 'manual' });
     revalidatePath('/activities');
     return data;
 }

@@ -1,6 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createAdminClient } from '../lib/supabase/admin';
 import { ActivityService } from './ActivityService';
-import type { AiActivitySuggestion } from '@/types/ai-suggestion';
+import type { AiActivitySuggestion } from '../types/ai-suggestion';
 
 interface ActivityRule {
     activityType: 'call' | 'email' | 'meeting' | 'task';
@@ -67,12 +67,12 @@ export class ActivityAiService {
             .eq('organization_id', organizationId)
             .not('stage', 'in', '("won","lost")');
 
-        if (error || !deals) return;
+        if (error || !Array.isArray(deals)) throw new Error('Não foi possível avaliar as oportunidades inativas.');
 
         const now = new Date();
 
         for (const deal of deals) {
-            const { data: existingAuto } = await supabase
+            const { data: existingAuto, error: existingError } = await supabase
                 .from('activities')
                 .select('id')
                 .eq('deal_id', deal.id)
@@ -81,15 +81,17 @@ export class ActivityAiService {
                 .eq('organization_id', organizationId)
                 .limit(1);
 
-            if (existingAuto && existingAuto.length > 0) continue;
+            if (existingError || !Array.isArray(existingAuto)) throw new Error('Não foi possível verificar as atividades existentes.');
+            if (existingAuto.length > 0) continue;
 
-            const { data: lastActivity } = await supabase
+            const { data: lastActivity, error: lastError } = await supabase
                 .from('activities')
                 .select('created_at')
                 .eq('deal_id', deal.id)
                 .eq('organization_id', organizationId)
                 .order('created_at', { ascending: false })
                 .limit(1);
+            if (lastError || !Array.isArray(lastActivity)) throw new Error('Não foi possível verificar a última atividade.');
 
             const lastDate = lastActivity?.[0]?.created_at
                 ? new Date(lastActivity[0].created_at)
@@ -162,12 +164,12 @@ export class ActivityAiService {
 
         const { data, error } = await query.limit(50);
 
-        if (error) {
+        if (error || !Array.isArray(data)) {
             console.error('[ActivityAiService] suggestions fetch failed');
-            return [];
+            throw new Error('Não foi possível carregar as sugestões.');
         }
 
-        return (data || []).map((item: any) => ({
+        return data.map((item) => ({
             id: item.id,
             organizationId: item.organization_id,
             dealId: item.deal_id,
@@ -230,13 +232,16 @@ export class ActivityAiService {
     static async dismissSuggestion(organizationId: string, suggestionId: string) {
         const supabase = createAdminClient();
 
-        const { error } = await supabase
+        const { data: dismissed, error } = await supabase
             .from('ai_activity_suggestions')
             .update({ status: 'dismissed' })
             .eq('id', suggestionId)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .eq('status', 'pending')
+            .select('id')
+            .maybeSingle();
 
-        if (error) throw new Error('Não foi possível processar a atividade com IA.');
+        if (error || !dismissed) throw new Error('Não foi possível processar a atividade com IA.');
     }
 
     static async hasValidCache(organizationId: string): Promise<boolean> {

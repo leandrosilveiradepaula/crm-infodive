@@ -116,7 +116,7 @@ export function ClientLogoUpload({ currentLogo, onLogoChange }: ClientLogoUpload
 
     return (
         <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                 Logo do Cliente
             </label>
 
@@ -129,8 +129,8 @@ export function ClientLogoUpload({ currentLogo, onLogoChange }: ClientLogoUpload
                         className="h-10 w-auto max-w-[100px] object-contain rounded"
                     />
                     <div className="flex-1">
-                        <p className="text-[10px] text-emerald-600 font-bold">Logo carregado ✓</p>
-                        <p className="text-[9px] text-muted-foreground">Aparecerá na capa</p>
+                        <p className="text-xs text-emerald-600 font-bold">Logo carregado ✓</p>
+                        <p className="text-xs text-muted-foreground">Aparecerá na capa</p>
                     </div>
                     <Button
                         variant="ghost"
@@ -161,10 +161,10 @@ export function ClientLogoUpload({ currentLogo, onLogoChange }: ClientLogoUpload
                         </div>
                     )}
                     <div className="text-center">
-                        <p className="text-[10px] font-bold text-foreground">
+                        <p className="text-xs font-bold text-foreground">
                             {isDragging ? 'Solte aqui' : 'Arraste ou clique'}
                         </p>
-                        <p className="text-[9px] text-muted-foreground">PNG, JPG ou WebP (máx. 2MB)</p>
+                        <p className="text-xs text-muted-foreground">PNG, JPG ou WebP (máx. 2MB)</p>
                     </div>
                 </div>
             )}

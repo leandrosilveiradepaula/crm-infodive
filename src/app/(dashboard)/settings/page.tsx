@@ -2,7 +2,7 @@ import { SettingsClientPage } from './client-page';
 import { getOrgSettings, getPipelineStages } from './actions';
 
 export const metadata = {
-    title: 'Configurações | CRM Next Gen',
+    title: 'Configurações | CRM Infodive',
 };
 
 export default async function SettingsPage() {

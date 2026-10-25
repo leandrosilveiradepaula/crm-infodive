@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { type SalesOrder } from '../../hooks/useSalesOrders';
 import { updateSalesOrder } from '@/app/(dashboard)/sales/actions';
+import { requireSalesOrderSaved } from '../../lib/sales-order-save-outcome';
+import { toast } from 'sonner';
 import {
     X,
     Package,
@@ -29,6 +31,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
     const [invoiceUrl, setInvoiceUrl] = useState(order.invoice_url || '');
     const [uploading, setUploading] = useState(false);
     const [openingInvoice, setOpeningInvoice] = useState(false);
+    const savingRef = useRef(false);
 
     const handleOpenInvoice = async (docPath: string) => {
         setOpeningInvoice(true);
@@ -54,28 +57,33 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
     const currentStepIndex = steps.findIndex(s => s.id === order.status);
 
     const handleStatusChange = async (newStatus: SalesOrder['status']) => {
+        // Lock synchronously, before React commits the disabled button state.
+        if (savingRef.current || uploading) return;
+        savingRef.current = true;
         setLoading(true);
         try {
-            const updates: Record<string, any> = { status: newStatus };
+            const updates: Partial<SalesOrder> = { status: newStatus };
             const now = new Date().toISOString();
-
             if (newStatus === 'nf_emitida' && !order.billed_at) updates.billed_at = now;
             if (newStatus === 'entregue' && !order.delivered_at) updates.delivered_at = now;
-
             if (newStatus === 'nf_emitida' && invoiceUrl && invoiceUrl !== order.invoice_url) {
                 updates.invoice_url = invoiceUrl;
             }
 
-            await updateSalesOrder(order.id, updates);
+            const result = await updateSalesOrder(order.id, updates);
+            requireSalesOrderSaved(result);
             onUpdate();
+        } catch {
+            toast.error('Não foi possível salvar as alterações do pedido. Verifique antes de tentar novamente.');
         } finally {
+            savingRef.current = false;
             setLoading(false);
         }
     };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file || uploading || savingRef.current) return;
 
         setUploading(true);
         try {
@@ -85,7 +93,14 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
             const result = await processInvoiceAction(order.id, formData);
 
-            if (!result.success) throw new Error(result.error);
+            if (!result.success) {
+                if ('partialSuccess' in result && result.partialSuccess) {
+                    alert(result.error || 'Nota fiscal registrada com operações pendentes. Verifique antes de reenviar.');
+                    onUpdate();
+                    return;
+                }
+                throw new Error(result.error);
+            }
 
             setInvoiceUrl(result.fileUrl!);
             // updateSalesOrder already done inside processInvoiceAction when confirmSave is true
@@ -122,6 +137,11 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                             </p>
                         </div>
                     </div>
+                    {loading && (
+                        <span role="status" className="text-xs font-semibold text-primary" aria-live="polite">
+                            Salvando alterações...
+                        </span>
+                    )}
                     <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
                         <X className="h-5 w-5" />
                     </button>
@@ -189,7 +209,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                         {invoiceUrl !== order.invoice_url && (
                                             <button
                                                 onClick={() => handleStatusChange(order.status)} // Just save
-                                                disabled={loading}
+                                                disabled={loading || uploading}
                                                 className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
                                             >
                                                 <Save className="h-5 w-5" />
@@ -256,7 +276,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                                     {step.label}
                                                 </h4>
                                                 {isCurrent && (
-                                                    <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                                    <span className="text-xs uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                                         Atual
                                                     </span>
                                                 )}
@@ -278,7 +298,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                             {isNext && (
                                                 <button
                                                     onClick={() => handleStatusChange(step.id as SalesOrder['status'])}
-                                                    disabled={loading}
+                                                    disabled={loading || uploading}
                                                     className="mt-3 w-full py-2 px-4 bg-muted hover:bg-muted/80 border border-border rounded-lg text-sm text-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 group"
                                                 >
                                                     Avançar para {step.label}

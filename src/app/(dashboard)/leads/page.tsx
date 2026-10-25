@@ -3,7 +3,7 @@ import { getLeads } from './actions';
 import { LeadsClientPage } from './client-page';
 
 export const metadata = {
-    title: 'Leads | CRM Next Gen',
+    title: 'Leads | CRM Infodive',
 };
 
 export default async function LeadsPage() {
