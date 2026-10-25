@@ -1,7 +1,7 @@
 export interface ServiceDeskSession {
     isLoggedIn: boolean;
-    userId: string | null | undefined;
-    organizationId: string | null | undefined;
+    userId?: string | null;
+    organizationId?: string | null;
 }
 
 export type ServiceDeskEntryDecision =
