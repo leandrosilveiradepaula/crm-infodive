@@ -4,23 +4,26 @@ import { revalidatePath } from 'next/cache';
 import { UserService } from '@/services/UserService';
 import { SettingsService, type PipelineStage } from '@/services/SettingsService';
 import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
+import { requireAuditedAdminAction } from '@/lib/admin-audit';
 
 // ─── USERS ──────────────────────────────────────────────────────────────────
 
 export async function getUsers() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:manage_users');
     return await UserService.getUsers(organizationId);
 }
 
 export async function updateUserRole(userId: string, role: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('users.update_role');
     const result = await UserService.updateUserRole(userId, organizationId, role);
     if (result.success) revalidatePath('/settings');
     return result;
 }
 
 export async function archiveUserAction(userId: string, newOwnerId?: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId, userId: actorId } = await requireAuditedAdminAction('users.archive');
+    if (actorId === userId) throw new Error('Forbidden: cannot archive your own admin identity');
     const result = await UserService.archiveUser(userId, organizationId, newOwnerId);
     if (result.success) revalidatePath('/settings');
     return result;
@@ -33,14 +36,14 @@ export async function updateUserProfile(userId: string, updates: {
     role?: string;
     roles?: string[];
 }) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('users.update');
     const result = await UserService.updateUserProfile(userId, organizationId, updates);
     if (result.success) revalidatePath('/settings');
     return result;
 }
 
 export async function createInvitationAction(email: string, role: string) {
-    const { organizationId, userId } = await requireSessionContext();
+    const { organizationId, userId } = await requireAuditedAdminAction('users.invite');
     return await UserService.createInvitation(email, role, organizationId, userId);
 }
 
@@ -62,7 +65,7 @@ export async function getOrgSettings() {
 }
 
 export async function saveOrgSettings(settings: any) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('organization.save');
     const result = await SettingsService.saveOrgSettings(organizationId, settings);
     if (result.success) revalidatePath('/settings');
     return result;
@@ -76,7 +79,7 @@ export async function getPipelineStages(): Promise<PipelineStage[]> {
 }
 
 export async function savePipelineStages(stages: PipelineStage[]) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('pipeline.save');
     const result = await SettingsService.savePipelineStages(organizationId, stages);
     if (result.success) {
         revalidatePath('/settings');
