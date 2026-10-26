@@ -30,6 +30,7 @@ import * as integrations from '../src/app/(dashboard)/integrations/actions';
 import * as apiKeys from '../src/app/(dashboard)/integrations/apikey-actions';
 import * as webhooks from '../src/app/(dashboard)/integrations/webhook-actions';
 import * as audit from '../src/app/(dashboard)/settings/audit-actions';
+import * as priceLists from '../src/app/(dashboard)/settings/price-lists-actions';
 import { GET as authMe } from '../src/app/api/auth/me/route';
 
 const ID='11111111-1111-4111-8111-111111111111';
@@ -55,6 +56,9 @@ const directWrites: Array<[string,()=>Promise<unknown>]> = [
   ['removeApiKey dedicated',()=>apiKeys.removeApiKey(ID)],
   ['createWebhook dedicated',()=>webhooks.createWebhook({url:'https://example.invalid',events:[],status:'active'} as any)],
   ['removeWebhook dedicated',()=>webhooks.removeWebhook(ID)],
+  ['save price-list template',()=>priceLists.saveTemplateAction('vendor',{} as any)],
+  ['import price-list',()=>priceLists.importPriceListAction('list','vendor','file.csv',[])],
+  ['delete price-list',()=>priceLists.deletePriceListAction(ID)],
 ];
 
 const directReads: Array<[string,()=>Promise<unknown>]> = [
@@ -66,6 +70,8 @@ const directReads: Array<[string,()=>Promise<unknown>]> = [
   ['combined webhooks',()=>integrations.getWebhooks()],
   ['dedicated webhooks',()=>webhooks.getWebhooks()],
   ['audit log viewer',()=>audit.getAuditLogs()],
+  ['price-list inventory',()=>priceLists.getPriceLists()],
+  ['price-list template',()=>priceLists.getTemplateAction('vendor')],
 ];
 
 describe('direct Server Action RBAC, not UI hiding',()=>{
