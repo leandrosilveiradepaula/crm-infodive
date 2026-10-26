@@ -1,64 +1,43 @@
-# CURRENT_TASK.md
+# CURRENT_TASK — CRM P0: banco, tenant e identidade confiável
 
-## Status
-Active
+**Origem:** decisão explícita do proprietário em 26/10/2026 de interromper temporariamente a certificação da AI Product Factory para resolver os riscos do banco de produção do CRM Infodive, depois retornar à Factory.
 
-## Objective
-Corrigir o gap confirmado em 2026-10-01: `addDealProduct` nao deve inventar `exchange_rate=5.0` quando a taxa nao foi informada.
+**Base:** CRM `main=e521308e14380121670b22f1aa3078d14e1883d7`. Antes de concluir ou fazer merge, verificar novamente GitHub, Supabase, CI e Vercel. A branch/PR não confere autorização para aplicar migration em produção.
 
-O usuario autorizou explicitamente a continuidade deste trabalho pela AI Product Factory.
+## Critério de conclusão do trabalho
 
-## Allowed scope
-- `docs/codex/CURRENT_TASK.md`
-- `src/services/DealService.ts`
-- `test/present-in-usd-core.test.ts`
-- `.github/workflows/crm-validation.yml` (somente para executar os checks obrigatorios deste PR)
-- `src/app/api/gemini/enrich/route.ts` (somente para remover a exigencia de GEMINI_API_KEY durante o build; a key continua obrigatoria em runtime)
-- `src/app/api/gemini/extract/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/specs/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/parse-company/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/api/gemini/parse-signature/route.ts` (mesma correcao de inicializacao runtime-only)
-- `src/app/debug/page.tsx` (somente para impedir uso de service role durante prerender/build e manter acesso privilegiado condicionado a sessao em runtime)
+1. Preparar uma migration atômica, fail-closed e sem alteração de dados: ativar RLS onde faltava, remover privilégios anônimos diretos e políticas `user_metadata`, impor limite de organização sobre todas as tabelas com `organization_id`, proteger `profiles` (incluindo org/status/role), proteger filhos sem org através do pai quando seguro e revogar acesso direto onde não há relação de tenant comprovada.
+2. Substituir `public.get_jwt_org_id` e triggers inseguros por identidade da tabela `profiles` ativa, obtida por função pequena e privada. Não aceitar `organization_id` fornecido pelo navegador, cookies antigos ou `user_metadata`.
+3. Corrigir login e contexto de sessão server-side. Usuário sem organização ou desativado falha fechado; não executar backfill nem inventar organização padrão.
+4. Testar no PostgreSQL 16 descartável com identidade e dados **sintéticos**: anon sem acesso, tenant A não vê/muta tenant B mesmo mudando `user_metadata`, perfil inativo negado, tentativa de alterar cargo/org negada, conta server-role mantém acesso técnico. Testes de autenticação e CI TypeScript/build.
+5. Preparar runbook de migração, conciliação de histórico, backup/restauração, janela de produção, verificações após aplicação e riscos residuais. Revalidar Supabase advisors após ativação.
 
-## CI blocker discovered
-- O primeiro CI real do PR passou TypeScript e 92 testes, mas `next build` falhou ao importar rotas Gemini que instanciavam clientes no escopo de modulo sem `GEMINI_API_KEY`.
-- A auditoria confirmou o mesmo padrao em `enrich`, `extract`, `specs`, `parse-company` e `parse-signature`.
-- A correcao autorizada e limitada a instanciar o cliente apenas no runtime da requisicao, depois de validar a variavel de ambiente.
-- Nenhuma credencial sera adicionada ao CI ou ao repositorio.
-- O terceiro CI revelou `/debug` prerenderizando sem sessao e chamando `createAdminClient()`, o que exige `SUPABASE_SERVICE_ROLE_KEY` durante o build. A correcao autorizada e tornar a pagina dinamica e criar o cliente privilegiado somente quando houver sessao valida.
+## Escopo autorizado de código e PR (não de produção)
 
-## Required behavior
-- taxa ausente permanece ausente/null-safe;
-- taxa explicita, inclusive zero, e preservada;
-- `deal.value` e comissao nao mudam;
-- nenhuma migration ou schema change;
-- patch minimo e geral.
+- `supabase/migrations/20261026204500_crm_authoritative_tenant_rls.sql`
+- `src/lib/auth-server.ts`
+- `src/app/login/actions.ts`
+- `test/auth-tenant-boundary.test.ts`
+- `scripts/verify_crm_tenant_hardening_pg.py`
+- `.github/workflows/crm-tenant-security-postgres.yml`
+- `docs/CRM_SECURITY_HARDENING_20261026.md`
+- este documento
 
-## Validation
-- `npx tsc --noEmit`
-- `npm test`
-- `npm run build`
-- `git diff --check`
+Permitir somente mudanças diretamente necessárias nesses caminhos e testes que revelem defeitos na mesma correção. Não alterar CRM negócio, Service Desk, Factory, credenciais, Vercel, n8n ou projetos Supabase por rotina. Não repetir benchmark do Agente SQL nem adicionar custo.
 
-## Commit / PR
-Commit e PR estao autorizados. A continuidade foi reafirmada pelo usuario em 2026-10-01. E autorizado adicionar um workflow minimo de CI no escopo acima apenas para executar os checks obrigatorios deste PR. Auto-merge continua proibido. Producao permanece sob gate humano.
+## Gates inegociáveis
 
-## External side effects
-Sem deploy, migration, mutacao de dados externos, secrets ou alteracoes de auth/RBAC.
+- **CRM Supabase `mpmhmjepmmpxbsmekldf` é PRODUÇÃO.** Sem migration, alteração de grants/policies ou dados no banco durante a implementação. Exigir autorização humana específica após backup restaurável, conciliação das migrations, CI verde e plano de implantação.
+- `main` publica produção: **merge exclusivamente humano**.
+- O CRM possui ao menos um perfil ativo sem organização atribuída. A correção não atribui automaticamente essa identidade; o efeito de bloqueio deve ser informado ao operador antes do gate.
+- O repositório tem migrations de código ainda não registradas no histórico do banco. **Não aplicar o backlog inteiro** em lote; reconciliar antes de qualquer DDL.
+- Auth/RBAC em Server Actions administrativas (issue #22) continua uma frente de segurança separada; RLS e `requireSessionContext` não provam autorização completa de todos os endpoints.
 
-## Additional authorized task (2026-10-02): Reduce Vercel deployment usage
+## Verificações exigidas
 
-Objective: reduce automatic Preview deployments while CRM and AI Product Factory are worked in parallel.
+- `CRM validation`: TypeScript, `npm test`, `npm run build`, `git diff --check`.
+- `CRM tenant isolation PostgreSQL 16`: migration real e casos negativos sem banco externo.
+- Revisão de diff e riscos; qualquer comportamento que dependa de Preview autenticado só pode receber PASS com prova real.
+- Sem merge automático, nenhuma migração aplicada em produção, nenhum crédito pago/modelo por curiosidade.
 
-Confirmed Factory controls:
-- `apps/console/vercel.json` disables Vercel Git deployments for ordinary branches and enables only `main` and `preview/**`.
-- Factory Preview promotions previously created the `preview/pr-N` ref at the base commit and then moved it to the candidate, potentially creating two deployments per promotion. Factory PR #573 removed that extra base deployment and made repeated promotion of the same SHA a no-op.
-
-Allowed additional CRM scope:
-- `vercel.json` at the repository root only, with `git.deploymentEnabled` set to disable ordinary branches, preserve production on `main`, and allow explicit final-candidate branches under `preview/**`.
-- `docs/codex/CURRENT_TASK.md` to record this scope.
-- No application code, credentials, dashboard-only settings, data, or schema changes.
-
-Operating rule: run the required CI on working branches; create or update one `preview/pr-N` ref only after the exact PR candidate is final and its required checks are green. Do not create a base-commit preview first. Merge to `main` only for a release-ready batch. `ignoreCommand` cancellations are not quota savings because Vercel counts canceled ignored deployments.
-
-Commit, PR, and merge for this narrowly scoped configuration change are authorized by the user's existing project authorization. The merge is expected to trigger one production deployment to install the policy; no other deployment or migration is authorized by this task.
+Após a regularização do banco e hardening de servidor necessários, retornar à certificação da Factory, cujo contrato permanente está em `ai-product-factory/docs/FINALIZATION_EXECUTION_CONTRACT.md`.
