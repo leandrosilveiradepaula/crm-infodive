@@ -1,43 +1,31 @@
-# CURRENT_TASK — CRM P0: banco, tenant e identidade confiável
+# CURRENT_TASK — CRM P0: RBAC real no servidor (issue #22)
 
-**Origem:** decisão explícita do proprietário em 26/10/2026 de interromper temporariamente a certificação da AI Product Factory para resolver os riscos do banco de produção do CRM Infodive, depois retornar à Factory.
+**Decisão atual, 26/10/2026:** PR #198 foi mergeada humanamente na `main=adaea55f88eaa80d12a8b19596189398a3364837`; migration `crm_authoritative_tenant_rls` já aplicada e auditada no Supabase CRM. O proprietário pediu concluir o parêntese de segurança do CRM para então retornar à certificação da AI Product Factory. Esta tarefa atende **somente** o bloqueio P0 de RBAC em Server Actions e APIs, vinculado à [issue #22](https://github.com/leandrosilveiradepaula/crm-infodive/issues/22).
 
-**Base:** CRM `main=e521308e14380121670b22f1aa3078d14e1883d7`. Antes de concluir ou fazer merge, verificar novamente GitHub, Supabase, CI e Vercel. A branch/PR não confere autorização para aplicar migration em produção.
+## Objetivo e critérios de aceite
 
-## Critério de conclusão do trabalho
+1. Fonte única de papéis/permissões para UI e servidor, mantendo o comportamento visual existente. Os papéis persistidos em `public.profiles.role` são a autoridade; não aceitar role, organização, claims `user_metadata` ou cabeçalho enviado pelo cliente.
+2. Verificar sessão, status `active`, tenant no banco e permissão imediatamente antes do uso de `service_role` para mudar usuários/papéis/status, transferir deals, convidar usuários, configurar organização/pipeline, gerenciar integrações, API keys e webhooks. Negar por padrão papel desconhecido, perfil revogado, tenant divergente e erros do banco.
+3. Tratar entradas duplicadas (por exemplo, `settings/actions.ts` e `settings/users-actions.ts`, `integrations/actions.ts` e as ações dedicadas de API keys/webhooks). Testar chamadas **diretas** às Server Actions, sem depender do PermissionGate da UI.
+4. Prevenir falsificação de trilha de auditoria por Server Action genérica; eventos administrativos devem ter ator e tenant derivados do servidor, com dados não sensíveis. Se não houver garantia transacional entre audit log e mudança de dados, declarar explicitamente a limitação — não declarar auditoria integral concluída.
+5. `/api/auth/me` deve negar sessão revogada/sem organização de modo consistente com `requireSessionContext`. Não retornar `isLoggedIn=true` a quem não possui perfil autorizado.
+6. Vitest negativos, TypeScript, build e checks no SHA exato; entregar **uma PR** pronta para merge humano, sem auto-merge.
 
-1. Preparar uma migration atômica, fail-closed e sem alteração de dados: ativar RLS onde faltava, remover privilégios anônimos diretos e políticas `user_metadata`, impor limite de organização sobre todas as tabelas com `organization_id`, proteger `profiles` (incluindo org/status/role), proteger filhos sem org através do pai quando seguro e revogar acesso direto onde não há relação de tenant comprovada.
-2. Substituir `public.get_jwt_org_id` e triggers inseguros por identidade da tabela `profiles` ativa, obtida por função pequena e privada. Não aceitar `organization_id` fornecido pelo navegador, cookies antigos ou `user_metadata`.
-3. Corrigir login e contexto de sessão server-side. Usuário sem organização ou desativado falha fechado; não executar backfill nem inventar organização padrão.
-4. Testar no PostgreSQL 16 descartável com identidade e dados **sintéticos**: anon sem acesso, tenant A não vê/muta tenant B mesmo mudando `user_metadata`, perfil inativo negado, tentativa de alterar cargo/org negada, conta server-role mantém acesso técnico. Testes de autenticação e CI TypeScript/build.
-5. Preparar runbook de migração, conciliação de histórico, backup/restauração, janela de produção, verificações após aplicação e riscos residuais. Revalidar Supabase advisors após ativação.
+## Escopo autorizado para a branch/PR atual
 
-## Escopo autorizado de código e PR (não de produção)
+- `docs/codex/CURRENT_TASK.md` e documentação de segurança deste escopo;
+- `src/lib/permission-matrix.ts`, `src/lib/server-authorization.ts`, `src/lib/admin-audit.ts`;
+- `src/types/auth.ts`, `src/hooks/usePermissions.ts`;
+- `src/app/(dashboard)/settings/{actions,users-actions,audit-actions}.ts`;
+- `src/app/(dashboard)/integrations/{actions,apikey-actions,webhook-actions}.ts`;
+- `src/app/api/auth/me/route.ts`;
+- testes Vitest sob `test/*-rbac*.test.ts` ou extensões focadas dos testes de auth;
+- qualquer outra ação administrativa somente se a prova descobrir bypass direto, registrando sua relevância ao gate #22.
 
-- `supabase/migrations/20261026204500_crm_authoritative_tenant_rls.sql`
-- `src/lib/auth-server.ts`
-- `src/app/login/actions.ts`
-- `test/auth-tenant-boundary.test.ts`
-- `scripts/verify_crm_tenant_hardening_pg.py`
-- `.github/workflows/crm-tenant-security-postgres.yml`
-- `docs/CRM_SECURITY_HARDENING_20261026.md`
-- este documento
+**Fora do escopo:** mais migrações, backfill de tenant, schema de Salesforce/Service Desk, alterações de quotas, mudanças de preços, n8n, modelos pagos, GitHub da Factory e PR #56 de release separado. Não repetir as 17 migrations históricas.
 
-Permitir somente mudanças diretamente necessárias nesses caminhos e testes que revelem defeitos na mesma correção. Não alterar CRM negócio, Service Desk, Factory, credenciais, Vercel, n8n ou projetos Supabase por rotina. Não repetir benchmark do Agente SQL nem adicionar custo.
+## Gates
 
-## Gates inegociáveis
+CRM `main` publica produção e **somente humano pode fazer merge**. Não alterar Supabase, RLS, grants, Auth, usuários, chaves ou Vercel diretamente. Testes usam mocks/sintéticos. No post-merge da PR #198, verificação Vercel READY / navegador de login real ainda é necessária antes de certificar operação. A emissão de CI verde não é autorização de produção.
 
-- **CRM Supabase `mpmhmjepmmpxbsmekldf` é PRODUÇÃO.** Sem migration, alteração de grants/policies ou dados no banco durante a implementação. Exigir autorização humana específica após backup restaurável, conciliação das migrations, CI verde e plano de implantação.
-- `main` publica produção: **merge exclusivamente humano**.
-- O CRM possui ao menos um perfil ativo sem organização atribuída. A correção não atribui automaticamente essa identidade; o efeito de bloqueio deve ser informado ao operador antes do gate.
-- O repositório tem migrations de código ainda não registradas no histórico do banco. **Não aplicar o backlog inteiro** em lote; reconciliar antes de qualquer DDL.
-- Auth/RBAC em Server Actions administrativas (issue #22) continua uma frente de segurança separada; RLS e `requireSessionContext` não provam autorização completa de todos os endpoints.
-
-## Verificações exigidas
-
-- `CRM validation`: TypeScript, `npm test`, `npm run build`, `git diff --check`.
-- `CRM tenant isolation PostgreSQL 16`: migration real e casos negativos sem banco externo.
-- Revisão de diff e riscos; qualquer comportamento que dependa de Preview autenticado só pode receber PASS com prova real.
-- Sem merge automático, nenhuma migração aplicada em produção, nenhum crédito pago/modelo por curiosidade.
-
-Após a regularização do banco e hardening de servidor necessários, retornar à certificação da Factory, cujo contrato permanente está em `ai-product-factory/docs/FINALIZATION_EXECUTION_CONTRACT.md`.
+Após resolver este P0 e registrar evidências, retornar a `ai-product-factory/docs/FINALIZATION_EXECUTION_CONTRACT.md`.
