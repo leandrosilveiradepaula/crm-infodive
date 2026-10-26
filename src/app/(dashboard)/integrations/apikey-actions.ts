@@ -1,11 +1,12 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
+import { requireAuditedAdminAction } from '@/lib/admin-audit';
 import { revalidatePath } from 'next/cache';
 
 export async function getApiKeys() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('api_keys')
@@ -21,7 +22,7 @@ export async function getApiKeys() {
 }
 
 export async function createApiKey(name: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('integrations.apikey.create');
     const supabase = createAdminClient();
     const prefix = `ak_${Math.random().toString(36).substring(2, 6)}`;
 
@@ -36,7 +37,7 @@ export async function createApiKey(name: string) {
 }
 
 export async function revokeApiKey(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('integrations.apikey.revoke');
     const supabase = createAdminClient();
     const { error } = await supabase
         .from('api_keys')
@@ -50,7 +51,7 @@ export async function revokeApiKey(id: string) {
 }
 
 export async function removeApiKey(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('integrations.apikey.delete');
     const supabase = createAdminClient();
     const { error } = await supabase
         .from('api_keys')

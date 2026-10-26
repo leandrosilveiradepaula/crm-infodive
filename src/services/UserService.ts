@@ -91,12 +91,25 @@ export class UserService {
         return { success: true };
     }
 
-    // userId is passed explicitly from the session — no auth.getUser() needed
+    // The Server Action's TypeScript argument is NOT runtime validation.
+    // A caller can send arbitrary JSON keys. NEVER spread that object into a
+    // service_role write (otherwise role, status and org can be escalated).
     static async updateMyProfile(userId: string, organizationId: string, data: { full_name?: string; phone?: string }) {
+        if (!data || typeof data !== 'object' || Array.isArray(data) ||
+            Object.keys(data).some(key => key !== 'full_name' && key !== 'phone') ||
+            (data.full_name !== undefined && (typeof data.full_name !== 'string' || data.full_name.length > 160)) ||
+            (data.phone !== undefined && (typeof data.phone !== 'string' || data.phone.length > 60))) {
+            return { success: false, error: 'Campos inválidos para atualização do perfil.' };
+        }
+        const safeUpdates: { full_name?: string; phone?: string; updated_at: string } = {
+            updated_at: new Date().toISOString(),
+        };
+        if (data.full_name !== undefined) safeUpdates.full_name = data.full_name;
+        if (data.phone !== undefined) safeUpdates.phone = data.phone;
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('profiles')
-            .update({ ...data, updated_at: new Date().toISOString() })
+            .update(safeUpdates)
             .eq('id', userId)
             .eq('organization_id', organizationId);
 
@@ -110,6 +123,13 @@ export class UserService {
         try {
             // 1. Transfer deals if requested
             if (newOwnerId && newOwnerId !== 'none') {
+                const { data: eligibleOwner, error: ownerError } = await supabase
+                    .from('profiles').select('id').eq('id', newOwnerId)
+                    .eq('organization_id', organizationId).eq('status', 'active')
+                    .maybeSingle();
+                if (ownerError || !eligibleOwner) {
+                    return { success: false, error: 'Invalid transfer owner' };
+                }
                 const { error: transferError } = await supabase
                     .from('deals')
                     .update({ owner_id: newOwnerId })

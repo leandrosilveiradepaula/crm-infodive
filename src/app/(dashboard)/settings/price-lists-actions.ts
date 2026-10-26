@@ -21,11 +21,12 @@ export interface PriceListTemplate {
     column_mapping: ColumnMapping;
 }
 
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
+import { requireAuditedAdminAction } from '@/lib/admin-audit';
 
 export async function getPriceLists() {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('products:edit');
         const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('price_lists')
@@ -43,7 +44,7 @@ export async function getPriceLists() {
 
 export async function saveTemplateAction(manufacturer: string, mapping: ColumnMapping) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requireAuditedAdminAction('products.pricelist.update');
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('price_list_templates')
@@ -64,7 +65,7 @@ export async function saveTemplateAction(manufacturer: string, mapping: ColumnMa
 
 export async function getTemplateAction(manufacturer: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requirePermission('products:edit');
         const supabase = createAdminClient();
         const { data, error } = await supabase
             .from('price_list_templates')
@@ -88,7 +89,7 @@ export async function importPriceListAction(
     products: ParsedRow[]
 ) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requireAuditedAdminAction('products.pricelist.update');
         const supabase = createAdminClient();
 
         const { data: priceList, error: createError } = await supabase
@@ -185,7 +186,7 @@ export async function importPriceListAction(
 
 export async function deletePriceListAction(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
+        const { organizationId } = await requireAuditedAdminAction('products.pricelist.delete');
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('price_lists')
