@@ -84,6 +84,19 @@ export class SettingsService {
 
         const existingIds = (existingData || []).map(r => r.id);
         const currentIds = stages.map(s => s.id);
+        if (new Set(currentIds).size !== currentIds.length) {
+            return { success: false, error: 'Duplicated pipeline stage ID' };
+        }
+        // service_role bypasses RLS, so an incoming ID must NOT reference
+        // an existing stage from another tenant (upsert would overwrite it).
+        if (currentIds.length > 0) {
+            const { data: collisions, error: collisionError } = await supabase
+                .from('pipeline_stages').select('id,organization_id').in('id', currentIds);
+            if (collisionError || (collisions || []).some(stage =>
+                stage.organization_id !== organizationId)) {
+                return { success: false, error: 'Invalid pipeline stage ownership' };
+            }
+        }
         const toDeleteIds = existingIds.filter(id => !currentIds.includes(id));
 
         // 2. Tentar deletar os que foram removidos
@@ -91,7 +104,8 @@ export class SettingsService {
             const { error: deleteError } = await supabase
                 .from('pipeline_stages')
                 .delete()
-                .in('id', toDeleteIds);
+                .in('id', toDeleteIds)
+                .eq('organization_id', organizationId);
             
             if (deleteError) {
                 return { 
