@@ -53,7 +53,9 @@ obj_a=UUID("aaaaaaaa-1111-4111-8111-111111111111")
 obj_b=UUID("bbbbbbbb-2222-4222-8222-222222222222")
 
 def one(db,statement,*args):
-    return db.execute(statement,args).fetchone()[0]
+    # An empty psycopg parameter list would parse SQL LIKE '%user_metadata%'
+    # as a placeholder. Execute literal SQL without a params argument.
+    return (db.execute(statement,args) if args else db.execute(statement)).fetchone()[0]
 
 def execute_as(db,role,uid,statement,*args):
     db.execute("RESET ROLE")
@@ -62,7 +64,7 @@ def execute_as(db,role,uid,statement,*args):
         ('{"role":"authenticated","user_metadata":{"organization_id":"%s"}}'%ORG_B,))
     db.execute("SET ROLE "+role)
     try:
-        return db.execute(statement,args).fetchall()
+        return (db.execute(statement,args) if args else db.execute(statement)).fetchall()
     finally:
         db.execute("RESET ROLE")
 
