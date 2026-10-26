@@ -72,12 +72,21 @@ with psycopg.connect(dsn,autocommit=True) as db:
     db.execute("CREATE ROLE anon NOLOGIN")
     db.execute("CREATE ROLE authenticated NOLOGIN")
     db.execute("CREATE ROLE service_role NOLOGIN BYPASSRLS")
+    db.execute("CREATE ROLE supabase_auth_admin NOLOGIN")
     db.execute("CREATE SCHEMA auth")
     db.execute("""
       CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE
       AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
       CREATE FUNCTION auth.jwt() RETURNS jsonb LANGUAGE sql STABLE
       AS $$ SELECT coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;
+    """)
+    db.execute("""
+      CREATE FUNCTION public.get_next_proposal_number(p_organization_id uuid)
+      RETURNS integer LANGUAGE sql SECURITY DEFINER
+      AS $ SELECT 1 $;
+      CREATE FUNCTION public.handle_new_user()
+      RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
+      AS $ BEGIN RETURN NEW; END; $;
     """)
     db.execute("GRANT USAGE ON SCHEMA public, auth TO anon, authenticated, service_role")
     db.execute("GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth TO anon, authenticated, service_role")
@@ -149,6 +158,17 @@ with psycopg.connect(dsn,autocommit=True) as db:
            "(coalesce(qual,'') ilike '%user_metadata%' OR coalesce(with_check,'') ilike '%user_metadata%')")==0
     assert one(db,"SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
            "WHERE n.nspname='public' AND c.relkind='r' AND has_table_privilege('anon',c.oid,'SELECT')")==0
+
+    # The legacy public SECURITY DEFINER RPC must be inaccessible to anon
+    # and authenticated clients while the server and Auth trigger still work.
+    assert one(db,"SELECT has_function_privilege('anon',"
+       "'public.get_next_proposal_number(uuid)','EXECUTE')") is False
+    assert one(db,"SELECT has_function_privilege('authenticated',"
+       "'public.get_next_proposal_number(uuid)','EXECUTE')") is False
+    assert one(db,"SELECT has_function_privilege('service_role',"
+       "'public.get_next_proposal_number(uuid)','EXECUTE')") is True
+    assert one(db,"SELECT has_function_privilege('supabase_auth_admin',"
+       "'public.handle_new_user()','EXECUTE')") is True
 
     # Forging user_metadata for tenant B does not change user A's authority.
     assert execute_as(db,"authenticated",A,"SELECT id FROM public.accounts")==[(obj_a,)]
