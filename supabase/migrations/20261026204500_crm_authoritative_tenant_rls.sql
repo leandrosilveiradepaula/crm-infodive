@@ -308,6 +308,10 @@ BEGIN
     IF p.proname <> ALL(allowed) THEN
       RAISE EXCEPTION 'Unknown public SECURITY DEFINER routine: %',p.proname;
     END IF;
+    -- Lock SECURITY DEFINER identifier resolution to trusted schemas, with
+    -- pg_temp last so user-created temporary objects cannot shadow tables.
+    -- Supabase pgcrypto may be installed under extensions (e.g. digest()).
+    EXECUTE format('ALTER FUNCTION %s SET search_path = pg_catalog, public, extensions, pg_temp',p.signature);
     EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC,anon,authenticated',p.signature);
     EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO service_role',p.signature);
     IF p.proname IN (
@@ -347,6 +351,14 @@ BEGIN
       AND has_table_privilege('anon',c.oid,'SELECT')
   ) THEN
     RAISE EXCEPTION 'CRM anonymous table SELECT grant survived';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.prosecdef
+      AND (p.proconfig IS NULL OR
+           NOT ('search_path=pg_catalog, public, extensions, pg_temp' = ANY(p.proconfig)))
+  ) THEN
+    RAISE EXCEPTION 'Mutable SECURITY DEFINER search path survived';
   END IF;
   IF EXISTS (
     SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
