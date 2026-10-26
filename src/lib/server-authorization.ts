@@ -1,6 +1,6 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext, type AuthorizedSessionContext } from '@/lib/auth-server';
-import { roleAllowsPermission } from '@/lib/permission-matrix';
+import { createAdminClient } from './supabase/admin';
+import { requireSessionContext, type AuthorizedSessionContext } from './auth-server';
+import { roleAllowsPermission } from './permission-matrix';
 import type { Permission } from '@/types/auth';
 
 /**
