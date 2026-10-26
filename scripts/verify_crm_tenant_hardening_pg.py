@@ -47,6 +47,7 @@ rls_legacy_off={"account_branches","accounts","activities","automation_logs",
 A=UUID("11111111-1111-4111-8111-111111111111")
 B=UUID("22222222-2222-4222-8222-222222222222")
 C=UUID("33333333-3333-4333-8333-333333333333")
+D=UUID("44444444-4444-4444-8444-444444444444")
 ORG_A=UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 ORG_B=UUID("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
 obj_a=UUID("aaaaaaaa-1111-4111-8111-111111111111")
@@ -135,7 +136,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
     db.execute("""CREATE POLICY "Read access for authenticated" ON public.user_scores
       FOR SELECT TO authenticated USING(true)""")
 
-    for user,org,status in [(A,ORG_A,"active"),(B,ORG_B,"active"),(C,ORG_A,"inactive")]:
+    for user,org,status in [(A,ORG_A,"active"),(B,ORG_B,"active"),(C,ORG_A,"inactive"),(D,None,"active")]:
         db.execute("INSERT INTO public.profiles (id,organization_id,status,role) VALUES (%s,%s,%s,'vendedor')",
                    (user,org,status))
     for row_id,org in ((obj_a,ORG_A),(obj_b,ORG_B)):
@@ -150,6 +151,15 @@ with psycopg.connect(dsn,autocommit=True) as db:
     db.execute("INSERT INTO public.automation_logs(id,automation_id,status) VALUES(%s,%s,'success')",
                (UUID("bbbbbbbb-2222-4222-8222-555555555555"),obj_b))
 
+    # Existing CRM has insert-time tenant attribution triggers. Install one
+    # before migration to verify the new function changes actual behavior.
+    db.execute("""
+      CREATE FUNCTION public.set_organization_id()
+      RETURNS trigger LANGUAGE plpgsql
+      AS $old_trigger$ BEGIN RETURN NEW; END; $old_trigger$;
+      CREATE TRIGGER ensure_org_id_deals BEFORE INSERT ON public.deals
+      FOR EACH ROW EXECUTE FUNCTION public.set_organization_id();
+    """)
     db.execute(migration)
 
     assert one(db,"SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
@@ -174,12 +184,14 @@ with psycopg.connect(dsn,autocommit=True) as db:
     assert execute_as(db,"authenticated",A,"SELECT id FROM public.accounts")==[(obj_a,)]
     assert execute_as(db,"authenticated",B,"SELECT id FROM public.accounts")==[(obj_b,)]
     assert execute_as(db,"authenticated",C,"SELECT id FROM public.accounts")==[]
+    assert execute_as(db,"authenticated",D,"SELECT id FROM public.accounts")==[]
     assert execute_as(db,"authenticated",A,"SELECT id FROM public.deals")==[(obj_a,)]
     assert execute_as(db,"authenticated",A,"SELECT id FROM public.proposals")==[(obj_a,)]
     assert len(execute_as(db,"authenticated",A,"SELECT id FROM public.proposal_versions"))==1
     assert len(execute_as(db,"authenticated",A,"SELECT id FROM public.automation_logs"))==1
     assert execute_as(db,"authenticated",A,"SELECT public.get_jwt_org_id()")==[(ORG_A,)]
     assert execute_as(db,"authenticated",C,"SELECT public.get_jwt_org_id()")==[(None,)]
+    assert execute_as(db,"authenticated",D,"SELECT public.get_jwt_org_id()")==[(None,)]
 
     for role,uid,sql,expected in (
         ("anon",None,"SELECT id FROM public.accounts","42501"),
@@ -195,9 +207,18 @@ with psycopg.connect(dsn,autocommit=True) as db:
         else:
             raise AssertionError("Unauthorized SQL was allowed: "+sql)
 
+    # The previously installed trigger must overwrite a forged tenant B
+    # with authoritative tenant A on INSERT; metadata is always ignored.
+    new_deal=UUID("aaaaaaaa-1111-4111-8111-eeeeeeeeeeee")
+    result=execute_as(db,"authenticated",A,
+        "INSERT INTO public.deals(id,organization_id) VALUES (%s,%s) RETURNING organization_id",
+        new_deal,ORG_B)
+    assert result==[(ORG_A,)],result
+    assert one(db,"SELECT organization_id FROM public.deals WHERE id=%s",new_deal)==ORG_A
+
     # Service-role reads remain available for the app's server-side clients.
     assert len(execute_as(db,"service_role",None,"SELECT id FROM public.accounts"))==2
-    assert len(execute_as(db,"service_role",None,"SELECT id FROM public.profiles"))==3
+    assert len(execute_as(db,"service_role",None,"SELECT id FROM public.profiles"))==4
 
     # Confirm an authenticated user cannot read or write the public proposal
     # table anonymously even though the historical policy was USING(TRUE).
