@@ -2,10 +2,11 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { UserProfile } from '@/hooks/useUsers';
-import { requireUserId, requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
+import { requireAuditedAdminAction } from '@/lib/admin-audit';
 
 export async function getUsers() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('settings:manage_users');
     const supabase = createAdminClient();
 
     try {
@@ -53,7 +54,7 @@ export async function getUsers() {
 }
 
 export async function updateUserAction(updateId: string, updates: Partial<UserProfile>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('users.update');
     const supabase = createAdminClient();
 
     try {
@@ -96,12 +97,20 @@ export async function updateUserAction(updateId: string, updates: Partial<UserPr
 }
 
 export async function archiveUserAction(archiveId: string, newOwnerId?: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId, userId: actorId } = await requireAuditedAdminAction('users.archive');
+    if (actorId === archiveId) throw new Error('Forbidden: cannot archive your own admin identity');
     const supabase = createAdminClient();
 
     try {
         // 1. Transfer deals if requested
         if (newOwnerId && newOwnerId !== 'none') {
+            const { data: eligibleOwner, error: ownerError } = await supabase
+                .from('profiles').select('id').eq('id', newOwnerId)
+                .eq('organization_id', organizationId).eq('status', 'active')
+                .maybeSingle();
+            if (ownerError || !eligibleOwner) {
+                return { success: false, error: 'Invalid transfer owner' };
+            }
             const { error: transferError } = await supabase
                 .from('deals')
                 .update({ owner_id: newOwnerId })
