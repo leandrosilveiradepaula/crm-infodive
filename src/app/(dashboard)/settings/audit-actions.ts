@@ -1,7 +1,7 @@
 'use server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
 
 export interface AuditLog {
     id: string;
@@ -14,7 +14,7 @@ export interface AuditLog {
 }
 
 export async function getAuditLogs(): Promise<AuditLog[]> {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('audit:view');
     const supabase = createAdminClient();
 
     try {
@@ -41,27 +41,11 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
     }
 }
 
-export async function createAuditLog(log: Omit<AuditLog, 'id' | 'timestamp'>) {
-    const { organizationId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
-    try {
-        const { error } = await supabase
-            .from('audit_logs')
-            .insert([{
-                user_name: log.user,
-                action: log.action,
-                details: log.details,
-                category: log.category,
-                ip_address: log.ip,
-                organization_id: organizationId
-            }]);
-
-        if (error) throw error;
-        return { success: true };
-    } catch (error: any) {
-        console.error('Error adding audit log:', error);
-        return { success: false, error: error.message };
-    }
+/**
+ * Deprecated untrusted Server Action. A caller must never supply arbitrary
+ * actor/action/IP entries in the security audit trail.
+ * Real administrative requests write their own server-derived intent record.
+ */
+export async function createAuditLog(_log: Omit<AuditLog, 'id' | 'timestamp'>) {
+    return { success: false, error: 'Forbidden: audit trail is server controlled' };
 }
-
