@@ -16,6 +16,8 @@ const ADMIN_EVENT_PERMISSIONS = {
   'integrations.apikey.delete': 'integrations:manage',
   'integrations.webhook.create': 'integrations:manage',
   'integrations.webhook.delete': 'integrations:manage',
+  'products.pricelist.update': 'products:edit',
+  'products.pricelist.delete': 'products:delete',
 } as const satisfies Record<string, Permission>;
 
 export type AdminAuditEvent = keyof typeof ADMIN_EVENT_PERMISSIONS;
