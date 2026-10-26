@@ -3,10 +3,11 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { Webhook } from '@/hooks/useWebhooks';
 import { revalidatePath } from 'next/cache';
-import { requireSessionContext } from '@/lib/auth-server';
+import { requirePermission } from '@/lib/server-authorization';
+import { requireAuditedAdminAction } from '@/lib/admin-audit';
 
 export async function getWebhooks() {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requirePermission('integrations:manage');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('webhooks')
@@ -22,7 +23,7 @@ export async function getWebhooks() {
 }
 
 export async function createWebhook(webhook: Omit<Webhook, 'id' | 'created_at' | 'last_triggered'>) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('integrations.webhook.create');
     const supabase = createAdminClient();
     const { data, error } = await supabase
         .from('webhooks')
@@ -35,7 +36,7 @@ export async function createWebhook(webhook: Omit<Webhook, 'id' | 'created_at' |
 }
 
 export async function removeWebhook(id: string) {
-    const { organizationId } = await requireSessionContext();
+    const { organizationId } = await requireAuditedAdminAction('integrations.webhook.delete');
     const supabase = createAdminClient();
     const { error } = await supabase
         .from('webhooks')
