@@ -110,6 +110,13 @@ export class UserService {
         try {
             // 1. Transfer deals if requested
             if (newOwnerId && newOwnerId !== 'none') {
+                const { data: eligibleOwner, error: ownerError } = await supabase
+                    .from('profiles').select('id').eq('id', newOwnerId)
+                    .eq('organization_id', organizationId).eq('status', 'active')
+                    .maybeSingle();
+                if (ownerError || !eligibleOwner) {
+                    return { success: false, error: 'Invalid transfer owner' };
+                }
                 const { error: transferError } = await supabase
                     .from('deals')
                     .update({ owner_id: newOwnerId })
