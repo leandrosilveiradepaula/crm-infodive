@@ -5,6 +5,7 @@ vi.mock('@/lib/supabase/admin',()=>({createAdminClient:mocked.createAdminClient}
 vi.mock('@/lib/constants',()=>({USER_ROLES:{ADMIN:'admin',MANAGER:'manager',VENDEDOR:'vendedor',SALES:'sales'}}));
 
 import { UserService } from '../src/services/UserService';
+import { SettingsService } from '../src/services/SettingsService';
 
 const USER='11111111-1111-4111-8111-111111111111';
 const ORG='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
@@ -47,5 +48,48 @@ describe('self-service profile update cannot escalate through service_role',()=>
     expect(record.phone).toBe('123');
     expect(eq).toHaveBeenCalledWith('id',USER);
     expect(eq).toHaveBeenCalledWith('organization_id',ORG);
+  });
+});
+
+describe('server-side cross-tenant administrative writes',()=>{
+  beforeEach(()=>{vi.resetAllMocks();});
+
+  it('denies transfer to another tenant before touching deals or archiving a user',async ()=>{
+    const maybeSingle=vi.fn().mockResolvedValue({data:null,error:null});
+    const eq=vi.fn();
+    const chain={eq,maybeSingle};
+    eq.mockReturnValue(chain);
+    const select=vi.fn().mockReturnValue(chain);
+    const from=vi.fn((table:string)=>{
+      if(table==='profiles')return {select};
+      throw new Error('Cross-tenant write reached '+table);
+    });
+    mocked.createAdminClient.mockReturnValue({from});
+    const result=await UserService.archiveUser(USER,ORG,OTHER);
+    expect(result.success).toBe(false);
+    expect(from).toHaveBeenCalledTimes(1);
+    expect(select).toHaveBeenCalledWith('id');
+    expect(eq).toHaveBeenCalledWith('organization_id',ORG);
+    expect(eq).toHaveBeenCalledWith('status','active');
+  });
+
+  it('denies pipeline upsert of an ID that already belongs to another tenant',async ()=>{
+    const foreignStage=OTHER;
+    const select=vi.fn((columns:string)=>{
+      if(columns==='id')return {eq:vi.fn().mockResolvedValue({data:[],error:null})};
+      if(columns==='id,organization_id')return {
+        in:vi.fn().mockResolvedValue({data:[{id:foreignStage,organization_id:OTHER}],error:null}),
+      };
+      throw new Error('Unexpected columns '+columns);
+    });
+    const upsert=vi.fn(),remove=vi.fn();
+    const from=vi.fn().mockReturnValue({select,upsert,delete:remove});
+    mocked.createAdminClient.mockReturnValue({from});
+    const result=await SettingsService.savePipelineStages(ORG,[
+      {id:foreignStage,name:'Foreign',color:'#ffffff',order_index:0},
+    ]);
+    expect(result.success).toBe(false);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(remove).not.toHaveBeenCalled();
   });
 });
