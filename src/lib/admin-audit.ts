@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { requirePermission } from '@/lib/server-authorization';
+import { createAdminClient } from './supabase/admin';
+import { requirePermission } from './server-authorization';
 import type { Permission } from '@/types/auth';
 
 /** Only reviewed literal actions may create privileged audit intent records. */
