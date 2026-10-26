@@ -15,6 +15,7 @@ A PR [#198](https://github.com/leandrosilveiradepaula/crm-infodive/pull/198) foi
 - Todas as variantes de Server Action de usuários, convites, alterações de perfil/roles, arquivamento, pipelines, configurações, integrações, API keys, webhooks e listas de preço passam por autorização no servidor **antes** de chamar serviços privilegiados.
 - Arquivamentos com transferência exigem que o destinatário seja **ativo e do mesmo tenant**. O ator não pode se autoarquivar nesse fluxo. Upserts de etapas do pipeline recusam IDs já pertencentes a outra organização.
 - `/api/auth/me` deixa de confiar no `organizationId` obsoleto da sessão: 401 se o perfil estiver ausente/inativo, sem tenant ou indisponível.
+- Uma auditoria adicional encontrou `updateMyProfile` gravando `...data` diretamente por `service_role`, permitindo enviar no JSON de uma Server Action campos proibidos que o TypeScript não valida em runtime. O serviço agora **nega campos além de nome/telefone** e monta allowlist explícita; teste adversarial verifica `role`, `roles`, `status` e `organization_id` forjados.
 - `createAuditLog` não aceita mais eventos arbitrários forjados por chamada direta. Eventos administrativos autorizados são registrados pelo próprio servidor **antes** da mutação, com identidade/organização verificadas, sem salvar payload ou credenciais. **São recibos de tentativa autorizada, NÃO prova de mudança concluída**.
 
 ## Limites e riscos que não podem ser ocultados
