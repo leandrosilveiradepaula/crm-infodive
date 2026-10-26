@@ -169,6 +169,10 @@ with psycopg.connect(dsn,autocommit=True) as db:
     assert one(db,"SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace "
            "WHERE n.nspname='public' AND c.relkind='r' AND has_table_privilege('anon',c.oid,'SELECT')")==0
 
+    assert one(db,"SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace "
+       "WHERE n.nspname='public' AND p.prosecdef AND "
+       "(p.proconfig IS NULL OR NOT ('search_path=pg_catalog, public, extensions, pg_temp' = ANY(p.proconfig)))")==0
+
     # The legacy public SECURITY DEFINER RPC must be inaccessible to anon
     # and authenticated clients while the server and Auth trigger still work.
     assert one(db,"SELECT has_function_privilege('anon',"
