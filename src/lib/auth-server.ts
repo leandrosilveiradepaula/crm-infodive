@@ -2,63 +2,53 @@ import { headers } from 'next/headers';
 import { getSession } from './session';
 import { createAdminClient } from './supabase/admin';
 
-/**
- * Reads the X-User-Id header injected by middleware.
- * Acts as a fast-path security layer for API routes.
- */
-export async function requireUserId(): Promise<string> {
-    const headersList = await headers();
-    const headerUserId = headersList.get('X-User-Id');
-
-    if (!headerUserId) {
-        throw new Error('Unauthorized API Access: Missing X-User-Id header');
-    }
-
-    return headerUserId;
+export interface AuthorizedSessionContext {
+    userId: string;
+    organizationId: string;
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Returns the full server-side auth context from Iron Session.
- * Use this in all Server Actions / Services that need tenant context.
+ * Fail closed on every privileged request. The signed Iron Session proves who
+ * signed in, NOT whether that profile remains active or belongs to the same
+ * organization. Always use the trusted server-side profiles row.
  *
- * organizationId comes from Iron Session (set at login).
- * If not in session (old sessions), it is fetched from auth.users via admin client
- * and saved back to the session automatically — no logout required.
+ * Never use JWT user_metadata, an X-User-Id supplied by a client or the old
+ * organizationId cached in an Iron Session for authorization.
  */
-export async function requireSessionContext(): Promise<{ userId: string; organizationId: string }> {
+export async function requireSessionContext(): Promise<AuthorizedSessionContext> {
     const session = await getSession();
 
-    if (!session.isLoggedIn || !session.userId) {
+    if (!session.isLoggedIn || !session.userId || !UUID.test(session.userId)) {
         throw new Error('Unauthorized: No active session');
     }
 
-    // Fast path: organizationId already in session
-    if (session.organizationId) {
-        return { userId: session.userId, organizationId: session.organizationId };
-    }
-
-    // Fallback: look up organizationId and status from Supabase
-    const adminClient = createAdminClient();
-
-    const { data: profile, error: profileError } = await adminClient
+    const admin = createAdminClient();
+    const { data: profile, error } = await admin
         .from('profiles')
-        .select('organization_id, status')
+        .select('organization_id,status')
         .eq('id', session.userId)
-        .single();
-    
-    if (profileError || !profile) {
-        throw new Error('Unauthorized: Profile not found or database error.');
+        .maybeSingle();
+
+    if (error || !profile || profile.status !== 'active' ||
+        typeof profile.organization_id !== 'string' ||
+        !UUID.test(profile.organization_id)) {
+        throw new Error('Unauthorized: Profile unavailable, inactive or without organization');
     }
 
-    if (profile.status === 'inactive') {
-        throw new Error('Unauthorized: This account has been deactivated. Contact your administrator.');
+    return {
+        userId: session.userId,
+        organizationId: profile.organization_id,
+    };
+}
+
+/** A middleware-injected header is an assertion, not an authority. */
+export async function requireUserId(): Promise<string> {
+    const context = await requireSessionContext();
+    const requestHeaders = await headers();
+    if (requestHeaders.get('X-User-Id') !== context.userId) {
+        throw new Error('Unauthorized: Invalid user header');
     }
-
-    const organizationId = profile.organization_id;
-
-    if (!organizationId) {
-        throw new Error('Unauthorized: Could not determine organization for this user. Contact support.');
-    }
-
-    return { userId: session.userId, organizationId };
+    return context.userId;
 }
