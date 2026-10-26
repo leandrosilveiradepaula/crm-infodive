@@ -19,6 +19,8 @@
 - `src/app/(dashboard)/settings/{actions,users-actions,audit-actions}.ts`;
 - `src/app/(dashboard)/integrations/{actions,apikey-actions,webhook-actions}.ts`;
 - `src/app/api/auth/me/route.ts`;
+- `src/app/(dashboard)/settings/price-lists-actions.ts`;
+- `src/services/{UserService,SettingsService}.ts` (tenant validation before service-role updates);
 - testes Vitest sob `test/*-rbac*.test.ts` ou extensões focadas dos testes de auth;
 - qualquer outra ação administrativa somente se a prova descobrir bypass direto, registrando sua relevância ao gate #22.
 
