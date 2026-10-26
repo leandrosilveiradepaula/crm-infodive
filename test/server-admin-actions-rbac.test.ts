@@ -56,9 +56,6 @@ const directWrites: Array<[string,()=>Promise<unknown>]> = [
   ['removeApiKey dedicated',()=>apiKeys.removeApiKey(ID)],
   ['createWebhook dedicated',()=>webhooks.createWebhook({url:'https://example.invalid',events:[],status:'active'} as any)],
   ['removeWebhook dedicated',()=>webhooks.removeWebhook(ID)],
-  ['save price-list template',()=>priceLists.saveTemplateAction('vendor',{} as any)],
-  ['import price-list',()=>priceLists.importPriceListAction('list','vendor','file.csv',[])],
-  ['delete price-list',()=>priceLists.deletePriceListAction(ID)],
 ];
 
 const directReads: Array<[string,()=>Promise<unknown>]> = [
@@ -70,8 +67,6 @@ const directReads: Array<[string,()=>Promise<unknown>]> = [
   ['combined webhooks',()=>integrations.getWebhooks()],
   ['dedicated webhooks',()=>webhooks.getWebhooks()],
   ['audit log viewer',()=>audit.getAuditLogs()],
-  ['price-list inventory',()=>priceLists.getPriceLists()],
-  ['price-list template',()=>priceLists.getTemplateAction('vendor')],
 ];
 
 describe('direct Server Action RBAC, not UI hiding',()=>{
@@ -93,6 +88,23 @@ describe('direct Server Action RBAC, not UI hiding',()=>{
 
   it.each(directReads)('denies privileged read %s without server role',async (_name,execute)=>{
     await expect(execute()).rejects.toThrow('Forbidden');
+    expect(mocked.createAdminClient).not.toHaveBeenCalled();
+  });
+
+  it('denies price-list reads and writes even when the action returns a failure envelope',async ()=>{
+    // Legacy price-list actions intentionally convert all exceptions into
+    // {success:false}; denial is still enforced BEFORE service-role access.
+    const attempts=[
+      ()=>priceLists.saveTemplateAction('vendor',{} as any),
+      ()=>priceLists.importPriceListAction('list','vendor','file.csv',[]),
+      ()=>priceLists.deletePriceListAction(ID),
+      ()=>priceLists.getPriceLists(),
+      ()=>priceLists.getTemplateAction('vendor'),
+    ];
+    for(const attempt of attempts){
+      const result=await attempt();
+      expect(result).toMatchObject({success:false});
+    }
     expect(mocked.createAdminClient).not.toHaveBeenCalled();
   });
 
