@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked=vi.hoisted(()=>({ createAdminClient:vi.fn() }));
 vi.mock('@/lib/supabase/admin',()=>({createAdminClient:mocked.createAdminClient}));
+vi.mock('@/lib/constants',()=>({USER_ROLES:{ADMIN:'admin',MANAGER:'manager',VENDEDOR:'vendedor',SALES:'sales'}}));
 
 import { UserService } from '../src/services/UserService';
 
