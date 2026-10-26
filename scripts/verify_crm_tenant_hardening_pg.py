@@ -83,10 +83,10 @@ with psycopg.connect(dsn,autocommit=True) as db:
     db.execute("""
       CREATE FUNCTION public.get_next_proposal_number(p_organization_id uuid)
       RETURNS integer LANGUAGE sql SECURITY DEFINER
-      AS $ SELECT 1 $;
+      AS $crm_sql$ SELECT 1 $crm_sql$;
       CREATE FUNCTION public.handle_new_user()
       RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER
-      AS $ BEGIN RETURN NEW; END; $;
+      AS $crm_trigger$ BEGIN RETURN NEW; END; $crm_trigger$;
     """)
     db.execute("GRANT USAGE ON SCHEMA public, auth TO anon, authenticated, service_role")
     db.execute("GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA auth TO anon, authenticated, service_role")
