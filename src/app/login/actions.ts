@@ -34,26 +34,21 @@ export async function login(formData: FormData) {
         return { error: 'Email ou senha incorretos.' };
     }
 
-    // Get organizationId from user metadata (set at signup)
-    let organizationId: string | undefined = data.user.user_metadata?.organization_id;
+    // Fetch tenant and revocation status from the server-owned profile only.
+    // JWT user_metadata is user-editable and MUST NEVER control organization.
+    const adminClient = createAdminClient();
+    const { data: profile, error: profileError } = await adminClient
+        .from('profiles')
+        .select('organization_id,status')
+        .eq('id', data.user.id)
+        .maybeSingle();
 
-    // Fallback: if not in JWT metadata, look up from profiles table
-    if (!organizationId) {
-        const adminClient = createAdminClient();
-        const { data: profile } = await adminClient
-            .from('profiles')
-            .select('organization_id')
-            .eq('id', data.user.id)
-            .single();
-        organizationId = profile?.organization_id || undefined;
+    if (profileError || !profile || profile.status !== 'active' ||
+        typeof profile.organization_id !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(profile.organization_id)) {
+        return { error: 'Conta sem organização ativa. Entre em contato com o administrador.' };
     }
-
-    // Also try auth.users raw_user_meta_data via admin
-    if (!organizationId) {
-        const adminClient = createAdminClient();
-        const { data: authUser } = await adminClient.auth.admin.getUserById(data.user.id);
-        organizationId = authUser?.user?.user_metadata?.organization_id;
-    }
+    const organizationId = profile.organization_id;
 
     // Save session
     const session = await getSession();
@@ -107,12 +102,9 @@ export async function signup(formData: FormData) {
         { auth: { persistSession: false } }
     );
 
-    // Prepare user metadata with securely derived information
-    const userMetadata: any = {
-        full_name: name,
-        role: role,
-        organization_id: organization_id,
-    };
+    // Full name is for display only. Role and organization stay exclusively
+    // on the server-owned profile, derived from a verified invitation.
+    const userMetadata = { full_name: name };
 
     // 2. Create user in Supabase Auth
     const { data, error } = await supabase.auth.signUp({
