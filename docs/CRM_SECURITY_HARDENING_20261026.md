@@ -32,14 +32,14 @@ A aplicação usa `service_role` no servidor e **não** altera o login Supabase 
 2. Inventariar migrations aplicadas vs repositório. **Não executar as 17 faltantes automaticamente.** Avaliar os campos/policies atuais, inclusive backfills e triggers que podem já existir fora do histórico.
 3. Fazer **backup completo e verificável** do PostgreSQL, Auth, objetos Storage e configurações importantes; comprovar restauração em ambiente isolado. Supabase Free não fornece PITR; confirmar estratégia antes da janela.
 
-   Executar o procedimento de backup **na máquina do operador**, com credencial PostgreSQL válida armazenada apenas em variáveis/gerenciador de segredos locais; **nunca** copiar senha, DSN, dumps ou perfis para issue, PR, navegador ou chat. Referência oficial: https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore . Exemplo orientativo para Supabase CLI recente (consultar \`supabase db dump --help\` da versão realmente instalada):
+   Executar o procedimento de backup **na máquina do operador**, com credencial PostgreSQL válida armazenada apenas em variáveis/gerenciador de segredos locais; **nunca** copiar senha, DSN, dumps ou perfis para issue, PR, navegador ou chat. Referência oficial: https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore . Exemplo orientativo para Supabase CLI recente (consultar `supabase db dump --help` da versão realmente instalada):
 
-   \`\`\`bash
+   ```bash
    # CRM_DATABASE_URL é uma DSN privada injetada localmente, sem eco em terminal.
    supabase db dump --db-url "$CRM_DATABASE_URL" -f crm_roles.sql --role-only
    supabase db dump --db-url "$CRM_DATABASE_URL" -f crm_schema.sql
    supabase db dump --db-url "$CRM_DATABASE_URL" -f crm_data.sql --data-only --use-copy
-   \`\`\`
+   ```
 
    **Limite importante da CLI:** `supabase db dump` **exclui os schemas gerenciados `auth` e `storage` por padrão**, conforme [referência oficial](https://supabase.com/docs/reference/cli/supabase-db-dump). Esses três arquivos **não são backup integral do projeto**: complementar, em procedimento controlado e separado, a salvaguarda/restauração dos usuários e identidades de Auth (incluindo hashes de senha e sua relação com `public.profiles`) e dos objetos físicos de Storage. Consultar também [migração de Auth users](https://supabase.com/docs/guides/troubleshooting/migrating-auth-users-between-projects). Não assumir que restaurar `public.profiles` restaura automaticamente `auth.users`.
 
