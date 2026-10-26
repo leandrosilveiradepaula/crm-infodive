@@ -45,7 +45,7 @@ export async function login(formData: FormData) {
 
     if (profileError || !profile || profile.status !== 'active' ||
         typeof profile.organization_id !== 'string' ||
-        !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(profile.organization_id)) {
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(profile.organization_id)) {
         return { error: 'Conta sem organização ativa. Entre em contato com o administrador.' };
     }
     const organizationId = profile.organization_id;
