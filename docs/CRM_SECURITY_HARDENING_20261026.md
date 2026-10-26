@@ -41,6 +41,8 @@ A aplicação usa `service_role` no servidor e **não** altera o login Supabase 
    supabase db dump --db-url "$CRM_DATABASE_URL" -f crm_data.sql --data-only --use-copy
    \`\`\`
 
+   **Limite importante da CLI:** `supabase db dump` **exclui os schemas gerenciados `auth` e `storage` por padrão**, conforme [referência oficial](https://supabase.com/docs/reference/cli/supabase-db-dump). Esses três arquivos **não são backup integral do projeto**: complementar, em procedimento controlado e separado, a salvaguarda/restauração dos usuários e identidades de Auth (incluindo hashes de senha e sua relação com `public.profiles`) e dos objetos físicos de Storage. Consultar também [migração de Auth users](https://supabase.com/docs/guides/troubleshooting/migrating-auth-users-between-projects). Não assumir que restaurar `public.profiles` restaura automaticamente `auth.users`.
+
    **Não considerar backup concluído por arquivos existentes:** verificar integridade/restauração em PostgreSQL isolado, compatibilidade de versão, perfis/identidades/Auth e exportação independente de objetos Storage, e registrar apenas recibo não sensível (tamanho/sha256/data), nunca os arquivos. Plano Free não substitui backup do operador nem fornece PITR.
 
 4. Informar ao proprietário que o perfil ativo sem `organization_id` será negado até correção administrativa autorizada. A migration não alterará esse registro.
