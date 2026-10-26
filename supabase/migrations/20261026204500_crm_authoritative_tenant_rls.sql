@@ -287,6 +287,43 @@ CREATE POLICY crm_my_badges_read ON public.user_badges FOR SELECT TO authenticat
 CREATE POLICY crm_my_scores_read ON public.user_scores FOR SELECT TO authenticated
   USING (user_id = (SELECT auth.uid()));
 
+-- Public SECURITY DEFINER RPCs bypass RLS; table grants alone are not enough.
+-- Public proposal/portal routes already call these functions through the trusted
+-- Next.js BFF with service_role. Fail closed on a newly introduced unknown
+-- definer routine instead of silently leaving it callable by anon.
+DO $definer$
+DECLARE p record;
+DECLARE allowed text[] := ARRAY[
+ 'calculate_deal_health','get_deal_room_by_token',
+ 'get_next_proposal_number','get_proposal_by_public_token',
+ 'handle_deal_won_gamification','handle_new_user',
+ 'is_admin_or_manager','is_manager','log_activity','sign_proposal'
+];
+BEGIN
+  FOR p IN
+    SELECT x.oid,x.proname,x.oid::regprocedure AS signature
+    FROM pg_proc x JOIN pg_namespace n ON n.oid=x.pronamespace
+    WHERE n.nspname='public' AND x.prosecdef
+  LOOP
+    IF p.proname <> ALL(allowed) THEN
+      RAISE EXCEPTION 'Unknown public SECURITY DEFINER routine: %',p.proname;
+    END IF;
+    EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC,anon,authenticated',p.signature);
+    EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO service_role',p.signature);
+    IF p.proname IN (
+      'calculate_deal_health','handle_deal_won_gamification',
+      'handle_new_user','is_admin_or_manager','is_manager','log_activity'
+    ) THEN
+      EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO authenticated',p.signature);
+    END IF;
+    IF p.proname='handle_new_user' AND
+       EXISTS(SELECT 1 FROM pg_roles WHERE rolname='supabase_auth_admin') THEN
+      EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO supabase_auth_admin',p.signature);
+    END IF;
+  END LOOP;
+END;
+$definer$;
+
 -- Defensive postconditions: an unexpected table/privilege/policy aborts the
 -- entire transaction. Production advisor rerun is still mandatory.
 DO $post$
@@ -310,6 +347,13 @@ BEGIN
       AND has_table_privilege('anon',c.oid,'SELECT')
   ) THEN
     RAISE EXCEPTION 'CRM anonymous table SELECT grant survived';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='public' AND p.prosecdef
+      AND has_function_privilege('anon',p.oid,'EXECUTE')
+  ) THEN
+    RAISE EXCEPTION 'Anonymous SECURITY DEFINER RPC survived';
   END IF;
 END;
 $post$;
