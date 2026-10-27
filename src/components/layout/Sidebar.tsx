@@ -88,6 +88,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed, se
                 <NavItem href="/contacts" icon={Users} label="Contatos" isActive={pathname === '/contacts'} collapsed={isCollapsed} />
                 <NavItem href="/activities" icon={Calendar} label="Atividades" isActive={pathname === '/activities'} collapsed={isCollapsed} />
                 <NavItem href="/contracts" icon={Scroll} label="Contratos" isActive={pathname === '/contracts'} collapsed={isCollapsed} />
+                <NavItem href="/service-desk" icon={Inbox} label="Service Desk" isActive={pathname.startsWith('/service-desk')} collapsed={isCollapsed} />
                 <NavItem href="/sales" icon={Truck} label="Vendas" isActive={pathname === '/sales'} collapsed={isCollapsed} />
                 <NavItem href="/inbox" icon={Inbox} label="Inbox" isActive={pathname === '/inbox'} collapsed={isCollapsed} />
                 <NavItem href="/automations" icon={Zap} label="Automações" isActive={pathname === '/automations'} collapsed={isCollapsed} />
