@@ -5,7 +5,8 @@ vi.mock('../src/lib/auth-server',()=>({requireSessionContext:mocks.session}));
 vi.mock('../src/lib/supabase/admin',()=>({createAdminClient:mocks.admin}));
 import { createServiceDeskTicket,listServiceDeskTickets,
   transitionServiceDeskTicket,listServiceDeskAccounts,listServiceDeskContracts,
-  addServiceDeskComment,recordServiceDeskTime
+  addServiceDeskComment,recordServiceDeskTime,
+  listServiceDeskAttachments,getServiceDeskAttachmentUrl
 } from '../src/app/(dashboard)/service-desk/actions';
 
 const USER='11111111-1111-4111-8111-111111111111';
@@ -88,6 +89,41 @@ describe('CRM-owned Service Desk server authorization',()=>{
       .rejects.toThrow('Invalid ticket comment');
     await expect(recordServiceDeskTime({ticketId:TICKET,minutes:0,description:'test'}))
       .rejects.toThrow('Invalid work time');
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it('authorizes attachment lookup through trusted CRM tenant',async()=>{
+    const {rpc,client}=setup();
+    rpc.mockImplementation((name:string)=>{
+      if(name==='crm_sd_attachment_path_v1')return Promise.resolve({
+        data:{object_key:'service-desk/'+ORG+'/'+TICKET+'/sample.pdf'},error:null
+      });
+      return Promise.resolve({data:[],error:null});
+    });
+    (client as any).storage={from:()=>({
+      createSignedUrl:vi.fn().mockResolvedValue({
+        data:{signedUrl:'https://example.test/temporary'},error:null
+      })
+    })};
+    await expect(getServiceDeskAttachmentUrl(CONTRACT))
+      .resolves.toBe('https://example.test/temporary');
+    expect(rpc).toHaveBeenCalledWith('crm_sd_attachment_path_v1',{
+      p_actor:USER,p_organization:ORG,p_attachment:CONTRACT
+    });
+  });
+  it('refuses cross-organization attachment paths before generating signed URLs',async()=>{
+    const {rpc,client}=setup();
+    const sign=vi.fn();
+    (client as any).storage={from:()=>({createSignedUrl:sign})};
+    rpc.mockResolvedValue({data:{
+      object_key:'service-desk/'+OTHER+'/'+TICKET+'/sample.pdf'},error:null
+    });
+    await expect(getServiceDeskAttachmentUrl(CONTRACT)).rejects.toThrow('Attachment forbidden');
+    expect(sign).not.toHaveBeenCalled();
+  });
+  it('rejects invalid attachment IDs without privileged RPC',async()=>{
+    const {rpc}=setup();
+    await expect(listServiceDeskAttachments('invalid'))
+      .rejects.toThrow('Invalid ticket');
     expect(rpc).not.toHaveBeenCalled();
   });
   it('includes exact organization and expected-status CAS on transitions',async()=>{
