@@ -13,6 +13,7 @@ ser revertida ou duplicada.
 - `src/app/(dashboard)/service-desk/**` (página incorporada e ações).
 - `src/components/layout/Sidebar.tsx` (somente entrada do módulo).
 - `test/service-desk-crm-module.test.ts` (negação de acesso e contexto).
+- `scripts/verify_crm_service_desk_pg.py` e `.github/workflows/crm-service-desk-postgres.yml` (PG16 isolado).
 - `docs/SERVICE_DESK_CRM_INTEGRATION.md` (contratos/rollback).
 - Este arquivo de tarefa.
 
