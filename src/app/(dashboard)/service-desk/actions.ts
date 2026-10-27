@@ -83,3 +83,36 @@ export async function transitionServiceDeskTicket(input: {
   if (error || data?.id !== input.id) throw new Error('CRM Service Desk transition failed');
   return data as {id:string;status:string};
 }
+
+export async function addServiceDeskComment(input: {
+  ticketId:string;body:string;visibility:'public'|'internal';
+}) {
+  if (!input || !UUID.test(input.ticketId) || typeof input.body !== 'string' ||
+      input.body.trim().length < 1 || input.body.trim().length > 5000 ||
+      !['public','internal'].includes(input.visibility))
+    throw new Error('Invalid ticket comment');
+  const { userId,organizationId,admin } = await requireServiceDeskActor();
+  const { data,error } = await admin.rpc('crm_sd_add_comment_v1',{
+    p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId,
+    p_body:input.body.trim(),p_visibility:input.visibility
+  });
+  if (error || !data?.id) throw new Error('Comment rejected');
+  return data as {id:string;ticket_id:string};
+}
+
+export async function recordServiceDeskTime(input: {
+  ticketId:string;minutes:number;description:string;
+}) {
+  if (!input || !UUID.test(input.ticketId) || !Number.isInteger(input.minutes) ||
+      input.minutes<1 || input.minutes>1440 ||
+      typeof input.description !== 'string' ||
+      input.description.trim().length < 1 || input.description.trim().length>5000)
+    throw new Error('Invalid work time');
+  const { userId,organizationId,admin } = await requireServiceDeskActor();
+  const { data,error } = await admin.rpc('crm_sd_record_time_v1',{
+    p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId,
+    p_minutes:input.minutes,p_description:input.description.trim()
+  });
+  if (error || !data?.id) throw new Error('Work time rejected');
+  return data as {id:string;ticket_id:string;minutes:number};
+}
