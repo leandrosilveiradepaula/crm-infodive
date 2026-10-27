@@ -61,7 +61,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
         id uuid PRIMARY KEY, organization_id uuid, name text NOT NULL)""")
     db.execute("""CREATE TABLE public.service_contracts (
         id uuid PRIMARY KEY, organization_id uuid, account_id uuid,
-        title text)""")
+        title text,status text DEFAULT 'active',start_date date,end_date date)""")
     db.execute("""CREATE FUNCTION crm_internal.current_organization_id() RETURNS uuid
       LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$
       SELECT p.organization_id FROM public.profiles p WHERE p.id=(SELECT auth.uid())
@@ -213,5 +213,11 @@ with psycopg.connect(dsn,autocommit=True) as db:
        "cross.pdf","application/pdf",1024))
     fails(db,lambda:as_role(db,"service_role",
        "UPDATE service_desk.ticket_attachments SET filename='changed.pdf' WHERE id=%s",record_id))
+    # Expired/canceled contracts must not be selectable for NEW tickets.
+    db.execute("UPDATE public.service_contracts SET status='canceled' WHERE id=%s",(CO1,))
+    fails(db,lambda:create())
+    db.execute("UPDATE public.service_contracts SET status='active',end_date=current_date - 1 WHERE id=%s",(CO1,))
+    fails(db,lambda:create())
+    db.execute("UPDATE public.service_contracts SET end_date=NULL WHERE id=%s",(CO1,))
     assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")
