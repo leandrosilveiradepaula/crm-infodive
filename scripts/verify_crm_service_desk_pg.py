@@ -78,7 +78,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
         db.execute("INSERT INTO public.service_contracts VALUES(%s,%s,%s,'Contract')",(cid,org,aid))
     db.execute(migration)
 
-    assert one(db,"SELECT count(*) FROM pg_tables WHERE schemaname='service_desk'")==9
+    assert one(db,"SELECT count(*) FROM pg_tables WHERE schemaname='service_desk'")==13
     for role in ["anon","authenticated"]:
         assert not one(db,"SELECT has_schema_privilege(%s,'service_desk','USAGE')",role)
         assert not one(db,"SELECT has_function_privilege(%s,'public.crm_sd_create_ticket_v1(uuid,uuid,uuid,uuid,text,text,text)','EXECUTE')",role)
@@ -130,5 +130,27 @@ with psycopg.connect(dsn,autocommit=True) as db:
       "UPDATE service_desk.time_entries SET minutes=20 WHERE ticket_id=%s",ticket))
     assert one(db,"SELECT count(*) FROM service_desk.time_entries WHERE ticket_id=%s",ticket)==1
     assert one(db,"SELECT count(*) FROM service_desk.ticket_comments WHERE ticket_id=%s",ticket)==1
+    # SLA targets come from the existing CRM contract, never copied contracts.
+    calendar=as_role(db,"service_role",
+      "SELECT public.crm_sd_create_sla_calendar_v1(%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+      A,O1,"Business hours","America/Sao_Paulo","business_hours",
+      [1,2,3,4,5],540,1080,[])[0]
+    assert as_role(db,"service_role",
+      "SELECT public.crm_sd_create_sla_rule_v1(%s,%s,%s,%s,%s,%s,%s,%s)",
+      A,O1,CO1,calendar,"high",60,120,480)[0]["version"]==1
+    fails(db,lambda:as_role(db,"service_role",
+      "SELECT public.crm_sd_create_sla_rule_v1(%s,%s,%s,%s,%s,%s,%s,%s)",
+      B,O2,CO1,calendar,"high",60,120,480))
+    next_ticket=create()
+    assert next_ticket["sla_configured"] is True
+    assert one(db,"SELECT count(*) FROM service_desk.ticket_sla_targets")==1
+    assert one(db,"SELECT count(*) FROM service_desk.sla_events WHERE event_type='started'")==1
+    assert as_role(db,"service_role",
+      "SELECT public.crm_sd_create_sla_rule_v1(%s,%s,%s,%s,%s,%s,%s,%s)",
+      A,O1,CO1,calendar,"high",30,60,240)[0]["version"]==2
+    assert one(db,"SELECT count(*) FROM service_desk.sla_rule_versions WHERE contract_id=%s",CO1)==2
+    fails(db,lambda:as_role(db,"service_role",
+      "UPDATE service_desk.sla_events SET event_type='met' WHERE ticket_id=%s",
+      UUID(next_ticket["id"])))
     assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")
