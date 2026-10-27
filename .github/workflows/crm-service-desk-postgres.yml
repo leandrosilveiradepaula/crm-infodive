@@ -1,0 +1,40 @@
+name: CRM Service Desk isolated PostgreSQL
+on:
+  pull_request:
+    branches: [main, 'preview/**']
+    paths:
+      - 'supabase/migrations/20261027123000_service_desk_crm_module.sql'
+      - 'scripts/verify_crm_service_desk_pg.py'
+      - '.github/workflows/crm-service-desk-postgres.yml'
+permissions:
+  contents: read
+jobs:
+  module-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: crm_ci
+          POSTGRES_PASSWORD: crm_ci
+          POSTGRES_DB: crm_sd_module_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U crm_ci -d crm_sd_module_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'psycopg[binary]==3.2.10'
+      - name: Run exact-schema tenancy, ACL and CAS regressions
+        env:
+          CRM_SD_ISOLATED: 'true'
+          CRM_SD_TEST_DSN: postgresql://crm_ci:crm_ci@127.0.0.1:5432/crm_sd_module_test
+        run: python scripts/verify_crm_service_desk_pg.py
