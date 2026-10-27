@@ -134,6 +134,20 @@ BEGIN
     WHERE sc.id=NEW.service_contract_id AND sc.account_id=NEW.account_id
       AND sc.organization_id=NEW.organization_id
   ) THEN RAISE EXCEPTION 'CRM contract/account organization mismatch' USING errcode='23514'; END IF;
+  -- A revoked or expired CRM service contract cannot be attached to a NEW
+  -- ticket. Existing tickets retain their original links for auditing.
+  IF NEW.service_contract_id IS NOT NULL AND
+    (TG_OP='INSERT' OR NEW.service_contract_id IS DISTINCT FROM OLD.service_contract_id)
+    AND NOT EXISTS (
+      SELECT 1 FROM public.service_contracts sc
+      WHERE sc.id=NEW.service_contract_id AND sc.account_id=NEW.account_id
+        AND sc.organization_id=NEW.organization_id
+        AND sc.status='active'
+        AND (sc.start_date IS NULL OR sc.start_date<=current_date)
+        AND (sc.end_date IS NULL OR sc.end_date>=current_date)
+    )
+  THEN RAISE EXCEPTION 'CRM service contract must be active at ticket creation'
+    USING errcode='23514'; END IF;
   IF NOT EXISTS (SELECT 1 FROM public.profiles p
     WHERE p.id=NEW.requester_user_id AND p.organization_id=NEW.organization_id
       AND p.status='active')
@@ -753,7 +767,9 @@ BEGIN
    OR p_first NOT BETWEEN 0 AND 100800 OR p_update NOT BETWEEN 0 AND 100800
    OR p_resolution NOT BETWEEN 0 AND 100800 OR
    NOT EXISTS(SELECT 1 FROM public.service_contracts c WHERE c.id=p_contract
-     AND c.organization_id=p_organization) OR
+     AND c.organization_id=p_organization AND c.status='active'
+     AND (c.start_date IS NULL OR c.start_date<=current_date)
+     AND (c.end_date IS NULL OR c.end_date>=current_date)) OR
    NOT EXISTS(SELECT 1 FROM service_desk.sla_calendars c WHERE c.id=p_calendar
      AND c.organization_id=p_organization)
  THEN RAISE EXCEPTION 'CRM SLA contract, calendar or duration invalid' USING errcode='22023'; END IF;
