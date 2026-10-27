@@ -103,12 +103,12 @@ with psycopg.connect(dsn,autocommit=True) as db:
         "SELECT jsonb_array_length(public.crm_sd_list_tickets_v1(%s,%s))",B,O2)[0]==0
     assert as_role(db,"service_role",
         "SELECT public.crm_sd_transition_ticket_v1(%s,%s,%s,%s,%s)",
-        A,O1,ticket,"new","triaged")[0]["status"]=="triaged"
+        A,O1,ticket,"new","open")[0]["status"]=="open"
     fails(db,lambda:as_role(db,"service_role",
         "SELECT public.crm_sd_transition_ticket_v1(%s,%s,%s,%s,%s)",
         A,O1,ticket,"new","in_progress"))
     fails(db,lambda:as_role(db,"service_role",
         "SELECT public.crm_sd_transition_ticket_v1(%s,%s,%s,%s,%s)",
-        B,O2,ticket,"triaged","in_progress"))
-    assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="triaged"
+        B,O2,ticket,"open","in_progress"))
+    assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")
