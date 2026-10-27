@@ -80,7 +80,8 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
     finally {setBusy(false);}
   }
   async function refreshAttachments(ticketId:string){
-    try {setAttachments(p=>({...p,[ticketId]:await listServiceDeskAttachments(ticketId)}));}
+    try {const records=await listServiceDeskAttachments(ticketId);
+      setAttachments(p=>({...p,[ticketId]:records}));}
     catch {setMessage('Não foi possível listar anexos.');}
   }
   async function uploadAttachment(ticketId:string){
