@@ -26,11 +26,15 @@ reviewed RPCs; Next.js server actions first verify CRM session and current
 profile role and organization and then invoke those RPCs. Database triggers
 revalidate active requester, assignee, client, contract and tenant, including
 when privileged callers bypass RLS. The ticket transitions are explicitly
-enumerated with old-status compare-and-swap.
+enumerated with old-status compare-and-swap and preserve the eight states
+and 37 transitions from the original Service Desk schema. Comments and
+append-only worked-time records are now written through CRM-owned RPCs,
+not via a second Supabase.
 
 This is an additive **first integration slice**, not a claim that
-legacy Service Desk's SLA automation, knowledge editing, attachments,
-full ticket lifecycle and every old UI screen have already been ported.
+legacy Service Desk's SLA automation, knowledge editing, attachment
+upload/download, full ticket lifecycle, reporting and every old UI screen
+have already been ported.
 Tables for these areas are namespace-isolated but operations beyond
 tickets remain disabled pending their own reviewed authorization.
 
