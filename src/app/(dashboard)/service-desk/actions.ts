@@ -193,3 +193,64 @@ export async function linkServiceDeskKnowledge(input: {ticketId:string;articleId
   if(error||data?.article_id!==input.articleId) throw new Error('Knowledge link denied');
   return data as {ticket_id:string;article_id:string};
 }
+
+const attachmentTypes:Record<string,string>={
+  'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg','text/plain':'txt'
+};
+const attachmentMaxBytes=5*1024*1024;
+
+export async function listServiceDeskAttachments(ticketId:string){
+  if(!UUID.test(ticketId))throw new Error('Invalid ticket');
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const {data,error}=await admin.rpc('crm_sd_list_attachments_v1',{
+    p_actor:userId,p_organization:organizationId,p_ticket:ticketId
+  });
+  if(error||!Array.isArray(data))throw new Error('Attachments unavailable');
+  return data as Array<{id:string;filename:string;mime_type:string;file_size:number;created_at:string}>;
+}
+
+export async function uploadServiceDeskAttachment(form:FormData){
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const ticketId=form.get('ticketId');
+  const file=form.get('file');
+  if(typeof ticketId!=='string'||!UUID.test(ticketId)||
+    !(file instanceof File)||file.size<1||file.size>attachmentMaxBytes||
+    !Object.hasOwn(attachmentTypes,file.type)||file.name.trim().length<1||
+    file.name.length>255)throw new Error('Invalid attachment');
+  // Authorization must precede the privileged Storage upload.
+  const {data:permitted,error:permissionError}=await admin.rpc(
+    'crm_sd_check_attachment_ticket_v1',{
+      p_actor:userId,p_organization:organizationId,p_ticket:ticketId
+    });
+  if(permissionError||permitted!==true)throw new Error('Attachment forbidden');
+  const key='service-desk/'+organizationId+'/'+ticketId+'/'+
+    crypto.randomUUID()+'.'+attachmentTypes[file.type];
+  const {error:uploadError}=await admin.storage.from('documents').upload(
+    key,file,{contentType:file.type,upsert:false,cacheControl:'0'}
+  );
+  if(uploadError)throw new Error('Private upload failed');
+  const {data,error}=await admin.rpc('crm_sd_register_attachment_v1',{
+    p_actor:userId,p_organization:organizationId,p_ticket:ticketId,
+    p_object_key:key,p_filename:file.name,p_mime:file.type,p_size:file.size
+  });
+  if(error||!data?.id){
+    await admin.storage.from('documents').remove([key]);
+    throw new Error('Attachment registration failed');
+  }
+  return data as {id:string;ticket_id:string};
+}
+
+export async function getServiceDeskAttachmentUrl(attachmentId:string){
+  if(!UUID.test(attachmentId))throw new Error('Invalid attachment ID');
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const {data,error}=await admin.rpc('crm_sd_attachment_path_v1',{
+    p_actor:userId,p_organization:organizationId,p_attachment:attachmentId
+  });
+  if(error||typeof data?.object_key!=='string'||
+    !data.object_key.startsWith('service-desk/'+organizationId+'/'))
+    throw new Error('Attachment forbidden');
+  const {data:signed,error:signError}=await admin.storage.from('documents')
+    .createSignedUrl(data.object_key,60);
+  if(signError||!signed?.signedUrl)throw new Error('Private download failed');
+  return signed.signedUrl as string;
+}
