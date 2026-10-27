@@ -32,8 +32,8 @@ append-only worked-time records are now written through CRM-owned RPCs,
 not via a second Supabase.
 
 This is an additive **first integration slice**, not a claim that
-legacy Service Desk's SLA automation, knowledge editing, attachment
-upload/download, full ticket lifecycle, reporting and every old UI screen
+legacy Service Desk's full SLA automation, attachment
+upload/download, all ticket administration, reporting and every old UI screen
 have already been ported.
 Tables for these areas are namespace-isolated but operations beyond
 tickets remain disabled pending their own reviewed authorization.
@@ -63,3 +63,7 @@ automatic destructive DDL. Keep CRM's prior production artifact reference.
 `product_ready=true`, does not revive F6/PR #10 and does not claim the
 Factory executed the code itself. The legacy lineage remains historical
 evidence; new CRM integration needs its own SHA, CI and browser receipts.
+
+## Knowledge editorial candidate
+
+The single CRM-backed knowledge domain now includes `service_desk.knowledge_articles`, append-only `knowledge_article_versions`, and ticket/article relationships. Draft → review → publication → archival transitions mirror the old Service Desk graph. Publication requires an authoritative CRM `admin` or `manager`; ordinary support staff can maintain their own drafts. Revisions enforce compare-and-swap, and `private` visibility remains restricted to author or managers. Any public visibility is **tenant-scoped**, never anonymous. All actions use the existing CRM server session and `service_role`-only RPCs; no secondary memberships or identity are introduced.

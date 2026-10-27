@@ -78,7 +78,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
         db.execute("INSERT INTO public.service_contracts VALUES(%s,%s,%s,'Contract')",(cid,org,aid))
     db.execute(migration)
 
-    assert one(db,"SELECT count(*) FROM pg_tables WHERE schemaname='service_desk'")==13
+    assert one(db,"SELECT count(*) FROM pg_tables WHERE schemaname='service_desk'")==15
     for role in ["anon","authenticated"]:
         assert not one(db,"SELECT has_schema_privilege(%s,'service_desk','USAGE')",role)
         assert not one(db,"SELECT has_function_privilege(%s,'public.crm_sd_create_ticket_v1(uuid,uuid,uuid,uuid,text,text,text)','EXECUTE')",role)
@@ -152,5 +152,44 @@ with psycopg.connect(dsn,autocommit=True) as db:
     fails(db,lambda:as_role(db,"service_role",
       "UPDATE service_desk.sla_events SET event_type='met' WHERE ticket_id=%s",
       UUID(next_ticket["id"])))
+    # Editorial flow: active CRM identity, revision CAS, publisher role,
+    # cross-tenant denial and append-only historical snapshots.
+    def know(actor=A,org=O1,account=AC1,visibility="tenant"):
+        return as_role(db,"service_role",
+           "SELECT public.crm_sd_create_knowledge_v1(%s,%s,%s,%s,%s,%s)",
+           actor,org,account,"Backup runbook","Check the backup agent",visibility)[0]
+    article=know()
+    article_id=UUID(article["id"])
+    assert article["revision"]==1
+    assert as_role(db,"service_role",
+      "SELECT jsonb_array_length(public.crm_sd_list_knowledge_v1(%s,%s))",A,O1)[0]==1
+    fails(db,lambda:know(A,O1,AC2))
+    fails(db,lambda:know(S,O1,AC1))
+    fails(db,lambda:know(B,O1,AC1))
+    assert as_role(db,"service_role",
+      "SELECT public.crm_sd_transition_knowledge_v1(%s,%s,%s,%s,%s)",
+      A,O1,article_id,1,"in_review")[0]["revision"]==2
+    assert as_role(db,"service_role",
+      "SELECT public.crm_sd_transition_knowledge_v1(%s,%s,%s,%s,%s)",
+      A,O1,article_id,2,"published")[0]["status"]=="published"
+    fails(db,lambda:as_role(db,"service_role",
+      "SELECT public.crm_sd_transition_knowledge_v1(%s,%s,%s,%s,%s)",
+      A,O1,article_id,2,"archived"))
+    fails(db,lambda:as_role(db,"service_role",
+      "SELECT public.crm_sd_transition_knowledge_v1(%s,%s,%s,%s,%s)",
+      B,O2,article_id,3,"archived"))
+    fails(db,lambda:as_role(db,"service_role",
+      "SELECT public.crm_sd_update_knowledge_v1(%s,%s,%s,%s,%s,%s,%s)",
+      A,O1,article_id,3,"Altered while published","changed","tenant"))
+    assert as_role(db,"service_role",
+      "SELECT public.crm_sd_link_knowledge_v1(%s,%s,%s,%s)",A,O1,ticket,article_id
+      )[0]["article_id"]==str(article_id)
+    fails(db,lambda:as_role(db,"service_role",
+      "SELECT public.crm_sd_link_knowledge_v1(%s,%s,%s,%s)",B,O2,ticket,article_id))
+    assert one(db,
+      "SELECT count(*) FROM service_desk.knowledge_article_versions WHERE article_id=%s",article_id)==3
+    fails(db,lambda:as_role(db,"service_role",
+      "DELETE FROM service_desk.knowledge_article_versions WHERE article_id=%s",article_id))
+    assert one(db,"SELECT count(*) FROM service_desk.knowledge_article_versions WHERE article_id=%s",article_id)==3
     assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")

@@ -116,3 +116,80 @@ export async function recordServiceDeskTime(input: {
   if (error || !data?.id) throw new Error('Work time rejected');
   return data as {id:string;ticket_id:string;minutes:number};
 }
+
+export type KnowledgeStatus = 'draft'|'in_review'|'published'|'archived';
+export type KnowledgeVisibility = 'tenant'|'private'|'public';
+const knowledgeStates = new Set(['draft','in_review','published','archived']);
+const knowledgeVisibilities = new Set(['tenant','private','public']);
+
+export async function listServiceDeskKnowledge() {
+  const { userId,organizationId,admin } = await requireServiceDeskActor();
+  const { data,error } = await admin.rpc('crm_sd_list_knowledge_v1',{
+    p_actor:userId,p_organization:organizationId
+  });
+  if(error||!Array.isArray(data)) throw new Error('Knowledge unavailable');
+  return data as Array<{id:string;title:string;content:string;revision:number;
+    status:KnowledgeStatus;visibility:KnowledgeVisibility;author_user_id:string;updated_at:string}>;
+}
+
+export async function createServiceDeskKnowledge(input: {
+  accountId?:string|null;title:string;content:string;visibility:KnowledgeVisibility;
+}) {
+  if(!input || (input.accountId!=null&&!UUID.test(input.accountId)) ||
+     typeof input.title!=='string'||input.title.trim().length<3||input.title.trim().length>240 ||
+     typeof input.content!=='string'||input.content.trim().length<1||input.content.trim().length>100000 ||
+     !knowledgeVisibilities.has(input.visibility)) throw new Error('Invalid knowledge content');
+  const { userId,organizationId,admin } = await requireServiceDeskActor();
+  const { data,error } = await admin.rpc('crm_sd_create_knowledge_v1',{
+    p_actor:userId,p_organization:organizationId,p_account:input.accountId||null,
+    p_title:input.title.trim(),p_content:input.content.trim(),p_visibility:input.visibility
+  });
+  if(error||!data?.id) throw new Error('Knowledge creation denied');
+  return data as {id:string;revision:number;status:KnowledgeStatus};
+}
+
+export async function updateServiceDeskKnowledge(input: {
+ id:string;expectedRevision:number;title:string;content:string;visibility:KnowledgeVisibility;
+}) {
+  if(!input||!UUID.test(input.id)||!Number.isInteger(input.expectedRevision)||
+     input.expectedRevision<1||typeof input.title!=='string'||
+     input.title.trim().length<3||input.title.trim().length>240||
+     typeof input.content!=='string'||input.content.trim().length<1||
+     input.content.trim().length>100000||!knowledgeVisibilities.has(input.visibility))
+    throw new Error('Invalid knowledge revision');
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const {data,error}=await admin.rpc('crm_sd_update_knowledge_v1',{
+    p_actor:userId,p_organization:organizationId,p_article:input.id,
+    p_expected:input.expectedRevision,p_title:input.title.trim(),
+    p_content:input.content.trim(),p_visibility:input.visibility
+  });
+  if(error||data?.id!==input.id)throw new Error('Knowledge edit denied');
+  return data as {id:string;revision:number;status:KnowledgeStatus};
+}
+
+export async function transitionServiceDeskKnowledge(input: {
+  id:string;expectedRevision:number;next:KnowledgeStatus;
+}) {
+  if(!input||!UUID.test(input.id)||!Number.isInteger(input.expectedRevision)||
+    input.expectedRevision<1||!knowledgeStates.has(input.next))
+    throw new Error('Invalid knowledge transition');
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const {data,error}=await admin.rpc('crm_sd_transition_knowledge_v1',{
+    p_actor:userId,p_organization:organizationId,p_article:input.id,
+    p_expected:input.expectedRevision,p_next:input.next
+  });
+  if(error||data?.id!==input.id)throw new Error('Knowledge transition denied');
+  return data as {id:string;revision:number;status:KnowledgeStatus};
+}
+
+export async function linkServiceDeskKnowledge(input: {ticketId:string;articleId:string}) {
+  if(!input||!UUID.test(input.ticketId)||!UUID.test(input.articleId))
+    throw new Error('Invalid ticket-knowledge relationship');
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const {data,error}=await admin.rpc('crm_sd_link_knowledge_v1',{
+    p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId,
+    p_article:input.articleId
+  });
+  if(error||data?.article_id!==input.articleId) throw new Error('Knowledge link denied');
+  return data as {ticket_id:string;article_id:string};
+}

@@ -263,16 +263,129 @@ CREATE TABLE service_desk.sla_pauses (
 );
 CREATE UNIQUE INDEX service_desk_single_open_sla_pause
  ON service_desk.sla_pauses(ticket_id) WHERE resumed_at IS NULL;
+-- Existing CRM identity is the sole authority for editorial permissions.
+-- Public visibility means within the *current CRM organization*, not anonymous access.
 CREATE TABLE service_desk.knowledge_articles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
   account_id uuid REFERENCES public.accounts(id) ON DELETE RESTRICT,
   author_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+  updated_by_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
   title text NOT NULL CHECK (char_length(btrim(title)) BETWEEN 3 AND 240),
-  content text NOT NULL,
-  published boolean NOT NULL DEFAULT false,
-  created_at timestamptz NOT NULL DEFAULT now()
+  content text NOT NULL CHECK (char_length(btrim(content)) BETWEEN 1 AND 100000),
+  visibility text NOT NULL DEFAULT 'tenant'
+    CHECK (visibility IN ('tenant','private','public')),
+  status text NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft','in_review','published','archived')),
+  revision integer NOT NULL DEFAULT 1 CHECK (revision>0),
+  published_at timestamptz,
+  archived_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(organization_id,id)
 );
+CREATE INDEX service_desk_knowledge_org_status ON
+  service_desk.knowledge_articles(organization_id,status,updated_at DESC);
+
+CREATE TABLE service_desk.knowledge_article_versions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  article_id uuid NOT NULL,
+  revision integer NOT NULL,
+  title text NOT NULL,
+  content text NOT NULL,
+  status text NOT NULL,
+  visibility text NOT NULL,
+  changed_by_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+  recorded_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(article_id,revision),
+  FOREIGN KEY (organization_id,article_id) REFERENCES
+    service_desk.knowledge_articles(organization_id,id) ON DELETE RESTRICT
+);
+CREATE TABLE service_desk.ticket_knowledge (
+  organization_id uuid NOT NULL,
+  ticket_id uuid NOT NULL,
+  article_id uuid NOT NULL,
+  associated_by_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+  associated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(organization_id,ticket_id,article_id),
+  FOREIGN KEY(organization_id,ticket_id) REFERENCES
+    service_desk.tickets(organization_id,id) ON DELETE RESTRICT,
+  FOREIGN KEY(organization_id,article_id) REFERENCES
+    service_desk.knowledge_articles(organization_id,id) ON DELETE RESTRICT
+);
+
+CREATE FUNCTION service_desk.validate_knowledge()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_guard$
+BEGIN
+  IF NOT EXISTS(SELECT 1 FROM public.profiles p
+      WHERE p.id=NEW.updated_by_user_id AND p.organization_id=NEW.organization_id
+        AND p.status='active') OR
+     NOT EXISTS(SELECT 1 FROM public.profiles p
+      WHERE p.id=NEW.author_user_id AND p.organization_id=NEW.organization_id)
+  THEN RAISE EXCEPTION 'Knowledge actor/author organization mismatch' USING errcode='23514'; END IF;
+  IF NEW.account_id IS NOT NULL AND NOT EXISTS(
+     SELECT 1 FROM public.accounts a WHERE a.id=NEW.account_id
+       AND a.organization_id=NEW.organization_id)
+  THEN RAISE EXCEPTION 'Knowledge account outside CRM organization' USING errcode='23514'; END IF;
+  IF TG_OP='INSERT' THEN
+    IF NEW.status<>'draft' OR NEW.revision<>1 OR NEW.published_at IS NOT NULL
+       OR NEW.archived_at IS NOT NULL OR NEW.updated_by_user_id<>NEW.author_user_id
+    THEN RAISE EXCEPTION 'Invalid initial knowledge state' USING errcode='23514'; END IF;
+  ELSE
+    IF NEW.id IS DISTINCT FROM OLD.id OR
+       NEW.organization_id IS DISTINCT FROM OLD.organization_id OR
+       NEW.author_user_id IS DISTINCT FROM OLD.author_user_id OR
+       NEW.account_id IS DISTINCT FROM OLD.account_id OR
+       NEW.revision<>OLD.revision+1
+    THEN RAISE EXCEPTION 'Knowledge identity/revision immutable' USING errcode='23514'; END IF;
+    IF OLD.status='published' AND
+      (NEW.title,NEW.content,NEW.visibility) IS DISTINCT FROM
+      (OLD.title,OLD.content,OLD.visibility)
+    THEN RAISE EXCEPTION 'Published content must enter review first' USING errcode='23514'; END IF;
+    IF NEW.status<>OLD.status AND NOT (
+      OLD.status='draft' AND NEW.status IN ('in_review','archived') OR
+      OLD.status='in_review' AND NEW.status IN ('draft','published','archived') OR
+      OLD.status='published' AND NEW.status IN ('in_review','archived') OR
+      OLD.status='archived' AND NEW.status='draft'
+    ) THEN RAISE EXCEPTION 'Invalid editorial transition' USING errcode='23514'; END IF;
+    IF NEW.status=OLD.status AND
+       (NEW.title,NEW.content,NEW.visibility) IS NOT DISTINCT FROM
+       (OLD.title,OLD.content,OLD.visibility)
+    THEN RAISE EXCEPTION 'Empty editorial revision' USING errcode='23514'; END IF;
+  END IF;
+  IF NEW.status='published' AND (TG_OP='INSERT' OR NEW.status IS DISTINCT FROM OLD.status)
+  THEN NEW.published_at:=now(); END IF;
+  IF NEW.status='archived' THEN NEW.archived_at:=now();
+  ELSE NEW.archived_at:=NULL; END IF;
+  NEW.updated_at:=now();
+  RETURN NEW;
+END;
+$kb_guard$;
+CREATE FUNCTION service_desk.snapshot_knowledge()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_snapshot$
+BEGIN
+  INSERT INTO service_desk.knowledge_article_versions(
+    organization_id,article_id,revision,title,content,status,visibility,changed_by_user_id)
+  VALUES(NEW.organization_id,NEW.id,NEW.revision,NEW.title,NEW.content,
+    NEW.status,NEW.visibility,NEW.updated_by_user_id);
+  RETURN NEW;
+END;
+$kb_snapshot$;
+CREATE FUNCTION service_desk.prevent_knowledge_version_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_immutable$
+BEGIN RAISE EXCEPTION 'Knowledge versions are append-only' USING errcode='42501'; END;
+$kb_immutable$;
+CREATE TRIGGER service_desk_knowledge_guard BEFORE INSERT OR UPDATE
+  ON service_desk.knowledge_articles FOR EACH ROW
+  EXECUTE FUNCTION service_desk.validate_knowledge();
+CREATE TRIGGER service_desk_knowledge_snapshot AFTER INSERT OR UPDATE
+  ON service_desk.knowledge_articles FOR EACH ROW
+  EXECUTE FUNCTION service_desk.snapshot_knowledge();
+CREATE TRIGGER service_desk_knowledge_versions_immutable BEFORE UPDATE OR DELETE
+  ON service_desk.knowledge_article_versions FOR EACH ROW
+  EXECUTE FUNCTION service_desk.prevent_knowledge_version_mutation();
+
 CREATE TABLE service_desk.time_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
@@ -409,7 +522,8 @@ BEGIN
   FOREACH t IN ARRAY ARRAY[
     'status_definitions','status_transitions','tickets','ticket_comments',
     'ticket_events','sla_calendars','sla_rule_versions','ticket_sla_targets',
-    'sla_events','sla_pauses','knowledge_articles','time_entries','ticket_attachments'
+    'sla_events','sla_pauses','knowledge_articles','knowledge_article_versions',
+    'ticket_knowledge','time_entries','ticket_attachments'
   ] LOOP
     EXECUTE format('ALTER TABLE service_desk.%I ENABLE ROW LEVEL SECURITY',t);
   END LOOP;
@@ -658,6 +772,127 @@ BEGIN
  RETURN jsonb_build_object('id',v_id,'version',v_version);
 END;
 $rule$;
+
+-- The editorial API is available exclusively through the CRM session-backed
+-- Next.js server. A missing/revoked profile or cross-organization ID is denied.
+CREATE FUNCTION public.crm_sd_list_knowledge_v1(p_actor uuid,p_organization uuid)
+RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_list$
+DECLARE v_rows jsonb;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,false);
+  SELECT COALESCE(jsonb_agg(jsonb_build_object(
+    'id',x.id,'title',x.title,'content',x.content,
+    'status',x.status,'visibility',x.visibility,
+    'revision',x.revision,'author_user_id',x.author_user_id,
+    'updated_at',x.updated_at
+  ) ORDER BY x.updated_at DESC,x.id DESC),'[]'::jsonb) INTO v_rows
+  FROM (SELECT a.* FROM service_desk.knowledge_articles a
+    WHERE a.organization_id=p_organization
+      AND (a.author_user_id=p_actor
+        OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id=p_actor
+           AND p.organization_id=p_organization AND p.role IN('admin','manager'))
+        OR (a.status='published' AND a.visibility IN('tenant','public')))
+    ORDER BY a.updated_at DESC,a.id DESC LIMIT 50) x;
+  RETURN v_rows;
+END;
+$kb_list$;
+
+CREATE FUNCTION public.crm_sd_create_knowledge_v1(
+ p_actor uuid,p_organization uuid,p_account uuid,
+ p_title text,p_content text,p_visibility text
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_create$
+DECLARE v_id uuid;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  IF p_title IS NULL OR char_length(btrim(p_title)) NOT BETWEEN 3 AND 240
+     OR p_content IS NULL OR char_length(btrim(p_content)) NOT BETWEEN 1 AND 100000
+     OR p_visibility NOT IN ('tenant','private','public') OR p_visibility IS NULL
+  THEN RAISE EXCEPTION 'Invalid knowledge article' USING errcode='22023'; END IF;
+  INSERT INTO service_desk.knowledge_articles(
+   organization_id,account_id,author_user_id,updated_by_user_id,title,content,visibility)
+  VALUES(p_organization,p_account,p_actor,p_actor,
+    btrim(p_title),btrim(p_content),p_visibility) RETURNING id INTO v_id;
+  RETURN jsonb_build_object('id',v_id,'revision',1,'status','draft');
+END;
+$kb_create$;
+
+CREATE FUNCTION public.crm_sd_update_knowledge_v1(
+ p_actor uuid,p_organization uuid,p_article uuid,p_expected integer,
+ p_title text,p_content text,p_visibility text
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_update$
+DECLARE v_row service_desk.knowledge_articles%ROWTYPE;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  IF p_title IS NULL OR char_length(btrim(p_title)) NOT BETWEEN 3 AND 240
+     OR p_content IS NULL OR char_length(btrim(p_content)) NOT BETWEEN 1 AND 100000
+     OR p_visibility NOT IN ('tenant','private','public') OR p_visibility IS NULL
+  THEN RAISE EXCEPTION 'Invalid knowledge contents' USING errcode='22023'; END IF;
+  SELECT * INTO v_row FROM service_desk.knowledge_articles
+   WHERE id=p_article AND organization_id=p_organization FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Knowledge article unavailable' USING errcode='P0002'; END IF;
+  IF v_row.revision IS DISTINCT FROM p_expected
+  THEN RAISE EXCEPTION 'Stale knowledge revision' USING errcode='40001'; END IF;
+  IF v_row.status NOT IN ('draft','in_review') OR NOT
+    (v_row.author_user_id=p_actor OR EXISTS(SELECT 1 FROM public.profiles p
+       WHERE p.id=p_actor AND p.organization_id=p_organization
+         AND p.role IN ('admin','manager')))
+  THEN RAISE EXCEPTION 'Knowledge edit forbidden' USING errcode='42501'; END IF;
+  UPDATE service_desk.knowledge_articles SET title=btrim(p_title),
+    content=btrim(p_content),visibility=p_visibility,
+    updated_by_user_id=p_actor,revision=revision+1
+  WHERE id=p_article AND organization_id=p_organization;
+  RETURN jsonb_build_object('id',p_article,'revision',p_expected+1,'status',v_row.status);
+END;
+$kb_update$;
+
+CREATE FUNCTION public.crm_sd_transition_knowledge_v1(
+ p_actor uuid,p_organization uuid,p_article uuid,p_expected integer,p_next text
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_transition$
+DECLARE v_row service_desk.knowledge_articles%ROWTYPE;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  SELECT * INTO v_row FROM service_desk.knowledge_articles
+   WHERE id=p_article AND organization_id=p_organization FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Knowledge article unavailable' USING errcode='P0002'; END IF;
+  IF v_row.revision IS DISTINCT FROM p_expected
+  THEN RAISE EXCEPTION 'Stale knowledge revision' USING errcode='40001'; END IF;
+  IF p_next='published' AND NOT EXISTS(
+    SELECT 1 FROM public.profiles p WHERE p.id=p_actor AND p.organization_id=p_organization
+      AND p.role IN('admin','manager'))
+  THEN RAISE EXCEPTION 'Publishing requires CRM manager' USING errcode='42501'; END IF;
+  IF NOT(v_row.author_user_id=p_actor OR EXISTS(SELECT 1 FROM public.profiles p
+    WHERE p.id=p_actor AND p.organization_id=p_organization
+      AND p.role IN('admin','manager')))
+  THEN RAISE EXCEPTION 'Knowledge transition forbidden' USING errcode='42501'; END IF;
+  UPDATE service_desk.knowledge_articles SET status=p_next,
+   updated_by_user_id=p_actor,revision=revision+1
+   WHERE id=p_article AND organization_id=p_organization;
+  RETURN jsonb_build_object('id',p_article,'revision',p_expected+1,'status',p_next);
+END;
+$kb_transition$;
+
+CREATE FUNCTION public.crm_sd_link_knowledge_v1(
+ p_actor uuid,p_organization uuid,p_ticket uuid,p_article uuid
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $kb_link$
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  IF NOT EXISTS(SELECT 1 FROM service_desk.tickets t
+       WHERE t.id=p_ticket AND t.organization_id=p_organization)
+     OR NOT EXISTS(SELECT 1 FROM service_desk.knowledge_articles a
+       WHERE a.id=p_article AND a.organization_id=p_organization
+         AND a.status='published'
+         AND (a.visibility IN('tenant','public') OR a.author_user_id=p_actor
+           OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id=p_actor
+              AND p.organization_id=p_organization AND p.role IN('admin','manager'))))
+  THEN RAISE EXCEPTION 'Ticket/knowledge relation forbidden' USING errcode='42501'; END IF;
+  INSERT INTO service_desk.ticket_knowledge(
+    organization_id,ticket_id,article_id,associated_by_user_id)
+  VALUES(p_organization,p_ticket,p_article,p_actor)
+  ON CONFLICT (organization_id,ticket_id,article_id) DO NOTHING;
+  RETURN jsonb_build_object('ticket_id',p_ticket,'article_id',p_article);
+END;
+$kb_link$;
+
 -- PostgREST exposes public RPCs only to the already privileged CRM server.
 -- A user JWT or publishable key cannot invoke these functions directly.
 REVOKE ALL ON FUNCTION public.crm_sd_list_tickets_v1(uuid,uuid) FROM PUBLIC,anon,authenticated;
@@ -684,6 +919,27 @@ GRANT EXECUTE ON FUNCTION public.crm_sd_create_sla_calendar_v1(
  uuid,uuid,text,text,text,integer[],integer,integer,date[]) TO service_role;
 GRANT EXECUTE ON FUNCTION public.crm_sd_create_sla_rule_v1(
  uuid,uuid,uuid,uuid,text,integer,integer,integer) TO service_role;
+REVOKE ALL ON FUNCTION public.crm_sd_list_knowledge_v1(uuid,uuid)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_create_knowledge_v1(uuid,uuid,uuid,text,text,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_update_knowledge_v1(uuid,uuid,uuid,integer,text,text,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_transition_knowledge_v1(uuid,uuid,uuid,integer,text)
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_link_knowledge_v1(uuid,uuid,uuid,uuid)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.crm_sd_list_knowledge_v1(uuid,uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_create_knowledge_v1(uuid,uuid,uuid,text,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_update_knowledge_v1(uuid,uuid,uuid,integer,text,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_transition_knowledge_v1(uuid,uuid,uuid,integer,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_link_knowledge_v1(uuid,uuid,uuid,uuid) TO service_role;
+REVOKE ALL ON FUNCTION service_desk.validate_knowledge() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION service_desk.snapshot_knowledge() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION service_desk.prevent_knowledge_version_mutation() FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION service_desk.validate_knowledge() TO service_role;
+GRANT EXECUTE ON FUNCTION service_desk.snapshot_knowledge() TO service_role;
+GRANT EXECUTE ON FUNCTION service_desk.prevent_knowledge_version_mutation() TO service_role;
 REVOKE ALL ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION service_desk.assert_ticket_scope() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) TO service_role;
