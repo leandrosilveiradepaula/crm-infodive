@@ -4,6 +4,7 @@ on:
     branches: [main, 'preview/**']
     paths:
       - 'supabase/migrations/20261027123000_service_desk_crm_module.sql'
+      - 'supabase/migrations/20261027145000_service_desk_private_attachments.sql'
       - 'scripts/verify_crm_service_desk_pg.py'
       - '.github/workflows/crm-service-desk-postgres.yml'
 permissions:
