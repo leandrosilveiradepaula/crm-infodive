@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createServiceDeskTicket,transitionServiceDeskTicket,
-  listServiceDeskContracts } from './actions';
+  listServiceDeskContracts,addServiceDeskComment,recordServiceDeskTime } from './actions';
 
 type Ticket = {id:string;ticket_number:number;subject:string;status:string;
   priority:string;account_name:string;contract_title:string|null;created_at:string};
@@ -30,6 +30,9 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
   const [priority,setPriority]=useState<'low'|'normal'|'high'|'urgent'>('normal');
   const [busy,setBusy]=useState(false);
   const [message,setMessage]=useState('');
+  const [commentText,setCommentText]=useState<Record<string,string>>({});
+  const [minutes,setMinutes]=useState<Record<string,string>>({});
+  const [workNotes,setWorkNotes]=useState<Record<string,string>>({});
   async function onAccount(id:string) {
     setAccountId(id);setContractId('');setContracts([]);
     if (!id) return;
@@ -50,6 +53,26 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
     setBusy(true);setMessage('');
     try {await transitionServiceDeskTicket({id,expected,next});router.refresh();}
     catch {setMessage('Mudança rejeitada. Atualize a página e confira o chamado.');}
+    finally {setBusy(false);}
+  }
+  async function addComment(ticketId:string) {
+    setBusy(true);setMessage('');
+    try {
+      await addServiceDeskComment({ticketId,body:commentText[ticketId]||'',visibility:'internal'});
+      setCommentText(p=>({...p,[ticketId]:''}));setMessage('Comentário interno registrado.');
+      router.refresh();
+    } catch {setMessage('Comentário não autorizado ou indisponível.');}
+    finally {setBusy(false);}
+  }
+  async function recordTime(ticketId:string) {
+    setBusy(true);setMessage('');
+    try {
+      await recordServiceDeskTime({ticketId,minutes:Number(minutes[ticketId]),
+        description:workNotes[ticketId]||''});
+      setMinutes(p=>({...p,[ticketId]:''}));setWorkNotes(p=>({...p,[ticketId]:''}));
+      setMessage('Apontamento de horas registrado.');
+      router.refresh();
+    } catch {setMessage('Apontamento rejeitado. Verifique os minutos e a descrição.');}
     finally {setBusy(false);}
   }
   return <main className="space-y-6 p-6">
@@ -90,6 +113,27 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
           <button key={next} type="button" disabled={busy}
             onClick={()=>void advance(t.id,t.status,next)} className="rounded border px-3 py-1">
             Mover para {next}</button>)}</div>
+        <div className="mt-3 grid gap-2 border-t pt-3">
+          <label className="text-sm">Comentário interno
+            <textarea maxLength={5000} value={commentText[t.id]||''}
+              onChange={e=>setCommentText(p=>({...p,[t.id]:e.target.value}))}
+              className="w-full rounded border p-2"/></label>
+          <button type="button" disabled={busy||!(commentText[t.id]||'').trim()}
+            onClick={()=>void addComment(t.id)} className="w-fit rounded border px-3 py-1">
+            Registrar comentário</button>
+          <label className="text-sm">Minutos trabalhados
+            <input type="number" min="1" max="1440" step="1"
+              value={minutes[t.id]||''} onChange={e=>setMinutes(p=>({...p,[t.id]:e.target.value}))}
+              className="w-full rounded border p-2"/></label>
+          <label className="text-sm">Descrição do trabalho
+            <textarea maxLength={5000} value={workNotes[t.id]||''}
+              onChange={e=>setWorkNotes(p=>({...p,[t.id]:e.target.value}))}
+              className="w-full rounded border p-2"/></label>
+          <button type="button" disabled={busy||!Number.isInteger(Number(minutes[t.id]))||
+            Number(minutes[t.id])<1||!(workNotes[t.id]||'').trim()}
+            onClick={()=>void recordTime(t.id)} className="w-fit rounded border px-3 py-1">
+            Registrar tempo</button>
+        </div>
       </li>)}</ul>}
     </section>
   </main>;
