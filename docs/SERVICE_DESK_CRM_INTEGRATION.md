@@ -67,3 +67,27 @@ evidence; new CRM integration needs its own SHA, CI and browser receipts.
 ## Knowledge editorial candidate
 
 The single CRM-backed knowledge domain now includes `service_desk.knowledge_articles`, append-only `knowledge_article_versions`, and ticket/article relationships. Draft → review → publication → archival transitions mirror the old Service Desk graph. Publication requires an authoritative CRM `admin` or `manager`; ordinary support staff can maintain their own drafts. Revisions enforce compare-and-swap, and `private` visibility remains restricted to author or managers. Any public visibility is **tenant-scoped**, never anonymous. All actions use the existing CRM server session and `service_role`-only RPCs; no secondary memberships or identity are introduced.
+
+## Private CRM Storage attachment integration
+
+The CRM already owns the **private** `documents` Supabase Storage bucket. A second
+Supabase Storage project or new public bucket is not required. The additive,
+separately gated migration
+`20261027145000_service_desk_private_attachments.sql` extends attachment
+metadata in `service_desk.ticket_attachments`, with immutable rows, a
+ticket-and-organization-bound object key, and service-role-only RPCs.
+
+Upload order: server-side CRM session/profile verification → ticket scoped
+authorization RPC → 5 MiB and MIME allowlist checks → private upload with
+`upsert:false` → scoped database registration. Failed registration triggers
+best-effort object cleanup. A scheduled orphan-reconciliation mechanism remains
+future operational hardening, **not a claim that orphaned uploads are
+automatically eliminated**. Downloads use a fresh CRM authorization check and
+a 60-second signed URL; never a public Storage URL. Signed URLs cannot be
+immediately revoked after issuance and must be treated as bearer credentials.
+
+**Critical production gates:** the CRM database schema and both versioned
+migrations must be explicitly approved before execution. The Preview cannot
+meaningfully validate the module until an approved isolated testing database
+contains these schemas; no production migration, forced Preview, or fake browser
+evidence has been performed. The code does not create or change Storage buckets.
