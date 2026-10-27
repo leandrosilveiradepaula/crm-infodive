@@ -1,7 +1,7 @@
 'use server';
 
-import { requireSessionContext } from '@/lib/auth-server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { requireSessionContext } from '../../../lib/auth-server';
+import { createAdminClient } from '../../../lib/supabase/admin';
 
 type TicketPriority = 'low' | 'normal' | 'high' | 'urgent';
 const validPriorities = new Set(['low','normal','high','urgent']);
