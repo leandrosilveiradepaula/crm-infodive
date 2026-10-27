@@ -179,17 +179,90 @@ CREATE TABLE service_desk.ticket_events (
 CREATE INDEX service_desk_events_ticket_time ON service_desk.ticket_events(ticket_id,occurred_at);
 
 -- Extensions reference CRM service contracts, never recreate that entity.
+-- SLA calendars and immutable rule snapshots are scoped to existing CRM contracts.
+CREATE TABLE service_desk.sla_calendars (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  name text NOT NULL CHECK (char_length(btrim(name)) BETWEEN 2 AND 120),
+  timezone text NOT NULL,
+  kind text NOT NULL CHECK (kind IN ('24x7','business_hours')),
+  weekdays integer[] NOT NULL DEFAULT ARRAY[1,2,3,4,5],
+  start_minute integer NOT NULL DEFAULT 540 CHECK (start_minute BETWEEN 0 AND 1439),
+  end_minute integer NOT NULL DEFAULT 1080 CHECK (end_minute BETWEEN 1 AND 1440),
+  holidays date[] NOT NULL DEFAULT ARRAY[]::date[],
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (organization_id,id),
+  UNIQUE (organization_id,name),
+  CHECK (end_minute > start_minute),
+  CHECK (weekdays <@ ARRAY[1,2,3,4,5,6,7]::integer[])
+);
 CREATE TABLE service_desk.sla_rule_versions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
   contract_id uuid NOT NULL REFERENCES public.service_contracts(id) ON DELETE RESTRICT,
+  calendar_id uuid NOT NULL,
   version integer NOT NULL CHECK (version > 0),
   priority text NOT NULL CHECK (priority IN ('low','normal','high','urgent')),
-  first_response_minutes integer NOT NULL CHECK (first_response_minutes >= 0),
-  resolution_minutes integer NOT NULL CHECK (resolution_minutes >= 0),
+  first_response_minutes integer NOT NULL CHECK (first_response_minutes BETWEEN 0 AND 100800),
+  update_minutes integer NOT NULL CHECK (update_minutes BETWEEN 0 AND 100800),
+  resolution_minutes integer NOT NULL CHECK (resolution_minutes BETWEEN 0 AND 100800),
   valid_from timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (contract_id,version,priority)
+  valid_to timestamptz,
+  UNIQUE (organization_id,id),
+  UNIQUE (contract_id,version,priority),
+  FOREIGN KEY (organization_id,calendar_id)
+    REFERENCES service_desk.sla_calendars(organization_id,id) ON DELETE RESTRICT,
+  CHECK (valid_to IS NULL OR valid_to > valid_from)
 );
+CREATE UNIQUE INDEX service_desk_active_rule_contract_priority
+ ON service_desk.sla_rule_versions(contract_id,priority) WHERE valid_to IS NULL;
+
+CREATE TABLE service_desk.ticket_sla_targets (
+  ticket_id uuid PRIMARY KEY,
+  organization_id uuid NOT NULL,
+  contract_id uuid NOT NULL REFERENCES public.service_contracts(id) ON DELETE RESTRICT,
+  rule_version_id uuid NOT NULL,
+  first_response_at timestamptz NOT NULL,
+  update_at timestamptz NOT NULL,
+  resolution_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  FOREIGN KEY (organization_id,ticket_id)
+    REFERENCES service_desk.tickets(organization_id,id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id,rule_version_id)
+    REFERENCES service_desk.sla_rule_versions(organization_id,id) ON DELETE RESTRICT
+);
+CREATE TABLE service_desk.sla_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  ticket_id uuid NOT NULL,
+  rule_version_id uuid NOT NULL,
+  event_type text NOT NULL CHECK(event_type IN ('started','paused','resumed','breached','met','reopened')),
+  idempotency_key text NOT NULL CHECK (char_length(btrim(idempotency_key)) BETWEEN 1 AND 160),
+  detail jsonb NOT NULL DEFAULT '{}'::jsonb CHECK(jsonb_typeof(detail)='object'),
+  occurred_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (ticket_id,idempotency_key),
+  FOREIGN KEY (organization_id,ticket_id)
+    REFERENCES service_desk.tickets(organization_id,id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id,rule_version_id)
+    REFERENCES service_desk.sla_rule_versions(organization_id,id) ON DELETE RESTRICT
+);
+CREATE TABLE service_desk.sla_pauses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL,
+  ticket_id uuid NOT NULL,
+  rule_version_id uuid NOT NULL,
+  reason text NOT NULL CHECK(char_length(btrim(reason)) BETWEEN 1 AND 500),
+  paused_at timestamptz NOT NULL DEFAULT now(),
+  resumed_at timestamptz,
+  created_by_user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
+  FOREIGN KEY (organization_id,ticket_id)
+    REFERENCES service_desk.tickets(organization_id,id) ON DELETE CASCADE,
+  FOREIGN KEY (organization_id,rule_version_id)
+    REFERENCES service_desk.sla_rule_versions(organization_id,id) ON DELETE RESTRICT,
+  CHECK (resumed_at IS NULL OR resumed_at >= paused_at)
+);
+CREATE UNIQUE INDEX service_desk_single_open_sla_pause
+ ON service_desk.sla_pauses(ticket_id) WHERE resumed_at IS NULL;
 CREATE TABLE service_desk.knowledge_articles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
@@ -225,6 +298,109 @@ CREATE TABLE service_desk.ticket_attachments (
 -- No attachment upload/download endpoint is enabled by this migration.
 -- Existing CRM Storage policies remain unchanged; private bucket required.
 
+-- Compute SLA due timestamps using real timezone transitions. The loop is
+-- bounded and fails closed if a calendar has no reachable working minute.
+CREATE FUNCTION service_desk.sla_due_at(
+  p_start timestamptz,p_minutes integer,p_calendar uuid
+) RETURNS timestamptz LANGUAGE plpgsql STABLE SECURITY INVOKER
+SET search_path='' AS $calc$
+DECLARE
+  v_cal service_desk.sla_calendars%ROWTYPE;
+  v_cursor timestamptz:=p_start;
+  v_local timestamp;
+  v_steps integer:=0;
+  v_remaining integer:=p_minutes;
+  v_weekday integer;
+  v_minute integer;
+BEGIN
+  SELECT * INTO v_cal FROM service_desk.sla_calendars WHERE id=p_calendar;
+  IF NOT FOUND OR p_start IS NULL OR p_minutes IS NULL OR
+     p_minutes NOT BETWEEN 0 AND 100800
+  THEN RAISE EXCEPTION 'Invalid SLA calendar or duration' USING errcode='22023'; END IF;
+  IF v_cal.kind='24x7' THEN
+    RETURN p_start + make_interval(mins=>p_minutes);
+  END IF;
+  WHILE v_remaining>0 LOOP
+    IF v_steps>527040 THEN
+      RAISE EXCEPTION 'SLA calendar has insufficient working hours' USING errcode='22023';
+    END IF;
+    v_local:=v_cursor AT TIME ZONE v_cal.timezone;
+    v_weekday:=extract(isodow from v_local)::integer;
+    v_minute:=extract(hour from v_local)::integer*60+
+              extract(minute from v_local)::integer;
+    IF v_weekday=ANY(v_cal.weekdays)
+       AND NOT (v_local::date=ANY(v_cal.holidays))
+       AND v_minute>=v_cal.start_minute AND v_minute<v_cal.end_minute
+    THEN
+      v_remaining:=v_remaining-1;
+    END IF;
+    v_cursor:=v_cursor+interval '1 minute';
+    v_steps:=v_steps+1;
+  END LOOP;
+  RETURN v_cursor;
+END;
+$calc$;
+REVOKE ALL ON FUNCTION service_desk.sla_due_at(timestamptz,integer,uuid)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION service_desk.sla_due_at(timestamptz,integer,uuid) TO service_role;
+
+-- All persisted rule/calendar relationships must match CRM tenancy even if
+-- a future privileged integration bypasses the public RPC.
+CREATE FUNCTION service_desk.validate_sla_domain()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $scope_sla$
+BEGIN
+  IF TG_TABLE_NAME='sla_calendars' THEN
+    IF NOT EXISTS(SELECT 1 FROM pg_catalog.pg_timezone_names tz WHERE tz.name=NEW.timezone)
+       OR (NEW.kind='business_hours' AND cardinality(NEW.weekdays)=0)
+    THEN RAISE EXCEPTION 'Invalid SLA timezone/calendar' USING errcode='23514'; END IF;
+  ELSIF TG_TABLE_NAME='sla_rule_versions' THEN
+    IF TG_OP='UPDATE' AND (
+      NEW.organization_id IS DISTINCT FROM OLD.organization_id OR
+      NEW.contract_id IS DISTINCT FROM OLD.contract_id OR
+      NEW.calendar_id IS DISTINCT FROM OLD.calendar_id OR
+      NEW.version IS DISTINCT FROM OLD.version OR
+      NEW.priority IS DISTINCT FROM OLD.priority OR
+      NEW.first_response_minutes IS DISTINCT FROM OLD.first_response_minutes OR
+      NEW.update_minutes IS DISTINCT FROM OLD.update_minutes OR
+      NEW.resolution_minutes IS DISTINCT FROM OLD.resolution_minutes OR
+      NEW.valid_from IS DISTINCT FROM OLD.valid_from OR OLD.valid_to IS NOT NULL
+    ) THEN RAISE EXCEPTION 'SLA rule version is immutable' USING errcode='23514'; END IF;
+    IF NOT EXISTS(SELECT 1 FROM public.service_contracts c
+      WHERE c.id=NEW.contract_id AND c.organization_id=NEW.organization_id)
+    THEN RAISE EXCEPTION 'CRM SLA contract organization mismatch' USING errcode='23514'; END IF;
+  ELSIF TG_TABLE_NAME='ticket_sla_targets' THEN
+    IF NOT EXISTS(SELECT 1 FROM service_desk.tickets t
+      WHERE t.id=NEW.ticket_id AND t.organization_id=NEW.organization_id
+        AND t.service_contract_id=NEW.contract_id)
+      OR NOT EXISTS(SELECT 1 FROM service_desk.sla_rule_versions r
+        WHERE r.id=NEW.rule_version_id AND r.contract_id=NEW.contract_id
+          AND r.organization_id=NEW.organization_id)
+    THEN RAISE EXCEPTION 'SLA target ticket, rule, contract mismatch' USING errcode='23514'; END IF;
+  END IF;
+  RETURN NEW;
+END;
+$scope_sla$;
+CREATE TRIGGER service_desk_calendar_scope
+  BEFORE INSERT OR UPDATE ON service_desk.sla_calendars
+  FOR EACH ROW EXECUTE FUNCTION service_desk.validate_sla_domain();
+CREATE TRIGGER service_desk_rule_scope
+  BEFORE INSERT OR UPDATE ON service_desk.sla_rule_versions
+  FOR EACH ROW EXECUTE FUNCTION service_desk.validate_sla_domain();
+CREATE TRIGGER service_desk_target_scope
+  BEFORE INSERT OR UPDATE ON service_desk.ticket_sla_targets
+  FOR EACH ROW EXECUTE FUNCTION service_desk.validate_sla_domain();
+CREATE FUNCTION service_desk.prevent_sla_event_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $immutable_sla$
+BEGIN RAISE EXCEPTION 'SLA event history is immutable' USING errcode='42501'; END;
+$immutable_sla$;
+CREATE TRIGGER service_desk_sla_events_append_only
+ BEFORE UPDATE OR DELETE ON service_desk.sla_events FOR EACH ROW
+ EXECUTE FUNCTION service_desk.prevent_sla_event_mutation();
+REVOKE ALL ON FUNCTION service_desk.validate_sla_domain() FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION service_desk.prevent_sla_event_mutation() FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION service_desk.validate_sla_domain() TO service_role;
+GRANT EXECUTE ON FUNCTION service_desk.prevent_sla_event_mutation() TO service_role;
+
 -- Even if Data API schemas are misconfigured later, anonymous users do not
 -- acquire table privileges. RLS is enabled as defense in depth.
 DO $rls$
@@ -232,7 +408,8 @@ DECLARE t text;
 BEGIN
   FOREACH t IN ARRAY ARRAY[
     'status_definitions','status_transitions','tickets','ticket_comments',
-    'ticket_events','sla_rule_versions','knowledge_articles','time_entries','ticket_attachments'
+    'ticket_events','sla_calendars','sla_rule_versions','ticket_sla_targets',
+    'sla_events','sla_pauses','knowledge_articles','time_entries','ticket_attachments'
   ] LOOP
     EXECUTE format('ALTER TABLE service_desk.%I ENABLE ROW LEVEL SECURITY',t);
   END LOOP;
@@ -295,6 +472,8 @@ CREATE FUNCTION public.crm_sd_create_ticket_v1(
   p_subject text,p_description text,p_priority text
 ) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $create$
 DECLARE v_ticket service_desk.tickets%ROWTYPE;
+  v_rule service_desk.sla_rule_versions%ROWTYPE;
+  v_target boolean:=false;
 BEGIN
   PERFORM service_desk.require_actor(p_actor,p_organization,true);
   IF p_subject IS NULL OR char_length(btrim(p_subject)) NOT BETWEEN 3 AND 240
@@ -310,7 +489,28 @@ BEGIN
   INSERT INTO service_desk.ticket_events(
     organization_id,ticket_id,actor_user_id,event_type)
   VALUES(p_organization,v_ticket.id,p_actor,'created');
-  RETURN jsonb_build_object('id',v_ticket.id,'ticket_number',v_ticket.ticket_number);
+  IF p_contract IS NOT NULL THEN
+    SELECT * INTO v_rule FROM service_desk.sla_rule_versions r
+    WHERE r.organization_id=p_organization AND r.contract_id=p_contract
+      AND r.priority=p_priority AND r.valid_from<=v_ticket.created_at
+      AND (r.valid_to IS NULL OR r.valid_to>v_ticket.created_at)
+    ORDER BY r.valid_from DESC,r.version DESC LIMIT 1;
+    IF FOUND THEN
+      INSERT INTO service_desk.ticket_sla_targets(
+        ticket_id,organization_id,contract_id,rule_version_id,
+        first_response_at,update_at,resolution_at
+      ) VALUES(v_ticket.id,p_organization,p_contract,v_rule.id,
+        service_desk.sla_due_at(v_ticket.created_at,v_rule.first_response_minutes,v_rule.calendar_id),
+        service_desk.sla_due_at(v_ticket.created_at,v_rule.update_minutes,v_rule.calendar_id),
+        service_desk.sla_due_at(v_ticket.created_at,v_rule.resolution_minutes,v_rule.calendar_id));
+      INSERT INTO service_desk.sla_events(
+        organization_id,ticket_id,rule_version_id,event_type,idempotency_key)
+      VALUES(p_organization,v_ticket.id,v_rule.id,'started','ticket-created');
+      v_target:=true;
+    END IF;
+  END IF;
+  RETURN jsonb_build_object('id',v_ticket.id,'ticket_number',v_ticket.ticket_number,
+    'sla_configured',v_target);
 END;
 $create$;
 
@@ -398,6 +598,66 @@ CREATE TRIGGER service_desk_time_append_only
 REVOKE ALL ON FUNCTION service_desk.prevent_time_mutation() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION service_desk.prevent_time_mutation() TO service_role;
 
+-- SLA configuration uses existing CRM service contracts. Only CRM admins and
+-- managers can create calendars or replace an active rule version.
+CREATE FUNCTION public.crm_sd_create_sla_calendar_v1(
+ p_actor uuid,p_organization uuid,p_name text,p_timezone text,p_kind text,
+ p_weekdays integer[],p_start_minute integer,p_end_minute integer,p_holidays date[]
+) RETURNS uuid LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $cal$
+DECLARE v_id uuid;
+BEGIN
+ PERFORM service_desk.require_actor(p_actor,p_organization,true);
+ IF NOT EXISTS(SELECT 1 FROM public.profiles p WHERE p.id=p_actor
+   AND p.organization_id=p_organization AND p.role IN ('admin','manager'))
+ THEN RAISE EXCEPTION 'CRM SLA configuration forbidden' USING errcode='42501'; END IF;
+ IF p_name IS NULL OR char_length(btrim(p_name)) NOT BETWEEN 2 AND 120
+    OR p_kind NOT IN ('24x7','business_hours') OR p_kind IS NULL
+    OR p_start_minute NOT BETWEEN 0 AND 1439
+    OR p_end_minute NOT BETWEEN 1 AND 1440
+    OR p_start_minute>=p_end_minute OR p_weekdays IS NULL OR
+    NOT p_weekdays<@ARRAY[1,2,3,4,5,6,7]::integer[]
+ THEN RAISE EXCEPTION 'Invalid calendar parameters' USING errcode='22023'; END IF;
+ INSERT INTO service_desk.sla_calendars(
+    organization_id,name,timezone,kind,weekdays,start_minute,end_minute,holidays)
+ VALUES(p_organization,btrim(p_name),p_timezone,p_kind,p_weekdays,
+    p_start_minute,p_end_minute,coalesce(p_holidays,ARRAY[]::date[]))
+ RETURNING id INTO v_id;
+ RETURN v_id;
+END;
+$cal$;
+CREATE FUNCTION public.crm_sd_create_sla_rule_v1(
+ p_actor uuid,p_organization uuid,p_contract uuid,p_calendar uuid,
+ p_priority text,p_first integer,p_update integer,p_resolution integer
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $rule$
+DECLARE v_id uuid;v_version integer;v_now timestamptz:=clock_timestamp();
+BEGIN
+ PERFORM service_desk.require_actor(p_actor,p_organization,true);
+ IF NOT EXISTS(SELECT 1 FROM public.profiles p WHERE p.id=p_actor
+   AND p.organization_id=p_organization AND p.role IN ('admin','manager'))
+ THEN RAISE EXCEPTION 'CRM SLA configuration forbidden' USING errcode='42501'; END IF;
+ IF p_priority NOT IN ('low','normal','high','urgent') OR p_priority IS NULL
+   OR p_first NOT BETWEEN 0 AND 100800 OR p_update NOT BETWEEN 0 AND 100800
+   OR p_resolution NOT BETWEEN 0 AND 100800 OR
+   NOT EXISTS(SELECT 1 FROM public.service_contracts c WHERE c.id=p_contract
+     AND c.organization_id=p_organization) OR
+   NOT EXISTS(SELECT 1 FROM service_desk.sla_calendars c WHERE c.id=p_calendar
+     AND c.organization_id=p_organization)
+ THEN RAISE EXCEPTION 'CRM SLA contract, calendar or duration invalid' USING errcode='22023'; END IF;
+ PERFORM pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended(p_contract::text||p_priority,0));
+ SELECT coalesce(max(version),0)+1 INTO v_version
+   FROM service_desk.sla_rule_versions
+   WHERE contract_id=p_contract AND priority=p_priority;
+ UPDATE service_desk.sla_rule_versions SET valid_to=v_now
+ WHERE contract_id=p_contract AND priority=p_priority AND valid_to IS NULL;
+ INSERT INTO service_desk.sla_rule_versions(
+  organization_id,contract_id,calendar_id,version,priority,
+  first_response_minutes,update_minutes,resolution_minutes,valid_from)
+ VALUES(p_organization,p_contract,p_calendar,v_version,p_priority,
+  p_first,p_update,p_resolution,v_now) RETURNING id INTO v_id;
+ RETURN jsonb_build_object('id',v_id,'version',v_version);
+END;
+$rule$;
 -- PostgREST exposes public RPCs only to the already privileged CRM server.
 -- A user JWT or publishable key cannot invoke these functions directly.
 REVOKE ALL ON FUNCTION public.crm_sd_list_tickets_v1(uuid,uuid) FROM PUBLIC,anon,authenticated;
@@ -414,6 +674,16 @@ REVOKE ALL ON FUNCTION public.crm_sd_record_time_v1(uuid,uuid,uuid,integer,text)
   FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.crm_sd_add_comment_v1(uuid,uuid,uuid,text,text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.crm_sd_record_time_v1(uuid,uuid,uuid,integer,text) TO service_role;
+REVOKE ALL ON FUNCTION public.crm_sd_create_sla_calendar_v1(
+ uuid,uuid,text,text,text,integer[],integer,integer,date[])
+ FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_create_sla_rule_v1(
+ uuid,uuid,uuid,uuid,text,integer,integer,integer)
+ FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.crm_sd_create_sla_calendar_v1(
+ uuid,uuid,text,text,text,integer[],integer,integer,date[]) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_create_sla_rule_v1(
+ uuid,uuid,uuid,uuid,text,integer,integer,integer) TO service_role;
 REVOKE ALL ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION service_desk.assert_ticket_scope() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) TO service_role;
