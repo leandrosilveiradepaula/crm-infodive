@@ -77,6 +77,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
     for cid,org,aid in [(CO1,O1,AC1),(CO2,O2,AC2)]:
         db.execute("INSERT INTO public.service_contracts VALUES(%s,%s,%s,'Contract')",(cid,org,aid))
     db.execute(migration)
+    db.execute((root/'supabase/migrations/20261027145000_service_desk_private_attachments.sql').read_text())
 
     assert one(db,"SELECT count(*) FROM pg_tables WHERE schemaname='service_desk'")==15
     for role in ["anon","authenticated"]:
@@ -191,5 +192,26 @@ with psycopg.connect(dsn,autocommit=True) as db:
     fails(db,lambda:as_role(db,"service_role",
       "DELETE FROM service_desk.knowledge_article_versions WHERE article_id=%s",article_id))
     assert one(db,"SELECT count(*) FROM service_desk.knowledge_article_versions WHERE article_id=%s",article_id)==3
+    key=f"service-desk/{O1}/{ticket}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf"
+    assert as_role(db,"service_role",
+       "SELECT public.crm_sd_check_attachment_ticket_v1(%s,%s,%s)",A,O1,ticket)[0] is True
+    attachment=as_role(db,"service_role",
+       "SELECT public.crm_sd_register_attachment_v1(%s,%s,%s,%s,%s,%s,%s)",
+       A,O1,ticket,key,"evidence.pdf","application/pdf",1024)[0]
+    record_id=UUID(attachment["id"])
+    assert as_role(db,"service_role",
+       "SELECT public.crm_sd_attachment_path_v1(%s,%s,%s)",A,O1,record_id)[0]["object_key"]==key
+    assert len(as_role(db,"service_role",
+       "SELECT public.crm_sd_list_attachments_v1(%s,%s,%s)",A,O1,ticket)[0])==1
+    fails(db,lambda:as_role(db,"service_role",
+       "SELECT public.crm_sd_attachment_path_v1(%s,%s,%s)",B,O2,record_id))
+    fails(db,lambda:as_role(db,"service_role",
+       "SELECT public.crm_sd_check_attachment_ticket_v1(%s,%s,%s)",B,O2,ticket))
+    fails(db,lambda:as_role(db,"service_role",
+       "SELECT public.crm_sd_register_attachment_v1(%s,%s,%s,%s,%s,%s,%s)",
+       A,O1,ticket,f"service-desk/{O2}/{ticket}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.pdf",
+       "cross.pdf","application/pdf",1024))
+    fails(db,lambda:as_role(db,"service_role",
+       "UPDATE service_desk.ticket_attachments SET filename='changed.pdf' WHERE id=%s",record_id))
     assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")
