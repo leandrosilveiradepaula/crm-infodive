@@ -4,7 +4,8 @@ const mocks=vi.hoisted(()=>({session:vi.fn(),admin:vi.fn()}));
 vi.mock('../src/lib/auth-server',()=>({requireSessionContext:mocks.session}));
 vi.mock('../src/lib/supabase/admin',()=>({createAdminClient:mocks.admin}));
 import { createServiceDeskTicket,listServiceDeskTickets,
-  transitionServiceDeskTicket,listServiceDeskAccounts,listServiceDeskContracts
+  transitionServiceDeskTicket,listServiceDeskAccounts,listServiceDeskContracts,
+  addServiceDeskComment,recordServiceDeskTime
 } from '../src/app/(dashboard)/service-desk/actions';
 
 const USER='11111111-1111-4111-8111-111111111111';
@@ -23,7 +24,9 @@ function setup(profile:unknown={id:USER,role:'support',status:'active',organizat
   const rpc=vi.fn().mockImplementation((name:string)=>{
     if(name==='crm_sd_list_tickets_v1')return Promise.resolve({data:[],error:null});
     if(name==='crm_sd_create_ticket_v1')return Promise.resolve({data:{id:TICKET,ticket_number:1},error:null});
-    if(name==='crm_sd_transition_ticket_v1')return Promise.resolve({data:{id:TICKET,status:'triaged'},error:null});
+    if(name==='crm_sd_transition_ticket_v1')return Promise.resolve({data:{id:TICKET,status:'open'},error:null});
+    if(name==='crm_sd_add_comment_v1')return Promise.resolve({data:{id:CONTRACT,ticket_id:TICKET},error:null});
+    if(name==='crm_sd_record_time_v1')return Promise.resolve({data:{id:CONTRACT,ticket_id:TICKET,minutes:15},error:null});
     return Promise.resolve({data:null,error:{message:'unexpected RPC'}});
   });
   const from=vi.fn().mockReturnValue({select});
@@ -64,6 +67,27 @@ describe('CRM-owned Service Desk server authorization',()=>{
     await expect(createServiceDeskTicket({accountId:OTHER,contractId:'bad',subject:'ok',priority:'high'}))
       .rejects.toThrow('Invalid ticket request');
     await expect(listServiceDeskContracts('bad')).rejects.toThrow('Invalid CRM account');
+    expect(rpc).not.toHaveBeenCalled();
+  });
+  it('scopes comments and immutable work entries to the current CRM session',async()=>{
+    const {rpc}=setup();
+    await addServiceDeskComment({ticketId:TICKET,body:'  Return call  ',visibility:'internal'});
+    await recordServiceDeskTime({ticketId:TICKET,minutes:15,description:'  Investigation  '});
+    expect(rpc).toHaveBeenCalledWith('crm_sd_add_comment_v1',{
+      p_actor:USER,p_organization:ORG,p_ticket:TICKET,
+      p_body:'Return call',p_visibility:'internal'
+    });
+    expect(rpc).toHaveBeenCalledWith('crm_sd_record_time_v1',{
+      p_actor:USER,p_organization:ORG,p_ticket:TICKET,
+      p_minutes:15,p_description:'Investigation'
+    });
+  });
+  it('rejects malformed comments and time before privileged RPC',async()=>{
+    const {rpc}=setup();
+    await expect(addServiceDeskComment({ticketId:TICKET,body:'',visibility:'internal'}))
+      .rejects.toThrow('Invalid ticket comment');
+    await expect(recordServiceDeskTime({ticketId:TICKET,minutes:0,description:'test'}))
+      .rejects.toThrow('Invalid work time');
     expect(rpc).not.toHaveBeenCalled();
   });
   it('includes exact organization and expected-status CAS on transitions',async()=>{
