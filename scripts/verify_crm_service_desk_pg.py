@@ -70,7 +70,7 @@ with psycopg.connect(dsn,autocommit=True) as db:
     db.execute("GRANT SELECT ON public.profiles TO authenticated,service_role")
     db.execute("GRANT SELECT ON public.accounts,public.service_contracts TO service_role")
     db.execute("GRANT EXECUTE ON FUNCTION crm_internal.current_organization_id() TO authenticated,service_role")
-    for uid,org,status,role in [(A,O1,"active","support"),(B,O2,"active","admin"),(S,O1,"inactive","admin")]:
+    for uid,org,status,role in [(A,O1,"active","admin"),(B,O2,"active","admin"),(S,O1,"inactive","admin")]:
         db.execute("INSERT INTO public.profiles VALUES(%s,%s,%s,%s)",(uid,org,status,role))
     for aid,org in [(AC1,O1),(AC2,O2)]:
         db.execute("INSERT INTO public.accounts VALUES(%s,%s,'Account')",(aid,org))
