@@ -334,6 +334,70 @@ BEGIN
 END;
 $transition$;
 
+-- Contract time accounting and ticket comments use the same CRM identity,
+-- never the former Service Desk's independent users/memberships.
+CREATE FUNCTION public.crm_sd_add_comment_v1(
+ p_actor uuid,p_organization uuid,p_ticket uuid,p_body text,p_visibility text
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $comment$
+DECLARE v_id uuid;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  IF p_body IS NULL OR char_length(btrim(p_body)) NOT BETWEEN 1 AND 5000
+     OR p_visibility NOT IN ('public','internal') OR p_visibility IS NULL
+  THEN RAISE EXCEPTION 'Invalid ticket comment' USING errcode='22023'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM service_desk.tickets t
+    WHERE t.id=p_ticket AND t.organization_id=p_organization)
+  THEN RAISE EXCEPTION 'Ticket unavailable' USING errcode='P0002'; END IF;
+  INSERT INTO service_desk.ticket_comments(
+    organization_id,ticket_id,author_user_id,body,visibility)
+  VALUES(p_organization,p_ticket,p_actor,btrim(p_body),p_visibility)
+  RETURNING id INTO v_id;
+  INSERT INTO service_desk.ticket_events(
+    organization_id,ticket_id,actor_user_id,event_type,
+    detail)
+  VALUES(p_organization,p_ticket,p_actor,'comment_created',
+    jsonb_build_object('comment_id',v_id,'visibility',p_visibility));
+  RETURN jsonb_build_object('id',v_id,'ticket_id',p_ticket);
+END;
+$comment$;
+
+CREATE FUNCTION public.crm_sd_record_time_v1(
+ p_actor uuid,p_organization uuid,p_ticket uuid,p_minutes integer,p_description text
+) RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $time$
+DECLARE v_id uuid;
+BEGIN
+  PERFORM service_desk.require_actor(p_actor,p_organization,true);
+  IF p_minutes IS NULL OR p_minutes < 1 OR p_minutes > 1440
+     OR p_description IS NULL OR char_length(btrim(p_description)) NOT BETWEEN 1 AND 5000
+  THEN RAISE EXCEPTION 'Invalid work time' USING errcode='22023'; END IF;
+  IF NOT EXISTS (SELECT 1 FROM service_desk.tickets t
+      WHERE t.id=p_ticket AND t.organization_id=p_organization)
+  THEN RAISE EXCEPTION 'Ticket unavailable' USING errcode='P0002'; END IF;
+  INSERT INTO service_desk.time_entries(
+    organization_id,ticket_id,author_user_id,minutes,description)
+  VALUES(p_organization,p_ticket,p_actor,p_minutes,btrim(p_description))
+  RETURNING id INTO v_id;
+  INSERT INTO service_desk.ticket_events(
+    organization_id,ticket_id,actor_user_id,event_type,detail)
+  VALUES(p_organization,p_ticket,p_actor,'time_recorded',
+    jsonb_build_object('time_entry_id',v_id,'minutes',p_minutes));
+  RETURN jsonb_build_object('id',v_id,'ticket_id',p_ticket,'minutes',p_minutes);
+END;
+$time$;
+
+-- Historical time entry rows must be append-only, including privileged callers.
+CREATE FUNCTION service_desk.prevent_time_mutation()
+RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path='' AS $immutable$
+BEGIN
+  RAISE EXCEPTION 'Work history is append-only' USING errcode='42501';
+END;
+$immutable$;
+CREATE TRIGGER service_desk_time_append_only
+  BEFORE UPDATE OR DELETE ON service_desk.time_entries
+  FOR EACH ROW EXECUTE FUNCTION service_desk.prevent_time_mutation();
+REVOKE ALL ON FUNCTION service_desk.prevent_time_mutation() FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION service_desk.prevent_time_mutation() TO service_role;
+
 -- PostgREST exposes public RPCs only to the already privileged CRM server.
 -- A user JWT or publishable key cannot invoke these functions directly.
 REVOKE ALL ON FUNCTION public.crm_sd_list_tickets_v1(uuid,uuid) FROM PUBLIC,anon,authenticated;
@@ -344,6 +408,12 @@ REVOKE ALL ON FUNCTION public.crm_sd_transition_ticket_v1(uuid,uuid,uuid,text,te
 GRANT EXECUTE ON FUNCTION public.crm_sd_list_tickets_v1(uuid,uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.crm_sd_create_ticket_v1(uuid,uuid,uuid,uuid,text,text,text) TO service_role;
 GRANT EXECUTE ON FUNCTION public.crm_sd_transition_ticket_v1(uuid,uuid,uuid,text,text) TO service_role;
+REVOKE ALL ON FUNCTION public.crm_sd_add_comment_v1(uuid,uuid,uuid,text,text)
+  FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.crm_sd_record_time_v1(uuid,uuid,uuid,integer,text)
+  FROM PUBLIC,anon,authenticated;
+GRANT EXECUTE ON FUNCTION public.crm_sd_add_comment_v1(uuid,uuid,uuid,text,text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.crm_sd_record_time_v1(uuid,uuid,uuid,integer,text) TO service_role;
 REVOKE ALL ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) FROM PUBLIC,anon,authenticated;
 REVOKE ALL ON FUNCTION service_desk.assert_ticket_scope() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION service_desk.require_actor(uuid,uuid,boolean) TO service_role;
