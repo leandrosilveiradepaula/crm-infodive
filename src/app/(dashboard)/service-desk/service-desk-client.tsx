@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createServiceDeskTicket,transitionServiceDeskTicket,
   listServiceDeskContracts,addServiceDeskComment,recordServiceDeskTime,
-  uploadServiceDeskAttachment,listServiceDeskAttachments,getServiceDeskAttachmentUrl } from './actions';
+  requestServiceDeskAttachmentUpload,completeServiceDeskAttachmentUpload,
+  listServiceDeskAttachments,getServiceDeskAttachmentUrl } from './actions';
 
 type Ticket = {id:string;ticket_number:number;subject:string;status:string;
   priority:string;account_name:string;contract_title:string|null;created_at:string};
@@ -87,11 +88,27 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
   async function uploadAttachment(ticketId:string){
     const file=attachmentFiles[ticketId];if(!file)return;
     setBusy(true);setMessage('');
-    const data=new FormData();data.append('ticketId',ticketId);data.append('file',file);
     try{
-      await uploadServiceDeskAttachment(data);
+      if(file.size<1||file.size>5*1024*1024)
+        throw new Error('File size out of bounds');
+      const request={ticketId,filename:file.name,mimeType:file.type,size:file.size};
+      const upload=await requestServiceDeskAttachmentUpload(request);
+      // File goes straight to Supabase Storage with a path-scoped short-lived
+      // token, not via Next.js Server Actions or a public bucket.
+      const {createClient}=await import('@supabase/supabase-js');
+      const client=createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const {error}=await client.storage.from('documents')
+        .uploadToSignedUrl(upload.path,upload.token,file,{
+          contentType:file.type,upsert:false
+        });
+      if(error)throw new Error('Upload rejected');
+      await completeServiceDeskAttachmentUpload({...request,path:upload.path});
       setAttachmentFiles(p=>({...p,[ticketId]:undefined}));
-      await refreshAttachments(ticketId);setMessage('Anexo registrado.');
+      await refreshAttachments(ticketId);
+      setMessage('Anexo registrado.');
     }catch{setMessage('Falha ao anexar arquivo. Verifique tamanho e formato.');}
     finally{setBusy(false);}
   }
