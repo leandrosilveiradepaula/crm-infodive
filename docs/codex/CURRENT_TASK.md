@@ -1,3 +1,37 @@
+# CURRENT_TASK — CRM #200: Service Desk como módulo do CRM (27/10/2026)
+
+**Decisão atual do operador substitui a tarefa anterior para esta branch.**
+A issue CRM #200 e Service Desk #12 autorizam preparar a integração
+aditiva do módulo Service Desk ao CRM, sem modificar produção. A tarefa
+anterior de RBAC #22 continua válida em seu escopo já entregue e não deve
+ser revertida ou duplicada.
+
+## Escopo autorizado para esta branch
+
+- `supabase/migrations/20261027123000_service_desk_crm_module.sql` (arquivo,
+  **não aplicar ao Supabase gerenciado**).
+- `src/app/(dashboard)/service-desk/**` (página incorporada e ações).
+- `src/components/layout/Sidebar.tsx` (somente entrada do módulo).
+- `test/service-desk-crm-module.test.ts` (negação de acesso e contexto).
+- `docs/SERVICE_DESK_CRM_INTEGRATION.md` (contratos/rollback).
+- Este arquivo de tarefa.
+
+**Proibido**: promover migration CRM, enviar service_role ao navegador,
+copiar tenants demo, criar novo Supabase, cortar Vercel, auto-merge, usar
+WIF/modelos pagos ou reativar a PR Service Desk #10 sem recibo válido.
+Produção e migration requerem gates humanos separados.
+
+## Critérios para PR
+
+- Reusar `profiles`, `accounts`, `service_contracts`, CRM Auth e
+  `crm_internal.current_organization_id()`, sem duplicar esses cadastros.
+- Testar autoridade server-side e isolamento no banco; CI real do HEAD,
+  TypeScript, Vitest, build e Preview obrigatório por UI.
+- PR contra `main` para revisão humana. Nada se considera integrado ou
+  certificado até migration aprovada, Preview real e E2E completo.
+
+---
+
 # CURRENT_TASK — CRM P0: RBAC real no servidor (issue #22)
 
 **Decisão atual, 26/10/2026:** PR #198 foi mergeada humanamente na `main=adaea55f88eaa80d12a8b19596189398a3364837`; migration `crm_authoritative_tenant_rls` já aplicada e auditada no Supabase CRM. O proprietário pediu concluir o parêntese de segurança do CRM para então retornar à certificação da AI Product Factory. Esta tarefa atende **somente** o bloqueio P0 de RBAC em Server Actions e APIs, vinculado à [issue #22](https://github.com/leandrosilveiradepaula/crm-infodive/issues/22).
