@@ -110,5 +110,25 @@ with psycopg.connect(dsn,autocommit=True) as db:
     fails(db,lambda:as_role(db,"service_role",
         "SELECT public.crm_sd_transition_ticket_v1(%s,%s,%s,%s,%s)",
         B,O2,ticket,"open","in_progress"))
+    # Comments and billable work belong only to the CRM organization.
+    def comment(actor=A,org=O1,ticket_id=ticket):
+        return as_role(db,"service_role",
+            "SELECT public.crm_sd_add_comment_v1(%s,%s,%s,%s,%s)",
+            actor,org,ticket_id,"Customer update","internal")[0]
+    def time(actor=A,org=O1,ticket_id=ticket,minutes=45):
+        return as_role(db,"service_role",
+            "SELECT public.crm_sd_record_time_v1(%s,%s,%s,%s,%s)",
+            actor,org,ticket_id,minutes,"Remote troubleshooting")[0]
+    assert comment()["ticket_id"]==str(ticket)
+    assert time()["minutes"]==45
+    fails(db,lambda:comment(B,O2,ticket))
+    fails(db,lambda:time(B,O2,ticket))
+    fails(db,lambda:comment(S,O1,ticket))
+    fails(db,lambda:time(S,O1,ticket))
+    fails(db,lambda:time(A,O1,ticket,0))
+    fails(db,lambda:as_role(db,"service_role",
+      "UPDATE service_desk.time_entries SET minutes=20 WHERE ticket_id=%s",ticket))
+    assert one(db,"SELECT count(*) FROM service_desk.time_entries WHERE ticket_id=%s",ticket)==1
+    assert one(db,"SELECT count(*) FROM service_desk.ticket_comments WHERE ticket_id=%s",ticket)==1
     assert one(db,"SELECT status FROM service_desk.tickets WHERE id=%s",ticket)=="open"
 print("CRM_SD_REAL_POSTGRES_MODULE_PASS=1")
