@@ -11,10 +11,14 @@ type Account = {id:string;name:string};
 type Contract = {id:string;title:string};
 
 const transitions: Record<string, string[]> = {
-  new:['triaged','in_progress'], triaged:['in_progress'],
-  in_progress:['waiting_customer','resolved'],
-  waiting_customer:['in_progress','resolved'],
-  resolved:['in_progress','closed']
+  new:['open','in_progress','waiting_customer','waiting_third_party','resolved','closed'],
+  open:['in_progress','waiting_customer','waiting_third_party','resolved','closed'],
+  in_progress:['open','waiting_customer','waiting_third_party','resolved','closed'],
+  waiting_customer:['open','in_progress','waiting_third_party','resolved','closed'],
+  waiting_third_party:['open','in_progress','waiting_customer','resolved','closed'],
+  resolved:['open','in_progress','closed','reopened'],
+  closed:['reopened'],
+  reopened:['open','in_progress','waiting_customer','waiting_third_party','resolved','closed']
 };
 export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:Account[]}) {
   const router=useRouter();
