@@ -44,15 +44,55 @@ CREATE TABLE service_desk.status_transitions (
 );
 -- Canonical module statuses, NOT copies of QA demonstration tenant records.
 -- Any additional status mapping from standalone QA must be reviewed separately.
+-- Preserve exactly the legacy Service Desk's eight canonical status codes
+-- and its transition graph. No synthetic 'triaged' replacement.
 INSERT INTO service_desk.status_definitions(code,label,terminal) VALUES
-  ('new','Novo',false),('triaged','Triagem',false),
-  ('in_progress','Em atendimento',false),('waiting_customer','Aguardando cliente',false),
-  ('resolved','Resolvido',false),('closed','Encerrado',true);
+  ('new','Novo',false),
+  ('open','Aberto',false),
+  ('in_progress','Em andamento',false),
+  ('waiting_customer','Aguardando cliente',false),
+  ('waiting_third_party','Aguardando terceiro',false),
+  ('resolved','Resolvido',false),
+  ('closed','Fechado',true),
+  ('reopened','Reaberto',false);
 INSERT INTO service_desk.status_transitions(from_status,to_status) VALUES
-  ('new','triaged'),('new','in_progress'),('triaged','in_progress'),
-  ('in_progress','waiting_customer'),('waiting_customer','in_progress'),
-  ('in_progress','resolved'),('waiting_customer','resolved'),
-  ('resolved','in_progress'),('resolved','closed');
+  ('new','open'),
+  ('new','in_progress'),
+  ('new','waiting_customer'),
+  ('new','waiting_third_party'),
+  ('new','resolved'),
+  ('new','closed'),
+  ('open','in_progress'),
+  ('open','waiting_customer'),
+  ('open','waiting_third_party'),
+  ('open','resolved'),
+  ('open','closed'),
+  ('in_progress','open'),
+  ('in_progress','waiting_customer'),
+  ('in_progress','waiting_third_party'),
+  ('in_progress','resolved'),
+  ('in_progress','closed'),
+  ('waiting_customer','open'),
+  ('waiting_customer','in_progress'),
+  ('waiting_customer','waiting_third_party'),
+  ('waiting_customer','resolved'),
+  ('waiting_customer','closed'),
+  ('waiting_third_party','open'),
+  ('waiting_third_party','in_progress'),
+  ('waiting_third_party','waiting_customer'),
+  ('waiting_third_party','resolved'),
+  ('waiting_third_party','closed'),
+  ('resolved','open'),
+  ('resolved','in_progress'),
+  ('resolved','closed'),
+  ('resolved','reopened'),
+  ('closed','reopened'),
+  ('reopened','open'),
+  ('reopened','in_progress'),
+  ('reopened','waiting_customer'),
+  ('reopened','waiting_third_party'),
+  ('reopened','resolved'),
+  ('reopened','closed');
 
 CREATE TABLE service_desk.tickets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
