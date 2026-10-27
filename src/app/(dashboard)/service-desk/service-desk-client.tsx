@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createServiceDeskTicket,transitionServiceDeskTicket,
-  listServiceDeskContracts,addServiceDeskComment,recordServiceDeskTime } from './actions';
+  listServiceDeskContracts,addServiceDeskComment,recordServiceDeskTime,
+  uploadServiceDeskAttachment,listServiceDeskAttachments,getServiceDeskAttachmentUrl } from './actions';
 
 type Ticket = {id:string;ticket_number:number;subject:string;status:string;
   priority:string;account_name:string;contract_title:string|null;created_at:string};
@@ -33,6 +34,9 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
   const [commentText,setCommentText]=useState<Record<string,string>>({});
   const [minutes,setMinutes]=useState<Record<string,string>>({});
   const [workNotes,setWorkNotes]=useState<Record<string,string>>({});
+  const [attachmentFiles,setAttachmentFiles]=useState<Record<string,File|undefined>>({});
+  const [attachments,setAttachments]=useState<Record<string,Array<{id:string;filename:string}>>>({});
+
   async function onAccount(id:string) {
     setAccountId(id);setContractId('');setContracts([]);
     if (!id) return;
@@ -75,6 +79,27 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
     } catch {setMessage('Apontamento rejeitado. Verifique os minutos e a descrição.');}
     finally {setBusy(false);}
   }
+  async function refreshAttachments(ticketId:string){
+    try {setAttachments(p=>({...p,[ticketId]:await listServiceDeskAttachments(ticketId)}));}
+    catch {setMessage('Não foi possível listar anexos.');}
+  }
+  async function uploadAttachment(ticketId:string){
+    const file=attachmentFiles[ticketId];if(!file)return;
+    setBusy(true);setMessage('');
+    const data=new FormData();data.append('ticketId',ticketId);data.append('file',file);
+    try{
+      await uploadServiceDeskAttachment(data);
+      setAttachmentFiles(p=>({...p,[ticketId]:undefined}));
+      await refreshAttachments(ticketId);setMessage('Anexo registrado.');
+    }catch{setMessage('Falha ao anexar arquivo. Verifique tamanho e formato.');}
+    finally{setBusy(false);}
+  }
+  async function openAttachment(id:string){
+    // Open only after the trusted CRM server authorizes a short-lived URL.
+    try {const url=await getServiceDeskAttachmentUrl(id);
+      window.open(url,'_blank','noopener,noreferrer');
+    }catch{setMessage('Acesso ao anexo negado.');}
+  }
   return <main className="space-y-6 p-6">
     <header><h1 className="text-2xl font-bold">Service Desk</h1>
       <p>Chamados associados aos mesmos clientes, contratos e usuários do CRM.</p></header>
@@ -114,6 +139,21 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
             onClick={()=>void advance(t.id,t.status,next)} className="rounded border px-3 py-1">
             Mover para {next}</button>)}</div>
         <div className="mt-3 grid gap-2 border-t pt-3">
+          <label className="text-sm">Anexo privado (PDF, PNG, JPEG ou TXT, até 5 MB)
+            <input type="file" accept=".pdf,.png,.jpg,.jpeg,.txt"
+              className="w-full rounded border p-2"
+              onChange={e=>setAttachmentFiles(p=>({...p,[t.id]:e.target.files?.[0]}))}/>
+          </label>
+          <button type="button" disabled={busy||!attachmentFiles[t.id]}
+            onClick={()=>void uploadAttachment(t.id)}
+            className="w-fit rounded border px-3 py-1">Enviar anexo</button>
+          <button type="button" disabled={busy}
+            onClick={()=>void refreshAttachments(t.id)}
+            className="w-fit rounded border px-3 py-1">Listar anexos</button>
+          {(attachments[t.id]||[]).map(a=><button type="button" key={a.id}
+            onClick={()=>void openAttachment(a.id)}
+            className="w-fit text-left underline">{a.filename}</button>)}
+
           <label className="text-sm">Comentário interno
             <textarea maxLength={5000} value={commentText[t.id]||''}
               onChange={e=>setCommentText(p=>({...p,[t.id]:e.target.value}))}
