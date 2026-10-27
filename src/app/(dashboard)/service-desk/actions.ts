@@ -197,8 +197,6 @@ export async function linkServiceDeskKnowledge(input: {ticketId:string;articleId
 const attachmentTypes:Record<string,string>={
   'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg','text/plain':'txt'
 };
-const attachmentMaxBytes=5*1024*1024;
-
 export async function listServiceDeskAttachments(ticketId:string){
   if(!UUID.test(ticketId))throw new Error('Invalid ticket');
   const {userId,organizationId,admin}=await requireServiceDeskActor();
@@ -209,34 +207,70 @@ export async function listServiceDeskAttachments(ticketId:string){
   return data as Array<{id:string;filename:string;mime_type:string;file_size:number;created_at:string}>;
 }
 
-export async function uploadServiceDeskAttachment(form:FormData){
+type AttachmentRequest={ticketId:string;filename:string;mimeType:string;size:number};
+const allowedAttachmentSize=5*1024*1024;
+function validateAttachmentRequest(input:AttachmentRequest){
+  if(!input||!UUID.test(input.ticketId)||
+    typeof input.filename!=='string'||input.filename.trim().length<1||
+    input.filename.length>255||
+    !Number.isInteger(input.size)||input.size<1||input.size>allowedAttachmentSize||
+    typeof input.mimeType!=='string'||!Object.hasOwn(attachmentTypes,input.mimeType))
+    throw new Error('Invalid attachment');
+}
+
+/** Issues a path-scoped token only after CRM profile and ticket authorization.
+ * File bytes go directly browser -> private CRM Supabase Storage, avoiding the
+ * Next.js Server Action 1 MB and Vercel Function 4.5 MB request limits.
+ */
+export async function requestServiceDeskAttachmentUpload(input:AttachmentRequest){
+  validateAttachmentRequest(input);
   const {userId,organizationId,admin}=await requireServiceDeskActor();
-  const ticketId=form.get('ticketId');
-  const file=form.get('file');
-  if(typeof ticketId!=='string'||!UUID.test(ticketId)||
-    !(file instanceof File)||file.size<1||file.size>attachmentMaxBytes||
-    !Object.hasOwn(attachmentTypes,file.type)||file.name.trim().length<1||
-    file.name.length>255)throw new Error('Invalid attachment');
-  // Authorization must precede the privileged Storage upload.
-  const {data:permitted,error:permissionError}=await admin.rpc(
+  const {data:allowed,error:permissionError}=await admin.rpc(
     'crm_sd_check_attachment_ticket_v1',{
-      p_actor:userId,p_organization:organizationId,p_ticket:ticketId
+      p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId
     });
-  if(permissionError||permitted!==true)throw new Error('Attachment forbidden');
-  const key='service-desk/'+organizationId+'/'+ticketId+'/'+
-    crypto.randomUUID()+'.'+attachmentTypes[file.type];
-  const {error:uploadError}=await admin.storage.from('documents').upload(
-    key,file,{contentType:file.type,upsert:false,cacheControl:'0'}
+  if(permissionError||allowed!==true)throw new Error('Attachment forbidden');
+  const path='service-desk/'+organizationId+'/'+input.ticketId+'/'+
+    crypto.randomUUID()+'.'+attachmentTypes[input.mimeType];
+  const {data,error}=await admin.storage.from('documents').createSignedUploadUrl(
+    path,{upsert:false}
   );
-  if(uploadError)throw new Error('Private upload failed');
+  if(error||!data?.token)throw new Error('Private upload authorization unavailable');
+  return {path,token:data.token};
+}
+
+/** Final registration requires a fresh CRM session, original ticket scope,
+ * and independently inspected Storage bytes before the database is updated.
+ */
+export async function completeServiceDeskAttachmentUpload(
+  input:AttachmentRequest & {path:string}
+){
+  validateAttachmentRequest(input);
+  const {userId,organizationId,admin}=await requireServiceDeskActor();
+  const prefix='service-desk/'+organizationId+'/'+input.ticketId+'/';
+  const suffix=attachmentTypes[input.mimeType];
+  const filename=typeof input.path==='string'&&input.path.startsWith(prefix)
+    ?input.path.slice(prefix.length):'';
+  if(!new RegExp(
+     '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.'+suffix+'$'
+    ).test(filename))throw new Error('Invalid attachment path');
+  const {data:allowed,error:permissionError}=await admin.rpc(
+    'crm_sd_check_attachment_ticket_v1',{
+      p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId
+    });
+  if(permissionError||allowed!==true)throw new Error('Attachment forbidden');
+  const {data:info,error:infoError}=await admin.storage.from('documents').info(input.path);
+  if(infoError||!info||info.size!==input.size||info.size>allowedAttachmentSize||
+     info.contentType!==input.mimeType)
+    throw new Error('Uploaded attachment metadata mismatch');
   const {data,error}=await admin.rpc('crm_sd_register_attachment_v1',{
-    p_actor:userId,p_organization:organizationId,p_ticket:ticketId,
-    p_object_key:key,p_filename:file.name,p_mime:file.type,p_size:file.size
+    p_actor:userId,p_organization:organizationId,p_ticket:input.ticketId,
+    p_object_key:input.path,p_filename:input.filename,
+    p_mime:input.mimeType,p_size:input.size
   });
-  if(error||!data?.id){
-    await admin.storage.from('documents').remove([key]);
-    throw new Error('Attachment registration failed');
-  }
+  // Do NOT delete on DB failure: an idempotent retry must never destroy a
+  // previously registered file. Orphan reconciliation is a separate concern.
+  if(error||!data?.id)throw new Error('Attachment registration failed');
   return data as {id:string;ticket_id:string};
 }
 
