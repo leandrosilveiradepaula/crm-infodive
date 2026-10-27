@@ -78,13 +78,16 @@ metadata in `service_desk.ticket_attachments`, with immutable rows, a
 ticket-and-organization-bound object key, and service-role-only RPCs.
 
 Upload order: server-side CRM session/profile verification → ticket scoped
-authorization RPC → 5 MiB and MIME allowlist checks → private upload with
-`upsert:false` → scoped database registration. Failed registration triggers
-best-effort object cleanup. A scheduled orphan-reconciliation mechanism remains
-future operational hardening, **not a claim that orphaned uploads are
-automatically eliminated**. Downloads use a fresh CRM authorization check and
-a 60-second signed URL; never a public Storage URL. Signed URLs cannot be
-immediately revoked after issuance and must be treated as bearer credentials.
+authorization RPC → short-lived path-scoped signed-upload token → browser
+upload directly to CRM private Storage → server revalidates actor/ticket
+and verifies Storage object size and MIME → scoped database registration.
+No Next.js action receives file bytes, preventing 1 MB Server Action body
+limits and Vercel function payload limits. Failed metadata registration
+is fail-closed; an orphaned Storage object may require dedicated
+reconciliation rather than unsafe automatic deletion. Downloads use
+a fresh CRM authorization check and a 60-second signed URL, never
+a public Storage URL. Signed URLs cannot be immediately revoked after
+issuance and must be treated as bearer credentials.
 
 **Critical production gates:** the CRM database schema and both versioned
 migrations must be explicitly approved before execution. The Preview cannot
