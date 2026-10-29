@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSessionContext } from '@/lib/auth-server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { findExistingSenderEmails } from '@/lib/email-sync-tenant';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '@/lib/config';
 import { refreshMicrosoftToken } from '@/lib/microsoft-auth';
@@ -40,10 +41,6 @@ type EmailMessage = {
     read: boolean;
     labels: string[];
     folder: string;
-};
-
-type EmailRow = {
-    email: string;
 };
 
 // Direct Gemini SDK call — avoids internal HTTP fetch that gets blocked by middleware auth check
@@ -184,23 +181,12 @@ export async function GET(request: NextRequest) {
                     try {
                         const bgSupabase = createAdminClient();
 
-                        // 2. Procurar quais remetentes JÁ existem no CRM (Contacts)
-                        const { data: existingContacts } = await bgSupabase
-                            .from('account_contacts')
-                            .select('email')
-                            .in('email', uniqueSenders);
-
-                        // 2.5 Verificar quem está na BLOCKLIST (Ignorados pelo Usuário)
-                        const { data: blacklistedContacts } = await bgSupabase
-                            .from('contact_blacklists')
-                            .select('email')
-                            .in('email', uniqueSenders);
-
-                        const existingEmailsArray = [
-                            ...((existingContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || []),
-                            ...((blacklistedContacts as EmailRow[] | null)?.map((c) => c.email.toLowerCase()) || [])
-                        ];
-                        const existingEmails = new Set(existingEmailsArray);
+                        // Read only sender identities belonging to the signed-in
+                        // user's organization. The admin client bypasses RLS.
+                        // If either lookup fails, abort before paid AI or writes.
+                        const existingEmails = await findExistingSenderEmails(
+                            orgId, uniqueSenders
+                        );
 
                         // 3. Filtrar os emails que pertencem a Pessoas Não Cadastradas
                         const unknownEmails = emails.filter((e) => !existingEmails.has(e.sender.email.toLowerCase()));
