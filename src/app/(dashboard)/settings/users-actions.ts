@@ -81,13 +81,18 @@ export async function updateUserAction(updateId: string, updates: Partial<UserPr
         // Remove undefined keys to avoid overriding with nulls if partial
         Object.keys(dbUpdates).forEach(key => dbUpdates[key] === undefined && delete dbUpdates[key]);
 
-        const { error } = await supabase
+        const { data: updatedProfile, error } = await supabase
             .from('profiles')
             .update(dbUpdates)
             .eq('id', updateId)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
         if (error) throw error;
+        if (!updatedProfile || updatedProfile.id !== updateId) {
+            return { success: false, error: 'User not found in organization' };
+        }
 
         return { success: true };
     } catch (error: any) {
@@ -102,6 +107,18 @@ export async function archiveUserAction(archiveId: string, newOwnerId?: string) 
     const supabase = createAdminClient();
 
     try {
+        // Confirm the requested target belongs to this tenant before any transfer.
+        const { data: archiveTarget, error: targetError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', archiveId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+        if (targetError) throw targetError;
+        if (!archiveTarget) {
+            return { success: false, error: 'User not found in organization' };
+        }
+
         // 1. Transfer deals if requested
         if (newOwnerId && newOwnerId !== 'none') {
             const { data: eligibleOwner, error: ownerError } = await supabase
@@ -116,18 +133,23 @@ export async function archiveUserAction(archiveId: string, newOwnerId?: string) 
                 .update({ owner_id: newOwnerId })
                 .eq('owner_id', archiveId)
                 .eq('organization_id', organizationId);
-            
+
             if (transferError) throw transferError;
         }
 
-        // 2. Archive user
-        const { error: archiveError } = await supabase
+        // 2. Archive user and require a receipt for the intended profile.
+        const { data: archivedProfile, error: archiveError } = await supabase
             .from('profiles')
             .update({ status: 'inactive' })
             .eq('id', archiveId)
-            .eq('organization_id', organizationId);
+            .eq('organization_id', organizationId)
+            .select('id')
+            .maybeSingle();
 
         if (archiveError) throw archiveError;
+        if (!archivedProfile || archivedProfile.id !== archiveId) {
+            return { success: false, error: 'User not found in organization' };
+        }
 
         return { success: true };
     } catch (error: any) {

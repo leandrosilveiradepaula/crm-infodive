@@ -34,6 +34,7 @@ import * as priceLists from '../src/app/(dashboard)/settings/price-lists-actions
 import { GET as authMe } from '../src/app/api/auth/me/route';
 
 const ID='11111111-1111-4111-8111-111111111111';
+const OTHER_ID='22222222-2222-4222-8222-222222222222';
 const ORG='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 
 const directWrites: Array<[string,()=>Promise<unknown>]> = [
@@ -69,6 +70,21 @@ const directReads: Array<[string,()=>Promise<unknown>]> = [
   ['audit log viewer',()=>audit.getAuditLogs()],
 ];
 
+function query(result: { data?: unknown; error?: unknown }) {
+  const chain: any = {
+    select: vi.fn(() => chain),
+    update: vi.fn(() => chain),
+    eq: vi.fn(() => chain),
+    maybeSingle: vi.fn(async () => result),
+    then: (resolve: (value: unknown) => unknown) => Promise.resolve(result).then(resolve),
+  };
+  return chain;
+}
+
+function adminClient(...queries: any[]) {
+  return { from: vi.fn(() => queries.shift()) };
+}
+
 describe('direct Server Action RBAC, not UI hiding',()=>{
   beforeEach(()=>{
     vi.resetAllMocks();
@@ -92,8 +108,6 @@ describe('direct Server Action RBAC, not UI hiding',()=>{
   });
 
   it('denies price-list reads and writes even when the action returns a failure envelope',async ()=>{
-    // Legacy price-list actions intentionally convert all exceptions into
-    // {success:false}; denial is still enforced BEFORE service-role access.
     const attempts=[
       ()=>priceLists.saveTemplateAction('vendor',{} as any),
       ()=>priceLists.importPriceListAction('list','vendor','file.csv',[]),
@@ -153,5 +167,85 @@ describe('direct Server Action RBAC, not UI hiding',()=>{
     const json=await res.json();
     expect(json.userId).toBe(ID);
     expect(json.profile.organization_id).toBe(ORG);
+  });
+});
+
+describe('tenant-scoped user mutation receipts', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mocked.requireAuditedAdminAction.mockResolvedValue({ userId: OTHER_ID, organizationId: ORG });
+  });
+
+  it.each(['missing target', 'cross-tenant target'])('fails an update with an empty receipt for a %s', async () => {
+    const update = query({ data: null, error: null });
+    mocked.createAdminClient.mockReturnValue(adminClient(update));
+
+    await expect(users.updateUserAction(ID, { role: 'admin' })).resolves.toMatchObject({ success: false });
+    expect(update.update).toHaveBeenCalledWith({ role: 'admin' });
+    expect(update.select).toHaveBeenCalledWith('id');
+    expect(update.maybeSingle).toHaveBeenCalled();
+  });
+
+  it('fails an update when its database mutation returns an error', async () => {
+    const update = query({ data: null, error: new Error('database unavailable') });
+    mocked.createAdminClient.mockReturnValue(adminClient(update));
+
+    await expect(users.updateUserAction(ID, { role: 'admin' })).resolves.toMatchObject({
+      success: false,
+      error: 'database unavailable',
+    });
+  });
+
+  it('keeps role mapping and returns success only for the requested update receipt', async () => {
+    const update = query({ data: { id: ID }, error: null });
+    mocked.createAdminClient.mockReturnValue(adminClient(update));
+
+    await expect(users.updateUserAction(ID, { roles: ['sales', 'manager'] })).resolves.toEqual({ success: true });
+    expect(update.update).toHaveBeenCalledWith({ roles: ['vendedor', 'manager'], role: 'vendedor' });
+  });
+
+  it.each(['missing target', 'cross-tenant target'])('does not transfer deals when archive target is a %s', async () => {
+    const target = query({ data: null, error: null });
+    const client = adminClient(target);
+    mocked.createAdminClient.mockReturnValue(client);
+
+    await expect(users.archiveUserAction(ID, OTHER_ID)).resolves.toMatchObject({ success: false });
+    expect(client.from).toHaveBeenCalledTimes(1);
+    expect(client.from).toHaveBeenCalledWith('profiles');
+    expect(target.update).not.toHaveBeenCalled();
+  });
+
+  it('fails archive when target lookup reports a database error without transferring deals', async () => {
+    const target = query({ data: null, error: new Error('database unavailable') });
+    const client = adminClient(target);
+    mocked.createAdminClient.mockReturnValue(client);
+
+    await expect(users.archiveUserAction(ID, OTHER_ID)).resolves.toMatchObject({
+      success: false,
+      error: 'database unavailable',
+    });
+    expect(client.from).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves a legitimate transfer and archive only when both target receipts are valid', async () => {
+    const target = query({ data: { id: ID }, error: null });
+    const owner = query({ data: { id: OTHER_ID }, error: null });
+    const transfer = query({ error: null });
+    const archive = query({ data: { id: ID }, error: null });
+    mocked.createAdminClient.mockReturnValue(adminClient(target, owner, transfer, archive));
+
+    await expect(users.archiveUserAction(ID, OTHER_ID)).resolves.toEqual({ success: true });
+    expect(transfer.update).toHaveBeenCalledWith({ owner_id: OTHER_ID });
+    expect(archive.update).toHaveBeenCalledWith({ status: 'inactive' });
+    expect(archive.select).toHaveBeenCalledWith('id');
+  });
+
+  it('fails archive when the final archive mutation has no target receipt', async () => {
+    const target = query({ data: { id: ID }, error: null });
+    const archive = query({ data: null, error: null });
+    mocked.createAdminClient.mockReturnValue(adminClient(target, archive));
+
+    await expect(users.archiveUserAction(ID)).resolves.toMatchObject({ success: false });
+    expect(archive.update).toHaveBeenCalledWith({ status: 'inactive' });
   });
 });
