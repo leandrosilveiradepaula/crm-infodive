@@ -66,3 +66,42 @@ Produção e migration requerem gates humanos separados.
 CRM `main` publica produção e **somente humano pode fazer merge**. Não alterar Supabase, RLS, grants, Auth, usuários, chaves ou Vercel diretamente. Testes usam mocks/sintéticos. No post-merge da PR #198, verificação Vercel READY / navegador de login real ainda é necessária antes de certificar operação. A emissão de CI verde não é autorização de produção.
 
 Após resolver este P0 e registrar evidências, retornar a `ai-product-factory/docs/FINALIZATION_EXECUTION_CONTRACT.md`.
+
+---
+
+## Tarefa autorizada — CRM issue #22 (29/10/2026; continuação OWNER)
+
+**Esta seção é a autorização ativa somente para a branch
+`preview/crm22-rbac-security-evidence` e a PR #202.** O Start real do OWNER
+na [issue operacional da Factory #1055](https://github.com/leandrosilveiradepaula/ai-product-factory/issues/1055),
+comentário 6487569648, e o gate humano de escopo aprovado autorizam
+concluir a [issue CRM #22](https://github.com/leandrosilveiradepaula/crm-infodive/issues/22).
+O escopo Service Desk CRM #200 acima continua histórico e válido para
+sua própria linhagem; **não** integra este candidato #22.
+
+A lacuna concreta identificada era consulta global com `service_role`
+em `src/app/api/email/sync/route.ts` aos remetentes existentes e às
+blacklists, sem filtro por organização. A PR #202 modifica somente os
+caminhos necessários ao isolamento da consulta, com denegação em caso de
+erro de banco, testes negativos e documentação de escopo:
+
+- `src/app/api/email/sync/route.ts` — chamada do helper com tenant
+  proveniente de `requireSessionContext`, sem alterar autenticação;
+- `src/lib/email-sync-tenant.ts` — filtro por organização, incluindo
+  o vínculo `account_contacts.account_id → accounts.organization_id`;
+- `test/email-sync-tenant-rbac.test.ts` — testes negativos de tenant,
+  falhas de leitura e respostas inválidas;
+- `docs/CRM22_EMAIL_SYNC_TENANCY.md` — causa, escopo e limitações;
+- `docs/codex/CURRENT_TASK.md` — reconciliação do escopo autorizado.
+
+Os checks de permissão, auditoria e perfis já presentes na main continuam
+sob o contrato RBAC #22 acima; não reimplementá-los sem falha demonstrada.
+Não alterar papéis, privilégios, RLS, banco, migrations, credenciais,
+integradores externos nem Service Desk. Não executar chamadas pagas de
+modelo nem benchmarks. Não alegar que a PR criada por executor externo
+foi produzida por Work Units da Factory: a prova ponta a ponta deve
+ter sua **própria** linhagem verificável, sem backfill artificial.
+
+**Critérios:** TypeScript, Vitest, build e CI no HEAD exato, Preview
+Vercel + browser verificado no mesmo SHA e revisão de autorização;
+proteger `main` com merge exclusivamente humano, após gate legítimo.
