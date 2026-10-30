@@ -105,3 +105,48 @@ ter sua **própria** linhagem verificável, sem backfill artificial.
 **Critérios:** TypeScript, Vitest, build e CI no HEAD exato, Preview
 Vercel + browser verificado no mesmo SHA e revisão de autorização;
 proteger `main` com merge exclusivamente humano, após gate legítimo.
+
+---
+
+## Tarefa autorizada — CRM issue #22 (29/10/2026; nova linhagem após PR #202)
+
+**Fonte de autorização e não implementação.** Origem canônica da autorização:
+https://github.com/leandrosilveiradepaula/crm-infodive/issues/22.
+Este trecho documenta um defeito existente **observado no código da main**
+f9b953e9c22ca112cb508c9ca89ddba4e5849cf7. A PR de bootstrap em DRAFT modifica somente este documento,
+não é Work Unit nem entrega de produto. Não fazer merge desta PR de fonte
+em produção como se concluísse o defeito.
+
+**Falha comprovada e ainda não implementada:**
+`updateUserAction` usa `.update(...).eq('id', updateId).eq('organization_id', organizationId)`
+e retorna `{ success: true }` sempre que o Supabase não retornar erro. Mas uma atualização
+que afeta zero registros (usuário inexistente ou de outra organização)
+não representa erro. `archiveUserAction` também responde sucesso quando o perfil
+alvo não existe no tenant; a transferência opcional de negócios é iniciada
+antes de se comprovar que o perfil-alvo pertence à organização. O registro
+de auditoria atual indica `authorized_attempt`, não mutação concluída.
+
+**Escopo gravável estrito para a próxima implementação pela Factory:**
+- `src/app/(dashboard)/settings/users-actions.ts`
+- `test/server-admin-actions-rbac.test.ts`
+
+**Critérios de aceite exigidos para a Work Unit real:**
+- Atualizações/arquivamentos contra ID ausente ou de outro tenant são negados
+  com resultado de falha, sem declarar sucesso e sem transferir deals;
+- A ação valida existência/tenant antes de qualquer transferência; a
+  própria alteração confirma exatamente o registro pretendido;
+- As operações legítimas existentes continuam funcionando, com autorização
+  server-side e perfis preservados, sem novas permissões;
+- Vitest inclui testes negativos de chamada direta para ID ausente, outro
+  tenant e erro de banco, mais regressão de operação legítima;
+- Auditoria não declara sucesso transacional sem recibo atômico real;
+  manter `authorized_attempt` com seu significado atual;
+- CI nativa, revisão de segurança, Preview no SHA exato e gate humano de
+  produção são necessários para o candidato implementado pela Factory.
+
+**Proibições:** sem alterações no Supabase, migrations, RLS, políticas de
+acesso, tokens, dados reais, Service Desk, outros módulos ou chamadas pagas
+a modelo sem aprovação. Não reabrir Change Sets antigos, não reproduzir
+planos vazios pagos e não atribuir uma implementação externa à Factory.
+O próximo Start deve ser novo, registrado pelo canal OWNER, com linhagem
+própria e sempre parar em `awaiting_release` antes de merge humano.
