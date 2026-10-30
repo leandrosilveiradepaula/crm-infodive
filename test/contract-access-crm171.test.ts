@@ -7,72 +7,121 @@ import { ContractService } from '../src/services/ContractService';
 const USER = 'user-1';
 const ORG = 'org-1';
 const OTHER = 'org-2';
-
+const DATE = '2026-10-30T12:00:00+00:00';
+const uid = (n: number) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0');
+const rows = (n: number) => Array.from({ length: n }, (_, i) =>
+  ({ id: uid(n - i), created_at: DATE }));
 type Response = { data: unknown; error: unknown };
+
 function query(response: Response) {
   const q: Record<string, any> = {};
-  for (const key of ['select', 'eq', 'order', 'range', 'lte']) q[key] = vi.fn(() => q);
+  for (const key of ['select', 'eq', 'or', 'order', 'limit', 'is', 'insert', 'update', 'delete']) q[key] = vi.fn(() => q);
   q.maybeSingle = vi.fn(async () => response);
-  q.then = (resolve: (value: Response) => unknown, reject?: (error: unknown) => unknown) => Promise.resolve(response).then(resolve, reject);
+  q.single = vi.fn(async () => response);
   return q;
 }
-function setup(role: string, rows: unknown[] = [], error: unknown = null) {
-  const profile = query({ data: { role }, error: null });
-  const contracts = query({ data: rows, error });
-  contracts.range = vi.fn((start: number, end: number) => Promise.resolve({ data: rows.slice(start, end + 1), error }));
+function setup(role: string | null, resultRows: unknown[] = [], error: unknown = null) {
+  const profile = query({ data: role ? { role } : null, error });
+  const contracts = query({ data: null, error: null });
+  let page = 0;
+  contracts.limit = vi.fn(async (size: number) => {
+    const start = page++ * size;
+    return { data: resultRows.slice(start, start + size), error: null };
+  });
   const from = vi.fn((table: string) => table === 'profiles' ? profile : contracts);
   mocked.createAdminClient.mockReturnValue({ from });
   return { profile, contracts, from };
 }
 
-describe('CRM #171 contracts read authorization', () => {
+describe('CRM #171 contract owner/tenant access and pagination', () => {
   beforeEach(() => vi.resetAllMocks());
-  it('uses relational owner filter without a large IN list, even with >1000 rows', async () => {
-    const rows = Array.from({ length: 1201 }, (_, i) => ({ id: String(i), created_at: '2026-10-30' }));
-    const { contracts } = setup('vendedor', rows);
+
+  it('paginates >1000 rows with keysets, not giant IN/offset', async () => {
+    const { contracts } = setup('vendedor', rows(1201));
     expect(await ContractService.getContracts(USER, ORG)).toHaveLength(1201);
     expect(contracts.eq).toHaveBeenCalledWith('visible_deal.owner_id', USER);
     expect(contracts.eq).toHaveBeenCalledWith('visible_deal.organization_id', ORG);
     expect(contracts.eq).toHaveBeenCalledWith('organization_id', ORG);
+    expect(contracts.limit).toHaveBeenCalledTimes(3);
+    expect(contracts.or).toHaveBeenCalledTimes(2);
+    expect(contracts.or).toHaveBeenCalledWith(
+      'created_at.lt."' + DATE + '",and(created_at.eq."' + DATE + '",id.lt.' + uid(702) + ')');
     expect(contracts.order).toHaveBeenCalledWith('id', { ascending: false });
-    expect(contracts.range).toHaveBeenCalledTimes(3);
-    expect((contracts as any).in).toBeUndefined();
+    expect(contracts.order).toHaveBeenCalledWith('created_at', { ascending: false, nullsFirst: true });
+    expect(contracts.in).toBeUndefined();
+    expect(contracts.range).toBeUndefined();
   });
-  it('rejects failure on a later page rather than returning partial data', async () => {
-    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i), created_at: '2026-10-30' }));
-    const { contracts } = setup('vendedor', rows);
-    contracts.range = vi.fn()
-      .mockResolvedValueOnce({ data: rows, error: null })
-      .mockResolvedValueOnce({ data: [], error: { message: 'second page unavailable' } });
+  it('rejects later-page errors rather than returning a partial list', async () => {
+    const { contracts } = setup('vendedor');
+    contracts.limit = vi.fn()
+      .mockResolvedValueOnce({ data: rows(500), error: null })
+      .mockResolvedValueOnce({ data: [], error: { message: 'down' } });
     await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('carregar');
   });
-  it('deduplicates repeated IDs across pages', async () => {
-    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i), created_at: '2026-10-30T00:00:00Z' }));
-    const { contracts } = setup('vendedor', rows);
-    contracts.range = vi.fn()
-      .mockResolvedValueOnce({ data: rows, error: null })
-      .mockResolvedValueOnce({ data: [{ id: '499', created_at: '2026-10-30' }, { id: '500', created_at: '2026-10-30' }], error: null });
-    const result = await ContractService.getContracts(USER, ORG);
-    expect(result).toHaveLength(501);
+  it('rejects duplicate IDs and null sort keys', async () => {
+    const { contracts } = setup('vendedor');
+    const first = rows(500);
+    contracts.limit = vi.fn()
+      .mockResolvedValueOnce({ data: first, error: null })
+      .mockResolvedValueOnce({ data: [first[499]], error: null });
+    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('inválida');
+    setup('admin', [{ id: uid(1), created_at: null }]);
+    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('inválida');
   });
-  it('admin sees tenant records without owner restriction', async () => {
-    const { contracts } = setup('admin', []);
-    await ContractService.getContracts(USER, ORG);
+  it('admin sees only tenant records without an owner filter', async () => {
+    const { contracts } = setup('admin', rows(2));
+    expect(await ContractService.getContracts(USER, ORG)).toHaveLength(2);
     expect(contracts.eq).toHaveBeenCalledWith('organization_id', ORG);
     expect(contracts.eq).not.toHaveBeenCalledWith('visible_deal.owner_id', USER);
   });
-  it('rejects unknown role', async () => {
+  it('fails closed on unknown/missing roles and checks tenant against active profile', async () => {
     setup('support');
     await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('negado');
-  });
-  it('rejects query errors instead of returning partial results', async () => {
-    setup('vendedor', [{ id: 'partial' }], { message: 'timeout' });
-    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('carregar');
-  });
-  it('never trusts a caller-provided organization other than the server parameter', async () => {
+    setup(null);
+    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('negado');
     const { profile } = setup('vendedor');
     await ContractService.getContracts(USER, ORG);
     expect(profile.eq).toHaveBeenCalledWith('organization_id', ORG);
+    expect(profile.eq).toHaveBeenCalledWith('status', 'active');
     expect(profile.eq).not.toHaveBeenCalledWith('organization_id', OTHER);
+  });
+  it('rejects role lookup errors', async () => {
+    setup('vendedor', [], { message: 'db down' });
+    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('negado');
+  });
+  it('rejects a cross-tenant proposal even for manager', async () => {
+    const profile = query({ data: { role: 'manager' }, error: null });
+    const foreignProposal = query({ data: null, error: null });
+    const from = vi.fn((table: string) => table === 'profiles' ? profile : foreignProposal);
+    mocked.createAdminClient.mockReturnValue({ from });
+    await expect(ContractService.createContract(USER, ORG,
+      { title: 'draft', proposalId: uid(1) })).rejects.toThrow('Proposta');
+    expect(foreignProposal.eq).toHaveBeenCalledWith('organization_id', ORG);
+    expect(from).not.toHaveBeenCalledWith('contracts');
+  });
+  it('does not claim delete success when a row disappeared', async () => {
+    const before = query({ data: { deal_id: null }, error: null });
+    const profile = query({ data: { role: 'admin' }, error: null });
+    const missing = query({ data: null, error: null });
+    let contractQueries = 0;
+    const from = vi.fn((table: string) => table === 'profiles' ? profile :
+      (contractQueries++ === 0 ? before : missing));
+    mocked.createAdminClient.mockReturnValue({ from });
+    await expect(ContractService.deleteContract(USER, ORG, uid(10))).rejects.toThrow('excluir');
+    expect(missing.is).toHaveBeenCalledWith('deal_id', null);
+    expect(missing.select).toHaveBeenCalledWith('id');
+  });
+  it('guards updates against a concurrently reassigned contract deal', async () => {
+    const before = query({ data: { deal_id: uid(3) }, error: null });
+    const profile = query({ data: { role: 'admin' }, error: null });
+    const deal = query({ data: { id: uid(3), owner_id: USER }, error: null });
+    const stale = query({ data: null, error: null });
+    let contractQueries = 0;
+    const from = vi.fn((table: string) => table === 'profiles' ? profile :
+      table === 'deals' ? deal : (contractQueries++ === 0 ? before : stale));
+    mocked.createAdminClient.mockReturnValue({ from });
+    await expect(ContractService.updateContract(USER, ORG, uid(10), { title: 'edit' }))
+      .rejects.toThrow('atualizar');
+    expect(stale.eq).toHaveBeenCalledWith('deal_id', uid(3));
   });
 });

@@ -17,3 +17,28 @@ This candidate is a **draft**. Verify PostgREST's `deals!inner` relationship and
 ## Known limitations
 
 The listing now retrieves bounded 500-row pages with stable created_at/id ordering and ID deduplication, but this is not a snapshot-isolated cursor: concurrent inserts/updates can shift offset pages. Verify deployed PostgREST max-rows behavior, query plans and whether a database-side cursor or keyset pagination is needed. Tests use mocks only, not a real database. Mutation authorization is checked before the service-role write; concurrent ownership changes are not transactionally locked, so a database-side atomic authorization boundary is still needed for strict race-free enforcement. Cross-table authorization for service-role reads is enforced by server code, not user RLS. Failures must not be represented as complete results.
+
+
+## Independent read-only verification and remaining boundaries — 30/10/2026
+
+The CRM managed database has a contracts.deal_id foreign key to deals.id,
+both tables have RLS enabled and the contracts_deal_id_idx exists. The
+source query shape has a valid relational key, but inspection alone is not
+an authenticated PostgREST request or Preview E2E. At inspection time,
+four contracts had no deal association, none had null created_at, and no
+cross-tenant deal reference was observed. Seller access to these legacy
+unowned contracts intentionally fails closed; business-role semantics
+still require independent validation.
+
+The candidate now uses keyset pages of 500 ordered by created_at/id;
+null sort keys and duplicate IDs produce explicit errors, and Server
+Actions no longer turn denied/failed reads into empty successful lists.
+Update/delete compare-and-set the previously authorized deal reference
+and reject zero affected rows; proposal links require the same tenant.
+
+Not certified: production-scale composite index/query plan, PostgREST
+schema cache, authenticated Preview, and transactionally atomic seller
+authorization under ownership changes. The existing service-role
+prechecks cannot eliminate all TOCTOU races without a DB-side boundary.
+Changes to schema, RLS, data, cost, Preview and production are not part
+of this scoped commit.

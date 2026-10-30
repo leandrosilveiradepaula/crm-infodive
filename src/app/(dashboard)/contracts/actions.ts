@@ -27,7 +27,8 @@ export async function getContracts(): Promise<Contract[]> {
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');
-        return [];
+        // Never show an empty successful list after an auth/database error.
+        throw new Error('Não foi possível carregar os contratos.');
     }
 }
 
