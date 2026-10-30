@@ -16,4 +16,4 @@ This candidate is a **draft**. Verify PostgREST's `deals!inner` relationship and
 
 ## Known limitations
 
-The current listing does not implement explicit page/window parameters. It uses a relational filter to avoid giant IN lists, but a full performance/pagination evaluation is still needed. Cross-table authorization for service-role reads is enforced by server code, not user RLS. Failures must not be represented as complete results.
+The listing now retrieves bounded 500-row pages with stable created_at/id ordering and ID deduplication, but this is not a snapshot-isolated cursor: concurrent inserts/updates can shift offset pages. Verify deployed PostgREST max-rows behavior, query plans and whether a database-side cursor or keyset pagination is needed. Tests use mocks only, not a real database. Mutation authorization is checked before the service-role write; concurrent ownership changes are not transactionally locked, so a database-side atomic authorization boundary is still needed for strict race-free enforcement. Cross-table authorization for service-role reads is enforced by server code, not user RLS. Failures must not be represented as complete results.
