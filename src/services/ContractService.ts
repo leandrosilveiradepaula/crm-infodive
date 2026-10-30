@@ -35,7 +35,35 @@ export class ContractService {
 
     }
 
-    static async createContract(organizationId: string, contract: Partial<Contract>) {
+    private static async assertCanWrite(userId: string, organizationId: string, dealId: string | null | undefined) {
+        const db = createAdminClient();
+        const { data: profile, error } = await db.from('profiles')
+            .select('role').eq('id', userId).eq('organization_id', organizationId)
+            .eq('status', 'active').maybeSingle();
+        if (error || !profile) throw new Error('Acesso aos contratos negado.');
+        if (profile.role !== 'admin' && profile.role !== 'manager' && profile.role !== 'vendedor')
+            throw new Error('Acesso aos contratos negado.');
+        if (!dealId) {
+            if (profile.role === 'vendedor') throw new Error('Contrato sem negócio não autorizado.');
+            return;
+        }
+        const { data: deal, error: dealError } = await db.from('deals')
+            .select('id,owner_id').eq('id', dealId).eq('organization_id', organizationId).maybeSingle();
+        if (dealError || !deal || (profile.role === 'vendedor' && deal.owner_id !== userId))
+            throw new Error('Negócio não autorizado.');
+    }
+
+    private static async assertCanEditContract(userId: string, organizationId: string, id: string) {
+        const db = createAdminClient();
+        const { data, error } = await db.from('contracts').select('deal_id')
+            .eq('id', id).eq('organization_id', organizationId).maybeSingle();
+        if (error || !data) throw new Error('Contrato não autorizado.');
+        await this.assertCanWrite(userId, organizationId, data.deal_id);
+        return data.deal_id as string | null;
+    }
+
+    static async createContract(userId: string, organizationId: string, contract: Partial<Contract>) {
+        await this.assertCanWrite(userId, organizationId, contract.dealId);
         const supabase = createAdminClient();
         
         const dbData = {
@@ -63,7 +91,10 @@ export class ContractService {
         return data;
     }
 
-    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>) {
+    static async updateContract(userId: string, organizationId: string, id: string, updates: Partial<Contract>) {
+        const existingDealId = await this.assertCanEditContract(userId, organizationId, id);
+        if (updates.dealId !== undefined && updates.dealId !== existingDealId)
+            await this.assertCanWrite(userId, organizationId, updates.dealId);
         const supabase = createAdminClient();
         
         const dbUpdates: any = {
@@ -94,7 +125,8 @@ export class ContractService {
         return data;
     }
 
-    static async deleteContract(organizationId: string, id: string) {
+    static async deleteContract(userId: string, organizationId: string, id: string) {
+        await this.assertCanEditContract(userId, organizationId, id);
         const supabase = createAdminClient();
         const { error } = await supabase
             .from('contracts')
