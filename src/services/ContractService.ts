@@ -24,20 +24,28 @@ export class ContractService {
         // when the caller did not explicitly request pagination.
         const pageSize = 500;
         const all: Record<string, unknown>[] = [];
+        // Use the initial upper bound on subsequent pages to exclude new rows.
+        // Offset pagination still needs an atomic snapshot for strict consistency.
+        let upperBound: string | null = null;
         const seen = new Set<string>();
         for (let offset = 0; ; offset += pageSize) {
-            const query = privileged
+            let query = privileged
                 ? supabase.from('contracts').select('*').eq('organization_id', organizationId)
                 : supabase.from('contracts')
                     .select('*, visible_deal:deals!inner(id)')
                     .eq('organization_id', organizationId)
                     .eq('visible_deal.organization_id', organizationId)
                     .eq('visible_deal.owner_id', userId);
+            if (upperBound !== null) query = query.lte('created_at', upperBound);
             const { data, error } = await query
                 .order('created_at', { ascending: false })
                 .order('id', { ascending: false })
                 .range(offset, offset + pageSize - 1);
             if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os contratos.');
+            if (offset === 0 && data.length > 0) {
+                if (typeof data[0]?.created_at !== 'string') throw new Error('Resposta de contratos inválida.');
+                upperBound = data[0].created_at;
+            }
             for (const item of data) {
                 if (!item || typeof item.id !== 'string') throw new Error('Resposta de contratos inválida.');
                 if (seen.has(item.id)) continue;
