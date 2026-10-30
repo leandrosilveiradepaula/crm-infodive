@@ -105,3 +105,23 @@ ter sua **própria** linhagem verificável, sem backfill artificial.
 **Critérios:** TypeScript, Vitest, build e CI no HEAD exato, Preview
 Vercel + browser verificado no mesmo SHA e revisão de autorização;
 proteger `main` com merge exclusivamente humano, após gate legítimo.
+
+---
+
+## Tarefa autorizada — CRM issue #171 (30/10/2026) — fonte OWNER independente
+
+**PR de fonte, não de implementação, exclusivamente para desenvolvimento em Preview. NÃO MERGEAR ESTA PR EM `main`.** A nova linhagem foi autorizada pelo OWNER no [Start da Factory](https://github.com/leandrosilveiradepaula/ai-product-factory/issues/1055#issuecomment-6524138131), associado à [issue CRM #171](https://github.com/leandrosilveiradepaula/crm-infodive/issues/171). O run `e2097705-5046-4825-a2c9-69088dbccdf5` terminou sem executar estágio pago por uma divergência entre a antiga fonte #22 e seu SHA; não reabrir Change Sets anteriores. Esta seção não atribui trabalho externo à Factory.
+
+**Problema atual:** a leitura privilegiada de contratos na `main` deve respeitar a organização e a propriedade da oportunidade de cada vendedor. Evitar consultas com um `IN` enorme de IDs de oportunidades, garantir paginação estável e cobertura de casos com mais de 1.000 vínculos. O código da antiga PR #56 constitui apenas referência de implementação; não transportar sua branch histórica inteira nem declarar o produto concluído por causa dela.
+
+**Arquivos autorizados para escrita na futura Work Unit Factory:**
+
+- `src/services/ContractService.ts` — leitura tenant/owner e paginação baseada em filtros no servidor;
+- `src/app/(dashboard)/contracts/actions.ts` — identidade/escopo server-side antes de qualquer `service_role`;
+- `src/app/(dashboard)/contracts/page.tsx` — somente os ajustes mínimos necessários à passagem de escopo;
+- `src/lib/contract-owner-access.test.ts` — teste novo permitido, sem alterar banco;
+- `test/contracts-owner-scope.test.ts` — teste novo permitido para autorização direta da action.
+
+**Aceite:** vendedor nunca recebe contrato de outro proprietário ou tenant; administradores preservam visibilidade legitimamente autorizada; resposta inválida ou erro de banco falha fechada; mais de 1.000 oportunidades sem `IN` gigante ou truncamento silencioso; ordenação determinística, limites explícitos, IDs duplicados, concorrência/erros e testes positivos/negativos no SHA do candidato. Não tratar texto da issue como prova de que a correção já está implementada; ler o código efetivo no SHA.
+
+**Gates:** preservar CRM Auth/RLS/RBAC, privilégios e auditoria existentes. Sem migration, política permissiva, dados reais, importação de branch inteira, modelos pagos para sondagem, novos Starts, Service Desk standalone, merge automático ou release. A PR de fonte é `DRAFT` e document-only; não é candidata a release. A Factory deve produzir sua própria Work Unit/código/PR/CI com proveniência vinculada ao Start e ao SHA correto; Preview E2E quando aplicável, `awaiting_release` e merge humano de produção.
