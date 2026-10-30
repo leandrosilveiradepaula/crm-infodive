@@ -11,7 +11,7 @@ const OTHER = 'org-2';
 type Response = { data: unknown; error: unknown };
 function query(response: Response) {
   const q: Record<string, any> = {};
-  for (const key of ['select', 'eq', 'order', 'range']) q[key] = vi.fn(() => q);
+  for (const key of ['select', 'eq', 'order', 'range', 'lte']) q[key] = vi.fn(() => q);
   q.maybeSingle = vi.fn(async () => response);
   q.then = (resolve: (value: Response) => unknown, reject?: (error: unknown) => unknown) => Promise.resolve(response).then(resolve, reject);
   return q;
@@ -39,7 +39,7 @@ describe('CRM #171 contracts read authorization', () => {
     expect((contracts as any).in).toBeUndefined();
   });
   it('rejects failure on a later page rather than returning partial data', async () => {
-    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i) }));
+    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i), created_at: '2026-10-30' }));
     const { contracts } = setup('vendedor', rows);
     contracts.range = vi.fn()
       .mockResolvedValueOnce({ data: rows, error: null })
@@ -51,7 +51,7 @@ describe('CRM #171 contracts read authorization', () => {
     const { contracts } = setup('vendedor', rows);
     contracts.range = vi.fn()
       .mockResolvedValueOnce({ data: rows, error: null })
-      .mockResolvedValueOnce({ data: [{ id: '499' }, { id: '500' }], error: null });
+      .mockResolvedValueOnce({ data: [{ id: '499', created_at: '2026-10-30' }, { id: '500', created_at: '2026-10-30' }], error: null });
     const result = await ContractService.getContracts(USER, ORG);
     expect(result).toHaveLength(501);
   });
