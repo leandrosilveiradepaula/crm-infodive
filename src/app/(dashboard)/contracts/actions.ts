@@ -7,8 +7,8 @@ import { type Contract } from '@/types/contract';
 
 export async function getContracts(): Promise<Contract[]> {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.getContracts(organizationId);
+        const { userId, organizationId } = await requireSessionContext();
+        const data = await ContractService.getContracts(userId, organizationId);
         return data.map((item: any) => ({
             id: item.id,
             title: item.title,
