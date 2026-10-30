@@ -33,8 +33,8 @@ export async function getContracts(): Promise<Contract[]> {
 
 export async function createContract(contract: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.createContract(organizationId, contract);
+        const { userId, organizationId } = await requireSessionContext();
+        const data = await ContractService.createContract(userId, organizationId, contract);
         revalidatePath('/contracts');
         return { success: true, data };
     } catch {
@@ -45,8 +45,8 @@ export async function createContract(contract: Partial<Contract>) {
 
 export async function updateContract(id: string, updates: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.updateContract(organizationId, id, updates);
+        const { userId, organizationId } = await requireSessionContext();
+        await ContractService.updateContract(userId, organizationId, id, updates);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
@@ -57,8 +57,8 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
 
 export async function deleteContract(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.deleteContract(organizationId, id);
+        const { userId, organizationId } = await requireSessionContext();
+        await ContractService.deleteContract(userId, organizationId, id);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
