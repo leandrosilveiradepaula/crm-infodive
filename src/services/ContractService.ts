@@ -2,16 +2,38 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { type Contract } from '@/types/contract';
 
 export class ContractService {
-    static async getContracts(organizationId: string) {
+    static async getContracts(userId: string, organizationId: string) {
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('contracts')
-            .select('*')
+        // Admin client bypasses RLS: derive the role from the trusted profile row.
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('role, roles')
+            .eq('id', userId)
             .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+            .eq('status', 'active')
+            .maybeSingle();
+        if (profileError || !profile) throw new Error('Acesso aos contratos negado.');
+        const roles = [profile.role, ...(Array.isArray(profile.roles) ? profile.roles : [])];
+        const privileged = roles.some((role) => role === 'admin' || role === 'manager');
+        if (!privileged && !roles.some((role) => role === 'sales' || role === 'seller' || role === 'vendedor' || role === 'commercial' || role === 'comercial')) {
+            throw new Error('Acesso aos contratos negado.');
+        }
 
-        if (error) throw new Error('Não foi possível carregar os contratos.');
+        // PostgREST relational filter is evaluated in SQL. Never send thousands
+        // of owned deal IDs in a URL, and never trust client-supplied ownership.
+        let query = privileged
+            ? supabase.from('contracts').select('*').eq('organization_id', organizationId)
+            : supabase.from('contracts')
+                .select('*, visible_deal:deals!inner(id)')
+                .eq('organization_id', organizationId)
+                .eq('visible_deal.organization_id', organizationId)
+                .eq('visible_deal.owner_id', userId);
+        const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false });
+        if (error || !data) throw new Error('Não foi possível carregar os contratos.');
         return data;
+
     }
 
     static async createContract(organizationId: string, contract: Partial<Contract>) {
