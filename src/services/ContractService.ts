@@ -20,18 +20,33 @@ export class ContractService {
 
         // PostgREST relational filter is evaluated in SQL. Never send thousands
         // of owned deal IDs in a URL, and never trust client-supplied ownership.
-        let query = privileged
-            ? supabase.from('contracts').select('*').eq('organization_id', organizationId)
-            : supabase.from('contracts')
-                .select('*, visible_deal:deals!inner(id)')
-                .eq('organization_id', organizationId)
-                .eq('visible_deal.organization_id', organizationId)
-                .eq('visible_deal.owner_id', userId);
-        const { data, error } = await query
-            .order('created_at', { ascending: false })
-            .order('id', { ascending: false });
-        if (error || !data) throw new Error('Não foi possível carregar os contratos.');
-        return data;
+        // Fetch bounded pages. Supabase/PostgREST may cap each response even
+        // when the caller did not explicitly request pagination.
+        const pageSize = 500;
+        const all: Record<string, unknown>[] = [];
+        const seen = new Set<string>();
+        for (let offset = 0; ; offset += pageSize) {
+            const query = privileged
+                ? supabase.from('contracts').select('*').eq('organization_id', organizationId)
+                : supabase.from('contracts')
+                    .select('*, visible_deal:deals!inner(id)')
+                    .eq('organization_id', organizationId)
+                    .eq('visible_deal.organization_id', organizationId)
+                    .eq('visible_deal.owner_id', userId);
+            const { data, error } = await query
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: false })
+                .range(offset, offset + pageSize - 1);
+            if (error || !Array.isArray(data)) throw new Error('Não foi possível carregar os contratos.');
+            for (const item of data) {
+                if (!item || typeof item.id !== 'string') throw new Error('Resposta de contratos inválida.');
+                if (seen.has(item.id)) continue;
+                seen.add(item.id);
+                all.push(item);
+            }
+            if (data.length < pageSize) break;
+        }
+        return all;
 
     }
 
