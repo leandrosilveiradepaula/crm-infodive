@@ -19,6 +19,7 @@ function query(response: Response) {
 function setup(role: string, rows: unknown[] = [], error: unknown = null) {
   const profile = query({ data: { role }, error: null });
   const contracts = query({ data: rows, error });
+  contracts.range = vi.fn((start: number, end: number) => Promise.resolve({ data: rows.slice(start, end + 1), error }));
   const from = vi.fn((table: string) => table === 'profiles' ? profile : contracts);
   mocked.createAdminClient.mockReturnValue({ from });
   return { profile, contracts, from };
@@ -34,7 +35,25 @@ describe('CRM #171 contracts read authorization', () => {
     expect(contracts.eq).toHaveBeenCalledWith('visible_deal.organization_id', ORG);
     expect(contracts.eq).toHaveBeenCalledWith('organization_id', ORG);
     expect(contracts.order).toHaveBeenCalledWith('id', { ascending: false });
+    expect(contracts.range).toHaveBeenCalledTimes(3);
     expect((contracts as any).in).toBeUndefined();
+  });
+  it('rejects failure on a later page rather than returning partial data', async () => {
+    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i) }));
+    const { contracts } = setup('vendedor', rows);
+    contracts.range = vi.fn()
+      .mockResolvedValueOnce({ data: rows, error: null })
+      .mockResolvedValueOnce({ data: [], error: { message: 'second page unavailable' } });
+    await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('carregar');
+  });
+  it('deduplicates repeated IDs across pages', async () => {
+    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i) }));
+    const { contracts } = setup('vendedor', rows);
+    contracts.range = vi.fn()
+      .mockResolvedValueOnce({ data: rows, error: null })
+      .mockResolvedValueOnce({ data: [{ id: '499' }, { id: '500' }], error: null });
+    const result = await ContractService.getContracts(USER, ORG);
+    expect(result).toHaveLength(501);
   });
   it('admin sees tenant records without owner restriction', async () => {
     const { contracts } = setup('admin', []);
