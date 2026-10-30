@@ -7,15 +7,14 @@ export class ContractService {
         // Admin client bypasses RLS: derive the role from the trusted profile row.
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('role, roles')
+            .select('role')
             .eq('id', userId)
             .eq('organization_id', organizationId)
             .eq('status', 'active')
             .maybeSingle();
         if (profileError || !profile) throw new Error('Acesso aos contratos negado.');
-        const roles = [profile.role, ...(Array.isArray(profile.roles) ? profile.roles : [])];
-        const privileged = roles.some((role) => role === 'admin' || role === 'manager');
-        if (!privileged && !roles.some((role) => role === 'sales' || role === 'seller' || role === 'vendedor' || role === 'commercial' || role === 'comercial')) {
+        const privileged = profile.role === 'admin' || profile.role === 'manager';
+        if (!privileged && profile.role !== 'vendedor') {
             throw new Error('Acesso aos contratos negado.');
         }
 
