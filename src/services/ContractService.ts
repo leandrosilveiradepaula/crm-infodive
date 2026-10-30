@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Contract } from '@/types/contract';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Contract } from '../types/contract';
 
 export class ContractService {
     static async getContracts(userId: string, organizationId: string) {
