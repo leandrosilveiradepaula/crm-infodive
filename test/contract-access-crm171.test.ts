@@ -47,7 +47,7 @@ describe('CRM #171 contracts read authorization', () => {
     await expect(ContractService.getContracts(USER, ORG)).rejects.toThrow('carregar');
   });
   it('deduplicates repeated IDs across pages', async () => {
-    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i) }));
+    const rows = Array.from({ length: 500 }, (_, i) => ({ id: String(i), created_at: '2026-10-30T00:00:00Z' }));
     const { contracts } = setup('vendedor', rows);
     contracts.range = vi.fn()
       .mockResolvedValueOnce({ data: rows, error: null })
