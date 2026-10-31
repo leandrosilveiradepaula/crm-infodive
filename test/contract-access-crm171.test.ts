@@ -99,6 +99,29 @@ describe('CRM #171 contract owner/tenant access and pagination', () => {
     expect(foreignProposal.eq).toHaveBeenCalledWith('organization_id', ORG);
     expect(from).not.toHaveBeenCalledWith('contracts');
   });
+  it('rejects a proposal linked to a deal when creating an unlinked contract', async () => {
+    const profile = query({ data: { role: 'admin' }, error: null });
+    const linkedProposal = query({ data: { id: uid(2), deal_id: uid(3) }, error: null });
+    const from = vi.fn((table: string) => table === 'profiles' ? profile : linkedProposal);
+    mocked.createAdminClient.mockReturnValue({ from });
+    await expect(ContractService.createContract(USER, ORG,
+      { title: 'draft', dealId: null, proposalId: uid(2) }))
+      .rejects.toThrow('Proposta');
+    expect(from).not.toHaveBeenCalledWith('contracts');
+  });
+  it('rejects a retained proposal incompatible with a new deal', async () => {
+    const profile = query({ data: { role: 'admin' }, error: null });
+    const contract = query({ data: { deal_id: null, proposal_id: uid(2) }, error: null });
+    const newDeal = query({ data: { id: uid(4), owner_id: USER }, error: null });
+    const proposal = query({ data: { id: uid(2), deal_id: uid(3) }, error: null });
+    const from = vi.fn((table: string) =>
+      table === 'profiles' ? profile : table === 'deals' ? newDeal :
+      table === 'proposals' ? proposal : contract);
+    mocked.createAdminClient.mockReturnValue({ from });
+    await expect(ContractService.updateContract(USER, ORG, uid(9),
+      { dealId: uid(4) })).rejects.toThrow('Proposta');
+    expect(contract.update).not.toHaveBeenCalled();
+  });
   it('does not claim delete success when a row disappeared', async () => {
     const before = query({ data: { deal_id: null }, error: null });
     const profile = query({ data: { role: 'admin' }, error: null });

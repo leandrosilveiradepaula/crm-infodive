@@ -76,7 +76,9 @@ export class ContractService {
         const db = createAdminClient();
         const { data, error } = await db.from('proposals').select('id,deal_id')
             .eq('id', proposalId).eq('organization_id', organizationId).maybeSingle();
-        if (error || !data || (data.deal_id && dealId && data.deal_id !== dealId))
+        // A linked proposal must belong to the same deal; null is not a
+        // wildcard for an existing proposal/deal relationship.
+        if (error || !data || (data.deal_id && data.deal_id !== dealId))
             throw new Error('Proposta não autorizada.');
     }
 
@@ -125,6 +127,15 @@ export class ContractService {
             await this.assertCanWrite(userId, organizationId, updates.dealId);
         if (updates.proposalId !== undefined)
             await this.assertProposalInTenant(organizationId, updates.proposalId, updates.dealId === undefined ? existingDealId : updates.dealId);
+        // Reassigning a deal must also validate an existing proposal that
+        // was not explicitly supplied in the update payload.
+        if (updates.dealId !== undefined && updates.dealId !== existingDealId && updates.proposalId === undefined) {
+            const { data: linked, error: linkedError } = await createAdminClient()
+                .from('contracts').select('proposal_id')
+                .eq('id', id).eq('organization_id', organizationId).maybeSingle();
+            if (linkedError || !linked) throw new Error('Contrato não autorizado.');
+            await this.assertProposalInTenant(organizationId, linked.proposal_id, updates.dealId);
+        }
         const supabase = createAdminClient();
         
         const dbUpdates: any = {
