@@ -7,8 +7,8 @@ import { type Contract } from '@/types/contract';
 
 export async function getContracts(): Promise<Contract[]> {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.getContracts(organizationId);
+        const { userId, organizationId } = await requireSessionContext();
+        const data = await ContractService.getContracts(userId, organizationId);
         return data.map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -27,14 +27,15 @@ export async function getContracts(): Promise<Contract[]> {
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');
-        return [];
+        // Never show an empty successful list after an auth/database error.
+        throw new Error('Não foi possível carregar os contratos.');
     }
 }
 
 export async function createContract(contract: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.createContract(organizationId, contract);
+        const { userId, organizationId } = await requireSessionContext();
+        const data = await ContractService.createContract(userId, organizationId, contract);
         revalidatePath('/contracts');
         return { success: true, data };
     } catch {
@@ -45,8 +46,8 @@ export async function createContract(contract: Partial<Contract>) {
 
 export async function updateContract(id: string, updates: Partial<Contract>) {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.updateContract(organizationId, id, updates);
+        const { userId, organizationId } = await requireSessionContext();
+        await ContractService.updateContract(userId, organizationId, id, updates);
         revalidatePath('/contracts');
         return { success: true };
     } catch {
@@ -57,8 +58,8 @@ export async function updateContract(id: string, updates: Partial<Contract>) {
 
 export async function deleteContract(id: string) {
     try {
-        const { organizationId } = await requireSessionContext();
-        await ContractService.deleteContract(organizationId, id);
+        const { userId, organizationId } = await requireSessionContext();
+        await ContractService.deleteContract(userId, organizationId, id);
         revalidatePath('/contracts');
         return { success: true };
     } catch {

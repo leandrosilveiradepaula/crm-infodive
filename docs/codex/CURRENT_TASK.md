@@ -105,3 +105,14 @@ ter sua **própria** linhagem verificável, sem backfill artificial.
 **Critérios:** TypeScript, Vitest, build e CI no HEAD exato, Preview
 Vercel + browser verificado no mesmo SHA e revisão de autorização;
 proteger `main` com merge exclusivamente humano, após gate legítimo.
+
+
+---
+
+# CURRENT_TASK — Journey V2 CRM #171 (30/10/2026)
+
+This section is authoritative ONLY for branch `factory/journey-88e94d11-4ada-4630-aa6a-fbf2c5665b2b`, bound to authenticated Factory journey `88e94d11-4ada-4630-aa6a-fbf2c5665b2b`, request `380ba6e9-be62-4911-8c32-c4762552c0c0`, source `fea4669258fcd832c7e187e7b00c1c5fb4d90a76`. It does not authorize changing or reusing #22 artifacts.
+
+Authorized scope: reconcile issue #171 against actual current repository state; address contract listing scalability and server-side organization/owner access control, including necessary contract actions and narrowly relevant tests; record security/performance tradeoffs. Allowed files: `src/services/ContractService.ts`, `src/app/(dashboard)/contracts/actions.ts`, focused `test/*contract*.test.ts`, `docs/CRM171_CONTRACT_ACCESS.md`, this task document. Commit and draft PR against `preview/crm171-delivery-v2` are authorized; no merge, migration, production deployment, RLS/grant change, new paid model calls or credentials. Follow existing repository instructions and verify TypeScript, Vitest, build and CI at exact SHA before marking ready. Do not claim Preview evidence until independently observed.
+
+Current code at source SHA no longer contains the large `.in('deal_id', visibleIds)` described by issue #171. The existing `getContracts` uses service role with tenant-only filtering; do not restore giant IN lists or blindly assume that RLS protects service-role queries. Authorization must be derived from the server-side active profile, with denial on unknown role or lookup errors, and seller visibility tied to owned deals without client-supplied owner IDs. Preserve deterministic ordering and avoid partial successes being presented as complete data.

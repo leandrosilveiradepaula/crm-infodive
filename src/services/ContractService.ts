@@ -1,20 +1,99 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Contract } from '@/types/contract';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Contract } from '../types/contract';
 
 export class ContractService {
-    static async getContracts(organizationId: string) {
+    static async getContracts(userId: string, organizationId: string) {
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('contracts')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+        // Service-role bypasses RLS; trust only the current active profile.
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles').select('role')
+            .eq('id', userId).eq('organization_id', organizationId)
+            .eq('status', 'active').maybeSingle();
+        if (profileError || !profile) throw new Error('Acesso aos contratos negado.');
+        const privileged = profile.role === 'admin' || profile.role === 'manager';
+        if (!privileged && profile.role !== 'vendedor') throw new Error('Acesso aos contratos negado.');
 
-        if (error) throw new Error('Não foi possível carregar os contratos.');
-        return data;
+        // Keyset pagination: INSERT/DELETE before the cursor cannot shift pages.
+        // This is not a transactional snapshot for changes to ownership/sort keys.
+        const pageSize = 500;
+        const all: Record<string, unknown>[] = [];
+        const seen = new Set<string>();
+        const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const timestamp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
+        let cursor: { created_at: string; id: string } | null = null;
+        for (;;) {
+            let query = privileged
+                ? supabase.from('contracts').select('*').eq('organization_id', organizationId)
+                : supabase.from('contracts')
+                    .select('*, visible_deal:deals!inner(id)')
+                    .eq('organization_id', organizationId)
+                    .eq('visible_deal.organization_id', organizationId)
+                    .eq('visible_deal.owner_id', userId);
+            if (cursor) {
+                // PostgREST OR operands with punctuation must be quoted.
+                query = query.or('created_at.lt."' + cursor.created_at +
+                    '",and(created_at.eq."' + cursor.created_at + '",id.lt.' + cursor.id + ')');
+            }
+            const { data, error } = await query
+                .order('created_at', { ascending: false, nullsFirst: true })
+                .order('id', { ascending: false }).limit(pageSize);
+            if (error || !Array.isArray(data) || data.length > pageSize)
+                throw new Error('Não foi possível carregar os contratos.');
+            for (const item of data) {
+                if (!item || typeof item.id !== 'string' || !uuid.test(item.id) ||
+                    typeof item.created_at !== 'string' || !timestamp.test(item.created_at) ||
+                    Number.isNaN(Date.parse(item.created_at)) || seen.has(item.id))
+                    throw new Error('Resposta de contratos inválida.');
+                seen.add(item.id);
+                all.push(item);
+            }
+            if (data.length < pageSize) return all;
+            const last = data[data.length - 1];
+            cursor = { created_at: last.created_at, id: last.id };
+        }
     }
 
-    static async createContract(organizationId: string, contract: Partial<Contract>) {
+    private static async assertCanWrite(userId: string, organizationId: string, dealId: string | null | undefined) {
+        const db = createAdminClient();
+        const { data: profile, error } = await db.from('profiles')
+            .select('role').eq('id', userId).eq('organization_id', organizationId)
+            .eq('status', 'active').maybeSingle();
+        if (error || !profile) throw new Error('Acesso aos contratos negado.');
+        if (profile.role !== 'admin' && profile.role !== 'manager' && profile.role !== 'vendedor')
+            throw new Error('Acesso aos contratos negado.');
+        if (!dealId) {
+            if (profile.role === 'vendedor') throw new Error('Contrato sem negócio não autorizado.');
+            return;
+        }
+        const { data: deal, error: dealError } = await db.from('deals')
+            .select('id,owner_id').eq('id', dealId).eq('organization_id', organizationId).maybeSingle();
+        if (dealError || !deal || (profile.role === 'vendedor' && deal.owner_id !== userId))
+            throw new Error('Negócio não autorizado.');
+    }
+
+    private static async assertProposalInTenant(organizationId: string, proposalId: string | null | undefined, dealId: string | null | undefined) {
+        if (!proposalId) return;
+        const db = createAdminClient();
+        const { data, error } = await db.from('proposals').select('id,deal_id')
+            .eq('id', proposalId).eq('organization_id', organizationId).maybeSingle();
+        // A linked proposal must belong to the same deal; null is not a
+        // wildcard for an existing proposal/deal relationship.
+        if (error || !data || (data.deal_id && data.deal_id !== dealId))
+            throw new Error('Proposta não autorizada.');
+    }
+
+    private static async assertCanEditContract(userId: string, organizationId: string, id: string) {
+        const db = createAdminClient();
+        const { data, error } = await db.from('contracts').select('deal_id')
+            .eq('id', id).eq('organization_id', organizationId).maybeSingle();
+        if (error || !data) throw new Error('Contrato não autorizado.');
+        await this.assertCanWrite(userId, organizationId, data.deal_id);
+        return data.deal_id as string | null;
+    }
+
+    static async createContract(userId: string, organizationId: string, contract: Partial<Contract>) {
+        await this.assertCanWrite(userId, organizationId, contract.dealId);
+        await this.assertProposalInTenant(organizationId, contract.proposalId, contract.dealId);
         const supabase = createAdminClient();
         
         const dbData = {
@@ -42,7 +121,21 @@ export class ContractService {
         return data;
     }
 
-    static async updateContract(organizationId: string, id: string, updates: Partial<Contract>) {
+    static async updateContract(userId: string, organizationId: string, id: string, updates: Partial<Contract>) {
+        const existingDealId = await this.assertCanEditContract(userId, organizationId, id);
+        if (updates.dealId !== undefined && updates.dealId !== existingDealId)
+            await this.assertCanWrite(userId, organizationId, updates.dealId);
+        if (updates.proposalId !== undefined)
+            await this.assertProposalInTenant(organizationId, updates.proposalId, updates.dealId === undefined ? existingDealId : updates.dealId);
+        // Reassigning a deal must also validate an existing proposal that
+        // was not explicitly supplied in the update payload.
+        if (updates.dealId !== undefined && updates.dealId !== existingDealId && updates.proposalId === undefined) {
+            const { data: linked, error: linkedError } = await createAdminClient()
+                .from('contracts').select('proposal_id')
+                .eq('id', id).eq('organization_id', organizationId).maybeSingle();
+            if (linkedError || !linked) throw new Error('Contrato não autorizado.');
+            await this.assertProposalInTenant(organizationId, linked.proposal_id, updates.dealId);
+        }
         const supabase = createAdminClient();
         
         const dbUpdates: any = {
@@ -61,27 +154,24 @@ export class ContractService {
         if (updates.content_json !== undefined) dbUpdates.content_json = updates.content_json;
         if (updates.signature_image !== undefined) dbUpdates.signature_image = updates.signature_image;
 
-        const { data, error } = await supabase
-            .from('contracts')
-            .update(dbUpdates)
-            .eq('id', id)
-            .eq('organization_id', organizationId)
-            .select()
-            .single();
-
-        if (error) throw new Error('Não foi possível atualizar o contrato.');
+        let write = supabase.from('contracts').update(dbUpdates)
+            .eq('id', id).eq('organization_id', organizationId);
+        write = existingDealId === null ? write.is('deal_id', null)
+            : write.eq('deal_id', existingDealId);
+        const { data, error } = await write.select().maybeSingle();
+        if (error || !data) throw new Error('Não foi possível atualizar o contrato.');
         return data;
     }
 
-    static async deleteContract(organizationId: string, id: string) {
+    static async deleteContract(userId: string, organizationId: string, id: string) {
+        const existingDealId = await this.assertCanEditContract(userId, organizationId, id);
         const supabase = createAdminClient();
-        const { error } = await supabase
-            .from('contracts')
-            .delete()
-            .eq('id', id)
-            .eq('organization_id', organizationId);
-
-        if (error) throw new Error('Não foi possível excluir o contrato.');
+        let write = supabase.from('contracts').delete()
+            .eq('id', id).eq('organization_id', organizationId);
+        write = existingDealId === null ? write.is('deal_id', null)
+            : write.eq('deal_id', existingDealId);
+        const { data, error } = await write.select('id').maybeSingle();
+        if (error || !data) throw new Error('Não foi possível excluir o contrato.');
         return true;
     }
 }
