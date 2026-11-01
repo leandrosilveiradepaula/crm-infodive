@@ -1,3 +1,26 @@
+# CURRENT_TASK — CRM #171: contratos escaláveis (Factory journey V2)
+
+**Autorização específica para a branch de implementação da issue #171**, vinculada à jornada V2 da AI Product Factory. Este bloco não autoriza alterações no escopo de outras issues, não substitui as regras permanentes de `AGENTS.md` e não concede permissão para produção.
+
+## Escopo e objetivo
+
+Corrigir `ContractService.getContracts` para não enviar todos os IDs de negócios visíveis em um único filtro PostgREST `.in('deal_id', visibleIds)`. Preservar organização, proprietário, RLS, autorização server-side, paginação global e ordenação estável. Cobrir mais de 1.000 vínculos, IDs duplicados, falhas parciais e limites; sem truncar resultados.
+
+## Arquivos permitidos exclusivamente para a issue #171
+
+- `src/services/ContractService.ts`;
+- `src/services/ContractService.test.ts` (se necessário, criar);
+- testes diretamente relacionados em `test/**` ou `tests/**` (somente contratos e regressão de escopo);
+- documentação específica da issue #171, se necessária.
+
+**Proibido:** alterar papéis, políticas RLS, migrations, permissões, credenciais, produção, módulos RBAC #22 ou Service Desk #200; ampliar escopo sem decisão humana. Não utilizar modelos pagos para sondagem. Não criar bypass de autorização.
+
+## Entrega
+
+Uma PR contra `main` para revisão e merge exclusivamente humanos. CI e testes no SHA exato; Preview somente conforme a política real do projeto. A autorização desta seção só vale para a execução da issue #171; não é uma autorização genérica para modificar `ContractService` em outras jornadas.
+
+---
+
 # CURRENT_TASK — CRM #200: Service Desk como módulo do CRM (27/10/2026)
 
 **Decisão atual do operador substitui a tarefa anterior para esta branch.**
