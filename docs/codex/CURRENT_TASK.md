@@ -1,3 +1,34 @@
+# CURRENT_TASK — CRM #209: escopo vigente para a nova Jornada V2
+
+**Autorização específica do OWNER, em 01/11/2026:** [CRM issue #209](https://github.com/leandrosilveiradepaula/crm-infodive/issues/209), [Factory issue operacional #1055](https://github.com/leandrosilveiradepaula/ai-product-factory/issues/1055). Esta seção é a autoridade **somente** para uma nova Jornada V2 legítima de CRM #209 admitida depois da incorporação humana deste arquivo na `main`, com `source_commit` imutável que contenha esta seção. Não retroage para journeys anteriores, não reabre Change Sets bloqueados e não atribui código humano à Factory.
+
+## Objetivo e decisão de escopo
+
+Resolver a falha **atual e reproduzível** da `main`: `ContractService.getContracts(organizationId)` usa `createAdminClient()` e somente `organization_id` para listar contratos. `service_role` contorna RLS; um vendedor não pode receber contratos fora de sua titularidade. O antigo filtro gigante `.in('deal_id', visibleIds)` da issue #171 **não existe** no source atual: é proibido implementá-lo ou alegar que foi corrigido nesta jornada. Inspecionar código, chamadas e relacionamentos exatos antes de alterar.
+
+### Arquivos autorizados
+
+- `src/services/ContractService.ts` — leitura paginada, filtros de tenant/proprietário e falha explícita.
+- `src/app/(dashboard)/contracts/actions.ts` — sessão, perfil ativo, autoridade server-side e tratamento de erros.
+- `src/types/contract.ts` — somente se estritamente necessário para tipos existentes, sem nova semântica.
+- `test/*contract*.test.ts` ou `tests/*contract*.test.ts` — testes negativos e positivos focados, sem chamadas de rede.
+- `docs/CRM209_CONTRACT_ACCESS.md` — decisão de arquitetura, riscos e evidências da tarefa.
+- `docs/codex/CURRENT_TASK.md` — apenas atualização documental desta autorização, se necessária.
+
+Não ampliar arquivos, dependências ou API sem demonstrar necessidade e autorização adicional. Inspecionar `profiles`, `deals`, `contracts`, contratos sem negócio e chamadores existentes. Os papéis existentes são a única autoridade; não aceitar tenant, perfil ou proprietário de argumentos do navegador. Não modificar sem decisão humana explícita a visibilidade de contratos legados sem `deal_id`, transferência concorrente de proprietário ou a matriz de papéis.
+
+### Aceite e limites
+
+- Isolamento por organização e proprietário com filtros aplicados no servidor, sem lista `IN` não limitada, sem leitura parcial silenciosa; paginação total estável por `created_at` e ID único.
+- Testes de dois tenants, vendedor/admin/diretoria conforme permissões realmente existentes, mais de 1.000 vínculos, duplicatas, páginas subsequentes, falha no meio da paginação e denegação segura.
+- Execução na própria branch exclusiva `factory/journey-<UUID>` da nova Journey V2, vinculada ao novo `source_commit` que contenha esta autorização; nunca reaproveitar PR humano #207, PR histórico #172, SHA de outra jornada ou branches já compartilhadas como produto autônomo.
+- Autoriza commits de código somente dentro deste escopo, testes e abertura de PR **não draft quando todos os gates estarem completos**; a `main` publica produção e exige merge humano. Sem auto-merge nem migração, RLS, credenciais, novos serviços pagos, alterações de produção ou dados. Preview real e CI exata conforme política.
+- Não usar modelos pagos só para testar, não comprar créditos e não executar o benchmark financeiro SQL. Falhas de prova permanecem bloqueio, sem inventar evidências.
+
+**Este arquivo de governança atualizado é um pré-requisito de source, não uma entrega autônoma.** A Factory só poderá reivindicar autonomia com run/commit/CI/Preview independentes, posteriores ao novo Start válido.
+
+---
+
 # CURRENT_TASK — CRM #171: contratos escaláveis (Factory journey V2)
 
 **Autorização específica para a branch de implementação da issue #171**, vinculada à jornada V2 da AI Product Factory. Este bloco não autoriza alterações no escopo de outras issues, não substitui as regras permanentes de `AGENTS.md` e não concede permissão para produção.
