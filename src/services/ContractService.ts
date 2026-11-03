@@ -1,14 +1,41 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { type Contract } from '@/types/contract';
 
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 100;
+
 export class ContractService {
-    static async getContracts(organizationId: string) {
+    static async getContracts(
+        organizationId: string,
+        ownerId: string | null,
+        canViewAll: boolean,
+        page = 0,
+        pageSize = DEFAULT_PAGE_SIZE,
+    ) {
+        if (!Number.isInteger(page) || page < 0 || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
+            throw new Error('Paginação de contratos inválida.');
+        }
+
+        if (!canViewAll && !ownerId) {
+            throw new Error('Não foi possível determinar a autoridade para ler contratos.');
+        }
+
         const supabase = createAdminClient();
-        const { data, error } = await supabase
+        const from = page * pageSize;
+        const to = from + pageSize - 1;
+        let query = supabase
             .from('contracts')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+            .select(canViewAll ? '*' : '*, deals!inner(owner_id)')
+            .eq('organization_id', organizationId);
+
+        if (!canViewAll) {
+            query = query.eq('deals.owner_id', ownerId);
+        }
+
+        const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: false })
+            .range(from, to);
 
         if (error) throw new Error('Não foi possível carregar os contratos.');
         return data;
