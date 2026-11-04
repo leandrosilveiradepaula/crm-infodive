@@ -87,7 +87,7 @@ export class ContractService {
         if (updates.status !== undefined) dbUpdates.status = updates.status;
         if (updates.type !== undefined) dbUpdates.type = updates.type;
         if (updates.signerName !== undefined) dbUpdates.signer_name = updates.signerName;
-        if (updates.signerRole !== undefined) dbUpdates.signer_role = updates.signer_role;
+        if ('signerRole' in updates && updates.signerRole !== undefined) dbUpdates.signer_role = updates.signerRole;
         if (updates.dealId !== undefined) dbUpdates.deal_id = updates.dealId;
         if (updates.proposalId !== undefined) dbUpdates.proposal_id = updates.proposalId;
         if (updates.content_json !== undefined) dbUpdates.content_json = updates.content_json;
