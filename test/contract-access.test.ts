@@ -4,11 +4,11 @@ const { from } = vi.hoisted(() => ({
     from: vi.fn(),
 }));
 
-vi.mock('@/lib/supabase/admin', () => ({
+vi.mock('../src/lib/supabase/admin', () => ({
     createAdminClient: () => ({ from }),
 }));
 
-import { ContractService } from '@/services/ContractService';
+import { ContractService } from '../src/services/ContractService';
 
 type QueryResult = { data: unknown[] | null; error: unknown };
 
