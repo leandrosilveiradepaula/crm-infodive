@@ -72,6 +72,12 @@ describe('ContractService.getContracts', () => {
         expect(from).not.toHaveBeenCalled();
     });
 
+    it('rejects an unsafe page offset before issuing a database query', async () => {
+        await expect(ContractService.getContracts('org-a', null, true, Number.MAX_SAFE_INTEGER, 100))
+            .rejects.toThrow('Paginação de contratos inválida.');
+        expect(from).not.toHaveBeenCalled();
+    });
+
     it('propagates a database read failure instead of returning a partial collection', async () => {
         const query = createQuery({ data: [{ id: 'partial' }], error: { message: 'read failed' } });
         from.mockReturnValue(query);
