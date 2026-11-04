@@ -12,7 +12,7 @@ export class ContractService {
         page = 0,
         pageSize = DEFAULT_PAGE_SIZE,
     ) {
-        if (!Number.isInteger(page) || page < 0 || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
+        if (!Number.isSafeInteger(page) || page < 0 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > MAX_PAGE_SIZE) {
             throw new Error('Paginação de contratos inválida.');
         }
 
@@ -23,6 +23,11 @@ export class ContractService {
         const supabase = createAdminClient();
         const from = page * pageSize;
         const to = from + pageSize - 1;
+
+        if (!Number.isSafeInteger(from) || !Number.isSafeInteger(to)) {
+            throw new Error('Paginação de contratos inválida.');
+        }
+
         let query = supabase
             .from('contracts')
             .select(canViewAll ? '*' : '*, deals!inner(owner_id)')
@@ -82,7 +87,7 @@ export class ContractService {
         if (updates.status !== undefined) dbUpdates.status = updates.status;
         if (updates.type !== undefined) dbUpdates.type = updates.type;
         if (updates.signerName !== undefined) dbUpdates.signer_name = updates.signerName;
-        if (updates.signerRole !== undefined) dbUpdates.signer_role = updates.signerRole;
+        if (updates.signerRole !== undefined) dbUpdates.signer_role = updates.signer_role;
         if (updates.dealId !== undefined) dbUpdates.deal_id = updates.dealId;
         if (updates.proposalId !== undefined) dbUpdates.proposal_id = updates.proposalId;
         if (updates.content_json !== undefined) dbUpdates.content_json = updates.content_json;
