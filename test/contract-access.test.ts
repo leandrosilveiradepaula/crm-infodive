@@ -1,6 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const from = vi.fn();
+const { from } = vi.hoisted(() => ({
+    from: vi.fn(),
+}));
 
 vi.mock('@/lib/supabase/admin', () => ({
     createAdminClient: () => ({ from }),
