@@ -1,5 +1,5 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Contract } from '@/types/contract';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Contract } from '../types/contract';
 
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 100;
