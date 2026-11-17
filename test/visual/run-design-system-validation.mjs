@@ -10,7 +10,7 @@ const axeSource = await readFile(resolve('node_modules/axe-core/axe.min.js'), 'u
 await mkdir(artifactDir, { recursive: true });
 const browser = await chromium.launch({ executablePath: chromePath, headless: true });
 const page = await browser.newPage();
-const results = { baseUrl, checks: [], axeViolations: [] };
+const results = { baseUrl, checks: [], axeViolations: {} };
 
 async function capture(name, viewport, dark = false) {
     await page.setViewportSize(viewport);
