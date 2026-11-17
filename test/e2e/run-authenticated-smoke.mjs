@@ -133,6 +133,20 @@ async function assertLayout(page) {
     if (layout.scrollWidth > layout.viewportWidth) throw new Error(`Document overflows viewport (${layout.scrollWidth}px > ${layout.viewportWidth}px).`);
 }
 
+async function assertMobileNavigation(page, baseUrl) {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(routeUrl(baseUrl, '/dashboard'), { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Abrir menu' }).click();
+    const sidebar = page.locator('aside');
+    await sidebar.waitFor({ state: 'visible' });
+    const openTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
+    if (openTranslate !== '0px') throw new Error('Mobile menu did not open.');
+    await page.getByRole('link', { name: 'Pipeline' }).click();
+    await page.waitForURL((url) => url.pathname === '/pipeline', { timeout: 20_000 });
+    const closedTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
+    if (closedTranslate !== '-100%') throw new Error('Mobile menu did not close after navigation.');
+}
+
 async function runAxe(page, source) {
     await page.addScriptTag({ content: source });
     const result = await page.evaluate(async () => window.axe.run(document, {
@@ -173,6 +187,8 @@ try {
         const page = await context.newPage();
         await login(page, baseUrl, account);
         const profileResult = { label: account.label, routeCount: account.routes.length, checks: [] };
+        await assertMobileNavigation(page, baseUrl);
+        profileResult.checks.push({ route: '/dashboard', viewport: 'mobile', theme: 'system', mobileMenuNavigation: 'passed' });
         for (const route of account.routes) {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);

@@ -17,5 +17,6 @@ describe('authenticated E2E smoke contract', () => {
     it('makes missing credentials an explicit skip and treats incomplete axe output as unresolved', () => {
         expect(source).toContain('E2E_AUTHENTICATED_SMOKE=SKIPPED');
         expect(source).toContain('axe returned ${result.incomplete.length} incomplete result(s), which require review.');
+        expect(source).toContain('Mobile menu did not close after navigation.');
     });
 });
