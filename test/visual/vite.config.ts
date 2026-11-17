@@ -16,4 +16,5 @@ export default defineConfig({
         },
     },
     css: { postcss: resolve(projectRoot, 'postcss.config.mjs') },
+    server: { fs: { strict: false } },
 });
