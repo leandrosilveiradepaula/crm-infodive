@@ -1,3 +1,37 @@
+# CURRENT_TASK — CRM #214: modernização e padronização UX/UI, B0+B1
+
+**Autorização do proprietário (conversa de 17/11/2026):** realizar a modernização da interface do CRM Infodive original, começando pela auditoria (B0) e pela fundação do design system e da navegação (B1). Referência de escopo e aceite: [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). Esta autorização é exclusiva da branch `ux-ui/crm214-foundation`, criada da `main` SHA `b1935c8f6e61ae246eb8958673b2a9e18c3da81f`. **Não altera, revoga, encerra nem reivindica conclusão** da jornada de contratos #209 e PR draft #213. Não autoriza ações na Factory.
+
+## Objetivo técnico autorizado para Codex
+
+Entregar **B0 + B1 juntos em uma PR coesa**, não uma sequência de PRs cosméticas:
+1. Inventariar cada rota/tela, variantes de estados e padrões de UI existentes. Encontrar duplicações e divergências objetivas de estilos e componentes. Criar relatório conciso e verificável em `docs/ui/`.
+2. Projetar design system original da Infodive, inspirado em princípios de usabilidade das referências da Clinia **sem reproduzir marca, código, materiais ou visual idêntico**. Definir tokens semânticos para cores, contraste, tipo, escala, espaçamento, bordas, sombras, densidade e estados claro/escuro, com documentação.
+3. Consolidar primitivas de UI compartilhadas e layout global: `src/app/globals.css`, `src/components/ui/**`, `src/components/ui/theme/**`, `src/components/layout/**`, `src/app/(dashboard)/layout.tsx`, respeitando os contratos públicos de componentes existentes. Alterar chamadores em `src/app/(dashboard)/**` e `src/components/**` **somente quando estritamente necessário para migrar a fundação compartilhada sem quebrar telas**.
+4. Adicionar testes focados de componentes/contratos/consistência, checagens automáticas de tokens e padrões que evitem reintrodução de estilos divergentes, e um catálogo visual privado ou não publicado para validar os componentes sem acessar dados produtivos.
+5. Executar `npm ci`, `npx tsc --noEmit`, `npm run lint`, `npm test`, `npm run build`; verificar rotas, breakpoints, formulários, foco, contraste e light/dark quando ambiente disponível. Se teste/browser ou Preview autenticado não estiverem acessíveis, **registrar o bloqueio**, sem afirmar que foram validados.
+6. Só ao concluir B0+B1, criar PR abrangente contra `main`, com diff e relatório; **não mergear**. Reconciliar alterações concorrentes de `main` e da PR #213 conforme necessário, **sem alterar a PR #213 ou misturar a correção de contratos**.
+
+## Limites
+
+- Proibido alterar `src/services/**`, modelos de negócio, cálculos, pagamentos, taxas de câmbio, contratos, autenticação/autorização, políticas RLS, dados ou schema SQL/Supabase; exceção somente após nova autorização explícita.
+- Sem alteração de variáveis/segredos, chamadas a serviços pagos, aplicação de migrations, deploy produtivo, merge ou exclusão de ambientes.
+- Não substituir arquitetura de dados nem reescrever regras de negócio com pretexto visual.
+- Não promover telas da Clinia como cópias; usar apenas referências de UX fornecidas pelo proprietário.
+- Não afirmar que o CRM foi testado em navegador apenas com leitura estática de código.
+- Se a colisão com `CURRENT_TASK` ou PR #213 impedir o trabalho com segurança, registrar impedimento específico em vez de improvisar.
+- Merges em `main` são exclusivamente humanos.
+
+## Entrega e aceite do bloco B0+B1
+
+- Inventário rastreável das telas e inconsistências e contrato de design system.
+- Shell e componentes centrais unificados; temas claro/escuro e estados consistentes.
+- Testes de regressão e checks de lint/build aprovados no SHA final; checagem de acessibilidade sem falsos positivos.
+- PR coesa para revisão humana, indicando riscos/limitações e evidência visual real se disponível.
+- **B2 (Dashboard, Kanban e leads/contatos/clientes), B3 (demais módulos) e B4 (QA final/release) ficam planejados na issue #214 e NÃO estão autorizados a serem implementados como parte desta primeira entrega sem novo escopo.**
+
+---
+
 # CURRENT_TASK — CRM #209: escopo vigente para a nova Jornada V2
 
 **Autorização específica do OWNER, em 01/11/2026:** [CRM issue #209](https://github.com/leandrosilveiradepaula/crm-infodive/issues/209), [Factory issue operacional #1055](https://github.com/leandrosilveiradepaula/ai-product-factory/issues/1055). Esta seção é a autoridade **somente** para uma nova Jornada V2 legítima de CRM #209 admitida depois da incorporação humana deste arquivo na `main`, com `source_commit` imutável que contenha esta seção. Não retroage para journeys anteriores, não reabre Change Sets bloqueados e não atribui código humano à Factory.
