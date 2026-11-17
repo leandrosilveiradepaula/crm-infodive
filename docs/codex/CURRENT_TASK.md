@@ -1,3 +1,42 @@
+# CURRENT_TASK — CRM #214 B2: modernização das telas comerciais prioritárias
+
+**Escopo específico:** segundo bloco do programa de interface do CRM Infodive aprovado pelo proprietário em 17/11/2026 e documentado na [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). A fundação B0+B1 está na [PR #215](https://github.com/leandrosilveiradepaula/crm-infodive/pull/215), ainda não mergeada. Esta tarefa de implementação B2 é **separada** de B0+B1, começa no commit `76b79ee0ff120e5744e918de71438c4619fb274c` e só vale para a branch `ux-ui/crm214-b2-core-workspaces`. Não revoga a tarefa #209/PR #213, não altera a Factory e não autoriza release nem merge.
+
+## Missão B2 — executar integralmente em um bloco
+
+Modernizar com identidade visual Infodive consistente e componentes B1, **sem copiar assets/marca/código da Clinia**, o conjunto das telas:
+1. Dashboard: cabeçalho, resumo, KPIs, gráficos, filtros e estados.
+2. Pipeline/Kanban: cabeçalho, filtros, colunas, cards, drag/drop existente, estados e painel/drawer contextual de oportunidade **somente usando dados, callbacks e operações de negócio já existentes**.
+3. Leads, Contatos e Clientes/Empresas: listas, cabeçalhos, filtros, tabelas, formulários, ações, modais e estados de carregamento, vazio e erro.
+4. Telas desktop/mobile, claro/escuro e navegação por teclado, preservando acesso por perfil e sem exibir informações a usuários não autorizados.
+
+Fazer primeiro um inventário de cada rota e contrato atual; reutilizar `Card`, `Button`, `Table`, `Input`, `PageHeader`, tokens semânticos, shell e estilos B1. Novos componentes só quando houver justificativa de reúso. Dar atenção à densidade informacional e alinhamento do Kanban; não alterar regras ou integrações para tornar o visual mais interessante.
+
+## Arquivos e trabalho permitidos
+
+- `src/app/(dashboard)/dashboard/**`, `src/app/(dashboard)/pipeline/**` **exceto** `pipeline/proposals/editor/**`, `src/app/(dashboard)/leads/**`, `src/app/(dashboard)/contacts/**`, `src/app/(dashboard)/customers/**`: **somente UI**; não modificar server actions, route handlers, nem o código que consulta/escreve banco.
+- Componentes de apresentação estritamente usados por essas telas, por exemplo `src/components/dashboard/**`, `src/components/pipeline/**`, `src/components/leads/**`, `src/components/contacts/**`, `src/components/customers/**`. Não refatorar serviços, permissões ou cálculos escondidos nesses componentes.
+- Componentes compartilhados `src/components/ui/**` e estilos `src/app/globals.css` só para corrigir problemas reais de contrato B1, com testes de regressão e justificativa.
+- Testes de componentes/UI e fixtures exclusivamente fictícias; harness `test/visual/**`; relatórios e evidências em `docs/ui/**`; este `CURRENT_TASK.md` apenas no escopo B2.
+- Se um arquivo misturar UI com regra de negócio, isolar a mudança aos elementos visuais sem alterar fluxo ou semântica de dados. Se for impossível, registrar impedimento específico e não improvisar.
+
+## Proibições
+
+- Não tocar `src/services/**`, modelos de domínio, negócio/precificação, taxas, propostas, contratos, autenticação/RBAC, Supabase, RLS, SQL/migrations, API, dependências pagas, .env/segredos, deploy ou produção.
+- Não fazer alterações na PR #215 nem na PR #213, nem mudar `main`. Nenhum merge, nenhuma migração, nenhum acesso a dados reais.
+- Não introduzir hardcode específico da Winnicott; o CRM Infodive original continua como alvo e futura base reutilizável.
+- B3 (demais módulos) e B4 (release e QA transversal) continuam fora deste escopo. Não atribuir a B2 uma validação E2E autenticada que não foi executada.
+
+## Aceite e entrega
+
+- B2 de ponta a ponta nas cinco áreas, cobrindo todos os estados relevantes e mantendo operações originais.
+- Testes específicos de regressão visual/teclado/responsividade e `axe` contra componentes, dados fictícios e também páginas reais se houver ambiente de teste autorizado; evidência honesta de limites.
+- TypeScript, lint, Vitest, build, diff check. Resolver falhas antes de propor merge; indicar se algum comando não puder ser executado.
+- Criar **uma PR coesa e significativa** após concluir todo B2, da branch B2 para `main`, com aviso explícito **"DEPENDE DA PR #215 — NÃO MERGEAR ANTES DA #215"**, para CI da PR rodar. Depois do merge humano da #215, verificar que o diff da PR B2 contém somente B2 e reexecutar gates no SHA exato. Nunca auto-merge.
+- O Codex deve continuar executando até conclusão do bloco B2 ou até dependência externa real, sem encerrar em planejamento/relatório parcial.
+
+---
+
 # CURRENT_TASK — CRM #214: modernização e padronização UX/UI, B0+B1
 
 **Autorização do proprietário (conversa de 17/11/2026):** realizar a modernização da interface do CRM Infodive original, começando pela auditoria (B0) e pela fundação do design system e da navegação (B1). Referência de escopo e aceite: [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). Esta autorização é exclusiva da branch `ux-ui/crm214-foundation`, criada da `main` SHA `b1935c8f6e61ae246eb8958673b2a9e18c3da81f`. **Não altera, revoga, encerra nem reivindica conclusão** da jornada de contratos #209 e PR draft #213. Não autoriza ações na Factory.
