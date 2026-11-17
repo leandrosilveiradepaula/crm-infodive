@@ -57,12 +57,20 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         whileHover={{ y: -6, scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={onClick}
+                        onKeyDown={(event) => {
+                            if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+                                event.preventDefault();
+                                onClick();
+                            }
+                        }}
+                        role={onClick ? 'button' : undefined}
+                        tabIndex={onClick ? 0 : undefined}
+                        aria-label={onClick ? `Abrir oportunidade ${deal.title}` : undefined}
                         className={`
-                            relative group cursor-pointer
-                            bg-card rounded-2xl p-2.5 border shadow-sm transition-all duration-300
+                            relative group cursor-pointer rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
                             ${snapshot.isDragging
-                                ? 'shadow-2xl shadow-primary/30 ring-2 ring-primary/40 border-primary/50 z-50 bg-card/90 backdrop-blur-md scale-105 rotate-2'
-                                : 'hover:shadow-lg hover:border-primary/30 border-border hover:-translate-y-1'
+                                ? 'z-50 scale-[1.02] border-primary/50 bg-card/95 shadow-xl ring-2 ring-primary/40 backdrop-blur-md'
+                                : 'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md'
                             }
                         `}
                     >

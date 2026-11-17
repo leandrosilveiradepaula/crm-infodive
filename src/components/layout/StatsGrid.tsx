@@ -20,41 +20,38 @@ interface StatsGridProps {
 
 export function StatsGrid({ items }: StatsGridProps) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+        <section aria-label="Resumo" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {items.map((stat, index) => {
                 const Icon = stat.icon;
                 const isClickable = !!stat.onClick;
                 return (
-                    <div 
+                    <button
                         key={index} 
                         onClick={stat.onClick}
-                        className={`bg-gradient-to-br ${stat.gradient} dark:bg-card p-3 lg:p-4 rounded-2xl border ${stat.border} shadow-sm group hover:shadow-md transition-all relative overflow-hidden ${isClickable ? 'cursor-pointer active:scale-95' : ''}`}
+                        type="button"
+                        disabled={!isClickable}
+                        className={`group relative min-h-28 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-ring' : 'cursor-default'}`}
                     >
-                        {/* Background Floating Icon */}
-                        <div className="absolute right-0 top-0 p-12 opacity-[0.03] transform translate-x-1/2 -translate-y-1/2 text-muted-foreground">
-                            <Icon className={`w-24 h-24 ${stat.color}`} />
+                        <div className="absolute -right-5 -top-5 text-primary/[0.06]" aria-hidden="true">
+                            <Icon className="size-24" />
                         </div>
-
-                        {/* Content */}
-                        <div className="flex items-center justify-between mb-3 relative z-10">
-                            <h3 className={`text-[9px] font-black ${stat.color} opacity-70 uppercase tracking-[0.2em]`}>
+                        <div className="relative flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium text-muted-foreground">
                                 {stat.label}
-                            </h3>
-                            <div className={`p-1.5 rounded-xl bg-background/50 border border-border group-hover:scale-110 transition-transform`}>
-                                <Icon className={`h-3.5 w-3.5 ${stat.color}`} />
+                                </p>
+                                <p className="mt-2 truncate text-2xl font-semibold tracking-tight text-foreground">
+                                    {stat.value}
+                                </p>
+                            </div>
+                            <div className={`grid size-9 shrink-0 place-items-center rounded-[var(--radius-control)] bg-muted ${stat.color}`}>
+                                <Icon className="size-4" />
                             </div>
                         </div>
-                        <div className="relative z-10">
-                            <p className="text-xl font-black text-foreground tracking-tighter truncate">
-                                {stat.value}
-                            </p>
-                            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-0.5">
-                                {stat.description}
-                            </p>
-                        </div>
-                    </div>
+                        <p className="relative mt-2 truncate text-xs text-muted-foreground">{stat.description}</p>
+                    </button>
                 );
             })}
-        </div>
+        </section>
     );
 }

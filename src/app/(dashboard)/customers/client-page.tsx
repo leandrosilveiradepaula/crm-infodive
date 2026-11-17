@@ -5,6 +5,7 @@ import { type Account } from '@/types/account';
 import { CustomerCard } from '@/components/customers/CustomerCard';
 import { CustomersTable } from '@/components/customers/CustomersTable';
 import { Button } from '@/components/ui/button';
+import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 import { Plus, Search, Download, Building, Briefcase, MapPin, User, X, FileSpreadsheet } from 'lucide-react';
 import { deleteAccount } from '@/app/(dashboard)/customers/actions';
 import { useRouter } from 'next/navigation';
@@ -118,17 +119,17 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 title="Minhas Empresas" 
                 description="Base de empresas, parceiros e fornecedores."
             >
-                <div className="flex gap-3">
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={() => setIsImportModalOpen(true)}>
-                        <FileSpreadsheet className="h-4 w-4 mr-2" />
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" onClick={() => setIsImportModalOpen(true)}>
+                        <FileSpreadsheet />
                         Importar Planilha
                     </Button>
-                    <Button variant="outline" className="text-muted-foreground hover:text-foreground hover:bg-muted h-11 rounded-2xl" onClick={handleExportCSV}>
-                        <Download className="h-4 w-4 mr-2" />
+                    <Button variant="outline" onClick={handleExportCSV}>
+                        <Download />
                         Exportar CSV
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2" onClick={handleCreate}>
-                        <Plus className="h-5 w-5" />
+                    <Button size="lg" onClick={handleCreate}>
+                        <Plus />
                         Novo Cadastro
                     </Button>
                 </div>
@@ -180,7 +181,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, cidade ou segmento..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -255,10 +256,13 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             )}
 
             {filteredAccounts.length === 0 && (
-                <div className="text-center py-20 bg-muted/10 border-2 border-dashed border-border rounded-3xl">
-                    <p className="text-muted-foreground font-medium">Nenhuma empresa encontrada com os filtros atuais.</p>
-                    <Button variant="link" onClick={clearFilters} className="text-primary mt-2">Limpar Filtros</Button>
-                </div>
+                <PremiumEmptyState
+                    icon={Building}
+                    title="Nenhuma empresa encontrada"
+                    description={initialAccounts.length === 0 ? 'Cadastre a primeira empresa para iniciar a base comercial.' : 'Ajuste os filtros para localizar outras empresas.'}
+                    actionLabel={initialAccounts.length === 0 ? 'Novo cadastro' : undefined}
+                    onAction={initialAccounts.length === 0 ? handleCreate : undefined}
+                />
             )}
 
             <CustomerFormModal

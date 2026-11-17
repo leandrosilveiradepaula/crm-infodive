@@ -191,16 +191,16 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                 title="Visão Geral"
                 description="Acompanhe o desempenho das suas vendas."
             >
-                <div className="flex items-center gap-2">
+                <div className="relative flex flex-wrap items-center gap-2">
                     {/* Year + Quarter Pill Selector — same as Pipeline */}
-                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
+                    <div className="flex max-w-full flex-col items-center gap-2 overflow-x-auto rounded-[var(--radius-control)] border border-border bg-card p-1 sm:h-10 sm:flex-row">
                         {/* Year Selector */}
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <CalendarDays className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="bg-transparent text-[11px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4"
+                                className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
                             >
                                 {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -213,7 +213,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`px-4 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -237,8 +237,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                     : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`relative px-4 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
-                                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                        className={`focus-ring relative h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected
+                                            ? 'bg-primary text-primary-foreground shadow-sm'
                                             : hasSelectionsInOtherYears
                                                 ? 'bg-primary/10 text-primary hover:bg-primary/20'
                                                 : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -254,12 +254,14 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         </div>
                     </div>
 
-                    <div className="w-px h-6 bg-border mx-1"></div>
+                    <div className="mx-1 hidden h-6 w-px bg-border sm:block"></div>
 
                     {/* Config Button */}
                     <button
                         onClick={() => setShowConfig(!showConfig)}
-                        className={`p-2.5 rounded-xl transition-colors ${showConfig ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                        aria-expanded={showConfig}
+                        aria-controls="dashboard-layout-options"
+                        className={`focus-ring rounded-[var(--radius-control)] p-2 transition-colors ${showConfig ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                         title="Configurar Layout"
                     >
                         <Settings className="h-4 w-4" />
@@ -267,9 +269,9 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                     {/* Config Popover */}
                     {showConfig && (
-                        <div className="absolute right-0 top-full mt-4 w-80 bg-card rounded-2xl shadow-2xl border border-border z-50 p-6 animate-in slide-in-from-top-2">
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-sm font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+                        <div id="dashboard-layout-options" className="absolute right-0 top-full z-50 mt-2 w-80 rounded-[var(--radius-panel)] border border-border bg-popover p-4 text-popover-foreground shadow-[var(--shadow-overlay)]">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <LayoutIcon className="h-4 w-4 text-primary" /> Personalizar
                                 </h3>
                                 <button onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
@@ -277,8 +279,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                                 {widgets.map((widget) => (
-                                    <label key={widget.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted cursor-pointer bg-muted/50 border border-border transition-all group">
-                                        <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors">{getWidgetLabel(widget.id)}</span>
+                                    <label key={widget.id} className="group flex cursor-pointer items-center justify-between rounded-[var(--radius-control)] border border-border p-3 transition-colors hover:bg-muted">
+                                        <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">{getWidgetLabel(widget.id)}</span>
                                         <div className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -294,7 +296,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                             <button
                                 onClick={resetLayout}
-                                className="w-full mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground py-3 border-t border-border transition-colors"
+                                className="focus-ring mt-4 flex w-full items-center justify-center gap-2 border-t border-border py-3 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
                             >
                                 <RotateCcw className="h-3 w-3" /> Restaurar Padrão
                             </button>
