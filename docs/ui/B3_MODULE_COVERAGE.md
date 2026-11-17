@@ -36,3 +36,15 @@ O harness isolado cobre apenas componentes reais compartilhados com fixtures
 fictícias. Ele não equivale a teste autenticado, não usa dados reais e não
 executa ações de negócio. Os limites e resultados finais são publicados junto
 da PR B3.
+
+## Evidência executada
+
+No commit `36c56f3`, a prévia isolada foi servida somente em `127.0.0.1` com
+fixtures fictícias. Playwright Core + Chrome local registraram desktop
+1440×960 e mobile 390×844 nos temas claro e escuro, menu móvel, tabelas,
+cards, filtros, tabs, estado vazio e foco. O axe-core WCAG 2 A/AA não reportou
+violações nos dois temas. As capturas e o resultado estruturado estão em
+`docs/ui/evidence/36c56f3/`.
+
+Isso não é evidência de E2E autenticado: nenhuma sessão, dado real, serviço,
+Supabase ou produção foi acessado.
