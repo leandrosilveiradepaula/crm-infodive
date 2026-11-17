@@ -50,14 +50,20 @@ try {
     for (const [theme, dark] of [['light', false], ['dark', true]]) {
         await page.goto(baseUrl, { waitUntil: 'networkidle' });
         await applyTheme(dark);
+        const restingFocusStyle = await page.locator('#fixture-search').evaluate((element) => {
+            const style = getComputedStyle(element);
+            return { outline: style.outlineStyle, boxShadow: style.boxShadow };
+        });
         await page.locator('#fixture-search').focus();
         const focusStyle = await page.locator('#fixture-search').evaluate((element) => {
             const style = getComputedStyle(element);
             return { outline: style.outlineStyle, boxShadow: style.boxShadow };
         });
-        if (focusStyle.outline === 'none' && focusStyle.boxShadow === 'none') throw new Error(`Input focus is not visible in ${theme} theme.`);
+        if (focusStyle.outline === restingFocusStyle.outline && focusStyle.boxShadow === restingFocusStyle.boxShadow) {
+            throw new Error(`Input focus is not visible in ${theme} theme.`);
+        }
         await page.screenshot({ path: resolve(artifactDir, `desktop-focus-${theme}.png`), fullPage: true });
-        results.checks.push({ name: 'keyboard-focus', theme, focusStyle, screenshot: `desktop-focus-${theme}.png` });
+        results.checks.push({ name: 'keyboard-focus', theme, restingFocusStyle, focusStyle, screenshot: `desktop-focus-${theme}.png` });
     }
 
     await page.addScriptTag({ content: axeSource });
