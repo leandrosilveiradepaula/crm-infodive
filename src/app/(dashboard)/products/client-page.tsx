@@ -124,19 +124,19 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
     ];
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-6 pb-10">
             {/* Header */}
             <PageHeader 
                 title="Catálogo de Produtos" 
                 description="Gerencie o portfólio de hardware, software e serviços."
             >
-                <div className="flex gap-3">
-                    <Button variant="outline" className="bg-card border-border text-muted-foreground hover:text-foreground h-11 px-6 rounded-2xl">
-                        <Download className="h-4 w-4 mr-2" />
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="outline">
+                        <Download />
                         Exportar CSV
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold h-11 px-6 rounded-2xl flex items-center gap-2" onClick={handleCreate}>
-                        <Plus className="h-4 w-4" />
+                    <Button size="lg" onClick={handleCreate}>
+                        <Plus />
                         Novo Produto
                     </Button>
                 </div>
@@ -149,7 +149,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, SKU ou fabricante..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -158,7 +158,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                     <ThemeSelect
                         value={filterBrand}
                         onChange={e => setFilterBrand(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Marca: Todas</option>
                         {existingBrands.map(brand => (
@@ -169,7 +169,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                     <ThemeSelect
                         value={filterCategory}
                         onChange={e => setFilterCategory(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Categoria: Todas</option>
                         {existingCategories.map(cat => (

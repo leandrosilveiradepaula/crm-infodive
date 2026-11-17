@@ -196,7 +196,7 @@ export function ActivitiesClientPage() {
     }
 
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-6 pb-10">
             {error && (
                 <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400 animate-slide-up">
                     <AlertCircle className="h-5 w-5" />
@@ -213,9 +213,9 @@ export function ActivitiesClientPage() {
                         setEditingActivity(null);
                         setShowNewModal(true);
                     }}
-                    className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2"
+                    size="lg"
                 >
-                    <Plus className="h-5 w-5" />
+                    <Plus />
                     Nova Atividade
                 </Button>
             </PageHeader>
@@ -269,7 +269,7 @@ export function ActivitiesClientPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar atividade por título ou descrição..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -279,7 +279,7 @@ export function ActivitiesClientPage() {
                     <ThemeSelect
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as ActivityStatus | 'all')}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Todos Status</option>
                         <option value="pending">Pendente</option>
@@ -291,7 +291,7 @@ export function ActivitiesClientPage() {
                     <ThemeSelect
                         value={filterType}
                         onChange={e => setFilterType(e.target.value as ActivityType | 'all')}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Todos Tipos</option>
                         <option value="task">Tarefa</option>
@@ -302,10 +302,13 @@ export function ActivitiesClientPage() {
                     </ThemeSelect>
 
                     {/* View Toggle */}
-                    <div className="flex gap-1 bg-muted/30 p-1 rounded-full border border-border h-11 items-center">
+                    <div role="group" aria-label="Modo de visualização" className="flex h-10 items-center gap-1 rounded-[var(--radius-control)] border border-border bg-muted p-1">
                         <button
+                            type="button"
                             onClick={() => setViewMode('list')}
-                            className={`p-2 rounded-full transition-all ${viewMode === 'list'
+                            aria-label="Visualização em lista"
+                            aria-pressed={viewMode === 'list'}
+                            className={`focus-ring rounded-md p-2 transition-colors ${viewMode === 'list'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}
@@ -313,8 +316,11 @@ export function ActivitiesClientPage() {
                             <List className="h-4 w-4" />
                         </button>
                         <button
+                            type="button"
                             onClick={() => setViewMode('calendar')}
-                            className={`p-2 rounded-full transition-all ${viewMode === 'calendar'
+                            aria-label="Visualização em calendário"
+                            aria-pressed={viewMode === 'calendar'}
+                            className={`focus-ring rounded-md p-2 transition-colors ${viewMode === 'calendar'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}

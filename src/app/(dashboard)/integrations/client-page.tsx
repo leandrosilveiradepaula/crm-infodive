@@ -72,7 +72,7 @@ export default function IntegrationsClientPage({
                 description="Potencialize seu CRM com ferramentas externas e acesso programático avançado."
             />
 
-            <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full">
+            <Tabs value={view} onValueChange={(v) => setView(v as 'apps' | 'dev')} className="w-full">
                 <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">
                     <TabsTrigger value="apps">
                         <Zap className="h-4 w-4" /> App Marketplace
@@ -86,7 +86,7 @@ export default function IntegrationsClientPage({
                 <TabsContent value="apps" className="mt-0 outline-none">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {initialIntegrations.map(app => (
-                        <div key={app.id} className="bg-card p-6 rounded-2xl border border-border shadow-md hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all group relative overflow-hidden">
+                        <article key={app.id} className="group relative overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
                             {app.status === 'connected' && (
                                 <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-emerald-600 text-white px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-bl-2xl shadow-lg z-10 animate-in slide-in-from-right-full duration-500">
                                     Conectado
@@ -111,10 +111,11 @@ export default function IntegrationsClientPage({
                             </div>
 
                             <button
+                                type="button"
                                 onClick={() => handleToggle(app.id, app.status)}
-                                className={`w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 transition-all ${app.status === 'connected'
-                                    ? 'bg-muted text-muted-foreground hover:bg-red-500/10 hover:text-red-500 border border-border hover:border-red-500/20'
-                                    : 'bg-primary text-white hover:bg-primary shadow-xl shadow-primary/20'
+                                className={`focus-ring flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] text-sm font-semibold transition-colors ${app.status === 'connected'
+                                    ? 'border border-border bg-secondary text-secondary-foreground hover:bg-destructive/10 hover:text-destructive'
+                                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm'
                                     }`}
                             >
                                 {app.status === 'connected' ? (
@@ -123,11 +124,11 @@ export default function IntegrationsClientPage({
                                     <> <ExternalLink className="h-4 w-4" /> Configurar Integração </>
                                 )}
                             </button>
-                        </div>
+                        </article>
                     ))}
 
                     {/* Request Integration Feature */}
-                    <div className="border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group min-h-[350px]">
+                    <div className="group flex min-h-[350px] flex-col items-center justify-center rounded-[var(--radius-panel)] border border-dashed border-border p-6 text-center transition-colors hover:border-primary/40 hover:bg-primary/5">
                         <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-500">
                             <Plus className="h-8 w-8 text-muted-foreground group-hover:text-white group-hover:rotate-180 transition-all duration-500" />
                         </div>

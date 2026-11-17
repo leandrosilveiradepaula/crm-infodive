@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import { BriefcaseBusiness, CheckCircle2, CircleAlert, Search, Users } from 'lucide-react';
+import { BriefcaseBusiness, CheckCircle2, CircleAlert, Package, Search, Users } from 'lucide-react';
 import '@/app/globals.css';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -16,6 +16,8 @@ import { StatsGrid } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { DealCard } from '@/components/pipeline/DealCard';
+import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function Fixture() {
     const [view, setView] = useState<ViewMode>('cards');
@@ -76,6 +78,14 @@ function Fixture() {
                             <Droppable droppableId="proposal">{(provided) => <div ref={provided.innerRef} {...provided.droppableProps}><DealCard deal={sampleDeal} index={0} onClick={() => undefined} />{provided.placeholder}</div>}</Droppable>
                         </section>
                     </DragDropContext>
+                </section>
+                <section className="space-y-4" aria-label="Prévia de módulos B3">
+                    <PageHeader title="Módulos operacionais" description="Estados de tabs e vazio com conteúdo fictício." />
+                    <Tabs defaultValue="catalog">
+                        <TabsList><TabsTrigger value="catalog">Catálogo</TabsTrigger><TabsTrigger value="automation">Automações</TabsTrigger></TabsList>
+                        <TabsContent value="catalog"><PremiumEmptyState icon={Package} title="Nenhum produto encontrado" description="Ajuste os filtros ou cadastre um produto." actionLabel="Novo produto" onAction={() => undefined} /></TabsContent>
+                        <TabsContent value="automation"><Card><CardContent className="p-4 text-sm text-muted-foreground">Nenhuma automação fictícia selecionada.</CardContent></Card></TabsContent>
+                    </Tabs>
                 </section>
             </div>
         </DashboardShell>

@@ -99,7 +99,7 @@ export function ReportsClientPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por oportunidade, empresa, produto, vendedor ou status..."
-                        className="pl-11 w-full h-[38px] bg-muted/30 border-border focus:bg-background transition-all rounded-xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -113,7 +113,7 @@ export function ReportsClientPage() {
                             <select
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4"
+                            className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
                             >
                                 {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -125,7 +125,7 @@ export function ReportsClientPage() {
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -140,7 +140,7 @@ export function ReportsClientPage() {
                                                 prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                                        className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                                     >
                                         {q}
                                     </button>

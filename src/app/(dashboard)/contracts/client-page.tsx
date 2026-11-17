@@ -124,9 +124,9 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 <Button
                     onClick={handleCreateContract}
                     disabled={isCreating}
-                    className="bg-primary hover:bg-primary/90 font-bold text-white h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 flex items-center gap-2"
+                    size="lg"
                 >
-                    <Plus className="h-4 w-4" />
+                    <Plus />
                     {isCreating ? 'Criando...' : 'Novo Contrato'}
                 </Button>
             </PageHeader>
@@ -179,7 +179,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar contratos por título ou empresa..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -188,7 +188,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                     <ThemeSelect
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all" className="bg-popover text-popover-foreground">Status: Todos</option>
                         <option value="draft" className="bg-popover text-popover-foreground">Rascunho</option>
@@ -200,7 +200,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
             </FilterBar>
 
             {/* Contracts List */}
-            <div className="bg-card rounded-3xl shadow-xl border border-border overflow-hidden">
+            <div className="overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-[var(--shadow-card)]">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-muted/50 border-b border-border">
@@ -251,7 +251,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                                         </div>
                                     </td>
                                     <td className="py-3 px-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 duration-200">
+                                        <div className="flex items-center justify-end gap-2 opacity-100 transition-all md:translate-x-2 md:opacity-0 md:group-hover:translate-x-0 md:group-hover:opacity-100">
                                             <button
                                                 className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-colors border border-transparent hover:border-border"
                                                 title="Visualizar"
@@ -288,7 +288,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                             icon={FileText}
                             title="Nenhum Contrato"
                             description="Você ainda não possui contratos gerados ou nenhum corresponde aos filtros atuais."
-                            actionLabel="Novo Contato"
+                            actionLabel="Novo contrato"
                             onAction={handleCreateContract}
                         />
                     </div>
