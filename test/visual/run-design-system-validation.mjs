@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { chromium } from 'playwright-core';
 
-const baseUrl = process.env.VISUAL_BASE_URL ?? 'http://127.0.0.1:4173';
+const baseUrl = process.env.VISUAL_BASE_URL ?? 'http://127.0.0.1:4173/test/visual/harness/';
 const artifactDir = resolve(process.env.VISUAL_ARTIFACT_DIR ?? 'docs/ui/evidence/49226af');
 const chromePath = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const axeSource = await readFile(resolve('node_modules/axe-core/axe.min.js'), 'utf8');

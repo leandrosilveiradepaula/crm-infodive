@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 const projectRoot = resolve(__dirname, '../..');
 
 export default defineConfig({
-    root: resolve(__dirname, 'harness'),
+    root: projectRoot,
     resolve: {
         alias: {
             '@': resolve(projectRoot, 'src'),
