@@ -1,3 +1,38 @@
+# CURRENT_TASK — CRM #214 B4: QA integrado e preparação segura da liberação visual
+
+**Autorização:** programa de modernização visual do CRM Infodive acordado pelo proprietário em 17/11/2026 e rastreado em [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). B4 é o fechamento de QA da modernização, **não** uma alteração de negócio nem uma autorização de release. Branch exclusiva `ux-ui/crm214-b4-integrated-qa`, criada no commit B3 revisado e com CI verde `4158fd3be3190464359eae5c9ac02f491fa9dc4d`. PRs cumulativas #215 (B0+B1), #216 (B2), #217 (B3) ainda dependentes de merge humano na ordem correta. PR #213 da Factory é outra trilha e continua intocada.
+
+## Resultado obrigatório
+
+Preparar evidência de que a **interface real do CRM**, e não apenas o harness isolado, funciona e é visualmente consistente nas rotas e operações críticas. Implementar os instrumentos de QA seguros e corrigir regressões exclusivamente de UI dentro deste bloco; **não falsificar prova de autenticação nem substituir Preview por screenshots fictícios**. Se faltarem ambiente de teste, sessão de teste ou autorização de Preview, concluir tudo que for possível sem acesso e registrar exatamente o gate humano, sem inventar PASS.
+
+## Execução B4 em bloco completo
+
+1. **Inventário de smoke E2E**: mapear todas as rotas existentes sob `src/app/(dashboard)/**`, definir casos de navegação/autorização, estados loading/empty/erro, modais, filtros, leitura de tabelas, views, keyboard, mobile/desktop, claro/escuro, e progredir até cobertura dos módulos. Priorizar Dashboard, Pipeline/Kanban e drawer de oportunidade, Leads/Contatos/Empresas, Atividades, Contratos/Propostas, Produtos, Vendas, Relatórios, Metas/Comissões, Automação, Inbox, Service Desk/KB, Settings e Integrações.
+2. **Ambiente segregado:** verificar existência de Preview Vercel do **SHA exato** e de contas/tenant de teste com dados fictícios. Se ausentes, não usar ambientes, segredos nem credenciais de produção. Não desativar autenticação/middleware, não copiar `.env`, não criar sessões artificiais como se fossem reais. Configurar a suíte para aceitar URL de teste e sessão legítima fornecidas por meio seguro (CI environment secrets), sem exibir valores e sem publicar traces com dados pessoais.
+3. **Automação de validação:** criar testes Playwright E2E operando com rotas Next reais e login de teste autorizado; cenários read-only por padrão; para testar escrita de negócio, **somente** ambiente isolado com tenant/credenciais de teste e autorização específica. Verificar gates de permissão com perfis já existentes, sem alterar policies ou permissões.
+4. **Qualidade visual:** screenshots por viewport desktop 1440x960 e mobile 390x844, light/dark, regressões de layout, overflow, contraste/axe A/AA, sem `incomplete` tratado como PASS, navegação por teclado (incl. drag/drop), foco, estado vazio/loading/erro, navegação entre módulos. Persistir evidência sanitizada e vinculada ao **mesmo SHA e Preview deployment ID** quando houver Preview autorizado. Não armazenar dados reais em artefatos.
+5. **QA técnico:** `npm ci`, `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build`, `git diff --check`; analisar conflitos de mudanças cumulativas e compatibilidade com a PR #213 sem alterar sua trilha. Corrigir problemas reais de apresentação; não se limitar a relatório.
+6. **Gate de release:** somente após evidência real e QA, recomendar o merge humano **#215 → #216 → #217** nessa ordem, com reconciliação de diff e CI do SHA integrado em cada etapa. Preferir preservar a linhagem Git dos commits originais ou documentar explicitamente como lidar com squash; nunca auto-merge, nunca alterar a `main` pelo Codex. B4 só deve ser declarado concluído para release quando as rotas reais e os perfis exigidos foram validados.
+7. **Handoff de produto reutilizável:** produzir apenas checklist técnico para futura cópia limpa, sem criar repositório novo, sem publicar produto clínico/WhatsApp e sem replicar dados, credenciais ou configurações internas.
+
+## Arquivos permitidos e proibições
+
+- Permitidos: testes E2E, runners/fixtures **fictícias** sob `test/**` ou `tests/**`, configurações de ferramentas de teste sem segredos, relatórios/evidências sanitizadas `docs/ui/**`, correções comprovadamente necessárias em arquivos de apresentação `src/app/(dashboard)/**`, `src/components/**` e tokens `src/app/globals.css` com testes.
+- Não alterar negócios em `src/services/**`, `src/types/**`, `src/app/api/**`, server actions, auth/RBAC, Supabase/SQL/RLS/migrations, dados, fórmulas/moedas, integrações financeiras, Factory, PR #213, variáveis de ambiente produtivas ou segredos. Nenhum deploy de produção nem chamada paga.
+- Sem Preview/deploy remoto automaticamente; verificar custos/cota e autorização de alvo/teste antes de eventual Preview. Se o Preview de B4 depender de liberação externa, registrar dependência claramente.
+- **Não criar PR somente para documentação ou evidência parcial.** Criar PR B4 **draft** somente se a entrega incluir testes E2E reutilizáveis e/ou correções efetivas, com dependência declarada #215/#216/#217; caso contrário, consolidar checklist/evidência no trabalho local/issue e informar gate necessário.
+- Sem reabrir B0/B1/B2/B3 para pequenas PRs cosméticas. Ações autorizadas precisam servir diretamente à validação/funcionalidade da interface.
+
+## Critérios de aceite de B4
+
+- Suíte E2E real, sem bypass de auth, por módulos e perfis relevantes, com resultados vinculados ao SHA/Preview (ou bloqueio externo explícito).
+- Visual desktop/mobile light/dark e axe, regressões funcionais sem vazamento de dados ou alteração de regras de negócio.
+- CI verde no SHA final, e evidência auditável, com aprovação humana antes de qualquer release.
+- Nenhum merge em `main`, deploy produtivo, migração, integração externa ou cópia para o CRM genérico feitos pelo Codex.
+
+---
+
 # CURRENT_TASK — CRM #214 B3: padronização visual de todos os módulos restantes
 
 **Escopo e autorização:** programa de modernização integral de UX/UI do CRM Infodive acordado pelo proprietário em 17/11/2026 e documentado na [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). Esta autorização técnica B3 vale **exclusivamente** para a branch `ux-ui/crm214-b3-complete-modules`, criada no SHA `4608ad949b0d6053a796d5d163682620d5b96e4a` da PR #216 (B2). Depende de #215 (B0+B1) e #216 (B2), que ainda NÃO foram mergeadas. Não revoga nem mexe na PR #213 da Factory. Merge exclusivamente humano.
