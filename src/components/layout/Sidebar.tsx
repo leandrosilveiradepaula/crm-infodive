@@ -150,11 +150,11 @@ function NavItem({ href, icon: Icon, label, isActive, collapsed }: { href: strin
             title={collapsed ? label : ''}
             className={cn(
                 "focus-ring group flex min-h-9 items-center gap-2 rounded-[var(--radius-control)] px-3 py-1.5 text-sm transition-colors",
-                isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                isActive ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" : "text-[color:var(--sidebar-foreground)] hover:bg-sidebar-accent hover:text-sidebar-foreground",
                 collapsed ? "justify-center" : ""
             )}
         >
-            <Icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-sidebar-foreground/70 group-hover:text-sidebar-foreground")} />
+            <Icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-sidebar-primary-foreground" : "text-[color:var(--sidebar-foreground)] group-hover:text-sidebar-foreground")} />
             {!collapsed && <span className="overflow-hidden whitespace-nowrap font-medium">{label}</span>}
         </Link>
     )
