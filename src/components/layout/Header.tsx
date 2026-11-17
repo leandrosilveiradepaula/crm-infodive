@@ -26,8 +26,10 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
         <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-border bg-background/90 px-3 py-3 backdrop-blur-xl sm:px-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <button
+                    type="button"
+                    aria-label="Abrir menu"
                     onClick={onMenuClick}
-                    className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted"
+                    className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted lg:hidden"
                 >
                     <Menu className="h-6 w-6" />
                 </button>

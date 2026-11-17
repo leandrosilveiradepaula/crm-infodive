@@ -66,15 +66,25 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
                     {!isCollapsed && <span className="whitespace-nowrap text-base font-semibold tracking-tight">Infodive CRM</span>}
                 </div>
                 <button
+                    type="button"
+                    aria-label="Fechar menu"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="focus-ring rounded-[var(--radius-control)] p-1 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                    className="focus-ring rounded-[var(--radius-control)] p-1 text-sidebar-foreground/70 hover:text-sidebar-foreground lg:hidden"
                 >
                     <X className="h-6 w-6" />
                 </button>
             </div>
 
             {/* Navigation */}
-            <nav aria-label="Navegação principal" className="scrollbar-hide flex-1 space-y-1 overflow-y-auto px-3 py-4">
+            <nav
+                aria-label="Navegação principal"
+                className="scrollbar-hide flex-1 space-y-1 overflow-y-auto px-3 py-4"
+                onClick={(event) => {
+                    if ((event.target as HTMLElement).closest('a')) {
+                        setIsMobileMenuOpen(false);
+                    }
+                }}
+            >
                 <NavItem href="/dashboard" icon={LayoutDashboard} label="Dashboard" isActive={pathname === '/dashboard'} collapsed={isCollapsed} />
                 <NavItem href="/pipeline" icon={Kanban} label="Pipeline" isActive={pathname === '/pipeline'} collapsed={isCollapsed} />
                 <NavItem href="/leads" icon={Users} label="Leads" isActive={pathname === '/leads'} collapsed={isCollapsed} />

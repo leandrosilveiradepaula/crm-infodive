@@ -5,10 +5,23 @@ import { describe, expect, it } from 'vitest';
 const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 
 describe('Infodive design-system foundation', () => {
-    it('defines semantic surfaces in both color modes', () => {
+    it('defines semantic surfaces in both themes while inheriting shared geometry', () => {
         const css = source('src/app/globals.css');
-        for (const token of ['--surface:', '--surface-raised:', '--surface-subtle:', '--success-subtle:', '--shadow-panel:', '--radius-control:']) {
-            expect(css.match(new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'))?.length).toBeGreaterThanOrEqual(2);
+        const light = css.match(/:root\s*\{([^}]+)\}/)?.[1];
+        const dark = css.match(/\.dark\s*\{([^}]+)\}/)?.[1];
+
+        expect(light).toBeDefined();
+        expect(dark).toBeDefined();
+        for (const theme of [light, dark]) {
+            for (const token of ['--surface:', '--surface-raised:', '--surface-subtle:', '--success-subtle:', '--warning-subtle:', '--info-subtle:', '--destructive-subtle:']) {
+                expect(theme).toContain(token);
+            }
+        }
+
+        // Radius, shadows and layout width are shared values inherited by dark mode.
+        // They must not be duplicated in .dark just to satisfy this test.
+        for (const token of ['--shadow-panel:', '--shadow-float:', '--radius-control:', '--radius-panel:', '--content-max-width:']) {
+            expect(light).toContain(token);
         }
     });
 
