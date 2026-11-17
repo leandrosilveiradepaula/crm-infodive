@@ -12,10 +12,17 @@ const browser = await chromium.launch({ executablePath: chromePath, headless: tr
 const page = await browser.newPage();
 const results = { baseUrl, checks: [], axeViolations: {} };
 
+async function applyTheme(dark) {
+    await page.evaluate((enabled) => document.documentElement.classList.toggle('dark', enabled), dark);
+    // CSS variables drive the token theme. Wait for style recalculation before
+    // inspecting pixels or running axe so the assertion observes the rendered theme.
+    await page.waitForTimeout(150);
+}
+
 async function capture(name, viewport, dark = false) {
     await page.setViewportSize(viewport);
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await page.evaluate((enabled) => document.documentElement.classList.toggle('dark', enabled), dark);
+    await applyTheme(dark);
     await page.screenshot({ path: resolve(artifactDir, `${name}.png`), fullPage: true });
     results.checks.push({ name, viewport, theme: dark ? 'dark' : 'light', screenshot: `${name}.png` });
 }
@@ -24,7 +31,9 @@ try {
     await capture('desktop-light', { width: 1440, height: 960 });
     await capture('desktop-dark', { width: 1440, height: 960 }, true);
     await capture('mobile-light', { width: 390, height: 844 });
+    await capture('mobile-dark', { width: 390, height: 844 }, true);
 
+    await applyTheme(false);
     await page.getByRole('button', { name: 'Abrir menu' }).click();
     await page.waitForTimeout(250);
     await page.screenshot({ path: resolve(artifactDir, 'mobile-menu-open.png'), fullPage: true });
@@ -36,20 +45,23 @@ try {
     if (closedTranslate !== '-100%') throw new Error('Mobile menu did not close after navigation.');
     results.checks.push({ name: 'mobile-menu-navigation', sidebarTranslate, closedTranslate });
 
-    await page.goto(baseUrl, { waitUntil: 'networkidle' });
-    await page.locator('#fixture-search').focus();
-    const focusStyle = await page.locator('#fixture-search').evaluate((element) => {
-        const style = getComputedStyle(element);
-        return { outline: style.outlineStyle, boxShadow: style.boxShadow };
-    });
-    if (focusStyle.outline === 'none' && focusStyle.boxShadow === 'none') throw new Error('Input focus is not visible.');
-    await page.screenshot({ path: resolve(artifactDir, 'desktop-focus.png'), fullPage: true });
-    results.checks.push({ name: 'keyboard-focus', focusStyle });
+    for (const [theme, dark] of [['light', false], ['dark', true]]) {
+        await page.goto(baseUrl, { waitUntil: 'networkidle' });
+        await applyTheme(dark);
+        await page.locator('#fixture-search').focus();
+        const focusStyle = await page.locator('#fixture-search').evaluate((element) => {
+            const style = getComputedStyle(element);
+            return { outline: style.outlineStyle, boxShadow: style.boxShadow };
+        });
+        if (focusStyle.outline === 'none' && focusStyle.boxShadow === 'none') throw new Error(`Input focus is not visible in ${theme} theme.`);
+        await page.screenshot({ path: resolve(artifactDir, `desktop-focus-${theme}.png`), fullPage: true });
+        results.checks.push({ name: 'keyboard-focus', theme, focusStyle, screenshot: `desktop-focus-${theme}.png` });
+    }
 
     await page.addScriptTag({ content: axeSource });
     const critical = [];
     for (const [theme, dark] of [['light', false], ['dark', true]]) {
-        await page.evaluate((enabled) => document.documentElement.classList.toggle('dark', enabled), dark);
+        await applyTheme(dark);
         const axe = await page.evaluate(async () => window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
         }));
