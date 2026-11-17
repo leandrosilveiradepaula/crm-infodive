@@ -41,4 +41,17 @@ describe('CRM #214 B3 module presentation', () => {
         expect(automations).not.toContain('text-white px-8 py-3.5 rounded-2xl');
         expect(settings).toContain('shadow-[var(--shadow-card)]');
     });
+    it('keeps icon-based empty states inside a Client Component boundary', () => {
+        // Passing Lucide React components as function-valued props from a Server
+        // Component to a Client Component breaks Next.js prerendering.
+        for (const path of [
+            'src/app/(dashboard)/price-lists/page.tsx',
+            'src/app/(dashboard)/sales-orders/page.tsx',
+        ]) {
+            const page = source(path);
+            expect(page.trimStart().startsWith("'use client';")).toBe(true);
+            expect(page).toContain('<PremiumEmptyState icon={');
+        }
+    });
+
 });

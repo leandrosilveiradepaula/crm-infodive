@@ -1,3 +1,5 @@
+'use client';
+
 import { FileSpreadsheet } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
