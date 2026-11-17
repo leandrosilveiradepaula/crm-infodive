@@ -53,7 +53,7 @@ try {
         const axe = await page.evaluate(async () => window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
         }));
-        results.axeViolations[theme] = axe.violations.map(({ id, impact, help, nodes }) => ({ id, impact, help, nodes: nodes.length }));
+        results.axeViolations[theme] = axe.violations.map(({ id, impact, help, nodes }) => ({ id, impact, help, targets: nodes.map(({ target }) => target.join(' ')) }));
         critical.push(...axe.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious').map(({ id }) => `${theme}:${id}`));
     }
     if (critical.length) throw new Error(`Axe found serious/critical violations: ${critical.join(', ')}`);
