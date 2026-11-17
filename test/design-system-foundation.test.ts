@@ -40,4 +40,11 @@ describe('Infodive design-system foundation', () => {
         expect(source('src/components/layout/Sidebar.tsx')).toContain('Infodive CRM');
         expect(source('src/components/layout/DashboardShell.tsx')).toContain('aria-label="Fechar menu"');
     });
+
+    it('makes horizontally scrollable tables reachable by keyboard', () => {
+        const table = source('src/components/ui/table.tsx');
+        expect(table).toContain('role="region"');
+        expect(table).toContain('aria-label="Tabela com rolagem horizontal"');
+        expect(table).toContain('tabIndex={0}');
+    });
 });
