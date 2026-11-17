@@ -28,13 +28,13 @@ try {
     await page.getByRole('button', { name: 'Abrir menu' }).click();
     await page.waitForTimeout(250);
     await page.screenshot({ path: resolve(artifactDir, 'mobile-menu-open.png'), fullPage: true });
-    const sidebarTransform = await page.locator('aside').evaluate((element) => getComputedStyle(element).transform);
-    if (sidebarTransform !== 'none') throw new Error('Mobile menu did not open.');
+    const sidebarTranslate = await page.locator('aside').evaluate((element) => getComputedStyle(element).translate);
+    if (sidebarTranslate !== '0px') throw new Error('Mobile menu did not open.');
     await page.getByRole('link', { name: 'Pipeline' }).click();
     await page.waitForTimeout(250);
-    const closedTransform = await page.locator('aside').evaluate((element) => getComputedStyle(element).transform);
-    if (closedTransform === 'none') throw new Error('Mobile menu did not close after navigation.');
-    results.checks.push({ name: 'mobile-menu-navigation', sidebarTransform, closedTransform });
+    const closedTranslate = await page.locator('aside').evaluate((element) => getComputedStyle(element).translate);
+    if (closedTranslate !== '-100%') throw new Error('Mobile menu did not close after navigation.');
+    results.checks.push({ name: 'mobile-menu-navigation', sidebarTranslate, closedTranslate });
 
     await page.goto(baseUrl, { waitUntil: 'networkidle' });
     await page.locator('#fixture-search').focus();
