@@ -24,4 +24,21 @@ describe('CRM #214 B3 module presentation', () => {
         expect(activities).toContain('aria-label="Visualização em lista"');
         expect(activities).toContain('aria-pressed={viewMode === \'calendar\'}');
     });
+
+    it('migrates the reviewed operational modules to shared controls instead of shell-only styling', () => {
+        const serviceDesk = source('src/app/(dashboard)/service-desk/service-desk-client.tsx');
+        const knowledge = source('src/app/(dashboard)/service-desk/knowledge/knowledge-client.tsx');
+        const automations = source('src/app/(dashboard)/automations/client-page.tsx');
+        const settings = source('src/app/(dashboard)/settings/client-page.tsx');
+
+        for (const content of [serviceDesk, knowledge]) {
+            expect(content).toContain("@/components/ui/button");
+            expect(content).toContain("@/components/ui/input");
+            expect(content).toContain("@/components/ui/textarea");
+            expect(content).toContain("@/components/layout/PageHeader");
+        }
+        expect(automations).toContain('<Button');
+        expect(automations).not.toContain('text-white px-8 py-3.5 rounded-2xl');
+        expect(settings).toContain('shadow-[var(--shadow-card)]');
+    });
 });

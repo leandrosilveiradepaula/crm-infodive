@@ -2,17 +2,17 @@
 
 ## Matriz de inventário
 
-| Área | Rotas revisadas | Superfície B3 | Limite preservado |
+| Área | Rotas revisadas | Situação comprovada | Limite preservado |
 | --- | --- | --- | --- |
 | Atividades | `/activities` | filtros, alternância lista/calendário, KPIs, loading/erro e modal existente | callbacks e ações intactos |
 | Contratos | `/contracts` | cabeçalho, filtros, tabela, ações responsivas e estado vazio | assinatura, documento e ações intactos |
 | Produtos | `/products` | catálogo, filtros, tabela/cards, modal e estado vazio | catálogo e operações intactos |
-| Propostas | `/proposals`, `/pipeline/proposals/editor/*` | revisão de composição; editor/documento não alterado | documento/exportação preservados |
-| Vendas | `/sales`, `/sales-orders` | usa tabs, listas e superfícies B1 existentes | pedidos, valores e operações intactos |
+| Propostas | `/proposals`, `/pipeline/proposals/editor/*` | `/proposals` com estado vazio B1; editor já conforme e intocado para preservar documento | documento/exportação preservados |
+| Vendas | `/sales`, `/sales-orders` | `/sales` container B1; `/sales-orders` estado vazio migrado para componente B1 | pedidos, valores e operações intactos |
 | Compras | `/purchases` | rota não presente na árvore desta branch | sem superfície a alterar |
-| Operação | `/inbox`, `/automations`, `/service-desk`, `/service-desk/knowledge` | shell/tabs/superfícies compartilhadas; automações usa controles existentes | inbox, automações e Service Desk intactos |
+| Operação | `/inbox`, `/automations`, `/service-desk`, `/service-desk/knowledge` | Inbox loading em Card; Automações, tickets e KB migrados para ações, campos, cards e estados B1 | inbox, automações e Service Desk intactos |
 | Gestão | `/reports`, `/goals`, `/goals-commissions`, `/gamification` | relatórios, metas e comissões: filtros, tabs, painéis e foco | cálculos e métricas intactos |
-| Administração | `/integrations`, `/settings`, `/price-lists` | cartões, tabs, ações e formulários pelos tokens B1 | chaves, webhooks, RBAC e ações intactos |
+| Administração | `/integrations`, `/settings`, `/price-lists` | Integrações e Settings com superfícies/ações B1; Tabelas de preço com estado vazio B1 | chaves, webhooks, RBAC e ações intactos |
 | Demais | `/design-preview` e rotas B2 | catálogo preservado; Dashboard/Pipeline/Leads/Contatos/Empresas fora de B3 | sem regressão intencional |
 
 As rotas públicas, portal e login não estão no grupo `(dashboard)` e permanecem
@@ -29,6 +29,10 @@ fora do escopo por decisão explícita.
 - a tabela de contratos mantém ações expostas em viewport móvel, sem depender
   de hover;
 - cards de integrações usam semântica de artigo e controles com foco.
+- Service Desk e Base de Conhecimento substituem campos e ações HTML ad hoc
+  por componentes B1, incluindo mensagens, formulário, lista e estado vazio;
+- Automações e Configurações têm ações primárias e painéis internos
+  normalizados sem alterar callbacks de salvamento ou execução.
 
 ## Evidência e limites
 

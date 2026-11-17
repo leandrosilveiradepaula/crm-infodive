@@ -39,6 +39,7 @@ import {
 import { toast } from 'sonner';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
+import { Button } from '@/components/ui/button';
 
 interface AutomationsClientPageProps {
     initialAutomations: Automation[];
@@ -221,15 +222,15 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 description="Otimize sua rotina com gatilhos e ações automáticas inteligentes."
             >
                 <div className="flex items-center gap-3">
-                    <button
+                    <Button
                         onClick={() => {
                             setInitialModalData(undefined);
                             setShowNewModal(true);
                         }}
-                        className="bg-primary text-white px-8 py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+                        size="lg"
                     >
-                        <Plus className="h-5 w-5" /> Criar Fluxo
-                    </button>
+                        <Plus /> Criar Fluxo
+                    </Button>
                 </div>
             </PageHeader>
 
@@ -253,7 +254,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         />
                         <button
                             onClick={handleAIBuilder}
-                            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-primary/90 transition-all flex items-center gap-1.5"
+                            className="focus-ring absolute right-1 top-1/2 flex h-8 -translate-y-1/2 items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                         >
                             <Zap className="h-3 w-3 fill-current" />
                             Gerar com IA
