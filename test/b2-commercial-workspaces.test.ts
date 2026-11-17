@@ -45,4 +45,19 @@ describe('CRM #214 B2 commercial workspaces', () => {
         expect(source('src/components/pipeline/DealCard.tsx')).toContain("event.key === 'Enter'");
         expect(source('src/components/ui/ViewToggle.tsx')).toContain('aria-pressed');
     });
+    it('preserves keyboard drag on Space and only opens card details with Enter', () => {
+        const card = source('src/components/pipeline/DealCard.tsx');
+        expect(card).toContain("provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement>");
+        expect(card).toContain("event.key === 'Enter'");
+        expect(card).not.toContain("event.key === ' '");
+        expect(card).toContain("snapshot.isDragging");
+        expect(card).toContain("event.target !== event.currentTarget");
+    });
+
+    it('retains the clear-filters action when customer results are empty', () => {
+        const customers = source('src/app/(dashboard)/customers/client-page.tsx');
+        expect(customers).toContain("'Limpar filtros'");
+        expect(customers).toContain('onAction={initialAccounts.length === 0 ? handleCreate : clearFilters}');
+    });
+
 });

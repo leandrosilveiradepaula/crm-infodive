@@ -36,7 +36,11 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                     {...provided.dragHandleProps}
                     onClick={onClick}
                     onKeyDown={(event) => {
-                        if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+                        // Preserve the drag handle's keyboard sensor: Space lifts/drops the card.
+                        (provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement> | null)?.onKeyDown?.(event);
+                        if (event.defaultPrevented || snapshot.isDragging || event.target !== event.currentTarget) return;
+                        // Enter opens details only while the card is not being dragged.
+                        if (onClick && event.key === 'Enter') {
                             event.preventDefault();
                             onClick();
                         }

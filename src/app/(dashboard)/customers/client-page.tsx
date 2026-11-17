@@ -260,8 +260,8 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     icon={Building}
                     title="Nenhuma empresa encontrada"
                     description={initialAccounts.length === 0 ? 'Cadastre a primeira empresa para iniciar a base comercial.' : 'Ajuste os filtros para localizar outras empresas.'}
-                    actionLabel={initialAccounts.length === 0 ? 'Novo cadastro' : undefined}
-                    onAction={initialAccounts.length === 0 ? handleCreate : undefined}
+                    actionLabel={initialAccounts.length === 0 ? 'Novo cadastro' : 'Limpar filtros'}
+                    onAction={initialAccounts.length === 0 ? handleCreate : clearFilters}
                 />
             )}
 
