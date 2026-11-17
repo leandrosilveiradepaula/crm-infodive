@@ -28,7 +28,7 @@ try {
     await page.getByRole('button', { name: 'Abrir menu' }).click();
     await page.screenshot({ path: resolve(artifactDir, 'mobile-menu-open.png'), fullPage: true });
     const sidebarTransform = await page.locator('aside').evaluate((element) => getComputedStyle(element).transform);
-    if (sidebarTransform === 'none') throw new Error('Mobile menu did not open.');
+    if (sidebarTransform !== 'none') throw new Error('Mobile menu did not open.');
     await page.getByRole('link', { name: 'Pipeline' }).click();
     const closedTransform = await page.locator('aside').evaluate((element) => getComputedStyle(element).transform);
     if (closedTransform === 'none') throw new Error('Mobile menu did not close after navigation.');
