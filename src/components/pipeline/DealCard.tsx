@@ -34,7 +34,15 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className="outline-none"
+                    onClick={onClick}
+                    onKeyDown={(event) => {
+                        if (onClick && (event.key === 'Enter' || event.key === ' ')) {
+                            event.preventDefault();
+                            onClick();
+                        }
+                    }}
+                    aria-label={onClick ? `Abrir oportunidade ${deal.title}` : undefined}
+                    className="rounded-[var(--radius-panel)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     style={provided.draggableProps.style}
                 >
                     <motion.div
@@ -56,18 +64,8 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         }}
                         whileHover={{ y: -6, scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={onClick}
-                        onKeyDown={(event) => {
-                            if (onClick && (event.key === 'Enter' || event.key === ' ')) {
-                                event.preventDefault();
-                                onClick();
-                            }
-                        }}
-                        role={onClick ? 'button' : undefined}
-                        tabIndex={onClick ? 0 : undefined}
-                        aria-label={onClick ? `Abrir oportunidade ${deal.title}` : undefined}
                         className={`
-                            relative group cursor-pointer rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                            relative group cursor-pointer rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform]
                             ${snapshot.isDragging
                                 ? 'z-50 scale-[1.02] border-primary/50 bg-card/95 shadow-xl ring-2 ring-primary/40 backdrop-blur-md'
                                 : 'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md'
