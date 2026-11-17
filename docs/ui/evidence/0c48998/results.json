@@ -1,0 +1,68 @@
+{
+  "baseUrl": "http://127.0.0.1:4174/test/visual/harness/",
+  "checks": [
+    {
+      "name": "desktop-light",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "theme": "light",
+      "screenshot": "desktop-light.png"
+    },
+    {
+      "name": "desktop-dark",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "theme": "dark",
+      "screenshot": "desktop-dark.png"
+    },
+    {
+      "name": "mobile-light",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "screenshot": "mobile-light.png"
+    },
+    {
+      "name": "mobile-dark",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "screenshot": "mobile-dark.png"
+    },
+    {
+      "name": "mobile-menu-navigation",
+      "sidebarTranslate": "0px",
+      "closedTranslate": "-100%"
+    },
+    {
+      "name": "keyboard-focus",
+      "theme": "light",
+      "focusStyle": {
+        "outline": "none",
+        "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.488 -0.023814 -0.24183 / 0.0162517) 0px 0px 0px 0.0975104px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+      },
+      "screenshot": "desktop-focus-light.png"
+    },
+    {
+      "name": "keyboard-focus",
+      "theme": "dark",
+      "focusStyle": {
+        "outline": "none",
+        "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, oklab(0.556 0 0 / 0.016475) 0px 0px 0px 0.09885px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+      },
+      "screenshot": "desktop-focus-dark.png"
+    }
+  ],
+  "axeViolations": {
+    "light": [],
+    "dark": []
+  }
+}

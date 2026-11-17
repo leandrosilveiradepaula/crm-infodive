@@ -28,3 +28,21 @@ O harness isolado em `test/visual/harness/` inclui a prévia B2 com resumo,
 filtros, alternância de visualização e card de oportunidade em coluna Kanban,
 com dados fictícios. A evidência deve ser interpretada como visual isolada:
 não cobre rotas autenticadas, dados reais, permissões ou callbacks de negócio.
+
+## Evidência executada
+
+No commit `0c48998`, o harness foi executado contra Vite local limitado a
+`127.0.0.1`, com Playwright Core, Chrome local e axe-core. Foram aprovados:
+
+- desktop 1440×960 e mobile 390×844, em claro e escuro;
+- shell, menu móvel, cabeçalho, resumo, filtro, alternância de visualização,
+  card de oportunidade e tabela/formulário do catálogo;
+- abertura/fechamento do menu móvel após navegação (`0px` → `-100%`);
+- foco visível em ambos os temas;
+- axe WCAG 2 A/AA sem violações.
+
+Capturas e resultado estruturado: `docs/ui/evidence/0c48998/`.
+
+Limite: não havia ambiente autenticado autorizado nesta execução. Portanto,
+não se afirma validação de Dashboard, Pipeline, Leads, Contatos ou Empresas
+com dados, sessão, permissões e operações reais.
