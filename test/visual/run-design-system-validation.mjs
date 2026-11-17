@@ -47,12 +47,16 @@ try {
     results.checks.push({ name: 'keyboard-focus', focusStyle });
 
     await page.addScriptTag({ content: axeSource });
-    const axe = await page.evaluate(async () => window.axe.run(document, {
-        runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
-    }));
-    results.axeViolations = axe.violations.map(({ id, impact, help, nodes }) => ({ id, impact, help, nodes: nodes.length }));
-    const critical = axe.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious');
-    if (critical.length) throw new Error(`Axe found serious/critical violations: ${critical.map(({ id }) => id).join(', ')}`);
+    const critical = [];
+    for (const [theme, dark] of [['light', false], ['dark', true]]) {
+        await page.evaluate((enabled) => document.documentElement.classList.toggle('dark', enabled), dark);
+        const axe = await page.evaluate(async () => window.axe.run(document, {
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+        }));
+        results.axeViolations[theme] = axe.violations.map(({ id, impact, help, nodes }) => ({ id, impact, help, nodes: nodes.length }));
+        critical.push(...axe.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious').map(({ id }) => `${theme}:${id}`));
+    }
+    if (critical.length) throw new Error(`Axe found serious/critical violations: ${critical.join(', ')}`);
 } finally {
     await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify(results, null, 2)}\n`);
     await browser.close();
