@@ -1,3 +1,43 @@
+# CURRENT_TASK — CRM #214 B3: padronização visual de todos os módulos restantes
+
+**Escopo e autorização:** programa de modernização integral de UX/UI do CRM Infodive acordado pelo proprietário em 17/11/2026 e documentado na [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). Esta autorização técnica B3 vale **exclusivamente** para a branch `ux-ui/crm214-b3-complete-modules`, criada no SHA `4608ad949b0d6053a796d5d163682620d5b96e4a` da PR #216 (B2). Depende de #215 (B0+B1) e #216 (B2), que ainda NÃO foram mergeadas. Não revoga nem mexe na PR #213 da Factory. Merge exclusivamente humano.
+
+## Missão B3 — bloco inteiro, não só diagnóstico
+
+Completar a **padronização UX/UI no CRM Infodive original** em todos os módulos/rotas do dashboard que ainda não foram migrados em B2, preservando funcionamento e identidade Infodive. Priorizar:
+- **Comercial e receita:** `/activities`, `/contracts`, `/proposals`, `/sales`, `/sales-orders`, `/products`, `/price-lists`, `/purchases`, inclusive listas, detalhes, wizards e modais; qualquer editor/visualização de proposta requer conservar layout de documento/exportação.
+- **Operação:** `/inbox`, `/automations`, `/service-desk`, `/service-desk/knowledge`.
+- **Análises e gestão:** `/reports`, `/goals`, `/goals-commissions`, `/gamification`, `/integrations`, `/settings` e suas subrotas.
+- **Rotas adicionais do dashboard:** inventariar todas as rotas realmente presentes na árvore e incluir as que faltarem (exceto as rotas públicas de login, assinatura ou portal, cuja revisão exige decisão separada).
+
+1. Inventariar por rota os componentes, estados default/loading/empty/error, filtros, modais, responsividade e temas; registrar matriz de cobertura e riscos em `docs/ui/B3_*.md`.
+2. Reutilizar tokens e primitivas B1+B2 (`PageHeader`, `Button`, `Input`, `Card`, `Table`, `FilterBar`, `PremiumEmptyState`, `ViewToggle` etc). Eliminar divergências visuais reais sem reescrever lógica, telas ou funcionalidades.
+3. Garantir que controles interativos tenham semântica de teclado apropriada, estados de foco, nomenclatura, responsividade e mensagens; não transformar elementos de leitura em botões desabilitados. Respeitar o drag/drop e controles existentes.
+4. Testar com fixtures inteiramente fictícias as variações de componentes e workspaces remanescentes; adicionar testes de regressão significativos e evidências visuais via harness isolado, com desktop/mobile e claro/escuro; verificar axe WCAG A/AA. Nunca alegar que isso equivale a E2E real.
+5. Executar `npm ci` em worktree limpo quando necessário, `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` e `git diff --check`. Corrigir regressões B3; se falha externa ocorrer, documentar causa e baseline com evidência.
+6. Abrir **uma PR coesa**, em **draft**, apontando para `main` para habilitar CI e declarando: **"DEPENDE DAS PRs #215 E #216. NÃO MERGEAR ANTES DE AMBAS."** O diff será cumulativo até os merges humanos. Reconciliar diff e CI após ambos sem force-push não autorizado.
+
+## Arquivos e limites
+
+- Permitidas alterações exclusivamente de apresentação e composição visual nas rotas remanescentes em `src/app/(dashboard)/**` e componentes de UI associados em `src/components/**`. Preservar `src/components/goals/**` e outros módulos nos quais a apresentação esteja misturada com regra de cálculo, alterando somente classes/elementos visuais sem tocar nas funções de cálculo.
+- Não alterar páginas já tratadas no B2 salvo correção necessária em componente compartilhado, com teste e justificativa.
+- Proibidas mudanças em `src/services/**`, `src/types/**`, `src/lib/**` de auth/segurança, `src/app/api/**`, server actions, autorização/RBAC, models, contratos de API, lógica de negócio, preço e moeda, faturamento, proposta persistida, contratos, integrações, envio de e-mail e pagamentos.
+- Proibidas alterações de banco, Supabase, SQL, RLS, migrations, credenciais, variáveis de ambiente, produção, deploy, Factory, PR #213 e `main`. Nenhuma operação paga.
+- Não reproduzir identidade visual da Clinia: apenas aplicar padrões genéricos de organização e usabilidade à identidade própria Infodive.
+- Não alterar AGENTS.md sem necessidade de governança geral. Não criar dados hardcoded de usuário/cliente, números de desempenho falsos ou atalhos para passar em testes.
+- Se uma mudança essencial exigir regra de negócio ou acesso a ambiente real, documentar o bloqueio concreto, manter a superfície segura e seguir os demais módulos.
+
+## Aceite e handoff
+
+- Matriz integral de módulos/telas do dashboard, cobrindo todos os módulos ainda não padronizados.
+- Alterações B3 concentradas em UX/UI e em componentes reutilizados; nenhum serviço/segredo alterado.
+- Navegação por teclado, responsividade, light/dark, estados loading/empty/error e acessibilidade avaliados com evidências honestas.
+- TypeScript, lint, testes, build e CI no SHA final quando disponíveis; PR única abrangente e documentada.
+- Sem merge automático. **B4 (QA integrado, Preview autenticado, release e baseline para cópia futura) é bloco independente e obrigatório** antes de declarar CRM totalmente modernizado.
+- Não interromper após apenas inventário ou relatório; implementar o bloco B3 completo até dependência externa real.
+
+---
+
 # CURRENT_TASK — CRM #214 B2: modernização das telas comerciais prioritárias
 
 **Escopo específico:** segundo bloco do programa de interface do CRM Infodive aprovado pelo proprietário em 17/11/2026 e documentado na [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). A fundação B0+B1 está na [PR #215](https://github.com/leandrosilveiradepaula/crm-infodive/pull/215), ainda não mergeada. Esta tarefa de implementação B2 é **separada** de B0+B1, começa no commit `76b79ee0ff120e5744e918de71438c4619fb274c` e só vale para a branch `ux-ui/crm214-b2-core-workspaces`. Não revoga a tarefa #209/PR #213, não altera a Factory e não autoriza release nem merge.
