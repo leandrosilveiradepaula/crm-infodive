@@ -60,4 +60,11 @@ describe('CRM #214 B2 commercial workspaces', () => {
         expect(customers).toContain('onAction={initialAccounts.length === 0 ? handleCreate : clearFilters}');
     });
 
+    it('renders read-only KPIs as information rather than disabled controls', () => {
+        const stats = source('src/components/layout/StatsGrid.tsx');
+        expect(stats).not.toContain('disabled={!isClickable}');
+        expect(stats).toContain('return isClickable ? (');
+        expect(stats).toContain('<div key={index} className={tileClasses}>');
+    });
+
 });

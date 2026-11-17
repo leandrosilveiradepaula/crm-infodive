@@ -24,22 +24,15 @@ export function StatsGrid({ items }: StatsGridProps) {
             {items.map((stat, index) => {
                 const Icon = stat.icon;
                 const isClickable = !!stat.onClick;
-                return (
-                    <button
-                        key={index} 
-                        onClick={stat.onClick}
-                        type="button"
-                        disabled={!isClickable}
-                        className={`group relative min-h-28 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-ring' : 'cursor-default'}`}
-                    >
+                const tileClasses = `group relative min-h-28 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-ring' : 'cursor-default'}`;
+                const tileContent = (
+                    <>
                         <div className="absolute -right-5 -top-5 text-primary/[0.06]" aria-hidden="true">
                             <Icon className="size-24" />
                         </div>
                         <div className="relative flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                                <p className="text-xs font-medium text-muted-foreground">
-                                {stat.label}
-                                </p>
+                                <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
                                 <p className="mt-2 truncate text-2xl font-semibold tracking-tight text-foreground">
                                     {stat.value}
                                 </p>
@@ -49,7 +42,17 @@ export function StatsGrid({ items }: StatsGridProps) {
                             </div>
                         </div>
                         <p className="relative mt-2 truncate text-xs text-muted-foreground">{stat.description}</p>
+                    </>
+                );
+
+                return isClickable ? (
+                    <button key={index} type="button" onClick={stat.onClick} className={tileClasses}>
+                        {tileContent}
                     </button>
+                ) : (
+                    <div key={index} className={tileClasses}>
+                        {tileContent}
+                    </div>
                 );
             })}
         </section>
