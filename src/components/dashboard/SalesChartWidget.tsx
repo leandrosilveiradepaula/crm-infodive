@@ -39,13 +39,13 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
                             dataKey="name"
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: 'var(--muted-foreground)', fontSize: 11, fontWeight: 600 }}
+                            tick={false}
                             dy={10}
                         />
                         <YAxis
                             axisLine={false}
                             tickLine={false}
-                            tick={{ fill: 'var(--muted-foreground)', fontSize: 11, fontWeight: 600 }}
+                            tick={false}
                             tickFormatter={(value) => `R$${value / 1000}k`}
                         />
                         <Tooltip
