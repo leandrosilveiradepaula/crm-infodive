@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LineChart, Line, PieChart, Pie } from 'recharts';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { Package } from 'lucide-react';
 import { formatCurrency } from '@/utils/format';
 
@@ -6,7 +7,8 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
 
     return (
         <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <AccessibleChart label="Conversão por etapa comercial" entries={data.map((point) => `${point.stage}: ${point.count} oportunidades`)} onSelect={onBarClick ? (index) => onBarClick(data[index].stageCode || data[index].stage) : undefined}>
+<ResponsiveContainer width="100%" height="100%">
                 <BarChart 
                     data={data} 
                     layout="vertical" 
@@ -37,6 +39,7 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
                     </Bar>
                 </BarChart>
             </ResponsiveContainer>
+</AccessibleChart>
         </div>
     );
 }
@@ -44,7 +47,8 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
 export function SalesPerformance({ data, onBarClick }: { data: any[], onBarClick?: (seller: string) => void }) {
     return (
         <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <AccessibleChart label="Receita por vendedor" entries={data.map((point) => `${point.seller}: ${formatCurrency(point.totalRevenue)}`)} onSelect={onBarClick ? (index) => onBarClick(data[index].seller) : undefined}>
+<ResponsiveContainer width="100%" height="100%">
                 <BarChart 
                     data={data} 
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
@@ -71,6 +75,7 @@ export function SalesPerformance({ data, onBarClick }: { data: any[], onBarClick
                     />
                 </BarChart>
             </ResponsiveContainer>
+</AccessibleChart>
         </div>
     );
 }
@@ -80,7 +85,8 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
 
     return (
         <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <AccessibleChart label="Previsão de receita mensal" entries={data.map((point) => `${point.month}: ${formatCurrency(point.value)}`)}>
+<ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                     <XAxis dataKey="month" stroke="var(--muted-foreground)" />
@@ -92,6 +98,7 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
                     <Line type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, fill: 'var(--primary)' }} name="Previsão" />
                 </LineChart>
             </ResponsiveContainer>
+</AccessibleChart>
         </div>
     );
 }
@@ -99,7 +106,8 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
 export function LossReasonChart({ data, onPieClick }: { data: any[], onPieClick?: (reason: string) => void }) {
     return (
         <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <AccessibleChart label="Motivos de perda" entries={data.map((point) => `${point.name}: ${point.value} ocorrências`)} onSelect={onPieClick ? (index) => onPieClick(data[index].name) : undefined}>
+<ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
                         data={data}
@@ -127,6 +135,7 @@ export function LossReasonChart({ data, onPieClick }: { data: any[], onPieClick?
                     />
                 </PieChart>
             </ResponsiveContainer>
+</AccessibleChart>
         </div>
     );
 }
@@ -171,7 +180,8 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
 
             {/* Chart */}
             <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <AccessibleChart label="Receita por produto" entries={data.map((point) => `${point.productName}: ${formatCurrency(point.revenue)}, ${point.quantitySold} unidades`)}>
+<ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis type="number" stroke="var(--muted-foreground)" />
@@ -184,6 +194,7 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
                         <Bar dataKey="revenue" fill="var(--primary)" radius={[0, 8, 8, 0]} />
                     </BarChart>
                 </ResponsiveContainer>
+</AccessibleChart>
             </div>
 
             {/* Product List */}
