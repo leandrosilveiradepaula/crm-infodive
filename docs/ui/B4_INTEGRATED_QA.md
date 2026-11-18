@@ -15,7 +15,7 @@ Esta distinção é intencional: o catálogo usa somente dados fictícios e não
 | --- | --- | --- |
 | Núcleo comercial | `/dashboard`, `/pipeline`, `/leads`, `/contacts`, `/customers` | Login real de conta de teste, leitura, shell, menu móvel, claro/escuro, teclado e axe |
 | Relacionamento | `/activities`, `/contracts`, `/proposals` | Leitura, tabelas, estados carregados pela rota e navegação |
-| Receita | `/products`, `/sales`, `/sales-orders`, `/purchases`, `/price-lists` | Leitura e responsividade, sem submissão ou escrita |
+| Receita | `/products`, `/sales`, `/sales-orders`, `/price-lists` | Leitura e responsividade, sem submissão ou escrita |
 | Gestão | `/reports`, `/goals`, `/goals-commissions` | Leitura, tema, overflow, foco e axe |
 | Operação | `/automations`, `/inbox`, `/service-desk`, `/service-desk/knowledge` | Navegação e apresentação, sem executar automações ou tickets |
 | Administração | `/integrations`, `/settings`, `/design-preview` | Leitura, gates de rota e layout; perfis podem declarar a lista de rotas permitidas |
@@ -40,3 +40,8 @@ Com esse gate, executar `npm run test:e2e` no CI. A suíte falha para alvo remot
 ## Handoff para release humano
 
 Após PASS autenticado vinculado ao SHA/Preview, revisar o diff cumulativo e os checks de cada PR e então considerar a ordem humana `#215 → #216 → #217`; B4 não autoriza merge, deploy, alteração de Supabase ou cópia do produto. A PR B4 deve permanecer draft enquanto o gate autenticado estiver bloqueado.
+
+
+## Endurecimento da suíte (revisão GitHub)
+
+O inventário executável agora contém 22 rotas estáticas existentes (sem `/purchases`, ausente no repositório, e sem editor de propostas dinâmico). O runner rejeita caminhos externos ou inexistentes, valida HTTP das rotas, exige que `CRM_E2E_EXPECTED_SHA` coincida com o SHA declarado do Preview remoto e falha em **qualquer** violação axe WCAG A/AA. Para gates autenticados do CI, `CRM_E2E_ENFORCE_PASS=true` transforma ausência de configuração em `BLOCKED` (exit 2), em vez de um job falsamente aprovado. Continua pendente Preview não produtivo verificado e contas fictícias para executar o teste real.

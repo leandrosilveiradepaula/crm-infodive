@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 const REQUIRED_ENV = ['CRM_E2E_BASE_URL', 'CRM_E2E_TEST_TARGET'];
 const defaultRoutes = [
     '/dashboard', '/pipeline', '/leads', '/contacts', '/customers', '/activities',
-    '/contracts', '/proposals', '/products', '/sales', '/sales-orders', '/purchases',
+    '/contracts', '/proposals', '/products', '/sales', '/sales-orders',
     '/reports', '/goals', '/goals-commissions', '/automations', '/inbox',
     '/service-desk', '/service-desk/knowledge', '/integrations', '/settings',
     '/price-lists', '/design-preview',
@@ -17,6 +17,10 @@ const viewports = [
 ];
 
 function skip(message) {
+    if (process.env.CRM_E2E_ENFORCE_PASS === 'true') {
+        process.stderr.write(`E2E_AUTHENTICATED_SMOKE=BLOCKED: ${message}\n`);
+        process.exit(2);
+    }
     process.stdout.write(`E2E_AUTHENTICATED_SMOKE=SKIPPED: ${message}\n`);
     process.exit(0);
 }
@@ -63,10 +67,14 @@ function validateEnvironment() {
     const target = new URL(process.env.CRM_E2E_BASE_URL);
     if (target.username || target.password) throw new Error('CRM_E2E_BASE_URL must not contain credentials.');
     const local = ['localhost', '127.0.0.1', '::1'].includes(target.hostname);
+    if (local && !['http:', 'https:'].includes(target.protocol)) throw new Error('Local targets must use HTTP or HTTPS.');
     if (!local && target.protocol !== 'https:') throw new Error('Remote targets must use HTTPS.');
     if (process.env.CRM_E2E_TEST_TARGET !== 'isolated') throw new Error('CRM_E2E_TEST_TARGET must be exactly "isolated".');
     if (!local && (!process.env.CRM_E2E_PREVIEW_SHA || !process.env.CRM_E2E_DEPLOYMENT_ID)) {
         throw new Error('Remote test targets require CRM_E2E_PREVIEW_SHA and CRM_E2E_DEPLOYMENT_ID for auditable evidence.');
+    }
+    if (!local && (!process.env.CRM_E2E_EXPECTED_SHA || process.env.CRM_E2E_EXPECTED_SHA !== process.env.CRM_E2E_PREVIEW_SHA)) {
+        throw new Error('Remote Preview SHA must match CRM_E2E_EXPECTED_SHA, supplied independently by the protected CI job.');
     }
     return { baseUrl: target, local };
 }
@@ -89,8 +97,10 @@ function axeSource() {
 }
 
 function routeUrl(baseUrl, route) {
-    if (!route.startsWith('/') || route.includes('://')) throw new Error(`Invalid E2E route: ${route}`);
-    return new URL(route, baseUrl).toString();
+    if (typeof route !== 'string' || !defaultRoutes.includes(route)) throw new Error('E2E route is not part of the verified CRM dashboard inventory.');
+    const url = new URL(route, baseUrl);
+    if (url.origin !== baseUrl.origin) throw new Error('E2E route must remain on the authorized target origin.');
+    return url.toString();
 }
 
 async function setTheme(page, theme) {
@@ -153,9 +163,8 @@ async function runAxe(page, source) {
         runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
     }));
     if (result.incomplete.length) throw new Error(`axe returned ${result.incomplete.length} incomplete result(s), which require review.`);
-    const blocking = result.violations.filter(({ impact }) => impact === 'critical' || impact === 'serious');
-    if (blocking.length) throw new Error(`axe found blocking violation(s): ${blocking.map(({ id }) => id).join(', ')}.`);
-    return result.violations.map(({ id, impact }) => ({ id, impact }));
+    if (result.violations.length) throw new Error(`axe found WCAG A/AA violation(s): ${result.violations.map(({ id }) => id).join(', ')}.`);
+    return [];
 }
 
 async function login(page, baseUrl, account) {
@@ -186,14 +195,22 @@ try {
         const context = await browser.newContext();
         const page = await context.newPage();
         await login(page, baseUrl, account);
+        if (!Array.isArray(account.routes) || account.routes.length === 0 || !account.routes.every((route) => defaultRoutes.includes(route))) {
+            throw new Error('Every test profile must define one or more valid routes from the verified CRM inventory.');
+        }
         const profileResult = { label: account.label, routeCount: account.routes.length, checks: [] };
-        await assertMobileNavigation(page, baseUrl);
-        profileResult.checks.push({ route: '/dashboard', viewport: 'mobile', theme: 'system', mobileMenuNavigation: 'passed' });
+        if (account.routes.includes('/dashboard') && account.routes.includes('/pipeline')) {
+            await assertMobileNavigation(page, baseUrl);
+            profileResult.checks.push({ route: '/dashboard', viewport: 'mobile', theme: 'system', mobileMenuNavigation: 'passed' });
+        } else {
+            profileResult.checks.push({ viewport: 'mobile', theme: 'system', mobileMenuNavigation: 'not-applicable-for-profile' });
+        }
         for (const route of account.routes) {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
-                    await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
+                    const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
+                    if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
                     await setTheme(page, theme);
                     await assertLayout(page);
