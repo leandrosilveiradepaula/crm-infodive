@@ -32,7 +32,7 @@ export const TasksWidget = () => {
     };
 
     return (
-        <div className="glass-card rounded-2xl p-4 flex flex-col h-full border border-white/5">
+        <div className="glass-card rounded-2xl p-4 flex flex-col h-full border border-border">
             <div className="flex items-center justify-between mb-4 shrink-0">
                 <div className="flex items-center gap-2">
                     <h2 className="text-base font-bold text-foreground">Minhas Tarefas</h2>
@@ -84,7 +84,7 @@ export const TasksWidget = () => {
                                                 {task.priority === 'urgent' ? 'Urgente' : task.priority === 'high' ? 'Alta' : task.priority}
                                             </span>
                                             {task.dueDate && (
-                                                <span className={`text-[10px] flex items-center gap-1 font-bold uppercase tracking-tight ${isOverdue ? 'text-destructive' : 'text-muted-foreground opacity-60'}`}>
+                                                <span className={`text-[10px] flex items-center gap-1 font-bold uppercase tracking-tight ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
                                                     <Calendar className="h-3 w-3" />
                                                     {formatDate(task.dueDate)}
                                                 </span>
