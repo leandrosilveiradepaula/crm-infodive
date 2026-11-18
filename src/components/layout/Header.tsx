@@ -50,6 +50,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
+                        aria-label="Buscar no CRM"
                         placeholder="Buscar..."
                         className="w-48 bg-surface-raised pl-10 lg:w-64"
                     />
