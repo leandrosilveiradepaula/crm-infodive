@@ -23,7 +23,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
     const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
 
     return (
-        <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-border bg-background/90 px-3 py-3 backdrop-blur-xl sm:px-4 lg:px-6">
+        <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-border bg-background px-3 py-3 sm:px-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <button
                     type="button"
