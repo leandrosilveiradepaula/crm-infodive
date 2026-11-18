@@ -11,6 +11,7 @@ import { PerformanceBadge } from '../PerformanceBadge';
 import { Target, TrendingUp, Award, Calendar, DollarSign, Filter, ChevronRight, Calculator, FileText, CalendarDays } from 'lucide-react';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 
 interface GoalsTabProps {
     users: UserGoalData[];
@@ -121,7 +122,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Visão Geral de Metas</h2>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
@@ -225,7 +226,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
                                         {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
                                     </th>
-                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-[#10b981] min-w-[140px]">
+                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-emerald-800 dark:text-emerald-300 min-w-[140px]">
                                         Realizado
                                     </th>
                                     <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
@@ -263,6 +264,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     {selectedPeriod === 'all' ? (
                                         <div className="flex flex-col items-center gap-1">
                                             <GoalInput
+                                                label={`Meta anual de ${(user as any).name || 'Usuário'}`}
                                                 value={user.yearly_goal ?? 0}
                                                 onSave={(val) => handleUpdate(user.user_id, { yearly_goal: val })}
                                                 hasError={hasError}
@@ -278,7 +280,8 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         </div>
                                             ) : (
                                                 <GoalInput
-                                                    value={user.quarterly_goals?.[selectedPeriod] ?? 0}
+                                                    label={`Meta ${selectedPeriod.toUpperCase()} de ${(user as any).name || 'Usuário'}`}
+                                                value={user.quarterly_goals?.[selectedPeriod] ?? 0}
                                                     onSave={(val) => handleUpdate(user.user_id, {
                                                         quarterly_goals: { ...user.quarterly_goals, [selectedPeriod]: val }
                                                     })}
@@ -287,7 +290,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         </td>
 
                                         <td className="py-2.5 px-3 text-center">
-                                            <span className="font-black text-emerald-600 text-sm">
+                                            <span className="font-black text-emerald-800 dark:text-emerald-300 text-sm">
                                                 {formatCurrency(user.totalSold)}
                                             </span>
                                         </td>
@@ -299,16 +302,16 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         {selectedPeriod === 'all' && (
                                             <>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
+                                                    <GoalInput label={`Meta Q1 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
+                                                    <GoalInput label={`Meta Q2 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
+                                                    <GoalInput label={`Meta Q3 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput className="w-16 text-[10px]" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
+                                                    <GoalInput label={`Meta Q4 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
                                                 </td>
                                             </>
                                         )}
@@ -324,6 +327,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                 <div className="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
                     <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">Performance {getPeriodLabel()}</h3>
                     <div className="flex-1 min-h-[300px]">
+                        <AccessibleChart label="Desempenho por vendedor" entries={chartData.map((point) => `${point.name}: meta ${formatCurrency(point.Meta)}, realizado ${formatCurrency(point.Realizado)}`)}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
                                 <XAxis type="number" hide />
@@ -341,6 +345,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
+                        </AccessibleChart>
                     </div>
                 </div>
             </div>
