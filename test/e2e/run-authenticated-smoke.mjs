@@ -380,6 +380,27 @@ try {
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
                     await setTheme(page, theme);
+                    // The original pre-QA could report green even if a route
+                    // rendered an empty product catalog. Local QA must prove
+                    // that the actual seeded tenant data reached the Next.js page.
+                    if (local && route === '/products') {
+                        const expectedSku = profileIndex === 3 ? 'QA-ISOLATED-003' : 'QA-SRV-001';
+                        try {
+                            await page.getByText(expectedSku, { exact: true }).first().waitFor({
+                                state: 'visible', timeout: 12_000,
+                            });
+                        } catch {
+                            throw new Error('LOCAL_QA_FIXTURE_NOT_RENDERED: products; profile=' + profileIndex);
+                        }
+                    }
+                    if (local && route === '/automations' && profileIndex === 0) {
+                        try {
+                            await page.getByText('Fluxo Inativo de Demonstração', { exact: true }).first()
+                                .waitFor({ state: 'visible', timeout: 12_000 });
+                        } catch {
+                            throw new Error('LOCAL_QA_FIXTURE_NOT_RENDERED: automations');
+                        }
+                    }
                     await assertLayout(page);
                     await assertKeyboardFocus(page);
                     const axeReport = await runAxe(page, source);

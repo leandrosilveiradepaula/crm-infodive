@@ -203,4 +203,16 @@ describe('authenticated E2E smoke contract', () => {
         expect(provisioner).toContain("LOCAL_QA_ASSIGN_OWNER_FAILED:");
     });
 
+
+    it('retries only temporary local PostgREST schema-cache unavailability after SQL seed', () => {
+        const wf = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-local-authenticated.yml'), 'utf8');
+        expect(wf).toContain("NOTIFY pgrst, 'reload schema'");
+        const auth = readFileSync(resolve(process.cwd(), 'test/e2e/local-qa/provision-local-auth.mjs'), 'utf8');
+        expect(auth).toContain("'PGRST205'");
+        expect(auth).toContain("'PGRST002'");
+        expect(auth).toContain('LOCAL_QA_POSTGREST_SCHEMA_NOT_READY');
+        expect(auth).toContain('LOCAL_QA_TENANT_QUERY_FAILED:');
+        expect(auth).toContain("env.NEXT_PUBLIC_SUPABASE_URL !== 'http://127.0.0.1:54321'");
+    });
+
 });

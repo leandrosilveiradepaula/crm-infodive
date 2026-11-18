@@ -244,4 +244,17 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(src).not.toContain('gap-2 text-primary font-black text-xs hover:text-foreground');
     });
 
+
+    it('keeps real product SKU readable and removes the translucent card glow', () => {
+        const src = source('src/components/products/ProductCard.tsx');
+        expect(src).toContain('<p className="text-[9px] text-foreground font-mono');
+        expect(src).not.toContain('<p className="text-[9px] text-primary font-mono');
+        expect(src).not.toContain('bg-primary/5 blur-[40px]');
+        expect(src).toContain('bg-surface-subtle text-foreground border-border');
+        const runner = source('test/e2e/run-authenticated-smoke.mjs');
+        expect(runner).toContain("LOCAL_QA_FIXTURE_NOT_RENDERED: products");
+        expect(runner).toContain("LOCAL_QA_FIXTURE_NOT_RENDERED: automations");
+        expect(runner).toContain("profileIndex === 3 ? 'QA-ISOLATED-003' : 'QA-SRV-001'");
+    });
+
 });

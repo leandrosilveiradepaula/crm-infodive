@@ -22,8 +22,24 @@ function assert(result, code) {
     if (result.error) throw new Error(code);
     return result.data;
 }
-const fixtures = assert(await admin.from('app_settings')
-    .select('organization_id,key,value').eq('key', 'organization'), 'LOCAL_QA_TENANT_QUERY_FAILED');
+// The SQL bootstrap commits before PostgREST has necessarily refreshed its
+// schema cache. Retry only known cache-not-ready responses; all other errors
+// are fail-closed and never retried. This is strictly localhost QA.
+async function readReadyTenants() {
+    for (let attempt = 0; attempt < 30; attempt++) {
+        const response = await admin.from('app_settings')
+            .select('organization_id,key,value').eq('key', 'organization');
+        if (!response.error) return response.data;
+        const code = response.error.code || 'UNKNOWN';
+        if (!['PGRST205', 'PGRST002', 'PGRST202'].includes(code)) {
+            throw new Error('LOCAL_QA_TENANT_QUERY_FAILED:' +
+                (/^[A-Z0-9]{3,12}$/.test(code) ? code : 'UNKNOWN'));
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw new Error('LOCAL_QA_POSTGREST_SCHEMA_NOT_READY');
+}
+const fixtures = await readReadyTenants();
 if (fixtures.length !== 2 ||
     new Set(fixtures.map(x => x.organization_id)).size !== 2) {
     throw new Error('LOCAL_QA_FIXTURE_TENANT_COUNT');

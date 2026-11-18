@@ -61,7 +61,12 @@ jobs:
               exit 1
             }
           done
-          echo "CRM_B4_LOCAL_FIXTURE=READY"
+          # PostgREST may have cached the empty public schema before SQL was
+          # applied. Explicitly reload, then the local provisioner waits for
+          # the known temporary PGRST schema-cache response to clear.
+          psql -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 54322 -U postgres -d postgres \
+            -c "NOTIFY pgrst, 'reload schema';" >/dev/null
+          echo "CRM_B4_LOCAL_FIXTURE=READY; schema_reload=requested"
         env:
           PGPASSWORD: postgres
       - name: Provision four real local Auth users and two isolated tenants
