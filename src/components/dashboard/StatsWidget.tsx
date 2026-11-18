@@ -20,10 +20,6 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, chang
         onClick={onClick}
         className="glass-card p-4 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-border h-full"
     >
-        <div className="absolute -right-3 -top-3 p-3 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
-            <Icon className="h-24 w-24" />
-        </div>
-
         <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-surface-subtle shadow-inner group-hover:scale-110 transition-transform`}>

@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     ]);
 
     return (
-        <Suspense fallback={<div className="text-white p-8">Carregando dashboard...</div>}>
+        <Suspense fallback={<div className="p-8 text-foreground">Carregando dashboard...</div>}>
             <DashboardClientPage
                 initialMetrics={metrics}
                 initialRecentDeals={recentDeals}
