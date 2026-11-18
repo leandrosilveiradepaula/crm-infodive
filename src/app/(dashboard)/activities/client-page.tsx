@@ -402,6 +402,8 @@ export function ActivitiesClientPage() {
                                                 <div className="flex items-start gap-5 relative z-10">
                                                     {/* Checkbox */}
                                                     <button
+                                                        type="button"
+                                                        aria-label={activity.status === 'completed' ? 'Reabrir atividade' : 'Concluir atividade'}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             handleToggleComplete(activity.id);
@@ -486,6 +488,8 @@ export function ActivitiesClientPage() {
                                                             {/* Actions */}
                                                             <div className="flex gap-2">
                                                                 <button
+                                                                    type="button"
+                                                                    aria-label="Editar atividade"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         setEditingActivity(activity);
@@ -496,6 +500,8 @@ export function ActivitiesClientPage() {
                                                                     <Edit className="h-4 w-4" />
                                                                 </button>
                                                                 <button
+                                                                    type="button"
+                                                                    aria-label="Excluir atividade"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
                                                                         handleDelete(activity.id);
