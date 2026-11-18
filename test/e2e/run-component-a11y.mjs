@@ -47,16 +47,16 @@ try {
             try {
                 await page.goto(base + '/?theme=' + theme, { waitUntil: 'networkidle' });
                 try {
-                    await page.waitForFunction(() => document.body.innerText.includes('Nenhuma sugestão ativa') &&
-                        document.body.innerText.includes('Reativar oportunidade fictícia') &&
-                        document.body.innerText.includes('Visão Geral de Metas') &&
-                        document.body.innerText.includes('Follow-up QA fictício'), null, { timeout: 15000 });
+                    await page.waitForFunction(() => (document.body.textContent || '').includes('Nenhuma sugestão ativa') &&
+                        (document.body.textContent || '').includes('Reativar oportunidade fictícia') &&
+                        (document.body.textContent || '').includes('Visão Geral de Metas') &&
+                        (document.body.textContent || '').includes('Follow-up QA fictício'), null, { timeout: 15000 });
                 } catch {
                     const flags = await page.evaluate(() => ({
-                        suggestions: document.body.innerText.includes('Nenhuma sugestão ativa'),
-                        active: document.body.innerText.includes('Reativar oportunidade fictícia'),
-                        goals: document.body.innerText.includes('Visão Geral de Metas'),
-                        automations: document.body.innerText.includes('Follow-up QA fictício'),
+                        suggestions: (document.body.textContent || '').includes('Nenhuma sugestão ativa'),
+                        active: (document.body.textContent || '').includes('Reativar oportunidade fictícia'),
+                        goals: (document.body.textContent || '').includes('Visão Geral de Metas'),
+                        automations: (document.body.textContent || '').includes('Follow-up QA fictício'),
                     }));
                     throw new Error('Synthetic components not mounted: flags=' + JSON.stringify(flags) +
                         ' browserErrors=' + JSON.stringify(browserErrors) + ' vite=' + serverOutput.slice(-1200));
