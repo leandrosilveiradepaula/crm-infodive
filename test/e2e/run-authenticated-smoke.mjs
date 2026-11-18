@@ -117,15 +117,20 @@ function routeUrl(baseUrl, route) {
 }
 
 async function setTheme(page, theme) {
-    const button = page.getByTitle('Alternar Tema');
-    if (theme === 'dark') {
-        const dark = await page.locator('html').evaluate((element) => element.classList.contains('dark'));
-        if (!dark) await button.click();
-    } else {
-        const dark = await page.locator('html').evaluate((element) => element.classList.contains('dark'));
-        if (dark) await button.click();
-    }
-    await page.waitForTimeout(100);
+    const wantDark = theme === 'dark';
+    const dark = await page.locator('html').evaluate(element => element.classList.contains('dark'));
+    // The former 100ms wait sampled CSS halfway through 500–700ms dark/light
+    // transitions, producing false axe violations/incomplete results.
+    if (dark !== wantDark) await page.getByTitle('Alternar Tema').click();
+    await page.waitForFunction(
+        expectedDark => document.documentElement.classList.contains('dark') === expectedDark,
+        wantDark,
+        { timeout: 5_000 },
+    );
+    // Wait for actual styles and fonts, not just the HTML theme class. This is
+    // deterministic visual stabilization; axe rules remain unchanged.
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(900);
 }
 
 async function assertKeyboardFocus(page) {

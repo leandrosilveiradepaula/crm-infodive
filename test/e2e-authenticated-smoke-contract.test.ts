@@ -215,4 +215,14 @@ describe('authenticated E2E smoke contract', () => {
         expect(auth).toContain("env.NEXT_PUBLIC_SUPABASE_URL !== 'http://127.0.0.1:54321'");
     });
 
+
+    it('waits for dark/light CSS transitions before calling axe on real pages', () => {
+        expect(source).toContain('expectedDark => document.documentElement.classList.contains');
+        expect(source).toContain('document.fonts.ready');
+        expect(source).toContain('await page.waitForTimeout(900)');
+        expect(source).not.toContain('await page.waitForTimeout(100)');
+        expect(source).toContain('const axeReport = await runAxe(page, source)');
+        expect(source).toContain("a11yFailureCount += 1");
+    });
+
 });
