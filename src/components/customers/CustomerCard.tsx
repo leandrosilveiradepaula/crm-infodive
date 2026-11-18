@@ -75,10 +75,10 @@ export function CustomerCard({ customer, onEdit, onDelete, onView }: CustomerCar
             </div>
 
             <div className="mt-3 flex flex-wrap gap-1.5 relative z-10">
-                <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 text-[8px] font-bold uppercase tracking-wider px-1.5 py-0">
+                <Badge variant="outline" className="bg-surface-subtle text-foreground border-border text-[8px] font-bold uppercase tracking-wider px-1.5 py-0">
                     {customer.segment}
                 </Badge>
-                <Badge variant="outline" className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 ${customer.status === 'Ativo' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/10' : 'bg-muted text-muted-foreground border-border'}`}>
+                <Badge variant="outline" className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0 ${customer.status === 'Ativo' ? 'bg-success-subtle text-foreground border-border' : 'bg-muted text-muted-foreground border-border'}`}>
                     {customer.status}
                 </Badge>
             </div>
