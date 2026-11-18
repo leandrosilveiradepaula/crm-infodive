@@ -170,7 +170,7 @@ async function assertMobileNavigation(page, baseUrl) {
     if (closedTranslate !== '-100%') throw new Error('Mobile menu did not close after navigation.');
 }
 
-async function runAxe(page, source, audit) {
+async function runAxe(page, source) {
     await page.addScriptTag({ content: source });
     const report = await page.evaluate(async () => {
         const result = await window.axe.run(document, {
@@ -219,9 +219,12 @@ async function runAxe(page, source, audit) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions']);
+            const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
+            const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
             const levels = [];
             let current = element;
-            for (let depth = 0; current && depth < 4; depth += 1) {
+            for (let depth = 0; current && depth < 10; depth += 1) {
                 const style = getComputedStyle(current);
                 const tag = current.tagName?.toLowerCase() || '';
                 levels.push({
@@ -230,11 +233,13 @@ async function runAxe(page, source, audit) {
                     background: safeColor(style.backgroundColor),
                     opacity: /^\d?(?:\.\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
                     backgroundImage: style.backgroundImage !== 'none',
+                    imageKind: /gradient\\(/.test(style.backgroundImage) ? 'gradient' :
+                        /url\\(/.test(style.backgroundImage) ? 'image' : 'none',
                     backdropFilter: style.backdropFilter !== 'none',
                 });
                 current = current.parentElement;
             }
-            return { resolved: true, levels };
+            return { resolved: true, region, isSvg: Boolean(element.closest('svg')), levels };
         };
         const sanitizeRule = (id) => /^[a-z][a-z0-9-]{0,70}$/.test(id || '')
             ? id : 'unknown-rule';
@@ -242,7 +247,7 @@ async function runAxe(page, source, audit) {
             incomplete: result.incomplete.slice(0, 6).map(({ id, nodes }) => ({
                 rule: sanitizeRule(id),
                 count: nodes?.length || 0,
-                samples: (nodes || []).slice(0, 6).map((node) => ({
+                samples: (nodes || []).slice(0, 16).map((node) => ({
                     ...inspect(node),
                     checks: [...(node.any || []), ...(node.all || []), ...(node.none || [])]
                         .slice(0, 3).map(safeCheck),
@@ -253,15 +258,7 @@ async function runAxe(page, source, audit) {
             violationsCount: result.violations.length,
         };
     });
-    if (report.incompleteCount) {
-        // All audit fields are internal allowlisted route/viewport/theme values.
-        // No account email/name, page body, selector, or credentials can be emitted.
-        throw new Error(`axe incomplete: profileIndex=${audit.profileIndex}; route=${audit.route}; viewport=${audit.viewport}; theme=${audit.theme}; count=${report.incompleteCount}; diagnostics=${JSON.stringify(report.incomplete)}`);
-    }
-    if (report.violationsCount) {
-        throw new Error(`axe WCAG A/AA violations: profileIndex=${audit.profileIndex}; route=${audit.route}; viewport=${audit.viewport}; theme=${audit.theme}; rules=${report.violations.join(',')}`);
-    }
-    return [];
+    return report;
 }
 
 async function login(page, baseUrl, account) {
@@ -272,7 +269,8 @@ async function login(page, baseUrl, account) {
     await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 20_000 });
 }
 
-const results = { version: 1, profiles: [], failures: [] };
+const results = { version: 2, profiles: [], failures: [] };
+let diagnosticMode = false;
 let browser;
 try {
     const { baseUrl, local } = validateEnvironment();
@@ -305,6 +303,10 @@ try {
     if (process.env.CHROME_PATH) launchOptions.executablePath = process.env.CHROME_PATH;
     browser = await chromium.launch(launchOptions);
     for (const [profileIndex, account] of accounts.entries()) {
+        // Once one audited combination fails, gather a broad read-only desktop/light
+        // matrix for the first approved admin profile rather than aborting on route 1.
+        // Never claim acceptance from diagnostic mode. Full coverage resumes on PASS.
+        if (diagnosticMode && profileIndex > 0) break;
         const context = await browser.newContext();
         // Bypass only the Vercel deployment's outer SSO layer, never CRM Auth.
         // A cross-origin request (e.g. to Supabase) must NEVER receive the secret.
@@ -343,15 +345,36 @@ try {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
+                    if (diagnosticMode && (viewport.name !== 'desktop' || theme !== 'light')) continue;
                     const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
                     await setTheme(page, theme);
                     await assertLayout(page);
                     await assertKeyboardFocus(page);
-                    const violations = await runAxe(page, source, { profileIndex, route, viewport: viewport.name, theme });
+                    const axeReport = await runAxe(page, source);
+                    const issues = axeReport.incompleteCount + axeReport.violationsCount;
+                    if (issues) {
+                        diagnosticMode = true;
+                        const finding = {
+                            profileIndex, route, viewport: viewport.name, theme,
+                            incompleteCount: axeReport.incompleteCount,
+                            violationsCount: axeReport.violationsCount,
+                            incomplete: axeReport.incomplete,
+                            violations: axeReport.violations,
+                        };
+                        results.failures.push(finding);
+                        // Only bounded, allowlisted component IDs, tags and numeric CSS;
+                        // no user content, HTML, selectors, URLs or credentials.
+                        process.stderr.write('CRM_B4_A11Y_DIAGNOSTIC=' + JSON.stringify({
+                            ...finding,
+                            incomplete: finding.incomplete.map((rule) => ({
+                                ...rule, samples: rule.samples.slice(0, 8),
+                            })),
+                        }) + '\n');
+                    }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
-                    profileResult.checks.push({ route, viewport: viewport.name, theme, axeViolations: violations });
+                    profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
                 }
             }
         }
@@ -359,7 +382,13 @@ try {
         await context.close();
     }
     if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
-    process.stdout.write(`E2E_AUTHENTICATED_SMOKE=PASSED: ${results.profiles.length} profile(s), ${results.profiles.reduce((total, profile) => total + profile.checks.length, 0)} visual route checks.\n`);
+    if (results.failures.length) {
+        fail('WCAG remains unresolved in ' + results.failures.length +
+            ' audited combination(s) across ' + new Set(results.failures.map((f) => f.route)).size +
+            ' route(s). The full matrix was intentionally not certified.');
+    } else {
+        process.stdout.write(`E2E_AUTHENTICATED_SMOKE=PASSED: ${results.profiles.length} profile(s), ${results.profiles.reduce((total, profile) => total + profile.checks.length, 0)} visual route checks.\n`);
+    }
 } catch (error) {
     results.failures.push({ message: error instanceof Error ? error.message : 'Unknown E2E failure.' });
     fail(error instanceof Error ? error.message : 'Unknown E2E failure.');
