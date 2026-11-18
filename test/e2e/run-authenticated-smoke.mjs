@@ -150,6 +150,31 @@ async function assertKeyboardFocus(page) {
     }
 }
 
+/**
+ * Ensure the real dashboard drag handles are keyboard-operable and their
+ * ARIA IDREFs resolve. axe-core may report this rule as incomplete rather
+ * than a violation when an externally generated description ID is missing.
+ * Do not log element text, ARIA values, account details or selectors.
+ */
+async function assertDashboardDragHandles(page, viewportName) {
+    const state = await page.evaluate((isMobile) => {
+        const handles = Array.from(document.querySelectorAll('[data-rfd-drag-handle-draggable-id]'));
+        const counts = { handles: handles.length, invalidDescription: 0, unlabeled: 0, notKeyboardReachable: 0, invisibleMobile: 0 };
+        for (const handle of handles) {
+            const refs = (handle.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+            if (!refs.length || refs.some((id) => !document.getElementById(id))) counts.invalidDescription++;
+            if (!handle.getAttribute('aria-label') && !handle.getAttribute('aria-labelledby')) counts.unlabeled++;
+            if (handle.tabIndex < 0 || handle.getAttribute('role') !== 'button') counts.notKeyboardReachable++;
+            if (isMobile && Number(getComputedStyle(handle).opacity) < 0.99) counts.invisibleMobile++;
+        }
+        return counts;
+    }, viewportName === 'mobile');
+    if (state.handles < 1 || state.invalidDescription || state.unlabeled ||
+        state.notKeyboardReachable || state.invisibleMobile) {
+        throw new Error('CRM_B4_DASHBOARD_DRAG_ARIA_FAILED:' + JSON.stringify(state));
+    }
+}
+
 async function assertLayout(page) {
     const layout = await page.evaluate(() => ({
         scrollWidth: document.documentElement.scrollWidth,
@@ -407,6 +432,7 @@ try {
                         }
                     }
                     await assertLayout(page);
+                    if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name);
                     await assertKeyboardFocus(page);
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;

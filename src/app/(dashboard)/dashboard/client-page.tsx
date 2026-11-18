@@ -326,13 +326,23 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                 data-qa-region={widget.id}
                                                 className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-2xl' : ''}`}
                                             >
-                                                <div
-                                                    {...provided.dragHandleProps}
-                                                    className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 p-1.5 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-all bg-card border border-border rounded-full text-muted-foreground hover:text-foreground shadow-lg hover:scale-110"
-                                                    title="Arrastar Widget"
-                                                >
-                                                    <GripHorizontal className="h-4 w-4" />
-                                                </div>
+                                                <>
+                                                    <span
+                                                        id={`dashboard-drag-instructions-${widget.id}`}
+                                                        className="sr-only"
+                                                    >
+                                                        Pressione espaço para selecionar este widget, use as setas para mover, espaço para soltar ou Escape para cancelar.
+                                                    </span>
+                                                    <div
+                                                        {...provided.dragHandleProps}
+                                                        aria-label={`Mover widget ${getWidgetLabel(widget.id)}`}
+                                                        aria-describedby={`dashboard-drag-instructions-${widget.id}`}
+                                                        className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 rounded-full border border-border bg-card p-1.5 text-foreground shadow-lg cursor-grab active:cursor-grabbing opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                        title="Arrastar Widget"
+                                                    >
+                                                        <GripHorizontal className="h-4 w-4" aria-hidden="true" />
+                                                    </div>
+                                                </>
                                                 <div className="h-full">
                                                     {renderWidget(widget.id)}
                                                 </div>

@@ -257,4 +257,21 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(runner).toContain("profileIndex === 3 ? 'QA-ISOLATED-003' : 'QA-SRV-001'");
     });
 
+
+    it('gives dashboard drag handles stable accessible descriptions and visible mobile/focus states', () => {
+        const dashboard = source('src/app/(dashboard)/dashboard/client-page.tsx');
+        expect(dashboard).toContain('id={`dashboard-drag-instructions-${widget.id}`}');
+        expect(dashboard).toContain('aria-describedby={`dashboard-drag-instructions-${widget.id}`}');
+        expect(dashboard).toContain('aria-label={`Mover widget ${getWidgetLabel(widget.id)}`}');
+        expect(dashboard).toContain('md:focus-visible:opacity-100');
+        expect(dashboard).toContain('cursor-grab active:cursor-grabbing opacity-100');
+        expect(dashboard).not.toContain('opacity-0 group-hover:opacity-100 transition-all');
+        const runner = source('test/e2e/run-authenticated-smoke.mjs');
+        expect(runner).toContain('async function assertDashboardDragHandles(page, viewportName)');
+        expect(runner).toContain("if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name)");
+        expect(runner).toContain("document.getElementById(id)");
+        expect(runner).toContain('notKeyboardReachable');
+        expect(runner).toContain('invisibleMobile');
+    });
+
 });
