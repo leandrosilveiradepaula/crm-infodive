@@ -119,19 +119,19 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
     const getTypeColor = (type: string) => {
         switch (type) {
-            case 'call': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-            case 'email': return 'text-primary bg-primary/10 border-primary/20';
-            case 'meeting': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            default: return 'text-muted-foreground bg-muted/50 border-border';
+            case 'call': return 'text-foreground bg-surface-subtle border-border';
+            case 'email': return 'text-foreground bg-surface-subtle border-border';
+            case 'meeting': return 'text-foreground bg-surface-subtle border-border';
+            default: return 'text-foreground bg-surface-subtle border-border';
         }
     };
 
     const getPriorityColor = (priority: string) => {
         switch (priority) {
-            case 'urgent': return 'text-red-500 bg-red-500/10 border-red-500/20';
-            case 'high': return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-            case 'medium': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            default: return 'text-muted-foreground bg-muted/50 border-border';
+            case 'urgent': return 'text-foreground bg-destructive-subtle border-destructive/30';
+            case 'high': return 'text-foreground bg-warning-subtle border-warning/30';
+            case 'medium': return 'text-foreground bg-surface-subtle border-border';
+            default: return 'text-foreground bg-surface-subtle border-border';
         }
     };
 
@@ -148,7 +148,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
     if (loading) {
         return (
-            <div className={`bg-gradient-to-br from-primary/5 via-card to-card border border-primary/10 ${compact ? 'rounded-2xl p-3' : 'rounded-3xl p-4'} animate-pulse`}>
+            <div className={`bg-card border border-border ${compact ? 'rounded-2xl p-3' : 'rounded-3xl p-4'} animate-pulse`}>
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-primary/10" />
                     <div className="h-5 w-48 bg-muted rounded-lg" />
@@ -163,14 +163,13 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
     }
 
     return (
-        <div className={`bg-gradient-to-br from-primary/5 via-card to-card border border-primary/10 shadow-sm ${compact ? 'rounded-2xl' : 'rounded-3xl'} overflow-hidden transition-all animate-in fade-in duration-500`}>
+        <div className={`bg-card border border-border shadow-sm ${compact ? 'rounded-2xl' : 'rounded-3xl'} overflow-hidden transition-all animate-in fade-in duration-500`}>
             {/* Header */}
             <div
                 className={`flex items-center justify-between ${compact ? 'px-3 py-2.5' : 'px-4 py-3'} cursor-pointer hover:bg-primary/5 transition-colors`}
-                onClick={() => setCollapsed(!collapsed)}
             >
                 <div className="flex items-center gap-3">
-                    <div className={`${compact ? 'p-1.5' : 'p-2'} bg-gradient-to-br from-primary to-primary/80 rounded-lg shadow-lg shadow-primary/20`}>
+                    <div className={`${compact ? 'p-1.5' : 'p-2'} bg-primary rounded-lg shadow-lg shadow-primary/20`}>
                         <Sparkles className={`${compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-white`} />
                     </div>
                     <div>
@@ -184,7 +183,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                         )}
                     </div>
                     {suggestions.length > 0 && (
-                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-primary text-white rounded-full uppercase tracking-widest">
+                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-primary text-primary-foreground rounded-full uppercase tracking-widest">
                             {suggestions.length}
                         </span>
                     )}
@@ -196,7 +195,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                             handleGenerate();
                         }}
                         disabled={generating}
-                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-surface-subtle text-foreground rounded-xl hover:bg-muted transition-all flex items-center gap-1.5 disabled:opacity-50"
                         title="Gerar novas sugestões"
                     >
                         {generating ? (
@@ -206,11 +205,14 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                         )}
                         {generating ? 'Analisando...' : 'Gerar'}
                     </button>
-                    {collapsed ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    <button type="button"
+                        aria-label={collapsed ? 'Expandir sugestões de IA' : 'Recolher sugestões de IA'}
+                        aria-expanded={!collapsed}
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="rounded-md p-1 text-muted-foreground hover:bg-muted focus-ring"
+                    >
+                        {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+                    </button>
                 </div>
             </div>
 
@@ -266,8 +268,8 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         <button
                                                             onClick={() => handleAccept(suggestion.id)}
-                                                            className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 transition-colors"
-                                                            title="Aceitar e criar atividade"
+                                                            className="p-1.5 rounded-lg bg-success-subtle text-foreground hover:bg-muted transition-colors"
+                                                            title="Aceitar e criar atividade" aria-label="Aceitar e criar atividade"
                                                         >
                                                             {isProcessing ? (
                                                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -277,8 +279,8 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                         </button>
                                                         <button
                                                             onClick={() => handleDismiss(suggestion.id)}
-                                                            className="p-1.5 rounded-lg bg-muted/50 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                                                            title="Dispensar"
+                                                            className="p-1.5 rounded-lg bg-surface-subtle text-foreground hover:bg-muted transition-colors"
+                                                            title="Dispensar" aria-label="Dispensar sugestão"
                                                         >
                                                             <X className="h-3.5 w-3.5" />
                                                         </button>
@@ -294,7 +296,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                         {getPriorityLabel(suggestion.priority)}
                                                     </span>
                                                     {suggestion.suggestedDueDate && (
-                                                        <span className="px-2 py-0.5 rounded-md border border-border bg-muted/30 text-[9px] font-bold text-muted-foreground">
+                                                        <span className="px-2 py-0.5 rounded-md border border-border bg-surface-subtle text-[9px] font-bold text-foreground">
                                                             📅 {new Date(suggestion.suggestedDueDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                                                         </span>
                                                     )}

@@ -198,6 +198,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <CalendarDays className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
+                                aria-label="Selecionar ano do Dashboard"
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                                 className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
@@ -258,6 +259,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                     {/* Config Button */}
                     <button
+                        aria-label="Configurar layout do Dashboard"
                         onClick={() => setShowConfig(!showConfig)}
                         aria-expanded={showConfig}
                         aria-controls="dashboard-layout-options"
@@ -274,7 +276,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                 <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <LayoutIcon className="h-4 w-4 text-primary" /> Personalizar
                                 </h3>
-                                <button onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
+                                <button aria-label="Fechar configuração de layout" onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
                             </div>
 
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">

@@ -235,7 +235,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             </PageHeader>
 
             {/* AI Builder Quick Input */}
-            <div className="bg-card border border-primary/20 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl shadow-sm mb-6">
+            <div className="bg-card border border-border rounded-2xl shadow-sm mb-6">
                 <div className="p-4 flex flex-col md:flex-row items-center gap-4">
                     <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
                         <Zap className="h-5 w-5 text-white animate-pulse" />
@@ -248,7 +248,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
                             placeholder="Descreva sua automação e a IA fará o resto..."
-                            className="pl-10 pr-28 w-full h-10 bg-background/50 border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
+                            aria-label="Descrever automação por IA"
+                            className="pl-10 pr-28 w-full h-10 bg-background border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                         />
@@ -309,7 +310,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         {filterType && (
                             <span className="text-xs font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
                                 <AlertCircle className="h-3 w-3" /> Filtrado: {filterType}
-                                <button onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
+                                <button type="button" aria-label="Limpar filtro de tipo" onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
                             </span>
                         )}
                         <span className="bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground">
@@ -372,7 +373,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <button className="p-2 text-muted-foreground hover:text-white transition-colors">
+                                                <button type="button" aria-label="Opções da automação" className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                                                     <MoreHorizontal className="h-5 w-5" />
                                                 </button>
                                             </DropdownMenuTrigger>
@@ -486,12 +487,12 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {showGallery && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-background/90 backdrop-blur-md animate-in fade-in duration-300">
                     <div className="bg-card w-full max-w-4xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col max-h-[85vh]">
-                        <div className="p-10 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/10 to-transparent">
+                        <div className="p-10 border-b border-border flex items-center justify-between bg-card">
                             <div>
-                                <h2 className="text-3xl font-black text-white tracking-tighter">Biblioteca de Receitas</h2>
+                                <h2 className="text-3xl font-black text-foreground tracking-tighter">Biblioteca de Receitas</h2>
                                 <p className="text-muted-foreground font-medium mt-1">Escolha um modelo e comece em segundos</p>
                             </div>
-                            <button onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all">
+                            <button type="button" aria-label="Fechar biblioteca de receitas" onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -522,12 +523,12 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             )}
 
             {/* Footer / AI Tip */}
-            <div className="bg-gradient-to-r from-primary/10 to-transparent p-6 rounded-3xl border border-primary/10 flex items-center gap-6">
+            <div className="bg-card p-6 rounded-3xl border border-primary/10 flex items-center gap-6">
                 <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
                     <Zap className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                    <h4 className="font-black text-white text-sm uppercase tracking-widest">Dica da Antigravity AI</h4>
+                    <h4 className="font-black text-foreground text-sm uppercase tracking-widest">Dica da Antigravity AI</h4>
                     <p className="text-muted-foreground text-sm mt-1">
                         Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação. 
                         <button 
