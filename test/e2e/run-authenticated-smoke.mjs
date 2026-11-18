@@ -233,8 +233,8 @@ async function runAxe(page, source) {
                     background: safeColor(style.backgroundColor),
                     opacity: /^\d?(?:\.\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
                     backgroundImage: style.backgroundImage !== 'none',
-                    imageKind: /gradient\\(/.test(style.backgroundImage) ? 'gradient' :
-                        /url\\(/.test(style.backgroundImage) ? 'image' : 'none',
+                    imageKind: /gradient\(/.test(style.backgroundImage) ? 'gradient' :
+                        /url\(/.test(style.backgroundImage) ? 'image' : 'none',
                     backdropFilter: style.backdropFilter !== 'none',
                 });
                 current = current.parentElement;
