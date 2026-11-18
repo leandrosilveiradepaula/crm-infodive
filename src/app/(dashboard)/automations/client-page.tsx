@@ -215,7 +215,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     };
 
     return (
-        <div className="space-y-6 pb-10 animate-in fade-in duration-700">
+        <div className="space-y-6 pb-10">
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
@@ -292,7 +292,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border/50">
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-surface-subtle px-3 py-1.5 rounded-lg border border-border/50">
                                     Usar Modelo
                                 </span>
                                 <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
@@ -410,14 +410,14 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
+                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
                                         <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
-                                    <div className="bg-muted/30 p-4 rounded-xl border border-border backdrop-blur-sm group-hover:border-border transition-colors">
+                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
                                         <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (

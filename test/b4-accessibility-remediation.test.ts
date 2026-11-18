@@ -152,4 +152,40 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(tokens).toContain('--success-readable: oklch(0.82 0.115 149.214);');
     });
 
+
+    it('keeps opaque text surfaces and responsive mobile layouts across all B4 failure areas', () => {
+        const goals = source('src/components/goals/tabs/GoalsTab.tsx');
+        expect(goals).not.toContain('fade-in slide-in-from-bottom-4 duration-700');
+        expect(goals).toContain('<thead className="bg-surface-raised');
+        const goalsPage = source('src/app/(dashboard)/goals/client-page.tsx');
+        expect(goalsPage).not.toContain('pb-10 animate-in fade-in');
+        expect(goalsPage).toContain('grid-cols-1 gap-1 sm:grid-cols-2');
+        const automation = source('src/app/(dashboard)/automations/client-page.tsx');
+        expect(automation).not.toContain('pb-10 animate-in fade-in');
+        expect(automation).not.toContain('border-border backdrop-blur-sm');
+        expect(automation).toContain('bg-surface-subtle p-4 rounded-xl');
+        const settings = source('src/app/(dashboard)/settings/client-page.tsx');
+        expect(settings).not.toContain('bg-muted/20 border-border');
+        expect(settings).toContain('bg-surface-raised border-border');
+        const input = source('src/components/ui/input.tsx');
+        const select = source('src/components/ui/select.tsx');
+        expect(input).not.toContain('dark:bg-input/30');
+        expect(select).not.toContain('dark:bg-input/30');
+        expect(select).toContain('bg-surface-raised');
+        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
+        expect(pipeline).toContain('flex-col gap-4 sm:flex-row');
+        expect(pipeline).toContain('w-full shrink-0 flex-col sm:w-80');
+        const customers = source('src/app/(dashboard)/customers/client-page.tsx');
+        expect(customers).toContain('grid-cols-1 gap-3 px-2 sm:grid-cols-2');
+        expect(customers).not.toContain('md:w-auto overflow-x-auto no-scrollbar');
+        const sales = source('src/app/(dashboard)/sales/SalesList.tsx');
+        expect(sales).toContain('grid-cols-2 gap-1 p-1 sm:inline-flex');
+        const design = source('src/app/(dashboard)/design-preview/page.tsx');
+        expect(design).toContain('<Table className="table-fixed">');
+        expect(design).toContain('whitespace-normal break-words');
+        const fixture = source('test/e2e/component-qa/main.tsx');
+        expect(fixture).toContain('<DesignPreviewPage />');
+        expect(fixture).toContain('<Tabs defaultValue="dashboard">');
+    });
+
 });

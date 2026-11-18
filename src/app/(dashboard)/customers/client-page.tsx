@@ -186,9 +186,9 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 px-2 w-full md:w-auto overflow-x-auto no-scrollbar">
+                <div className="grid w-full grid-cols-1 gap-3 px-2 sm:grid-cols-2 lg:w-auto xl:flex xl:items-center">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por status" className="w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por status" className="w-full xl:w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -199,7 +199,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por segmento" className="w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por segmento" className="w-full xl:w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Segmento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -211,7 +211,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={relationshipFilter} onValueChange={setRelationshipFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por relacionamento" className="w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-muted/30 border-border hover:bg-muted/50 transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por relacionamento" className="w-full xl:w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Relacionamento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">

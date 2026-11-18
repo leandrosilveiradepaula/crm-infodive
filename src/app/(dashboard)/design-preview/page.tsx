@@ -63,11 +63,11 @@ export default function DesignPreviewPage() {
                     <CardDescription>Densidade legível, cabeçalho discreto e estados semânticos.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader><TableRow><TableHead>Cliente</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Responsável</TableHead></TableRow></TableHeader>
+                    <Table className="table-fixed">
+                        <TableHeader><TableRow><TableHead className="whitespace-normal break-words px-2">Cliente</TableHead><TableHead className="whitespace-normal break-words px-2">Status</TableHead><TableHead className="whitespace-normal break-words px-2 text-right">Responsável</TableHead></TableRow></TableHeader>
                         <TableBody>
-                            <TableRow><TableCell className="font-medium">Empresa exemplo</TableCell><TableCell><Badge variant="secondary">Em andamento</Badge></TableCell><TableCell className="text-right">Equipe comercial</TableCell></TableRow>
-                            <TableRow><TableCell className="font-medium">Conta demonstração</TableCell><TableCell><Badge className="bg-info text-info-foreground">Qualificado</Badge></TableCell><TableCell className="text-right">Infodive</TableCell></TableRow>
+                            <TableRow><TableCell className="whitespace-normal break-words px-2 font-medium">Empresa exemplo</TableCell><TableCell className="whitespace-normal break-words px-2"><Badge variant="secondary" className="whitespace-normal">Em andamento</Badge></TableCell><TableCell className="whitespace-normal break-words px-2 text-right">Equipe comercial</TableCell></TableRow>
+                            <TableRow><TableCell className="whitespace-normal break-words px-2 font-medium">Conta demonstração</TableCell><TableCell className="whitespace-normal break-words px-2"><Badge className="whitespace-normal bg-info text-info-foreground">Qualificado</Badge></TableCell><TableCell className="whitespace-normal break-words px-2 text-right">Infodive</TableCell></TableRow>
                         </TableBody>
                     </Table>
                 </CardContent>

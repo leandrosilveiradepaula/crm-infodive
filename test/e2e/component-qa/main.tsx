@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client';
 import '../../../src/app/globals.css';
 import { AiSuggestionsPanel } from '@/components/activities/AiSuggestionsPanel';
 import { TopPerformersWidget } from '@/components/dashboard/TopPerformersWidget';
+import DesignPreviewPage from '@/app/(dashboard)/design-preview/page';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 
 const theme = new URLSearchParams(window.location.search).get('theme') === 'dark' ? 'dark' : 'light';
 document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -24,6 +27,26 @@ function App() {
                 </section>
                 <section aria-label="Líderes de desempenho" className="min-w-0">
                     <TopPerformersWidget data={performers} />
+                </section>
+                <section aria-label="Campos em ambos os temas" className="min-w-0 rounded-xl border border-border bg-card p-3">
+                    <Input aria-label="Campo sintético" placeholder="Nome sintético" value="Entrada de teste" readOnly />
+                </section>
+                <section aria-label="Navegação de vendas responsiva" className="min-w-0 lg:col-span-2">
+                    <Tabs defaultValue="dashboard">
+                        <TabsList aria-label="Navegação comercial" className="grid w-full grid-cols-2 gap-1 p-1 sm:inline-flex sm:w-auto sm:flex-wrap">
+                            <TabsTrigger value="dashboard">Visão Geral</TabsTrigger>
+                            <TabsTrigger value="orders">Pedidos <span className="rounded-md border border-border bg-surface-raised px-1.5 py-0.5 text-foreground">8</span></TabsTrigger>
+                            <TabsTrigger value="installments">Financeiro</TabsTrigger>
+                            <TabsTrigger value="commissions">Comissões</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="dashboard">Painel de vendas demonstrativo</TabsContent>
+                        <TabsContent value="orders">Pedidos demonstrativos</TabsContent>
+                        <TabsContent value="installments">Financeiro demonstrativo</TabsContent>
+                        <TabsContent value="commissions">Comissões demonstrativas</TabsContent>
+                    </Tabs>
+                </section>
+                <section aria-label="Prévia real do sistema de design" className="min-w-0 lg:col-span-2">
+                    <DesignPreviewPage />
                 </section>
             </div>
         </main>

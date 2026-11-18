@@ -126,7 +126,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
-                <div className="flex flex-col sm:flex-row gap-2 bg-muted/20 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
+                <div className="flex flex-col sm:flex-row gap-2 bg-surface-subtle p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
                     {/* View Year Selector */}
                     <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                         <CalendarDays className="h-4 w-4 text-primary opacity-50" />
@@ -143,7 +143,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                         <svg className="h-3 w-3 text-muted-foreground -ml-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
 
-                    <div className="flex gap-1 items-center px-1">
+                    <div className="flex flex-wrap gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedPeriod('all')}
                             className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
@@ -217,10 +217,10 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Enhanced Table */}
-                <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-card shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700 h-fit">
+                <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-card shadow-sm h-fit">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-muted/10 border-b border-border">
+                            <thead className="bg-surface-raised border-b border-border">
                                 <tr>
                                     <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
                                     <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">

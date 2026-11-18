@@ -288,7 +288,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
-                <div className="flex flex-col sm:flex-row gap-2 bg-muted/20 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
+                <div className="flex flex-col sm:flex-row gap-2 bg-surface-subtle p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
                     {/* View Year Selector */}
                     <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                         <CalendarDays className="h-4 w-4 text-primary opacity-50" />
@@ -305,7 +305,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                         <svg className="h-3 w-3 text-muted-foreground -ml-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
 
-                    <div className="flex gap-1 items-center px-1">
+                    <div className="flex flex-wrap gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedQuarters([])}
                             className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
@@ -346,14 +346,14 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
 
             {/* Kanban Board */}
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex-1 overflow-x-auto pb-4">
-                    <div className="flex min-h-[34rem] gap-4">
+                <div className="flex-1 overflow-visible pb-4 sm:overflow-x-auto">
+                    <div className="flex min-h-[34rem] flex-col gap-4 sm:flex-row">
                         {DEFAULT_STAGES.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <section key={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-80 shrink-0 flex-col">
+                                <section key={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-80">
                                     <header className="mb-2 flex items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
                                         <div>
                                             <div className="flex items-center gap-2">

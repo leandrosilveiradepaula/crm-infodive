@@ -31,7 +31,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         // Premium pill/segment style (new default)
-        default: "bg-muted/50 p-1 rounded-2xl border border-border h-auto gap-0.5",
+        default: "bg-muted p-1 rounded-2xl border border-border h-auto gap-0.5",
         // Line underline style (kept for backward compat)
         line: "gap-1 bg-transparent rounded-none border-b border-border pb-0",
       },
@@ -73,7 +73,7 @@ function TabsTrigger({
         "disabled:pointer-events-none disabled:opacity-50",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         // Inactive
-        "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+        "text-muted-foreground hover:text-foreground hover:bg-surface-raised",
         // Active (pill style)
         "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
         // Vertical orientation

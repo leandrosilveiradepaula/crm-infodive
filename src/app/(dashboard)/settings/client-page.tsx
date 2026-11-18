@@ -156,7 +156,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Razão social ou nome fantasia"
                             value={form.name}
                             onChange={e => setForm({ ...form, name: e.target.value })}
-                            className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                             placeholder="Nome da sua empresa"
                         />
                     </div>
@@ -169,7 +169,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Email institucional"
                             value={form.support_email}
                             onChange={e => setForm({ ...form, support_email: e.target.value })}
-                            className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                             placeholder="suporte@empresa.com"
                         />
                     </div>
@@ -183,7 +183,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         aria-label="CNPJ da empresa"
                             value={form.cnpj || ''}
                         onChange={e => setForm({ ...form, cnpj: e.target.value })}
-                        className="h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
+                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
                         placeholder="00.000.000/0000-00"
                     />
                 </div>
@@ -193,7 +193,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         aria-label="Inscrição estadual"
                             value={form.ie || ''}
                         onChange={e => setForm({ ...form, ie: e.target.value })}
-                        className="h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
+                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
                         placeholder="IE da empresa"
                     />
                 </div>
@@ -215,7 +215,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="CEP"
                             value={form.zip || ''}
                             onChange={e => setForm({ ...form, zip: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                             placeholder="00000-000"
                         />
                     </div>
@@ -225,7 +225,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Logradouro"
                             value={form.street || ''}
                             onChange={e => setForm({ ...form, street: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                         />
                     </div>
                     <div className="md:col-span-1 space-y-2">
@@ -234,7 +234,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Número do endereço"
                             value={form.number || ''}
                             onChange={e => setForm({ ...form, number: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                         />
                     </div>
                 </div>
@@ -246,7 +246,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Bairro"
                             value={form.neighborhood || ''}
                             onChange={e => setForm({ ...form, neighborhood: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                         />
                     </div>
                     <div className="space-y-2">
@@ -255,7 +255,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Cidade"
                             value={form.city || ''}
                             onChange={e => setForm({ ...form, city: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
                         />
                     </div>
                     <div className="space-y-2">
@@ -264,7 +264,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                             aria-label="Estado (UF)"
                             value={form.state || ''}
                             onChange={e => setForm({ ...form, state: e.target.value })}
-                            className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm uppercase"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm uppercase"
                             maxLength={2}
                         />
                     </div>
