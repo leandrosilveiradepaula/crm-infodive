@@ -15,8 +15,8 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis type="number" stroke="var(--muted-foreground)" />
-                    <YAxis dataKey="stage" type="category" stroke="var(--muted-foreground)" width={100} />
+                    <XAxis type="number" tick={false} />
+                    <YAxis dataKey="stage" type="category" tick={false} width={100} />
                     <Tooltip
                         contentStyle={{ backgroundColor: 'var(--popover)', border: '1px solid var(--border)' }}
                         itemStyle={{ color: 'var(--foreground)' }}
@@ -54,8 +54,8 @@ export function SalesPerformance({ data, onBarClick }: { data: any[], onBarClick
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="seller" stroke="var(--muted-foreground)" />
-                    <YAxis stroke="var(--muted-foreground)" />
+                    <XAxis dataKey="seller" tick={false} />
+                    <YAxis tick={false} />
                     <Tooltip
                         contentStyle={{ backgroundColor: 'var(--popover)', border: '1px solid var(--border)' }}
                         itemStyle={{ color: 'var(--foreground)' }}
@@ -89,8 +89,8 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
 <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-                    <YAxis stroke="var(--muted-foreground)" />
+                    <XAxis dataKey="month" tick={false} />
+                    <YAxis tick={false} />
                     <Tooltip
                         contentStyle={{ backgroundColor: 'var(--popover)', border: '1px solid var(--border)' }}
                         itemStyle={{ color: 'var(--foreground)' }}
@@ -184,8 +184,8 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis type="number" stroke="var(--muted-foreground)" />
-                        <YAxis dataKey="productName" type="category" width={150} stroke="var(--muted-foreground)" />
+                        <XAxis type="number" tick={false} />
+                        <YAxis dataKey="productName" type="category" width={150} tick={false} />
                         <Tooltip
                             contentStyle={{ backgroundColor: 'var(--popover)', border: '1px solid var(--border)' }}
                             itemStyle={{ color: 'var(--foreground)' }}
