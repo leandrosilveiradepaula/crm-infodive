@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BriefcaseBusiness, CheckCircle2, CircleAlert, Search } from 'lucide-react';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import { BriefcaseBusiness, CheckCircle2, CircleAlert, Search, Users } from 'lucide-react';
 import '@/app/globals.css';
 import DashboardShell from '@/components/layout/DashboardShell';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -10,8 +12,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { StatsGrid } from '@/components/layout/StatsGrid';
+import { FilterBar } from '@/components/layout/FilterBar';
+import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
+import { DealCard } from '@/components/pipeline/DealCard';
 
 function Fixture() {
+    const [view, setView] = useState<ViewMode>('cards');
+    const sampleDeal = {
+        id: 'visual-deal', title: 'Renovação de contrato', company: 'Empresa Exemplo', value: 45000,
+        probability: 70, stage: 'proposal', owner: 'Ana Martins', tags: ['Prioridade'], days_in_stage: 3,
+        expected_close_date: '2026-12-20', next_step: 'Agendar apresentação', health_score: 90,
+    } as any;
+
     return (
         <DashboardShell>
             <div className="space-y-6 pb-6" data-testid="visual-fixture">
@@ -47,6 +60,23 @@ function Fixture() {
                         </TableBody></Table>
                     </CardContent>
                 </Card>
+                <section className="space-y-4" aria-label="Prévia de workspaces B2">
+                    <PageHeader title="Workspaces comerciais" description="Prévia isolada de resumo, filtros e pipeline com dados fictícios." />
+                    <StatsGrid items={[
+                        { label: 'Pipeline ativo', value: 'R$ 45 mil', description: '1 oportunidade', icon: BriefcaseBusiness, color: 'text-primary', gradient: '', border: '' },
+                        { label: 'Leads qualificados', value: 12, description: 'Este mês', icon: Users, color: 'text-success', gradient: '', border: '' },
+                    ]} />
+                    <FilterBar>
+                        <div className="relative flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input aria-label="Buscar workspaces" className="h-10 pl-9" placeholder="Buscar oportunidades, leads ou empresas" /></div>
+                        <ViewToggle view={view} onViewChange={setView} />
+                    </FilterBar>
+                    <DragDropContext onDragEnd={() => undefined}>
+                        <section className="w-80 rounded-[var(--radius-panel)] border border-primary/20 bg-primary/5 p-2" aria-label="Coluna Proposta">
+                            <header className="mb-2 flex items-center justify-between rounded-[var(--radius-control)] border border-border bg-card p-3"><div><div className="flex items-center gap-2"><span className="size-2 rounded-full bg-primary" /><h3 className="text-sm font-semibold">Proposta</h3></div><p className="mt-1 text-xs text-muted-foreground">1 oportunidade</p></div><span className="text-sm font-semibold">R$ 45 mil</span></header>
+                            <Droppable droppableId="proposal">{(provided) => <div ref={provided.innerRef} {...provided.droppableProps}><DealCard deal={sampleDeal} index={0} onClick={() => undefined} />{provided.placeholder}</div>}</Droppable>
+                        </section>
+                    </DragDropContext>
+                </section>
             </div>
         </DashboardShell>
     );

@@ -68,8 +68,8 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 title="Contatos" 
                 description="Gerencie todos os contatos da sua base."
             >
-                <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
+                <Button onClick={() => setIsModalOpen(true)} size="lg">
+                    <Plus />
                     Novo Contato
                 </Button>
             </PageHeader>
@@ -124,7 +124,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por nome, email ou empresa..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -133,7 +133,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterAccount}
                         onChange={e => setFilterAccount(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Empresa: Todas</option>
                         {uniqueAccounts.map(acc => (
@@ -144,7 +144,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     <ThemeSelect
                         value={filterRole}
                         onChange={e => setFilterRole(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Cargo: Todos</option>
                         {uniqueRoles.map(role => (
@@ -172,6 +172,16 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     contacts={filteredContacts}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                />
+            )}
+
+            {filteredContacts.length === 0 && (
+                <PremiumEmptyState
+                    icon={Users}
+                    title="Nenhum contato encontrado"
+                    description={contacts.length === 0 ? 'Cadastre o primeiro contato para organizar sua base.' : 'Ajuste os filtros para localizar outros contatos.'}
+                    actionLabel={contacts.length === 0 ? 'Novo contato' : undefined}
+                    onAction={contacts.length === 0 ? () => setIsModalOpen(true) : undefined}
                 />
             )}
 

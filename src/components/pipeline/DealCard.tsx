@@ -34,7 +34,19 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className="outline-none"
+                    onClick={onClick}
+                    onKeyDown={(event) => {
+                        // Preserve the drag handle's keyboard sensor: Space lifts/drops the card.
+                        (provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement> | null)?.onKeyDown?.(event);
+                        if (event.defaultPrevented || snapshot.isDragging || event.target !== event.currentTarget) return;
+                        // Enter opens details only while the card is not being dragged.
+                        if (onClick && event.key === 'Enter') {
+                            event.preventDefault();
+                            onClick();
+                        }
+                    }}
+                    aria-label={onClick ? `Abrir oportunidade ${deal.title}` : undefined}
+                    className="rounded-[var(--radius-panel)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     style={provided.draggableProps.style}
                 >
                     <motion.div
@@ -56,13 +68,11 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         }}
                         whileHover={{ y: -6, scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={onClick}
                         className={`
-                            relative group cursor-pointer
-                            bg-card rounded-2xl p-2.5 border shadow-sm transition-all duration-300
+                            relative group cursor-pointer rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform]
                             ${snapshot.isDragging
-                                ? 'shadow-2xl shadow-primary/30 ring-2 ring-primary/40 border-primary/50 z-50 bg-card/90 backdrop-blur-md scale-105 rotate-2'
-                                : 'hover:shadow-lg hover:border-primary/30 border-border hover:-translate-y-1'
+                                ? 'z-50 scale-[1.02] border-primary/50 bg-card/95 shadow-xl ring-2 ring-primary/40 backdrop-blur-md'
+                                : 'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md'
                             }
                         `}
                     >

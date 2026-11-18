@@ -147,13 +147,13 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
     ];
 
     return (
-        <div className="flex-1 space-y-8 pb-10">
+        <div className="flex-1 space-y-6 pb-10">
             <PageHeader 
                 title="Gestão de Leads" 
                 description="Capture, qualifique e converta interessados em clientes."
             >
-                <Button onClick={() => setIsFormOpen(true)} className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 rounded-2xl shadow-xl shadow-primary/20 transition-all flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
+                <Button onClick={() => setIsFormOpen(true)} size="lg">
+                    <Plus />
                     Novo Lead
                 </Button>
             </PageHeader>
@@ -165,7 +165,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar leads por nome, empresa ou email..."
-                        className="pl-11 w-full h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -174,7 +174,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     <ThemeSelect
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Status: Todos</option>
                         <option value="Novo">Novo</option>
@@ -187,7 +187,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     <ThemeSelect
                         value={filterInterest}
                         onChange={e => setFilterInterest(e.target.value)}
-                        className="h-11 rounded-2xl bg-muted/30 border-border transition-all"
+                        className="h-10"
                     >
                         <option value="all">Interesse: Todos</option>
                         {uniqueInterests.map(interest => (
@@ -218,6 +218,16 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onConvert={handleConvert}
+                />
+            )}
+
+            {filteredLeads.length === 0 && (
+                <PremiumEmptyState
+                    icon={Users}
+                    title="Nenhum lead encontrado"
+                    description={leads.length === 0 ? 'Cadastre o primeiro lead para começar a qualificação.' : 'Ajuste ou limpe os filtros para ver outros leads.'}
+                    actionLabel={leads.length === 0 ? 'Novo lead' : undefined}
+                    onAction={leads.length === 0 ? () => setIsFormOpen(true) : undefined}
                 />
             )}
 

@@ -30,11 +30,11 @@ interface PipelineClientPageProps {
 }
 
 const DEFAULT_STAGES = [
-    { id: 'qualification', title: 'Qualificação', color: 'border-info', bg: 'bg-info/5', probability: 30 },
-    { id: 'proposal', title: 'Proposta', color: 'border-teal-500', bg: 'bg-teal-500/5', probability: 50 },
-    { id: 'negotiation', title: 'Negociação', color: 'border-warning', bg: 'bg-warning/5', probability: 75 },
-    { id: 'won', title: 'Ganho', color: 'border-success', bg: 'bg-success/5', probability: 100 },
-    { id: 'lost', title: 'Perdido', color: 'border-destructive', bg: 'bg-destructive/5', probability: 0 }
+    { id: 'qualification', title: 'Qualificação', accent: 'bg-info', surface: 'bg-info/5 border-info/20', probability: 30 },
+    { id: 'proposal', title: 'Proposta', accent: 'bg-primary', surface: 'bg-primary/5 border-primary/20', probability: 50 },
+    { id: 'negotiation', title: 'Negociação', accent: 'bg-warning', surface: 'bg-warning/5 border-warning/20', probability: 75 },
+    { id: 'won', title: 'Ganho', accent: 'bg-success', surface: 'bg-success/5 border-success/20', probability: 100 },
+    { id: 'lost', title: 'Perdido', accent: 'bg-destructive', surface: 'bg-destructive/5 border-destructive/20', probability: 0 }
 ];
 
 export const PipelineClientPage = ({ initialDeals, userProfile, distributors, allAccounts }: PipelineClientPageProps) => {
@@ -260,13 +260,14 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
     return (
         <div className="min-h-full flex flex-col relative space-y-6 pb-20">
             {/* Header */}
-            <PageHeader 
+            <PageHeader
                 title="Funil de Vendas" 
                 description="Gestão de Pipeline estratégico e acompanhamento de metas."
             >
                 <button
+                    type="button"
                     onClick={() => setShowNewDealModal(true)}
-                    className="bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 font-bold h-[38px] px-5 rounded-xl flex items-center gap-2 transition-all active:scale-95"
+                    className="focus-ring inline-flex h-10 items-center gap-2 rounded-[var(--radius-control)] bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                 >
                     <Plus className="h-4 w-4" /> Nova Oportunidade
                 </button>
@@ -346,29 +347,30 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             {/* Kanban Board */}
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-x-auto pb-4">
-                    <div className="flex space-x-4 h-full min-w-max">
+                    <div className="flex min-h-[34rem] gap-4">
                         {DEFAULT_STAGES.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <div key={stage.id} className="w-72 flex flex-col h-full">
-                                    <div className={`p-4 rounded-t-2xl border-b-2 ${stage.color} bg-card flex justify-between items-center shadow-sm mb-2`}>
+                                <section key={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-80 shrink-0 flex-col">
+                                    <header className="mb-2 flex items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
                                         <div>
-                                            <h3 className="font-black text-foreground text-xs uppercase tracking-widest">{stage.title}</h3>
-                                            <div className="flex gap-2 mt-1">
-                                                <span className="text-[10px] bg-muted px-1.5 rounded text-muted-foreground">{stageDeals.length}</span>
-                                                <span className="text-[10px] text-primary font-bold">{formatCompact(totalStageValue)}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span aria-hidden="true" className={`size-2 rounded-full ${stage.accent}`} />
+                                                <h3 className="text-sm font-semibold text-foreground">{stage.title}</h3>
                                             </div>
+                                            <p className="mt-1 text-xs text-muted-foreground">{stageDeals.length} oportunidades</p>
                                         </div>
-                                    </div>
+                                        <span className="text-sm font-semibold text-foreground">{formatCompact(totalStageValue)}</span>
+                                    </header>
 
                                     <Droppable droppableId={stage.id}>
                                         {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-1 rounded-2xl px-2 py-2 space-y-3 transition-colors ${snapshot.isDraggingOver ? 'bg-accent/50' : ''}`}
+                                                className={`flex-1 space-y-3 rounded-[var(--radius-panel)] border p-2 transition-colors ${stage.surface} ${snapshot.isDraggingOver ? 'ring-2 ring-primary/30' : ''}`}
                                                 style={{ minHeight: '200px' }}
                                             >
                                                 {stageDeals.map((deal, index) => (
@@ -384,7 +386,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                             </div>
                                         )}
                                     </Droppable>
-                                </div>
+                                </section>
                             );
                         })}
                     </div>
