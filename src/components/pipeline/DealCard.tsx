@@ -73,9 +73,9 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
 
                         {/* Stagnation Alert - Floating badge */}
                         {isStagnant && (
-                            <div className="absolute -top-2 -right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-destructive border border-card shadow-lg z-20 animate-pulse">
+                            <div className="absolute -top-2 -right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-destructive-subtle border border-destructive/40 shadow-lg z-20 animate-pulse">
                                 <div className="h-1 w-1 rounded-full bg-card shadow-sm" />
-                                <span className="text-[8px] font-black text-white uppercase tracking-widest">Estagnado</span>
+                                <span className="text-[8px] font-black text-foreground uppercase tracking-widest">Estagnado</span>
                             </div>
                         )}
 
@@ -109,7 +109,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                             <div className="space-y-2">
                                 <div className="flex flex-wrap gap-1">
                                     {(deal.tags || []).slice(0, 3).map((tag: string) => (
-                                        <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted/50 text-[8px] font-black text-muted-foreground border border-border/50 uppercase tracking-tighter">
+                                        <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted text-[8px] font-black text-muted-foreground border border-border/50 uppercase tracking-tighter">
                                             {tag}
                                         </span>
                                     ))}
@@ -122,7 +122,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                     <h4 className="font-bold text-foreground text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
                                         {deal.title}
                                     </h4>
-                                    <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground truncate opacity-80">
+                                    <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground truncate">
                                         <ShoppingBag className="h-3 w-3 shrink-0" />
                                         <span>{deal.company || 'Cliente Desconhecido'}</span>
                                     </div>
@@ -130,7 +130,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
 
                                 {/* Next Step Interaction - More subtle */}
                                 {deal.next_step && (
-                                    <div className="px-2 py-1.5 bg-primary/5 rounded-lg border border-primary/10 flex items-center gap-1.5">
+                                    <div className="px-2 py-1.5 bg-surface-subtle rounded-lg border border-border flex items-center gap-1.5">
                                         <div className="h-1 w-1 rounded-full bg-primary shrink-0 animate-pulse" />
                                         <p className="text-[9px] text-primary font-bold leading-tight uppercase tracking-tight flex-1 truncate">
                                             {deal.next_step}
@@ -158,7 +158,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                 {/* Probability Progress - Sleek */}
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center px-0.5">
-                                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-70">Probabilidade</span>
+                                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Probabilidade</span>
                                         <span className={`text-[9px] font-black ${deal.probability > 70 ? 'text-success' : 'text-primary'}`}>
                                             {deal.probability}%
                                         </span>
@@ -181,7 +181,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                         </div>
                                     )}
                                     {deal.expected_close_date && (
-                                        <div className="text-[9px] text-muted-foreground font-bold flex items-center gap-1 opacity-60">
+                                        <div className="text-[9px] text-muted-foreground font-bold flex items-center gap-1">
                                             <Calendar className="h-2.5 w-2.5" />
                                             <span>{new Date(deal.expected_close_date).toLocaleDateString('pt-BR')}</span>
                                         </div>
@@ -205,7 +205,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                             e.stopPropagation();
                                             onDuplicate(deal.id);
                                         }}
-                                        className="p-2 bg-popover/90 backdrop-blur-md shadow-2xl border border-primary/30 rounded-xl text-primary hover:text-primary/80 hover:border-primary/50 transition-all"
+                                        className="p-2 bg-popover shadow-2xl border border-primary/30 rounded-xl text-primary hover:text-primary/80 hover:border-primary/50 transition-all"
                                         title="Duplicar Oportunidade"
                                     >
                                         <Copy className="h-4 w-4" />
@@ -223,7 +223,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
-                                        className="p-2 bg-popover/90 backdrop-blur-md shadow-2xl border border-success/30 rounded-xl text-success hover:text-success/80 hover:border-success/50 transition-all"
+                                        className="p-2 bg-popover shadow-2xl border border-success/30 rounded-xl text-success hover:text-success/80 hover:border-success/50 transition-all"
                                         title={`WhatsApp: ${deal.contact_phone}`}
                                     >
                                         <Phone className="h-4 w-4" />
@@ -240,7 +240,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                         whileTap={{ scale: 0.9 }}
                                         href={`mailto:${deal.contact_email}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="p-2 bg-popover/90 backdrop-blur-md shadow-2xl border border-primary/30 rounded-xl text-primary hover:text-primary/80 hover:border-primary/50 transition-all"
+                                        className="p-2 bg-popover shadow-2xl border border-primary/30 rounded-xl text-primary hover:text-primary/80 hover:border-primary/50 transition-all"
                                         title={`Email: ${deal.contact_email}`}
                                     >
                                         <Mail className="h-4 w-4" />
@@ -257,7 +257,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                         whileTap={{ scale: 0.9 }}
                                         href={`tel:${deal.contact_phone}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        className="p-2 bg-popover/90 backdrop-blur-md shadow-2xl border border-info/30 rounded-xl text-info hover:text-info/80 hover:border-info/50 transition-all"
+                                        className="p-2 bg-popover shadow-2xl border border-info/30 rounded-xl text-info hover:text-info/80 hover:border-info/50 transition-all"
                                         title={`Ligar: ${deal.contact_phone}`}
                                     >
                                         <Phone className="h-4 w-4" />
