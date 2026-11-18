@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import { Building, Clock, Mail, Phone, ExternalLink, FileText, ChevronRight, AlertCircle, ShoppingBag, User, Calendar, Copy } from 'lucide-react';
+import { Building, Clock, Mail, Phone, ExternalLink, FileText, ChevronRight, AlertCircle, ShoppingBag, User, Calendar, Copy, GripHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/utils/format';
 import { Deal } from '@/types/deal';
@@ -33,19 +33,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                 <div
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    {...provided.dragHandleProps}
                     onClick={onClick}
-                    onKeyDown={(event) => {
-                        // Preserve the drag handle's keyboard sensor: Space lifts/drops the card.
-                        (provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement> | null)?.onKeyDown?.(event);
-                        if (event.defaultPrevented || snapshot.isDragging || event.target !== event.currentTarget) return;
-                        // Enter opens details only while the card is not being dragged.
-                        if (onClick && event.key === 'Enter') {
-                            event.preventDefault();
-                            onClick();
-                        }
-                    }}
-                    aria-label={onClick ? `Abrir oportunidade ${deal.title}` : undefined}
                     className="rounded-[var(--radius-panel)] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     style={provided.draggableProps.style}
                 >
@@ -93,6 +81,29 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
 
                         {/* Content Layer */}
                         <div className="relative z-10 pl-2">
+                            {/* Dedicated drag handle prevents nested interactive descendants:
+                                Space lifts/drops the card via dnd keyboard sensor, while
+                                Enter on the independent action opens the details. */}
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <button
+                                    {...provided.dragHandleProps}
+                                    type="button"
+                                    aria-label={`Arrastar oportunidade ${deal.title}`}
+                                    onClick={(event) => event.stopPropagation()}
+                                    className="focus-ring rounded-md border border-border bg-surface-subtle p-1.5 text-muted-foreground"
+                                >
+                                    <GripHorizontal className="h-3.5 w-3.5" />
+                                </button>
+                                {onClick && (
+                                    <button
+                                        type="button"
+                                        onClick={(event) => { event.stopPropagation(); onClick(); }}
+                                        className="focus-ring rounded-md px-2 py-1 text-xs font-semibold text-primary hover:bg-muted"
+                                    >
+                                        Abrir detalhes <span className="sr-only">da oportunidade {deal.title}</span>
+                                    </button>
+                                )}
+                            </div>
 
                             {/* Tags & Header */}
                             <div className="space-y-2">
