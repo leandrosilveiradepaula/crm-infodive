@@ -248,7 +248,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     <tr key={user.user_id} className="group hover:bg-muted/30 transition-all duration-200">
                                         <td className="py-2.5 px-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-xs font-black shadow-md">
+                                                <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xs font-black shadow-md">
                                                     {(user as any).avatar || (user as any).name?.charAt(0) || 'U'}
                                                 </div>
                                                 <div>
