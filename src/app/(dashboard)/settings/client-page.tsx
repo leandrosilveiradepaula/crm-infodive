@@ -79,7 +79,8 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
-                                    type="color" 
+                                    type="color"
+                                    aria-label="Selecionar cor primária da marca"
                                     value={form.primary_color || '#3b82f6'} 
                                     onChange={e => setForm({ ...form, primary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
@@ -91,7 +92,8 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
-                                    type="color" 
+                                    type="color"
+                                    aria-label="Selecionar cor secundária da marca"
                                     value={form.secondary_color || '#1e293b'} 
                                     onChange={e => setForm({ ...form, secondary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
@@ -282,6 +284,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
                     </div>
                     <Switch
+                        aria-label="Alternar modo escuro"
                         checked={mounted && theme === 'dark'}
                         onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                         disabled={!mounted}
