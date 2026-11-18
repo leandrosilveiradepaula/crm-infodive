@@ -364,6 +364,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         <label className="relative inline-flex items-center cursor-pointer scale-110">
                                             <input
                                                 type="checkbox"
+                                                aria-label="Habilitar automação"
                                                 checked={automation.enabled}
                                                 onChange={(e) => handleToggle(automation.id, e.target.checked)}
                                                 className="sr-only peer"
