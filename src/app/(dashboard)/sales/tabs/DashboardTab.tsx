@@ -36,6 +36,7 @@ import {
     AreaChart,
     Area
 } from 'recharts';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { startOfWeek, addWeeks, format, isSameWeek, isAfter, addDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -306,7 +307,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         </div>
                         
                         <div className="h-[320px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <AccessibleChart label="Fluxo de caixa por semana" entries={cashFlowData.map((point) => `${point.date}: recebimento ${formatCurrency(point.amount)}, acumulado ${formatCurrency(point.cumulative)}`)}>
+<ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={cashFlowData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
@@ -360,6 +362,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
+</AccessibleChart>
                         </div>
                     </div>
                 </div>
@@ -432,7 +435,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Distribuição por Status</h3>
                     </div>
                     <div className="h-[240px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <AccessibleChart label="Pedidos por situação" entries={statusData.map((point) => `${point.name}: ${point.value} pedidos`)}>
+<ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={statusData}
@@ -471,6 +475,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 />
                             </PieChart>
                         </ResponsiveContainer>
+</AccessibleChart>
                     </div>
                 </div>
 
@@ -483,7 +488,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Volume por Faturamento</h3>
                     </div>
                     <div className="h-[240px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <AccessibleChart label="Volume de vendas por faturamento" entries={entityData.map((point) => `${point.name}: ${formatCurrency(point.value)}`)}>
+<ResponsiveContainer width="100%" height="100%">
                             <BarChart data={entityData} layout="vertical" margin={{ left: 40, right: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
                                 <XAxis type="number" hide />
@@ -523,6 +529,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
+</AccessibleChart>
                     </div>
                 </div>
             </div>
