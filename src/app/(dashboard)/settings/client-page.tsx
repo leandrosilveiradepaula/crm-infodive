@@ -153,6 +153,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="relative group">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
+                            aria-label="Razão social ou nome fantasia"
                             value={form.name}
                             onChange={e => setForm({ ...form, name: e.target.value })}
                             className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -165,6 +166,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="relative group">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
+                            aria-label="Email institucional"
                             value={form.support_email}
                             onChange={e => setForm({ ...form, support_email: e.target.value })}
                             className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -178,7 +180,8 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                 <div className="space-y-2">
                     <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CNPJ</Label>
                     <Input
-                        value={form.cnpj || ''}
+                        aria-label="CNPJ da empresa"
+                            value={form.cnpj || ''}
                         onChange={e => setForm({ ...form, cnpj: e.target.value })}
                         className="h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
                         placeholder="00.000.000/0000-00"
@@ -187,7 +190,8 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                 <div className="space-y-2">
                     <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
                     <Input
-                        value={form.ie || ''}
+                        aria-label="Inscrição estadual"
+                            value={form.ie || ''}
                         onChange={e => setForm({ ...form, ie: e.target.value })}
                         className="h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
                         placeholder="IE da empresa"
@@ -208,6 +212,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="md:col-span-2 space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CEP</Label>
                         <Input
+                            aria-label="CEP"
                             value={form.zip || ''}
                             onChange={e => setForm({ ...form, zip: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -217,6 +222,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="md:col-span-3 space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Logradouro</Label>
                         <Input
+                            aria-label="Logradouro"
                             value={form.street || ''}
                             onChange={e => setForm({ ...form, street: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -225,6 +231,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="md:col-span-1 space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nº</Label>
                         <Input
+                            aria-label="Número do endereço"
                             value={form.number || ''}
                             onChange={e => setForm({ ...form, number: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -236,6 +243,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Bairro</Label>
                         <Input
+                            aria-label="Bairro"
                             value={form.neighborhood || ''}
                             onChange={e => setForm({ ...form, neighborhood: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -244,6 +252,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Cidade</Label>
                         <Input
+                            aria-label="Cidade"
                             value={form.city || ''}
                             onChange={e => setForm({ ...form, city: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
@@ -252,6 +261,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     <div className="space-y-2">
                         <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">UF</Label>
                         <Input
+                            aria-label="Estado (UF)"
                             value={form.state || ''}
                             onChange={e => setForm({ ...form, state: e.target.value })}
                             className="h-[34px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm uppercase"
