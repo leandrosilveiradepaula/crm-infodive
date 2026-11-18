@@ -70,7 +70,7 @@ describe('authenticated E2E smoke contract', () => {
         expect(workflow).toContain('CRM_B4_QA_ENABLED');
         expect(workflow).toContain('exit 1');
         expect(workflow).toContain("CRM_E2E_ENFORCE_PASS: 'true'");
-        expect(workflow).toContain('CRM_E2E_ACCOUNTS_FILE:');
+        expect(workflow).not.toContain('CRM_E2E_ACCOUNTS_FILE: ${{ env.');
         expect(workflow).toContain('node test/e2e/provision-qa-auth.mjs');
         expect(workflow).toContain('CRM_B4_SUPABASE_SERVICE_ROLE_KEY:');
         expect(workflow).toContain('npm run test:e2e');

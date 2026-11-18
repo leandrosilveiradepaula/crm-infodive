@@ -69,7 +69,6 @@ jobs:
           CRM_E2E_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
           CRM_E2E_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
           CRM_E2E_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
-          CRM_E2E_ACCOUNTS_FILE: ${{ env.CRM_E2E_ACCOUNTS_FILE }}
           VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
           CRM_E2E_ENFORCE_PASS: 'true'
           CRM_E2E_CAPTURE_SANITIZED: 'false'
