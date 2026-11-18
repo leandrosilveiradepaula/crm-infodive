@@ -362,7 +362,7 @@ export function ActivitiesClientPage() {
                                 <h3 className={`text-[11px] font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${groupColors[group]}`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     {groupTitles[group]}
-                                    <span className="ml-1 opacity-50">({items.length})</span>
+                                    <span className="ml-1 text-foreground">({items.length})</span>
                                 </h3>
                                 <div className="space-y-3">
                                     {items.map(activity => {
@@ -372,18 +372,18 @@ export function ActivitiesClientPage() {
                                         const isOverdue = activity.status === 'pending' && activity.dueDate && activity.dueDate < nowStr;
 
                                         const typeColors: Record<string, string> = {
-                                            meeting: 'text-stage-proposal bg-stage-proposal/10 border-stage-proposal/20',
-                                            call: 'text-success bg-success/10 border-success/20',
-                                            email: 'text-primary bg-primary/10 border-primary/20',
-                                            task: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-                                            note: 'text-muted-foreground bg-gray-500/10 border-gray-500/20'
+                                            meeting: 'text-foreground bg-surface-subtle border-border',
+                                            call: 'text-foreground bg-success-subtle border-border',
+                                            email: 'text-foreground bg-surface-subtle border-border',
+                                            task: 'text-foreground bg-warning-subtle border-border',
+                                            note: 'text-foreground bg-surface-subtle border-border'
                                         };
 
                                         const priorityColors: Record<string, string> = {
-                                            urgent: 'text-red-400 bg-red-500/10 border border-red-500/20',
-                                            high: 'text-orange-400 bg-orange-500/10 border border-orange-500/20',
-                                            medium: 'text-yellow-400 bg-yellow-500/10 border border-yellow-500/20',
-                                            low: 'text-muted-foreground bg-gray-500/10 border border-gray-500/20'
+                                            urgent: 'text-foreground bg-destructive-subtle border border-destructive/30',
+                                            high: 'text-foreground bg-warning-subtle border border-warning/30',
+                                            medium: 'text-foreground bg-warning-subtle border border-border',
+                                            low: 'text-foreground bg-surface-subtle border border-border'
                                         };
 
                                         return (
@@ -397,7 +397,7 @@ export function ActivitiesClientPage() {
                                                 }}
                                             >
                                                 {/* Ambient Glow */}
-                                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity rounded-full -mr-10 -mt-10" />
+                                                <div className="absolute top-0 right-0 w-24 h-24 bg-surface-subtle opacity-0 group-hover:opacity-100 transition-opacity rounded-full -mr-10 -mt-10" />
                                                 
                                                 <div className="flex items-start gap-5 relative z-10">
                                                     {/* Checkbox */}
@@ -469,7 +469,7 @@ export function ActivitiesClientPage() {
 
                                                                     {/* Linked Deal */}
                                                                     {activity.dealTitle && (
-                                                                        <span className="bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-surface-subtle px-2.5 py-1 rounded-lg border border-border text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-1">
                                                                             <List className="h-3 w-3" />
                                                                             {activity.dealTitle}
                                                                         </span>
@@ -477,7 +477,7 @@ export function ActivitiesClientPage() {
 
                                                                     {/* Linked Account */}
                                                                     {activity.customerName && (
-                                                                        <span className="bg-success/10 px-2.5 py-1 rounded-lg border border-success/20 text-[10px] font-black text-success uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-success-subtle px-2.5 py-1 rounded-lg border border-border text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-1">
                                                                             <Users className="h-3 w-3" />
                                                                             {activity.customerName}
                                                                         </span>
