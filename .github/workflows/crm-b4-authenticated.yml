@@ -40,6 +40,12 @@ jobs:
           cache: npm
       - name: Install reviewed CRM dependencies
         run: npm ci
+      - name: Create and confirm fictitious QA users through protected Supabase Auth Admin
+        env:
+          CRM_B4_SUPABASE_URL: https://lwpjiufsetnpjuoyline.supabase.co
+          CRM_B4_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.CRM_B4_SUPABASE_SERVICE_ROLE_KEY }}
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+        run: node test/e2e/provision-qa-auth.mjs
       - name: Install isolated browser QA toolchain without changing the lockfile
         run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
       - name: Identify Chrome executable
@@ -63,7 +69,7 @@ jobs:
           CRM_E2E_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
           CRM_E2E_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
           CRM_E2E_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
-          CRM_E2E_ACCOUNTS_JSON: ${{ secrets.CRM_B4_ACCOUNTS_JSON }}
+          CRM_E2E_ACCOUNTS_FILE: ${{ env.CRM_E2E_ACCOUNTS_FILE }}
           VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
           CRM_E2E_ENFORCE_PASS: 'true'
           CRM_E2E_CAPTURE_SANITIZED: 'false'

@@ -52,3 +52,12 @@ Em caso de PASS autenticado, a workflow envia **somente** `results.json` (rotas,
 
 
 Mesmo com `CRM_E2E_BASE_URL` em `localhost`, defina `CRM_E2E_BACKEND_ISOLATED=true` **somente após confirmar backend e contas fictícios independentes**: executar Next.js local não garante que os serviços de dados sejam locais. Sem essa aprovação, o runner falha antes de abrir navegador ou autenticar.
+
+
+## Provisionamento automático de Auth (sem cadastro manual)
+
+Na própria workflow B4, depois de `npm ci` e após aprovação do environment `crm-ui-qa`, o script `test/e2e/provision-qa-auth.mjs` usa a API oficial `supabase.auth.admin.createUser` para criar as quatro contas sintéticas em `lwpjiufsetnpjuoyline`. Reusa apenas usuários marcados como fixtures, rotaciona as senhas por execução e verifica/insere perfis server-owned nos dois tenants de QA. Recusa qualquer outro projeto, qualquer usuário inesperado e a falta da confirmação de isolamento. Não escreve diretamente em `auth.users`.
+
+**Única credencial adicional:** cadastrar no GitHub environment protegido `crm-ui-qa` a chave exclusiva de serviço do projeto Supabase QA como secret `CRM_B4_SUPABASE_SERVICE_ROLE_KEY`. A mesma chave QA deve ser cadastrada de forma server-only encrypted no projeto Vercel QA como `SUPABASE_SERVICE_ROLE_KEY`. Nunca copiar a chave do CRM original. Não compartilhar credenciais por chat ou comentários.
+
+As senhas são geradas criptograficamente no runner, gravadas em arquivo privado `0600` dentro de `RUNNER_TEMP`, e lidas pelo E2E com `CRM_E2E_ACCOUNTS_FILE`. Esse arquivo não é anexado como artifact; desaparece ao encerrar o runner. O secret `CRM_B4_ACCOUNTS_JSON` e o cadastro manual das contas **não são necessários** no fluxo automático. O `QA_BIND_SYNTHETIC_USERS.sql` anterior é um método alternativo e não deve ser executado sobre contas já vinculadas automaticamente.

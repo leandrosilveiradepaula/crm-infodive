@@ -70,7 +70,9 @@ describe('authenticated E2E smoke contract', () => {
         expect(workflow).toContain('CRM_B4_QA_ENABLED');
         expect(workflow).toContain('exit 1');
         expect(workflow).toContain("CRM_E2E_ENFORCE_PASS: 'true'");
-        expect(workflow).toContain('CRM_E2E_ACCOUNTS_JSON:');
+        expect(workflow).toContain('CRM_E2E_ACCOUNTS_FILE:');
+        expect(workflow).toContain('node test/e2e/provision-qa-auth.mjs');
+        expect(workflow).toContain('CRM_B4_SUPABASE_SERVICE_ROLE_KEY:');
         expect(workflow).toContain('npm run test:e2e');
         expect(workflow).toContain('crm-b4-e2e-');
         expect(workflow).toContain("CRM_E2E_CAPTURE_SANITIZED: 'false'");
@@ -115,6 +117,31 @@ describe('authenticated E2E smoke contract', () => {
         expect(runCheck({ url: 'another-preview.vercel.app' })).not.toBe(0);
         expect(runCheck({ meta: { ...record.meta, githubCommitSha: 'b'.repeat(40) } })).not.toBe(0);
         expect(runCheck({ project: { id: 'prj_production' } })).not.toBe(0);
+    });
+
+    it('provisions synthetic QA users through Supabase Auth Admin only in a protected environment', () => {
+        const bootstrap = readFileSync(resolve(process.cwd(), 'test/e2e/provision-qa-auth.mjs'), 'utf8');
+        expect(bootstrap).toContain("QA_URL = 'https://lwpjiufsetnpjuoyline.supabase.co'");
+        expect(bootstrap).toContain('CRM_B4_BACKEND_ISOLATED');
+        expect(bootstrap).toContain('auth.admin.createUser');
+        expect(bootstrap).toContain('auth.admin.updateUserById');
+        expect(bootstrap).toContain('email_confirm: true');
+        expect(bootstrap).toContain("app_metadata: { crm_b4_qa_fixture: true }");
+        expect(bootstrap).toContain("mode: 0o600, flag: 'wx'");
+        expect(bootstrap).toContain('CRM_E2E_ACCOUNTS_FILE=');
+        expect(bootstrap).not.toContain("from('auth.users')");
+        const result = spawnSync(process.execPath, ['test/e2e/provision-qa-auth.mjs'], {
+            cwd: process.cwd(), env: {}, encoding: 'utf8',
+        });
+        expect(result.status).toBe(2);
+        expect(result.stderr).toContain('CRM_QA_AUTH_PROVISION=BLOCKED: ISOLATION_NOT_APPROVED');
+    });
+
+    it('reads only a 0600 credentials file issued by the protected provisioner', () => {
+        expect(source).toContain('CRM_E2E_ACCOUNTS_FILE');
+        expect(source).toContain("stat.mode & 0o077");
+        expect(source).toContain("readFileSync(credentialsFile, 'utf8')");
+        expect(source).toContain('Provide exactly one E2E account source');
     });
 
 });

@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { verifyVercelPreview } from './verify-vercel-preview.mjs';
@@ -37,11 +38,22 @@ function parseAccounts() {
     const hasAllInline = inline.every(Boolean);
     if (hasInline && !hasAllInline) throw new Error('Both CRM_E2E_EMAIL and CRM_E2E_PASSWORD are required together.');
 
-    if (process.env.CRM_E2E_ACCOUNTS_JSON && hasInline) {
-        throw new Error('Use either CRM_E2E_ACCOUNTS_JSON or CRM_E2E_EMAIL/CRM_E2E_PASSWORD, not both.');
+    const credentialsFile = process.env.CRM_E2E_ACCOUNTS_FILE;
+    if (Number(Boolean(credentialsFile)) + Number(Boolean(process.env.CRM_E2E_ACCOUNTS_JSON)) + Number(hasInline) > 1) {
+        throw new Error('Provide exactly one E2E account source: protected file, protected JSON secret or single account.');
     }
-    if (process.env.CRM_E2E_ACCOUNTS_JSON) {
-        const accounts = JSON.parse(process.env.CRM_E2E_ACCOUNTS_JSON);
+    if (credentialsFile || process.env.CRM_E2E_ACCOUNTS_JSON) {
+        // The auto-provisioner creates this file mode 0600 in a disposable,
+        // permission-0700 directory under the protected CI runner temp path.
+        let source = process.env.CRM_E2E_ACCOUNTS_JSON;
+        if (credentialsFile) {
+            const stat = statSync(credentialsFile);
+            if (!stat.isFile() || (stat.mode & 0o077) !== 0) {
+                throw new Error('Ephemeral E2E credentials file must be a private regular file.');
+            }
+            source = readFileSync(credentialsFile, 'utf8');
+        }
+        const accounts = JSON.parse(source);
         if (!Array.isArray(accounts) || accounts.length === 0) throw new Error('CRM_E2E_ACCOUNTS_JSON must contain at least one account.');
         return accounts.map((account, index) => ({
             label: `profile-${index + 1}`,
