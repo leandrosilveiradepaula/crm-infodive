@@ -1,6 +1,5 @@
 'use client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { MoreHorizontal } from 'lucide-react';
 import { useTheme } from '../providers/ThemeProvider';
 
 interface SalesChartWidgetProps {
@@ -27,9 +26,7 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
                         <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-surface-subtle border border-border mr-2"></div>Projeção</span>
                     </div>
                 </div>
-                <button className="p-2 hover:bg-muted/50 rounded-full transition-colors text-muted-foreground hover:text-foreground">
-                    <MoreHorizontal className="h-5 w-5" />
-                </button>
+
             </div>
 
             <div className="flex-1" style={{ minHeight: 300 }}>
