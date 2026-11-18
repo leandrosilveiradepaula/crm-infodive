@@ -41,7 +41,7 @@ describe('authenticated E2E smoke contract', () => {
     it('does not treat moderate/minor WCAG or an unapproved route as a successful E2E', () => {
         expect(source).toContain('if (result.violations.length)');
         expect(source).toContain('if (url.origin !== baseUrl.origin)');
-        expect(source).toContain('!defaultRoutes.includes(route)');
+        expect(source).toContain("route !== '/login' && !defaultRoutes.includes(route)");
         expect(source).toContain('if (!response?.ok())');
         expect(source).toContain("mobileMenuNavigation: 'not-applicable-for-profile'");
     });
