@@ -18,7 +18,7 @@ interface StatCardProps {
 const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, change, onClick }: StatCardProps) => (
     <div
         onClick={onClick}
-        className="glass-card p-4 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-white/20 h-full"
+        className="glass-card p-4 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-border h-full"
     >
         <div className="absolute -right-3 -top-3 p-3 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
             <Icon className="h-24 w-24" />
@@ -36,11 +36,11 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, chang
                 )}
             </div>
 
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60 leading-none">{title}</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">{title}</p>
             <h3 className="text-2xl font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
 
             {subtitle && (
-                <p className="text-[10px] text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight opacity-70">
+                <p className="text-[10px] text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight">
                     <span className="w-1 h-1 rounded-full bg-primary/40"></span>
                     {subtitle}
                 </p>
