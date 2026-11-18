@@ -170,4 +170,28 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain('Provide exactly one E2E account source');
     });
 
+    it('blocks protected GitHub environment approval until real local Next.js E2E passed for the same SHA', () => {
+        const wf = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-authenticated.yml'), 'utf8');
+        expect(wf).toContain('local-parity-preflight:');
+        expect(wf).toContain('needs: local-parity-preflight');
+        expect(wf).toContain('CRM B4 real local authenticated QA');
+        expect(wf).toContain('REVIEWED_SHA:');
+        expect(wf).toContain('conclusion == "success"');
+        expect(wf).toContain('environment: crm-ui-qa');
+        const local = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-local-authenticated.yml'), 'utf8');
+        expect(local).toContain('Start pristine ephemeral Supabase');
+        expect(local).toContain('Compile real Next.js application');
+        expect(local).toContain('node test/e2e/run-authenticated-smoke.mjs');
+        expect(local).toContain('supabase stop --no-backup');
+        expect(local).not.toContain('environment: crm-ui-qa');
+        expect(local).not.toContain('supabase link');
+        const bootstrap = readFileSync(resolve(process.cwd(), 'test/e2e/local-qa/export-local-status.mjs'), 'utf8');
+        expect(bootstrap).toContain("values.API_URL !== 'http://127.0.0.1:54321'");
+        expect(bootstrap).toContain('CRM_E2E_BACKEND_ISOLATED:');
+        const provision = readFileSync(resolve(process.cwd(), 'test/e2e/local-qa/provision-local-auth.mjs'), 'utf8');
+        expect(provision).toContain("QA_ACCOUNTS } from '../provision-qa-auth.mjs'");
+        expect(provision).toContain('auth.admin.createUser');
+        expect(provision).toContain('mode: 0o600');
+    });
+
 });

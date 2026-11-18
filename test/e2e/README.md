@@ -72,3 +72,12 @@ A workflow protegida agora depende **somente da aprovação do environment `crm-
 A etapa `test/e2e/prepare-qa-preview.mjs prepare` descobre o deployment **READY em Staging**, exige projeto e equipe QA específicos, branch B4, commit revisado e URL do deployment (proibido Production). Ela gera um bypass de SSO do Vercel aleatório, específico do job, via API administrativa do **projeto QA**, que é transmitido ao Playwright somente em requests para o hostname do QA. O **login Supabase Auth do CRM nunca é burlado**. O bypass é revogado por etapa `always()`, inclusive quando o E2E falha; se o job for abruptamente cancelado, conferir/revogar manualmente no Vercel QA → Deployment Protection → Protection Bypass for Automation.
 
 **Ordem protegida:** aprovação de reviewer → checkout SHA exato → verificar Staging → gerar bypass SSO temporário → criar/confirmar 4 usuários fictícios Supabase → login por formulário real → smoke read-only → revogar bypass → publicar recibo `results.json` somente em caso de PASS. Nada é enviado a produção; não anexar capturas ou contas. Após cada alteração do código, publicar novo Staging **do novo SHA** antes de aprovar o job do E2E.
+
+
+## Pré-gate real local antes de nova aprovação (#218)
+
+A workflow `crm-b4-local-authenticated.yml` inicia Supabase real num diretório temporário, aplica os três scripts QA sintéticos (sem tocar nas migrations hospedadas), cria os quatro perfis via Auth local, compila Next.js e roda `run-authenticated-smoke.mjs` autenticando com usuários legítimos. Cobre a mesma matriz real do gate remoto, incluindo layout e barra lateral.
+
+A workflow protegida agora tem o job `local-parity-preflight` sem segredos: só libera `crm-ui-qa` depois de encontrar **SUCCESS** do job real local no SHA idêntico. O simples sucesso do teste sintético de Vite ou do TypeScript não pode liberar mais uma solicitação de revisão.
+
+O esquema QA sintético não é idêntico à produção por definição; portanto, ainda há uma certificação final remota protegida, mas **somente quando o local estiver verde**. As referências completas e restrições estão em `test/e2e/local-qa/README.md`.

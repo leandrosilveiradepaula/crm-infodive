@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 # Serialize credential rotation and project-scoped Vercel bypass grants.
 concurrency:
@@ -17,7 +18,38 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Zero protected secrets. Fail closed until the identical reviewed SHA has
+  # passed the *real* Next.js + local Supabase authenticated E2E matrix.
+  # This job finishes BEFORE GitHub presents any environment approval request.
+  local-parity-preflight:
+    name: Check real local CRM E2E on this exact SHA
+    if: github.event.number == 218 && github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require completed SUCCESS for real local E2E (never component-only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          runs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$REVIEWED_SHA&per_page=100")"
+          if ! jq -e --arg sha "$REVIEWED_SHA" '
+            [.workflow_runs[] | select(
+              .head_sha == $sha and
+              .name == "CRM B4 real local authenticated QA" and
+              .status == "completed" and
+              .conclusion == "success"
+            )] | length > 0
+          ' <<<"$runs" >/dev/null; then
+            echo "::error::Full real Next.js local authenticated QA has not passed for the exact SHA. Do NOT request protected approval."
+            exit 2
+          fi
+          echo "CRM_B4_LOCAL_PARITY_PREFLIGHT=PASS; sha=$REVIEWED_SHA"
+
   authenticated:
+    needs: local-parity-preflight
     name: B4 authenticated E2E (real CRM pages)
     if: github.event.number == 218 && github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
