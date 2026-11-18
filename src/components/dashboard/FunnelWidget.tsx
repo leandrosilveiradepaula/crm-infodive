@@ -1,5 +1,5 @@
 'use client';
-import { ResponsiveContainer, FunnelChart, Funnel, LabelList, Tooltip } from 'recharts';
+import { ResponsiveContainer, FunnelChart, Funnel, Tooltip } from 'recharts';
 import { Activity } from 'lucide-react';
 import { formatCurrency } from '../../utils/analytics';
 import type { DashboardMetrics } from '../../hooks/useDashboardMetrics';
@@ -57,11 +57,19 @@ export const FunnelWidget = ({ data }: FunnelWidgetProps) => {
                                 }))
                             }
                             isAnimationActive
-                        >
-                            <LabelList position="right" fill="var(--muted-foreground)" stroke="none" dataKey="name" style={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                        </Funnel>
+                        />
                     </FunnelChart>
                 </ResponsiveContainer>
+            </div>
+            {/* Labels are HTML outside the chart so text never overlays SVG paint. */}
+            <div role="list" aria-label="Etapas do funil" className="mt-3 flex flex-wrap gap-2">
+                {data.map((stage, index) => (
+                    <span key={stage.stage + '-' + index} role="listitem" className="rounded-md bg-surface-subtle px-2 py-1 text-xs font-semibold text-foreground">
+                        {stage.stage === 'qualification' ? 'Qualificação' :
+                         stage.stage === 'proposal' ? 'Proposta' :
+                         stage.stage === 'negotiation' ? 'Negociação' : stage.stage}
+                    </span>
+                ))}
             </div>
         </div>
     );
