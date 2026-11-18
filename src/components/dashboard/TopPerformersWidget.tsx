@@ -30,7 +30,7 @@ export const TopPerformersWidget = ({ data }: TopPerformersWidgetProps) => {
                             <p className="text-[13px] font-black text-foreground tracking-tighter leading-none mb-1">
                                 {formatCompact(performer.value)}
                             </p>
-                            <p className="text-[9px] text-success font-black uppercase tracking-widest leading-none">{performer.won} ganhos</p>
+                            <p className="text-[9px] text-success-readable font-black uppercase tracking-widest leading-none">{performer.won} ganhos</p>
                         </div>
                     </div>
                 ))}

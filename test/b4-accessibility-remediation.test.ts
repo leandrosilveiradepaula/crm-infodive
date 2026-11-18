@@ -135,4 +135,21 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(reports).toContain('onSelect={onPieClick ?');
     });
 
+    it('keeps the dashboard AI actions readable throughout its lifecycle and in dark theme', () => {
+        const panel = source('src/components/activities/AiSuggestionsPanel.tsx');
+        expect(panel).not.toContain('animate-in fade-in duration-500');
+        expect(panel).not.toContain('opacity-50 pointer-events-none');
+        expect(panel).not.toContain('disabled:opacity-50');
+        expect(panel).toContain('bg-card border border-border shadow-sm');
+
+        const performers = source('src/components/dashboard/TopPerformersWidget.tsx');
+        expect(performers).toContain('text-success-readable');
+        expect(performers).not.toContain('text-success font-black');
+
+        const tokens = source('src/app/globals.css');
+        expect(tokens).toContain('--color-success-readable: var(--success-readable);');
+        expect(tokens).toContain('--success-readable: oklch(0.37 0.13 149.214);');
+        expect(tokens).toContain('--success-readable: oklch(0.82 0.115 149.214);');
+    });
+
 });

@@ -51,6 +51,7 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-subtle: var(--surface-subtle);
+  --color-success-readable: var(--success-readable);
   --color-success-subtle: var(--success-subtle);
   --color-warning-subtle: var(--warning-subtle);
   --color-info-subtle: var(--info-subtle);
@@ -94,6 +95,7 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --success: oklch(0.52 0.16 149.214);
+  --success-readable: oklch(0.37 0.13 149.214);
   --success-subtle: oklch(0.95 0.04 149.214);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.53 0.12 70.08);
@@ -146,6 +148,7 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --success: oklch(0.52 0.16 149.214);
+  --success-readable: oklch(0.82 0.115 149.214);
   --success-subtle: oklch(0.26 0.045 149.214);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.53 0.12 70.08);

@@ -163,7 +163,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
     }
 
     return (
-        <div className={`bg-card border border-border shadow-sm ${compact ? 'rounded-2xl' : 'rounded-3xl'} overflow-hidden transition-all animate-in fade-in duration-500`}>
+        <div className={`bg-card border border-border shadow-sm ${compact ? 'rounded-2xl' : 'rounded-3xl'} overflow-hidden`}>
             {/* Header */}
             <div
                 className={`flex items-center justify-between ${compact ? 'px-3 py-2.5' : 'px-4 py-3'} cursor-pointer hover:bg-primary/5 transition-colors`}
@@ -195,7 +195,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                             handleGenerate();
                         }}
                         disabled={generating}
-                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-surface-subtle text-foreground rounded-xl hover:bg-muted transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-surface-subtle text-foreground rounded-xl hover:bg-muted transition-all flex items-center gap-1.5 disabled:cursor-progress"
                         title="Gerar novas sugestões"
                     >
                         {generating ? (
@@ -238,7 +238,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                 return (
                                     <div
                                         key={suggestion.id}
-                                        className={`group bg-card border border-border rounded-xl ${compact ? 'p-2.5' : 'p-3'} hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
+                                        className={`group bg-card border border-border rounded-xl ${compact ? 'p-2.5' : 'p-3'} hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all ${isProcessing ? 'cursor-progress' : ''}`}
                                     >
                                         <div className="flex items-start gap-3">
                                             {/* Type Icon */}
