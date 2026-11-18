@@ -331,7 +331,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
                                 <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} width={60} />
+                                <YAxis dataKey="name" type="category" tick={false} width={60} />
                                 <Tooltip
                                     cursor={{ fill: 'var(--muted-foreground)', opacity: 0.1 }}
                                     contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', backgroundColor: 'var(--popover)', color: 'var(--foreground)' }}
