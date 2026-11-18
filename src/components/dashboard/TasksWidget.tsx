@@ -37,7 +37,7 @@ export const TasksWidget = () => {
                 <div className="flex items-center gap-2">
                     <h2 className="text-base font-bold text-foreground">Minhas Tarefas</h2>
                     {overdueCount > 0 && (
-                        <span className="bg-destructive/10 text-destructive text-[9px] font-black px-1.5 py-0.5 rounded border border-destructive/20 uppercase tracking-widest">
+                        <span className="bg-destructive-subtle text-foreground text-[9px] font-black px-1.5 py-0.5 rounded border border-destructive/20 uppercase tracking-widest">
                             {overdueCount} atrasadas
                         </span>
                     )}
@@ -53,7 +53,7 @@ export const TasksWidget = () => {
             <div className="flex-1 space-y-2 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
                 {relevantTasks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-6">
-                        <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mb-2.5">
+                        <div className="w-10 h-10 rounded-full bg-success-subtle flex items-center justify-center mb-2.5">
                             <CheckCircle2 className="h-5 w-5 text-success" />
                         </div>
                         <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Tudo em dia!</p>
@@ -65,7 +65,7 @@ export const TasksWidget = () => {
                         return (
                             <div
                                 key={task.id}
-                                className={`group p-2.5 rounded-xl transition-all border border-transparent hover:bg-muted/50 cursor-pointer active:scale-[0.98] ${isOverdue ? 'border-l-2 border-l-destructive bg-destructive/5' : ''}`}
+                                className={`group p-2.5 rounded-xl transition-all border border-transparent hover:bg-muted/50 cursor-pointer active:scale-[0.98] ${isOverdue ? 'border-l-2 border-l-destructive bg-destructive-subtle' : ''}`}
                                 onClick={() => router.push('/activities')}
                             >
                                 <div className="flex items-start gap-2.5">
@@ -77,9 +77,9 @@ export const TasksWidget = () => {
                                             {task.title}
                                         </p>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className={`text-[8px] uppercase font-black tracking-widest px-1 py-0 rounded ${task.priority === 'urgent' ? 'bg-destructive/20 text-destructive' :
-                                                task.priority === 'high' ? 'bg-warning/20 text-warning' :
-                                                    'bg-muted-foreground/10 text-muted-foreground'
+                                            <span className={`text-[8px] uppercase font-black tracking-widest px-1 py-0 rounded ${task.priority === 'urgent' ? 'bg-destructive-subtle text-foreground' :
+                                                task.priority === 'high' ? 'bg-warning-subtle text-foreground' :
+                                                    'bg-surface-subtle text-muted-foreground'
                                                 }`}>
                                                 {task.priority === 'urgent' ? 'Urgente' : task.priority === 'high' ? 'Alta' : task.priority}
                                             </span>

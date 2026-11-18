@@ -240,8 +240,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                         className={`focus-ring relative h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected
                                             ? 'bg-primary text-primary-foreground shadow-sm'
                                             : hasSelectionsInOtherYears
-                                                ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                                ? 'bg-secondary text-secondary-foreground hover:bg-accent'
+                                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                             }`}
                                     >
                                         {tab.label}
@@ -321,6 +321,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
+                                                data-qa-region={widget.id}
                                                 className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-2xl' : ''}`}
                                             >
                                                 <div

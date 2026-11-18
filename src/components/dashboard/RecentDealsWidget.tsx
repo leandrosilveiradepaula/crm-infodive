@@ -26,9 +26,9 @@ export const RecentDealsWidget = ({ deals }: RecentDealsWidgetProps) => {
             <div className="flex-1 space-y-2">
                 {deals.slice(0, 4).map((deal, i) => {
                     const statusColor =
-                        deal.stage === 'won' ? 'text-success bg-success/10' :
-                            deal.stage === 'lost' ? 'text-destructive bg-destructive/10' :
-                                'text-primary bg-primary/10';
+                        deal.stage === 'won' ? 'text-foreground bg-success-subtle' :
+                            deal.stage === 'lost' ? 'text-foreground bg-destructive-subtle' :
+                                'text-foreground bg-surface-subtle';
 
                     return (
                         <div
@@ -38,7 +38,7 @@ export const RecentDealsWidget = ({ deals }: RecentDealsWidgetProps) => {
                         >
                             <div className="flex justify-between items-start">
                                 <div className="flex items-start">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black ${i % 2 === 0 ? 'bg-primary/20 text-primary' : 'bg-info/20 text-info'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black ${i % 2 === 0 ? 'bg-surface-subtle text-foreground' : 'bg-info-subtle text-foreground'}`}>
                                         {deal.company?.charAt(0) || '?'}
                                     </div>
                                     <div className="ml-2.5">

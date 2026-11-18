@@ -26,11 +26,11 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, chang
 
         <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${colorClass} bg-opacity-10 shadow-inner group-hover:scale-110 transition-transform`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-surface-subtle shadow-inner group-hover:scale-110 transition-transform`}>
                     <Icon className={`h-4.5 w-4.5 ${colorClass.replace('bg-', 'text-')}`} />
                 </div>
                 {change && (
-                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'} uppercase tracking-widest`}>
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success-subtle text-foreground' : 'bg-destructive-subtle text-foreground'} uppercase tracking-widest`}>
                         {change}
                     </span>
                 )}
