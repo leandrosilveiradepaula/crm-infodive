@@ -228,7 +228,8 @@
     @apply outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
+  /* Opaque surface: contrast requires a deterministic backdrop in both themes. */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border;
+    @apply bg-card border border-border;
   }
 }
