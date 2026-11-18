@@ -277,6 +277,7 @@ export function ActivitiesClientPage() {
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <ThemeSelect
+                        aria-label="Filtrar atividades por status"
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as ActivityStatus | 'all')}
                         className="h-10"
@@ -289,6 +290,7 @@ export function ActivitiesClientPage() {
                     </ThemeSelect>
 
                     <ThemeSelect
+                        aria-label="Filtrar atividades por tipo"
                         value={filterType}
                         onChange={e => setFilterType(e.target.value as ActivityType | 'all')}
                         className="h-10"

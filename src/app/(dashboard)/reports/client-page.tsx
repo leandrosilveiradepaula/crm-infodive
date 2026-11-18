@@ -111,7 +111,8 @@ export function ReportsClientPage() {
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <Calendar className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
-                                value={selectedYear}
+                                aria-label="Selecionar ano do relatório"
+                        value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                             className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
                             >
@@ -153,7 +154,8 @@ export function ReportsClientPage() {
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Status:</span>
                         <select
-                            value={statusFilter}
+                            aria-label="Filtrar relatórios por status"
+                        value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
                             className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
                         >
@@ -170,7 +172,8 @@ export function ReportsClientPage() {
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Faturamento:</span>
                         <select
-                            value={billingFilter}
+                            aria-label="Filtrar relatórios por faturamento"
+                        value={billingFilter}
                             onChange={(e) => setBillingFilter(e.target.value)}
                             className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
                         >
@@ -187,7 +190,8 @@ export function ReportsClientPage() {
                     {/* Seller Select */}
                     <div className="w-full sm:w-[150px]">
                         <ThemeSelect
-                            value={sellerFilter}
+                            aria-label="Filtrar relatórios por vendedor"
+                        value={sellerFilter}
                             onChange={(e) => setSellerFilter(e.target.value)}
                             className="h-11 rounded-full bg-muted/30 border-border text-[10px] uppercase font-black tracking-widest"
                         >

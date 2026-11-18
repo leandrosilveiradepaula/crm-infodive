@@ -156,6 +156,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <ThemeSelect
+                        aria-label="Filtrar produtos por marca"
                         value={filterBrand}
                         onChange={e => setFilterBrand(e.target.value)}
                         className="h-10"
@@ -167,6 +168,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                     </ThemeSelect>
 
                     <ThemeSelect
+                        aria-label="Filtrar produtos por categoria"
                         value={filterCategory}
                         onChange={e => setFilterCategory(e.target.value)}
                         className="h-10"
