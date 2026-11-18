@@ -1,0 +1,70 @@
+name: CRM B4 authenticated acceptance
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  qa-readiness:
+    name: B4 E2E isolated-environment gate
+    if: github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require explicit QA environment activation
+        env:
+          QA_ENABLED: ${{ vars.CRM_B4_QA_ENABLED }}
+        run: |
+          if [ "$QA_ENABLED" != "true" ]; then
+            echo "::error::BLOCKED: isolated CRM B4 backend and protected QA environment not approved. Do not use shared Production/Preview Supabase configuration."
+            exit 1
+          fi
+
+  authenticated:
+    name: B4 authenticated E2E (real CRM pages)
+    needs: qa-readiness
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: crm-ui-qa
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install reviewed CRM dependencies
+        run: npm ci
+      - name: Install isolated browser QA toolchain without changing the lockfile
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
+      - name: Identify Chrome executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$chrome" ]; then
+            echo "::error::Chrome is unavailable on the isolated runner."
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - name: Real authenticated CRM smoke (read-only, fail-closed)
+        env:
+          CRM_E2E_BASE_URL: ${{ vars.CRM_B4_PREVIEW_URL }}
+          CRM_E2E_TEST_TARGET: isolated
+          CRM_E2E_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_E2E_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_E2E_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_E2E_DEPLOYMENT_ID: ${{ vars.CRM_B4_DEPLOYMENT_ID }}
+          CRM_E2E_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_E2E_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_E2E_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          CRM_E2E_ACCOUNTS_JSON: ${{ secrets.CRM_B4_ACCOUNTS_JSON }}
+          VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_E2E_ENFORCE_PASS: 'true'
+          CRM_E2E_CAPTURE_SANITIZED: 'false'
+        run: npm run test:e2e

@@ -45,3 +45,8 @@ Após PASS autenticado vinculado ao SHA/Preview, revisar o diff cumulativo e os 
 ## Endurecimento da suíte (revisão GitHub)
 
 O inventário executável agora contém 22 rotas estáticas existentes (sem `/purchases`, ausente no repositório, e sem editor de propostas dinâmico). O runner rejeita caminhos externos ou inexistentes, valida HTTP das rotas, exige que `CRM_E2E_EXPECTED_SHA` coincida com o SHA declarado do Preview remoto e falha em **qualquer** violação axe WCAG A/AA. Para gates autenticados do CI, `CRM_E2E_ENFORCE_PASS=true` transforma ausência de configuração em `BLOCKED` (exit 2), em vez de um job falsamente aprovado. Continua pendente Preview não produtivo verificado e contas fictícias para executar o teste real.
+
+
+## Continuidade B4 — gate protegido e verificação independente
+
+No GitHub foi confirmado que o mesmo cadastro de variáveis de conexão Supabase e de serviço está direcionado a Preview e Production no Vercel, sem ambiente customizado. **Nenhum Preview dessa configuração é qualificado como isolado**. O CI deve permanecer bloqueado, sem deploy automático ou sessão real. Foi adicionado um job específico de E2E apenas para a branch B4: readiness falha por padrão, e o job autenticado exige aprovação de environment, confirmação humana de backend independente, secrets protegidos, Chrome/Linux e validação independente do deployment Vercel por SHA, branch, projeto, URL e status antes de qualquer login. Instrumentação e tests contratuais não equivalem a prova E2E real.

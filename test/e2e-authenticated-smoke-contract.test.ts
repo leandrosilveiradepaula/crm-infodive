@@ -63,4 +63,54 @@ describe('authenticated E2E smoke contract', () => {
         expect(required.stderr).toContain('E2E_AUTHENTICATED_SMOKE=BLOCKED');
     });
 
+    it('ships a protected PR-specific E2E workflow that fails while QA is unconfigured', () => {
+        const workflow = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-authenticated.yml'), 'utf8');
+        expect(workflow).toContain("github.head_ref == 'ux-ui/crm214-b4-integrated-qa'");
+        expect(workflow).toContain('environment: crm-ui-qa');
+        expect(workflow).toContain('CRM_B4_QA_ENABLED');
+        expect(workflow).toContain('exit 1');
+        expect(workflow).toContain("CRM_E2E_ENFORCE_PASS: 'true'");
+        expect(workflow).toContain('CRM_E2E_ACCOUNTS_JSON:');
+        expect(workflow).toContain('npm run test:e2e');
+        expect(workflow).not.toContain('vercel deploy');
+    });
+
+    it('requires independent Vercel deployment verification before contacting a remote target', () => {
+        expect(source).toContain('await verifyVercelPreview({');
+        expect(source).toContain("CRM_E2E_BACKEND_ISOLATED !== 'true'");
+        expect(source).not.toContain("C:/Program Files/Google/Chrome/Application/chrome.exe");
+        expect(source).toContain('if (process.env.CHROME_PATH) launchOptions.executablePath');
+    });
+
+    it('rejects production and mismatched remote deployments using mocked Vercel responses', () => {
+        const record = {
+            id: 'dpl_Test123',
+            project: { id: 'prj_test' },
+            url: 'qa-crm.example.vercel.app',
+            readyState: 'READY',
+            target: null,
+            meta: { githubCommitSha: 'a'.repeat(40), githubCommitRef: 'ux-ui/crm214-b4-integrated-qa' },
+        };
+        const runCheck = (override: Record<string, unknown>) => {
+            const data = JSON.stringify({ ...record, ...override });
+            const program = [
+                "import { verifyVercelPreview } from './test/e2e/verify-vercel-preview.mjs';",
+                'const record = ' + data + ';',
+                "await verifyVercelPreview({ baseUrl: 'https://qa-crm.example.vercel.app', deploymentId: 'dpl_Test123',",
+                "  expectedSha: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', expectedBranch: 'ux-ui/crm214-b4-integrated-qa',",
+                "  projectId: 'prj_test', teamId: 'team_test', token: 'not-a-real-token',",
+                "  fetchFn: async () => ({ ok: true, json: async () => record }),",
+                '});',
+            ].join('\n');
+            return spawnSync(process.execPath, ['--input-type=module', '-e', program], {
+                cwd: process.cwd(), encoding: 'utf8',
+            }).status;
+        };
+        expect(runCheck({})).toBe(0);
+        expect(runCheck({ target: 'production' })).not.toBe(0);
+        expect(runCheck({ url: 'another-preview.vercel.app' })).not.toBe(0);
+        expect(runCheck({ meta: { ...record.meta, githubCommitSha: 'b'.repeat(40) } })).not.toBe(0);
+        expect(runCheck({ project: { id: 'prj_production' } })).not.toBe(0);
+    });
+
 });

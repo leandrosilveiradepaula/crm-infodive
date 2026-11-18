@@ -28,3 +28,21 @@ A lista padrão contém **22 rotas estáticas existentes** no grupo de dashboard
 Para que a execução autenticada seja um **gate obrigatório**, o job protegido deve definir `CRM_E2E_ENFORCE_PASS=true`. Sem o alvo ou as contas, o runner então encerra com `E2E_AUTHENTICATED_SMOKE=BLOCKED` e código de saída 2, nunca com aprovação. Para desenvolvimento local sem gate, a ausência desses parâmetros continua produzindo `SKIPPED` explicitamente. `CRM_E2E_EXPECTED_SHA` deve vir do SHA de head revisado do PR (não de variável controlada pelo próprio alvo); a URL e o deployment ID também devem ser conferidos independentemente no Vercel antes de executar.
 
 O runner exige zero violações WCAG A/AA do axe, incluindo severidades moderada/menor. Todas as rotas informadas pelos perfis precisam pertencer ao inventário; contas com acesso restrito não tentarão executar a navegação móvel entre Dashboard e Pipeline caso não tenham permissão para ambas as páginas.
+
+
+## Gate autenticado no GitHub Actions
+
+A workflow `.github/workflows/crm-b4-authenticated.yml` roda em PRs da branch B4 contra `main`. Enquanto `CRM_B4_QA_ENABLED` (variável de repositório) não for explicitamente ativada, o job de preparação **falha com BLOCKED**; isso é intencional e nunca representa E2E aprovado.
+
+**Pré-requisito de isolamento:** o projeto Vercel `crm-infodive` atualmente tem as mesmas entradas de variáveis `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GEMINI_API_KEY` e `SESSION_SECRET` dirigidas a Preview e Production, sem ambiente customizado. Não ativar o job nem publicar Preview de QA até separar backend, tenant, credenciais e recursos/quotas. Não é seguro presumir que Preview está isolado por ser URL diferente.
+
+Após configurar um Preview não produtivo com backend de teste **realmente separado** e tenant/contas fictícios:
+
+- Criar no GitHub o **environment** `crm-ui-qa` com *required reviewers* e acesso restrito à branch B4. O workflow deliberadamente não cria esse ambiente nem injeta secrets.
+- Definir variáveis do repositório `CRM_B4_QA_ENABLED=true` somente depois da aprovação externa; e no environment protegido `CRM_B4_PREVIEW_URL`, `CRM_B4_DEPLOYMENT_ID`, `CRM_B4_VERCEL_TEAM_ID`, `CRM_B4_VERCEL_PROJECT_ID`, `CRM_B4_BACKEND_ISOLATED=true` **somente após confirmar isolamento de backend**. As variáveis podem ficar no environment; `CRM_B4_QA_ENABLED` deve ser de repositório, pois é checada antes de entrar no environment.
+- Definir *secrets* do environment `CRM_B4_ACCOUNTS_JSON` (usuários fictícios e apenas rotas permitidas) e `CRM_B4_VERCEL_TOKEN` (somente escopo mínimo de leitura para validar deployment); não compartilhar valores no chat ou em PRs.
+- A cada novo SHA/Preview, atualizar URL e deployment ID. O job injeta o SHA revisado da PR de forma independente, consulta a API Vercel para conferir projeto, branch, URL, estado READY e ausência de target de produção, e só então tenta login legítimo.
+- Dependências de QA `playwright-core@1.64.1` e `axe-core@4.14.0` são instaladas **apenas no runner isolado**, com versões fixas; sem mudança do package-lock do produto. Chrome do Linux é detectado automaticamente.
+- Nenhuma screenshot E2E é publicada por padrão; o output não registra senhas nem cookies. O job não toca banco, produção nem executa ações comerciais de escrita.
+
+A confirmação `CRM_B4_BACKEND_ISOLATED=true` representa um **gate humano**, não um teste automático da separação dos bancos. Não fazer merge da PR B4 enquanto o job não passar de forma autenticada no SHA exato.

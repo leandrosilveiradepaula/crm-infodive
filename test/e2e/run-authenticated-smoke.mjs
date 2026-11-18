@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { verifyVercelPreview } from './verify-vercel-preview.mjs';
 
 const require = createRequire(import.meta.url);
 const REQUIRED_ENV = ['CRM_E2E_BASE_URL', 'CRM_E2E_TEST_TARGET'];
@@ -180,6 +181,22 @@ let browser;
 try {
     const { baseUrl, local } = validateEnvironment();
     const accounts = parseAccounts();
+    if (!local) {
+        // A protected reviewer must confirm a genuinely separate synthetic backend.
+        // This flag is a human approval gate, not proof of backend isolation by itself.
+        if (process.env.CRM_E2E_BACKEND_ISOLATED !== 'true') {
+            throw new Error('No separate synthetic QA backend has been approved for the Preview.');
+        }
+        await verifyVercelPreview({
+            baseUrl: baseUrl.href,
+            deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID,
+            expectedSha: process.env.CRM_E2E_EXPECTED_SHA,
+            expectedBranch: process.env.CRM_E2E_EXPECTED_BRANCH,
+            projectId: process.env.CRM_E2E_VERCEL_PROJECT_ID,
+            teamId: process.env.CRM_E2E_VERCEL_TEAM_ID,
+            token: process.env.VERCEL_TOKEN,
+        });
+    }
     const { chromium } = await loadPlaywright();
     const source = await axeSource();
     const artifactDir = process.env.CRM_E2E_ARTIFACT_DIR ? resolve(process.env.CRM_E2E_ARTIFACT_DIR) : null;
@@ -187,10 +204,9 @@ try {
     if (capture && !artifactDir) throw new Error('CRM_E2E_ARTIFACT_DIR is required when screenshots are enabled.');
     if (artifactDir) await mkdir(artifactDir, { recursive: true });
 
-    browser = await chromium.launch({
-        executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-        headless: true,
-    });
+    const launchOptions = { headless: true };
+    if (process.env.CHROME_PATH) launchOptions.executablePath = process.env.CHROME_PATH;
+    browser = await chromium.launch(launchOptions);
     for (const account of accounts) {
         const context = await browser.newContext();
         const page = await context.newPage();
