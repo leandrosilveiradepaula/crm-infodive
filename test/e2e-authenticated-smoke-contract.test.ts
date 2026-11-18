@@ -17,14 +17,21 @@ describe('authenticated E2E smoke contract', () => {
 
     it('makes missing credentials an explicit skip and treats incomplete axe output as unresolved', () => {
         expect(source).toContain('E2E_AUTHENTICATED_SMOKE=SKIPPED');
-        expect(source).toContain('axe incomplete: profileIndex=');
-        expect(source).toContain('diagnostics=${JSON.stringify(report.incomplete)}');
+        expect(source).toContain('CRM_B4_A11Y_DIAGNOSTIC=');
+        expect(source).toContain('diagnosticMode');
+        expect(source).toContain('WCAG remains unresolved in ');
+        expect(source).toContain('full matrix was intentionally not certified');
+        expect(source).toContain('results.failures.push(finding)');
+        expect(source).toContain("if (diagnosticMode && profileIndex > 0) break");
         expect(source).toContain('Never retain HTML, text, attributes, selectors, URLs or screenshots.');
         expect(source).toContain('result.incomplete.slice(0, 6)');
-        expect(source).toContain('samples: (nodes || []).slice(0, 6).map((node) => ({');
+        expect(source).toContain('samples: (nodes || []).slice(0, 16).map((node) => ({');
         expect(source).toContain('safeCheck');
         expect(source).toContain('backgroundImage: style.backgroundImage');
         expect(source).toContain('backdropFilter: style.backdropFilter');
+        expect(source).toContain("element.closest('[data-qa-region]')");
+        expect(source).toContain("region = regions.has(candidateRegion)");
+        expect(source).toContain("imageKind: /gradient\\(/");
         expect(source).toContain('Mobile menu did not close after navigation.');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
@@ -47,7 +54,8 @@ describe('authenticated E2E smoke contract', () => {
     });
 
     it('does not treat moderate/minor WCAG or an unapproved route as a successful E2E', () => {
-        expect(source).toContain('if (report.violationsCount)');
+        expect(source).toContain('axeReport.incompleteCount + axeReport.violationsCount');
+        expect(source).toContain('fail(');
         expect(source).toContain('if (url.origin !== baseUrl.origin)');
         expect(source).toContain("route !== '/login' && !defaultRoutes.includes(route)");
         expect(source).toContain('if (!response?.ok())');

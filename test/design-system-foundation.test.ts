@@ -61,6 +61,26 @@ describe('Infodive design-system foundation', () => {
         expect(performers).not.toContain('tracking-widest opacity-60');
     });
 
+    it('removes gradient-backed chart labels and translucent dashboard text overlays', () => {
+        const chart = source('src/components/dashboard/SalesChartWidget.tsx');
+        const funnel = source('src/components/dashboard/FunnelWidget.tsx');
+        const stats = source('src/components/dashboard/StatsWidget.tsx');
+        const deals = source('src/components/dashboard/RecentDealsWidget.tsx');
+        const tasks = source('src/components/dashboard/TasksWidget.tsx');
+        const dashboard = source('src/app/(dashboard)/dashboard/client-page.tsx');
+
+        expect(chart).not.toContain('<linearGradient');
+        expect(chart).not.toContain('url(#colorSales)');
+        expect(chart).toContain('fill="var(--surface-subtle)"');
+        expect(funnel).not.toContain('<LabelList');
+        expect(funnel).toContain('role="list"');
+        expect(stats).not.toContain('bg-opacity-10');
+        expect(stats).not.toContain('bg-success/10 text-success');
+        expect(deals).not.toContain('bg-primary/20 text-primary');
+        expect(tasks).not.toContain('bg-destructive/20 text-destructive');
+        expect(dashboard).toContain('data-qa-region={widget.id}');
+    });
+
     it('makes horizontally scrollable tables reachable by keyboard', () => {
         const table = source('src/components/ui/table.tsx');
         expect(table).toContain('role="region"');
