@@ -97,7 +97,7 @@ function axeSource() {
 }
 
 function routeUrl(baseUrl, route) {
-    if (typeof route !== 'string' || !defaultRoutes.includes(route)) throw new Error('E2E route is not part of the verified CRM dashboard inventory.');
+    if (typeof route !== 'string' || (route !== '/login' && !defaultRoutes.includes(route))) throw new Error('E2E route is not an authorized login/dashboard route.');
     const url = new URL(route, baseUrl);
     if (url.origin !== baseUrl.origin) throw new Error('E2E route must remain on the authorized target origin.');
     return url.toString();
