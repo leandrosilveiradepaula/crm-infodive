@@ -50,7 +50,7 @@ export function ProductCard({ product, onEdit, onDelete, onDuplicate }: ProductC
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full outline-none">
+                        <Button aria-label="Opções do produto" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full outline-none">
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
