@@ -181,12 +181,13 @@ let browser;
 try {
     const { baseUrl, local } = validateEnvironment();
     const accounts = parseAccounts();
+    // Local Next.js can still point at a live backend. Require the same explicit
+    // synthetic-backend approval before a local or remote authenticated session.
+    // This flag is a human approval gate, not proof of isolation by itself.
+    if (process.env.CRM_E2E_BACKEND_ISOLATED !== 'true') {
+        throw new Error('A separate synthetic QA backend must be approved before authenticated E2E.');
+    }
     if (!local) {
-        // A protected reviewer must confirm a genuinely separate synthetic backend.
-        // This flag is a human approval gate, not proof of backend isolation by itself.
-        if (process.env.CRM_E2E_BACKEND_ISOLATED !== 'true') {
-            throw new Error('No separate synthetic QA backend has been approved for the Preview.');
-        }
         await verifyVercelPreview({
             baseUrl: baseUrl.href,
             deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID,

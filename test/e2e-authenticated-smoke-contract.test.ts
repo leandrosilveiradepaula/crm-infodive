@@ -80,6 +80,7 @@ describe('authenticated E2E smoke contract', () => {
 
     it('requires independent Vercel deployment verification before contacting a remote target', () => {
         expect(source).toContain('await verifyVercelPreview({');
+        expect(source).toContain('Local Next.js can still point at a live backend.');
         expect(source).toContain("CRM_E2E_BACKEND_ISOLATED !== 'true'");
         expect(source).not.toContain("C:/Program Files/Google/Chrome/Application/chrome.exe");
         expect(source).toContain('if (process.env.CHROME_PATH) launchOptions.executablePath');

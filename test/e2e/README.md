@@ -49,3 +49,6 @@ A confirmação `CRM_B4_BACKEND_ISOLATED=true` representa um **gate humano**, n�
 
 
 Em caso de PASS autenticado, a workflow envia **somente** `results.json` (rotas, perfil numérico, SHA, deployment ID e checks); **não envia screenshots, cookies ou traces**. O artefato expira em sete dias. `CRM_E2E_CAPTURE_SANITIZED` permanece `false`; não habilitar capturas sem revisar conteúdo e proteção de acesso. Resultado inexistente faz a publicação falhar, em vez de emitir evidência vazia.
+
+
+Mesmo com `CRM_E2E_BASE_URL` em `localhost`, defina `CRM_E2E_BACKEND_ISOLATED=true` **somente após confirmar backend e contas fictícios independentes**: executar Next.js local não garante que os serviços de dados sejam locais. Sem essa aprovação, o runner falha antes de abrir navegador ou autenticar.
