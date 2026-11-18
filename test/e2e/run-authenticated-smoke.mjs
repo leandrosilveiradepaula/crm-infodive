@@ -178,7 +178,7 @@ async function runAxe(page, source, audit) {
         });
         // Record only rule identifiers, node counts and limited computed CSS.
         // Never retain HTML, text, attributes, selectors, URLs or screenshots.
-        const safeColor = (value) => /^(?:rgba?\\([0-9.,%\\s]+\\)|transparent|currentcolor)$/i.test(value || '')
+        const safeColor = (value) => /^(?:rgba?\([0-9.,%\s]+\)|transparent|currentcolor)$/i.test(value || '')
             ? value : 'unresolved';
         const staticTags = new Set([
             'html', 'body', 'main', 'header', 'nav', 'aside', 'section', 'article',
@@ -203,7 +203,7 @@ async function runAxe(page, source, audit) {
                     tag: staticTags.has(tag) ? tag : 'other',
                     color: safeColor(style.color),
                     background: safeColor(style.backgroundColor),
-                    opacity: /^\\d?(?:\\.\\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
+                    opacity: /^\d?(?:\.\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
                 });
                 current = current.parentElement;
             }
