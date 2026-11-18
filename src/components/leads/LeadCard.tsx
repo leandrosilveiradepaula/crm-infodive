@@ -24,10 +24,10 @@ interface LeadCardProps {
 
 export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCardProps) {
     const statusColors = {
-        'Novo': 'bg-primary/10 text-primary border-primary/20',
-        'Convertido': 'bg-success/10 text-success border-success/20',
-        'Qualificado': 'bg-stage-proposal/10 text-stage-proposal border-stage-proposal/20',
-        'Perdido': 'bg-destructive/10 text-destructive border-destructive/20',
+        'Novo': 'bg-surface-subtle text-foreground border-border',
+        'Convertido': 'bg-success-subtle text-foreground border-border',
+        'Qualificado': 'bg-surface-subtle text-foreground border-border',
+        'Perdido': 'bg-destructive-subtle text-foreground border-border',
     };
 
     return (
@@ -56,13 +56,13 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
 
                 <div className="flex items-center gap-2.5 mb-2">
                     <Avatar className="h-8 w-8 border border-primary/20 shadow-none">
-                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black">
+                        <AvatarFallback className="bg-surface-subtle text-foreground text-[10px] font-black">
                             {lead.contact_name ? lead.contact_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'L'}
                         </AvatarFallback>
                     </Avatar>
                     <div className="pr-6 overflow-hidden">
                         <h3 className="text-foreground font-bold text-xs leading-tight line-clamp-1 group-hover:text-primary transition-colors">{lead.contact_name}</h3>
-                        <p className="text-muted-foreground text-[8px] font-black uppercase tracking-widest flex items-center gap-1 opacity-80 mt-0.5">
+                        <p className="text-muted-foreground text-[8px] font-black uppercase tracking-widest flex items-center gap-1 mt-0.5">
                             <Building className="h-2.5 w-2.5" />
                             {lead.company}
                         </p>
@@ -102,7 +102,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                             Converter
                         </Button>
                     ) : (
-                        <div className="text-success text-[8px] font-black uppercase tracking-widest flex items-center bg-success/10 px-1.5 py-0.5 rounded-md border border-success/20">
+                        <div className="text-foreground text-[8px] font-black uppercase tracking-widest flex items-center bg-success-subtle px-1.5 py-0.5 rounded-md border border-success/20">
                             <CheckCircle className="h-3 w-3 mr-1" />
                             Convertido
                         </div>
