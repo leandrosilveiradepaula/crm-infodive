@@ -4,6 +4,8 @@ import '../../../src/app/globals.css';
 import { AiSuggestionsPanel } from '@/components/activities/AiSuggestionsPanel';
 import { TopPerformersWidget } from '@/components/dashboard/TopPerformersWidget';
 import DesignPreviewPage from '@/app/(dashboard)/design-preview/page';
+import { GoalsTab } from '@/components/goals/tabs/GoalsTab';
+import AutomationsClientPage from '@/app/(dashboard)/automations/client-page';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 
@@ -11,6 +13,32 @@ const theme = new URLSearchParams(window.location.search).get('theme') === 'dark
 document.documentElement.classList.toggle('dark', theme === 'dark');
 
 function App() {
+    const syntheticGoals = Array.from({ length: 6 }, (_, i) => ({
+        user_id: 'qa-synthetic-user-' + i,
+        name: 'Operador QA ' + (i + 1),
+        yearly_goal: 400000,
+        monthly_goal: 35000,
+        quarterly_goals: { q1: 100000, q2: 100000, q3: 100000, q4: 100000 },
+        commission_rules: {
+            hardware: { base: 1, new: 2 },
+            software: { base: 1, new: 2 },
+            services: { base: 1, new: 2 },
+        },
+    }));
+    const syntheticAutomations = [
+        {
+            id: 'qa-automation-1', name: 'Follow-up QA fictício', description: 'Lembrete automático de exemplo',
+            enabled: true, category: 'followup', trigger: { type: 'deal_created', config: {} },
+            conditions: [], actions: [{ type: 'send_notification', config: {} }], createdBy: 'qa-synthetic',
+            createdAt: '2026-01-01', updatedAt: '2026-01-01', executionCount: 10, successCount: 8, failureCount: 2,
+        },
+        {
+            id: 'qa-automation-2', name: 'Fluxo pausado de teste', description: 'Validação de contraste do fluxo pausado',
+            enabled: false, category: 'alert', trigger: { type: 'deal_stagnant', config: {} },
+            conditions: [], actions: [{ type: 'create_task', config: {} }], createdBy: 'qa-synthetic',
+            createdAt: '2026-01-01', updatedAt: '2026-01-01', executionCount: 0, successCount: 0, failureCount: 0,
+        },
+    ];
     const performers = [
         { owner: 'Operador Sintético A', count: 8, value: 78500, won: 4 },
         { owner: 'Operador Sintético B', count: 2, value: 45000, won: 1 },
@@ -47,6 +75,12 @@ function App() {
                 </section>
                 <section aria-label="Prévia real do sistema de design" className="min-w-0 lg:col-span-2">
                     <DesignPreviewPage />
+                </section>
+                <section aria-label="Metas reais com dados sintéticos" className="min-w-0 lg:col-span-2 rounded-xl border border-border bg-card p-3">
+                    <GoalsTab users={syntheticGoals} deals={[]} />
+                </section>
+                <section aria-label="Automações reais com dados sintéticos" className="min-w-0 lg:col-span-2 rounded-xl border border-border bg-card p-3">
+                    <AutomationsClientPage initialAutomations={syntheticAutomations as any} />
                 </section>
             </div>
         </main>

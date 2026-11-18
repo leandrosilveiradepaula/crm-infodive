@@ -185,6 +185,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(design).toContain('whitespace-normal break-words');
         const fixture = source('test/e2e/component-qa/main.tsx');
         expect(fixture).toContain('<DesignPreviewPage />');
+        expect(fixture).toContain('<GoalsTab users={syntheticGoals} deals={[]} />');
+        expect(fixture).toContain('<AutomationsClientPage initialAutomations={syntheticAutomations as any} />');
         expect(fixture).toContain('<Tabs defaultValue="dashboard">');
     });
 

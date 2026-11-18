@@ -38,7 +38,9 @@ try {
             try {
                 await page.goto(base + '/?theme=' + theme, { waitUntil: 'networkidle' });
                 await page.waitForFunction(() => document.body.innerText.includes('Nenhuma sugestão ativa') &&
-                    document.body.innerText.includes('Reativar oportunidade fictícia'), { timeout: 15000 });
+                    document.body.innerText.includes('Reativar oportunidade fictícia') &&
+                    document.body.innerText.includes('Visão Geral de Metas') &&
+                    document.body.innerText.includes('Follow-up QA fictício'), { timeout: 20000 });
                 await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
                 const result = await page.evaluate(async () => {
                     const report = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
