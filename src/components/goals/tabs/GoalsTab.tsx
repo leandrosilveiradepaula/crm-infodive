@@ -270,7 +270,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                                 hasError={hasError}
                                             />
                                             {hasError && (
-                                                <span className="text-[9px] text-red-500 font-bold whitespace-nowrap">
+                                                <span className="text-[9px] text-destructive-readable font-bold whitespace-nowrap">
                                                     {((user.yearly_goal || 0) - quarterlyTotal) > 0 
                                                         ? `Faltam ${formatCurrency((user.yearly_goal || 0) - quarterlyTotal)}`
                                                         : `Sobram ${formatCurrency(Math.abs((user.yearly_goal || 0) - quarterlyTotal))}`

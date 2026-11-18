@@ -440,7 +440,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
-                                            <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                                            <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-success-readable' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
                                                     ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)
                                                     : 0}%

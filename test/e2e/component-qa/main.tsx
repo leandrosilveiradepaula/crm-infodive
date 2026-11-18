@@ -8,6 +8,7 @@ import { GoalsTab } from '@/components/goals/tabs/GoalsTab';
 import AutomationsClientPage from '@/app/(dashboard)/automations/client-page';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { EnhancedProgressBar } from '@/components/goals/EnhancedProgressBar';
 
 const theme = new URLSearchParams(window.location.search).get('theme') === 'dark' ? 'dark' : 'light';
 document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -58,6 +59,12 @@ function App() {
                 </section>
                 <section aria-label="Campos em ambos os temas" className="min-w-0 rounded-xl border border-border bg-card p-3">
                     <Input aria-label="Campo sintético" placeholder="Nome sintético" value="Entrada de teste" readOnly />
+                </section>
+                <section aria-label="Indicadores de desempenho sintéticos" className="min-w-0 space-y-3 rounded-xl border border-border bg-card p-3">
+                    <EnhancedProgressBar value={0} />
+                    <EnhancedProgressBar value={50} />
+                    <EnhancedProgressBar value={85} />
+                    <EnhancedProgressBar value={100} />
                 </section>
                 <section aria-label="Navegação de vendas responsiva" className="min-w-0 lg:col-span-2">
                     <Tabs defaultValue="dashboard">

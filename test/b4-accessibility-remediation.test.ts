@@ -190,4 +190,20 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(fixture).toContain('<Tabs defaultValue="dashboard">');
     });
 
+
+    it('uses theme-specific readable semantic text for progress and automation counters', () => {
+        const tokens = source('src/app/globals.css');
+        for (const name of ['destructive-readable', 'warning-readable', 'success-readable']) {
+            expect(tokens).toContain('--color-' + name + ': var(--' + name + ');');
+        }
+        const bar = source('src/components/goals/EnhancedProgressBar.tsx');
+        expect(bar).toContain('text-destructive-readable');
+        expect(bar).toContain('text-warning-readable');
+        expect(bar).toContain('text-success-readable');
+        expect(bar).not.toContain("return 'text-red-600'");
+        const automations = source('src/app/(dashboard)/automations/client-page.tsx');
+        expect(automations).toContain("'text-success-readable' : 'text-muted-foreground'");
+        expect(source('test/e2e/component-qa/main.tsx')).toContain('<EnhancedProgressBar value={50} />');
+    });
+
 });

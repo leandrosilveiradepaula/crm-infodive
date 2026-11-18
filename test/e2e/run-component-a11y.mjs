@@ -73,7 +73,7 @@ try {
                         const region = element.closest('section[aria-label]')?.getAttribute('aria-label') || 'other';
                         const safeRegions = new Set([
                             'Sugestões vazias', 'Sugestões presentes', 'Líderes de desempenho',
-                            'Campos em ambos os temas', 'Navegação de vendas responsiva',
+                            'Campos em ambos os temas', 'Indicadores de desempenho sintéticos', 'Navegação de vendas responsiva',
                             'Prévia real do sistema de design', 'Metas reais com dados sintéticos',
                             'Automações reais com dados sintéticos',
                         ]);
