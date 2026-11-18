@@ -72,3 +72,29 @@ A inspeção de código identificou superfícies de dashboard translúcidas: `.g
 [Run #32](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/44232821629) retornou FAIL com `axe color-contrast incomplete` em **16 elementos** do Dashboard no desktop/light. Os diagnósticos apontaram fundos que usam gradientes (`bgGradient`), um badge semitransparente e elementos SVG. O provisioning de quatro contas QA, o login real e a revogação do bypass Vercel passaram. A existência de `incomplete` continua reprovando o B4; não é uma violação comprovada nem PASS.
 
 A correção concentrou a mudança em: badges com cores semânticas opacas, fundo decorativo transparente atrás de textos, gradiente SVG de SalesChart convertido em superfície sólida, rótulos do Funil colocados como HTML legível sobre fundo sólido e marcadores fixos `data-qa-region` para localizar cada elemento sem reter conteúdo. O runner deixa de interromper todo o E2E na primeira avaliação do axe: **se encontrar erro, executa uma varredura diagnóstica somente desktop/light das rotas do primeiro perfil, registra contagens e componentes de forma sanitizada e mantém FAIL**. Se todas as verificações passarem, ele executa normalmente a matriz completa de perfis, temas e viewports. Nenhuma regra WCAG foi suprimida.
+
+
+## E2E real #38 — diagnóstico agregado e remediação B4
+
+Execução autenticada [#38](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/44235726637), SHA `da521084`, ambiente Vercel QA Staging isolado, quatro usuários fictícios e dois tenants. O login e o provisionamento QA foram bem-sucedidos, assim como a revogação do bypass temporário do Vercel. O E2E **falhou, corretamente**, após varrer 22 rotas em modo diagnóstico desktop/light do primeiro perfil: **14 rotas com pelo menos um resultado WCAG não aprovado**. Nem toda rota apresentava `incomplete`; há também violações reais.
+
+| Rota | Regras de violação detectadas | Incomplete |
+| --- | --- | --- |
+| `/dashboard` | `button-name`, `select-name` | `color-contrast`: 15 nós |
+| `/pipeline` | `color-contrast`, `nested-interactive` | Não |
+| `/leads` | `button-name`, `color-contrast`, `select-name` | Não |
+| `/contacts` | `button-name`, `select-name` | Não |
+| `/customers` | `button-name`, `color-contrast` | Não |
+| `/activities` | `button-name`, `color-contrast`, `select-name` | `color-contrast`: 5 nós |
+| `/contracts` | `select-name` | Não |
+| `/products` | `button-name`, `select-name` | Não |
+| `/sales` | `color-contrast` | `color-contrast`: 19 nós |
+| `/reports` | `color-contrast`, `select-name` | `color-contrast`: 13 nós |
+| `/goals` | `color-contrast`, `label` | `color-contrast`: 6 nós |
+| `/goals-commissions` | `color-contrast`, `label` | `color-contrast`: 6 nós |
+| `/automations` | `button-name`, `color-contrast`, `label` | `color-contrast`: 6 nós |
+| `/settings` | `button-name`, `label` | Não |
+
+A partir dessa prova foi feito **um único bloco de correções dentro da PR #218**, nunca em PR adicional: filtro nativo/select com nomes acessíveis nos workspaces; menus icon-only de lead, contato, empresa e produto nomeados; ações de atividades e configurações nomeadas; painel IA sem gradiente sob texto, com controle de expansão por teclado e badges sólidos; gráficos e relatórios com superfícies de fundo opacas; cartão de oportunidade com *drag handle* de teclado independente dos demais botões, eliminando a causa estrutural de `nested-interactive`; campos de comissão nomeados e badges dos cards com tokens de texto legíveis. O runner inclui amostras sanitizadas de regras de violação com apenas *tags*, indicadores booleanos de rótulos e valores numéricos de CSS, sem extrair conteúdo, seletor, URL, DOM completo, cookies, screenshots ou credenciais.
+
+**Estado:** reparações são **candidatas**; somente CI no SHA final + novo Staging `READY` + E2E real autenticado 4 perfis, dois temas e dois viewports podem demonstrar B4 PASS. Não reclassificar `incomplete` como PASS; não reduzir regras axe nem usar bypass do login Supabase Auth. Nenhum merge, produção, migration ou Supabase original foi alterado.
