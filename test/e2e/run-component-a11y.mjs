@@ -35,12 +35,32 @@ try {
     for (const theme of ['light', 'dark']) {
         for (const viewport of [{ width: 1366, height: 900 }, { width: 390, height: 844 }]) {
             const page = await browser.newPage({ viewport, reducedMotion: 'no-preference' });
+            const browserErrors = [];
+            page.on('pageerror', error => {
+                if (browserErrors.length < 5) browserErrors.push('pageerror:' + error.name + ':' + error.message.slice(0, 450));
+            });
+            page.on('console', message => {
+                if (message.type() === 'error' && browserErrors.length < 5) {
+                    browserErrors.push('console:' + message.text().slice(0, 450));
+                }
+            });
             try {
                 await page.goto(base + '/?theme=' + theme, { waitUntil: 'networkidle' });
-                await page.waitForFunction(() => document.body.innerText.includes('Nenhuma sugestão ativa') &&
-                    document.body.innerText.includes('Reativar oportunidade fictícia') &&
-                    document.body.innerText.includes('Visão Geral de Metas') &&
-                    document.body.innerText.includes('Follow-up QA fictício'), { timeout: 20000 });
+                try {
+                    await page.waitForFunction(() => document.body.innerText.includes('Nenhuma sugestão ativa') &&
+                        document.body.innerText.includes('Reativar oportunidade fictícia') &&
+                        document.body.innerText.includes('Visão Geral de Metas') &&
+                        document.body.innerText.includes('Follow-up QA fictício'), null, { timeout: 15000 });
+                } catch {
+                    const flags = await page.evaluate(() => ({
+                        suggestions: document.body.innerText.includes('Nenhuma sugestão ativa'),
+                        active: document.body.innerText.includes('Reativar oportunidade fictícia'),
+                        goals: document.body.innerText.includes('Visão Geral de Metas'),
+                        automations: document.body.innerText.includes('Follow-up QA fictício'),
+                    }));
+                    throw new Error('Synthetic components not mounted: flags=' + JSON.stringify(flags) +
+                        ' browserErrors=' + JSON.stringify(browserErrors) + ' vite=' + serverOutput.slice(-1200));
+                }
                 await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
                 const result = await page.evaluate(async () => {
                     const report = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
