@@ -233,4 +233,15 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(source('test/e2e/component-qa/main.tsx')).toContain('Abas de metas e comissões mobile');
     });
 
+
+    it('regresses the two live Automações WCAG contrast nodes in both themes', () => {
+        const src = source('src/app/(dashboard)/automations/client-page.tsx');
+        // Axe authenticated #84 and local run #44331065048 identified one count
+        // span and one history button on desktop in both themes.
+        expect(src).toContain('<span className="bg-surface-raised text-xs px-3 py-1 rounded-full text-foreground">');
+        expect(src).not.toContain('bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground');
+        expect(src).toContain('gap-2 text-foreground font-black text-xs underline underline-offset-4');
+        expect(src).not.toContain('gap-2 text-primary font-black text-xs hover:text-foreground');
+    });
+
 });

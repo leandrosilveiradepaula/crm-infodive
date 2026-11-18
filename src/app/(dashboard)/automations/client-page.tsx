@@ -313,7 +313,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <button type="button" aria-label="Limpar filtro de tipo" onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
                             </span>
                         )}
-                        <span className="bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground">
+                        <span className="bg-surface-raised text-xs px-3 py-1 rounded-full text-foreground">
                             {filteredAutomations.length}
                         </span>
                     </h2>
@@ -452,7 +452,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             setSelectedAutomation(automation);
                                             setShowHistory(true);
                                         }}
-                                        className="flex items-center gap-2 text-primary font-black text-xs hover:text-foreground transition-colors group/btn"
+                                        className="flex items-center gap-2 text-foreground font-black text-xs underline underline-offset-4 hover:text-primary transition-colors group/btn"
                                     >
                                         <History className="h-4 w-4" />
                                         Ver Histórico
