@@ -32,7 +32,6 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     AreaChart,
     Area
 } from 'recharts';
@@ -321,12 +320,12 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         dataKey="date" 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
+                                        tick={false}
                                     />
                                     <YAxis 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
+                                        tick={false}
                                         tickFormatter={(val) => `R$ ${val/1000}k`}
                                     />
                                     <Tooltip
@@ -466,13 +465,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         return null;
                                     }}
                                 />
-                                <Legend
-                                    verticalAlign="bottom"
-                                    align="center"
-                                    layout="horizontal"
-                                    iconType="circle"
-                                    formatter={(value) => <span className="text-[9px] font-bold text-muted-foreground uppercase">{value}</span>}
-                                />
+
                             </PieChart>
                         </ResponsiveContainer>
 </AccessibleChart>
@@ -498,7 +491,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     type="category"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
+                                    tick={false}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
