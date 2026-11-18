@@ -9,6 +9,11 @@ import AutomationsClientPage from '@/app/(dashboard)/automations/client-page';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { EnhancedProgressBar } from '@/components/goals/EnhancedProgressBar';
+import { StatsGrid } from '@/components/layout/StatsGrid';
+import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
+import { LeadCard } from '@/components/leads/LeadCard';
+import { ContactCard } from '@/components/contacts/ContactCard';
+import { Users, Target, TrendingUp, Zap } from 'lucide-react';
 
 const theme = new URLSearchParams(window.location.search).get('theme') === 'dark' ? 'dark' : 'light';
 document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -82,6 +87,44 @@ function App() {
                 </section>
                 <section aria-label="Prévia real do sistema de design" className="min-w-0 lg:col-span-2">
                     <DesignPreviewPage />
+                </section>
+                <section aria-label="Resumo compartilhado dos módulos" className="min-w-0 lg:col-span-2">
+                    <StatsGrid items={[
+                        { label: 'Total de Leads', value: 3, description: 'Base completa', icon: Users, color: 'text-primary', gradient: '', border: '' },
+                        { label: 'Contatos Principais', value: 2, description: 'Interlocutores chave', icon: Target, color: 'text-primary', gradient: '', border: '' },
+                        { label: 'Novos no mês', value: 1, description: 'Aquisição recente', icon: TrendingUp, color: 'text-primary', gradient: '', border: '' },
+                        { label: 'Automatizações', value: 4, description: 'Fluxos ativos', icon: Zap, color: 'text-primary', gradient: '', border: '' },
+                    ]} />
+                </section>
+                <section aria-label="Cards reais de leads e contatos fictícios" className="min-w-0 grid grid-cols-1 gap-4 lg:col-span-2 md:grid-cols-2">
+                    <LeadCard lead={{
+                        id: 'fake-lead', contact_name: 'Contato QA de teste', company: 'Empresa Sintética',
+                        email: 'contato@example.invalid', phone: '+55 11 0000-0000', city: 'Cidade QA',
+                        status: 'Novo', interest: 'Software', created_at: '2026-01-01',
+                    } as any} onEdit={() => { throw new Error('QA read-only'); }} onDelete={() => { throw new Error('QA read-only'); }}
+                        onConvert={() => { throw new Error('QA read-only'); }} onEnrich={() => { throw new Error('QA read-only'); }} />
+                    <ContactCard contact={{
+                        id: 'fake-contact', name: 'Contato QA de teste', role: 'Gerente',
+                        email: 'contato@example.invalid', mobile_phone: '+55 11 0000-0000',
+                        account: { name: 'Empresa Sintética' }, is_primary: false,
+                    } as any} onEdit={() => { throw new Error('QA read-only'); }} onDelete={() => { throw new Error('QA read-only'); }} />
+                </section>
+                <section aria-label="Estados vazios dos módulos" className="min-w-0 lg:col-span-2">
+                    <PremiumEmptyState icon={Users} title="Nenhum lead encontrado" description="Cadastre o primeiro lead para começar a qualificação." />
+                </section>
+                <section aria-label="Abas de metas e comissões mobile" className="min-w-0 lg:col-span-2">
+                    <Tabs defaultValue="goals">
+                        <TabsList className="flex h-auto w-full flex-col items-stretch gap-1 p-2 sm:grid sm:grid-cols-2 xl:flex xl:flex-row xl:flex-wrap xl:justify-start">
+                            {[
+                                ['goals', 'Metas de Vendas'], ['commissions', 'Regras de Comissão'],
+                                ['campaigns', 'Gestão de Campanhas'], ['planning', 'Planejamento Financeiro'],
+                                ['statement', 'Extrato de Comissões'],
+                            ].map(([value, label]) =>
+                                <TabsTrigger key={value} value={value} className="min-h-10 w-full min-w-0 justify-start whitespace-normal text-left sm:justify-center xl:w-auto">{label}</TabsTrigger>
+                            )}
+                        </TabsList>
+                        <TabsContent value="goals">Metas de teste</TabsContent>
+                    </Tabs>
                 </section>
                 <section aria-label="Metas reais com dados sintéticos" className="min-w-0 lg:col-span-2 rounded-xl border border-border bg-card p-3">
                     <GoalsTab users={syntheticGoals} deals={[]} />

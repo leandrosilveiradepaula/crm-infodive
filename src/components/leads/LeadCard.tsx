@@ -62,7 +62,7 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                     </Avatar>
                     <div className="pr-6 overflow-hidden">
                         <h3 className="text-foreground font-bold text-xs leading-tight line-clamp-1 group-hover:text-primary transition-colors">{lead.contact_name}</h3>
-                        <p className="text-muted-foreground text-[8px] font-black uppercase tracking-widest flex items-center gap-1 mt-0.5">
+                        <p className="text-foreground text-[8px] font-black uppercase tracking-widest flex items-center gap-1 mt-0.5">
                             <Building className="h-2.5 w-2.5" />
                             {lead.company}
                         </p>
@@ -70,24 +70,24 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                 </div>
 
                 <div className="space-y-1.5 mb-2.5">
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground relative px-0.5">
+                    <div className="flex items-center gap-2 text-[10px] text-foreground relative px-0.5">
                         <Mail className="h-3 w-3 shrink-0 text-primary/60" />
                         <span className="truncate">{lead.email}</span>
                     </div>
                     {lead.phone && (
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-0.5">
+                        <div className="flex items-center gap-2 text-[10px] text-foreground px-0.5">
                             <Phone className="h-3 w-3 shrink-0 text-primary/60" />
                             <span>{lead.phone}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground px-1.5 bg-muted/30 py-1 rounded-md border border-border group-hover:border-border/80 transition-colors mt-1.5">
+                    <div className="flex items-center gap-2 text-[10px] text-foreground px-1.5 bg-surface-subtle py-1 rounded-md border border-border group-hover:border-border/80 transition-colors mt-1.5">
                         <Briefcase className="h-3 w-3 shrink-0 text-primary/80" />
                         <span className="truncate font-bold text-foreground/80">{lead.interest || 'Negócio Geral'}</span>
                     </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-border">
-                    <Badge variant="outline" className={`${statusColors[lead.status as keyof typeof statusColors] || 'bg-muted text-muted-foreground'} border uppercase text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded-md`}>
+                    <Badge variant="outline" className={`${statusColors[lead.status as keyof typeof statusColors] || 'bg-muted text-foreground'} border uppercase text-[8px] font-black tracking-widest px-1.5 py-0.5 rounded-md`}>
                         {lead.status}
                     </Badge>
 

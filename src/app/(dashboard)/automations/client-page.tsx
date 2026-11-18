@@ -242,7 +242,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     </div>
                     <div className="flex-1 space-y-0.5 text-center md:text-left">
                         <h3 className="text-sm font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
-                        <p className="text-xs text-muted-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
+                        <p className="text-xs text-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
                     </div>
                     <div className="w-full md:w-[450px] relative group">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -270,7 +270,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Featured Templates (Receitas) */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-black text-muted-foreground uppercase tracking-[0.2em]">Receitas Recomendadas</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">Receitas Recomendadas</h2>
                     <button 
                         onClick={() => setShowGallery(true)}
                         className="text-xs font-bold text-primary hover:underline transition-all"
@@ -292,7 +292,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-surface-subtle px-3 py-1.5 rounded-lg border border-border/50">
+                                <span className="text-[10px] font-black text-foreground uppercase tracking-widest bg-surface-subtle px-3 py-1.5 rounded-lg border border-border/50">
                                     Usar Modelo
                                 </span>
                                 <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
@@ -305,7 +305,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Automation Grid Section */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold flex items-center gap-3 text-muted-foreground">
+                    <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
                         Fluxos de Trabalho 
                         {filterType && (
                             <span className="text-xs font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
@@ -354,10 +354,10 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
                                                 {!automation.enabled && (
-                                                    <span className="text-[10px] font-black uppercase text-muted-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
+                                                    <span className="text-[10px] font-black uppercase text-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{automation.description}</p>
+                                            <p className="text-sm text-foreground mt-1 line-clamp-1">{automation.description}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -411,14 +411,14 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Gatilho</p>
+                                        <p className="text-[10px] font-black text-foreground uppercase tracking-widest mb-2">Gatilho</p>
                                         <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
                                     <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2">Ações</p>
+                                        <p className="text-[10px] font-black text-foreground uppercase tracking-widest mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
@@ -435,11 +435,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Execuções</span>
+                                            <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Execuções</span>
                                             <span className="text-sm font-black text-foreground">{automation.executionCount || 0}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">Taxa Sucesso</span>
+                                            <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Taxa Sucesso</span>
                                             <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-success-readable' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
                                                     ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)

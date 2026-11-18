@@ -74,6 +74,8 @@ try {
                         const safeRegions = new Set([
                             'Sugestões vazias', 'Sugestões presentes', 'Líderes de desempenho',
                             'Campos em ambos os temas', 'Indicadores de desempenho sintéticos', 'Navegação de vendas responsiva',
+                            'Resumo compartilhado dos módulos', 'Cards reais de leads e contatos fictícios',
+                            'Estados vazios dos módulos', 'Abas de metas e comissões mobile',
                             'Prévia real do sistema de design', 'Metas reais com dados sintéticos',
                             'Automações reais com dados sintéticos',
                         ]);

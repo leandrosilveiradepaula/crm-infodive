@@ -206,4 +206,31 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(source('test/e2e/component-qa/main.tsx')).toContain('<EnhancedProgressBar value={50} />');
     });
 
+
+    it('keeps shared stats, leads, contacts and empty-state text fully readable', () => {
+        const stats = source('src/components/layout/StatsGrid.tsx');
+        expect(stats).toContain('data-qa-region="stats"');
+        expect(stats).not.toContain('text-primary/[0.06]');
+        expect(stats).toContain('text-xs font-medium text-foreground');
+        expect(stats).toContain('truncate text-xs text-foreground');
+        expect(source('src/components/layout/PageHeader.tsx')).toContain('text-sm leading-5 text-foreground');
+        expect(source('src/components/ui/PremiumEmptyState.tsx')).toContain('text-foreground max-w-xs');
+        expect(source('src/components/leads/LeadCard.tsx')).toContain('text-foreground text-[8px]');
+        expect(source('src/components/contacts/ContactCard.tsx')).toContain('text-foreground text-[9px]');
+        const fixture = source('test/e2e/component-qa/main.tsx');
+        expect(fixture).toContain('<StatsGrid items={[');
+        expect(fixture).toContain('<LeadCard lead={{');
+        expect(fixture).toContain('<ContactCard contact={{');
+    });
+
+    it('reflows all five goals-and-commissions tabs without narrow-screen overlap', () => {
+        const tabs = source('src/app/(dashboard)/goals-commissions/client-page.tsx');
+        expect(tabs).not.toContain('overflow-x-auto no-scrollbar');
+        expect(tabs).toContain('flex-col items-stretch gap-1 p-2 sm:grid sm:grid-cols-2');
+        for (const value of ['goals', 'commissions', 'campaigns', 'planning', 'statement']) {
+            expect(tabs).toContain('<TabsTrigger value="' + value + '" className="min-h-10');
+        }
+        expect(source('test/e2e/component-qa/main.tsx')).toContain('Abas de metas e comissões mobile');
+    });
+
 });

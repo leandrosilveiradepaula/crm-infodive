@@ -12,7 +12,7 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
             <div className="min-w-0 space-y-1">
                 <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h1>
                 {description && (
-                    <p className="max-w-3xl text-sm leading-5 text-muted-foreground">
+                    <p className="max-w-3xl text-sm leading-5 text-foreground">
                         {description}
                     </p>
                 )}
