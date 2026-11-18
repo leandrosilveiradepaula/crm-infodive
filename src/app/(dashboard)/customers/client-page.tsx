@@ -225,7 +225,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     {(searchTerm || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos') && (
-                        <Button variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors">
+                        <Button aria-label="Limpar filtros de empresas" variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors">
                             <X className="h-5 w-5" />
                         </Button>
                     )}
