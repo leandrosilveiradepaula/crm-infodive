@@ -319,12 +319,12 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         dataKey="date" 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }} 
+                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }} 
                                     />
                                     <YAxis 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }}
+                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
                                         tickFormatter={(val) => `R$ ${val/1000}k`}
                                     />
                                     <Tooltip
@@ -492,7 +492,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     type="category"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }}
+                                    tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
