@@ -23,6 +23,7 @@ const vite = spawn(process.execPath, [resolve(repo, 'node_modules/vite/bin/vite.
 let serverOutput = '';
 for (const stream of [vite.stdout, vite.stderr]) stream.on('data', chunk => { serverOutput = (serverOutput + chunk.toString()).slice(-3000); });
 let browser;
+let failingCombinations = 0;
 try {
     let ready = false;
     for (let i = 0; i < 120; i++) {
@@ -64,9 +65,34 @@ try {
                 await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
                 const result = await page.evaluate(async () => {
                     const report = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
+                    const diagnose = node => {
+                        const target = Array.isArray(node.target) ? node.target[0] : null;
+                        let element = null;
+                        try { if (typeof target === 'string') element = document.querySelector(target); } catch {}
+                        if (!element) return { resolved: false };
+                        const region = element.closest('section[aria-label]')?.getAttribute('aria-label') || 'other';
+                        const safeRegions = new Set([
+                            'Sugestões vazias', 'Sugestões presentes', 'Líderes de desempenho',
+                            'Campos em ambos os temas', 'Navegação de vendas responsiva',
+                            'Prévia real do sistema de design', 'Metas reais com dados sintéticos',
+                            'Automações reais com dados sintéticos',
+                        ]);
+                        const styles = [];
+                        for (let e = element, depth = 0; e && depth < 4; e = e.parentElement, depth++) {
+                            const s = getComputedStyle(e);
+                            styles.push({
+                                tag: e.tagName.toLowerCase().slice(0, 12),
+                                color: s.color.slice(0, 80),
+                                background: s.backgroundColor.slice(0, 80),
+                                opacity: s.opacity.slice(0, 8),
+                                classes: Array.from(e.classList).filter(x => /^(text-|bg-|opacity-|animate-|dark:|group-hover:)/.test(x)).slice(0, 8),
+                            });
+                        }
+                        return { resolved: true, region: safeRegions.has(region) ? region : 'other', styles };
+                    };
                     return {
-                        violations: report.violations.map(x => ({ rule: x.id, count: x.nodes.length })),
-                        incomplete: report.incomplete.map(x => ({ rule: x.id, count: x.nodes.length })),
+                        violations: report.violations.map(x => ({ rule: x.id, count: x.nodes.length, samples: x.nodes.slice(0, 6).map(diagnose) })),
+                        incomplete: report.incomplete.map(x => ({ rule: x.id, count: x.nodes.length, samples: x.nodes.slice(0, 6).map(diagnose) })),
                     };
                 });
                 const issueCount = result.violations.length + result.incomplete.length;
@@ -74,9 +100,12 @@ try {
                     theme, viewport: viewport.width === 390 ? 'mobile' : 'desktop',
                     result: issueCount ? 'FAIL' : 'PASS', ...result,
                 }) + '\n');
-                if (issueCount) throw new Error('Synthetic browser WCAG A/AA audit failed; do not request protected approval.');
+                if (issueCount) failingCombinations += 1;
             } finally { await page.close(); }
         }
+    }
+    if (failingCombinations) {
+        throw new Error('Synthetic browser WCAG A/AA failed in ' + failingCombinations + ' combinations; protected approval is blocked.');
     }
 } finally {
     if (browser) await browser.close();
