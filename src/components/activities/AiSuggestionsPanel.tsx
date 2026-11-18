@@ -170,7 +170,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
             >
                 <div className="flex items-center gap-3">
                     <div className={`${compact ? 'p-1.5' : 'p-2'} bg-primary rounded-lg shadow-lg shadow-primary/20`}>
-                        <Sparkles className={`${compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-white`} />
+                        <Sparkles className={`${compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-primary-foreground`} />
                     </div>
                     <div>
                         <h3 className={`font-black text-foreground tracking-tight ${compact ? 'text-xs' : 'text-sm'}`}>

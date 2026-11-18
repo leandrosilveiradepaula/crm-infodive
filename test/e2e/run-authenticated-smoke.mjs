@@ -303,7 +303,9 @@ async function login(page, baseUrl, account) {
 }
 
 const results = { version: 2, profiles: [], failures: [] };
-let diagnosticMode = false;
+const MAX_A11Y_DIAGNOSTICS = 32;
+let a11yFailureCount = 0;
+const a11yFailedRoutes = new Set();
 let browser;
 try {
     const { baseUrl, local } = validateEnvironment();
@@ -336,10 +338,6 @@ try {
     if (process.env.CHROME_PATH) launchOptions.executablePath = process.env.CHROME_PATH;
     browser = await chromium.launch(launchOptions);
     for (const [profileIndex, account] of accounts.entries()) {
-        // Once one audited combination fails, gather a broad read-only desktop/light
-        // matrix for the first approved admin profile rather than aborting on route 1.
-        // Never claim acceptance from diagnostic mode. Full coverage resumes on PASS.
-        if (diagnosticMode && profileIndex > 0) break;
         const context = await browser.newContext();
         // Bypass only the Vercel deployment's outer SSO layer, never CRM Auth.
         // A cross-origin request (e.g. to Supabase) must NEVER receive the secret.
@@ -378,7 +376,6 @@ try {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
-                    if (diagnosticMode && (viewport.name !== 'desktop' || theme !== 'light')) continue;
                     const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
@@ -388,23 +385,33 @@ try {
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;
                     if (issues) {
-                        diagnosticMode = true;
-                        const finding = {
-                            profileIndex, route, viewport: viewport.name, theme,
-                            incompleteCount: axeReport.incompleteCount,
-                            violationsCount: axeReport.violationsCount,
-                            incomplete: axeReport.incomplete,
-                            violations: axeReport.violations,
-                        };
-                        results.failures.push(finding);
-                        // Only bounded, allowlisted component IDs, tags and numeric CSS;
-                        // no user content, HTML, selectors, URLs or credentials.
-                        process.stderr.write('CRM_B4_A11Y_DIAGNOSTIC=' + JSON.stringify({
-                            ...finding,
-                            incomplete: finding.incomplete.map((rule) => ({
-                                ...rule, samples: rule.samples.slice(0, 8),
-                            })),
-                        }) + '\n');
+                        a11yFailureCount += 1;
+                        a11yFailedRoutes.add(route);
+                        // Continue the full approved profile/viewport/theme matrix on
+                        // failure. The previous diagnostic shortcut hid later defects
+                        // and required another human approval for each newly found issue.
+                        // Bound stored diagnostics to avoid leaking excess QA metadata.
+                        if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                            const finding = {
+                                profileIndex, route, viewport: viewport.name, theme,
+                                incompleteCount: axeReport.incompleteCount,
+                                violationsCount: axeReport.violationsCount,
+                                incomplete: axeReport.incomplete,
+                                violations: axeReport.violations,
+                            };
+                            results.failures.push(finding);
+                            // Only bounded allowlisted regions, tags and numeric CSS.
+                            // Never record user data, HTML, selectors, URLs or secrets.
+                            process.stderr.write('CRM_B4_A11Y_DIAGNOSTIC=' + JSON.stringify({
+                                ...finding,
+                                incomplete: finding.incomplete.map((rule) => ({
+                                    ...rule, samples: rule.samples.slice(0, 4),
+                                })),
+                                violations: finding.violations.map((rule) => ({
+                                    ...rule, samples: rule.samples.slice(0, 4),
+                                })),
+                            }) + '\n');
+                        }
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
@@ -415,10 +422,10 @@ try {
         await context.close();
     }
     if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
-    if (results.failures.length) {
-        fail('WCAG remains unresolved in ' + results.failures.length +
-            ' audited combination(s) across ' + new Set(results.failures.map((f) => f.route)).size +
-            ' route(s). The full matrix was intentionally not certified.');
+    if (a11yFailureCount) {
+        fail('WCAG remains unresolved in ' + a11yFailureCount +
+            ' audited combination(s) across ' + a11yFailedRoutes.size +
+            ' route(s). Full matrix was audited but not certified.');
     } else {
         process.stdout.write(`E2E_AUTHENTICATED_SMOKE=PASSED: ${results.profiles.length} profile(s), ${results.profiles.reduce((total, profile) => total + profile.checks.length, 0)} visual route checks.\n`);
     }

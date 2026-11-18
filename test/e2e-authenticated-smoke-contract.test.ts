@@ -18,11 +18,15 @@ describe('authenticated E2E smoke contract', () => {
     it('makes missing credentials an explicit skip and treats incomplete axe output as unresolved', () => {
         expect(source).toContain('E2E_AUTHENTICATED_SMOKE=SKIPPED');
         expect(source).toContain('CRM_B4_A11Y_DIAGNOSTIC=');
-        expect(source).toContain('diagnosticMode');
+        expect(source).not.toContain('diagnosticMode');
         expect(source).toContain('WCAG remains unresolved in ');
-        expect(source).toContain('full matrix was intentionally not certified');
+        expect(source).toContain('Full matrix was audited but not certified');
         expect(source).toContain('results.failures.push(finding)');
-        expect(source).toContain("if (diagnosticMode && profileIndex > 0) break");
+        expect(source).toContain('for (const [profileIndex, account] of accounts.entries())');
+        expect(source).toContain("for (const theme of ['light', 'dark'])");
+        expect(source).toContain('MAX_A11Y_DIAGNOSTICS');
+        expect(source).toContain('a11yFailureCount += 1;');
+        expect(source).toContain('a11yFailedRoutes.add(route);');
         expect(source).toContain('Never retain HTML, text, attributes, selectors, URLs or screenshots.');
         expect(source).toContain('result.incomplete.slice(0, 6)');
         expect(source).toContain('samples: (nodes || []).slice(0, 16).map((node) => ({');
