@@ -46,3 +46,6 @@ Após configurar um Preview não produtivo com backend de teste **realmente sepa
 - Nenhuma screenshot E2E é publicada por padrão; o output não registra senhas nem cookies. O job não toca banco, produção nem executa ações comerciais de escrita.
 
 A confirmação `CRM_B4_BACKEND_ISOLATED=true` representa um **gate humano**, não um teste automático da separação dos bancos. Não fazer merge da PR B4 enquanto o job não passar de forma autenticada no SHA exato.
+
+
+Em caso de PASS autenticado, a workflow envia **somente** `results.json` (rotas, perfil numérico, SHA, deployment ID e checks); **não envia screenshots, cookies ou traces**. O artefato expira em sete dias. `CRM_E2E_CAPTURE_SANITIZED` permanece `false`; não habilitar capturas sem revisar conteúdo e proteção de acesso. Resultado inexistente faz a publicação falhar, em vez de emitir evidência vazia.

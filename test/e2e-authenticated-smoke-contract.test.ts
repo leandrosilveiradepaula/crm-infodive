@@ -72,6 +72,9 @@ describe('authenticated E2E smoke contract', () => {
         expect(workflow).toContain("CRM_E2E_ENFORCE_PASS: 'true'");
         expect(workflow).toContain('CRM_E2E_ACCOUNTS_JSON:');
         expect(workflow).toContain('npm run test:e2e');
+        expect(workflow).toContain('crm-b4-e2e-');
+        expect(workflow).toContain("CRM_E2E_CAPTURE_SANITIZED: 'false'");
+        expect(workflow).toContain('results.json');
         expect(workflow).not.toContain('vercel deploy');
     });
 

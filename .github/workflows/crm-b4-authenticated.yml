@@ -67,4 +67,13 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
           CRM_E2E_ENFORCE_PASS: 'true'
           CRM_E2E_CAPTURE_SANITIZED: 'false'
+          CRM_E2E_ARTIFACT_DIR: ${{ runner.temp }}/crm-b4-e2e
         run: npm run test:e2e
+      - name: Publish sanitized route audit only (no screenshots)
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crm-b4-e2e-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/crm-b4-e2e/results.json
+          if-no-files-found: error
+          retention-days: 7
