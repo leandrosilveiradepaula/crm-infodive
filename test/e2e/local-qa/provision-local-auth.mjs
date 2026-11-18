@@ -68,9 +68,17 @@ for (const [table, key, value, owner, tenantKey] of [
     ['scenarios','name','Cenário Fictício','qa-admin@example.invalid','primary'],
 ]) {
     const field = table === 'deals' ? 'owner_id' : 'user_id';
-    const changed = assert(await admin.from(table).update({ [field]: users.get(owner) })
-        .eq(key, value).eq('organization_id', tenant[tenantKey]).select('id'), 'LOCAL_QA_ASSIGN_OWNER_FAILED');
-    if (changed.length !== 1) throw new Error('LOCAL_QA_OWNER_FIXTURE_MISSING');
+    const result = await admin.from(table).update({ [field]: users.get(owner) })
+        .eq(key, value).eq('organization_id', tenant[tenantKey]).select('id');
+    if (result.error) {
+        // Print only an allowlisted table name and SQL/PostgREST code, never
+        // record contents, credentials or raw error messages.
+        const allowed = new Set(['deals', 'scenarios']);
+        const safeTable = allowed.has(table) ? table : 'unexpected';
+        const code = /^[A-Z0-9]{3,8}$/.test(result.error.code || '') ? result.error.code : 'UNKNOWN';
+        throw new Error('LOCAL_QA_ASSIGN_OWNER_FAILED:' + safeTable + ':' + code);
+    }
+    if (result.data?.length !== 1) throw new Error('LOCAL_QA_OWNER_FIXTURE_MISSING:' + table);
 }
 const dir = await mkdtemp(join(env.RUNNER_TEMP, 'crm-b4-local-accounts-'));
 const path = join(dir, 'accounts.json');

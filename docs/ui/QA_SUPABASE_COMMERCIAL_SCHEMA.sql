@@ -247,6 +247,7 @@ CREATE TABLE public.automation_logs (
 CREATE TABLE public.scenarios (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(), organization_id uuid NOT NULL,
  name text NOT NULL, description text, year integer, scenario_data jsonb DEFAULT '{}'::jsonb,
+ user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
  revenue_goal numeric DEFAULT 0, created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz DEFAULT now()
 );

@@ -194,4 +194,13 @@ describe('authenticated E2E smoke contract', () => {
         expect(provision).toContain('mode: 0o600');
     });
 
+    it('keeps the local synthetic schema compatible with QA Auth provisioner ownership fields', () => {
+        const sql = readFileSync(resolve(process.cwd(), 'docs/ui/QA_SUPABASE_COMMERCIAL_SCHEMA.sql'), 'utf8');
+        const scenario = sql.split('CREATE TABLE public.scenarios (')[1]?.split(');')[0] || '';
+        expect(scenario).toContain('user_id uuid REFERENCES auth.users(id)');
+        const provisioner = readFileSync(resolve(process.cwd(), 'test/e2e/local-qa/provision-local-auth.mjs'), 'utf8');
+        expect(provisioner).toContain("['scenarios','name','Cenário Fictício'");
+        expect(provisioner).toContain("LOCAL_QA_ASSIGN_OWNER_FAILED:");
+    });
+
 });
