@@ -178,8 +178,33 @@ async function runAxe(page, source, audit) {
         });
         // Record only rule identifiers, node counts and limited computed CSS.
         // Never retain HTML, text, attributes, selectors, URLs or screenshots.
-        const safeColor = (value) => /^(?:rgba?\([0-9.,%\s]+\)|transparent|currentcolor)$/i.test(value || '')
-            ? value : 'unresolved';
+        const safeColor = (value) => {
+            if (typeof value !== 'string' || value.length > 180) return 'unresolved';
+            const clean = value.trim().toLowerCase();
+            if (clean === 'transparent' || clean === 'currentcolor') return clean;
+            if (/^#[a-f0-9]{3,8}$/.test(clean)) return clean;
+            const format = /^(rgba?|hsla?|oklch|oklab|lab|lch|color)\(/.exec(clean)?.[1];
+            if (!format) return 'unresolved';
+            // Return numeric channels only; never raw strings, selectors or user data.
+            const channels = (clean.match(/-?\d+(?:\.\d+)?%?/g) || []).slice(0, 6);
+            return channels.length ? format + '(' + channels.join(',') + ')' : 'unresolved';
+        };
+        const safeCheck = (check) => {
+            const id = /^[a-z][a-z0-9-]{0,70}$/.test(check.id || '') ? check.id : 'unknown-check';
+            const message = typeof check.message === 'string' ? check.message.toLowerCase() : '';
+            const reason = /background gradient/.test(message) ? 'gradient' :
+                /background image/.test(message) ? 'background-image' :
+                /overlap|obscur/.test(message) ? 'overlap' :
+                /outside.*viewport/.test(message) ? 'outside-viewport' :
+                /pseudo.element|pseudo element/.test(message) ? 'pseudo-element' :
+                /parse.*color|color.*pars/.test(message) ? 'color-parse' :
+                /transparen|alpha/.test(message) ? 'alpha' :
+                /text.shadow/.test(message) ? 'text-shadow' :
+                /1:1 contrast|equal.*ratio/.test(message) ? 'equal-ratio' :
+                /short.*text/.test(message) ? 'short-text' :
+                'undetermined';
+            return { id, reason };
+        };
         const staticTags = new Set([
             'html', 'body', 'main', 'header', 'nav', 'aside', 'section', 'article',
             'div', 'span', 'p', 'button', 'a', 'input', 'select', 'textarea',
@@ -204,6 +229,8 @@ async function runAxe(page, source, audit) {
                     color: safeColor(style.color),
                     background: safeColor(style.backgroundColor),
                     opacity: /^\d?(?:\.\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
+                    backgroundImage: style.backgroundImage !== 'none',
+                    backdropFilter: style.backdropFilter !== 'none',
                 });
                 current = current.parentElement;
             }
@@ -215,7 +242,11 @@ async function runAxe(page, source, audit) {
             incomplete: result.incomplete.slice(0, 6).map(({ id, nodes }) => ({
                 rule: sanitizeRule(id),
                 count: nodes?.length || 0,
-                samples: (nodes || []).slice(0, 3).map(inspect),
+                samples: (nodes || []).slice(0, 6).map((node) => ({
+                    ...inspect(node),
+                    checks: [...(node.any || []), ...(node.all || []), ...(node.none || [])]
+                        .slice(0, 3).map(safeCheck),
+                })),
             })),
             incompleteCount: result.incomplete.length,
             violations: result.violations.map(({ id }) => sanitizeRule(id)).slice(0, 15),
