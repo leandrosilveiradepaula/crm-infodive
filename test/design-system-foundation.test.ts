@@ -41,6 +41,26 @@ describe('Infodive design-system foundation', () => {
         expect(source('src/components/layout/DashboardShell.tsx')).toContain('aria-label="Fechar menu"');
     });
 
+    it('keeps shared layout and dashboard surfaces opaque for contrast in both themes', () => {
+        const css = source('src/app/globals.css');
+        const glass = css.match(/\.glass-card\s*\{([^}]+)\}/)?.[1] ?? '';
+        expect(glass).toContain('bg-card');
+        expect(glass).not.toMatch(/bg-card\/80|backdrop-blur|backdrop-filter/);
+        for (const path of ['src/components/layout/Header.tsx', 'src/components/layout/PageHeader.tsx']) {
+            const header = source(path);
+            expect(header).toContain('bg-background');
+            expect(header).not.toMatch(/bg-background\/90|backdrop-blur/);
+        }
+        const health = source('src/components/dashboard/HealthWidget.tsx');
+        const stats = source('src/components/dashboard/StatsWidget.tsx');
+        const performers = source('src/components/dashboard/TopPerformersWidget.tsx');
+        expect(health).not.toContain('text-white');
+        expect(health).toContain('text-primary-foreground');
+        expect(stats).not.toContain('tracking-widest opacity-60');
+        expect(performers).not.toContain('bg-gradient-to-br');
+        expect(performers).not.toContain('tracking-widest opacity-60');
+    });
+
     it('makes horizontally scrollable tables reachable by keyboard', () => {
         const table = source('src/components/ui/table.tsx');
         expect(table).toContain('role="region"');
