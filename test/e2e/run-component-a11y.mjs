@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+/**
+ * Browser audit for actual CRM components rendered with synthetic data and real
+ * project CSS. Never reads GitHub environments, CRM credentials or Supabase.
+ * It is only a preflight; the protected authenticated E2E remains mandatory.
+ */
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+import { setTimeout as pause } from 'node:timers/promises';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright-core';
+
+const repo = resolve(fileURLToPath(new URL('.', import.meta.url)), '../..');
+const require = createRequire(import.meta.url);
+const base = 'http://127.0.0.1:4178';
+const chrome = process.env.CHROME_PATH || ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(existsSync);
+if (!chrome || !existsSync(chrome)) throw new Error('Chrome is unavailable on QA runner.');
+const vite = spawn(process.execPath, [resolve(repo, 'node_modules/vite/bin/vite.js'), '--config', resolve(repo, 'test/e2e/component-qa/vite.config.mjs')], {
+    cwd: repo, env: process.env, stdio: ['ignore', 'pipe', 'pipe'],
+});
+let serverOutput = '';
+for (const stream of [vite.stdout, vite.stderr]) stream.on('data', chunk => { serverOutput = (serverOutput + chunk.toString()).slice(-3000); });
+let browser;
+try {
+    let ready = false;
+    for (let i = 0; i < 120; i++) {
+        if (vite.exitCode !== null) throw new Error('Synthetic QA server exited: ' + serverOutput);
+        try { const r = await fetch(base); if (r.ok) { ready = true; break; } } catch {}
+        await pause(250);
+    }
+    if (!ready) throw new Error('Synthetic QA server failed to start: ' + serverOutput);
+    browser = await chromium.launch({ executablePath: chrome, headless: true, args: ['--no-sandbox'] });
+    for (const theme of ['light', 'dark']) {
+        for (const viewport of [{ width: 1366, height: 900 }, { width: 390, height: 844 }]) {
+            const page = await browser.newPage({ viewport, reducedMotion: 'no-preference' });
+            try {
+                await page.goto(base + '/?theme=' + theme, { waitUntil: 'networkidle' });
+                await page.waitForFunction(() => document.body.innerText.includes('Nenhuma sugestão ativa') &&
+                    document.body.innerText.includes('Reativar oportunidade fictícia'), { timeout: 15000 });
+                await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
+                const result = await page.evaluate(async () => {
+                    const report = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
+                    return {
+                        violations: report.violations.map(x => ({ rule: x.id, count: x.nodes.length })),
+                        incomplete: report.incomplete.map(x => ({ rule: x.id, count: x.nodes.length })),
+                    };
+                });
+                const issueCount = result.violations.length + result.incomplete.length;
+                process.stdout.write('CRM_B4_SYNTHETIC_AXE=' + JSON.stringify({
+                    theme, viewport: viewport.width === 390 ? 'mobile' : 'desktop',
+                    result: issueCount ? 'FAIL' : 'PASS', ...result,
+                }) + '\n');
+                if (issueCount) throw new Error('Synthetic browser WCAG A/AA audit failed; do not request protected approval.');
+            } finally { await page.close(); }
+        }
+    }
+} finally {
+    if (browser) await browser.close();
+    vite.kill('SIGTERM');
+}
