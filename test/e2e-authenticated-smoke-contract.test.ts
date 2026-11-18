@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -44,6 +45,22 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("route !== '/login' && !defaultRoutes.includes(route)");
         expect(source).toContain('if (!response?.ok())');
         expect(source).toContain("mobileMenuNavigation: 'not-applicable-for-profile'");
+    });
+
+    it('exits as SKIPPED locally but blocks required QA when no target is configured', () => {
+        const script = resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs');
+        const local = spawnSync(process.execPath, [script], {
+            env: {},
+            encoding: 'utf8',
+        });
+        expect(local.status).toBe(0);
+        expect(local.stdout).toContain('E2E_AUTHENTICATED_SMOKE=SKIPPED');
+        const required = spawnSync(process.execPath, [script], {
+            env: { CRM_E2E_ENFORCE_PASS: 'true' },
+            encoding: 'utf8',
+        });
+        expect(required.status).toBe(2);
+        expect(required.stderr).toContain('E2E_AUTHENTICATED_SMOKE=BLOCKED');
     });
 
 });
