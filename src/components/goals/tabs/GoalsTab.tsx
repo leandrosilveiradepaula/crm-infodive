@@ -145,7 +145,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                     <div className="flex gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedPeriod('all')}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Tempo Todo
                         </button>
@@ -162,7 +162,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     aria-label={`Filtrar por ${tab.label}`}
                                     onClick={() => setSelectedPeriod(tab.id as any)}
                                     className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                         }`}
                                 >
