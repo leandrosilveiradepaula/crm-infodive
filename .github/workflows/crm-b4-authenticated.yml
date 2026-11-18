@@ -3,7 +3,10 @@ name: CRM B4 authenticated acceptance
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review]
+    # Authenticated QA only starts when a fully validated draft is submitted for review.
+    # Pushing development commits must NOT queue secret-bearing jobs that require
+    # a human reviewer and block subsequent runs.
+    types: [ready_for_review]
 
 permissions:
   contents: read
