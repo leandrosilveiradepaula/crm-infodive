@@ -8,26 +8,19 @@ on:
 permissions:
   contents: read
 
-jobs:
-  qa-readiness:
-    name: B4 E2E isolated-environment gate
-    if: github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Require explicit QA environment activation
-        env:
-          QA_ENABLED: ${{ vars.CRM_B4_QA_ENABLED }}
-        run: |
-          if [ "$QA_ENABLED" != "true" ]; then
-            echo "::error::BLOCKED: isolated CRM B4 backend and protected QA environment not approved. Do not use shared Production/Preview Supabase configuration."
-            exit 1
-          fi
+# Serialize credential rotation and project-scoped Vercel bypass grants.
+concurrency:
+  group: crm214-b4-protected-authenticated-e2e
+  cancel-in-progress: false
 
+jobs:
   authenticated:
     name: B4 authenticated E2E (real CRM pages)
-    needs: qa-readiness
+    if: github.event.number == 218 && github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    # GitHub requires a human reviewer to approve this exact workflow run
+    # before any secret-bearing step starts. Never remove this environment.
     environment: crm-ui-qa
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -40,6 +33,16 @@ jobs:
           cache: npm
       - name: Install reviewed CRM dependencies
         run: npm ci
+      - name: Attest ready staging deployment and create ephemeral Vercel SSO bypass
+        env:
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          CRM_B4_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_B4_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_B4_VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_B4_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_B4_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_B4_PR_NUMBER: ${{ github.event.number }}
+        run: node test/e2e/prepare-qa-preview.mjs prepare
       - name: Create and confirm fictitious QA users through protected Supabase Auth Admin
         env:
           CRM_B4_SUPABASE_URL: https://lwpjiufsetnpjuoyline.supabase.co
@@ -60,12 +63,10 @@ jobs:
           echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
       - name: Real authenticated CRM smoke (read-only, fail-closed)
         env:
-          CRM_E2E_BASE_URL: ${{ vars.CRM_B4_PREVIEW_URL }}
           CRM_E2E_TEST_TARGET: isolated
           CRM_E2E_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
           CRM_E2E_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
           CRM_E2E_EXPECTED_BRANCH: ${{ github.head_ref }}
-          CRM_E2E_DEPLOYMENT_ID: ${{ vars.CRM_B4_DEPLOYMENT_ID }}
           CRM_E2E_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
           CRM_E2E_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
           CRM_E2E_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
@@ -74,6 +75,16 @@ jobs:
           CRM_E2E_CAPTURE_SANITIZED: 'false'
           CRM_E2E_ARTIFACT_DIR: ${{ runner.temp }}/crm-b4-e2e
         run: npm run test:e2e
+      - name: Revoke temporary Vercel SSO bypass, even after failure
+        if: always()
+        env:
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          CRM_B4_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_B4_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_B4_VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_B4_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_B4_PR_NUMBER: ${{ github.event.number }}
+        run: node test/e2e/prepare-qa-preview.mjs cleanup
       - name: Publish sanitized route audit only (no screenshots)
         if: success()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

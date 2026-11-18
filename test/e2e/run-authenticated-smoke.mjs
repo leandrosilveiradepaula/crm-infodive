@@ -222,6 +222,27 @@ try {
     browser = await chromium.launch(launchOptions);
     for (const account of accounts) {
         const context = await browser.newContext();
+        // Bypass only the Vercel deployment's outer SSO layer, never CRM Auth.
+        // A cross-origin request (e.g. to Supabase) must NEVER receive the secret.
+        if (!local) {
+            const bypass = process.env.CRM_B4_PROTECTION_BYPASS;
+            if (!/^[a-f0-9]{32}$/.test(bypass || '')) {
+                throw new Error('Protected QA deployment requires ephemeral Vercel SSO authorization.');
+            }
+            await context.route('**/*', async (route) => {
+                const requestedUrl = new URL(route.request().url());
+                if (requestedUrl.origin !== baseUrl.origin) {
+                    await route.continue();
+                    return;
+                }
+                await route.continue({
+                    headers: {
+                        ...route.request().headers(),
+                        'x-vercel-protection-bypass': bypass,
+                    },
+                });
+            });
+        }
         const page = await context.newPage();
         await login(page, baseUrl, account);
         if (!Array.isArray(account.routes) || account.routes.length === 0 || !account.routes.every((route) => defaultRoutes.includes(route))) {

@@ -67,8 +67,12 @@ describe('authenticated E2E smoke contract', () => {
         const workflow = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-authenticated.yml'), 'utf8');
         expect(workflow).toContain("github.head_ref == 'ux-ui/crm214-b4-integrated-qa'");
         expect(workflow).toContain('environment: crm-ui-qa');
-        expect(workflow).toContain('CRM_B4_QA_ENABLED');
-        expect(workflow).toContain('exit 1');
+        expect(workflow).toContain('github.event.number == 218');
+        expect(workflow).toContain('cancel-in-progress: false');
+        expect(workflow).toContain('node test/e2e/prepare-qa-preview.mjs prepare');
+        expect(workflow).toContain('node test/e2e/prepare-qa-preview.mjs cleanup');
+        expect(workflow).toContain('if: always()');
+        expect(workflow).not.toContain('CRM_B4_QA_ENABLED');
         expect(workflow).toContain("CRM_E2E_ENFORCE_PASS: 'true'");
         expect(workflow).not.toContain('CRM_E2E_ACCOUNTS_FILE: ${{ env.');
         expect(workflow).toContain('node test/e2e/provision-qa-auth.mjs');
@@ -86,6 +90,9 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("CRM_E2E_BACKEND_ISOLATED !== 'true'");
         expect(source).not.toContain("C:/Program Files/Google/Chrome/Application/chrome.exe");
         expect(source).toContain('if (process.env.CHROME_PATH) launchOptions.executablePath');
+        expect(source).toContain("await context.route('**/*'");
+        expect(source).toContain('requestedUrl.origin !== baseUrl.origin');
+        expect(source).toContain("'x-vercel-protection-bypass': bypass");
     });
 
     it('rejects production and mismatched remote deployments using mocked Vercel responses', () => {

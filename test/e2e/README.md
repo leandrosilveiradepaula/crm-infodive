@@ -61,3 +61,14 @@ Na própria workflow B4, depois de `npm ci` e após aprovação do environment `
 **Única credencial adicional:** cadastrar no GitHub environment protegido `crm-ui-qa` a chave exclusiva de serviço do projeto Supabase QA como secret `CRM_B4_SUPABASE_SERVICE_ROLE_KEY`. A mesma chave QA deve ser cadastrada de forma server-only encrypted no projeto Vercel QA como `SUPABASE_SERVICE_ROLE_KEY`. Nunca copiar a chave do CRM original. Não compartilhar credenciais por chat ou comentários.
 
 As senhas são geradas criptograficamente no runner, gravadas em arquivo privado `0600` dentro de `RUNNER_TEMP`, e lidas pelo E2E com `CRM_E2E_ACCOUNTS_FILE`. Esse arquivo não é anexado como artifact; desaparece ao encerrar o runner. O secret `CRM_B4_ACCOUNTS_JSON` e o cadastro manual das contas **não são necessários** no fluxo automático. O `QA_BIND_SYNTHETIC_USERS.sql` anterior é um método alternativo e não deve ser executado sobre contas já vinculadas automaticamente.
+
+
+## Fluxo B4 autorizado por revisão humana — Staging 18/11/2026
+
+O projeto Vercel QA foi implantado em **Staging** com `target=staging` (não produtivo), URL sob `*.vercel.app`, e metadados do SHA da PR #218. A proteção externa SSO do Vercel permanece habilitada. **Não remover SSO e não habilitar produção**.
+
+A workflow protegida agora depende **somente da aprovação do environment `crm-ui-qa` para o SHA exato da PR**. Não exige mais variável de repositório `CRM_B4_QA_ENABLED`, `CRM_B4_PREVIEW_URL` nem `CRM_B4_DEPLOYMENT_ID`. As variáveis do environment já cadastradas `CRM_B4_BACKEND_ISOLATED=true`, `CRM_B4_VERCEL_TEAM_ID` e `CRM_B4_VERCEL_PROJECT_ID`, mais os secrets `CRM_B4_VERCEL_TOKEN` e `CRM_B4_SUPABASE_SERVICE_ROLE_KEY`, são suficientes para iniciar o fluxo **depois da aprovação humana**.
+
+A etapa `test/e2e/prepare-qa-preview.mjs prepare` descobre o deployment **READY em Staging**, exige projeto e equipe QA específicos, branch B4, commit revisado e URL do deployment (proibido Production). Ela gera um bypass de SSO do Vercel aleatório, específico do job, via API administrativa do **projeto QA**, que é transmitido ao Playwright somente em requests para o hostname do QA. O **login Supabase Auth do CRM nunca é burlado**. O bypass é revogado por etapa `always()`, inclusive quando o E2E falha; se o job for abruptamente cancelado, conferir/revogar manualmente no Vercel QA → Deployment Protection → Protection Bypass for Automation.
+
+**Ordem protegida:** aprovação de reviewer → checkout SHA exato → verificar Staging → gerar bypass SSO temporário → criar/confirmar 4 usuários fictícios Supabase → login por formulário real → smoke read-only → revogar bypass → publicar recibo `results.json` somente em caso de PASS. Nada é enviado a produção; não anexar capturas ou contas. Após cada alteração do código, publicar novo Staging **do novo SHA** antes de aprovar o job do E2E.

@@ -28,3 +28,11 @@
 **Limitação de escopo:** UI QA read-only valida apresentação, rotas e estado por perfil, não equivalência integral de todas as regras comerciais/migrations. Nenhum merge, migração produtiva ou deploy de produção foi autorizado ou executado. PR #213 da Factory continua separada.
 
 **Não habilitar o Preview nem o E2E até configurar a chave server-only do QA no Vercel QA e no environment GitHub protegido.** Após esse gate, a própria workflow cria usuários/perfis fictícios antes do E2E; não existe necessidade de criar contas manualmente.
+
+
+## 18/11/2026 — implantação controlada e teste automatizado com aprovação humana
+
+- O primeiro deployment no Vercel QA foi retornado com `target=production` **apesar da intenção de Preview**; foi cancelado imediatamente em `INITIALIZING` (ID `dpl_3NEof5soAGF9UhNG3btT4uUsVCUs`) e permanece `CANCELED`. Nenhum ambiente produtivo do CRM original foi alterado.
+- Repetido com `target=staging` explícito para o projeto QA. Deployment `dpl_BgCikCd93XYi6HPaK6Lok8ENanxu` concluído **READY** no SHA `c67bf48bd2f012e3386d73b1b3352c1804533979`, com branch B4. Esse SHA poderá ficar desatualizado após alterações de automação; sempre redeploy Staging no HEAD final antes do E2E.
+- O projeto QA mantém `ssoProtection` ativado. A workflow protegida usa autorização temporária Vercel **limitada ao hostname do deployment**, não sessão artificial do CRM. O operador só precisa aprovar o workflow no environment `crm-ui-qa`; descoberta de deployment e rotação/revogação do bypass são automáticas. A etapa `always()` revoga o bypass, mas cancelamento abrupto requer revisão manual no painel de Vercel.
+- Não é mais necessário cadastrar variáveis de URL/ID do Preview nem o toggle `CRM_B4_QA_ENABLED`; **não** habilitar deploy produtivo, nem tocar no projeto original.
