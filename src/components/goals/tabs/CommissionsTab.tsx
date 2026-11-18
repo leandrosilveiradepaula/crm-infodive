@@ -155,7 +155,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                         <div className="relative">
                                                             <input
                                                                 type="number"
-                                                                aria-label={`${product.label}: comissão de ${i===1?"cliente base":"cliente novo"} em porcentagem`}
+                                                                aria-label={`${product.label}: comissão de cliente base em porcentagem`}
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"
@@ -184,7 +184,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                         <div className="relative">
                                                             <input
                                                                 type="number"
-                                                                aria-label={`${product.label}: comissão de ${i===1?"cliente base":"cliente novo"} em porcentagem`}
+                                                                aria-label={`${product.label}: comissão de cliente novo em porcentagem`}
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"
