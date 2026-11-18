@@ -109,8 +109,10 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
 
     it('provides semantic datasets with keyboard equivalents for chart drill-downs', () => {
         const chart = source('src/components/charts/AccessibleChart.tsx');
-        expect(chart).toContain('aria-hidden="true"');
-        expect(chart).toContain('role="group" aria-label={label}');
+        expect(chart).not.toContain('aria-hidden="true"');
+        expect(chart).toContain('<details');
+        expect(chart).toContain('Ver dados: {label}');
+        expect(chart).toContain('<summary');
         expect(chart).toContain('onClick={() => onSelect(index)}');
         for (const path of [
             'src/components/dashboard/SalesChartWidget.tsx',
@@ -118,7 +120,17 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
             'src/components/charts/ReportsCharts.tsx',
             'src/components/goals/tabs/GoalsTab.tsx',
         ]) expect(source(path)).toContain('<AccessibleChart');
-        const reports = source('src/components/charts/ReportsCharts.tsx');
+        const sales = source('src/app/(dashboard)/sales/tabs/DashboardTab.tsx');
+        const goals = source('src/components/goals/tabs/GoalsTab.tsx');
+        const dashboard = source('src/components/dashboard/SalesChartWidget.tsx');
+        for (const sourceText of [sales, goals, dashboard]) {
+            expect(sourceText).toContain('tick={false}');
+            expect(sourceText).not.toContain('tick={{ fill:');
+        }
+        expect(sales).not.toContain('<Legend');
+                const reports = source('src/components/charts/ReportsCharts.tsx');
+        expect(reports).toContain('tick={false}');
+        expect(reports).not.toContain('stroke="var(--muted-foreground)"');
         expect(reports).toContain('onSelect={onBarClick ?');
         expect(reports).toContain('onSelect={onPieClick ?');
     });
