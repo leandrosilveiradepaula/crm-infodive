@@ -1,12 +1,11 @@
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { DollarSign } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 
 // --- Layout Primitives ---
 
 export const ThemePanel = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-card border border-border rounded-2xl p-4", className)}>
+    <div className={cn("surface-panel p-4", className)}>
         {children}
     </div>
 );
@@ -41,7 +40,7 @@ export const ThemeInput = React.forwardRef<HTMLInputElement, ThemeInputProps>(
             <input
                 ref={ref}
                 className={cn(
-                    "bg-card border border-border rounded-xl px-3 py-2 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px] placeholder:text-muted-foreground transition-all",
+                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-3 py-2 text-xs font-semibold text-foreground shadow-xs outline-none transition-[color,box-shadow,border-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}
@@ -63,7 +62,7 @@ export const ThemeSelect = React.forwardRef<HTMLSelectElement, ThemeSelectProps>
             <select
                 ref={ref}
                 className={cn(
-                    "bg-card border border-border rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px]",
+                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-2 py-1.5 text-xs font-semibold text-foreground outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}
@@ -80,7 +79,7 @@ ThemeSelect.displayName = "ThemeSelect";
 // --- Read-Only Displays ---
 
 export const ThemeReadOnlyField = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-muted border border-border rounded-xl px-3 py-2 text-xs font-bold text-muted-foreground h-[34px] flex items-center truncate", className)}>
+    <div className={cn("bg-muted border border-border rounded-[var(--radius-control)] px-3 py-2 text-xs font-semibold text-muted-foreground h-[34px] flex items-center truncate", className)}>
         {children || '---'}
     </div>
 );
@@ -88,7 +87,7 @@ export const ThemeReadOnlyField = ({ children, className }: { children: ReactNod
 
 // --- Specific Widgets ---
 
-import { formatCurrency, parseCurrencyValue } from '@/utils/format';
+import { formatCurrency } from '@/utils/format';
 
 export const ThemeCurrencyInput = React.forwardRef<HTMLInputElement, Omit<ThemeInputProps, 'value' | 'onChange'> & {
     value?: number | string,

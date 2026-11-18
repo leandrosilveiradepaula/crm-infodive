@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -48,10 +48,13 @@
   --color-stage-negotiation: var(--stage-negotiation);
   --color-stage-won: var(--stage-won);
   --color-stage-lost: var(--stage-lost);
-  --color-ibm-blue: #0f62fe;
-  /* IBM Blue */
-  --color-ibm-dark: #161616;
-  /* IBM Dark Background */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-info-subtle: var(--info-subtle);
+  --color-destructive-subtle: var(--destructive-subtle);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -62,12 +65,21 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* Infodive interface foundation: semantic values, never product-specific hex values. */
+  --radius: 0.75rem;
+  --radius-control: 0.625rem;
+  --radius-panel: 0.875rem;
+  --shadow-panel: 0 1px 2px oklch(0.145 0.02 260 / 5%), 0 1px 3px oklch(0.145 0.02 260 / 4%);
+  --shadow-float: 0 12px 32px oklch(0.145 0.02 260 / 12%);
+  --content-max-width: 110rem;
   --background: oklch(0.985 0.002 247.839);
   /* Soft Gray/White, not harsh white */
   --foreground: oklch(0.129 0.042 264.695);
   /* Deep Navy Blue for text */
   --card: oklch(1 0 0);
+  --surface: oklch(1 0 0);
+  --surface-raised: oklch(1 0 0);
+  --surface-subtle: oklch(0.97 0.004 247.839);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
@@ -81,11 +93,15 @@
   --accent: oklch(0.95 0.01 240);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.627 0.194 149.214); /* Emerald 500 */
+  --success: oklch(0.52 0.16 149.214);
+  --success-subtle: oklch(0.95 0.04 149.214);
   --success-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.704 0.140 70.08); /* Orange 500 */
+  --warning: oklch(0.53 0.12 70.08);
+  --warning-subtle: oklch(0.97 0.04 85);
   --warning-foreground: oklch(0.985 0 0);
-  --info: oklch(0.6 0.15 180); /* Teal 500 */
+  --info: oklch(0.48 0.12 180);
+  --info-subtle: oklch(0.95 0.03 210);
+  --destructive-subtle: oklch(0.96 0.025 27.325);
   --info-foreground: oklch(0.985 0 0);
   --border: oklch(0.9 0.01 260);
   --input: oklch(0.9 0.01 260);
@@ -114,6 +130,9 @@
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
+  --surface: oklch(0.205 0 0);
+  --surface-raised: oklch(0.235 0.005 260);
+  --surface-subtle: oklch(0.175 0.004 260);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -126,12 +145,16 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --success: oklch(0.627 0.194 149.214);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.704 0.140 70.08);
-  --warning-foreground: oklch(0.145 0 0);
-  --info: oklch(0.6 0.15 180);
-  --info-foreground: oklch(0.145 0 0);
+  --success: oklch(0.52 0.16 149.214);
+  --success-subtle: oklch(0.26 0.045 149.214);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.53 0.12 70.08);
+  --warning-subtle: oklch(0.27 0.04 85);
+  --warning-foreground: oklch(0.985 0 0);
+  --info: oklch(0.48 0.12 180);
+  --info-subtle: oklch(0.25 0.035 210);
+  --destructive-subtle: oklch(0.26 0.04 27.325);
+  --info-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -161,7 +184,11 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
   }
 
   /* Responsive Scaling for Layout */
@@ -179,7 +206,23 @@
 }
 
 @layer utilities {
+  .app-content {
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin-inline: auto;
+  }
+
+  .surface-panel {
+    @apply border border-border bg-card;
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .focus-ring {
+    @apply outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
   .glass-card {
-    @apply bg-card/60 backdrop-blur-xl border border-border;
+    @apply bg-card/80 backdrop-blur-xl border border-border;
   }
 }

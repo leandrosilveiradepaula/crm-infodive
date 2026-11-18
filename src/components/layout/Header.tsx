@@ -23,33 +23,35 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
     const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
 
     return (
-        <header className="bg-card dark:bg-gray-950/50 dark:backdrop-blur-md border-b border-border dark:border-border px-4 lg:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between border-b border-border bg-background/90 px-3 py-3 backdrop-blur-xl sm:px-4 lg:px-6">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <button
+                    type="button"
+                    aria-label="Abrir menu"
                     onClick={onMenuClick}
-                    className="lg:hidden p-2 text-muted-foreground dark:text-muted-foreground hover:bg-muted/50 dark:hover:bg-gray-800 rounded-lg"
+                    className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted lg:hidden"
                 >
                     <Menu className="h-6 w-6" />
                 </button>
                 <div className="hidden lg:flex items-center gap-2">
                     <button
                         onClick={onToggleSidebar}
-                        className="p-2 text-muted-foreground hover:bg-muted/50 rounded-lg transition-all"
+                        className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted transition-colors"
                         title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
                     >
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
                 </div>
-                <h2 className="text-lg lg:text-xl font-bold text-foreground dark:text-white truncate">Bem-vindo, {firstName} 👋</h2>
+                <h2 className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">Bem-vindo, {firstName} 👋</h2>
             </div>
 
-            <div className="flex items-center gap-2 lg:gap-4">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3">
                 <div className="relative hidden md:block">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
                         placeholder="Buscar..."
-                        className="pl-10 w-48 lg:w-64 bg-muted/50 dark:bg-background border-border dark:border-border"
+                        className="w-48 bg-surface-raised pl-10 lg:w-64"
                     />
                 </div>
 
@@ -57,7 +59,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     variant="ghost"
                     size="icon"
                     onClick={() => setIsAiOpen(true)}
-                    className="text-primary hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                    className="text-primary hover:bg-accent"
                     title="Watson AI"
                 >
                     <Bot className="h-5 w-5" />
@@ -74,9 +76,9 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     <span className="sr-only">Toggle theme</span>
                 </Button>
 
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative" aria-label="Notificações" title="Notificações">
                     <Bell className="h-5 w-5" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-gray-950" />
+                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
                 </Button>
             </div>
 
