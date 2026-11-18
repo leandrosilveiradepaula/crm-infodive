@@ -21,7 +21,10 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain('diagnostics=${JSON.stringify(report.incomplete)}');
         expect(source).toContain('Never retain HTML, text, attributes, selectors, URLs or screenshots.');
         expect(source).toContain('result.incomplete.slice(0, 6)');
-        expect(source).toContain('samples: (nodes || []).slice(0, 3).map(inspect)');
+        expect(source).toContain('samples: (nodes || []).slice(0, 6).map((node) => ({');
+        expect(source).toContain('safeCheck');
+        expect(source).toContain('backgroundImage: style.backgroundImage');
+        expect(source).toContain('backdropFilter: style.backdropFilter');
         expect(source).toContain('Mobile menu did not close after navigation.');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
