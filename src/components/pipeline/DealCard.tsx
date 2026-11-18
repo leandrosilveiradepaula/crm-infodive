@@ -175,7 +175,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
 
                                 <div className="flex justify-between items-center mt-1">
                                     {daysInStage > 0 && (
-                                        <div className="flex items-center gap-1 opacity-60">
+                                        <div className="flex items-center gap-1">
                                             <Clock className="h-2.5 w-2.5 text-muted-foreground" />
                                             <span className="text-[9px] font-bold text-muted-foreground">{daysInStage}d na etapa</span>
                                         </div>
