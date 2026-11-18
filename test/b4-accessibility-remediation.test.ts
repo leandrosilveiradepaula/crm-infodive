@@ -90,4 +90,37 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(runner).not.toContain("runOnly: { type: 'rule', values: ['color-contrast'] }");
         expect(runner).not.toContain('disableRules:');
     });
+    it('labels genuine company filters, monetary goals and organization inputs', () => {
+        const customers = source('src/app/(dashboard)/customers/client-page.tsx');
+        for (const name of ['Filtrar empresas por status', 'Filtrar empresas por segmento', 'Filtrar empresas por relacionamento'])
+            expect(customers).toContain('aria-label="' + name + '"');
+        const table = source('src/components/customers/CustomersTable.tsx');
+        expect(table).toContain('aria-label={`Editar empresa ${account.name}`}');
+        expect(table).toContain('aria-label={`Excluir empresa ${account.name}`}');
+        expect(source('src/components/goals/GoalInput.tsx')).toContain('aria-label={label}');
+        const goals = source('src/components/goals/tabs/GoalsTab.tsx');
+        for (const name of ['Meta anual de', 'Meta Q1 de', 'Meta Q2 de', 'Meta Q3 de', 'Meta Q4 de'])
+            expect(goals).toContain(name);
+        const settings = source('src/app/(dashboard)/settings/client-page.tsx');
+        for (const name of ['Razão social ou nome fantasia', 'Email institucional', 'CNPJ da empresa', 'Inscrição estadual', 'CEP', 'Logradouro', 'Número do endereço', 'Bairro', 'Cidade', 'Estado (UF)'])
+            expect(settings).toContain('aria-label="' + name + '"');
+        expect(source('src/app/(dashboard)/automations/client-page.tsx')).not.toContain('opacity-60 grayscale-[0.8]');
+    });
+
+    it('provides semantic datasets with keyboard equivalents for chart drill-downs', () => {
+        const chart = source('src/components/charts/AccessibleChart.tsx');
+        expect(chart).toContain('aria-hidden="true"');
+        expect(chart).toContain('role="group" aria-label={label}');
+        expect(chart).toContain('onClick={() => onSelect(index)}');
+        for (const path of [
+            'src/components/dashboard/SalesChartWidget.tsx',
+            'src/app/(dashboard)/sales/tabs/DashboardTab.tsx',
+            'src/components/charts/ReportsCharts.tsx',
+            'src/components/goals/tabs/GoalsTab.tsx',
+        ]) expect(source(path)).toContain('<AccessibleChart');
+        const reports = source('src/components/charts/ReportsCharts.tsx');
+        expect(reports).toContain('onSelect={onBarClick ?');
+        expect(reports).toContain('onSelect={onPieClick ?');
+    });
+
 });
