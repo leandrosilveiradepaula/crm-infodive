@@ -204,7 +204,7 @@ export function ReportsClientPage() {
 
                     <button
                         onClick={handleExportReport}
-                        className="h-11 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center gap-2 transition-all group shrink-0"
+                        className="h-11 px-4 bg-success-subtle hover:bg-muted text-foreground border border-border rounded-full flex items-center gap-2 transition-all group shrink-0"
                     >
                         <Download className="h-4 w-4 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-black uppercase tracking-widest">CSV</span>
@@ -339,26 +339,26 @@ export function ReportsClientPage() {
                                 <tr key={deal.id} className="group hover:bg-muted/30 transition-colors">
                                     <td className="py-2.5">
                                         <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter opacity-70">
+                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
                                             {new Date(deal.created_at).toLocaleDateString()}
                                         </p>
                                     </td>
                                     <td className="py-4">
-                                        <span className="text-sm text-foreground/80">{deal.company}</span>
+                                        <span className="text-sm text-foreground">{deal.company}</span>
                                     </td>
                                     <td className="py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                            <div className="h-6 w-6 rounded-full bg-surface-subtle flex items-center justify-center text-[10px] font-bold text-foreground">
                                                 {deal.owner?.charAt(0)}
                                             </div>
-                                            <span className="text-sm text-foreground/80">{deal.owner}</span>
+                                            <span className="text-sm text-foreground">{deal.owner}</span>
                                         </div>
                                     </td>
                                     <td className="py-4">
                                         <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-                                            deal.stage === 'won' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                            deal.stage === 'lost' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                                            'bg-primary/10 text-primary border-primary/20'
+                                            deal.stage === 'won' ? 'bg-success-subtle text-foreground border-border' :
+                                            deal.stage === 'lost' ? 'bg-destructive-subtle text-foreground border-border' :
+                                            'bg-surface-subtle text-foreground border-border'
                                         }`}>
                                             {deal.stage === 'qualification' ? 'Qualificação' :
                                              deal.stage === 'proposal' ? 'Proposta' :
