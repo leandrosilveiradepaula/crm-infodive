@@ -1,5 +1,6 @@
 'use client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { useTheme } from '../providers/ThemeProvider';
 
 interface SalesChartWidgetProps {
@@ -30,6 +31,7 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
             </div>
 
             <div className="flex-1" style={{ minHeight: 300 }}>
+                <AccessibleChart label="Vendas e negócios por período" entries={displayData.map((point) => `${point.name}: vendas ${point.sales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}, ${point.deals} negócios`)}>
                 <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={displayData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.3} />
@@ -81,6 +83,7 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
                         />
                     </AreaChart>
                 </ResponsiveContainer>
+                </AccessibleChart>
             </div>
         </div>
     );
