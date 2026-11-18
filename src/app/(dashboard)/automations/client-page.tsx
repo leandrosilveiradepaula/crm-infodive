@@ -339,7 +339,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 key={automation.id}
                                 className={`group relative bg-card p-5 rounded-2xl border transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 ${automation.enabled
                                     ? 'border-border hover:border-primary/30'
-                                    : 'border-border opacity-60 grayscale-[0.8]'
+                                    : 'border-border border-dashed'
                                     }`}
                             >
                                 <div className="flex justify-between items-start mb-6">
