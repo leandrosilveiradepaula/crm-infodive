@@ -243,6 +243,35 @@ async function runAxe(page, source) {
         };
         const sanitizeRule = (id) => /^[a-z][a-z0-9-]{0,70}$/.test(id || '')
             ? id : 'unknown-rule';
+        const inspectViolation = (node) => {
+            // Only boolean accessibility properties and allowlisted style categories.
+            // Do NOT record text, attribute values, selectors, HTML or user data.
+            let element = null;
+            try {
+                const selector = Array.isArray(node.target) ? node.target[0] : null;
+                if (typeof selector === 'string') element = document.querySelector(selector);
+            } catch {}
+            if (!element) return { resolved: false };
+            const style = getComputedStyle(element);
+            const tag = element.tagName?.toLowerCase() || '';
+            const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions']);
+            return {
+                resolved: true,
+                tag: staticTags.has(tag) ? tag : 'other',
+                region: regions.has(candidateRegion) ? candidateRegion : 'outside-widgets',
+                hasAriaLabel: element.hasAttribute('aria-label'),
+                hasAriaLabelledBy: element.hasAttribute('aria-labelledby'),
+                hasExplicitLabel: Boolean(element.labels?.length),
+                hasTitle: element.hasAttribute('title'),
+                hasVisibleText: Boolean((element.innerText || '').trim()),
+                hasSvgIcon: Boolean(element.querySelector('svg')),
+                isSvg: Boolean(element.closest('svg')),
+                color: safeColor(style.color),
+                background: safeColor(style.backgroundColor),
+                hasBackgroundImage: style.backgroundImage !== 'none',
+            };
+        };
         return {
             incomplete: result.incomplete.slice(0, 6).map(({ id, nodes }) => ({
                 rule: sanitizeRule(id),
@@ -254,7 +283,11 @@ async function runAxe(page, source) {
                 })),
             })),
             incompleteCount: result.incomplete.length,
-            violations: result.violations.map(({ id }) => sanitizeRule(id)).slice(0, 15),
+            violations: result.violations.slice(0, 12).map(({ id, nodes }) => ({
+                rule: sanitizeRule(id),
+                count: nodes?.length || 0,
+                samples: (nodes || []).slice(0, 5).map(inspectViolation),
+            })),
             violationsCount: result.violations.length,
         };
     });
