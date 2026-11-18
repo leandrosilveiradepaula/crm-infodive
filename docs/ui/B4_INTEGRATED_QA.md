@@ -50,3 +50,10 @@ O inventário executável agora contém 22 rotas estáticas existentes (sem `/pu
 ## Continuidade B4 — gate protegido e verificação independente
 
 No GitHub foi confirmado que o mesmo cadastro de variáveis de conexão Supabase e de serviço está direcionado a Preview e Production no Vercel, sem ambiente customizado. **Nenhum Preview dessa configuração é qualificado como isolado**. O CI deve permanecer bloqueado, sem deploy automático ou sessão real. Foi adicionado um job específico de E2E apenas para a branch B4: readiness falha por padrão, e o job autenticado exige aprovação de environment, confirmação humana de backend independente, secrets protegidos, Chrome/Linux e validação independente do deployment Vercel por SHA, branch, projeto, URL e status antes de qualquer login. Instrumentação e tests contratuais não equivalem a prova E2E real.
+
+
+## Primeiro E2E autenticado real (run 44228227063)
+
+Primeiro teste iniciou no Staging do HEAD `e5b0dd7`. PASS em validação do Preview, geração de autorização temporária de SSO, criação/confirmação dos 4 usuários fictícios, instalação do navegador, autenticação inicial suficiente para alcançar a inspeção axe. O smoke encontrou **1 resultado axe `incomplete`**; o gate permaneceu FAIL, sem gerar recibo final de PASS. A autorização temporária de SSO foi revogada com sucesso na etapa de cleanup.
+
+**Correções subsequentes na mesma PR:** detalhamento exclusivamente sanitizado de `incomplete` (ID da regra, contexto do teste, tag e cores CSS computadas e de ancestrais; sem texto, HTML, seletores, URL, captura, dados pessoais) e registro `::add-mask::` antes de exportar o token temporário de SSO para o CI. A execução anterior expôs o valor do bypass temporário em logs de ambiente do Actions; o token foi revogado e não deve mais ser considerado válido. Não reclassificar `incomplete` como PASS. Novo E2E depende de Staging no novo HEAD e aprovação humana do environment protegido.

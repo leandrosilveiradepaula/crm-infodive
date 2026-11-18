@@ -170,13 +170,66 @@ async function assertMobileNavigation(page, baseUrl) {
     if (closedTranslate !== '-100%') throw new Error('Mobile menu did not close after navigation.');
 }
 
-async function runAxe(page, source) {
+async function runAxe(page, source, audit) {
     await page.addScriptTag({ content: source });
-    const result = await page.evaluate(async () => window.axe.run(document, {
-        runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
-    }));
-    if (result.incomplete.length) throw new Error(`axe returned ${result.incomplete.length} incomplete result(s), which require review.`);
-    if (result.violations.length) throw new Error(`axe found WCAG A/AA violation(s): ${result.violations.map(({ id }) => id).join(', ')}.`);
+    const report = await page.evaluate(async () => {
+        const result = await window.axe.run(document, {
+            runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
+        });
+        // Record only rule identifiers, node counts and limited computed CSS.
+        // Never retain HTML, text, attributes, selectors, URLs or screenshots.
+        const safeColor = (value) => /^(?:rgba?\\([0-9.,%\\s]+\\)|transparent|currentcolor)$/i.test(value || '')
+            ? value : 'unresolved';
+        const staticTags = new Set([
+            'html', 'body', 'main', 'header', 'nav', 'aside', 'section', 'article',
+            'div', 'span', 'p', 'button', 'a', 'input', 'select', 'textarea',
+            'label', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'h1', 'h2', 'h3',
+        ]);
+        const inspect = (node) => {
+            let element = null;
+            try {
+                const selector = Array.isArray(node.target) ? node.target[0] : null;
+                if (typeof selector === 'string') element = document.querySelector(selector);
+            } catch {
+                // Complex shadow DOM targets are intentionally not serialized.
+            }
+            if (!element) return { resolved: false };
+            const levels = [];
+            let current = element;
+            for (let depth = 0; current && depth < 4; depth += 1) {
+                const style = getComputedStyle(current);
+                const tag = current.tagName?.toLowerCase() || '';
+                levels.push({
+                    tag: staticTags.has(tag) ? tag : 'other',
+                    color: safeColor(style.color),
+                    background: safeColor(style.backgroundColor),
+                    opacity: /^\\d?(?:\\.\\d+)?$/.test(style.opacity) ? style.opacity : 'unresolved',
+                });
+                current = current.parentElement;
+            }
+            return { resolved: true, levels };
+        };
+        const sanitizeRule = (id) => /^[a-z][a-z0-9-]{0,70}$/.test(id || '')
+            ? id : 'unknown-rule';
+        return {
+            incomplete: result.incomplete.slice(0, 6).map(({ id, nodes }) => ({
+                rule: sanitizeRule(id),
+                count: nodes?.length || 0,
+                samples: (nodes || []).slice(0, 3).map(inspect),
+            })),
+            incompleteCount: result.incomplete.length,
+            violations: result.violations.map(({ id }) => sanitizeRule(id)).slice(0, 15),
+            violationsCount: result.violations.length,
+        };
+    });
+    if (report.incompleteCount) {
+        // All audit fields are internal allowlisted route/viewport/theme values.
+        // No account email/name, page body, selector, or credentials can be emitted.
+        throw new Error(`axe incomplete: profileIndex=${audit.profileIndex}; route=${audit.route}; viewport=${audit.viewport}; theme=${audit.theme}; count=${report.incompleteCount}; diagnostics=${JSON.stringify(report.incomplete)}`);
+    }
+    if (report.violationsCount) {
+        throw new Error(`axe WCAG A/AA violations: profileIndex=${audit.profileIndex}; route=${audit.route}; viewport=${audit.viewport}; theme=${audit.theme}; rules=${report.violations.join(',')}`);
+    }
     return [];
 }
 
@@ -220,7 +273,7 @@ try {
     const launchOptions = { headless: true };
     if (process.env.CHROME_PATH) launchOptions.executablePath = process.env.CHROME_PATH;
     browser = await chromium.launch(launchOptions);
-    for (const account of accounts) {
+    for (const [profileIndex, account] of accounts.entries()) {
         const context = await browser.newContext();
         // Bypass only the Vercel deployment's outer SSO layer, never CRM Auth.
         // A cross-origin request (e.g. to Supabase) must NEVER receive the secret.
@@ -265,7 +318,7 @@ try {
                     await setTheme(page, theme);
                     await assertLayout(page);
                     await assertKeyboardFocus(page);
-                    const violations = await runAxe(page, source);
+                    const violations = await runAxe(page, source, { profileIndex, route, viewport: viewport.name, theme });
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeViolations: violations });
                 }

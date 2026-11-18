@@ -17,7 +17,11 @@ describe('authenticated E2E smoke contract', () => {
 
     it('makes missing credentials an explicit skip and treats incomplete axe output as unresolved', () => {
         expect(source).toContain('E2E_AUTHENTICATED_SMOKE=SKIPPED');
-        expect(source).toContain('axe returned ${result.incomplete.length} incomplete result(s), which require review.');
+        expect(source).toContain('axe incomplete: profileIndex=');
+        expect(source).toContain('diagnostics=${JSON.stringify(report.incomplete)}');
+        expect(source).toContain('Never retain HTML, text, attributes, selectors, URLs or screenshots.');
+        expect(source).toContain('result.incomplete.slice(0, 6)');
+        expect(source).toContain('samples: (nodes || []).slice(0, 3).map(inspect)');
         expect(source).toContain('Mobile menu did not close after navigation.');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {

@@ -129,6 +129,16 @@ describe('QA staging deployment and temporary Vercel SSO bypass (offline)', () =
         }
     });
 
+    it('masks temporary bypass before calling Vercel or exporting it to Actions', () => {
+        const file = readFileSync(new URL('./e2e/prepare-qa-preview.mjs', import.meta.url), 'utf8');
+        const mask = file.indexOf("process.stdout.write('::add-mask::' + bypass");
+        const grant = file.indexOf('    await changeBypass(fetchFn, env, {');
+        const exportEnv = file.indexOf("'CRM_B4_PROTECTION_BYPASS=' + bypass");
+        expect(mask).toBeGreaterThan(0);
+        expect(grant).toBeGreaterThan(mask);
+        expect(exportEnv).toBeGreaterThan(grant);
+    });
+
     it('never generates bypass if no QA deployment matches exact SHA', async () => {
         const dir = mkdtempSync(join(tmpdir(), 'crm214-qa-no-sha-'));
         try {

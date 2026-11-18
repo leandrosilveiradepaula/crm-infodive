@@ -91,6 +91,10 @@ export async function prepareQaPreview(env, fetchFn = globalThis.fetch) {
     // The app's real Supabase Auth login is still mandatory for every account.
     // Never print, upload, or send this value to a host other than the QA deployment.
     const bypass = randomBytes(16).toString('hex');
+    // GitHub prints GITHUB_ENV values in subsequent step logs. Mask before the
+    // token enters any API request or environment file so it is never logged.
+    // A revoked bypass still must not appear unredacted in retained QA logs.
+    process.stdout.write('::add-mask::' + bypass + '\n');
     await changeBypass(fetchFn, env, {
         generate: { secret: bypass, note: 'CRM B4 protected E2E job - revoke on completion' },
     });
