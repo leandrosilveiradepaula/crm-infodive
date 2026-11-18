@@ -319,7 +319,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         dataKey="date" 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }} 
+                                        tick={{ fill: 'var(--foreground)', fontSize: 11, fontWeight: 'bold' }}
                                     />
                                     <YAxis 
                                         axisLine={false} 
