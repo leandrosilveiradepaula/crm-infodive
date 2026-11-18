@@ -9,7 +9,7 @@ import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 export default function ProposalsPage() {
     const router = useRouter();
     return (
-        <div className="space-y-8 pb-10">
+        <div className="space-y-6 pb-10">
             <PageHeader 
                 title="Propostas" 
                 description="Gerencie propostas comerciais enviadas." 

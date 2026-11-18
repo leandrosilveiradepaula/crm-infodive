@@ -29,7 +29,7 @@ export function GoalsCommissionsClientPage({
 }: GoalsClientPageProps) {
 
     return (
-        <div className="animate-in fade-in duration-500 pb-10 space-y-8">
+        <div className="space-y-6 pb-10">
             <PageHeader 
                 title="Metas e Comissões" 
                 description="Gerencie as metas mensais e regras de comissionamento da equipe." 
@@ -59,7 +59,7 @@ export function GoalsCommissionsClientPage({
                     </TabsTrigger>
                 </TabsList>
 
-                <div className="bg-card rounded-3xl shadow-2xl border border-border p-8 min-h-[600px] mt-6">
+                <div className="mt-6 min-h-[600px] rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-[var(--shadow-card)] md:p-6">
                     <TabsContent value="goals" className="m-0">
                         <GoalsTab users={userData} />
                     </TabsContent>

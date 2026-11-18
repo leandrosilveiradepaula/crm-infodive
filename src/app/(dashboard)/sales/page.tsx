@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function SalesPage() {
     return (
-        <div className="flex-1 space-y-8 pb-10">
+        <div className="flex-1 space-y-6 pb-10">
             <PageHeader 
                 title="Gestão de Vendas" 
                 description="Acompanhe o ciclo completo desde a geração do pedido até o pagamento da comissão." 

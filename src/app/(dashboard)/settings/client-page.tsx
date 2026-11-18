@@ -108,7 +108,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
             <OrganizationThemeSettings />
 
             <div className="flex justify-end pt-4">
-                <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/20 transition-all">
+                <Button onClick={handleSave} disabled={saving} size="lg">
                     {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                     Salvar Identidade
                 </Button>
@@ -260,7 +260,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             </div>
 
             <div className="flex justify-end pt-4">
-                <Button onClick={handleSaveOrg} disabled={saving} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/20 transition-all">
+                <Button onClick={handleSaveOrg} disabled={saving} size="lg">
                     {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                     Salvar Alterações
                 </Button>
@@ -328,7 +328,7 @@ export function SettingsClientPage({ initialOrgSettings, initialStages }: { init
                     </TabsTrigger>
                 </TabsList>
 
-                <div className="bg-card rounded-2xl shadow-sm border border-border p-4 min-h-[600px]">
+                <div className="min-h-[600px] rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
                     <TabsContent value="general" className="mt-0 outline-none"><GeneralSettings initial={initialOrgSettings} /></TabsContent>
                     <TabsContent value="branding" className="mt-0 outline-none"><BrandingSettings initial={initialOrgSettings} /></TabsContent>
                     <TabsContent value="profile" className="mt-0 outline-none"><ProfileSettings /></TabsContent>

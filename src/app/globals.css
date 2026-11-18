@@ -205,6 +205,12 @@
   }
 }
 
+/* Shared form contract: focus must remain visible independently of utility compilation. */
+[data-slot="input"]:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 @layer utilities {
   .app-content {
     width: 100%;

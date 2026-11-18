@@ -57,7 +57,7 @@ export function GoalsClientPage({
                 </TabsList>
 
                 {/* Content Area */}
-                <div className="bg-card rounded-2xl shadow-sm border border-border p-4 min-h-[600px]">
+                <div className="min-h-[600px] rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
                     <TabsContent value="goals" className="mt-0 outline-none">
                         <GoalsTab users={userData} deals={statementDeals} />
                     </TabsContent>
