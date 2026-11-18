@@ -94,6 +94,10 @@ describe('QA staging deployment and temporary Vercel SSO bypass (offline)', () =
 
     it('refuses a production deployment or mismatched branch/sha instead of making a bypass', () => {
         expect(chooseApprovedDeployment({ deployments: [deployment] }, sha).id).toBe(deployment.id);
+        expect(chooseApprovedDeployment({ deployments: [{ ...deployment, projectId: undefined }] }, sha).id)
+            .toBe(deployment.id);
+        expect(() => chooseApprovedDeployment({ deployments: [{ ...deployment, projectId: 'prj_wrong' }] }, sha))
+            .toThrow('QA_STAGING_READY_FOR_REVIEWED_SHA_NOT_FOUND');
         expect(() => chooseApprovedDeployment({ deployments: [{ ...deployment, target: 'production' }] }, sha))
             .toThrow('QA_STAGING_READY_FOR_REVIEWED_SHA_NOT_FOUND');
         expect(() => chooseApprovedDeployment({

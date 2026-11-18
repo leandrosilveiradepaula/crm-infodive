@@ -42,7 +42,9 @@ export function chooseApprovedDeployment(payload, sha) {
     const approved = items.filter((d) =>
         d.meta?.githubCommitSha === sha &&
         d.meta?.githubCommitRef === qaBranch &&
-        (d.projectId || d.project?.id) === qaProjectId &&
+        // Some Vercel index responses omit projectId; the follow-up v13
+        // deployment lookup MUST establish project identity before any bypass.
+        (!(d.projectId || d.project?.id) || (d.projectId || d.project?.id) === qaProjectId) &&
         d.target === 'staging' &&
         (d.readyState || d.state) === 'READY' &&
         /^dpl_[A-Za-z0-9]+$/.test(d.id || d.uid || '') &&
