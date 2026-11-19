@@ -180,7 +180,8 @@ async function assertLayout(page) {
         scrollWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,
         main: Boolean(document.querySelector('main')),
-        navigation: Boolean(document.querySelector('nav[aria-label="Navegação principal"]')),
+        navigation: Boolean(document.querySelector('nav[aria-label="Áreas principais"]')) &&
+            Boolean(document.querySelector('nav[aria-label^="Navegação de "]')),
     }));
     if (!layout.main || !layout.navigation) throw new Error('Dashboard shell is incomplete.');
     if (layout.scrollWidth > layout.viewportWidth) throw new Error(`Document overflows viewport (${layout.scrollWidth}px > ${layout.viewportWidth}px).`);
