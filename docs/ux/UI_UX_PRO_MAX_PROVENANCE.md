@@ -15,3 +15,5 @@ Representative commands actually run against the user-supplied archive during so
 Observed recommendation: Minimalism/Swiss-style layout, enterprise density 8/10, subtle motion 2/10, clear focus/contrast and coherent grid. The generic search returned a marketing page pattern ("Product Demo + Features") unsuitable for a CRM OPERATIONS application; explicitly discard it. Its suggested palette is not an override of the user's Clinia screenshots or existing Infodive brand.
 
 DO NOT run untrusted install scripts from an uploaded ZIP in CI, Vercel or production. Only install reviewed/pinned code in a development environment after validating its provenance. Upstream library information is supplementary; every screen must pass the direct screenshot reference contract and real QA.
+
+Local CI correction: the vendored scripts/design_system.py had 46 trailing-whitespace lines normalized, without logic changes; consequently, 46/48 original runtime files are blob-identical (the other two are SKILL.md and design_system.py).
