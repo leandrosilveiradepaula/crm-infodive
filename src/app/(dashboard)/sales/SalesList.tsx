@@ -58,7 +58,7 @@ export default function SalesList() {
 
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-2 gap-1 p-1 sm:inline-flex sm:w-auto sm:flex-wrap">
                 <TabsTrigger value="dashboard" className="gap-2">
                     <LayoutDashboard className="w-4 h-4" />
                     Visão Geral
@@ -67,7 +67,7 @@ export default function SalesList() {
                     <Package className="w-4 h-4" />
                     Pedidos
                     {orders.length > 0 && (
-                        <span className="ml-1 px-1.5 py-0.5 rounded-md bg-primary/20 text-[9px] font-black">{orders.length}</span>
+                        <span className="ml-1 px-1.5 py-0.5 rounded-md bg-surface-raised border border-border text-foreground text-[9px] font-black">{orders.length}</span>
                     )}
                 </TabsTrigger>
                 <TabsTrigger value="installments" className="gap-2">

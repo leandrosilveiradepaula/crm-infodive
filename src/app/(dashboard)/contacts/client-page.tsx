@@ -131,6 +131,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <ThemeSelect
+                        aria-label="Filtrar contatos por empresa"
                         value={filterAccount}
                         onChange={e => setFilterAccount(e.target.value)}
                         className="h-10"
@@ -142,6 +143,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     </ThemeSelect>
 
                     <ThemeSelect
+                        aria-label="Filtrar contatos por cargo"
                         value={filterRole}
                         onChange={e => setFilterRole(e.target.value)}
                         className="h-10"

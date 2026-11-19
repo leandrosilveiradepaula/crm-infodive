@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThemeCurrencyInput } from '@/components/ui/theme/ThemeComponents';
 
-export const GoalInput = ({ value, onSave, hasError, className = '' }: { value: number; onSave: (val: number) => void; hasError?: boolean; className?: string }) => {
+export const GoalInput = ({ value, onSave, hasError, className = '', label = 'Valor da meta' }: { value: number; onSave: (val: number) => void; hasError?: boolean; className?: string; label?: string }) => {
     const [localValue, setLocalValue] = useState<string | number>(value);
     const [isFocused, setIsFocused] = useState(false);
 
@@ -19,6 +19,7 @@ export const GoalInput = ({ value, onSave, hasError, className = '' }: { value: 
 
     return (
         <ThemeCurrencyInput
+            aria-label={label}
             className={`${baseClasses} ${hasError ? errorClasses : normalClasses} ${isFocused ? focusClasses : ''} ${className} pl-9 pr-2 h-8 text-right w-[130px]`}
             value={localValue || 0}
             onChange={(e) => setLocalValue(Number(e.target.value))}

@@ -32,6 +32,10 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Install isolated browser QA toolchain (no protected secrets)
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
+      - name: Synthetic browser WCAG A/AA preflight (desktop/mobile, light/dark)
+        run: node test/e2e/run-component-a11y.mjs
       - name: Diff check
         shell: bash
         run: |

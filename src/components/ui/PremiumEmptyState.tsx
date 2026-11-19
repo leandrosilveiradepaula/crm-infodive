@@ -32,7 +32,7 @@ export function PremiumEmptyState({
             </div>
 
             <h3 className={`${isCompact ? 'text-sm' : 'text-lg'} font-semibold text-foreground tracking-tight mb-2`}>{title}</h3>
-            <p className={`${isCompact ? 'text-xs' : 'text-sm'} text-muted-foreground max-w-xs mx-auto leading-relaxed ${!isCompact && actionLabel ? 'mb-6' : ''}`}>
+            <p className={`${isCompact ? 'text-xs' : 'text-sm'} text-foreground max-w-xs mx-auto leading-relaxed ${!isCompact && actionLabel ? 'mb-6' : ''}`}>
                 {description}
             </p>
 

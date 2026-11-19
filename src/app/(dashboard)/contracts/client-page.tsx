@@ -186,6 +186,7 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <ThemeSelect
+                        aria-label="Filtrar contratos por status"
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
                         className="h-10"

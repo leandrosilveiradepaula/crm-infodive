@@ -1,0 +1,130 @@
+name: CRM B4 authenticated acceptance
+
+on:
+  pull_request:
+    branches: [main]
+    # Authenticated QA only starts when a fully validated draft is submitted for review.
+    # Pushing development commits must NOT queue secret-bearing jobs that require
+    # a human reviewer and block subsequent runs.
+    types: [ready_for_review]
+
+permissions:
+  contents: read
+  actions: read
+
+# Serialize credential rotation and project-scoped Vercel bypass grants.
+concurrency:
+  group: crm214-b4-protected-authenticated-e2e
+  cancel-in-progress: false
+
+jobs:
+  # Zero protected secrets. Fail closed until the identical reviewed SHA has
+  # passed the *real* Next.js + local Supabase authenticated E2E matrix.
+  # This job finishes BEFORE GitHub presents any environment approval request.
+  local-parity-preflight:
+    name: Check real local CRM E2E on this exact SHA
+    if: github.event.number == 218 && github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require completed SUCCESS for real local E2E (never component-only)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          runs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$REVIEWED_SHA&per_page=100")"
+          if ! jq -e --arg sha "$REVIEWED_SHA" '
+            [.workflow_runs[] | select(
+              .head_sha == $sha and
+              .name == "CRM B4 real local authenticated QA" and
+              .status == "completed" and
+              .conclusion == "success"
+            )] | length > 0
+          ' <<<"$runs" >/dev/null; then
+            echo "::error::Full real Next.js local authenticated QA has not passed for the exact SHA. Do NOT request protected approval."
+            exit 2
+          fi
+          echo "CRM_B4_LOCAL_PARITY_PREFLIGHT=PASS; sha=$REVIEWED_SHA"
+
+  authenticated:
+    needs: local-parity-preflight
+    name: B4 authenticated E2E (real CRM pages)
+    if: github.event.number == 218 && github.head_ref == 'ux-ui/crm214-b4-integrated-qa' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    # GitHub requires a human reviewer to approve this exact workflow run
+    # before any secret-bearing step starts. Never remove this environment.
+    environment: crm-ui-qa
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install reviewed CRM dependencies
+        run: npm ci
+      - name: Attest ready staging deployment and create ephemeral Vercel SSO bypass
+        env:
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          CRM_B4_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_B4_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_B4_VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_B4_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_B4_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_B4_PR_NUMBER: ${{ github.event.number }}
+        run: node test/e2e/prepare-qa-preview.mjs prepare
+      - name: Create and confirm fictitious QA users through protected Supabase Auth Admin
+        env:
+          CRM_B4_SUPABASE_URL: https://lwpjiufsetnpjuoyline.supabase.co
+          CRM_B4_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.CRM_B4_SUPABASE_SERVICE_ROLE_KEY }}
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+        run: node test/e2e/provision-qa-auth.mjs
+      - name: Install isolated browser QA toolchain without changing the lockfile
+        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
+      - name: Identify Chrome executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$chrome" ]; then
+            echo "::error::Chrome is unavailable on the isolated runner."
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - name: Real authenticated CRM smoke (read-only, fail-closed)
+        env:
+          CRM_E2E_TEST_TARGET: isolated
+          CRM_E2E_PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_E2E_EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          CRM_E2E_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_E2E_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_E2E_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_E2E_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_E2E_ENFORCE_PASS: 'true'
+          CRM_E2E_CAPTURE_SANITIZED: 'false'
+          CRM_E2E_ARTIFACT_DIR: ${{ runner.temp }}/crm-b4-e2e
+        run: npm run test:e2e
+      - name: Revoke temporary Vercel SSO bypass, even after failure
+        if: always()
+        env:
+          CRM_B4_BACKEND_ISOLATED: ${{ vars.CRM_B4_BACKEND_ISOLATED }}
+          CRM_B4_VERCEL_TEAM_ID: ${{ vars.CRM_B4_VERCEL_TEAM_ID }}
+          CRM_B4_VERCEL_PROJECT_ID: ${{ vars.CRM_B4_VERCEL_PROJECT_ID }}
+          CRM_B4_VERCEL_TOKEN: ${{ secrets.CRM_B4_VERCEL_TOKEN }}
+          CRM_B4_EXPECTED_BRANCH: ${{ github.head_ref }}
+          CRM_B4_PR_NUMBER: ${{ github.event.number }}
+        run: node test/e2e/prepare-qa-preview.mjs cleanup
+      - name: Publish sanitized route audit only (no screenshots)
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crm-b4-e2e-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/crm-b4-e2e/results.json
+          if-no-files-found: error
+          retention-days: 7

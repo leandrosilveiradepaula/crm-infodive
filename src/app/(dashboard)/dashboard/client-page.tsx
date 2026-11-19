@@ -198,6 +198,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <CalendarDays className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
+                                aria-label="Selecionar ano do Dashboard"
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                                 className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
@@ -240,8 +241,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                         className={`focus-ring relative h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected
                                             ? 'bg-primary text-primary-foreground shadow-sm'
                                             : hasSelectionsInOtherYears
-                                                ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                                ? 'bg-secondary text-secondary-foreground hover:bg-accent'
+                                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                             }`}
                                     >
                                         {tab.label}
@@ -258,6 +259,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                     {/* Config Button */}
                     <button
+                        aria-label="Configurar layout do Dashboard"
                         onClick={() => setShowConfig(!showConfig)}
                         aria-expanded={showConfig}
                         aria-controls="dashboard-layout-options"
@@ -274,7 +276,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                 <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                     <LayoutIcon className="h-4 w-4 text-primary" /> Personalizar
                                 </h3>
-                                <button onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
+                                <button aria-label="Fechar configuração de layout" onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
                             </div>
 
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
@@ -321,15 +323,26 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
+                                                data-qa-region={widget.id}
                                                 className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-2xl' : ''}`}
                                             >
-                                                <div
-                                                    {...provided.dragHandleProps}
-                                                    className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 p-1.5 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-all bg-card border border-border rounded-full text-muted-foreground hover:text-foreground shadow-lg hover:scale-110"
-                                                    title="Arrastar Widget"
-                                                >
-                                                    <GripHorizontal className="h-4 w-4" />
-                                                </div>
+                                                <>
+                                                    <span
+                                                        id={`dashboard-drag-instructions-${widget.id}`}
+                                                        className="sr-only"
+                                                    >
+                                                        Pressione espaço para selecionar este widget, use as setas para mover, espaço para soltar ou Escape para cancelar.
+                                                    </span>
+                                                    <div
+                                                        {...provided.dragHandleProps}
+                                                        aria-label={`Mover widget ${getWidgetLabel(widget.id)}`}
+                                                        aria-describedby={`dashboard-drag-instructions-${widget.id}`}
+                                                        className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 rounded-full border border-border bg-card p-1.5 text-foreground shadow-lg cursor-grab active:cursor-grabbing opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                        title="Arrastar Widget"
+                                                    >
+                                                        <GripHorizontal className="h-4 w-4" aria-hidden="true" />
+                                                    </div>
+                                                </>
                                                 <div className="h-full">
                                                     {renderWidget(widget.id)}
                                                 </div>

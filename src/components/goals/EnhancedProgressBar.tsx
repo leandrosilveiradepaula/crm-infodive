@@ -33,10 +33,10 @@ export function EnhancedProgressBar({
     };
 
     const getTextColor = () => {
-        if (percentage >= 100) return 'text-emerald-600';
+        if (percentage >= 100) return 'text-success-readable';
         if (percentage >= 70) return 'text-primary';
-        if (percentage >= 40) return 'text-amber-600';
-        return 'text-red-600';
+        if (percentage >= 40) return 'text-warning-readable';
+        return 'text-destructive-readable';
     };
 
     const sizeClasses = {

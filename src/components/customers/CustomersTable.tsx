@@ -83,10 +83,10 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                             </td>
                             <td className="px-4 py-3">
                                 <div className="flex items-center gap-1 justify-end">
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => onEdit(account)}>
+                                    <Button aria-label={`Editar empresa ${account.name}`} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => onEdit(account)}>
                                         <Pencil className="h-3.5 w-3.5" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => onDelete(account.id)}>
+                                    <Button aria-label={`Excluir empresa ${account.name}`} variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => onDelete(account.id)}>
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                 </div>

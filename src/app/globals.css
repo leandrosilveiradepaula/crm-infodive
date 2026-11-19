@@ -25,6 +25,7 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-readable: var(--destructive-readable);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -41,6 +42,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+  --color-warning-readable: var(--warning-readable);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
   --color-stage-qualification: var(--stage-qualification);
@@ -51,6 +53,7 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-subtle: var(--surface-subtle);
+  --color-success-readable: var(--success-readable);
   --color-success-subtle: var(--success-subtle);
   --color-warning-subtle: var(--warning-subtle);
   --color-info-subtle: var(--info-subtle);
@@ -93,10 +96,13 @@
   --accent: oklch(0.95 0.01 240);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-readable: oklch(0.44 0.17 27.325);
   --success: oklch(0.52 0.16 149.214);
+  --success-readable: oklch(0.37 0.13 149.214);
   --success-subtle: oklch(0.95 0.04 149.214);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.53 0.12 70.08);
+  --warning-readable: oklch(0.40 0.11 70.08);
   --warning-subtle: oklch(0.97 0.04 85);
   --warning-foreground: oklch(0.985 0 0);
   --info: oklch(0.48 0.12 180);
@@ -145,10 +151,13 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-readable: oklch(0.82 0.12 22.216);
   --success: oklch(0.52 0.16 149.214);
+  --success-readable: oklch(0.82 0.115 149.214);
   --success-subtle: oklch(0.26 0.045 149.214);
   --success-foreground: oklch(0.985 0 0);
   --warning: oklch(0.53 0.12 70.08);
+  --warning-readable: oklch(0.84 0.09 75);
   --warning-subtle: oklch(0.27 0.04 85);
   --warning-foreground: oklch(0.985 0 0);
   --info: oklch(0.48 0.12 180);
@@ -228,7 +237,8 @@
     @apply outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
+  /* Opaque surface: contrast requires a deterministic backdrop in both themes. */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border;
+    @apply bg-card border border-border;
   }
 }

@@ -30,7 +30,7 @@ export function GoalsClientPage({
     const [activeTab, setActiveTab] = useState<'goals' | 'commissions' | 'campaigns' | 'planning' | 'statement'>('goals');
 
     return (
-        <div className="space-y-6 pb-10 animate-in fade-in duration-500">
+        <div className="space-y-6 pb-10">
             <PageHeader 
                 title="Metas e Comissões" 
                 description="Gerencie as metas mensais e regras de comissionamento da equipe." 
@@ -38,7 +38,7 @@ export function GoalsClientPage({
 
             {/* Navigation Tabs */}
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">
+                <TabsList className="mb-6 grid w-full grid-cols-1 gap-1 sm:grid-cols-2 xl:flex xl:flex-wrap xl:justify-start">
                     <TabsTrigger value="goals">
                         <Target className="h-4 w-4" /> Metas de Vendas
                     </TabsTrigger>

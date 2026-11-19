@@ -42,16 +42,18 @@ describe('CRM #214 B2 commercial workspaces', () => {
         ]) {
             expect(source(path)).toContain('PremiumEmptyState');
         }
-        expect(source('src/components/pipeline/DealCard.tsx')).toContain("event.key === 'Enter'");
+        expect(source('src/components/pipeline/DealCard.tsx')).toContain('Abrir detalhes');
         expect(source('src/components/ui/ViewToggle.tsx')).toContain('aria-pressed');
     });
-    it('preserves keyboard drag on Space and only opens card details with Enter', () => {
+    it('keeps drag keyboard sensor on a separate, accessible button, never around quick actions', () => {
         const card = source('src/components/pipeline/DealCard.tsx');
-        expect(card).toContain("provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement>");
-        expect(card).toContain("event.key === 'Enter'");
-        expect(card).not.toContain("event.key === ' '");
-        expect(card).toContain("snapshot.isDragging");
-        expect(card).toContain("event.target !== event.currentTarget");
+        expect(card).toContain('{...provided.draggableProps}');
+        expect(card).toContain('{...provided.dragHandleProps}');
+        expect(card).toContain('type="button"');
+        expect(card).toContain('Arrastar oportunidade');
+        expect(card).toContain('Abrir detalhes');
+        expect(card).toContain('event.stopPropagation()');
+        expect(card).not.toContain('provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement>');
     });
 
     it('retains the clear-filters action when customer results are empty', () => {

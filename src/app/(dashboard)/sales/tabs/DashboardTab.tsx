@@ -32,10 +32,10 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     AreaChart,
     Area
 } from 'recharts';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { startOfWeek, addWeeks, format, isSameWeek, isAfter, addDays, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -306,7 +306,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         </div>
                         
                         <div className="h-[320px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <AccessibleChart label="Fluxo de caixa por semana" entries={cashFlowData.map((point) => `${point.date}: recebimento ${formatCurrency(point.amount)}, acumulado ${formatCurrency(point.cumulative)}`)}>
+<ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={cashFlowData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
@@ -319,12 +320,12 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         dataKey="date" 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }} 
+                                        tick={false}
                                     />
                                     <YAxis 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }}
+                                        tick={false}
                                         tickFormatter={(val) => `R$ ${val/1000}k`}
                                     />
                                     <Tooltip
@@ -360,6 +361,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
+</AccessibleChart>
                         </div>
                     </div>
                 </div>
@@ -373,14 +375,14 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                             </div>
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Alertas de Risco AI</h3>
                         </div>
-                        <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-[9px] font-black text-rose-500 border border-rose-500/20">
+                        <span className="px-2 py-0.5 rounded-full bg-destructive-subtle text-[9px] font-black text-foreground border border-border">
                             {alerts.length} ATIVOS
                         </span>
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-muted max-h-[400px]">
                         {isLoadingAlerts ? (
-                            <div className="flex flex-col items-center justify-center h-full space-y-2 opacity-50 py-12">
+                            <div className="flex flex-col items-center justify-center h-full space-y-2 py-12">
                                 <Loader2 className="w-6 h-6 animate-spin" />
                                 <span className="text-[10px] font-bold uppercase tracking-widest">Analisando Pipeline...</span>
                             </div>
@@ -396,7 +398,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 <button
                                     key={alert.id}
                                     onClick={() => handleDeepAnalysis(alert)}
-                                    className="w-full text-left group p-3 rounded-xl border border-border bg-card/50 hover:border-primary/50 transition-all hover:bg-card relative overflow-hidden"
+                                    className="w-full text-left group p-3 rounded-xl border border-border bg-card hover:border-primary/50 transition-all hover:bg-card relative overflow-hidden"
                                 >
                                     <div className="flex items-start gap-3">
                                         <div className={`mt-1 h-2 w-2 rounded-full shrink-0 ${
@@ -406,7 +408,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         <div className="flex-1 min-w-0">
                                             <p className="text-[10px] font-black text-foreground truncate uppercase">{alert.customer || 'Cliente Desconhecido'}</p>
                                             <p className="text-[9px] font-bold text-muted-foreground truncate">{alert.title}</p>
-                                            <p className="text-[11px] font-medium text-foreground/80 mt-1 line-clamp-2 leading-tight">{alert.message}</p>
+                                            <p className="text-[11px] font-medium text-foreground mt-1 line-clamp-2 leading-tight">{alert.message}</p>
                                         </div>
                                         <ChevronRight className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
                                     </div>
@@ -432,7 +434,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Distribuição por Status</h3>
                     </div>
                     <div className="h-[240px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <AccessibleChart label="Pedidos por situação" entries={statusData.map((point) => `${point.name}: ${point.value} pedidos`)}>
+<ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={statusData}
@@ -462,15 +465,10 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                         return null;
                                     }}
                                 />
-                                <Legend
-                                    verticalAlign="bottom"
-                                    align="center"
-                                    layout="horizontal"
-                                    iconType="circle"
-                                    formatter={(value) => <span className="text-[9px] font-bold text-muted-foreground uppercase">{value}</span>}
-                                />
+
                             </PieChart>
                         </ResponsiveContainer>
+</AccessibleChart>
                     </div>
                 </div>
 
@@ -483,7 +481,8 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Volume por Faturamento</h3>
                     </div>
                     <div className="h-[240px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <AccessibleChart label="Volume de vendas por faturamento" entries={entityData.map((point) => `${point.name}: ${formatCurrency(point.value)}`)}>
+<ResponsiveContainer width="100%" height="100%">
                             <BarChart data={entityData} layout="vertical" margin={{ left: 40, right: 40 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
                                 <XAxis type="number" hide />
@@ -492,7 +491,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     type="category"
                                     axisLine={false}
                                     tickLine={false}
-                                    tick={{ fill: '#888', fontSize: 10, fontWeight: 'bold' }}
+                                    tick={false}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
@@ -501,7 +500,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                             return (
                                                 <div className="glass-card p-3 border border-border/50 text-xs shadow-xl">
                                                     <p className="font-bold text-foreground">{payload[0].payload.name}</p>
-                                                    <p className="text-emerald-500 mt-1 font-black">{formatCurrency(payload[0].value as number)}</p>
+                                                    <p className="text-foreground mt-1 font-black">{formatCurrency(payload[0].value as number)}</p>
                                                 </div>
                                             );
                                         }
@@ -523,6 +522,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
+</AccessibleChart>
                     </div>
                 </div>
             </div>
@@ -547,11 +547,11 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                                     borderColor: week.intensity > 0.5 ? 'rgba(245, 158, 11, 0.4)' : 'rgba(255,255,255,0.05)'
                                 }}
                             >
-                                <div className="text-[8px] font-black uppercase tracking-tighter text-muted-foreground">{week.label}</div>
-                                <div className="text-[10px] font-black text-foreground mt-1">{formatCurrency(week.amount)}</div>
+                                <div className="text-[8px] font-black uppercase tracking-tighter text-foreground">{week.label}</div>
+                                <div className="text-[10px] font-black text-foreground bg-card inline-block rounded px-1 mt-1">{formatCurrency(week.amount)}</div>
                                 
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-background/95 flex items-center justify-center p-2 rounded-lg transition-opacity pointer-events-none border border-amber-500/30">
-                                    <span className="text-[8px] font-black text-amber-500 leading-tight text-center">
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-background flex items-center justify-center p-2 rounded-lg transition-opacity pointer-events-none border border-amber-500/30">
+                                    <span className="text-[8px] font-black text-foreground leading-tight text-center">
                                         {week.dateRange}
                                     </span>
                                 </div>
@@ -571,7 +571,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                     <div className="space-y-3">
                         <div className="flex justify-between items-center">
                             <span className="text-xs text-muted-foreground">Ciclo Completo</span>
-                            <span className="text-sm font-bold text-emerald-500">{completedOrdersCount} / {orders.length}</span>
+                            <span className="text-sm font-bold text-foreground">{completedOrdersCount} / {orders.length}</span>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                             <div
@@ -581,7 +581,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         </div>
                         <div className="flex justify-between items-center pt-1">
                             <span className="text-xs text-muted-foreground text-[10px] font-bold">VENCIDAS:</span>
-                            <span className="text-xs font-black text-rose-500">{overdueInstallments}</span>
+                            <span className="text-xs font-black text-foreground">{overdueInstallments}</span>
                         </div>
                     </div>
                 </div>
@@ -598,18 +598,18 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                         {pendingInvoicesCount > 0 && (
                             <button
                                 onClick={() => onNavigateToOrders('pedido_gerado')}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-amber-500/5 border border-amber-500/20 hover:bg-amber-500/10 transition-all text-left"
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-warning-subtle border border-border hover:bg-muted transition-all text-left"
                             >
-                                <span className="text-[10px] font-bold text-amber-600">{pendingInvoicesCount} NF PEN.</span>
+                                <span className="text-[10px] font-bold text-foreground">{pendingInvoicesCount} NF PEN.</span>
                                 <ArrowUpRight className="w-3 h-3 text-amber-500" />
                             </button>
                         )}
                         {overdueInstallments > 0 && (
                             <button
                                 onClick={() => onNavigateToOrders()}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 transition-all text-left"
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-destructive-subtle border border-border hover:bg-muted transition-all text-left"
                             >
-                                <span className="text-[10px] font-bold text-rose-600">{overdueInstallments} VENCIDOS</span>
+                                <span className="text-[10px] font-bold text-foreground">{overdueInstallments} VENCIDOS</span>
                                 <ArrowUpRight className="w-3 h-3 text-rose-500" />
                             </button>
                         )}
@@ -690,7 +690,7 @@ export function DashboardTab({ orders, onNavigateToOrders }: DashboardTabProps) 
                             </button>
                             <button
                                 onClick={() => toast.info('Ação registrada no CRM')}
-                                className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                                className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
                             >
                                 Executar Sugestão
                             </button>

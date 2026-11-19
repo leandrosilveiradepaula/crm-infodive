@@ -74,17 +74,17 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                 }`}
                         >
                             <div className={`h-12 w-12 rounded-xl flex items-center justify-center text-sm font-black transition-all ${selectedUserId === (user.user_id || user.id)
-                                ? 'bg-card/20 text-white shadow-lg'
-                                : 'bg-gradient-to-br from-muted to-muted/50 text-muted-foreground'
+                                ? 'bg-primary-foreground text-primary shadow-lg'
+                                : 'bg-muted text-muted-foreground'
                                 }`}>
                                 {user.avatar || user.name?.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className={`text-sm font-bold truncate ${selectedUserId === (user.user_id || user.id) ? 'text-white' : 'text-foreground'
+                                <p className={`text-sm font-bold truncate ${selectedUserId === (user.user_id || user.id) ? 'text-primary-foreground' : 'text-foreground'
                                     }`}>
                                     {user.name}
                                 </p>
-                                <p className={`text-[10px] uppercase tracking-wider font-medium ${selectedUserId === (user.user_id || user.id) ? 'text-blue-200' : 'text-muted-foreground'
+                                <p className={`text-[10px] uppercase tracking-wider font-medium ${selectedUserId === (user.user_id || user.id) ? 'text-primary-foreground' : 'text-muted-foreground'
                                     }`}>
                                     {user.role}
                                 </p>
@@ -103,7 +103,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                             <DollarSign className="h-24 w-24 opacity-20 relative" />
                         </div>
                         <p className="text-lg font-medium">Selecione um usuário</p>
-                        <p className="text-sm text-muted-foreground/60 mt-1">Configure as regras de comissão</p>
+                        <p className="text-sm text-muted-foreground mt-1">Configure as regras de comissão</p>
                     </div>
                 ) : (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -117,7 +117,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                             </div>
                             <button
                                 onClick={() => setIsSimulatorOpen(true)}
-                                className="flex items-center gap-2 h-11 px-6 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10"
+                                className="flex items-center gap-2 h-11 px-6 bg-success-subtle hover:bg-muted text-foreground rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest border border-emerald-500/20 hover:border-emerald-500/40 shadow-lg shadow-emerald-500/10"
                             >
                                 <Calculator className="h-4 w-4" />
                                 Simular Ganhos
@@ -155,6 +155,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                         <div className="relative">
                                                             <input
                                                                 type="number"
+                                                                aria-label={`${product.label}: comissão de cliente base em porcentagem`}
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"
@@ -183,6 +184,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                                         <div className="relative">
                                                             <input
                                                                 type="number"
+                                                                aria-label={`${product.label}: comissão de cliente novo em porcentagem`}
                                                                 min="0"
                                                                 max="100"
                                                                 step="0.5"

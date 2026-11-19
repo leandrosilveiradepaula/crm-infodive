@@ -178,9 +178,9 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             {/* Compact banner */}
             <button
                 onClick={() => setExpanded(!expanded)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg text-sm hover:bg-primary/10 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-lg text-sm hover:bg-muted transition-colors"
             >
-                <span className="flex items-center gap-2 text-primary dark:text-blue-400 font-medium">
+                <span className="flex items-center gap-2 text-foreground font-medium">
                     <Sparkles className="h-3.5 w-3.5" />
                     <span>{suggestions.length} sugestão(ões) de contato</span>
                 </span>
