@@ -194,6 +194,9 @@ async function assertMobileNavigation(page, baseUrl) {
     await sidebar.waitFor({ state: 'visible' });
     const openTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
     if (openTranslate !== '0px') throw new Error('Mobile menu did not open.');
+    await page.getByRole('link', { name: 'Comercial' }).click();
+    await page.getByRole('button', { name: 'Abrir menu' }).click();
+    await sidebar.waitFor({ state: 'visible' });
     await page.getByRole('link', { name: 'Pipeline' }).click();
     await page.waitForURL((url) => url.pathname === '/pipeline', { timeout: 20_000 });
     const closedTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
