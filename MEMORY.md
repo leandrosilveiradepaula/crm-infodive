@@ -19,7 +19,7 @@ The user will not evaluate every micro-change. The executing agent owns discover
 - PUBLIC text contract: docs/ux/CLINIA_VISUAL_CONTRACT.md.
 - Private-vs-public inventory: docs/ux/REFERENCE_MANIFEST.md.
 - Implementation gates and progress: docs/ux/UX_RECOVERY_PLAN.md.
-- Project skill: .agents/skills/crm-clinia-ux/SKILL.md. UI/UX Pro Max is a separate upstream skill; do not misrepresent it as a one-skill ZIP install.
+- Project skill: .agents/skills/crm-clinia-ux/SKILL.md. The official main UI/UX Pro Max skill is vendored as a separate project-local skill under .agents/skills/ui-ux-pro-max from a pinned upstream commit; this is NOT a global ChatGPT Skill installation.
 
 ## Product and boundaries
 Next.js, Tailwind and shared components; original Infodive commercial entities and the existing Service Desk module. Preserve business rules, auth/RBAC, RLS, multitenancy, currencies/exchange rates, proposal/PDF generation, integrators and all live data. QA is isolated; no mutations in production. Keep source in existing repository. No hardcoded customer/clinic names, demo counts, brand substitutions or fake modules.

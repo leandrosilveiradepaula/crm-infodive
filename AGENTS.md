@@ -64,7 +64,7 @@ Differentiate explicitly between:
 For ANY work that changes the CRM's appearance, navigation, interaction, page composition, or visual acceptance:
 
 1. Read MEMORY.md, docs/ux/CLINIA_VISUAL_CONTRACT.md, docs/ux/REFERENCE_MANIFEST.md and docs/ux/UX_RECOVERY_PLAN.md before proposing or editing a UI file.
-2. Invoke the project skill at .agents/skills/crm-clinia-ux/SKILL.md and use the project-local UI/UX Pro Max skill when available. Never claim a skill was executed if its tool/script was not actually run.
+2. Invoke the project skill at .agents/skills/crm-clinia-ux/SKILL.md and use the installed project-local UI/UX Pro Max skill. Never claim a skill was executed if its tool/script was not actually run.
 3. Treat the privately archived user-provided Clinia screenshots as the PRIMARY visual reference, not generic SaaS design suggestions. Borrow interaction and layout principles, NOT the Clinia brand, code, text, imagery or medical-specific features.
 4. Preserve Infodive CRM's B2B product domain, data, permissions, server actions, financial logic, integrations and tenant isolation. Do not turn the CRM into a clinical product. Do not invent non-existent WhatsApp, agent, workflow or scheduling functionality.
 5. Require a documented information architecture, a shared screen-family contract, current-vs-target comparison and visual evidence from authenticated, synthetic QA before accepting a redesigned module. Axe, TypeScript, builds, responsive checks and E2E smoke are necessary, NEVER sufficient for a UX/UI completion claim.

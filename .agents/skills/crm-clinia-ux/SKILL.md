@@ -12,7 +12,7 @@ This skill is a project-local orchestration skill for the ORIGINAL Infodive CRM.
 2. Read MEMORY.md, docs/ux/CLINIA_VISUAL_CONTRACT.md, docs/ux/REFERENCE_MANIFEST.md, docs/ux/BASELINE_GAPS.md and docs/ux/UX_RECOVERY_PLAN.md.
 3. Access the 19 actual Clinia screenshots from the user's private ChatGPT Library folder /CRM/UX Clinia - Referencias 2026-11-19, or the original conversation attachments. VISUALLY inspect the relevant images; do not substitute filenames or written summaries for image inspection. Never publish them into this public repo.
 4. If this executor has no visual access, say exactly which sources are inaccessible and do not mark visual parity as PASS. Continue only with work that can be legitimately proven without reference images.
-5. Use the independently installed project-local UI/UX Pro Max source skill to query the relevant UX/domain and nextjs/react stack. Prefer scripts/search.py from .agents/skills/ui-ux-pro-max if installed. If missing, use the original private archive only when actually accessible; never claim execution of absent tools.
+5. Execute the installed UI/UX Pro Max source skill using python3 .agents/skills/ui-ux-pro-max/scripts/search.py to query the relevant UX/domain and nextjs/react stack. The path is mandatory. If absent or broken, STOP the skill-dependent visual recommendation, diagnose the installation and never claim execution of absent tools.
 6. Interpret general style recommendations against the photos and Infodive's existing brand. A generic landing-page pattern is NOT a CRM layout specification.
 
 ## For each route family
