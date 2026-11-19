@@ -14,3 +14,5 @@ Validation command from the root of crm-infodive:
   python3 .agents/skills/ui-ux-pro-max/scripts/search.py "dashboard navigation" --stack nextjs -n 4
 
 Before each UI change also read the user-specific mandatory contract at docs/ux/CLINIA_VISUAL_CONTRACT.md and call the CRM-specific orchestration skill at .agents/skills/crm-clinia-ux/SKILL.md. Do not substitute generic generator output for the screenshot-based requirements. Never place Clinia source screenshots in the public repository.
+
+Local CI-only change: scripts/design_system.py had 46 upstream lines with trailing spaces removed to pass git diff --check; its execution logic is unchanged. Exactly 46 of the 48 original runtime files remain blob-identical; SKILL.md has project-relative path edits and design_system.py has this whitespace normalization.
