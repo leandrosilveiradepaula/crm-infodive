@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   nextjs-local-e2e:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ux-ui/crm214-b4-integrated-qa'
+    if: github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'ux-ui/crm214-b4-integrated-qa' || startsWith(github.head_ref, 'codex/issue-214-ux-recovery-'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
