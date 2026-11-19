@@ -296,7 +296,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
                             aria-label="Selecionar ano"
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
+                            className="min-h-9 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-semibold text-foreground outline-none"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -308,7 +308,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <div className="flex flex-wrap gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedQuarters([])}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`min-h-9 whitespace-nowrap rounded-[var(--radius-control)] px-3 py-1 text-xs font-semibold transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                         >
                             Tempo Todo
                         </button>
@@ -331,9 +331,9 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                                 : [...prev, val].sort()
                                         );
                                     }}
-                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
-                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                    className={`relative min-h-9 whitespace-nowrap rounded-[var(--radius-control)] px-3 py-1 text-xs font-semibold transition-colors ${isSelected
+                                        ? 'bg-primary text-primary-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                         }`}
                                 >
                                     {tab.label}

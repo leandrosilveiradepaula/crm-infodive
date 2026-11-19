@@ -152,12 +152,12 @@ export function ReportsClientPage() {
 
                     {/* Status Pill */}
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Status:</span>
+                        <span className="shrink-0 text-xs font-medium text-muted-foreground">Status:</span>
                         <select
                             aria-label="Filtrar relatórios por status"
                         value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
+                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent text-xs font-semibold text-foreground outline-none"
                         >
                             <option value="all">Todos</option>
                             <option value="qualification">Qualificação</option>
@@ -170,12 +170,12 @@ export function ReportsClientPage() {
 
                     {/* Faturamento Pill */}
                     <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest shrink-0">Faturamento:</span>
+                        <span className="shrink-0 text-xs font-medium text-muted-foreground">Faturamento:</span>
                         <select
                             aria-label="Filtrar relatórios por faturamento"
                         value={billingFilter}
                             onChange={(e) => setBillingFilter(e.target.value)}
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none min-w-[80px]"
+                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent text-xs font-semibold text-foreground outline-none"
                         >
                             <option value="all">Todos</option>
                             {allBillingTypes.map(type => (
@@ -193,7 +193,7 @@ export function ReportsClientPage() {
                             aria-label="Filtrar relatórios por vendedor"
                         value={sellerFilter}
                             onChange={(e) => setSellerFilter(e.target.value)}
-                            className="h-11 rounded-full bg-muted/30 border-border text-[10px] uppercase font-black tracking-widest"
+                            className="h-11 rounded-[var(--radius-control)] border-border bg-muted/30 text-xs font-semibold"
                         >
                             <option value="all">Vendedor: Todos</option>
                             {allSellers.map(seller => (
@@ -207,7 +207,7 @@ export function ReportsClientPage() {
                         className="h-11 px-4 bg-success-subtle hover:bg-muted text-foreground border border-border rounded-full flex items-center gap-2 transition-all group shrink-0"
                     >
                         <Download className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">CSV</span>
+                        <span className="text-xs font-semibold">CSV</span>
                     </button>
                 </div>
             </FilterBar>
@@ -256,7 +256,7 @@ export function ReportsClientPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Funnel */}
                 <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-primary/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                         <Filter className="h-4 w-4 text-primary" />
                         Funil de Conversão
                     </h3>
@@ -270,7 +270,7 @@ export function ReportsClientPage() {
 
                 {/* Sales Performance */}
                 <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-emerald-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                         <Users className="h-4 w-4 text-emerald-400" />
                         Performance por Vendedor
                     </h3>
@@ -284,7 +284,7 @@ export function ReportsClientPage() {
 
                 {/* Revenue Forecast */}
                 <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-teal-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                         <TrendingUp className="h-4 w-4 text-teal-400" />
                         Previsão de Receita (3 Meses)
                     </h3>
@@ -293,7 +293,7 @@ export function ReportsClientPage() {
 
                 {/* Loss Reasons */}
                 <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-red-500/20 transition-all">
-                    <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                         <Target className="h-4 w-4 text-red-400" />
                         Motivos de Perda
                     </h3>
@@ -313,11 +313,11 @@ export function ReportsClientPage() {
             <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 mb-1">
+                        <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
                             <Target className="h-4 w-4 text-primary" />
                             Detalhamento das Oportunidades
                         </h3>
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
+                        <p className="text-xs text-muted-foreground">
                             {mappedDeals.length} resultados encontrados para os filtros atuais
                         </p>
                     </div>
@@ -327,11 +327,11 @@ export function ReportsClientPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-border">
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Oportunidade</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Vendedor</th>
-                                <th className="pb-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="pb-4 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor</th>
+                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Oportunidade</th>
+                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Empresa</th>
+                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Vendedor</th>
+                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Status</th>
+                                <th className="pb-4 text-right text-xs font-semibold text-muted-foreground">Valor</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -339,7 +339,7 @@ export function ReportsClientPage() {
                                 <tr key={deal.id} className="group hover:bg-muted/30 transition-colors">
                                     <td className="py-2.5">
                                         <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
+                                        <p className="text-xs text-muted-foreground">
                                             {new Date(deal.created_at).toLocaleDateString()}
                                         </p>
                                     </td>
@@ -355,7 +355,7 @@ export function ReportsClientPage() {
                                         </div>
                                     </td>
                                     <td className="py-4">
-                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                        <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${
                                             deal.stage === 'won' ? 'bg-success-subtle text-foreground border-border' :
                                             deal.stage === 'lost' ? 'bg-destructive-subtle text-foreground border-border' :
                                             'bg-surface-subtle text-foreground border-border'
@@ -368,7 +368,7 @@ export function ReportsClientPage() {
                                     </td>
                                     <td className="py-4 text-right">
                                         <p className="font-bold text-foreground">{formatCurrency(deal.value)}</p>
-                                        <p className="text-[10px] text-muted-foreground font-bold">{deal.probability}% Prob.</p>
+                                        <p className="text-xs text-muted-foreground">{deal.probability}% de probabilidade</p>
                                     </td>
                                 </tr>
                             ))}

@@ -263,11 +263,11 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="bg-muted/50 text-muted-foreground text-left">
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Pedido / Deal</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Responsável NF</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Valor</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Status Atual</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Próxima Etapa</th>
+                            <th className="px-5 py-3 text-xs font-semibold">Pedido / negócio</th>
+                            <th className="px-5 py-3 text-xs font-semibold">Responsável NF</th>
+                            <th className="px-5 py-3 text-xs font-semibold">Valor</th>
+                            <th className="px-5 py-3 text-xs font-semibold">Status atual</th>
+                            <th className="px-5 py-3 text-xs font-semibold">Próxima etapa</th>
                             <th className="px-5 py-3"></th>
                         </tr>
                     </thead>
@@ -305,7 +305,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     )}
                                                     {order.deal?.title || 'Pedido S/ N'}
                                                 </span>
-                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
+                                                <span className="ml-5 mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
                                                     <User className="w-3 h-3" />
                                                     {order.deal?.customer?.name || 'Cliente final'}
                                                 </span>
@@ -315,7 +315,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             <Badge 
                                                 variant="outline" 
                                                 onClick={(e) => e.stopPropagation()}
-                                                className={`text-[9px] uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
+                                                className={`text-xs font-medium ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
                                             >
                                                 {order.billing_entity === 'infodive' ? 'Infodive' : 'Distribuidor'}
                                             </Badge>
@@ -324,7 +324,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             {formatCurrency(order.total_value)}
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white/5 shadow-sm ${config.color}`}>
+                                            <div className={`inline-flex items-center gap-1.5 rounded-[var(--radius-control)] border border-white/5 px-2 py-0.5 text-xs font-semibold shadow-sm ${config.color}`}>
                                                 <config.icon className="w-3 h-3" />
                                                 {config.label}
                                             </div>

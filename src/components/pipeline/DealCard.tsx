@@ -75,7 +75,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                         {isStagnant && (
                             <div className="absolute -top-2 -right-2 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-destructive-subtle border border-destructive/40 shadow-lg z-20 animate-pulse">
                                 <div className="h-1 w-1 rounded-full bg-card shadow-sm" />
-                                <span className="text-[8px] font-black text-foreground uppercase tracking-widest">Estagnado</span>
+                                <span className="text-[11px] font-semibold text-foreground">Estagnado</span>
                             </div>
                         )}
 
@@ -109,12 +109,12 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                             <div className="space-y-2">
                                 <div className="flex flex-wrap gap-1">
                                     {(deal.tags || []).slice(0, 3).map((tag: string) => (
-                                        <span key={tag} className="px-1.5 py-0.5 rounded-md bg-muted text-[8px] font-black text-muted-foreground border border-border/50 uppercase tracking-tighter">
+                                        <span key={tag} className="rounded-md border border-border/50 bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                                             {tag}
                                         </span>
                                     ))}
                                     {(deal.tags || []).length > 3 && (
-                                        <span className="text-[8px] font-black text-muted-foreground self-center pl-1">+{(deal.tags || []).length - 3}</span>
+                                        <span className="self-center pl-1 text-[11px] font-medium text-muted-foreground">+{(deal.tags || []).length - 3}</span>
                                     )}
                                 </div>
 
@@ -122,7 +122,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                     <h4 className="font-bold text-foreground text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
                                         {deal.title}
                                     </h4>
-                                    <div className="mt-1 flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground truncate">
+                                    <div className="mt-1 flex items-center gap-1.5 truncate text-xs font-medium text-muted-foreground">
                                         <ShoppingBag className="h-3 w-3 shrink-0" />
                                         <span>{deal.company || 'Cliente Desconhecido'}</span>
                                     </div>
@@ -132,7 +132,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                 {deal.next_step && (
                                     <div className="px-2 py-1.5 bg-surface-subtle rounded-lg border border-border flex items-center gap-1.5">
                                         <div className="h-1 w-1 rounded-full bg-primary shrink-0 animate-pulse" />
-                                        <p className="text-[9px] text-primary font-bold leading-tight uppercase tracking-tight flex-1 truncate">
+                                        <p className="flex-1 truncate text-xs font-medium leading-tight text-primary">
                                             {deal.next_step}
                                         </p>
                                     </div>
@@ -158,8 +158,8 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                 {/* Probability Progress - Sleek */}
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center px-0.5">
-                                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Probabilidade</span>
-                                        <span className={`text-[9px] font-black ${deal.probability > 70 ? 'text-success' : 'text-primary'}`}>
+                                        <span className="text-[11px] font-medium text-muted-foreground">Probabilidade</span>
+                                        <span className={`text-xs font-semibold ${deal.probability > 70 ? 'text-success' : 'text-primary'}`}>
                                             {deal.probability}%
                                         </span>
                                     </div>
@@ -177,11 +177,11 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, index, hasProposal, on
                                     {daysInStage > 0 && (
                                         <div className="flex items-center gap-1">
                                             <Clock className="h-2.5 w-2.5 text-muted-foreground" />
-                                            <span className="text-[9px] font-bold text-muted-foreground">{daysInStage}d na etapa</span>
+                                            <span className="text-xs font-medium text-muted-foreground">{daysInStage}d na etapa</span>
                                         </div>
                                     )}
                                     {deal.expected_close_date && (
-                                        <div className="text-[9px] text-muted-foreground font-bold flex items-center gap-1">
+                                        <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
                                             <Calendar className="h-2.5 w-2.5" />
                                             <span>{new Date(deal.expected_close_date).toLocaleDateString('pt-BR')}</span>
                                         </div>

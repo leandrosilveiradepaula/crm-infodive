@@ -10,6 +10,16 @@ G3 — Operational workspaces. Activities, contracts, sales/products/proposals, 
 G4 — Management. Reports/analytics, goals/commissions, integrations/settings, real loading/error/empty states; contextual navigation and consistent analytics density. Evidence: real dashboards with permitted synthetic data.
 G5 — End-to-end comparative visual and functional acceptance. QA on SAME SHA for desktop/mobile and light/dark, side-by-side analysis against source screenshots, accessibility, permissions, functional regression, diff ledger with zero P0/P1 and documented P2. Publish a visual result matrix; only then request the human merge. Validate post-merge deployed SHA separately.
 
+### Current G1 evidence (2026-11-19)
+
+The first G1 candidate is being developed on `codex/issue-214-ux-recovery-g1-shell`. It replaces the end-user's flat module list with an icon rail and route-derived contextual area navigation; the internal Design System route is intentionally absent from that navigation while its direct developer route remains unchanged. Focused source-contract tests and targeted lint passed locally. This is **not visual acceptance**: no authenticated QA screenshot, deployment ID, same-SHA functional run, or manual comparison of the candidate has yet been recorded.
+
+The same candidate also begins the G2/G4 readability remediation: Pipeline period controls and deal-card metadata no longer rely on 8–10px all-caps text, and the visible report filters plus key organization settings labels use the shared compact-but-legible text scale. No commercial calculation, filter semantics, server action, credential, or settings persistence contract was changed. The remaining route families still require actual authenticated visual inspection before their respective acceptance claims.
+
+The G3 pass now applies the same treatment to the visible metadata/status surfaces of Activities, Contracts, Automations and Integrations. These edits are limited to typography, spacing, semantic color tokens and border radii. They are not evidence of completion for those modules: default, empty, modal and narrow-viewport real QA captures remain required.
+
+The visible Orders, Installments and Commissions tables now share that table-header and status treatment. Financial amounts, calculation logic, status transitions and actions were deliberately left unchanged. Real QA must still exercise their row expansion, upload/modal and narrow-viewport states.
+
 ## Definition of done per route family
 - Existing product capability and role/tenant scope correctly preserved; no new hardcodes, mocks, fake metrics, fake sends or silent actions.
 - Screen matches the applicable observed patterns in the Clinia reference contract (structure, navigation, information hierarchy, filters, table/board, detail, states) without copying protected identity.

@@ -56,6 +56,14 @@ describe('CRM #214 B2 commercial workspaces', () => {
         expect(card).not.toContain('provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement>');
     });
 
+    it('keeps Pipeline controls and deal-card metadata legible at the shared compact density', () => {
+        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
+        const card = source('src/components/pipeline/DealCard.tsx');
+        expect(pipeline).not.toContain('text-[9px]');
+        expect(card).not.toContain('text-[8px]');
+        expect(card).toContain('text-[11px] font-medium text-muted-foreground');
+    });
+
     it('retains the clear-filters action when customer results are empty', () => {
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
         expect(customers).toContain("'Limpar filtros'");

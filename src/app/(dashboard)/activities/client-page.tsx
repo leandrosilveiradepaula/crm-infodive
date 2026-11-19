@@ -359,7 +359,7 @@ export function ActivitiesClientPage() {
 
                         return (
                             <div key={group} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h3 className={`text-[11px] font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${groupColors[group]}`}>
+                                <h3 className={`mb-4 flex items-center gap-2 text-sm font-semibold ${groupColors[group]}`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     {groupTitles[group]}
                                     <span className="ml-1 text-foreground">({items.length})</span>
@@ -430,7 +430,7 @@ export function ActivitiesClientPage() {
 
                                                                 <div className="flex flex-wrap items-center gap-3">
                                                                     {/* Type Badge */}
-                                                                    <span className={`px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${typeColors[activity.type]}`}>
+                                                                    <span className={`flex items-center gap-1.5 rounded-[var(--radius-control)] border px-2.5 py-1 text-xs font-semibold ${typeColors[activity.type]}`}>
                                                                         <TypeIcon className="h-3 w-3" />
                                                                         {activity.type === 'meeting' && 'Reunião'}
                                                                         {activity.type === 'call' && 'Ligação'}
@@ -440,7 +440,7 @@ export function ActivitiesClientPage() {
                                                                     </span>
 
                                                                     {/* Priority */}
-                                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${priorityColors[activity.priority]}`}>
+                                                                    <span className={`rounded-[var(--radius-control)] px-2.5 py-1 text-xs font-semibold ${priorityColors[activity.priority]}`}>
                                                                         {activity.priority === 'urgent' && '🔥 Urgente'}
                                                                         {activity.priority === 'high' && 'Alta'}
                                                                         {activity.priority === 'medium' && 'Média'}
