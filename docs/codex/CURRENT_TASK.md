@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-19: RESTORE UX SOURCE OF TRUTH (documentation and skills ONLY)
+
+**Authorization:** the owner explicitly requested permanent preservation of every UI/UX obligation, AGENTS.md and MEMORY.md instructions, the Clinia visual references, and the UI/UX skill, BEFORE restarting the redesign. This source-of-truth stage is not an authorization to change application screens, database, environments, or production.
+
+**Background:** PRs #215–#218 are merged in main (baseline c04754c9fc9a2800f8cfb34a8db75ac92dd7ec78). B4 authenticated QA #87 passed technically. After reviewing the production interface, the owner explicitly rejected the visual result: modules, navigation, visual patterns and fidelity to the provided Clinia reference remain inconsistent. The claim "UX/UI modernization complete" is withdrawn; technical QA PASS does not equal UX acceptance.
+
+**Permitted for THIS stage:** AGENTS.md, MEMORY.md, this CURRENT_TASK.md, docs/ux/**, a clear notice in docs/ui/B4_INTEGRATED_QA.md, and .agents/skills/** needed for reusable UX review. Record visual requirements, inventories, execution plan, acceptance gates and provenance. Publish one cohesive branch/PR; keep merge exclusively human.
+
+**Prohibited for THIS stage:** changing UI components, app layouts, product flows, customer data, migrations, RLS/auth, environment variables, production, integrations, paid calls, Factory or unrelated repos. Do not copy user-supplied Clinia screenshots into this public repository. Original references remain in private ChatGPT Library.
+
+**Required durable outcome:** root governance points to one authoritative visual contract and reference manifest; a persistent memory of state and failure mode; reusable local agent skill; phased implementation with evidence-based acceptance and honest status. The active task must be replaced with a scoped redesign execution authorization before application refactoring begins.
+
+---
+
 # CURRENT_TASK — CRM #214 B4: QA integrado e preparação segura da liberação visual
 
 **Autorização:** programa de modernização visual do CRM Infodive acordado pelo proprietário em 17/11/2026 e rastreado em [issue #214](https://github.com/leandrosilveiradepaula/crm-infodive/issues/214). B4 é o fechamento de QA da modernização, **não** uma alteração de negócio nem uma autorização de release. Branch exclusiva `ux-ui/crm214-b4-integrated-qa`, criada no commit B3 revisado e com CI verde `4158fd3be3190464359eae5c9ac02f491fa9dc4d`. PRs cumulativas #215 (B0+B1), #216 (B2), #217 (B3) ainda dependentes de merge humano na ordem correta. PR #213 da Factory é outra trilha e continua intocada.

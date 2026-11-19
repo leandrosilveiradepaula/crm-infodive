@@ -1,3 +1,5 @@
+> **UX acceptance revoked on 2026-11-19.** The integrated authenticated QA passed its technical/a11y checks and PR #218 was merged, but the owner subsequently reviewed the production CRM and rejected the visual and navigation consistency. This report is HISTORICAL technical evidence, not proof of Clinia-reference fidelity, design coherence or product UX acceptance. See docs/ux/CLINIA_VISUAL_CONTRACT.md and docs/ux/UX_RECOVERY_PLAN.md. Do not reuse the word "complete" for the UX redesign solely from this QA run.
+
 # CRM #214 — B4: QA integrado
 
 ## Estado da evidência

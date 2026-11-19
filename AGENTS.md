@@ -57,3 +57,21 @@ Differentiate explicitly between:
 `AGENTS.md` is permanent governance. Do not place temporary task details, one-off implementation instructions, benchmark-specific values, temporary branch names, or short-lived acceptance criteria here.
 
 `docs/codex/CURRENT_TASK.md` is the authoritative description of the current task and may change from task to task.
+
+
+## Mandatory CRM UX/UI recovery contract (19 November 2026)
+
+For ANY work that changes the CRM's appearance, navigation, interaction, page composition, or visual acceptance:
+
+1. Read MEMORY.md, docs/ux/CLINIA_VISUAL_CONTRACT.md, docs/ux/REFERENCE_MANIFEST.md and docs/ux/UX_RECOVERY_PLAN.md before proposing or editing a UI file.
+2. Invoke the project skill at .agents/skills/crm-clinia-ux/SKILL.md and use the project-local UI/UX Pro Max skill when available. Never claim a skill was executed if its tool/script was not actually run.
+3. Treat the privately archived user-provided Clinia screenshots as the PRIMARY visual reference, not generic SaaS design suggestions. Borrow interaction and layout principles, NOT the Clinia brand, code, text, imagery or medical-specific features.
+4. Preserve Infodive CRM's B2B product domain, data, permissions, server actions, financial logic, integrations and tenant isolation. Do not turn the CRM into a clinical product. Do not invent non-existent WhatsApp, agent, workflow or scheduling functionality.
+5. Require a documented information architecture, a shared screen-family contract, current-vs-target comparison and visual evidence from authenticated, synthetic QA before accepting a redesigned module. Axe, TypeScript, builds, responsive checks and E2E smoke are necessary, NEVER sufficient for a UX/UI completion claim.
+6. Capture real application screenshots for each critical screen family on the SAME tested SHA and authenticated QA deployment, across light/dark and desktop/mobile, with references and annotations of material divergences. An image not actually inspected is NOT accepted as proof. Never capture or publish private production customer data.
+7. The owner has rejected the former B1–B4 result as visual acceptance despite the technical QA PASS and merge of PRs #215–#218. Treat those PRs as a technical baseline, NOT the approved visual target. Do not mark issue #214 done for UX until this contract is satisfied.
+8. Work in cohesive end-to-end implementation blocks, not cosmetic micro-PRs or repeated prompts for "prossiga". Human merge is the only default handoff gate. Never merge to main or deploy to production automatically.
+9. Maintain docs/ux/UX_RECOVERY_PLAN.md and MEMORY.md with observed proof, actual SHA, routes covered, and unresolved discrepancies. Never advance status solely on CI green; require functional, visual and product acceptance separately.
+10. The source ZIP (UI/UX Pro Max) and 19 reference screenshots are retained in private ChatGPT Library at /CRM/UX Clinia - Referencias 2026-11-19. This public GitHub repository must not contain copies of the third-party screenshots, personal CRM data, or secrets. A fresh executor without Library access must explicitly state that reference images are not directly available and cannot assert visual equivalence.
+
+Historical CURRENT_TASK sections do not override the current topmost authorized task. Record a new scoped CURRENT_TASK section before editing the application, preserving old tasks as history.

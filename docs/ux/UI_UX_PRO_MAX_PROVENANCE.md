@@ -1,0 +1,17 @@
+# UI/UX Pro Max intake, constraints and actual usage
+
+Original private source: /CRM/UX Clinia - Referencias 2026-11-19/ui-ux-pro-max-skill-main.zip
+Version declared by skill.json: 2.15.0; upstream project: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill; license: MIT. SHA-256 of uploaded ZIP: a80226887c19565bcbc79ccf5748b066be33fb46b3d244d41ffe650f192976a4.
+
+The archive is a MULTI-SKILL SOURCE TREE with 13 SKILL.md entrypoints, including CLI-mirrored entries. It is not valid to report "the ZIP was installed as one ChatGPT skill". It must be split or a specific skill selected for an individual import; ChatGPT plugin/library registration is distinct from a repository-local agent skill.
+
+Project policy: project-local .agents/skills/crm-clinia-ux/SKILL.md is the specific CRM acceptance orchestration skill. If the official UI/UX Pro Max core skill is also vendored under .agents/skills/ui-ux-pro-max, run its search.py from its actual path. Otherwise locate the original ZIP in the private Library and use the unmodified source skill (if this executor has access); never fabricate searches or say a missing local skill was used.
+
+Representative commands actually run against the user-supplied archive during source-of-truth preparation:
+- python3 <source>/scripts/search.py "B2B sales CRM operations dashboard dense clean neutral" --design-system --variance 3 --motion 2 --density 8 -p "Infodive CRM"
+- python3 <source>/scripts/search.py "navigation overloaded sidebar progressive disclosure" --domain ux -n 4
+- python3 <source>/scripts/search.py "enterprise CRM Next.js Tailwind dashboard layout" --stack nextjs -n 4
+
+Observed recommendation: Minimalism/Swiss-style layout, enterprise density 8/10, subtle motion 2/10, clear focus/contrast and coherent grid. The generic search returned a marketing page pattern ("Product Demo + Features") unsuitable for a CRM OPERATIONS application; explicitly discard it. Its suggested palette is not an override of the user's Clinia screenshots or existing Infodive brand.
+
+DO NOT run untrusted install scripts from an uploaded ZIP in CI, Vercel or production. Only install reviewed/pinned code in a development environment after validating its provenance. Upstream library information is supplementary; every screen must pass the direct screenshot reference contract and real QA.
