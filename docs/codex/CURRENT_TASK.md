@@ -10,6 +10,21 @@
 
 **Required durable outcome:** root governance points to one authoritative visual contract and reference manifest; a persistent memory of state and failure mode; reusable local agent skill; phased implementation with evidence-based acceptance and honest status. The active task must be replaced with a scoped redesign execution authorization before application refactoring begins.
 
+
+## NEXT TASK — automatically authorized AFTER human merge of PR #219
+
+The owner has already requested that the agent perform the entire UI/UX redesign, not hand back a plan or request repeated "prossiga" approvals. The present task authorizes source-of-truth preservation on PR #219 only. Once PR #219 is merged by a human and its instructions exist on main, this CONDITIONAL task becomes active without requiring a new human prompt.
+
+**Goal:** finish G0–G5 described in docs/ux/UX_RECOVERY_PLAN.md for the ORIGINAL Infodive CRM: compare the saved Clinia screenshots, close the navigation/IA gaps, consolidate shell, commercial workspaces, operational workspaces, analytics/admin and certify actual visual and functional QA. The screenshots define observed interaction patterns, not clinical business features. Use both .agents/skills/crm-clinia-ux and .agents/skills/ui-ux-pro-max. The executable scripts and full data tables of UI/UX Pro Max are included.
+
+**Allowed application code after activation:** scoped UI presentation files in src/app/(dashboard)/**, src/components/**, src/app/globals.css, relevant UI tests under test/**, authenticated E2E automation/workflows where necessary, and docs/ux/** to record evidence. Keep each PR a substantial end-to-end route-family block with real before/after QA; never open cosmetic PRs just to advance a counter. Preserve login, public proposal and PDF layouts unless specifically needed and reviewed.
+
+**Hard boundaries:** no direct changes to Supabase/migrations/RLS, server actions, API logic, authorization, customer data, currencies, exchange rates, existing CRM product workflows, external integration, secrets, Factory or production. No blind npm install, paid cloud action or preview outside approved quota. If product-wide consistency requires changing business logic, stop ONLY that affected subtask and document a real separate authorization gate; continue safe UI work autonomously.
+
+**Required acceptance before asking a human to merge:** complete route-family functional regression; real authenticated synthetic QA on same commit SHA; comparative visual inspection against original Clinia references, desktop/mobile/light/dark, accessible keyboard and WCAG AA; no P0/P1 discrepancy; documented source-current-target differences. Do not declare release accepted on CI green alone.
+
+**Human gate:** merging each substantial PR into main remains exclusively human. No auto-merge, forced history, production deployment/migration or destructive database change. The agent must keep working autonomously until a real external gate, not stop after each small edit.
+
 ---
 
 # CURRENT_TASK — CRM #214 B4: QA integrado e preparação segura da liberação visual

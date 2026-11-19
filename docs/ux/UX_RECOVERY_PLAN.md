@@ -35,5 +35,5 @@ P0: security/data leak, broken core action, inaccessible essential function; P1:
 - Do NOT ask owner to review micro-steps; diagnose and repair autonomously in cohesive implementation blocks.
 - Only ask for genuine human gates (merge, paid resource, destructive production changes).
 - No early certification; the agent must visit and visually inspect the actual UI, not only a static isolated component preview.
-- Current phase is SOURCE-OF-TRUTH preparation only. Before editing application code, change the topmost docs/codex/CURRENT_TASK.md to a scoped, explicit implementation authorization while preserving historical sections.
+- Current phase is SOURCE-OF-TRUTH preparation only until human merge of PR #219. The next application implementation G0–G5 has a CONDITIONAL explicit authorization at the top of docs/codex/CURRENT_TASK.md; it activates after that human merge without a repeated owner prompt.
 - Do not use product marketing screenshots to certify functionality that Infodive does not possess.
