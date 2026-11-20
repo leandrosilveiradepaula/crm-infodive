@@ -10,9 +10,11 @@ G3 — Operational workspaces. Activities, contracts, sales/products/proposals, 
 G4 — Management. Reports/analytics, goals/commissions, integrations/settings, real loading/error/empty states; contextual navigation and consistent analytics density. Evidence: real dashboards with permitted synthetic data.
 G5 — End-to-end comparative visual and functional acceptance. QA on SAME SHA for desktop/mobile and light/dark, side-by-side analysis against source screenshots, accessibility, permissions, functional regression, diff ledger with zero P0/P1 and documented P2. Publish a visual result matrix; only then request the human merge. Validate post-merge deployed SHA separately.
 
-### Current G1 evidence (2026-11-19)
+### Current G1 evidence (2026-11-20)
 
-The first G1 candidate is being developed on `codex/issue-214-ux-recovery-g1-shell`. It replaces the end-user's flat module list with an icon rail and route-derived contextual area navigation; the internal Design System route is intentionally absent from that navigation while its direct developer route remains unchanged. Focused source-contract tests and targeted lint passed locally. This is **not visual acceptance**: no authenticated QA screenshot, deployment ID, same-SHA functional run, or manual comparison of the candidate has yet been recorded.
+The first G1 candidate is being developed on `codex/issue-214-ux-recovery-g1-shell`. It replaces the end-user's flat module list with an icon rail and route-derived contextual area navigation; the internal Design System route is intentionally absent from that navigation while its direct developer route remains unchanged. Focused source-contract tests and targeted lint passed locally.
+
+Candidate `62c39d7dd5c32846176328701d7bceebeaa2a419` has two recorded GitHub Actions successes: validation run `44762570319` and isolated authenticated-local QA run `44762570326`. The latter produced 168 sanitized PNG captures and 172 checks across 42 authorized route/profile combinations (artifact `14642333538`). The evidence is explicitly **local-isolated**: its `results.json` has no Preview SHA or deployment ID, which is expected and must not be reported as deployed verification. Captures were produced; they are not a blanket visual PASS. Manual inspection recorded the shell/nav, Pipeline, Inbox, and Reports representatives. That inspection found the Pipeline KPI block too tall (P1, repaired in the next candidate), Inbox legitimately limited to its Office 365 connection state in this fixture, and Reports needing explicit no-data states instead of empty charts (repaired in the next candidate).
 
 The same candidate also begins the G2/G4 readability remediation: Pipeline period controls and deal-card metadata no longer rely on 8–10px all-caps text, and the visible report filters plus key organization settings labels use the shared compact-but-legible text scale. No commercial calculation, filter semantics, server action, credential, or settings persistence contract was changed. The remaining route families still require actual authenticated visual inspection before their respective acceptance claims.
 
@@ -35,13 +37,13 @@ P0: security/data leak, broken core action, inaccessible essential function; P1:
 ## Evidence matrix to maintain (fill with observed results, never guesses)
 | Family | Source image group | Baseline QA | Implemented SHA | Functional QA | Visual comparison | Final acceptance |
 |---|---|---|---|---|---|---|
-| Shell/nav | all operational app captures | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| CRM board/list | CRM images | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| Opportunity detail | drawer/modal images | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| Inbox/chat | inbox/chat images | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| Analytics | stats images | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| Automations/agents | flow/agent images | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
-| Other modules | family-consistency contract | NOT YET CAPTURED | pending | pending | pending | NOT ACCEPTED |
+| Shell/nav | all operational app captures | 168 local-isolated captures produced | `62c39d7` | Run `44762570326` passed | Representative manually inspected; comparison incomplete | NOT ACCEPTED |
+| CRM board/list | CRM images | Pipeline desktop/mobile captured locally | `62c39d7` | Run `44762570326` passed | KPI block found P1 too tall; follow-up candidate required | NOT ACCEPTED |
+| Opportunity detail | drawer/modal images | captured locally | `62c39d7` | Run `44762570326` passed | Not manually compared in this candidate | NOT ACCEPTED |
+| Inbox/chat | inbox/chat images | Office 365 connection state captured locally | `62c39d7` | Run `44762570326` passed | Fixture has no connected mailbox; no chat fabricated | NOT ACCEPTED |
+| Analytics | stats images | Reports desktop/mobile captured locally | `62c39d7` | Run `44762570326` passed | Zero-data visual defect identified; follow-up candidate required | NOT ACCEPTED |
+| Automations/agents | flow/agent images | captured locally | `62c39d7` | Run `44762570326` passed | Not manually compared in this candidate | NOT ACCEPTED |
+| Other modules | family-consistency contract | captured locally | `62c39d7` | Run `44762570326` passed | Not manually compared in this candidate | NOT ACCEPTED |
 
 ## Execution discipline
 - Do NOT ask owner to review micro-steps; diagnose and repair autonomously in cohesive implementation blocks.

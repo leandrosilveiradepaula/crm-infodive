@@ -3,10 +3,19 @@ import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { Package } from 'lucide-react';
 import { formatCurrency } from '@/utils/format';
 
+function EmptyChartState({ message = 'Sem dados para os filtros selecionados.' }: { message?: string }) {
+    return (
+        <div className="flex h-full items-center justify-center rounded-[var(--radius-control)] border border-dashed border-border bg-muted/20 px-6 text-center text-sm text-muted-foreground">
+            {message}
+        </div>
+    );
+}
+
 export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick?: (stage: string) => void }) {
 
     return (
         <div className="h-[300px] w-full">
+            {data.every((point) => point.count === 0) ? <EmptyChartState /> : (
             <AccessibleChart label="Conversão por etapa comercial" entries={data.map((point) => `${point.stage}: ${point.count} oportunidades`)} onSelect={onBarClick ? (index) => onBarClick(data[index].stageCode || data[index].stage) : undefined}>
 <ResponsiveContainer width="100%" height="100%">
                 <BarChart 
@@ -40,6 +49,7 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
                 </BarChart>
             </ResponsiveContainer>
 </AccessibleChart>
+            )}
         </div>
     );
 }
@@ -47,6 +57,7 @@ export function ConversionFunnel({ data, onBarClick }: { data: any[], onBarClick
 export function SalesPerformance({ data, onBarClick }: { data: any[], onBarClick?: (seller: string) => void }) {
     return (
         <div className="h-[300px] w-full">
+            {data.length === 0 ? <EmptyChartState /> : (
             <AccessibleChart label="Receita por vendedor" entries={data.map((point) => `${point.seller}: ${formatCurrency(point.totalRevenue)}`)} onSelect={onBarClick ? (index) => onBarClick(data[index].seller) : undefined}>
 <ResponsiveContainer width="100%" height="100%">
                 <BarChart 
@@ -76,6 +87,7 @@ export function SalesPerformance({ data, onBarClick }: { data: any[], onBarClick
                 </BarChart>
             </ResponsiveContainer>
 </AccessibleChart>
+            )}
         </div>
     );
 }
@@ -85,6 +97,7 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
 
     return (
         <div className="h-[300px] w-full">
+            {data.every((point) => point.value === 0) ? <EmptyChartState message="Não há histórico suficiente para projetar receita nos filtros selecionados." /> : (
             <AccessibleChart label="Previsão de receita mensal" entries={data.map((point) => `${point.month}: ${formatCurrency(point.value)}`)}>
 <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -99,6 +112,7 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
                 </LineChart>
             </ResponsiveContainer>
 </AccessibleChart>
+            )}
         </div>
     );
 }
@@ -106,6 +120,7 @@ export function RevenueForecast({ forecast }: { forecast: number[] }) {
 export function LossReasonChart({ data, onPieClick }: { data: any[], onPieClick?: (reason: string) => void }) {
     return (
         <div className="h-[300px] w-full">
+            {data.length === 0 ? <EmptyChartState message="Não há motivos de perda nos filtros selecionados." /> : (
             <AccessibleChart label="Motivos de perda" entries={data.map((point) => `${point.name}: ${point.value} ocorrências`)} onSelect={onPieClick ? (index) => onPieClick(data[index].name) : undefined}>
 <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -136,6 +151,7 @@ export function LossReasonChart({ data, onPieClick }: { data: any[], onPieClick?
                 </PieChart>
             </ResponsiveContainer>
 </AccessibleChart>
+            )}
         </div>
     );
 }
@@ -158,6 +174,8 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
             <div className="mb-6">
                 <p className="text-sm text-muted-foreground">Produtos mais vendidos por receita</p>
             </div>
+
+            {data.length === 0 ? <EmptyChartState message="Não há produtos ganhos para os filtros selecionados." /> : <>
 
             {/* Top Product */}
             {topProduct && (
@@ -217,6 +235,7 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
                     </div>
                 ))}
             </div>
+            </>}
         </div>
     );
 };

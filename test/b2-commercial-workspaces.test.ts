@@ -64,6 +64,14 @@ describe('CRM #214 B2 commercial workspaces', () => {
         expect(card).toContain('text-[11px] font-medium text-muted-foreground');
     });
 
+    it('keeps the pipeline summary compact so the board remains the primary workspace', () => {
+        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
+        expect(pipeline).toContain('data-qa-region="pipeline-summary"');
+        expect(pipeline).toContain('grid-cols-2');
+        expect(pipeline).toContain('lg:grid-cols-4');
+        expect(pipeline).not.toContain('<StatsGrid items={stats} />');
+    });
+
     it('retains the clear-filters action when customer results are empty', () => {
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
         expect(customers).toContain("'Limpar filtros'");

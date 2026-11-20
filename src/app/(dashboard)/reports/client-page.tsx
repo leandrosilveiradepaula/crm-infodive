@@ -217,7 +217,7 @@ export function ReportsClientPage() {
                 {
                     label: "Vendas Totais",
                     value: formatCompact(stats.dealMetrics.totalValue),
-                    description: "+12.5%",
+                    description: "Receita de negócios ganhos",
                     icon: DollarSign,
                     color: "text-primary",
                     gradient: "from-primary/5 to-white dark:from-primary/10",
@@ -226,7 +226,7 @@ export function ReportsClientPage() {
                 {
                     label: "Taxa de Conversão",
                     value: formatPercentage(stats.dealMetrics.conversionRate),
-                    description: "+2.1%",
+                    description: "Negócios ganhos sobre fechados",
                     icon: Target,
                     color: "text-teal-600 dark:text-teal-400",
                     gradient: "from-teal-50 to-white dark:from-teal-950/20",
@@ -235,7 +235,7 @@ export function ReportsClientPage() {
                 {
                     label: "Ciclo Médio",
                     value: `${Math.round(stats.dealMetrics.avgCycleTime)}d`,
-                    description: "+3 dias",
+                    description: "Tempo médio até o fechamento",
                     icon: Calendar,
                     color: "text-orange-600 dark:text-orange-400",
                     gradient: "from-orange-50 to-white dark:from-orange-950/20",

@@ -1,6 +1,6 @@
 # MEMORY — CRM Infodive UX/UI source of truth
 
-Last updated: 2026-11-19. Repository-scoped continuity, not ChatGPT personal memory.
+Last updated: 2026-11-20. Repository-scoped continuity, not ChatGPT personal memory.
 
 ## Owner's fixed goal
 Modernize the ORIGINAL Infodive CRM so every existing module shares one polished, clear, navigable enterprise experience inspired by the user-provided Clinia UI examples. The clinical imagery is a VISUAL/INTERACTION REFERENCE, not a request to copy that product or add clinical functionality. Do not replace Infodive with a new app, greenfield CRM, WhatsApp product or unrelated service.
@@ -32,3 +32,8 @@ A route-family is complete only with: feature contract preserved; actual authent
 
 ## Next work AFTER this preparation PR is merged
 The conditional G0–G5 execution authorization is already recorded at the top of docs/codex/CURRENT_TASK.md and activates only after PR #219 is merged humanly. Then complete baseline/audit, shell/navigation, commercial workspaces, operational workspaces, analytics/admin and final visual acceptance against original references. Do not reopen previously merged PRs, and do not start an unrelated application.
+
+## Evidence and current remediation (2026-11-20)
+- Candidate `62c39d7dd5c32846176328701d7bceebeaa2a419` has recorded successful validation (`44762570319`) and isolated authenticated-local QA (`44762570326`). Artifact `14642333538` contains 168 sanitized screenshots and 172 checks across 42 route/profile combinations. It has no Preview SHA or deployment ID by design; it is not production or Preview evidence.
+- Representative inspection found a P1 Pipeline density defect: four generic KPI cards displaced the board. The follow-up candidate uses a compact responsive pipeline summary so the Kanban remains the primary workspace. It also renders explicit Reports no-data states and removes hard-coded report-trend descriptions; values and filters remain data-driven.
+- Inbox in the local fixture exposes the supported Office 365 connection state only. Do not add a fabricated three-pane mailbox or chat to obtain screenshot resemblance. Exact PR-review comment retrieval is temporarily unavailable because GitHub API rate limiting returned HTTP 403; retry only after quota resets.

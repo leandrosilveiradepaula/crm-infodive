@@ -15,7 +15,6 @@ import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDeals } from '@/hooks/useDeals';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DollarSign, Sparkles } from 'lucide-react';
 import { Deal } from '@/types/deal';
@@ -218,7 +217,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-primary" /></div>;
     }
 
-    const stats: StatItem[] = [
+    const stats = [
         {
             label: "Total Pipeline",
             value: formatCompact(metrics.totalValue),
@@ -273,7 +272,31 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                 </button>
             </PageHeader>
 
-            <StatsGrid items={stats} />
+            <section
+                aria-label="Resumo do pipeline"
+                data-qa-region="pipeline-summary"
+                className="grid grid-cols-2 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-[var(--shadow-card)] lg:grid-cols-4"
+            >
+                {stats.map((stat, index) => {
+                    const Icon = stat.icon;
+
+                    return (
+                        <div
+                            key={stat.label}
+                            className={`flex min-w-0 items-center gap-3 px-4 py-3 ${index > 0 ? 'border-l border-border' : ''} ${index === 2 ? 'border-t lg:border-t-0' : ''} ${index === 3 ? 'border-l-0 border-t lg:border-l lg:border-t-0' : ''}`}
+                        >
+                            <div className={`grid size-8 shrink-0 place-items-center rounded-[var(--radius-control)] bg-muted ${stat.color}`}>
+                                <Icon className="size-4" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="truncate text-xs font-medium text-muted-foreground">{stat.label}</p>
+                                <p className="mt-0.5 truncate text-lg font-semibold tracking-tight text-foreground">{stat.value}</p>
+                                <p className="truncate text-xs text-muted-foreground">{stat.description}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </section>
             
             <FilterBar>
                 <div className="relative flex-1 w-full group">
