@@ -180,11 +180,13 @@ describe('authenticated E2E smoke contract', () => {
         expect(wf).toContain('environment: crm-ui-qa');
         const local = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-local-authenticated.yml'), 'utf8');
         expect(local).toContain('Start pristine ephemeral Supabase');
+        expect(local).toContain('ref: ${{ github.event.pull_request.head.sha }}');
         expect(local).toContain('Compile real Next.js application');
         expect(local).toContain('node test/e2e/run-authenticated-smoke.mjs');
         expect(local).toContain('CRM_E2E_CAPTURE_SANITIZED=true');
         expect(local).toContain('CRM_E2E_ARTIFACT_DIR="$RUNNER_TEMP/crm-b4-local-visual-evidence"');
         expect(local).toContain('Upload sanitized local visual evidence');
+        expect(local).toContain('crm-b4-local-visual-evidence-${{ github.event.pull_request.head.sha }}');
         expect(local).toContain('retention-days: 7');
         expect(local).toContain('supabase stop --no-backup');
         expect(local).not.toContain('environment: crm-ui-qa');
