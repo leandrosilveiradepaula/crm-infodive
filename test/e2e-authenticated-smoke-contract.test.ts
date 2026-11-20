@@ -37,6 +37,8 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("region = regions.has(candidateRegion)");
         expect(source).toContain("imageKind: /gradient\\(/");
         expect(source).toContain('Mobile menu did not close after navigation.');
+        expect(source).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
+        expect(source).toContain('candidateSha, target:');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];

@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { verifyVercelPreview } from './verify-vercel-preview.mjs';
 
 const require = createRequire(import.meta.url);
@@ -342,6 +343,10 @@ let a11yFailureCount = 0;
 const a11yFailedRoutes = new Set();
 let browser;
 try {
+    // This reads the checked-out candidate, not GitHub's PR merge SHA. The
+    // workflow explicitly checks out the head SHA before this runner starts.
+    const candidateSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    if (!/^[a-f0-9]{40}$/i.test(candidateSha)) throw new Error('Could not determine the checked-out candidate SHA.');
     const { baseUrl, local } = validateEnvironment();
     const accounts = parseAccounts();
     // Local Next.js can still point at a live backend. Require the same explicit
@@ -477,7 +482,7 @@ try {
         results.profiles.push(profileResult);
         await context.close();
     }
-    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
+    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, candidateSha, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
     if (a11yFailureCount) {
         fail('WCAG remains unresolved in ' + a11yFailureCount +
             ' audited combination(s) across ' + a11yFailedRoutes.size +
