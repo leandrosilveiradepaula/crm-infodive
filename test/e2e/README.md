@@ -81,3 +81,7 @@ A workflow `crm-b4-local-authenticated.yml` inicia Supabase real num diretório 
 A workflow protegida agora tem o job `local-parity-preflight` sem segredos: só libera `crm-ui-qa` depois de encontrar **SUCCESS** do job real local no SHA idêntico. O simples sucesso do teste sintético de Vite ou do TypeScript não pode liberar mais uma solicitação de revisão.
 
 O esquema QA sintético não é idêntico à produção por definição; portanto, ainda há uma certificação final remota protegida, mas **somente quando o local estiver verde**. As referências completas e restrições estão em `test/e2e/local-qa/README.md`.
+
+### Evidência visual sanitizada da execução local
+
+A workflow local captura screenshots apenas porque seus dois tenants, perfis, nomes e registros são criados do zero pelos fixtures sintéticos da própria execução. As imagens e `results.json` ficam no artefato privado de sete dias `crm-b4-local-visual-evidence-<SHA>`; credenciais, cookies, traces, HTML e dados de qualquer ambiente remoto não são incluídos. Essa evidência demonstra o CRM autenticado contra o stack local descartável no SHA exato. Ela não substitui a comparação manual com as referências Clinia nem o gate remoto protegido.

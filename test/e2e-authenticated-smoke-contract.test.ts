@@ -182,6 +182,10 @@ describe('authenticated E2E smoke contract', () => {
         expect(local).toContain('Start pristine ephemeral Supabase');
         expect(local).toContain('Compile real Next.js application');
         expect(local).toContain('node test/e2e/run-authenticated-smoke.mjs');
+        expect(local).toContain('CRM_E2E_CAPTURE_SANITIZED=true');
+        expect(local).toContain('CRM_E2E_ARTIFACT_DIR="$RUNNER_TEMP/crm-b4-local-visual-evidence"');
+        expect(local).toContain('Upload sanitized local visual evidence');
+        expect(local).toContain('retention-days: 7');
         expect(local).toContain('supabase stop --no-backup');
         expect(local).not.toContain('environment: crm-ui-qa');
         expect(local).not.toContain('supabase link');

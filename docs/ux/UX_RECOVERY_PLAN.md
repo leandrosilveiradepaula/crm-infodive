@@ -20,6 +20,8 @@ The G3 pass now applies the same treatment to the visible metadata/status surfac
 
 The visible Orders, Installments and Commissions tables now share that table-header and status treatment. Financial amounts, calculation logic, status transitions and actions were deliberately left unchanged. Real QA must still exercise their row expansion, upload/modal and narrow-viewport states.
 
+The local authenticated QA workflow now retains a seven-day, sanitized screenshot artifact only for its disposable local stack. It is intentionally limited to fake tenants and users created during the run; it contains no cookies, traces, credentials, HTML or remote data. The artifact is evidence for same-SHA inspection, not automatic visual acceptance: each family must still be compared manually against the private references and recorded in the matrix below.
+
 ## Definition of done per route family
 - Existing product capability and role/tenant scope correctly preserved; no new hardcodes, mocks, fake metrics, fake sends or silent actions.
 - Screen matches the applicable observed patterns in the Clinia reference contract (structure, navigation, information hierarchy, filters, table/board, detail, states) without copying protected identity.
