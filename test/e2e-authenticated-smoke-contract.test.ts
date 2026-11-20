@@ -157,6 +157,7 @@ describe('authenticated E2E smoke contract', () => {
         expect(bootstrap).toContain("app_metadata: { crm_b4_qa_fixture: true }");
         expect(bootstrap).toContain("mode: 0o600, flag: 'wx'");
         expect(bootstrap).toContain('CRM_E2E_ACCOUNTS_FILE=');
+        expect(bootstrap).toContain("basename(process.argv[1] || '') === 'provision-qa-auth.mjs'");
         expect(bootstrap).not.toContain("from('auth.users')");
         const result = spawnSync(process.execPath, ['test/e2e/provision-qa-auth.mjs'], {
             cwd: process.cwd(), env: {}, encoding: 'utf8',
