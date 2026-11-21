@@ -295,11 +295,11 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                     className="border-muted-foreground/30 data-[state=checked]:bg-primary rounded-md"
                                 />
                             </TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Status</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Cliente / Origem</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Valor</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5">Vencimento</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground py-5 text-right">Ações</TableHead>
+                            <TableHead className="py-5 text-xs font-semibold text-muted-foreground">Status</TableHead>
+                            <TableHead className="py-5 text-xs font-semibold text-muted-foreground">Cliente / origem</TableHead>
+                            <TableHead className="py-5 text-right text-xs font-semibold text-muted-foreground">Valor</TableHead>
+                            <TableHead className="py-5 text-xs font-semibold text-muted-foreground">Vencimento</TableHead>
+                            <TableHead className="py-5 text-right text-xs font-semibold text-muted-foreground">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -338,7 +338,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                         <TableCell className="py-5">
                                             <Badge 
                                                 variant="outline" 
-                                                className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
+                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${
                                                     i.status === 'paid' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' : 
                                                     isOverdue ? 'bg-rose-500/5 text-rose-500 border-rose-500/20' : 
                                                     'bg-amber-500/5 text-amber-500 border-amber-500/20'

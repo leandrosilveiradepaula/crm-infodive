@@ -53,7 +53,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Logo Upload */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Logo da Empresa</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">Logo da empresa</Label>
                     <div className="flex items-center gap-6 p-5 bg-muted/20 border-2 border-dashed border-border rounded-2xl group hover:border-primary/50 transition-all">
                         <div className="h-20 w-20 bg-card rounded-xl border border-border flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform">
                             {form.logo_url ? (
@@ -66,17 +66,17 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest border-border hover:bg-muted">
                                 Alterar Logo
                             </Button>
-                            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">PNG ou SVG. Máx 2MB.</p>
+                            <p className="text-xs text-muted-foreground">PNG ou SVG. Máx. 2 MB.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Brand Colors */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Cores da Marca</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">Cores da marca</Label>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
+                            <Label className="mb-2 block text-xs font-medium text-muted-foreground">Cor primária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color"
@@ -89,7 +89,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             </div>
                         </div>
                         <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
+                            <Label className="mb-2 block text-xs font-medium text-muted-foreground">Cor secundária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color"
@@ -149,7 +149,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Razão Social / Nome Fantasia</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">Razão social / nome fantasia</Label>
                     <div className="relative group">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -162,7 +162,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Email Institucional</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">E-mail institucional</Label>
                     <div className="relative group">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
@@ -178,7 +178,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CNPJ</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">CNPJ</Label>
                     <Input
                         aria-label="CNPJ da empresa"
                             value={form.cnpj || ''}
@@ -188,7 +188,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
+                    <Label className="text-xs font-semibold text-muted-foreground">Inscrição estadual (IE)</Label>
                     <Input
                         aria-label="Inscrição estadual"
                             value={form.ie || ''}
@@ -202,7 +202,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             <Separator className="bg-border/50" />
 
             <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                <h4 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                     <span className="w-6 h-[1px] bg-border" />
                     Endereço Sede
                     <span className="flex-1 h-[1px] bg-border" />
@@ -210,7 +210,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <div className="md:col-span-2 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CEP</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">CEP</Label>
                         <Input
                             aria-label="CEP"
                             value={form.zip || ''}
@@ -220,7 +220,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="md:col-span-3 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Logradouro</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">Logradouro</Label>
                         <Input
                             aria-label="Logradouro"
                             value={form.street || ''}
@@ -229,7 +229,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="md:col-span-1 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nº</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">Número</Label>
                         <Input
                             aria-label="Número do endereço"
                             value={form.number || ''}
@@ -241,7 +241,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Bairro</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">Bairro</Label>
                         <Input
                             aria-label="Bairro"
                             value={form.neighborhood || ''}
@@ -250,7 +250,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Cidade</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">Cidade</Label>
                         <Input
                             aria-label="Cidade"
                             value={form.city || ''}
@@ -259,7 +259,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">UF</Label>
+                        <Label className="text-xs font-semibold text-muted-foreground">UF</Label>
                         <Input
                             aria-label="Estado (UF)"
                             value={form.state || ''}
@@ -291,7 +291,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
                 <div className="flex items-center justify-between p-4 bg-muted/10 rounded-xl border border-border">
                     <div className="space-y-0.5">
                         <Label className="text-sm text-foreground font-bold">Modo Escuro / Claro</Label>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
+                        <p className="text-xs text-muted-foreground">Alternar tema da interface pessoal</p>
                     </div>
                     <Switch
                         aria-label="Alternar modo escuro"

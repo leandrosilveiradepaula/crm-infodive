@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { verifyVercelPreview } from './verify-vercel-preview.mjs';
 
 const require = createRequire(import.meta.url);
@@ -180,7 +181,8 @@ async function assertLayout(page) {
         scrollWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,
         main: Boolean(document.querySelector('main')),
-        navigation: Boolean(document.querySelector('nav[aria-label="Navegação principal"]')),
+        navigation: Boolean(document.querySelector('nav[aria-label="Áreas principais"]')) &&
+            Boolean(document.querySelector('nav[aria-label^="Navegação de "]')),
     }));
     if (!layout.main || !layout.navigation) throw new Error('Dashboard shell is incomplete.');
     if (layout.scrollWidth > layout.viewportWidth) throw new Error(`Document overflows viewport (${layout.scrollWidth}px > ${layout.viewportWidth}px).`);
@@ -194,6 +196,9 @@ async function assertMobileNavigation(page, baseUrl) {
     await sidebar.waitFor({ state: 'visible' });
     const openTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
     if (openTranslate !== '0px') throw new Error('Mobile menu did not open.');
+    await page.getByRole('link', { name: 'Comercial' }).click();
+    await page.getByRole('button', { name: 'Abrir menu' }).click();
+    await sidebar.waitFor({ state: 'visible' });
     await page.getByRole('link', { name: 'Pipeline' }).click();
     await page.waitForURL((url) => url.pathname === '/pipeline', { timeout: 20_000 });
     const closedTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
@@ -338,6 +343,10 @@ let a11yFailureCount = 0;
 const a11yFailedRoutes = new Set();
 let browser;
 try {
+    // This reads the checked-out candidate, not GitHub's PR merge SHA. The
+    // workflow explicitly checks out the head SHA before this runner starts.
+    const candidateSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    if (!/^[a-f0-9]{40}$/i.test(candidateSha)) throw new Error('Could not determine the checked-out candidate SHA.');
     const { baseUrl, local } = validateEnvironment();
     const accounts = parseAccounts();
     // Local Next.js can still point at a live backend. Require the same explicit
@@ -473,7 +482,7 @@ try {
         results.profiles.push(profileResult);
         await context.close();
     }
-    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
+    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, candidateSha, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
     if (a11yFailureCount) {
         fail('WCAG remains unresolved in ' + a11yFailureCount +
             ' audited combination(s) across ' + a11yFailedRoutes.size +

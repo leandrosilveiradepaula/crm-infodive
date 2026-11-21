@@ -88,7 +88,7 @@ export default function IntegrationsClientPage({
                     {initialIntegrations.map(app => (
                         <article key={app.id} className="group relative overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
                             {app.status === 'connected' && (
-                                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-emerald-600 text-white px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-bl-2xl shadow-lg z-10 animate-in slide-in-from-right-full duration-500">
+                                <div className="absolute right-0 top-0 z-10 rounded-bl-[var(--radius-panel)] bg-success px-4 py-2 text-xs font-semibold text-success-foreground shadow-sm">
                                     Conectado
                                 </div>
                             )}
@@ -97,7 +97,7 @@ export default function IntegrationsClientPage({
                                 <div className={`h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 ${getIconColor(app.provider)} border border-border`}>
                                     {getAppIcon(app.provider)}
                                 </div>
-                                <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground bg-muted px-3 py-1.5 rounded-xl border border-border backdrop-blur-sm">{app.provider.replace('_', ' ')}</span>
+                                <span className="rounded-[var(--radius-control)] border border-border bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{app.provider.replace('_', ' ')}</span>
                             </div>
 
                             <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight">{app.name}</h3>
@@ -106,7 +106,7 @@ export default function IntegrationsClientPage({
                             {/* Feature Pills */}
                             <div className="flex flex-wrap gap-2 mb-8 h-16 content-start">
                                 {getFeatures(app.provider).map(f => (
-                                    <span key={f} className="text-[10px] font-bold text-muted-foreground border border-border bg-muted px-2.5 py-1 rounded-lg hover:bg-muted/80 transition-colors cursor-default">{f}</span>
+                                    <span key={f} className="cursor-default rounded-[var(--radius-control)] border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80">{f}</span>
                                 ))}
                             </div>
 

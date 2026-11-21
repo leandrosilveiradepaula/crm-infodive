@@ -54,4 +54,15 @@ describe('CRM #214 B3 module presentation', () => {
         }
     });
 
+    it('labels analytics empty states and does not present fixed trend copy as data', () => {
+        const reports = source('src/app/(dashboard)/reports/client-page.tsx');
+        const charts = source('src/components/charts/ReportsCharts.tsx');
+
+        expect(reports).not.toContain('description: "+12.5%"');
+        expect(reports).not.toContain('description: "+2.1%"');
+        expect(reports).not.toContain('description: "+3 dias"');
+        expect(charts).toContain('function EmptyChartState');
+        expect(charts).toContain('Sem dados para os filtros selecionados.');
+    });
+
 });

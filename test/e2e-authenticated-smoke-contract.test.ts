@@ -37,6 +37,8 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("region = regions.has(candidateRegion)");
         expect(source).toContain("imageKind: /gradient\\(/");
         expect(source).toContain('Mobile menu did not close after navigation.');
+        expect(source).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
+        expect(source).toContain('candidateSha, target:');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];
@@ -155,6 +157,7 @@ describe('authenticated E2E smoke contract', () => {
         expect(bootstrap).toContain("app_metadata: { crm_b4_qa_fixture: true }");
         expect(bootstrap).toContain("mode: 0o600, flag: 'wx'");
         expect(bootstrap).toContain('CRM_E2E_ACCOUNTS_FILE=');
+        expect(bootstrap).toContain("basename(process.argv[1] || '') === 'provision-qa-auth.mjs'");
         expect(bootstrap).not.toContain("from('auth.users')");
         const result = spawnSync(process.execPath, ['test/e2e/provision-qa-auth.mjs'], {
             cwd: process.cwd(), env: {}, encoding: 'utf8',
@@ -180,8 +183,14 @@ describe('authenticated E2E smoke contract', () => {
         expect(wf).toContain('environment: crm-ui-qa');
         const local = readFileSync(resolve(process.cwd(), '.github/workflows/crm-b4-local-authenticated.yml'), 'utf8');
         expect(local).toContain('Start pristine ephemeral Supabase');
+        expect(local).toContain('ref: ${{ github.event.pull_request.head.sha }}');
         expect(local).toContain('Compile real Next.js application');
         expect(local).toContain('node test/e2e/run-authenticated-smoke.mjs');
+        expect(local).toContain('CRM_E2E_CAPTURE_SANITIZED=true');
+        expect(local).toContain('CRM_E2E_ARTIFACT_DIR="$RUNNER_TEMP/crm-b4-local-visual-evidence"');
+        expect(local).toContain('Upload sanitized local visual evidence');
+        expect(local).toContain('crm-b4-local-visual-evidence-${{ github.event.pull_request.head.sha }}');
+        expect(local).toContain('retention-days: 7');
         expect(local).toContain('supabase stop --no-backup');
         expect(local).not.toContain('environment: crm-ui-qa');
         expect(local).not.toContain('supabase link');

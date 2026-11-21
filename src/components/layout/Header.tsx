@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
-    const { theme, toggleTheme } = useTheme();
+    const { toggleTheme } = useTheme();
     const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
     
@@ -42,7 +42,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
                 </div>
-                <h2 className="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">Bem-vindo, {firstName} 👋</h2>
+                <p className="truncate text-sm font-medium text-muted-foreground sm:text-base">Olá, <span className="font-semibold text-foreground">{firstName}</span></p>
             </div>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3">
@@ -71,10 +71,11 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     size="icon"
                     onClick={toggleTheme}
                     title="Alternar Tema"
+                    aria-label="Alternar tema"
                 >
                     <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
+                    <span className="sr-only">Alternar tema</span>
                 </Button>
 
                 <Button variant="ghost" size="icon" className="relative" aria-label="Notificações" title="Notificações">

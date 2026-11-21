@@ -15,8 +15,8 @@ import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDeals } from '@/hooks/useDeals';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
+import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { DollarSign, Sparkles } from 'lucide-react';
 import { Deal } from '@/types/deal';
 import { Profile } from '@/types/profile';
@@ -45,6 +45,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
     const [selectedQuarters, setSelectedQuarters] = useState<string[]>([]); // Array of 'YYYY-QX' e.g. ['2026-Q4', '2027-Q1']
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
     const [showNewDealModal, setShowNewDealModal] = useState(false);
+    const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
     // View Modal State
     const [viewingDeal, setViewingDeal] = useState<Deal | null>(null);
@@ -218,7 +219,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
         return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-primary" /></div>;
     }
 
-    const stats: StatItem[] = [
+    const stats = [
         {
             label: "Total Pipeline",
             value: formatCompact(metrics.totalValue),
@@ -273,7 +274,31 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                 </button>
             </PageHeader>
 
-            <StatsGrid items={stats} />
+            <section
+                aria-label="Resumo do pipeline"
+                data-qa-region="pipeline-summary"
+                className="grid grid-cols-2 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-[var(--shadow-card)] lg:grid-cols-4"
+            >
+                {stats.map((stat, index) => {
+                    const Icon = stat.icon;
+
+                    return (
+                        <div
+                            key={stat.label}
+                            className={`flex min-w-0 items-center gap-3 px-4 py-3 ${index > 0 ? 'border-l border-border' : ''} ${index === 2 ? 'border-t lg:border-t-0' : ''} ${index === 3 ? 'border-l-0 border-t lg:border-l lg:border-t-0' : ''}`}
+                        >
+                            <div className={`grid size-8 shrink-0 place-items-center rounded-[var(--radius-control)] bg-muted ${stat.color}`}>
+                                <Icon className="size-4" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="truncate text-xs font-medium text-muted-foreground">{stat.label}</p>
+                                <p className="mt-0.5 truncate text-lg font-semibold tracking-tight text-foreground">{stat.value}</p>
+                                <p className="truncate text-xs text-muted-foreground">{stat.description}</p>
+                            </div>
+                        </div>
+                    );
+                })}
+            </section>
             
             <FilterBar>
                 <div className="relative flex-1 w-full group">
@@ -296,7 +321,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
                             aria-label="Selecionar ano"
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
+                            className="min-h-9 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-semibold text-foreground outline-none"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -308,7 +333,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     <div className="flex flex-wrap gap-1 items-center px-1">
                         <button
                             onClick={() => setSelectedQuarters([])}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`min-h-9 whitespace-nowrap rounded-[var(--radius-control)] px-3 py-1 text-xs font-semibold transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                         >
                             Tempo Todo
                         </button>
@@ -331,9 +356,9 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                                 : [...prev, val].sort()
                                         );
                                     }}
-                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
-                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                                    className={`relative min-h-9 whitespace-nowrap rounded-[var(--radius-control)] px-3 py-1 text-xs font-semibold transition-colors ${isSelected
+                                        ? 'bg-primary text-primary-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                         }`}
                                 >
                                     {tab.label}
@@ -342,9 +367,27 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                         })}
                     </div>
                 </div>
+                <ViewToggle view={viewMode} onViewChange={setViewMode} />
             </FilterBar>
 
-            {/* Kanban Board */}
+            {viewMode === 'list' ? (
+                <section aria-label="Lista de oportunidades" className="overflow-x-auto rounded-[var(--radius-panel)] border border-border bg-card shadow-[var(--shadow-card)]">
+                    <table className="min-w-[720px] w-full text-left">
+                        <thead className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
+                            <tr><th className="px-4 py-3">Oportunidade</th><th className="px-4 py-3">Empresa</th><th className="px-4 py-3">Etapa</th><th className="px-4 py-3">Probabilidade</th><th className="px-4 py-3 text-right">Valor</th></tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                            {filteredDeals.map((deal) => {
+                                const stage = DEFAULT_STAGES.find((item) => item.id === deal.stage);
+                                return <tr key={deal.id} tabIndex={0} onClick={() => setViewingDeal(deal)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setViewingDeal(deal); } }} className="focus-ring cursor-pointer text-sm hover:bg-muted/40">
+                                    <td className="px-4 py-3 font-medium text-foreground">{deal.title}</td><td className="px-4 py-3 text-muted-foreground">{deal.company || '—'}</td><td className="px-4 py-3"><span className="inline-flex items-center gap-2 text-muted-foreground"><span className={`size-2 rounded-full ${stage?.accent || 'bg-muted-foreground'}`} />{stage?.title || 'Qualificação'}</span></td><td className="px-4 py-3 text-muted-foreground">{deal.probability || 0}%</td><td className="px-4 py-3 text-right font-medium text-foreground">{formatCompact(Number(deal.value || 0))}</td>
+                                </tr>;
+                            })}
+                            {filteredDeals.length === 0 && <tr><td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">Nenhuma oportunidade corresponde aos filtros atuais.</td></tr>}
+                        </tbody>
+                    </table>
+                </section>
+            ) : (
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-visible pb-4 sm:overflow-x-auto">
                     <div className="flex min-h-[34rem] flex-col gap-4 sm:flex-row">
@@ -392,6 +435,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                     </div>
                 </div>
             </DragDropContext>
+            )}
 
             {/* New Deal Modal */}
             <DealFormModal

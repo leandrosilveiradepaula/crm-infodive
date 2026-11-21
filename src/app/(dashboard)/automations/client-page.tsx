@@ -270,7 +270,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Featured Templates (Receitas) */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">Receitas Recomendadas</h2>
+                    <h2 className="text-sm font-semibold text-foreground">Receitas recomendadas</h2>
                     <button 
                         onClick={() => setShowGallery(true)}
                         className="text-xs font-bold text-primary hover:underline transition-all"
@@ -292,7 +292,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-foreground uppercase tracking-widest bg-surface-subtle px-3 py-1.5 rounded-lg border border-border/50">
+                                <span className="rounded-[var(--radius-control)] border border-border/50 bg-surface-subtle px-3 py-1.5 text-xs font-medium text-foreground">
                                     Usar Modelo
                                 </span>
                                 <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
@@ -354,7 +354,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             <div className="flex items-center gap-3">
                                                 <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
                                                 {!automation.enabled && (
-                                                    <span className="text-[10px] font-black uppercase text-foreground bg-muted px-2.5 py-1 rounded-lg">Pausado</span>
+                                                    <span className="rounded-[var(--radius-control)] bg-muted px-2.5 py-1 text-xs font-medium text-foreground">Pausado</span>
                                                 )}
                                             </div>
                                             <p className="text-sm text-foreground mt-1 line-clamp-1">{automation.description}</p>
@@ -411,19 +411,19 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
                                 <div className="grid grid-cols-2 gap-4 mb-6">
                                     <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-foreground uppercase tracking-widest mb-2">Gatilho</p>
+                                        <p className="mb-2 text-xs font-semibold text-foreground">Gatilho</p>
                                         <p className="text-sm font-bold text-foreground flex items-center gap-2">
                                             <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
                                             {automation.trigger?.type || 'N/A'}
                                         </p>
                                     </div>
                                     <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="text-[10px] font-black text-foreground uppercase tracking-widest mb-2">Ações</p>
+                                        <p className="mb-2 text-xs font-semibold text-foreground">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
                                                     key={`${action.type}-${idx}`}
-                                                    className="text-[10px] font-black bg-background border border-border px-3 py-1.5 rounded-lg text-primary group-hover:border-primary/20 transition-all"
+                                                    className="rounded-[var(--radius-control)] border border-border bg-background px-3 py-1.5 text-xs font-medium text-primary transition-colors group-hover:border-primary/20"
                                                 >
                                                     {action.type.replace('_', ' ').toUpperCase()}
                                                 </span>
@@ -435,11 +435,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                 <div className="flex items-center justify-between pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Execuções</span>
+                                            <span className="text-xs font-medium text-foreground">Execuções</span>
                                             <span className="text-sm font-black text-foreground">{automation.executionCount || 0}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-bold text-foreground uppercase tracking-tighter">Taxa Sucesso</span>
+                                            <span className="text-xs font-medium text-foreground">Taxa de sucesso</span>
                                             <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-success-readable' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
                                                     ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)
