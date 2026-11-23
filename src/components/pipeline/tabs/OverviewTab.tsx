@@ -26,9 +26,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
     // Helper for health trend icon
     const getTrendIcon = (trend?: string) => {
         switch (trend) {
-            case 'improving': return <ArrowUpRight className="h-4 w-4 text-emerald-500" />;
-            case 'declining': return <ArrowDownRight className="h-4 w-4 text-red-500" />;
-            default: return <Minus className="h-4 w-4 text-blue-500" />;
+            case 'improving': return <ArrowUpRight className="h-4 w-4 text-success-readable" />;
+            case 'declining': return <ArrowDownRight className="h-4 w-4 text-destructive-readable" />;
+            default: return <Minus className="h-4 w-4 text-foreground" />;
         }
     };
 
@@ -41,8 +41,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 action: "Adicionar Produtos",
                 onClick: onViewProducts,
                 icon: Package,
-                color: "text-amber-500",
-                bg: "bg-amber-500/10"
+                color: "text-warning-readable",
+                bg: "bg-warning-subtle"
             };
         }
         if (deal.stage === 'qualification' || deal.stage === 'discovery') {
@@ -52,8 +52,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 action: "Gerenciar Clientes",
                 onClick: onViewStakeholders,
                 icon: Users,
-                color: "text-blue-500",
-                bg: "bg-blue-500/10"
+                color: "text-foreground",
+                bg: "bg-info-subtle"
             };
         }
         return {
@@ -62,8 +62,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
             action: "Enviar Mensagem",
             onClick: () => { }, // Would open omnichannel
             icon: MessageSquare,
-            color: "text-teal-500",
-            bg: "bg-teal-500/10"
+            color: "text-foreground",
+            bg: "bg-info-subtle"
         };
     };
 
@@ -75,17 +75,17 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
             {/* 1. Metrics Row */}
             <div className="grid grid-cols-4 gap-4">
                 {/* Metric: Value & Forecast */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-blue-500/30 transition-all shadow-sm min-h-[90px]">
+                <div className="bg-card border border-border p-3 rounded-[var(--radius-panel)] flex flex-col justify-between group hover:border-info/30 transition-all shadow-control-ui min-h-[90px]">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-blue-500/10 rounded-md">
-                            <Target className="h-3.5 w-3.5 text-blue-500" />
+                        <div className="p-1 bg-info-subtle rounded-[var(--radius-control)]">
+                            <Target className="h-3.5 w-3.5 text-foreground" />
                         </div>
-                        <Badge variant="outline" className="text-[8px] uppercase font-black text-blue-500 border-blue-500/20 px-1.5 py-0">Forecast</Badge>
+                        <Badge variant="outline" className="ds-type-metadata uppercase font-semibold text-foreground border-info/20 px-1.5 py-0">Forecast</Badge>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
-                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
-                        <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
+                        <h4 className="ds-type-section-title font-semibold text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
+                        <p className="ds-type-metadata text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Calendar className="h-3 w-3" />
                             {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString('pt-BR') : 'Não definido'}
                         </p>
@@ -93,75 +93,75 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 </div>
 
                 {/* Metric: Health Score */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-emerald-500/30 transition-all shadow-sm min-h-[90px]">
+                <div className="bg-card border border-border p-3 rounded-[var(--radius-panel)] flex flex-col justify-between group hover:border-success/30 transition-all shadow-control-ui min-h-[90px]">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-emerald-500/10 rounded-md">
-                            <Zap className="h-3.5 w-3.5 text-emerald-500" />
+                        <div className="p-1 bg-success-subtle rounded-[var(--radius-control)]">
+                            <Zap className="h-3.5 w-3.5 text-success-readable" />
                         </div>
                         <div className="flex items-center gap-1">
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
+                            <span className="ds-type-metadata font-semibold text-success-readable uppercase tracking-widest">{deal.health_score || 0}%</span>
                             {getTrendIcon(deal.health_trend)}
                         </div>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
+                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
                         <Progress value={deal.health_score || 0} className="h-1 bg-muted" />
-                        <p className="text-[9px] text-muted-foreground mt-1">Baseado em atividade</p>
+                        <p className="ds-type-metadata text-muted-foreground mt-1">Baseado em atividade</p>
                     </div>
                 </div>
 
                 {/* Metric: Momentum */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-teal-500/30 transition-all shadow-sm min-h-[90px]">
+                <div className="bg-card border border-border p-3 rounded-[var(--radius-panel)] flex flex-col justify-between group hover:border-info/30 transition-all shadow-control-ui min-h-[90px]">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-teal-500/10 rounded-md">
-                            <Clock className="h-3.5 w-3.5 text-teal-500" />
+                        <div className="p-1 bg-info-subtle rounded-[var(--radius-control)]">
+                            <Clock className="h-3.5 w-3.5 text-foreground" />
                         </div>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
-                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
+                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
+                        <h4 className="ds-type-section-title font-semibold text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
+                        <p className="ds-type-metadata text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
                     </div>
                 </div>
 
                 {/* Metric: Stakeholders */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-amber-500/30 transition-all shadow-sm min-h-[90px]">
+                <div className="bg-card border border-border p-3 rounded-[var(--radius-panel)] flex flex-col justify-between group hover:border-warning/30 transition-all shadow-control-ui min-h-[90px]">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-amber-500/10 rounded-md">
-                            <Users className="h-3.5 w-3.5 text-amber-500" />
+                        <div className="p-1 bg-warning-subtle rounded-[var(--radius-control)]">
+                            <Users className="h-3.5 w-3.5 text-warning-readable" />
                         </div>
-                        <Badge variant="outline" className="text-[8px] uppercase font-black text-amber-500 border-amber-500/20 px-1.5 py-0">
+                        <Badge variant="outline" className="ds-type-metadata uppercase font-semibold text-warning-readable border-warning/20 px-1.5 py-0">
                             {deal.custom_fields?.stakeholders?.length || 1} Total
                         </Badge>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
-                        <h4 className="text-[13px] font-bold text-foreground truncate leading-tight">{deal.contact_name || 'Não definido'}</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
+                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
+                        <h4 className="ds-type-body font-bold text-foreground truncate leading-tight">{deal.contact_name || 'Não definido'}</h4>
+                        <p className="ds-type-metadata text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
                     </div>
                 </div>
             </div>
 
             {/* 2. AI Next Best Action spotlight */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-teal-600/5 border border-blue-500/20 rounded-xl p-4 backdrop-blur-sm group">
-                <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
+            <div className="relative overflow-hidden ds-panel-highlight border p-4 group">
+                <div className="absolute top-0 right-0 p-20 bg-info-subtle rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-20" />
                 <div className="relative z-10 flex items-center justify-between gap-6">
                     <div className="flex gap-4 items-center max-w-2xl">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-                            <Bot className="h-5 w-5 text-white" />
+                        <div className="h-10 w-10 rounded-[var(--radius-control)] bg-primary flex items-center justify-center shadow-control-ui shrink-0">
+                            <Bot className="h-5 w-5 text-primary-foreground" />
                         </div>
                         <div>
                             <div className="flex items-center gap-1.5 mb-1">
-                                <Sparkles className="h-3 w-3 text-blue-500" />
-                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
+                                <Sparkles className="h-3 w-3 text-foreground" />
+                                <span className="ds-type-metadata font-semibold text-foreground uppercase tracking-widest">IA : Próxima Melhor Ação</span>
                             </div>
-                            <h3 className="text-base font-black text-foreground mb-0.5">{nextAction.title}</h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{nextAction.description}</p>
+                            <h3 className="ds-type-body font-semibold text-foreground mb-0.5">{nextAction.title}</h3>
+                            <p className="ds-type-label text-muted-foreground leading-relaxed">{nextAction.description}</p>
                         </div>
                     </div>
                     <Button
                         onClick={nextAction.onClick}
-                        className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-5 text-sm rounded-lg shadow-lg shadow-primary/20 gap-2 shrink-0 transition-all hover:scale-105"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-10 px-5 ds-type-body rounded-[var(--radius-control)] shadow-card-ui shadow-primary/20 gap-2 shrink-0 transition-all hover:scale-105"
                     >
                         <nextAction.icon className="h-3.5 w-3.5" />
                         {nextAction.action}
@@ -175,11 +175,11 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 {/* Left: Activity Timeline */}
                 <div className="col-span-2 space-y-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <ActivityIcon className="h-4 w-4 text-blue-500" />
+                        <h3 className="ds-type-body font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <ActivityIcon className="h-4 w-4 text-foreground" />
                             Timeline de Atividade
                         </h3>
-                        <Button variant="ghost" size="sm" className="text-[10px] font-bold uppercase text-muted-foreground hover:text-blue-500">
+                        <Button variant="ghost" size="sm" className="ds-type-metadata font-bold uppercase text-muted-foreground hover:text-foreground">
                             Ver Histórico Completo
                         </Button>
                     </div>
@@ -192,15 +192,15 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         ].map((item, i) => (
                             <div key={i} className="relative pl-10 group">
                                 <div className={`
-                                    absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-all group-hover:scale-110 shadow-sm
-                                    ${item.type === 'proposal' ? 'bg-teal-500' : item.type === 'products' ? 'bg-blue-500' : 'bg-emerald-500'}
+                                    absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-all group-hover:scale-110 shadow-control-ui
+                                    ${item.type === 'proposal' ? 'bg-info' : item.type === 'products' ? 'bg-primary' : 'bg-success'}
                                 `}>
-                                    {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-white" /> : <ActivityIcon className="h-2.5 w-2.5 text-white" />}
+                                    {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-primary-foreground" /> : <ActivityIcon className="h-2.5 w-2.5 text-primary-foreground" />}
                                 </div>
-                                <div className="bg-card border border-border p-3.5 rounded-xl hover:border-blue-500/20 transition-all shadow-sm">
+                                <div className="bg-card border border-border p-3.5 rounded-[var(--radius-panel)] hover:border-info/20 transition-all shadow-control-ui">
                                     <div className="flex justify-between items-start mb-1">
-                                        <h4 className="text-sm font-bold text-foreground">{item.title}</h4>
-                                        <span className="text-[10px] text-muted-foreground font-medium uppercase">
+                                        <h4 className="ds-type-body font-bold text-foreground">{item.title}</h4>
+                                        <span className="ds-type-metadata text-muted-foreground font-medium uppercase">
                                             {formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}
                                         </span>
                                     </div>
@@ -208,7 +208,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                                         <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
                                             <User className="h-2.5 w-2.5 text-muted-foreground" />
                                         </div>
-                                        <span className="text-[10px] text-muted-foreground font-bold">{item.user}</span>
+                                        <span className="ds-type-metadata text-muted-foreground font-bold">{item.user}</span>
                                     </div>
                                 </div>
                             </div>
@@ -220,30 +220,30 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                 <div className="space-y-8">
                     {/* Mix de Produtos Summary */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Package className="h-4 w-4 text-blue-500" />
+                        <h3 className="ds-type-body font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Package className="h-4 w-4 text-foreground" />
                             Mix de Produtos
                         </h3>
-                        <div className="bg-card border border-border rounded-xl p-5 space-y-4 shadow-sm">
+                        <div className="bg-card border border-border rounded-[var(--radius-panel)] p-5 space-y-4 shadow-control-ui">
                             {(deal.deal_products || []).length > 0 ? (
                                 <>
                                     <div className="space-y-3">
                                         {(deal.deal_products || []).slice(0, 3).map((p, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs">
+                                            <div key={i} className="flex justify-between items-center ds-type-label">
                                                 <span className="text-foreground font-medium truncate max-w-[120px]">{p.name}</span>
                                                 <span className="text-muted-foreground font-bold">x{p.quantity}</span>
                                             </div>
                                         ))}
                                     </div>
                                     <div className="pt-3 border-t border-border flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Itens</span>
-                                        <span className="text-sm font-black text-primary">{(deal.deal_products || []).length}</span>
+                                        <span className="ds-type-metadata font-semibold text-muted-foreground uppercase tracking-widest">Total Itens</span>
+                                        <span className="ds-type-body font-semibold text-primary">{(deal.deal_products || []).length}</span>
                                     </div>
                                 </>
                             ) : (
-                                <p className="text-xs text-muted-foreground italic text-center py-4">Nenhum produto adicionado</p>
+                                <p className="ds-type-label text-muted-foreground italic text-center py-4">Nenhum produto adicionado</p>
                             )}
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewProducts}>
+                            <Button variant="outline" size="sm" className="w-full ds-type-metadata font-semibold uppercase rounded-[var(--radius-control)] tracking-widest h-9" onClick={onViewProducts}>
                                 Gerenciar Mix
                             </Button>
                         </div>
@@ -251,34 +251,34 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
 
                     {/* Stakeholders Summary */}
                     <div className="space-y-4">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Users className="h-4 w-4 text-blue-500" />
+                        <h3 className="ds-type-body font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                            <Users className="h-4 w-4 text-foreground" />
                             Stakeholders
                         </h3>
-                        <div className="bg-card border border-border rounded-xl p-5 space-y-5 shadow-sm">
+                        <div className="bg-card border border-border rounded-[var(--radius-panel)] p-5 space-y-5 shadow-control-ui">
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                        <User className="h-4 w-4 text-blue-500" />
+                                    <div className="h-8 w-8 rounded-[var(--radius-control)] bg-info-subtle flex items-center justify-center border border-info/20">
+                                        <User className="h-4 w-4 text-foreground" />
                                     </div>
                                     <div>
-                                        <p className="text-[11px] font-bold text-foreground leading-tight">{deal.contact_name || 'Decisor não definido'}</p>
-                                        <p className="text-[9px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Tomador de Decisão</p>
+                                        <p className="ds-type-label font-bold text-foreground leading-tight">{deal.contact_name || 'Decisor não definido'}</p>
+                                        <p className="ds-type-metadata text-foreground font-semibold uppercase tracking-widest mt-0.5">Tomador de Decisão</p>
                                     </div>
                                 </div>
                                 {deal.custom_fields?.technical_influencer && (
-                                    <div className="flex items-center gap-3 opacity-60">
-                                        <div className="h-8 w-8 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-500/20">
-                                            <User className="h-4 w-4 text-teal-500" />
+                                    <div className="flex items-center gap-3 ">
+                                        <div className="h-8 w-8 rounded-[var(--radius-control)] bg-info-subtle flex items-center justify-center border border-info/20">
+                                            <User className="h-4 w-4 text-foreground" />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
-                                            <p className="text-[9px] text-teal-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
+                                            <p className="ds-type-label font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
+                                            <p className="ds-type-metadata text-foreground font-semibold uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
                                         </div>
                                     </div>
                                 )}
                             </div>
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewStakeholders}>
+                            <Button variant="outline" size="sm" className="w-full ds-type-metadata font-semibold uppercase rounded-[var(--radius-control)] tracking-widest h-9" onClick={onViewStakeholders}>
                                 Ver Todos
                             </Button>
                         </div>

@@ -45,11 +45,11 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
     const getStatusConfig = (status: DealAnalysis['status']) => {
         switch (status) {
             case 'healthy':
-                return { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', label: 'Saudável' };
+                return { icon: CheckCircle2, color: 'text-success-readable', bg: 'bg-success-subtle', border: 'border-success/30', label: 'Saudável' };
             case 'at_risk':
-                return { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', label: 'Atenção' };
+                return { icon: AlertCircle, color: 'text-warning-readable', bg: 'bg-warning-subtle', border: 'border-warning/30', label: 'Atenção' };
             case 'urgent':
-                return { icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-200', label: 'Urgente' };
+                return { icon: AlertTriangle, color: 'text-destructive-readable', bg: 'bg-destructive-subtle', border: 'border-destructive/30', label: 'Urgente' };
             default:
                 return { icon: CheckCircle2, color: 'text-muted-foreground', bg: 'bg-muted/50', border: 'border-border', label: 'Análise' };
         }
@@ -57,9 +57,9 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (!analysis && !loading) {
         return (
-            <div className="bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-all relative group">
+            <div className="bg-card rounded-xl border border-border p-6 shadow-control-ui hover:shadow-md transition-all relative group">
                 <div className="flex items-start gap-5">
-                    <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="p-3 bg-info-subtle rounded-xl border border-info/30">
                         <Brain className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
@@ -73,7 +73,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         </p>
                         <button
                             onClick={handleAnalyze}
-                            className="text-xs font-bold bg-primary text-white px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm"
+                            className="text-xs font-bold bg-primary text-white px-4 py-2.5 rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-control-ui"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
                             Iniciar Diagnóstico
@@ -96,18 +96,18 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (error) {
         return (
-            <div className="bg-rose-50 rounded-xl border border-rose-100 p-6 relative">
+            <div className="bg-destructive-subtle rounded-xl border border-rose-100 p-6 relative">
                 <button
                     onClick={handleReset}
-                    className="absolute top-4 right-4 p-2 bg-rose-100 text-rose-600 rounded-lg hover:bg-rose-200 transition-colors text-xs font-bold"
+                    className="absolute top-4 right-4 p-2 bg-rose-100 text-destructive-readable rounded-[var(--radius-control)] hover:bg-rose-200 transition-colors text-xs font-bold"
                 >
                     FECHAR
                 </button>
                 <div className="flex items-center gap-3 mb-2">
-                    <AlertCircle className="h-5 w-5 text-rose-600" />
+                    <AlertCircle className="h-5 w-5 text-destructive-readable" />
                     <h3 className="text-sm font-bold text-rose-700">Falha na Análise</h3>
                 </div>
-                <p className="text-xs text-rose-600 mb-4">{error}</p>
+                <p className="text-xs text-destructive-readable mb-4">{error}</p>
                 <button
                     onClick={handleAnalyze}
                     className="text-xs font-bold text-rose-700 hover:text-rose-800 underline decoration-rose-300 underline-offset-4"
@@ -124,7 +124,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
     const StatusIcon = statusConfig.icon;
 
     return (
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden animate-in fade-in duration-500">
+        <div className="bg-card rounded-xl border border-border shadow-control-ui overflow-hidden animate-in fade-in duration-500">
             {/* Header */}
             <div className="p-6 border-b border-border bg-muted/50/20">
                 <div className="flex items-start justify-between gap-3">
@@ -140,11 +140,11 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Score:</span>
-                                <span className={`text-base font-bold ${analysis.healthScore >= 70 ? 'text-emerald-600' : analysis.healthScore >= 40 ? 'text-amber-600' : 'text-rose-600'
+                                <span className={`text-base font-bold ${analysis.healthScore >= 70 ? 'text-success-readable' : analysis.healthScore >= 40 ? 'text-warning-readable' : 'text-destructive-readable'
                                     }`}>
                                     {analysis.healthScore}/100
                                 </span>
-                                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
+                                <span className={`ml-2 px-2 py-0.5 rounded-full ds-type-metadata font-bold border uppercase tracking-wide whitespace-nowrap ${statusConfig.bg} ${statusConfig.color} ${statusConfig.border}`}>
                                     {statusConfig.label}
                                 </span>
                             </div>
@@ -154,7 +154,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                     <div className="flex items-center gap-2 flex-shrink-0 ml-1">
                         <button
                             onClick={handleAnalyze}
-                            className="flex items-center justify-center w-9 h-9 bg-card hover:bg-muted/50 border border-border rounded-lg text-muted-foreground hover:text-foreground transition-all shadow-sm"
+                            className="flex items-center justify-center w-9 h-9 bg-card hover:bg-muted/50 border border-border rounded-[var(--radius-control)] text-muted-foreground hover:text-foreground transition-all shadow-control-ui"
                             title="Atualizar"
                         >
                             <RotateCcw className="h-4 w-4" />
@@ -162,7 +162,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         </button>
                         <button
                             onClick={handleReset}
-                            className="flex items-center justify-center w-9 h-9 bg-card hover:bg-muted/50 border border-border rounded-lg text-muted-foreground hover:text-foreground transition-all shadow-sm"
+                            className="flex items-center justify-center w-9 h-9 bg-card hover:bg-muted/50 border border-border rounded-[var(--radius-control)] text-muted-foreground hover:text-foreground transition-all shadow-control-ui"
                             title="Minimizar"
                         >
                             <ChevronUp className="h-5 w-5" />
@@ -177,13 +177,13 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                 {/* Insights */}
                 <div>
                     <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
-                        <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+                        <Sparkles className="h-3.5 w-3.5 text-foreground" />
                         Insights
                     </h4>
                     <div className="grid gap-3">
                         {analysis.insights.map((insight, i) => (
-                            <div key={i} className="flex gap-3 p-3 bg-muted/50 rounded-lg border border-border">
-                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
+                            <div key={i} className="flex gap-3 p-3 bg-muted/50 rounded-[var(--radius-control)] border border-border">
+                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-info-subtle0 flex-shrink-0" />
                                 <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
                             </div>
                         ))}
@@ -194,13 +194,13 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                     {/* Mitigation */}
                     <div>
                         <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
-                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                            <ShieldCheck className="h-3.5 w-3.5 text-success-readable" />
                             Mitigação
                         </h4>
                         <ul className="space-y-3">
                             {analysis.recommendations.map((rec, i) => (
                                 <li key={i} className="flex gap-2.5 items-start text-sm text-muted-foreground">
-                                    <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                    <CheckCircle2 className="h-4 w-4 text-success-readable mt-0.5 flex-shrink-0" />
                                     <span>{rec}</span>
                                 </li>
                             ))}
@@ -215,8 +215,8 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         </h4>
                         <ul className="space-y-2">
                             {analysis.nextSteps.map((step, i) => (
-                                <li key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold">
+                                <li key={i} className="flex items-center gap-3 p-2 rounded-[var(--radius-control)] hover:bg-muted/50 transition-colors">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-info-subtle dark:bg-info-subtle text-foreground dark:text-foreground ds-type-metadata font-bold">
                                         {i + 1}
                                     </span>
                                     <span className="text-sm text-foreground font-medium">{step}</span>

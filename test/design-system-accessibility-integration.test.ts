@@ -1,0 +1,55 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
+
+describe('Global visual contract in real Pipeline and reporting states', () => {
+  it('keeps text-bearing panels on deterministic solid surfaces, never behind decorative gradients', () => {
+    const css = read('src/design-system/tokens.css');
+    for (const cls of ['.ds-panel-highlight', '.ds-panel-financial']) {
+      const block = css.slice(css.indexOf(cls), css.indexOf('}', css.indexOf(cls)));
+      expect(block).toContain('background-color: var(--ds-surface-');
+      expect(block).toContain('background-image: none;');
+    }
+    expect(css).toContain('--ds-gradient-highlight:');
+    expect(css).toContain('.ds-gradient-context {');
+  });
+
+  it('removes nested Pipeline modal local palettes and gradients while keeping readable statuses', () => {
+    const files = [
+      'src/components/pipeline/tabs/OverviewTab.tsx',
+      'src/components/pipeline/ai/DealDoctorFinal.tsx',
+      'src/components/pipeline/ai/RiskRadar.tsx',
+    ];
+    for (const file of files) {
+      const src = read(file);
+      expect(src).not.toMatch(/\bbg-gradient-to-[a-z-]+/);
+      expect(src).not.toMatch(/\btext-(?:blue|emerald|amber|teal|rose|red)-\d{2,3}\b/);
+      expect(src).not.toMatch(/\b(?:from|to)-(?:blue|teal)-\d{2,3}/);
+    }
+    const overview = read(files[0]);
+    expect(overview).toContain('ds-panel-highlight');
+    expect(overview).toContain('text-success-readable');
+    const doctor = read(files[1]);
+    expect(doctor).toContain('text-warning-readable');
+    const radar = read(files[2]);
+    expect(radar).toContain('text-destructive-readable');
+  });
+
+  it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
+    const report = read('src/app/(dashboard)/reports/client-page.tsx');
+    const charts = read('src/components/charts/ReportsCharts.tsx');
+    for (const fake of ['description: "+12.5%"', 'description: "+2.1%"', 'description: "+3 dias"']) {
+      expect(report).not.toContain(fake);
+    }
+    expect(report).toContain('aria-label="Buscar nos relatórios"');
+    expect(report).toContain('bg-surface-raised');
+    expect(report).toContain('md:flex-[1_1_18rem]');
+    expect(report).not.toContain('gradient: "from-');
+    expect(charts).toContain('function EmptyChartState');
+    expect(charts).toContain('Sem dados para os filtros selecionados.');
+    const stats = read('src/components/layout/StatsGrid.tsx');
+    expect(stats).toContain('gradient?: string;');
+  });
+});

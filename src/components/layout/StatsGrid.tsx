@@ -9,8 +9,8 @@ export interface StatItem {
     description: string;
     icon: LucideIcon;
     color: string; // Semantic Tailwind text class, e.g. 'text-primary'
-    gradient: string; // Legacy field until all callers migrate; never render feature-local gradients
-    border: string; // Tailwind border class like 'border-primary/10'
+    gradient?: string; // Deprecated input; never rendered. New callers must use semantic panel tokens.
+    border?: string; // Deprecated input; never rendered. Layout owns border.
     onClick?: () => void;
 }
 

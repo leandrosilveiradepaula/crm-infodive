@@ -22,46 +22,46 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
     const factors = deal.risk_factors ?? [];
 
     const getScoreColor = (s: number) => {
-        if (s >= 80) return 'text-emerald-400';
-        if (s >= 50) return 'text-yellow-400';
-        return 'text-red-500';
+        if (s >= 80) return 'text-success-readable';
+        if (s >= 50) return 'text-warning-readable';
+        return 'text-destructive-readable';
     };
 
     const getScoreBg = (s: number) => {
-        if (s >= 80) return 'bg-emerald-500';
-        if (s >= 50) return 'bg-yellow-500';
-        return 'bg-red-500';
+        if (s >= 80) return 'bg-success';
+        if (s >= 50) return 'bg-warning';
+        return 'bg-destructive';
     };
 
     const getTrendIcon = () => {
         switch (trend) {
-            case 'improving': return <TrendingUp className="h-4 w-4 text-emerald-400" />;
-            case 'declining': return <TrendingDown className="h-4 w-4 text-red-400" />;
+            case 'improving': return <TrendingUp className="h-4 w-4 text-success-readable" />;
+            case 'declining': return <TrendingDown className="h-4 w-4 text-destructive-readable" />;
             default: return <Minus className="h-4 w-4 text-muted-foreground" />;
         }
     };
 
     return (
-        <div className="bg-card border border-border rounded-2xl p-5 shadow-lg shadow-slate-200/50 relative overflow-hidden group hover:shadow-xl transition-shadow duration-500">
+        <div className="bg-card border border-border rounded-[var(--radius-panel)] p-5 shadow-card-ui  relative overflow-hidden group hover:shadow-overlay-ui transition-shadow duration-500">
             {/* Background Effect */}
             <div className={`absolute top-0 right-0 p-24 rounded-full blur-3xl opacity-[0.08] translate-x-12 -translate-y-12 ${getScoreBg(score)} transition-colors duration-1000`} />
 
             <div className="flex items-center justify-between mb-6 relative z-10">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted/50 rounded-xl border border-border shadow-sm">
+                    <div className="p-2 bg-muted/50 rounded-[var(--radius-panel)] border border-border shadow-sm">
                         <Activity className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-foreground leading-tight">Risk Radar</h3>
-                        <p className="text-[10px] font-medium text-muted-foreground mt-0.5">Monitoramento Contínuo</p>
+                        <h3 className="ds-type-body font-bold text-foreground leading-tight">Risk Radar</h3>
+                        <p className="ds-type-metadata font-medium text-muted-foreground mt-0.5">Monitoramento Contínuo</p>
                     </div>
                 </div>
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${trend === 'improving' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' :
-                        trend === 'declining' ? 'bg-rose-50 border-rose-100 text-rose-700' :
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${trend === 'improving' ? 'bg-success-subtle border-success/30 text-success-readable' :
+                        trend === 'declining' ? 'bg-destructive-subtle border-destructive/30 text-destructive-readable' :
                             'bg-muted/50 border-border text-muted-foreground'
                     }`}>
                     {getTrendIcon()}
-                    <span className="text-[10px] font-bold uppercase tracking-wide">
+                    <span className="ds-type-metadata font-bold uppercase tracking-wide">
                         {trend === 'improving' ? 'Melhorando' : trend === 'declining' ? 'Crítico' : 'Estável'}
                     </span>
                 </div>
@@ -96,8 +96,8 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                         />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-2xl font-black ${getScoreColor(score)} tracking-tighter`}>{score}</span>
-                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mt-[-2px]">Score</span>
+                        <span className={`ds-type-metric font-black ${getScoreColor(score)} tracking-tighter`}>{score}</span>
+                        <span className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wider mt-[-2px]">Score</span>
                     </div>
                 </div>
 
@@ -105,12 +105,12 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                 <div className="flex-1 min-w-0 py-1">
                     {factors.length > 0 ? (
                         <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                            <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                                 <AlertTriangle className="h-3 w-3" /> Pontos de Atenção
                             </p>
                             <ul className="space-y-2.5">
                                 {factors.slice(0, 3).map((factor: string, idx: number) => (
-                                    <li key={idx} className="flex gap-2.5 items-start text-xs text-muted-foreground font-medium leading-relaxed group/item">
+                                    <li key={idx} className="flex gap-2.5 items-start ds-type-label text-muted-foreground font-medium leading-relaxed group/item">
                                         <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${getScoreBg(score)} opacity-60 group-hover/item:opacity-100 transition-opacity`} />
                                         <span className="line-clamp-2">{factor}</span>
                                     </li>
@@ -119,11 +119,11 @@ export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
                         </div>
                     ) : (
                         <div className="flex flex-col justify-center h-full animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                            <div className="flex items-center gap-2 text-success-readable mb-1">
                                 <ShieldCheck className="h-4 w-4" />
-                                <span className="font-bold text-sm">Deal Saudável</span>
+                                <span className="font-bold ds-type-body">Deal Saudável</span>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed font-medium">
+                            <p className="ds-type-label text-muted-foreground leading-relaxed font-medium">
                                 Nenhuma anomalia detectada. O engajamento está positivo e dentro do esperado.
                             </p>
                         </div>

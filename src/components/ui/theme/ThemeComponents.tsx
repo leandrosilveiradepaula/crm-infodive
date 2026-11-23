@@ -40,7 +40,7 @@ export const ThemeInput = React.forwardRef<HTMLInputElement, ThemeInputProps>(
             <input
                 ref={ref}
                 className={cn(
-                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-3 py-2 ds-type-control text-foreground shadow-xs outline-none transition-[color,box-shadow,border-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                    "h-[var(--ds-control-height-default)] rounded-[var(--radius-control)] border border-input bg-surface-raised px-3 py-2 ds-type-control text-foreground shadow-control-ui outline-none transition-[color,box-shadow,border-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}

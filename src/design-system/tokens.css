@@ -508,7 +508,7 @@
   }
   .ds-panel-highlight {
     background-color: var(--ds-surface-highlight);
-    background-image: var(--ds-gradient-highlight);
+    background-image: none;
     color: var(--foreground);
     border-color: var(--border);
     border-radius: var(--radius-panel);
@@ -518,7 +518,7 @@
   .ds-progress-success { background-image: var(--ds-gradient-progress-success); }
   .ds-panel-financial {
     background-color: var(--ds-surface-financial);
-    background-image: var(--ds-gradient-financial);
+    background-image: none;
     color: var(--foreground);
     border-color: var(--border);
     border-radius: var(--radius-panel);
