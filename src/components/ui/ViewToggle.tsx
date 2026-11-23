@@ -9,16 +9,17 @@ interface ViewToggleProps {
     view: ViewMode;
     onViewChange: (view: ViewMode) => void;
     className?: string;
+    gridLabel?: string;
 }
 
-export function ViewToggle({ view, onViewChange, className }: ViewToggleProps) {
+export function ViewToggle({ view, onViewChange, className, gridLabel = 'Visualização em cards' }: ViewToggleProps) {
     return (
         <div role="group" aria-label="Modo de visualização" className={cn('flex items-center rounded-[var(--radius-control)] border border-border bg-muted p-1 gap-0.5', className)}>
             <button
                 type="button"
                 onClick={() => onViewChange('cards')}
-                title="Visualização em cards"
-                aria-label="Visualização em cards"
+                title={gridLabel}
+                aria-label={gridLabel}
                 aria-pressed={view === 'cards'}
                 className={cn(
                     'focus-ring rounded-md p-1.5 transition-colors',

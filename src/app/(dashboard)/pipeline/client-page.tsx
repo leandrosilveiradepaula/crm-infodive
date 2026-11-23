@@ -367,7 +367,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                         })}
                     </div>
                 </div>
-                <ViewToggle view={viewMode} onViewChange={setViewMode} />
+                <ViewToggle view={viewMode} onViewChange={setViewMode} gridLabel="Visualização em quadro" />
             </FilterBar>
 
             {viewMode === 'list' ? (

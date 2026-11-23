@@ -75,7 +75,7 @@ describe('CRM #214 B2 commercial workspaces', () => {
     it('offers an accessible board/list switch without changing commercial data', () => {
         const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
         expect(pipeline).toContain("useState<ViewMode>('cards')");
-        expect(pipeline).toContain('<ViewToggle view={viewMode} onViewChange={setViewMode} />');
+        expect(pipeline).toContain('gridLabel="Visualização em quadro"');
         expect(pipeline).toContain('aria-label="Lista de oportunidades"');
         expect(pipeline).toContain('filteredDeals.map((deal)');
     });
