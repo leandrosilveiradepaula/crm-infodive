@@ -16,6 +16,27 @@ Edit the appropriate --ds-base-* or --ds-type-* variable in src/design-system/to
 
 **No new colors are prescribed by this program.** Current brand values are carried forward from globals.css. Dark mode values are preserved. New aliases use existing semantic colors.
 
+## Verified migration inventory baseline — 2026-11-23
+
+GitHub Actions run [45239400879](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45239400879), candidate SHA 6fd9d5901f29d5020f461e7665185ee9c84ff629:
+- TypeScript, unit tests, Next.js build, synthetic WCAG A/AA for desktop/mobile + light/dark, git diff check and design-token non-regression check: **PASS**.
+- **196 files** have **5,536 occurrences** in categories inventoried by scripts/report-design-system-debt.mjs.
+- **11 changed UI files**, **zero increases** of guarded local style decisions against main.
+- Includes local font-size classes, raw color palettes, gradients, radius and shadow classes; a regex occurrence is NOT necessarily an independent bug. This is a migration-debt measurement only, not UX approval.
+
+| Family | Files with remaining occurrences | Occurrences |
+|---|---:|---:|
+| Comercial | 68 | 1,791 |
+| Analytics and admin | 31 | 1,116 |
+| Pipeline and drawers | 24 | 1,237 |
+| Operation | 18 | 511 |
+| Shell and Dashboard | 15 | 161 |
+| Shared components | 15 | 53 |
+| Other | 25 | 667 |
+| **Total** | **196** | **5,536** |
+
+Recalculate on the final SHA after each migration block using npm run design-system:inventory and attach node scripts/report-design-system-debt.mjs --markdown output. Do not blindly replace all matches: classify semantic role, behavior and justified exceptions before migrating. The core PR does NOT eliminate the 196-file backlog.
+
 ## Phases and actual status
 | Family | What must be migrated | Current candidate state | Required QA |
 |---|---|---|---|
@@ -28,7 +49,7 @@ Edit the appropriate --ds-base-* or --ds-type-* variable in src/design-system/to
 | DS6 Analytics/admin | Reports, KPI/graphs, integrations, goals, settings | PENDING | chart statuses, data and theme comparison |
 | DS7 Global acceptance | no remaining hardcodes except documented exceptions | PENDING | one core change propagates to ALL migrated families |
 
-The prior owner-reported number (~106 affected files) is a preliminary estimate, NOT a certified inventory. Run:
+The earlier owner-reported estimate (~106 files) was replaced by the measured baseline below; future totals must be recomputed from the exact SHA. Run:
 - npm run design-system:inventory — summary by screen family and top files.
 - node scripts/report-design-system-debt.mjs --markdown — complete per-file migration matrix. Record verified totals, diff and completed routes against actual SHA rather than inventing a counter.
 - npm run lint:design-system — fail if the current branch introduces new local design decisions compared with its merge base.

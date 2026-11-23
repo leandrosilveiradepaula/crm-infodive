@@ -2,7 +2,7 @@
 
 ## 2026-11-23 user directive — CENTRALIZED configurable Design System, not pixel-by-pixel cleanup
 
-The owner explicitly rejected continuing ad hoc local Tailwind restyling in ~106 files. A legitimate result requires changing fonts, colors, radii, shadows, typography and gradients centrally once with automatic propagation to ALL migrated modules. Preserve the existing visual identity; never ask the agent to invent local colors or choose new contrast palettes per module. No framework switch, business logic edits, Supabase migrations, or production deploy.
+The owner explicitly rejected continuing ad hoc local Tailwind restyling. On candidate 6fd9d590, CI run 45239400879 measured 196 UI files and 5,536 categorized style occurrences (broader than the earlier owner estimate of ~106 files). These numbers count matching style tokens, not distinct visual defects. A legitimate result requires changing fonts, colors, radii, shadows, typography and gradients centrally once with automatic propagation to ALL migrated modules. Preserve the existing visual identity; never ask the agent to invent local colors or choose new contrast palettes per module. No framework switch, business logic edits, Supabase migrations, or production deploy.
 
 Confirmed on main: Next 16/Tailwind 4. src/app/globals.css had a base semantic palette but no coherent type/gradient token system; ViewDealModal.tsx had local from-blue-50/to-white and from-blue-50/to-teal-50 gradients; root layout loaded Inter while globals.css used --font-geist-sans; OrganizationThemeSettings presents an org theme picker but updateOrgTheme did not persist a default choice, so the UI is NOT a functional theme configuration system. Do not claim it is.
 
