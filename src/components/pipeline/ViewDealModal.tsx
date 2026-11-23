@@ -472,6 +472,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
+                                aria-label="Fechar detalhes da oportunidade"
                                 className="hover:bg-rose-100 dark:hover:bg-rose-900/20 hover:text-rose-600 rounded-full h-10 w-10 transition-colors"
                             >
                                 <X className="w-6 h-6 text-foreground/70" />

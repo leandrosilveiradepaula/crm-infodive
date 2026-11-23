@@ -490,6 +490,19 @@ try {
                         if (detailIssues) {
                             a11yFailureCount += 1;
                             a11yFailedRoutes.add('/pipeline?detail');
+                            const finding = {
+                                profileIndex, route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme,
+                                incompleteCount: detailAxe.incompleteCount,
+                                violationsCount: detailAxe.violationsCount,
+                                incomplete: detailAxe.incomplete,
+                                violations: detailAxe.violations,
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_B4_A11Y_DIAGNOSTIC=' + JSON.stringify({
+                                ...finding,
+                                incomplete: finding.incomplete.map((rule) => ({ ...rule, samples: rule.samples.slice(0, 4) })),
+                                violations: finding.violations.map((rule) => ({ ...rule, samples: rule.samples.slice(0, 4) })),
+                            }) + '\n');
                         }
                         await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
                         profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed' });

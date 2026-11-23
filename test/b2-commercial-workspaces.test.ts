@@ -43,6 +43,7 @@ describe('CRM #214 B2 commercial workspaces', () => {
             expect(source(path)).toContain('PremiumEmptyState');
         }
         expect(source('src/components/pipeline/DealCard.tsx')).toContain('Abrir detalhes');
+        expect(source('src/components/pipeline/ViewDealModal.tsx')).toContain('aria-label="Fechar detalhes da oportunidade"');
         expect(source('src/components/ui/ViewToggle.tsx')).toContain('aria-pressed');
     });
     it('keeps drag keyboard sensor on a separate, accessible button, never around quick actions', () => {
