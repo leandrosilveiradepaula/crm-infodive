@@ -146,10 +146,11 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(performers).toContain('text-success-readable');
         expect(performers).not.toContain('text-success font-black');
 
-        const tokens = source('src/app/globals.css');
+        const tokens = source('src/design-system/tokens.css');
         expect(tokens).toContain('--color-success-readable: var(--success-readable);');
-        expect(tokens).toContain('--success-readable: oklch(0.37 0.13 149.214);');
-        expect(tokens).toContain('--success-readable: oklch(0.82 0.115 149.214);');
+        expect(tokens).toContain('--ds-base-success-readable: oklch(0.37 0.13 149.214);');
+        expect(tokens).toContain('--success-readable: var(--ds-base-success-readable);');
+        expect(tokens).toContain('--ds-base-success-readable: oklch(0.82 0.115 149.214);');
     });
 
 
@@ -192,7 +193,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
 
 
     it('uses theme-specific readable semantic text for progress and automation counters', () => {
-        const tokens = source('src/app/globals.css');
+        const tokens = source('src/design-system/tokens.css');
         for (const name of ['destructive-readable', 'warning-readable', 'success-readable']) {
             expect(tokens).toContain('--color-' + name + ': var(--' + name + ');');
         }
@@ -213,7 +214,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(stats).not.toContain('text-primary/[0.06]');
         expect(stats).toContain('text-xs font-medium text-foreground');
         expect(stats).toContain('truncate text-xs text-foreground');
-        expect(source('src/components/layout/PageHeader.tsx')).toContain('text-sm leading-5 text-foreground');
+        expect(source('src/components/layout/PageHeader.tsx')).toContain('<Typography as="p" variant="body" className="max-w-3xl text-muted-foreground">');
         expect(source('src/components/ui/PremiumEmptyState.tsx')).toContain('text-foreground max-w-xs');
         expect(source('src/components/leads/LeadCard.tsx')).toContain('text-foreground text-[8px]');
         expect(source('src/components/contacts/ContactCard.tsx')).toContain('text-foreground text-[9px]');
