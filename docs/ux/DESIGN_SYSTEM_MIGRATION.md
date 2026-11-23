@@ -42,8 +42,8 @@ Recalculate on the final SHA after each migration block using npm run design-sys
 |---|---|---|---|
 | DS0 Central core | primitive color pairs, fonts, type, radius, shadows, gradients, spacing, Tailwind mapping | Implemented in candidate branch; CI not yet certified | token contract tests and theme inversion |
 | DS1 Shared components | Typography, Button, Card, Input, Table, Dialog, PageHeader and other primitives | Partially migrated in candidate | snapshot, role/keyboard and WCAG checks |
-| DS2 Shell/nav | all nav, headers and layout including #220 work | **PENDING** (#220 remains separate draft) | mobile/desktop, collapsed, both themes |
-| DS3 Pipeline | Board, cards, tables, drawer, financial panels and dialogs | ViewDealModal partially migrated; board/card not certified | board/list, editing, finance, mobile |
+| DS2 Shell/nav | all nav, headers and layout including #220 work | **CANDIDATE PORTED TO #221**; CI and authenticated QA pending | mobile/desktop, collapsed, both themes |
+| DS3 Pipeline | Board, cards, tables, drawer, financial panels and dialogs | **CANDIDATE BOARD/LIST + CARDS PORTED TO #221**; remaining commercial flows and QA pending | board/list, editing, finance, mobile |
 | DS4 Commercial | Leads, contacts, companies, proposals, sales, products, price tables | PENDING | real authenticated actions |
 | DS5 Operation | Inbox, activities, contracts, automations, Service Desk | PENDING | functional states and permission coverage |
 | DS6 Analytics/admin | Reports, KPI/graphs, integrations, goals, settings | PENDING | chart statuses, data and theme comparison |
@@ -53,6 +53,13 @@ The earlier owner-reported estimate (~106 files) was replaced by the measured ba
 - npm run design-system:inventory — summary by screen family and top files.
 - node scripts/report-design-system-debt.mjs --markdown — complete per-file migration matrix. Record verified totals, diff and completed routes against actual SHA rather than inventing a counter.
 - npm run lint:design-system — fail if the current branch introduces new local design decisions compared with its merge base.
+
+## G1 shell + Pipeline integration (source PR #220)
+
+The shell is a two-tier navigation composed of an icon rail and route-derived contextual area links. The Pipeline uses compact KPI summary, the board/list switch, existing action/drag semantics and the commercial-stage state names; none of those features are newly invented. Only design VALUES are centralized: `--ds-nav-rail-width`, `--ds-nav-expanded-width`, `--ds-nav-target-size`, `--ds-header-height`, `--ds-filter-gap`, `--ds-gradient-progress-primary/success`. The components consume these tokens; changing a token changes all consumers without editing pages.
+
+The original Clinia screenshots `093344(1).png` (compact Kanban under filters) and `093410(1).png` (detail drawer and right inspector) were directly examined as structural references. No claim of pixel-identical reproduction or global UX acceptance. The original #220's most recent authenticated QA at SHA `6f722876e91ec9cc761888a0f9cb48245eded3cb` **FAILED** due to a WCAG color-contrast violation in `/pipeline` detail; it also returned `aria-hidden-focus` incomplete samples. The integrated candidate is a new SHA, so this failure must be RETESTED with the revised centralized tokens and actual local-isolated QA results.
+
 
 ## Policy
 **Allowed:** grid/flex positioning, responsive behavior, overflow, structural widths, existing semantic colors/tokens, shared primitives. **Forbidden in newly written UI:** color names like bg-blue-500, literal hex, local background gradients, text-[9px], new arbitrary font scales, rounded-xl/shadow-lg as a component-specific decision. Exceptions (e.g. an external partner icon or chart-required data scale) must have a documented semantic role, read-only mapping and justification; do not suppress a real accessibility issue.

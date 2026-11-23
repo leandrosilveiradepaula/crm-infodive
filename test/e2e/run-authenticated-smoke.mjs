@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { verifyVercelPreview } from './verify-vercel-preview.mjs';
 
 const require = createRequire(import.meta.url);
@@ -180,7 +181,8 @@ async function assertLayout(page) {
         scrollWidth: document.documentElement.scrollWidth,
         viewportWidth: window.innerWidth,
         main: Boolean(document.querySelector('main')),
-        navigation: Boolean(document.querySelector('nav[aria-label="Navegação principal"]')),
+        navigation: Boolean(document.querySelector('nav[aria-label="Áreas principais"]')) &&
+            Boolean(document.querySelector('nav[aria-label^="Navegação de "]')),
     }));
     if (!layout.main || !layout.navigation) throw new Error('Dashboard shell is incomplete.');
     if (layout.scrollWidth > layout.viewportWidth) throw new Error(`Document overflows viewport (${layout.scrollWidth}px > ${layout.viewportWidth}px).`);
@@ -194,6 +196,9 @@ async function assertMobileNavigation(page, baseUrl) {
     await sidebar.waitFor({ state: 'visible' });
     const openTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
     if (openTranslate !== '0px') throw new Error('Mobile menu did not open.');
+    await page.getByRole('link', { name: 'Comercial' }).click();
+    await page.getByRole('button', { name: 'Abrir menu' }).click();
+    await sidebar.waitFor({ state: 'visible' });
     await page.getByRole('link', { name: 'Pipeline' }).click();
     await page.waitForURL((url) => url.pathname === '/pipeline', { timeout: 20_000 });
     const closedTranslate = await sidebar.evaluate((element) => getComputedStyle(element).translate);
@@ -249,7 +254,7 @@ async function runAxe(page, source) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions']);
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
             const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
             const levels = [];
@@ -285,7 +290,7 @@ async function runAxe(page, source) {
             const style = getComputedStyle(element);
             const tag = element.tagName?.toLowerCase() || '';
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions']);
             return {
                 resolved: true,
                 tag: staticTags.has(tag) ? tag : 'other',
@@ -338,6 +343,10 @@ let a11yFailureCount = 0;
 const a11yFailedRoutes = new Set();
 let browser;
 try {
+    // This reads the checked-out candidate, not GitHub's PR merge SHA. The
+    // workflow explicitly checks out the head SHA before this runner starts.
+    const candidateSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    if (!/^[a-f0-9]{40}$/i.test(candidateSha)) throw new Error('Could not determine the checked-out candidate SHA.');
     const { baseUrl, local } = validateEnvironment();
     const accounts = parseAccounts();
     // Local Next.js can still point at a live backend. Require the same explicit
@@ -467,13 +476,44 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+
+                    // The board screenshot alone cannot prove the focused opportunity
+                    // inspector. Capture one read-only drawer state from the synthetic
+                    // admin fixture without changing stage, products, or any deal data.
+                    if (capture && local && profileIndex === 0 && route === '/pipeline' && viewport.name === 'desktop' && theme === 'light') {
+                        const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
+                        await openDetails.click();
+                        const dialog = page.getByRole('dialog');
+                        await dialog.waitFor({ state: 'visible', timeout: 12_000 });
+                        const detailAxe = await runAxe(page, source);
+                        const detailIssues = detailAxe.incompleteCount + detailAxe.violationsCount;
+                        if (detailIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/pipeline?detail');
+                            const finding = {
+                                profileIndex, route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme,
+                                incompleteCount: detailAxe.incompleteCount,
+                                violationsCount: detailAxe.violationsCount,
+                                incomplete: detailAxe.incomplete,
+                                violations: detailAxe.violations,
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_B4_A11Y_DIAGNOSTIC=' + JSON.stringify({
+                                ...finding,
+                                incomplete: finding.incomplete.map((rule) => ({ ...rule, samples: rule.samples.slice(0, 4) })),
+                                violations: finding.violations.map((rule) => ({ ...rule, samples: rule.samples.slice(0, 4) })),
+                            }) + '\n');
+                        }
+                        await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
+                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed' });
+                    }
                 }
             }
         }
         results.profiles.push(profileResult);
         await context.close();
     }
-    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
+    if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, candidateSha, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
     if (a11yFailureCount) {
         fail('WCAG remains unresolved in ' + a11yFailureCount +
             ' audited combination(s) across ' + a11yFailedRoutes.size +

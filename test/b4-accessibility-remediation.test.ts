@@ -212,8 +212,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         const stats = source('src/components/layout/StatsGrid.tsx');
         expect(stats).toContain('data-qa-region="stats"');
         expect(stats).not.toContain('text-primary/[0.06]');
-        expect(stats).toContain('text-xs font-medium text-foreground');
-        expect(stats).toContain('truncate text-xs text-foreground');
+        expect(stats).toContain('ds-type-label');
+        expect(stats).toContain('ds-type-label');
         expect(source('src/components/layout/PageHeader.tsx')).toContain('<Typography as="p" variant="body" className="max-w-3xl text-muted-foreground">');
         expect(source('src/components/ui/PremiumEmptyState.tsx')).toContain('text-foreground max-w-xs');
         expect(source('src/components/leads/LeadCard.tsx')).toContain('text-foreground text-[8px]');

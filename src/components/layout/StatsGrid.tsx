@@ -8,8 +8,8 @@ export interface StatItem {
     value: string | number;
     description: string;
     icon: LucideIcon;
-    color: string; // Tailwind color class like 'text-primary' or 'text-emerald-600'
-    gradient: string; // Tailwind gradient classes like 'from-primary/5 to-white'
+    color: string; // Semantic Tailwind text class, e.g. 'text-primary'
+    gradient: string; // Legacy field until all callers migrate; never render feature-local gradients
     border: string; // Tailwind border class like 'border-primary/10'
     onClick?: () => void;
 }
@@ -24,13 +24,13 @@ export function StatsGrid({ items }: StatsGridProps) {
             {items.map((stat, index) => {
                 const Icon = stat.icon;
                 const isClickable = !!stat.onClick;
-                const tileClasses = `group relative min-h-28 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md focus-ring' : 'cursor-default'}`;
+                const tileClasses = `group relative min-h-28 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-ui focus-ring' : 'cursor-default'}`;
                 const tileContent = (
                     <>
                         <div className="relative flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                                <p className="text-xs font-medium text-foreground">{stat.label}</p>
-                                <p className="mt-2 truncate text-2xl font-semibold tracking-tight text-foreground">
+                                <p className="ds-type-label font-medium text-foreground">{stat.label}</p>
+                                <p className="mt-2 truncate ds-type-metric font-semibold tracking-tight text-foreground">
                                     {stat.value}
                                 </p>
                             </div>
@@ -38,7 +38,7 @@ export function StatsGrid({ items }: StatsGridProps) {
                                 <Icon className="size-4" />
                             </div>
                         </div>
-                        <p className="relative mt-2 truncate text-xs text-foreground">{stat.description}</p>
+                        <p className="relative mt-2 truncate ds-type-label text-foreground">{stat.description}</p>
                     </>
                 );
 

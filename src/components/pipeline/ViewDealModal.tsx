@@ -418,7 +418,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
                                 )}
                                 <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="ds-type-metadata uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
+                                <span className="ds-type-metadata uppercase font-bold tracking-tighter text-muted-foreground">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>
@@ -472,6 +472,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
+                                aria-label="Fechar detalhes da oportunidade"
                                 className="hover:bg-destructive-subtle hover:text-destructive-readable rounded-full h-10 w-10 transition-colors"
                             >
                                 <X className="w-6 h-6 text-foreground/70" />
@@ -678,8 +679,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             )}
                             {/* AI & Risk Sections */}
                             <div className="space-y-6">
-                                <DealDoctorFinal
-                                    deal={deal}
+                                <div data-qa-region="deal-doctor">
+                                    <DealDoctorFinal
+                                        deal={deal}
                                     onClose={() => setShowDealDoctor(false)}
                                     onAnalysisComplete={(analysis) => {
                                         console.log('[ViewDealModal-Sidebar] Analysis Completed:', analysis);
@@ -694,11 +696,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             return newDeal;
                                         });
                                     }}
-                                />
+                                    />
+                                </div>
                                 <div className="h-px bg-surface-subtle"></div>
-                                <RiskRadar deal={deal} />
+                                <div data-qa-region="deal-risk"><RiskRadar deal={deal} /></div>
                                 <div className="h-px bg-surface-subtle"></div>
-                                <DealSuggestedActions dealId={deal.id} />
+                                <div data-qa-region="deal-actions"><DealSuggestedActions dealId={deal.id} /></div>
                             </div>
 
                             {/* Client Portal Card */}

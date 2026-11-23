@@ -1,5 +1,12 @@
 # MEMORY — CRM Infodive UX/UI source of truth
 
+## 2026-11-23 — G1/DS2 shell and commercial workspace integration
+
+The owner explicitly authorized the next task after #221: integrate the functional G1 branch #220 with the central semantic Design System, not resume per-module hand-picked colors. #220 head inspected at 6f722876e91ec9cc761888a0f9cb48245eded3cb: its conventional CI PASS but full isolated authenticated QA FAIL on /pipeline -> deal-detail (color contrast violation and aria-hidden-focus incomplete). Do NOT claim #220 is accepted. Preserve its legitimate icon-rail/contextual navigation and board/list pipeline work, and fix the source cause against DS tokens.
+
+PR #221 is extended on its OWN branch rather than creating another micro-PR. Integration adds centralized nav widths/icon targets/header height/filter geometry, centrally configured deal-card progress gradients, Typography roles in shell and Pipeline, accessible close label and QA regions in ViewDealModal, and reuse of the isolated synthetic QA workflow from #220. No Supabase hosted project, business code, credentials, production or main merge touched. Full integrated QA and contrast still pending on the candidate until actual run results are observed.
+
+
 ## 2026-11-23 user directive — CENTRALIZED configurable Design System, not pixel-by-pixel cleanup
 
 The owner explicitly rejected continuing ad hoc local Tailwind restyling. On candidate 6fd9d590, CI run 45239400879 measured 196 UI files and 5,536 categorized style occurrences (broader than the earlier owner estimate of ~106 files). These numbers count matching style tokens, not distinct visual defects. A legitimate result requires changing fonts, colors, radii, shadows, typography and gradients centrally once with automatic propagation to ALL migrated modules. Preserve the existing visual identity; never ask the agent to invent local colors or choose new contrast palettes per module. No framework switch, business logic edits, Supabase migrations, or production deploy.

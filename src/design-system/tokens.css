@@ -230,6 +230,24 @@
   --ds-font-family-heading: var(--ds-font-family-body);
   --ds-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --ds-root-font-size: 16px;
+  /* Shared shell and operating workspace geometry. */
+  --ds-nav-rail-width: 4.5rem;
+  --ds-nav-expanded-width: 19.5rem;
+  --ds-nav-target-size: 2.5rem;
+  --ds-nav-icon-size: 1.25rem;
+  --ds-header-height: 4rem;
+  --ds-header-padding-y: 0.75rem;
+  --ds-toggle-icon-padding: 0.375rem;
+  --ds-toggle-container-padding: 0.25rem;
+  --ds-filter-gap: 0.75rem;
+  --ds-filter-padding: 0.75rem;
+  --ds-progress-primary-start: var(--primary);
+  --ds-progress-primary-end: color-mix(in oklab, var(--primary) 60%, transparent);
+  --ds-progress-success-start: var(--success);
+  --ds-progress-success-end: color-mix(in oklab, var(--success) 80%, transparent);
+  --ds-gradient-progress-primary: linear-gradient(90deg, var(--ds-progress-primary-start), var(--ds-progress-primary-end));
+  --ds-gradient-progress-success: linear-gradient(90deg, var(--ds-progress-success-start), var(--ds-progress-success-end));
+
   --ds-space-unit: 0.25rem;
   --ds-card-gap: 1rem;
   --ds-card-padding-block: 1.25rem;
@@ -496,6 +514,8 @@
     border-radius: var(--radius-panel);
     box-shadow: var(--shadow-panel);
   }
+  .ds-progress-primary { background-image: var(--ds-gradient-progress-primary); }
+  .ds-progress-success { background-image: var(--ds-gradient-progress-success); }
   .ds-panel-financial {
     background-color: var(--ds-surface-financial);
     background-image: var(--ds-gradient-financial);

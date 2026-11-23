@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-23: INTEGRATE G1 SHELL AND PIPELINE ON CENTRAL DESIGN SYSTEM
+
+**Owner authorization:** “prossiga com a próxima tarefa” after Design System PR #221. Extend the existing DRAFT PR #221; use the implementation from DRAFT PR #220 only where consistent with global semantic tokens. Do not merge any branch into main.
+
+**Exact source candidates:** #221 head at task start 1a68e9de93e49bc0d4a201aa62ccffbccfa1d317; #220 head 6f722876e91ec9cc761888a0f9cb48245eded3cb. #220 regular CI PASS, latest local authenticated QA FAIL on Pipeline opportunity detail. This task MUST not relabel it PASS. Real screenshot references are the 19 privately held Clinia PNGs; no copying them to public GitHub.
+
+**Implementation block:** integrate Sidebar contextual icon rail, Header and ViewToggle, Pipeline board/list, DealCard, shared StatsGrid/FilterBar and detail accessibility into the centralized token contract in src/design-system/tokens.css. No new hardcoded colors, fonts, control radius, shadows or gradients; CSS semantics own all design values. Preserve route hierarchy, features and all financial logic. Reuse sanitized SHA-bound E2E local QA workflow, do not connect hosted Supabase.
+
+**Allowed:** original UI presentation components listed above; one coherent isolated local-QA workflow and test helpers from #220; relevant tests, docs/ux/**, MEMORY.md, docs/codex/CURRENT_TASK.md and token style additions. **Denied:** database migrations, API/server actions, tenant/RBAC changes, production deployments, hosted credentials, other repos and any automatic merge.
+
+**Completion criteria:** CI unit+build+synthetic axe+nonregression guard PASS on the exact candidate; isolated authenticated local QA with sanitized screenshots and 4 test profiles PASS or explicit failure ledger; keyboard/ARIA and dark-mode contrast. Compare actual screenshots against the original reference before claiming visual acceptance. The current PR stays DRAFT until all gates verified. The global 196-file design migration is not complete.
+
+---
+
 # CURRENT_TASK — 2026-11-23: CENTRAL CONFIGURABLE DESIGN SYSTEM CORE (DS0–DS1 + Pipeline drawer pilot)
 
 **Explicit owner authorization:** 2026-11-23 direction to prioritize a single globally configurable Design System (colors, fonts, title sizes, radii, shadows, gradient roles and geometry), followed by “prossiga”. This task supersedes local module-by-module visual retouching as the immediate priority. It does NOT authorize Supabase migrations, production deployment or human merge.
