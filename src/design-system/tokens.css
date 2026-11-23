@@ -336,7 +336,7 @@
   --destructive: var(--ds-base-destructive);
   --ds-base-destructive-readable: oklch(0.82 0.12 22.216);
   --destructive-readable: var(--ds-base-destructive-readable);
-  --ds-base-destructive-foreground: oklch(0.205 0 0);
+  --ds-base-destructive-foreground: oklch(0.985 0 0);
   --destructive-foreground: var(--ds-base-destructive-foreground);
   --ds-base-success: oklch(0.52 0.16 149.214);
   --success: var(--ds-base-success);
