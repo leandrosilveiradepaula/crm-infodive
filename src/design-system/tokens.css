@@ -1,0 +1,510 @@
+/* Infodive CRM Design System core v1.
+ * Edit ONLY these shared primitive values to change all consuming modules.
+ * Semantic aliases --background, --primary, --success etc stay backward compatible.
+ * Future branding config must override vetted --ds-base-* values, not inject arbitrary CSS.
+ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--ds-font-family-body);
+  --font-mono: var(--ds-font-family-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-readable: var(--destructive-readable);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-readable: var(--warning-readable);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-stage-qualification: var(--stage-qualification);
+  --color-stage-proposal: var(--stage-proposal);
+  --color-stage-negotiation: var(--stage-negotiation);
+  --color-stage-won: var(--stage-won);
+  --color-stage-lost: var(--stage-lost);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-success-readable: var(--success-readable);
+  --color-success-subtle: var(--success-subtle);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-info-subtle: var(--info-subtle);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Dynamic semantic typography and component variants (Tailwind v4). */
+  --font-ui: var(--ds-font-family-body);
+  --font-display: var(--ds-font-family-heading);
+  --text-page-title: var(--ds-type-page-title-size);
+  --text-page-title--line-height: var(--ds-type-page-title-leading);
+  --text-page-title--font-weight: var(--ds-type-page-title-weight);
+  --text-section-title: var(--ds-type-section-title-size);
+  --text-section-title--line-height: var(--ds-type-section-title-leading);
+  --text-section-title--font-weight: var(--ds-type-section-title-weight);
+  --text-body-ui: var(--ds-type-body-size);
+  --text-body-ui--line-height: var(--ds-type-body-leading);
+  --text-body-ui--font-weight: var(--ds-type-body-weight);
+  --text-label-ui: var(--ds-type-label-size);
+  --text-label-ui--line-height: var(--ds-type-label-leading);
+  --text-label-ui--font-weight: var(--ds-type-label-weight);
+  --text-table-ui: var(--ds-type-table-size);
+  --text-table-ui--line-height: var(--ds-type-table-leading);
+  --text-table-ui--font-weight: var(--ds-type-table-weight);
+  --text-metadata-ui: var(--ds-type-metadata-size);
+  --text-metadata-ui--line-height: var(--ds-type-metadata-leading);
+  --text-metadata-ui--font-weight: var(--ds-type-metadata-weight);
+  --text-control-ui: var(--ds-type-control-size);
+  --text-control-ui--line-height: var(--ds-type-control-leading);
+  --text-control-ui--font-weight: var(--ds-type-control-weight);
+  --text-metric-ui: var(--ds-type-metric-size);
+  --text-metric-ui--line-height: var(--ds-type-metric-leading);
+  --text-metric-ui--font-weight: var(--ds-type-metric-weight);
+  --shadow-card-ui: var(--ds-shadow-card);
+  --shadow-control-ui: var(--ds-shadow-control);
+  --shadow-overlay-ui: var(--ds-shadow-overlay);
+  --color-surface-highlight: var(--ds-surface-highlight);
+  --color-surface-financial: var(--ds-surface-financial);
+}
+
+:root {
+  /* Infodive interface foundation: semantic values, never product-specific hex values. */
+  --ds-base-radius: 0.75rem;
+  --radius: var(--ds-base-radius);
+  --ds-base-radius-control: 0.625rem;
+  --radius-control: var(--ds-base-radius-control);
+  --ds-base-radius-panel: 0.875rem;
+  --radius-panel: var(--ds-base-radius-panel);
+  --ds-base-shadow-panel: 0 1px 2px oklch(0.145 0.02 260 / 5%), 0 1px 3px oklch(0.145 0.02 260 / 4%);
+  --shadow-panel: var(--ds-base-shadow-panel);
+  --ds-base-shadow-float: 0 12px 32px oklch(0.145 0.02 260 / 12%);
+  --shadow-float: var(--ds-base-shadow-float);
+  --ds-base-content-max-width: 110rem;
+  --content-max-width: var(--ds-base-content-max-width);
+  --ds-base-background: oklch(0.985 0.002 247.839);
+  --background: var(--ds-base-background);
+  /* Soft Gray/White, not harsh white */
+  --ds-base-foreground: oklch(0.129 0.042 264.695);
+  --foreground: var(--ds-base-foreground);
+  /* Deep Navy Blue for text */
+  --ds-base-card: oklch(1 0 0);
+  --card: var(--ds-base-card);
+  --ds-base-surface: oklch(1 0 0);
+  --surface: var(--ds-base-surface);
+  --ds-base-surface-raised: oklch(1 0 0);
+  --surface-raised: var(--ds-base-surface-raised);
+  --ds-base-surface-subtle: oklch(0.97 0.004 247.839);
+  --surface-subtle: var(--ds-base-surface-subtle);
+  --ds-base-card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: var(--ds-base-card-foreground);
+  --ds-base-popover: oklch(1 0 0);
+  --popover: var(--ds-base-popover);
+  --ds-base-popover-foreground: oklch(0.129 0.042 264.695);
+  --popover-foreground: var(--ds-base-popover-foreground);
+  --ds-base-primary: oklch(0.488 0.243 264.376);
+  --primary: var(--ds-base-primary);
+  /* IBM Blue */
+  --ds-base-primary-foreground: oklch(0.985 0 0);
+  --primary-foreground: var(--ds-base-primary-foreground);
+  --ds-base-secondary: oklch(0.95 0.01 240);
+  --secondary: var(--ds-base-secondary);
+  --ds-base-secondary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: var(--ds-base-secondary-foreground);
+  --ds-base-muted: oklch(0.95 0.01 240);
+  --muted: var(--ds-base-muted);
+  --ds-base-muted-foreground: oklch(0.45 0.02 260);
+  --muted-foreground: var(--ds-base-muted-foreground);
+  --ds-base-accent: oklch(0.95 0.01 240);
+  --accent: var(--ds-base-accent);
+  --ds-base-accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: var(--ds-base-accent-foreground);
+  --ds-base-destructive: oklch(0.577 0.245 27.325);
+  --destructive: var(--ds-base-destructive);
+  --ds-base-destructive-readable: oklch(0.44 0.17 27.325);
+  --destructive-readable: var(--ds-base-destructive-readable);
+  --ds-base-destructive-foreground: oklch(0.985 0 0);
+  --destructive-foreground: var(--ds-base-destructive-foreground);
+  --ds-base-success: oklch(0.52 0.16 149.214);
+  --success: var(--ds-base-success);
+  --ds-base-success-readable: oklch(0.37 0.13 149.214);
+  --success-readable: var(--ds-base-success-readable);
+  --ds-base-success-subtle: oklch(0.95 0.04 149.214);
+  --success-subtle: var(--ds-base-success-subtle);
+  --ds-base-success-foreground: oklch(0.985 0 0);
+  --success-foreground: var(--ds-base-success-foreground);
+  --ds-base-warning: oklch(0.53 0.12 70.08);
+  --warning: var(--ds-base-warning);
+  --ds-base-warning-readable: oklch(0.40 0.11 70.08);
+  --warning-readable: var(--ds-base-warning-readable);
+  --ds-base-warning-subtle: oklch(0.97 0.04 85);
+  --warning-subtle: var(--ds-base-warning-subtle);
+  --ds-base-warning-foreground: oklch(0.985 0 0);
+  --warning-foreground: var(--ds-base-warning-foreground);
+  --ds-base-info: oklch(0.48 0.12 180);
+  --info: var(--ds-base-info);
+  --ds-base-info-subtle: oklch(0.95 0.03 210);
+  --info-subtle: var(--ds-base-info-subtle);
+  --ds-base-destructive-subtle: oklch(0.96 0.025 27.325);
+  --destructive-subtle: var(--ds-base-destructive-subtle);
+  --ds-base-info-foreground: oklch(0.985 0 0);
+  --info-foreground: var(--ds-base-info-foreground);
+  --ds-base-border: oklch(0.9 0.01 260);
+  --border: var(--ds-base-border);
+  --ds-base-input: oklch(0.9 0.01 260);
+  --input: var(--ds-base-input);
+  --ds-base-ring: oklch(0.488 0.243 264.376);
+  --ring: var(--ds-base-ring);
+  --ds-base-chart-1: oklch(0.488 0.243 264.376);
+  --chart-1: var(--ds-base-chart-1);
+  --ds-base-chart-2: oklch(0.6 0.118 184.704);
+  --chart-2: var(--ds-base-chart-2);
+  --ds-base-chart-3: oklch(0.398 0.07 227.392);
+  --chart-3: var(--ds-base-chart-3);
+  --ds-base-chart-4: oklch(0.828 0.189 84.429);
+  --chart-4: var(--ds-base-chart-4);
+  --ds-base-chart-5: oklch(0.769 0.188 70.08);
+  --chart-5: var(--ds-base-chart-5);
+  --ds-base-sidebar: oklch(0.985 0.002 247.839);
+  --sidebar: var(--ds-base-sidebar);
+  --ds-base-sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-foreground: var(--ds-base-sidebar-foreground);
+  --ds-base-sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: var(--ds-base-sidebar-primary);
+  --ds-base-sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: var(--ds-base-sidebar-primary-foreground);
+  --ds-base-sidebar-accent: oklch(0.95 0.01 240);
+  --sidebar-accent: var(--ds-base-sidebar-accent);
+  --ds-base-sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-accent-foreground: var(--ds-base-sidebar-accent-foreground);
+  --ds-base-sidebar-border: oklch(0.9 0.01 260);
+  --sidebar-border: var(--ds-base-sidebar-border);
+  --ds-base-sidebar-ring: oklch(0.488 0.243 264.376);
+  --sidebar-ring: var(--ds-base-sidebar-ring);
+  --ds-base-stage-qualification: oklch(0.6 0.18 190); /* Teal 600-ish */
+  --stage-qualification: var(--ds-base-stage-qualification);
+  --ds-base-stage-proposal: oklch(0.7 0.15 170); /* Light Teal/Cyan */
+  --stage-proposal: var(--ds-base-stage-proposal);
+  --ds-base-stage-negotiation: oklch(0.704 0.140 70.08); /* Orange 500 */
+  --stage-negotiation: var(--ds-base-stage-negotiation);
+  --ds-base-stage-won: oklch(0.627 0.194 149.214); /* Emerald 500 */
+  --stage-won: var(--ds-base-stage-won);
+  --ds-base-stage-lost: oklch(0.577 0.245 27.325); /* Red 500 */
+  --stage-lost: var(--ds-base-stage-lost);
+
+  /* Single-source configurable typography. Font files are loaded by Next.js; names below are editable. */
+  --ds-font-family-body: var(--ds-font-inter, Inter), ui-sans-serif, system-ui, sans-serif;
+  --ds-font-family-heading: var(--ds-font-family-body);
+  --ds-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --ds-root-font-size: 16px;
+  --ds-space-unit: 0.25rem;
+  --ds-card-gap: 1rem;
+  --ds-card-padding-block: 1.25rem;
+  --ds-card-padding-inline: 1.25rem;
+  --ds-card-header-gap: 0.375rem;
+  --ds-table-header-height: 2.5rem;
+  --ds-table-cell-inline: 0.75rem;
+  --ds-table-cell-padding: 0.75rem;
+  --ds-control-height-default: 2.25rem;
+  --ds-control-height-small: 2rem;
+  --ds-control-height-large: 2.5rem;
+  --ds-control-padding-default: 1rem;
+  --ds-control-padding-small: 0.75rem;
+  --ds-control-padding-large: 1.5rem;
+  --ds-control-padding-field: 0.75rem;
+  --ds-control-padding-y: 0.25rem;
+  --ds-page-header-inline: 0.75rem;
+  --ds-page-header-block: 1rem;
+  --ds-page-header-gap: 0.75rem;
+  --ds-page-header-bottom: 1.25rem;
+
+  --ds-type-page-title-size: 1.5rem;
+  --ds-type-page-title-leading: 1.25;
+  --ds-type-page-title-weight: 600;
+  --ds-type-section-title-size: 1.125rem;
+  --ds-type-section-title-leading: 1.4;
+  --ds-type-section-title-weight: 600;
+  --ds-type-body-size: 0.875rem;
+  --ds-type-body-leading: 1.5;
+  --ds-type-body-weight: 400;
+  --ds-type-label-size: 0.8125rem;
+  --ds-type-label-leading: 1.4;
+  --ds-type-label-weight: 500;
+  --ds-type-table-size: 0.875rem;
+  --ds-type-table-leading: 1.45;
+  --ds-type-table-weight: 400;
+  --ds-type-metadata-size: 0.75rem;
+  --ds-type-metadata-leading: 1.4;
+  --ds-type-metadata-weight: 500;
+  --ds-type-control-size: 0.875rem;
+  --ds-type-control-leading: 1.25;
+  --ds-type-control-weight: 600;
+  --ds-type-metric-size: 1.5rem;
+  --ds-type-metric-weight: 700;
+  --ds-type-metric-leading: 1.25;
+  --ds-type-table-heading-transform: uppercase;
+  --ds-type-table-heading-letter-spacing: 0.04em;
+
+  /* Configurable global geometry and elevation; aliases preserve legacy components. */
+  --ds-shadow-control: 0 1px 2px oklch(0.145 0.02 260 / 6%);
+  --ds-shadow-card: var(--shadow-panel);
+  --ds-shadow-overlay: var(--shadow-float);
+  --shadow-card: var(--ds-shadow-card);
+  --ds-surface-highlight: var(--surface-subtle);
+  --ds-surface-financial: var(--info-subtle);
+
+  /* Gradients are semantic values. No feature component should declare a gradient. */
+  --ds-highlight-start: var(--surface-subtle);
+  --ds-highlight-end: var(--surface-raised);
+  --ds-financial-start: var(--info-subtle);
+  --ds-financial-end: var(--surface-raised);
+  --ds-gradient-highlight: linear-gradient(135deg, var(--ds-highlight-start), var(--ds-highlight-end));
+  --ds-gradient-financial: linear-gradient(135deg, var(--ds-financial-start), var(--ds-financial-end));
+  --ds-gradient-context: linear-gradient(90deg, var(--ds-highlight-start), var(--ds-highlight-end));
+  --ds-overlay-backdrop: oklch(0 0 0 / 50%);
+}
+
+.dark {
+  --ds-base-background: oklch(0.145 0 0);
+  --background: var(--ds-base-background);
+  --ds-base-foreground: oklch(0.985 0 0);
+  --foreground: var(--ds-base-foreground);
+  --ds-base-card: oklch(0.205 0 0);
+  --card: var(--ds-base-card);
+  --ds-base-surface: oklch(0.205 0 0);
+  --surface: var(--ds-base-surface);
+  --ds-base-surface-raised: oklch(0.235 0.005 260);
+  --surface-raised: var(--ds-base-surface-raised);
+  --ds-base-surface-subtle: oklch(0.175 0.004 260);
+  --surface-subtle: var(--ds-base-surface-subtle);
+  --ds-base-card-foreground: oklch(0.985 0 0);
+  --card-foreground: var(--ds-base-card-foreground);
+  --ds-base-popover: oklch(0.205 0 0);
+  --popover: var(--ds-base-popover);
+  --ds-base-popover-foreground: oklch(0.985 0 0);
+  --popover-foreground: var(--ds-base-popover-foreground);
+  --ds-base-primary: oklch(0.922 0 0);
+  --primary: var(--ds-base-primary);
+  --ds-base-primary-foreground: oklch(0.205 0 0);
+  --primary-foreground: var(--ds-base-primary-foreground);
+  --ds-base-secondary: oklch(0.269 0 0);
+  --secondary: var(--ds-base-secondary);
+  --ds-base-secondary-foreground: oklch(0.985 0 0);
+  --secondary-foreground: var(--ds-base-secondary-foreground);
+  --ds-base-muted: oklch(0.269 0 0);
+  --muted: var(--ds-base-muted);
+  --ds-base-muted-foreground: oklch(0.708 0 0);
+  --muted-foreground: var(--ds-base-muted-foreground);
+  --ds-base-accent: oklch(0.269 0 0);
+  --accent: var(--ds-base-accent);
+  --ds-base-accent-foreground: oklch(0.985 0 0);
+  --accent-foreground: var(--ds-base-accent-foreground);
+  --ds-base-destructive: oklch(0.704 0.191 22.216);
+  --destructive: var(--ds-base-destructive);
+  --ds-base-destructive-readable: oklch(0.82 0.12 22.216);
+  --destructive-readable: var(--ds-base-destructive-readable);
+  --ds-base-destructive-foreground: oklch(0.205 0 0);
+  --destructive-foreground: var(--ds-base-destructive-foreground);
+  --ds-base-success: oklch(0.52 0.16 149.214);
+  --success: var(--ds-base-success);
+  --ds-base-success-readable: oklch(0.82 0.115 149.214);
+  --success-readable: var(--ds-base-success-readable);
+  --ds-base-success-subtle: oklch(0.26 0.045 149.214);
+  --success-subtle: var(--ds-base-success-subtle);
+  --ds-base-success-foreground: oklch(0.985 0 0);
+  --success-foreground: var(--ds-base-success-foreground);
+  --ds-base-warning: oklch(0.53 0.12 70.08);
+  --warning: var(--ds-base-warning);
+  --ds-base-warning-readable: oklch(0.84 0.09 75);
+  --warning-readable: var(--ds-base-warning-readable);
+  --ds-base-warning-subtle: oklch(0.27 0.04 85);
+  --warning-subtle: var(--ds-base-warning-subtle);
+  --ds-base-warning-foreground: oklch(0.985 0 0);
+  --warning-foreground: var(--ds-base-warning-foreground);
+  --ds-base-info: oklch(0.48 0.12 180);
+  --info: var(--ds-base-info);
+  --ds-base-info-subtle: oklch(0.25 0.035 210);
+  --info-subtle: var(--ds-base-info-subtle);
+  --ds-base-destructive-subtle: oklch(0.26 0.04 27.325);
+  --destructive-subtle: var(--ds-base-destructive-subtle);
+  --ds-base-info-foreground: oklch(0.985 0 0);
+  --info-foreground: var(--ds-base-info-foreground);
+  --ds-base-border: oklch(1 0 0 / 10%);
+  --border: var(--ds-base-border);
+  --ds-base-input: oklch(1 0 0 / 15%);
+  --input: var(--ds-base-input);
+  --ds-base-ring: oklch(0.556 0 0);
+  --ring: var(--ds-base-ring);
+  --ds-base-chart-1: oklch(0.488 0.243 264.376);
+  --chart-1: var(--ds-base-chart-1);
+  --ds-base-chart-2: oklch(0.696 0.17 162.48);
+  --chart-2: var(--ds-base-chart-2);
+  --ds-base-chart-3: oklch(0.769 0.188 70.08);
+  --chart-3: var(--ds-base-chart-3);
+  --ds-base-chart-4: oklch(0.627 0.265 303.9);
+  --chart-4: var(--ds-base-chart-4);
+  --ds-base-chart-5: oklch(0.645 0.246 16.439);
+  --chart-5: var(--ds-base-chart-5);
+  --ds-base-sidebar: oklch(0.205 0 0);
+  --sidebar: var(--ds-base-sidebar);
+  --ds-base-sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-foreground: var(--ds-base-sidebar-foreground);
+  --ds-base-sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: var(--ds-base-sidebar-primary);
+  --ds-base-sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: var(--ds-base-sidebar-primary-foreground);
+  --ds-base-sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: var(--ds-base-sidebar-accent);
+  --ds-base-sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-accent-foreground: var(--ds-base-sidebar-accent-foreground);
+  --ds-base-sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-border: var(--ds-base-sidebar-border);
+  --ds-base-sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: var(--ds-base-sidebar-ring);
+  --ds-base-stage-qualification: oklch(0.6 0.18 190);
+  --stage-qualification: var(--ds-base-stage-qualification);
+  --ds-base-stage-proposal: oklch(0.65 0.15 170);
+  --stage-proposal: var(--ds-base-stage-proposal);
+  --ds-base-stage-negotiation: oklch(0.704 0.140 70.08);
+  --stage-negotiation: var(--ds-base-stage-negotiation);
+  --ds-base-stage-won: oklch(0.627 0.194 149.214);
+  --stage-won: var(--ds-base-stage-won);
+  --ds-base-stage-lost: oklch(0.704 0.191 22.216);
+  --stage-lost: var(--ds-base-stage-lost);
+}
+
+/* Applied from one source to every theme and route. Only the variables above may be overridden. */
+@media (max-width: 1550px) {
+  :root { --ds-root-font-size: 14.5px; }
+}
+@media (max-width: 1366px) {
+  :root { --ds-root-font-size: 13.5px; }
+}
+@media (min-width: 640px) {
+  :root { --ds-type-page-title-size: 1.75rem; --ds-page-header-inline: 1rem; }
+}
+
+@media (min-width: 1024px) {
+  :root { --ds-page-header-inline: 1.5rem; --ds-page-header-bottom: 1.5rem; }
+}
+
+@layer components {
+  .ds-page-header {
+    padding-block: var(--ds-page-header-block);
+    padding-inline: var(--ds-page-header-inline);
+    margin-bottom: var(--ds-page-header-bottom);
+  }
+
+  .ds-type-page-title {
+    font-family: var(--ds-font-family-heading);
+    font-size: var(--ds-type-page-title-size);
+    font-weight: var(--ds-type-page-title-weight);
+    line-height: var(--ds-type-page-title-leading);
+    letter-spacing: -0.02em;
+  }
+  .ds-type-section-title {
+    font-family: var(--ds-font-family-heading);
+    font-size: var(--ds-type-section-title-size);
+    font-weight: var(--ds-type-section-title-weight);
+    line-height: var(--ds-type-section-title-leading);
+  }
+  .ds-type-body {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-body-size);
+    font-weight: var(--ds-type-body-weight);
+    line-height: var(--ds-type-body-leading);
+  }
+  .ds-type-label {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-label-size);
+    font-weight: var(--ds-type-label-weight);
+    line-height: var(--ds-type-label-leading);
+  }
+  .ds-type-table {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-table-size);
+    font-weight: var(--ds-type-table-weight);
+    line-height: var(--ds-type-table-leading);
+  }
+  .ds-type-metadata {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-metadata-size);
+    font-weight: var(--ds-type-metadata-weight);
+    line-height: var(--ds-type-metadata-leading);
+  }
+  .ds-type-control {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-control-size);
+    font-weight: var(--ds-type-control-weight);
+    line-height: var(--ds-type-control-leading);
+  }
+  .ds-type-table-heading {
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-label-size);
+    font-weight: var(--ds-type-label-weight);
+    line-height: var(--ds-type-label-leading);
+    text-transform: var(--ds-type-table-heading-transform);
+    letter-spacing: var(--ds-type-table-heading-letter-spacing);
+  }
+  .ds-type-metric {
+    font-family: var(--ds-font-family-heading);
+    font-size: var(--ds-type-metric-size);
+    font-weight: var(--ds-type-metric-weight);
+    line-height: var(--ds-type-metric-leading);
+  }
+  .ds-overlay-backdrop {
+    background-color: var(--ds-overlay-backdrop);
+  }
+  .ds-panel-highlight {
+    background-color: var(--ds-surface-highlight);
+    background-image: var(--ds-gradient-highlight);
+    color: var(--foreground);
+    border-color: var(--border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+  }
+  .ds-panel-financial {
+    background-color: var(--ds-surface-financial);
+    background-image: var(--ds-gradient-financial);
+    color: var(--foreground);
+    border-color: var(--border);
+    border-radius: var(--radius-panel);
+    box-shadow: var(--shadow-panel);
+  }
+  .ds-gradient-context {
+    background-image: var(--ds-gradient-context);
+  }
+}

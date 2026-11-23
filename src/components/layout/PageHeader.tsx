@@ -1,4 +1,5 @@
 import React from 'react';
+import { Typography } from '@/components/ui/typography';
 
 interface PageHeaderProps {
     title: string;
@@ -8,13 +9,13 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
     return (
-        <div className="sticky top-0 z-20 -mx-3 mb-5 flex flex-col gap-3 border-b border-border bg-background px-3 py-4 sm:-mx-4 sm:px-4 lg:-mx-6 lg:mb-6 lg:px-6 md:flex-row md:items-center md:justify-between">
+        <div className="sticky top-0 z-20 -mx-3  flex flex-col gap-[var(--ds-page-header-gap)] border-b border-border bg-background ds-page-header sm:-mx-4  lg:-mx-6   md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 space-y-1">
-                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">{title}</h1>
+                <Typography as="h1" variant="pageTitle">{title}</Typography>
                 {description && (
-                    <p className="max-w-3xl text-sm leading-5 text-foreground">
+                    <Typography as="p" variant="body" className="max-w-3xl text-muted-foreground">
                         {description}
-                    </p>
+                    </Typography>
                 )}
             </div>
             

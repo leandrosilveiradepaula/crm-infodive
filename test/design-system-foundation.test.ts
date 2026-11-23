@@ -6,7 +6,7 @@ const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf
 
 describe('Infodive design-system foundation', () => {
     it('defines semantic surfaces in both themes while inheriting shared geometry', () => {
-        const css = source('src/app/globals.css');
+        const css = source('src/design-system/tokens.css');
         const light = css.match(/:root\s*\{([^}]+)\}/)?.[1];
         const dark = css.match(/\.dark\s*\{([^}]+)\}/)?.[1];
 

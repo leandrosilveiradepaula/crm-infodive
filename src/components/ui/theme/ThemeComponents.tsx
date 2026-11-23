@@ -12,7 +12,7 @@ export const ThemePanel = ({ children, className }: { children: ReactNode, class
 
 export const ThemeSectionHeader = ({ title, iconColor = "bg-primary", children }: { title: string, iconColor?: string, children?: ReactNode }) => (
     <div className="flex items-center justify-between h-6 mb-2">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+        <p className="ds-type-label text-muted-foreground uppercase tracking-wide flex items-center gap-2">
             <span className={cn("w-1 h-1 rounded-full", iconColor)}></span>
             {title}
         </p>
@@ -23,7 +23,7 @@ export const ThemeSectionHeader = ({ title, iconColor = "bg-primary", children }
 // --- Typography & Labels ---
 
 export const ThemeLabel = ({ children, className, ...props }: { children: ReactNode, className?: string } & React.ComponentProps<typeof Label>) => (
-    <Label className={cn("text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mb-1.5", className)} {...props}>
+    <Label className={cn("ds-type-label text-muted-foreground uppercase tracking-wide block mb-1.5", className)} {...props}>
         {children}
     </Label>
 );
@@ -40,7 +40,7 @@ export const ThemeInput = React.forwardRef<HTMLInputElement, ThemeInputProps>(
             <input
                 ref={ref}
                 className={cn(
-                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-3 py-2 text-xs font-semibold text-foreground shadow-xs outline-none transition-[color,box-shadow,border-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-3 py-2 ds-type-control text-foreground shadow-xs outline-none transition-[color,box-shadow,border-color] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}
@@ -62,7 +62,7 @@ export const ThemeSelect = React.forwardRef<HTMLSelectElement, ThemeSelectProps>
             <select
                 ref={ref}
                 className={cn(
-                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-2 py-1.5 text-xs font-semibold text-foreground outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-2 py-1.5 ds-type-control text-foreground outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}
@@ -79,7 +79,7 @@ ThemeSelect.displayName = "ThemeSelect";
 // --- Read-Only Displays ---
 
 export const ThemeReadOnlyField = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-muted border border-border rounded-[var(--radius-control)] px-3 py-2 text-xs font-semibold text-muted-foreground h-[34px] flex items-center truncate", className)}>
+    <div className={cn("bg-muted border border-border rounded-[var(--radius-control)] px-3 py-2 ds-type-control text-muted-foreground h-[34px] flex items-center truncate", className)}>
         {children || '---'}
     </div>
 );
@@ -133,7 +133,7 @@ export const ThemeCurrencyInput = React.forwardRef<HTMLInputElement, Omit<ThemeI
 
         return (
             <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">{currency}</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 ds-type-label text-muted-foreground">{currency}</span>
                 <ThemeInput
                     ref={ref}
                     type="text"

@@ -377,8 +377,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                 {/* Header */}
                 <div className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
                     <div className="flex items-center gap-6">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${deal.stage === 'won' ? 'bg-emerald-500/20 text-emerald-500' :
-                            deal.stage === 'lost' ? 'bg-rose-500/20 text-rose-500' : 'bg-primary/20 text-blue-500'
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-control-ui ${deal.stage === 'won' ? 'bg-success-subtle text-success-readable' :
+                            deal.stage === 'lost' ? 'bg-destructive-subtle text-destructive-readable' : 'bg-primary/20 text-info'
                             }`}>
                             <DollarSign className="w-6 h-6" />
                         </div>
@@ -396,7 +396,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 </div>
                             )}
                             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground w-full">
-                                <Building2 className="w-3.5 h-3.5 text-blue-500/60 shrink-0" />
+                                <Building2 className="w-3.5 h-3.5 text-info/60 shrink-0" />
                                 {isEditing ? (
                                     <Select
                                         value={formData.account_id || 'none'}
@@ -418,7 +418,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
                                 )}
                                 <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
+                                <span className="ds-type-metadata uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>
@@ -429,9 +429,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                                className="text-muted-foreground hover:text-foreground h-8 font-bold text-[10px] uppercase tracking-widest"
+                                className="text-muted-foreground hover:text-foreground h-8 font-bold ds-type-metadata uppercase tracking-widest"
                             >
-                                {isEditing ? <Save className="w-3.5 h-3.5 mr-2 text-emerald-500" /> : <Edit2 className="w-3.5 h-3.5 mr-2" />}
+                                {isEditing ? <Save className="w-3.5 h-3.5 mr-2 text-success-readable" /> : <Edit2 className="w-3.5 h-3.5 mr-2" />}
                                 {isEditing ? 'Salvar' : 'Editar'}
                             </Button>
                             <div className="w-px h-4 bg-border mx-1" />
@@ -448,7 +448,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         key={stage}
                                         onClick={() => handleStageChange(stage)}
                                         className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${deal.stage === stage
-                                            ? 'bg-primary text-white shadow-lg'
+                                            ? 'bg-primary text-primary-foreground shadow-lg'
                                             : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                             }`}
                                     >
@@ -464,7 +464,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 onClick={handleDuplicate}
                                 disabled={isLoading}
                                 title="Duplicar Oportunidade"
-                                className="hover:bg-blue-100 dark:hover:bg-blue-900/20 hover:text-primary rounded-full h-10 w-10 transition-colors"
+                                className="hover:bg-info-subtle hover:text-primary rounded-full h-10 w-10 transition-colors"
                             >
                                 <Copy className="w-5 h-5 text-foreground/70" />
                             </Button>
@@ -472,7 +472,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 variant="ghost"
                                 size="icon"
                                 onClick={onClose}
-                                className="hover:bg-rose-100 dark:hover:bg-rose-900/20 hover:text-rose-600 rounded-full h-10 w-10 transition-colors"
+                                className="hover:bg-destructive-subtle hover:text-destructive-readable rounded-full h-10 w-10 transition-colors"
                             >
                                 <X className="w-6 h-6 text-foreground/70" />
                             </Button>
@@ -586,32 +586,32 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     <div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                             {/* Financial Cockpit Section */}
-                            <section className="bg-gradient-to-br from-blue-50 to-white border border-border rounded-xl p-4 shadow-sm relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-blue-400 pointer-events-none" />
+                            <section className="ds-panel-financial border p-4 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-info pointer-events-none" />
                                 <div className="flex items-center gap-2 mb-6 relative z-10">
-                                    <div className="p-1.5 bg-blue-100 rounded-lg border border-blue-200">
+                                    <div className="p-1.5 bg-info-subtle rounded-lg border border-info/30">
                                         <Zap className="h-4 w-4 text-primary" />
                                     </div>
-                                    <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wide">Cockpit Financeiro</h4>
+                                    <h4 className="ds-type-metadata font-bold text-foreground uppercase tracking-wide">Cockpit Financeiro</h4>
                                 </div>
                                 {/* Stats Container */}
                                 <div className="space-y-3 relative z-10">
                                     {/* Value Display */}
-                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
-                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
+                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 shadow-sm">
+                                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-[10px] font-bold text-primary">R$</span>
-                                            <span className="text-2xl font-black text-foreground tracking-tight">
+                                            <span className="ds-type-metadata font-bold text-primary">R$</span>
+                                            <span className="ds-type-metric text-foreground tracking-tight">
                                                 {formatCurrency(calculateDealValue(deal.deal_products || [])).replace('R$', '').trim()}
                                             </span>
                                         </div>
                                     </div>
 
                                     {/* Probability Gauge */}
-                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
+                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 shadow-sm">
                                         <div className="flex justify-between items-center mb-3">
-                                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
-                                            <span className={`text-[10px] font-black uppercase ${formData.probability > 70 ? 'text-emerald-600' : 'text-primary'}`}>
+                                            <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
+                                            <span className={`ds-type-metadata font-black uppercase ${formData.probability > 70 ? 'text-success-readable' : 'text-primary'}`}>
                                                 {formData.probability}%
                                             </span>
                                         </div>
@@ -625,7 +625,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                 />
                                             ) : null}
                                             <div
-                                                className={`h-full rounded-full transition-all duration-1000 ${formData.probability > 70 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'}`}
+                                                className={`h-full rounded-full transition-all duration-1000 ${formData.probability > 70 ? 'bg-success shadow-control-ui' : 'bg-info shadow-control-ui'}`}
                                                 style={{ width: `${formData.probability}%` }}
                                             />
                                         </div>
@@ -633,12 +633,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                                     {/* Expected Close Date */}
                                     <div
-                                        className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
+                                        className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
                                         onClick={() => !isEditing && setIsEditing(true)}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Data de Fechamento</p>
+                                                <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide mb-1">Data de Fechamento</p>
                                                 <p className="text-sm font-bold text-foreground">
                                                     {isEditing ? (
                                                         <input
@@ -653,7 +653,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                                     )}
                                                 </p>
                                             </div>
-                                            <Calendar className="h-8 w-8 text-blue-500/20" />
+                                            <Calendar className="h-8 w-8 text-info/20" />
                                         </div>
                                     </div>
                                 </div>
@@ -662,14 +662,14 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             {deal.stage === 'lost' && (
                                 <section className="space-y-4">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <AlertCircle className="h-4 w-4 text-red-500 fill-red-50" />
-                                        <h4 className="text-[10px] font-black text-red-600 uppercase tracking-widest">Feedback de Perda</h4>
+                                        <AlertCircle className="h-4 w-4 text-destructive-readable fill-destructive-subtle" />
+                                        <h4 className="ds-type-metadata font-black text-destructive-readable uppercase tracking-widest">Feedback de Perda</h4>
                                     </div>
-                                    <div className="bg-card/5 p-4 rounded-xl border border-white/5 transition-all hover:bg-card/10 hover:border-primary/20 group">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
-                                        <p className="text-sm font-bold text-red-500">{deal.loss_reason || 'Não informado'}</p>
+                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border/40 transition-all hover:bg-surface-raised hover:border-primary/20 group">
+                                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
+                                        <p className="text-sm font-bold text-destructive-readable">{deal.loss_reason || 'Não informado'}</p>
                                         {deal.lost_at && (
-                                            <p className="text-[9px] text-red-500/50 font-medium mt-1">
+                                            <p className="ds-type-metadata text-destructive-readable/50 font-medium mt-1">
                                                 Registrado em: {new Date(deal.lost_at).toLocaleDateString('pt-BR')}
                                             </p>
                                         )}
@@ -695,14 +695,14 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         });
                                     }}
                                 />
-                                <div className="h-px bg-card/5"></div>
+                                <div className="h-px bg-surface-subtle"></div>
                                 <RiskRadar deal={deal} />
-                                <div className="h-px bg-card/5"></div>
+                                <div className="h-px bg-surface-subtle"></div>
                                 <DealSuggestedActions dealId={deal.id} />
                             </div>
 
                             {/* Client Portal Card */}
-                            <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-4 rounded-xl border border-blue-200 relative overflow-hidden group">
+                            <div className="ds-panel-highlight p-4 border relative overflow-hidden group">
                                 <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                     <Globe className="h-24 w-24 text-primary" />
                                 </div>
@@ -712,7 +712,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             <Globe className="h-4 w-4 text-primary" />
                                             Portal do Cliente
                                         </h3>
-                                        <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                        <p className="ds-type-metadata text-muted-foreground leading-relaxed">
                                             Compartilhe este link seguro para acompanhamento da proposta e status.
                                         </p>
                                     </div>
@@ -747,10 +747,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                             {/* Tags */}
                             <section>
-                                <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Segmentação & Tags</h4>
+                                <h4 className="ds-type-metadata font-black text-muted-foreground uppercase tracking-widest mb-4">Segmentação & Tags</h4>
                                 <div className="flex flex-wrap gap-2">
                                     {(deal.tags || ['Enterprise', 'High Priority']).map(tag => (
-                                        <span key={tag} className="px-2.5 py-1 rounded-full bg-blue-100 text-[9px] font-black text-blue-700 border border-blue-200 uppercase tracking-tighter">
+                                        <span key={tag} className="px-2.5 py-1 rounded-full bg-info-subtle ds-type-metadata font-black text-info border border-info/30 uppercase tracking-tighter">
                                             {tag}
                                         </span>
                                     ))}
@@ -763,17 +763,17 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => router.push(`/pipeline/proposals/editor/${deal.id}`)}
-                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-teal-300"
+                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-info/40"
                                 >
-                                    <FileText className="h-4 w-4 text-teal-500" />
+                                    <FileText className="h-4 w-4 text-info" />
                                     Proposta
                                 </button>
 
                                 <button
                                     onClick={() => setShowContractBuilder(true)}
-                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-emerald-300"
+                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-success/40"
                                 >
-                                    <Scroll className="h-4 w-4 text-emerald-600" />
+                                    <Scroll className="h-4 w-4 text-success-readable" />
                                     Contrato
                                 </button>
                             </div>
@@ -781,7 +781,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             {deal.stage === 'won' && (
                                 <button
                                     onClick={() => setShowHandoverModal(true)}
-                                    className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-emerald-200"
+                                    className="w-full py-3 bg-success-subtle hover:bg-success-subtle text-success-readable rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-success/30"
                                 >
                                     <CheckSquare className="h-4 w-4" />
                                     Iniciar Handover Técnico

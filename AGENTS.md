@@ -4,6 +4,16 @@
 
 This file contains permanent repository-level instructions for coding agents working in this project. Task-specific requirements belong in `docs/codex/CURRENT_TASK.md`, not here.
 
+## Owner override 2026-11-23 — centralized, configurable Design System FIRST
+
+The immediate CRM UX priority is not individual visual retouching. Build and consume one centrally configurable semantic Design System before continuing module-by-module restyling. This decision overrides any historical G1-G5 task wording that implies selecting local colors, typography, gradients, shadows or radii by visual guesswork.
+
+Mandatory order: central source of primitive theme values -> semantic aliases -> shared UI/typography components -> incremental route-family migration -> a strict hardcode non-regression gate and per-file debt matrix -> authenticated same-SHA visual/functional certification. Preserve the actual Infodive identity and existing business behavior; screenshots are structural references, not an instruction to guess new brand palettes.
+
+Default visual configuration is src/design-system/tokens.css. src/app/globals.css only imports that configuration and contains base utilities. Every migrated UI component must consume semantic colors, typography, radii, shadows, geometry and gradients; never add new Tailwind palette literals or component-local gradient declarations. See docs/ux/DESIGN_SYSTEM_MIGRATION.md and src/design-system/README.md. The current ~/106 files are an owner-reported estimate, not a certified inventory.
+
+Keep PR #220 isolated as a pre-existing draft; reconcile its layout changes with the new core before merge. Do not silently merge, deploy, migrate databases or modify theme persistence. A future per-organization theme editor requires its own schema/authorization/security and WCAG validation gate.
+
 ## ChatGPT + GitHub + Codex governance
 
 GitHub is the shared control plane between ChatGPT, Codex, and maintainers.

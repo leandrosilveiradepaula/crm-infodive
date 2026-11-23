@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-23: CENTRAL CONFIGURABLE DESIGN SYSTEM CORE (DS0–DS1 + Pipeline drawer pilot)
+
+**Explicit owner authorization:** 2026-11-23 direction to prioritize a single globally configurable Design System (colors, fonts, title sizes, radii, shadows, gradient roles and geometry), followed by “prossiga”. This task supersedes local module-by-module visual retouching as the immediate priority. It does NOT authorize Supabase migrations, production deployment or human merge.
+
+**Repository baseline:** main at a9097aac7c53548f6f0983265c24a90c513b8746. Existing PR #220 is an independent G1 UX DRAFT; do not change its branch or merge it. Open one substantial separate PR for this central core against main, then reconcile #220 later.
+
+**Allowed in this scope:** src/design-system/**; src/app/globals.css; src/app/layout.tsx ONLY to resolve the centrally loaded font; src/components/ui/** for shared UI primitives; src/components/layout/PageHeader.tsx; src/components/pipeline/ViewDealModal.tsx as an end-to-end reference migration; relevant tests under test/**, scripts/**, package.json, .github/workflows/crm-validation.yml to enforce hardcode policy; docs/ux/** and root AGENTS.md/MEMORY.md/docs/codex/CURRENT_TASK.md. Keep untouched all business/server/API actions, RBAC, RLS, migrations, integration and production environment.
+
+**Deliverables:** one authoritative CSS token source with light/dark, semantic aliases and Tailwind 4 mapping; shared typography and base components; no locally defined gradients in the Pipeline drawer; versioned migration plan and per-file debt inventory; a CI guard preventing growth in local hardcoded colors/type/radius/shadows/gradients. Existing nonmigrated visual debt remains explicitly PENDING; do not claim global UX acceptance or completion of ~106 files.
+
+**Required validation:** TypeScript, unit tests, build, design-token guard and real synthetic accessibility/browser QA on the same candidate SHA through existing workflows. No false PASS for runtime admin configurator, WCAG across unconverted modules, or production deployment. The PR remains DRAFT while checks and visual gates are pending. A human approves merge into main.
+
+---
+
 # CURRENT_TASK — 2026-11-19: RESTORE UX SOURCE OF TRUTH (documentation and skills ONLY)
 
 **Authorization:** the owner explicitly requested permanent preservation of every UI/UX obligation, AGENTS.md and MEMORY.md instructions, the Clinia visual references, and the UI/UX skill, BEFORE restarting the redesign. This source-of-truth stage is not an authorization to change application screens, database, environments, or production.

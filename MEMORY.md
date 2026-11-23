@@ -1,5 +1,14 @@
 # MEMORY — CRM Infodive UX/UI source of truth
 
+## 2026-11-23 user directive — CENTRALIZED configurable Design System, not pixel-by-pixel cleanup
+
+The owner explicitly rejected continuing ad hoc local Tailwind restyling in ~106 files. A legitimate result requires changing fonts, colors, radii, shadows, typography and gradients centrally once with automatic propagation to ALL migrated modules. Preserve the existing visual identity; never ask the agent to invent local colors or choose new contrast palettes per module. No framework switch, business logic edits, Supabase migrations, or production deploy.
+
+Confirmed on main: Next 16/Tailwind 4. src/app/globals.css had a base semantic palette but no coherent type/gradient token system; ViewDealModal.tsx had local from-blue-50/to-white and from-blue-50/to-teal-50 gradients; root layout loaded Inter while globals.css used --font-geist-sans; OrganizationThemeSettings presents an org theme picker but updateOrgTheme did not persist a default choice, so the UI is NOT a functional theme configuration system. Do not claim it is.
+
+New implementation program: docs/ux/DESIGN_SYSTEM_MIGRATION.md; central defaults in src/design-system/tokens.css; shared primitives; per-file debt reporter and CI guard. Core DS0 is not global UX acceptance; remaining route families require incremental conversion and same-SHA visual/functional QA. PR #220 remains separate draft. Future runtime tenant theme config is out of scope pending security/migration authorization.
+
+
 Last updated: 2026-11-19. Repository-scoped continuity, not ChatGPT personal memory.
 
 ## Owner's fixed goal
