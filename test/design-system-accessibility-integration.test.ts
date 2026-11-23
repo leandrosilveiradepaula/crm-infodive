@@ -37,6 +37,16 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(radar).toContain('text-destructive-readable');
   });
 
+  it('keeps the real application background inert while the modal is mounted, with cleanup', () => {
+    const shell = read('src/components/layout/DashboardShell.tsx');
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    expect(shell).toContain('data-slot="crm-dashboard-shell"');
+    expect(modal).toContain("document.querySelector<HTMLElement>('[data-slot=\"crm-dashboard-shell\"]')");
+    expect(modal).toContain('shell.inert = true;');
+    expect(modal).toContain('shell.inert = wasInert;');
+    expect(modal).toContain('}, [isOpen]);');
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');

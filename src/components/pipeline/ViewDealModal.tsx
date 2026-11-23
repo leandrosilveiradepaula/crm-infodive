@@ -368,6 +368,19 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
         }
     };
 
+    // Modal content is portalled to document.body. Inert the underlying
+    // application shell while the opportunity dialog is open so background
+    // actions cannot receive focus or be evaluated as foreground controls.
+    // Restore the previous inert state on close/unmount (including error paths).
+    useEffect(() => {
+        if (!isOpen) return;
+        const shell = document.querySelector<HTMLElement>('[data-slot="crm-dashboard-shell"]');
+        if (!shell) return;
+        const wasInert = shell.inert;
+        shell.inert = true;
+        return () => { shell.inert = wasInert; };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
