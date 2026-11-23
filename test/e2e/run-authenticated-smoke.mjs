@@ -476,6 +476,24 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+
+                    // The board screenshot alone cannot prove the focused opportunity
+                    // inspector. Capture one read-only drawer state from the synthetic
+                    // admin fixture without changing stage, products, or any deal data.
+                    if (capture && local && profileIndex === 0 && route === '/pipeline' && viewport.name === 'desktop' && theme === 'light') {
+                        const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
+                        await openDetails.click();
+                        const dialog = page.getByRole('dialog');
+                        await dialog.waitFor({ state: 'visible', timeout: 12_000 });
+                        const detailAxe = await runAxe(page, source);
+                        const detailIssues = detailAxe.incompleteCount + detailAxe.violationsCount;
+                        if (detailIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/pipeline?detail');
+                        }
+                        await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
+                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed' });
+                    }
                 }
             }
         }

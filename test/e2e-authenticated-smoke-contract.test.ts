@@ -39,6 +39,8 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain('Mobile menu did not close after navigation.');
         expect(source).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
         expect(source).toContain('candidateSha, target:');
+        expect(source).toContain("state: 'deal-detail'");
+        expect(source).toContain('pipeline-deal-detail-desktop-light.png');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];
