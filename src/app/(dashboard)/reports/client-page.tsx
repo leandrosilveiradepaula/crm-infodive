@@ -95,7 +95,7 @@ export function ReportsClientPage() {
 
             {/* Nova Barra de Filtros (Padrão Pipeline) */}
             <FilterBar>
-                <div className="relative flex-1 w-full group">
+                <div className="relative w-full min-w-0 md:min-w-[18rem] md:flex-[1_1_18rem] group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por oportunidade, empresa, produto, vendedor ou status..."
@@ -105,7 +105,7 @@ export function ReportsClientPage() {
                     />
                 </div>
 
-                <div className="flex flex-wrap gap-3 w-full lg:w-auto items-center">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-3 md:flex-[1_1_34rem]">
                     {/* Advanced Multi-Year Pill Selector */}
                     <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">

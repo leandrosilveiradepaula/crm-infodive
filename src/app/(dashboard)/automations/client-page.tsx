@@ -278,12 +278,12 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         Ver todas
                     </button>
                 </div>
-                <div className="flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 no-scrollbar">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {recipes.map((recipe, idx) => (
                         <button
                             key={idx}
                             onClick={() => handleUseRecipe(recipe)}
-                            className="min-w-[240px] bg-card border border-border p-4 rounded-2xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex flex-col justify-between group"
+                            className="min-h-32 bg-card border border-border p-4 rounded-2xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex flex-col justify-between group"
                         >
                             <div className="flex items-center gap-4 mb-6">
                                 <div className={`p-3 rounded-xl ${recipe.bg}`}>
