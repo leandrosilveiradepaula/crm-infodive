@@ -396,7 +396,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 </div>
                             )}
                             <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground w-full">
-                                <Building2 className="w-3.5 h-3.5 text-blue-500/60 shrink-0" />
+                                <Building2 className="w-3.5 h-3.5 text-primary shrink-0" />
                                 {isEditing ? (
                                     <Select
                                         value={formData.account_id || 'none'}
@@ -418,7 +418,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
                                 )}
                                 <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground/50">ID: #{deal.id.slice(0, 8)}</span>
+                                <span className="text-[10px] uppercase font-bold tracking-tighter text-muted-foreground">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>
@@ -612,7 +612,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <div className="bg-card p-3 rounded-lg border border-border group-hover:border-blue-300 transition-all relative z-10 shadow-sm">
                                         <div className="flex justify-between items-center mb-3">
                                             <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
-                                            <span className={`text-[10px] font-black uppercase ${formData.probability > 70 ? 'text-emerald-600' : 'text-primary'}`}>
+                                            <span className={`text-[10px] font-black uppercase ${formData.probability > 70 ? 'text-success-readable' : 'text-primary'}`}>
                                                 {formData.probability}%
                                             </span>
                                         </div>
@@ -664,13 +664,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 <section className="space-y-4">
                                     <div className="flex items-center gap-2 mb-2">
                                         <AlertCircle className="h-4 w-4 text-red-500 fill-red-50" />
-                                        <h4 className="text-[10px] font-black text-red-600 uppercase tracking-widest">Feedback de Perda</h4>
+                                        <h4 className="text-[10px] font-black text-destructive-readable uppercase tracking-widest">Feedback de Perda</h4>
                                     </div>
                                     <div className="bg-card/5 p-4 rounded-xl border border-white/5 transition-all hover:bg-card/10 hover:border-primary/20 group">
                                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
-                                        <p className="text-sm font-bold text-red-500">{deal.loss_reason || 'Não informado'}</p>
+                                        <p className="text-sm font-bold text-destructive-readable">{deal.loss_reason || 'Não informado'}</p>
                                         {deal.lost_at && (
-                                            <p className="text-[9px] text-red-500/50 font-medium mt-1">
+                                            <p className="text-[9px] text-destructive-readable font-medium mt-1">
                                                 Registrado em: {new Date(deal.lost_at).toLocaleDateString('pt-BR')}
                                             </p>
                                         )}
@@ -774,7 +774,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     onClick={() => setShowContractBuilder(true)}
                                     className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-emerald-300"
                                 >
-                                    <Scroll className="h-4 w-4 text-emerald-600" />
+                                    <Scroll className="h-4 w-4 text-success-readable" />
                                     Contrato
                                 </button>
                             </div>

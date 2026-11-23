@@ -44,6 +44,8 @@ describe('CRM #214 B2 commercial workspaces', () => {
         }
         expect(source('src/components/pipeline/DealCard.tsx')).toContain('Abrir detalhes');
         expect(source('src/components/pipeline/ViewDealModal.tsx')).toContain('aria-label="Fechar detalhes da oportunidade"');
+        expect(source('src/components/pipeline/ViewDealModal.tsx')).toContain('text-success-readable');
+        expect(source('src/components/pipeline/ViewDealModal.tsx')).not.toContain('text-muted-foreground/50');
         expect(source('src/components/ui/ViewToggle.tsx')).toContain('aria-pressed');
     });
     it('keeps drag keyboard sensor on a separate, accessible button, never around quick actions', () => {
