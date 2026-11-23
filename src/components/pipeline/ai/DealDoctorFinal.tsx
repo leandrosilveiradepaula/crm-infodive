@@ -57,9 +57,9 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (!analysis && !loading) {
         return (
-            <div className="bg-card rounded-xl border border-border p-6 shadow-control-ui hover:shadow-md transition-all relative group">
+            <div className="bg-card rounded-[var(--radius-panel)] border border-border p-6 shadow-control-ui hover:shadow-md transition-all relative group">
                 <div className="flex items-start gap-5">
-                    <div className="p-3 bg-info-subtle rounded-xl border border-info/30">
+                    <div className="p-3 bg-info-subtle rounded-[var(--radius-panel)] border border-info/30">
                         <Brain className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
@@ -86,7 +86,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (loading) {
         return (
-            <div className="bg-card rounded-xl border border-border p-8 flex flex-col items-center justify-center min-h-[200px] relative">
+            <div className="bg-card rounded-[var(--radius-panel)] border border-border p-8 flex flex-col items-center justify-center min-h-[200px] relative">
                 <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
                 <h3 className="text-sm font-bold text-foreground">Analisando Pipeline...</h3>
                 <p className="text-xs text-muted-foreground mt-1">Processando dados do negócio</p>
@@ -96,21 +96,21 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (error) {
         return (
-            <div className="bg-destructive-subtle rounded-xl border border-rose-100 p-6 relative">
+            <div className="bg-destructive-subtle rounded-[var(--radius-panel)] border border-destructive/30 p-6 relative">
                 <button
                     onClick={handleReset}
-                    className="absolute top-4 right-4 p-2 bg-rose-100 text-destructive-readable rounded-[var(--radius-control)] hover:bg-rose-200 transition-colors text-xs font-bold"
+                    className="absolute top-4 right-4 p-2 bg-destructive-subtle text-destructive-readable rounded-[var(--radius-control)] hover:bg-destructive-subtle transition-colors text-xs font-bold"
                 >
                     FECHAR
                 </button>
                 <div className="flex items-center gap-3 mb-2">
                     <AlertCircle className="h-5 w-5 text-destructive-readable" />
-                    <h3 className="text-sm font-bold text-rose-700">Falha na Análise</h3>
+                    <h3 className="text-sm font-bold text-destructive-readable">Falha na Análise</h3>
                 </div>
                 <p className="text-xs text-destructive-readable mb-4">{error}</p>
                 <button
                     onClick={handleAnalyze}
-                    className="text-xs font-bold text-rose-700 hover:text-rose-800 underline decoration-rose-300 underline-offset-4"
+                    className="text-xs font-bold text-destructive-readable hover:text-destructive-readable underline decoration-destructive/40 underline-offset-4"
                 >
                     Tentar Novamente
                 </button>
@@ -124,12 +124,12 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
     const StatusIcon = statusConfig.icon;
 
     return (
-        <div className="bg-card rounded-xl border border-border shadow-control-ui overflow-hidden animate-in fade-in duration-500">
+        <div className="bg-card rounded-[var(--radius-panel)] border border-border shadow-control-ui overflow-hidden animate-in fade-in duration-500">
             {/* Header */}
             <div className="p-6 border-b border-border bg-muted/50/20">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                        <div className={`p-2 rounded-xl ${statusConfig.bg} border ${statusConfig.border} flex-shrink-0`}>
+                        <div className={`p-2 rounded-[var(--radius-panel)] ${statusConfig.bg} border ${statusConfig.border} flex-shrink-0`}>
                             <StatusIcon className={`h-5 w-5 ${statusConfig.color}`} />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -183,7 +183,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                     <div className="grid gap-3">
                         {analysis.insights.map((insight, i) => (
                             <div key={i} className="flex gap-3 p-3 bg-muted/50 rounded-[var(--radius-control)] border border-border">
-                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-info-subtle0 flex-shrink-0" />
+                                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-info flex-shrink-0" />
                                 <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
                             </div>
                         ))}
