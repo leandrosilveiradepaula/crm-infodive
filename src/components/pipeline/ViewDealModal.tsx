@@ -679,10 +679,11 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             )}
                             {/* AI & Risk Sections */}
                             <div className="space-y-6">
-                                <DealDoctorFinal
-                                    deal={deal}
-                                    onClose={() => setShowDealDoctor(false)}
-                                    onAnalysisComplete={(analysis) => {
+                                <div data-qa-region="deal-doctor">
+                                    <DealDoctorFinal
+                                        deal={deal}
+                                        onClose={() => setShowDealDoctor(false)}
+                                        onAnalysisComplete={(analysis) => {
                                         console.log('[ViewDealModal-Sidebar] Analysis Completed:', analysis);
                                         setDeal(prev => {
                                             const newDeal = {
@@ -694,12 +695,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             console.log('[ViewDealModal-Sidebar] Updating Deal State:', newDeal);
                                             return newDeal;
                                         });
-                                    }}
-                                />
+                                        }}
+                                    />
+                                </div>
                                 <div className="h-px bg-card/5"></div>
-                                <RiskRadar deal={deal} />
+                                <div data-qa-region="deal-risk"><RiskRadar deal={deal} /></div>
                                 <div className="h-px bg-card/5"></div>
-                                <DealSuggestedActions dealId={deal.id} />
+                                <div data-qa-region="deal-actions"><DealSuggestedActions dealId={deal.id} /></div>
                             </div>
 
                             {/* Client Portal Card */}
