@@ -46,3 +46,4 @@ jobs:
           git diff --check "$merge_base"..HEAD
           node --test test/design-token-guard.check.mjs
           node scripts/check-design-token-policy.mjs "$merge_base"
+          node scripts/report-design-system-debt.mjs --summary
