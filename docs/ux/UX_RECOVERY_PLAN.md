@@ -10,7 +10,7 @@ G3 — Operational workspaces. Activities, contracts, sales/products/proposals, 
 G4 — Management. Reports/analytics, goals/commissions, integrations/settings, real loading/error/empty states; contextual navigation and consistent analytics density. Evidence: real dashboards with permitted synthetic data.
 G5 — End-to-end comparative visual and functional acceptance. QA on SAME SHA for desktop/mobile and light/dark, side-by-side analysis against source screenshots, accessibility, permissions, functional regression, diff ledger with zero P0/P1 and documented P2. Publish a visual result matrix; only then request the human merge. Validate post-merge deployed SHA separately.
 
-### Current G1 evidence (2026-11-20)
+### Current G1 evidence (2026-11-23)
 
 The first G1 candidate is being developed on `codex/issue-214-ux-recovery-g1-shell`. It replaces the end-user's flat module list with an icon rail and route-derived contextual area navigation; the internal Design System route is intentionally absent from that navigation while its direct developer route remains unchanged. Focused source-contract tests and targeted lint passed locally.
 
@@ -25,6 +25,15 @@ The G3 pass now applies the same treatment to the visible metadata/status surfac
 The visible Orders, Installments and Commissions tables now share that table-header and status treatment. Financial amounts, calculation logic, status transitions and actions were deliberately left unchanged. Real QA must still exercise their row expansion, upload/modal and narrow-viewport states.
 
 The local authenticated QA workflow now retains a seven-day, sanitized screenshot artifact only for its disposable local stack. It is intentionally limited to fake tenants and users created during the run; it contains no cookies, traces, credentials, HTML or remote data. The artifact is evidence for same-SHA inspection, not automatic visual acceptance: each family must still be compared manually against the private references and recorded in the matrix below.
+
+#### Manual evidence review — `33b0b8a` and follow-up repairs
+
+Artifact `14816324236` for `33b0b8a7b69cb9abb218b58688f4ca2b21f75c86` was downloaded through an authenticated GitHub CLI and manually opened. It contains 168 sanitized PNG captures, is bound by Actions metadata to the named SHA, and expires 2026-11-30. The inspected desktop/mobile light views covered Pipeline, Inbox, Reports and Automations. Pipeline retained the compact board-first composition and the Office 365 Inbox was correctly shown as an integration-required state rather than a fabricated chat. Two material gaps were observed:
+
+- **P1 — Reports filter composition:** at desktop width the controls could consume the whole filter row, leaving the search input visibly truncated. Commit `4a74a5b` gives search and filter groups explicit responsive flex-bases so the control wraps rather than becoming unreadable.
+- **P2 — Automation recipe reachability:** at narrow width the recommended recipe list revealed only part of the next card through a scrollbar-free horizontal carousel. Commit `4a74a5b` changes the existing recipe controls to a responsive grid, preserving their actions while making every recipe reachable without horizontal discovery.
+
+The `4a74a5b` QA run was automatically cancelled when later candidate commits superseded it. The final candidate must complete QA and be manually re-opened before either repair can be accepted. The local production build and TypeScript check were re-run after regenerating stale Next development route types; both passed. Build emitted three non-fatal chart-dimension warnings during static generation; these are not evidence of visual acceptance.
 
 ## Definition of done per route family
 - Existing product capability and role/tenant scope correctly preserved; no new hardcodes, mocks, fake metrics, fake sends or silent actions.
