@@ -1,3 +1,9 @@
+### 2026-11-24 — P1 Commercial authenticated Partners accessibility
+
+At SHA 2a1a36d7 CI [45478409187](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45478409187) SUCCESS (296 tests, 32 strict modules). Real authenticated QA [45478409438](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45478409438) FAILED all four desktop/mobile, light/dark opportunity Partners states. Axe evidence: `button-name` on an unnamed ExternalLink-only icon button with no click handler (thus misleading dead control); a separate `aria-valid-attr-value` *incomplete* on dialog, requiring further exact root-cause evidence. Repair decorative icon with non-interactive aria-hidden span; add bounded structural boolean diagnostic of dialog labelledby/describedby IDREF presence and mounted title/description, never log values or customer data. Keep strict axe fail-closed and same-SHA acceptance blocked until actual zero violations/incompletes and reviewed screenshots. No hosted DB or production changes.
+
+---
+
 ### 2026-11-24 — DS6 Pipeline source-contract alignment
 
 At SHA 81953310, GHA CI [45478015290](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45478015290) reports exactly two historical source-test failures, not a compiler defect. `test/b2-commercial-workspaces.test.ts` expected old stage palette utilities `bg-info` and `bg-success` after migration to dedicated `bg-stage-qualification` and `bg-stage-won` central semantics; `test/b4-accessibility-remediation.test.ts` required old literal `sm:w-80` after conversion to `sm:w-[var(--ds-kanban-column-width)]`. Tests must be updated to assert the new stronger centralized contracts, preserving responsive Kanban. Real-browser computed-stage-token and WCAG certification remain release blockers, P1 OPEN. PR Draft, no production or hosted data changes.

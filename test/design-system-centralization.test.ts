@@ -298,6 +298,15 @@ describe('Central design system — source propagation and strict migrated famil
     expect(qa).toContain('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
   });
 
+  it('does not present decorative manufacturer links as unnamed buttons', () => {
+    const partners = read('src/components/pipeline/tabs/PartnersTab.tsx');
+    expect(partners).not.toContain('<button className="p-2 text-muted-foreground hover:text-foreground"><ExternalLink');
+    expect(partners).toContain('<span aria-hidden="true" className="p-2 text-muted-foreground"><ExternalLink');
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('allTargetsExist');
+    expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

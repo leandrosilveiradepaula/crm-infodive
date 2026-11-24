@@ -253,7 +253,7 @@ export const PartnersTab = ({
                                                 </div>
                                             </div>
                                         </div>
-                                        <button className="p-2 text-muted-foreground hover:text-foreground"><ExternalLink className="h-4 w-4" /></button>
+                                        <span aria-hidden="true" className="p-2 text-muted-foreground"><ExternalLink className="h-4 w-4" /></span>
                                     </div>
 
                                     {!isVirtual && isFirst && (

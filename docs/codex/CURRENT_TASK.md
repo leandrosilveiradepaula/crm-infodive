@@ -1,3 +1,9 @@
+## 2026-11-24 — DS6 AUTHENTICATED PARTNERS A11Y BLOCKER
+
+SHA 2a1a36d7 CI run 45478409187 SUCCESS (296 tests, 32 strict modules). Authenticated QA 45478409438 FAILED four theme/viewport combinations on the nested Partners tab with one `button-name` violation: icon-only `ExternalLink` rendered in an inert `<button>`, no aria label or click handler, exact visual coords [884,328] desktop and [324,528] mobile. This is decorative rather than an actionable link: replace with aria-hidden icon span, do NOT add misleading accessible button. Axe also reports one `aria-valid-attr-value` incomplete on the dialog itself (source cause uncertain): instrument only safe booleans of ARIA reference existence + title/description presence, never actual ids/HTML/customer data; retain zero violation AND zero incomplete gate. Next run same-SHA real four-role 22-route QA and screenshots; finish Partners/Clientes navigation. PR #221 DRAFT, no prod/hosted Supabase/merge.
+
+---
+
 ## 2026-11-24 — DS6 SYNCHRONIZE HISTORICAL B2/B4 SOURCE TEST CONTRACTS
 
 Exact SHA 81953310 real /pipeline route correctly changed five stage accents to centrally configured `bg-stage-*` classes and column geometry to `sm:w-[var(--ds-kanban-column-width)]`. CI run 45478015290 FAILED with exactly two existing source-contract assertions, which still expected old `bg-info`/`bg-success` stage classes and hardcoded `sm:w-80`. Update the old tests to assert NEW semantic-stage literals, DOM QA hook and central column variable. Do NOT revert the actual route to satisfy historical test literals. Preserve all business logic and compare same-SHA CI and real authenticated four-profile QA before considering DS6 certified. Same DRAFT PR #221, no merge, hosted DB or production.

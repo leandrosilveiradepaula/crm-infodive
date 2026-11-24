@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 Partners QA real defects
+
+SHA 2a1a36d7 CI 45478409187 PASS, authenticated local QA 45478409438 FAIL all 4 theme/viewport combinations in Partners: unnamed inert ExternalLink-only button (WCAG `button-name`) and one `aria-valid-attr-value` incomplete associated with dialog. Candidate replaces decorative icon button with aria-hidden span, adds safe IDREF existence booleans for root cause. No bypass of axe; no business changes. Keep #221 DRAFT, repeat same-SHA CI+QA and visual checks.
+
 ## 2026-11-24 — DS6 historical B2/B4 source tests realigned
 
 At SHA 81953310, CI 45478015290 failed only two source assertions that hardcoded obsolete classes in the *real* /pipeline UI: B2 expected bg-info and bg-success surfaces, B4 expected sm:w-80. The actual route was intentionally migrated to --stage-* semantics and --ds-kanban-column-width. Update tests to check semantic-stage source and shared width token, not revert working central design. Requires exact-SHA CI+authenticated browser recheck. No production, migrations, hosted DB or merge; PR #221 draft.

@@ -558,9 +558,25 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
         const audit = await runAxe(page, source);
         if (audit.violationsCount || audit.incompleteCount) {
             // Sanitized axe data: allowlisted rule names and computed styles only.
+            // Describe ONLY the structure of dialog ARIA IDREF wiring; never
+            // print element IDs, text, selectors, URLs or customer records.
+            const dialogAria = await dialog.evaluate(element => {
+                const attrNames = ['aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns'];
+                const references = attrNames.flatMap(name => {
+                    const present = (element.getAttribute(name) || '').trim();
+                    return present ? [{
+                        attribute: name,
+                        numberOfReferences: present.split(/\s+/).length,
+                        allTargetsExist: present.split(/\s+/).every(id => Boolean(document.getElementById(id))),
+                    }] : [];
+                });
+                const title = element.querySelector('[data-slot="dialog-title"]');
+                const description = element.querySelector('[data-slot="dialog-description"]');
+                return { references, hasTitle: Boolean(title), hasDescription: Boolean(description) };
+            });
             process.stderr.write('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=' +
                 JSON.stringify({ state: item.slug, violations: audit.violations,
-                    incomplete: audit.incomplete }) + '\n');
+                    incomplete: audit.incomplete, dialogAria }) + '\n');
             throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug);
         }
         if (capture) {
