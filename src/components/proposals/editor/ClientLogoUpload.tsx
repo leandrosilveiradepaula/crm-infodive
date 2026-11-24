@@ -116,27 +116,27 @@ export function ClientLogoUpload({ currentLogo, onLogoChange }: ClientLogoUpload
 
     return (
         <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            <label className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                 Logo do Cliente
             </label>
 
             {currentLogo ? (
                 /* Preview with remove button */
-                <div className="relative group rounded-lg border border-border bg-white dark:bg-muted/20 p-3 flex items-center gap-3">
+                <div className="relative group rounded-[var(--radius-control)] border border-border bg-white dark:bg-muted/20 p-3 flex items-center gap-3">
                     <img
                         src={currentLogo}
                         alt="Logo do cliente"
                         className="h-10 w-auto max-w-[100px] object-contain rounded"
                     />
                     <div className="flex-1">
-                        <p className="text-[10px] text-emerald-600 font-bold">Logo carregado ✓</p>
-                        <p className="text-[9px] text-muted-foreground">Aparecerá na capa</p>
+                        <p className="text-metadata-ui text-success-readable font-bold">Logo carregado ✓</p>
+                        <p className="text-metadata-ui text-muted-foreground">Aparecerá na capa</p>
                     </div>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={removeLogo}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0 text-destructive-readable hover:text-destructive-readable hover:bg-destructive-subtle dark:hover:bg-destructive/10"
                     >
                         <X className="w-3.5 h-3.5" />
                     </Button>
@@ -148,23 +148,23 @@ export function ClientLogoUpload({ currentLogo, onLogoChange }: ClientLogoUpload
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-xl p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${isDragging
-                        ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-500/10'
-                        : 'border-border hover:border-blue-300 hover:bg-muted/30'
+                    className={`relative border-2 border-dashed rounded-[var(--radius-panel)] p-4 flex flex-col items-center gap-2 cursor-pointer transition-all ${isDragging
+                        ? 'border-primary bg-surface-highlight/50 dark:bg-primary/10'
+                        : 'border-border hover:border-primary hover:bg-muted/30'
                         }`}
                 >
                     {isLoading ? (
-                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
                     ) : (
                         <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center">
                             <ImageIcon className="w-4 h-4 text-muted-foreground" />
                         </div>
                     )}
                     <div className="text-center">
-                        <p className="text-[10px] font-bold text-foreground">
+                        <p className="text-metadata-ui font-bold text-foreground">
                             {isDragging ? 'Solte aqui' : 'Arraste ou clique'}
                         </p>
-                        <p className="text-[9px] text-muted-foreground">PNG, JPG ou WebP (máx. 2MB)</p>
+                        <p className="text-metadata-ui text-muted-foreground">PNG, JPG ou WebP (máx. 2MB)</p>
                     </div>
                 </div>
             )}

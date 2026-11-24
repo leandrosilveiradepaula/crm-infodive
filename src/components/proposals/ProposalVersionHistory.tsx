@@ -36,19 +36,19 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
         return (
             <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
-                <span className="text-sm text-muted-foreground">Carregando histórico...</span>
+                <span className="text-body-ui text-muted-foreground">Carregando histórico...</span>
             </div>
         );
     }
 
     if (proposals.length <= 1) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 bg-white rounded-3xl border border-border text-center">
-                <div className="h-12 w-12 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center p-12 bg-white rounded-[var(--radius-panel)] border border-border text-center">
+                <div className="h-12 w-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center mb-4">
                     <History className="h-6 w-6" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground">Apenas uma versão</h3>
-                <p className="text-xs text-muted-foreground mt-2 max-w-xs">
+                <h3 className="text-body-ui font-bold text-foreground">Apenas uma versão</h3>
+                <p className="text-metadata-ui text-muted-foreground mt-2 max-w-xs">
                     Esta é a primeira e única versão da proposta para esta oportunidade até o momento.
                 </p>
             </div>
@@ -56,9 +56,9 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
     }
 
     return (
-        <div className="bg-white rounded-3xl border border-border shadow-sm p-4 overflow-hidden relative">
-            <h3 className="text-[10px] font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-                <History className="h-3.5 w-3.5 text-teal-600" />
+        <div className="bg-white rounded-[var(--radius-panel)] border border-border shadow-control-ui p-4 overflow-hidden relative">
+            <h3 className="text-metadata-ui font-black text-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+                <History className="h-3.5 w-3.5 text-info" />
                 Histórico de Versões
             </h3>
 
@@ -80,42 +80,42 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
                             {/* Timeline Node */}
                             <div className="hidden md:flex flex-col items-center pt-2 shrink-0">
                                 <div className={`h-3 w-3 rounded-full border-2 bg-background flex items-center justify-center relative z-10
-                                    ${isCurrent ? 'border-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.3)]' : 'border-border'}`}
+                                    ${isCurrent ? 'border-info shadow-[0_0_8px_rgba(20,184,166,0.3)]' : 'border-border'}`}
                                 >
-                                    {isCurrent && <div className="h-1 w-1 bg-teal-500 rounded-full" />}
+                                    {isCurrent && <div className="h-1 w-1 bg-info rounded-full" />}
                                 </div>
                             </div>
 
                             {/* Content */}
-                            <div className={`flex-1 rounded-2xl border p-3.5 transition-all
-                                ${isCurrent ? 'bg-teal-50/50 border-teal-200' : 'bg-card border-border hover:border-teal-300'}`}
+                            <div className={`flex-1 rounded-[var(--radius-panel)] border p-3.5 transition-all
+                                ${isCurrent ? 'bg-info-subtle/50 border-info' : 'bg-card border-border hover:border-info'}`}
                             >
                                 <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
                                     <div className="flex items-center gap-2.5">
-                                        <div className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                                            <FileText className="h-3.5 w-3.5 text-slate-500" />
+                                        <div className="h-7 w-7 rounded-[var(--radius-control)] bg-muted flex items-center justify-center shrink-0">
+                                            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-1.5 leading-none mb-1">
-                                                <h4 className="text-[13px] font-bold">
+                                                <h4 className="text-body-ui font-bold">
                                                     Versão {prop.version || 1}
                                                 </h4>
                                                 {isCurrent && (
-                                                    <span className="bg-teal-100 text-teal-700 text-[8px] font-black px-1.5 py-0 rounded-full uppercase tracking-widest">
+                                                    <span className="bg-info-subtle text-info text-metadata-ui font-black px-1.5 py-0 rounded-full uppercase tracking-widest">
                                                         Atual
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-black opacity-60">
+                                            <p className="text-metadata-ui text-muted-foreground uppercase tracking-widest font-black opacity-60">
                                                 {new Date(prop.createdAt).toLocaleString('pt-BR')} • #{prop.number || 'Draft'}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="text-right">
-                                        <p className="text-[13px] font-black leading-tight tracking-tighter">{formatCurrency(prop.total || 0)}</p>
+                                        <p className="text-body-ui font-black leading-tight tracking-tighter">{formatCurrency(prop.total || 0)}</p>
                                         {prevProp && valueDiff !== 0 && (
-                                            <p className={`text-[9px] font-bold ${valueDiff > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                            <p className={`text-metadata-ui font-bold ${valueDiff > 0 ? 'text-success-readable' : 'text-destructive-readable'}`}>
                                                 {valueDiff > 0 ? '+' : ''}{formatCurrency(valueDiff)}
                                             </p>
                                         )}
@@ -133,7 +133,7 @@ export function ProposalVersionHistory({ dealId, currentProposalId }: ProposalVe
                                                 // Currently editor only takes dealId. We can pass proposalId as query param
                                                 router.push(`/pipeline/proposals/editor/${dealId}?sourceProposalId=${prop.id}`);
                                             }}
-                                            className="h-7 px-2 text-[9px] uppercase font-black tracking-widest text-teal-700 hover:text-teal-800 hover:bg-teal-50 border-teal-100"
+                                            className="h-7 px-2 text-metadata-ui uppercase font-black tracking-widest text-info hover:text-info hover:bg-info-subtle border-info"
                                         >
                                             <Copy className="h-3 w-3 mr-1.5" />
                                             Restaurar Versão

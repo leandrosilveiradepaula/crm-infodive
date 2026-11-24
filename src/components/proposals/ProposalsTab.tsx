@@ -64,15 +64,15 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
             {/* Header / Actions */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
+                    <h2 className="text-section-title font-bold text-foreground flex items-center gap-3">
                         <FileText className="h-6 w-6 text-primary" />
                         Propostas
                     </h2>
-                    <p className="text-sm text-muted-foreground mt-1">Gerencie e acompanhe o status das propostas.</p>
+                    <p className="text-body-ui text-muted-foreground mt-1">Gerencie e acompanhe o status das propostas.</p>
                 </div>
                 <Button
                     onClick={onGenerate}
-                    className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 flex items-center gap-2 rounded-xl shadow-lg shadow-primary/20 transition-all"
+                    className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 flex items-center gap-2 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 transition-all"
                 >
                     <Plus className="h-4 w-4" /> Nova Proposta
                 </Button>
@@ -85,17 +85,17 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
                         <button
                             key={status.id || 'all'}
                             onClick={() => setStatusFilter(status.id)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${statusFilter === status.id
-                                ? 'ring-2 ring-primary/50 border-primary shadow-md ' + status.bg
-                                : 'border-border shadow-sm ' + status.bg
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-panel)] border transition-all ${statusFilter === status.id
+                                ? 'ring-2 ring-primary/50 border-primary shadow-control-ui ' + status.bg
+                                : 'border-border shadow-control-ui ' + status.bg
                                 }`}
                         >
                             <status.icon className={`w-4 h-4 ${status.color}`} />
-                            <span className={`text-sm font-semibold ${statusFilter === status.id ? status.color : 'text-muted-foreground'}`}>
+                            <span className={`text-body-ui font-semibold ${statusFilter === status.id ? status.color : 'text-muted-foreground'}`}>
                                 {status.label}
                             </span>
                             {status.id !== null && status.count > 0 && (
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusFilter === status.id ? 'bg-white/80' : 'bg-background'} ${status.color}`}>
+                                <span className={`text-metadata-ui font-bold px-2 py-0.5 rounded-full ${statusFilter === status.id ? 'bg-white/80' : 'bg-background'} ${status.color}`}>
                                     {status.count}
                                 </span>
                             )}
@@ -110,7 +110,7 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Buscar por título ou número..."
-                        className="pl-10 bg-background border-border rounded-lg"
+                        className="pl-10 bg-background border-border rounded-[var(--radius-control)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -121,16 +121,16 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
                 {isLoading ? (
                     <div className="space-y-4">
-                        {[1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-muted rounded-xl animate-pulse" />)}
+                        {[1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-muted rounded-[var(--radius-panel)] animate-pulse" />)}
                     </div>
                 ) : filteredProposals.length === 0 ? (
-                    <div className="h-64 flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-xl bg-muted/30 space-y-4">
+                    <div className="h-64 flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-[var(--radius-panel)] bg-muted/30 space-y-4">
                         <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
                             <FileText className="h-8 w-8 text-muted-foreground" />
                         </div>
                         <div>
                             <p className="text-foreground font-medium">Nenhuma proposta encontrada</p>
-                            <p className="text-sm text-muted-foreground mt-1">Clique em "Nova Proposta" para começar.</p>
+                            <p className="text-body-ui text-muted-foreground mt-1">Clique em "Nova Proposta" para começar.</p>
                         </div>
                     </div>
                 ) : (
