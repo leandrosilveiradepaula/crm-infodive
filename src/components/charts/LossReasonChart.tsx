@@ -42,11 +42,11 @@ export const LossReasonChart = ({ data }: LossReasonChartProps) => {
                         content={({ active, payload }) => {
                             if (active && payload && payload.length) {
                                 return (
-                                    <div className="glass-card p-4 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{payload[0].name}</p>
+                                    <div className="glass-card p-4 shadow-card-ui rounded-[var(--radius-panel)] animate-in fade-in zoom-in-95 duration-200">
+                                        <p className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground mb-2">{payload[0].name}</p>
                                         <div className="flex justify-between gap-8 items-center">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase">Frequência:</span>
-                                            <span className="text-sm font-black text-foreground">{payload[0].value}</span>
+                                            <span className="text-metadata-ui font-bold text-muted-foreground uppercase">Frequência:</span>
+                                            <span className="text-body-ui font-black text-foreground">{payload[0].value}</span>
                                         </div>
                                     </div>
                                 );
