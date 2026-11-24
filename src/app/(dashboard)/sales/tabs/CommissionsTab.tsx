@@ -83,11 +83,11 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
     const filtered = useMemo(() => {
         return allCommissions.filter(c => {
             const matchesFilter = filter === 'all' || c.status === filter;
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 c.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 c.dealTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 c.userName.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
             return matchesFilter && matchesSearch;
         }).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
     }, [allCommissions, filter, searchTerm]);
@@ -134,7 +134,7 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                
+
                 <div className="flex bg-muted/50 p-1 rounded-[var(--radius-panel)] border border-border overflow-hidden">
                     {(['all', 'pending', 'paid'] as const).map((f) => (
                         <button
@@ -172,8 +172,8 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                                     <PremiumEmptyState
                                         icon={DollarSign}
                                         title="Nenhuma comissão encontrada"
-                                        description={searchTerm || filter !== 'all' 
-                                            ? "Não encontramos comissões com os filtros aplicados." 
+                                        description={searchTerm || filter !== 'all'
+                                            ? "Não encontramos comissões com os filtros aplicados."
                                             : "Ainda não há comissões geradas para este período."
                                         }
                                         variant="compact"
@@ -184,10 +184,10 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                             filtered.map((c) => (
                                 <TableRow key={c.id} className="border-border/50 hover:bg-primary/[0.02] transition-colors group">
                                     <TableCell className="py-5">
-                                        <Badge 
-                                            variant="outline" 
+                                        <Badge
+                                            variant="outline"
                                             className={`text-metadata-ui font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
-                                                c.status === 'paid' ? 'bg-success/5 text-success-readable border-success/20' : 
+                                                c.status === 'paid' ? 'bg-success/5 text-success-readable border-success/20' :
                                                 'bg-warning/5 text-warning-readable border-warning/20'
                                             }`}
                                         >
