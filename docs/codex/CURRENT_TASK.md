@@ -1,3 +1,9 @@
+## 2026-11-24 — DS8 integrated dashboard, shared command and catalog styling
+
+The single centralized CRM Design System Draft PR #221 now includes 16 additional original Dashboard/Products/Email/CommandBar/Notifications/Handover components with private Tailwind palette, type-scale and geometry substitutions to existing central `tokens.css` roles. Measured category reduction in these files: 71 + 142 = 213 local occurrences, not 213 independent user-facing defects. Adds 14 newly clean modules to strict anti-hardcode policy; source tests verify all 16 family members. Colors and font weights remain centrally configurable and light/dark semantic; no product, backend, Auth, financial rules, live data or migrations changed. This batch is NOT globally visually certified until exact new SHA browser proofs and the approved private screenshots are compared. Preserve PR Draft and human main merge.
+
+---
+
 ## 2026-11-24 — DS8 follow-up: genuine login, charts, calendar and opportunity diagnosis
 
 Continues the original CRM Design System branch and single PR #221. Eight additional existing components (login page, opportunity AI header, shared calendar and five charts) are switched to the same semantic palette/type/geometry primitives; 230 additional local-style matches were eliminated by the inventory categories in this batch. Three newly clean modules are strict-guarded, with source contracts for all eight. Unchanged login/auth semantics, sales chart data and AI callbacks; no personal data, hosted infrastructure, migrations or production. A source contract is NOT a browser screenshot or functional acceptance. Login/analytics visual contrast in both themes still needs actual final-SHA browser proof and separate owner visual assessment. Previously inspected private screen references remain private.
