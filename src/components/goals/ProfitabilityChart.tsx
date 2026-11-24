@@ -50,8 +50,8 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(value);
 
     return (
-        <div className="w-full h-[300px] bg-card rounded-2xl border border-border p-4 shadow-sm">
-            <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-4 ml-2">
+        <div className="w-full h-[300px] bg-card rounded-[var(--radius-panel)] border border-border p-4 shadow-control-ui">
+            <h3 className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-4 ml-2">
                 Análise de Ponto de Equilíbrio
             </h3>
             <ResponsiveContainer width="100%" height="100%">
@@ -61,13 +61,13 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
                         dataKey="sales"
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
-                        fontSize={10}
+                        fontSize="var(--ds-type-metadata-size)"
                         tick={{ fill: 'var(--muted-foreground)' }}
                     />
                     <YAxis
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
-                        fontSize={10}
+                        fontSize="var(--ds-type-metadata-size)"
                         tick={{ fill: 'var(--muted-foreground)' }}
                     />
                     <Tooltip
@@ -75,8 +75,8 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
                             backgroundColor: 'var(--popover)',
                             borderColor: 'var(--border)',
                             color: 'var(--popover-foreground)',
-                            borderRadius: '0.75rem',
-                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                            borderRadius: 'var(--radius-panel)',
+                            boxShadow: 'var(--ds-shadow-overlay)'
                         }}
                         formatter={(value: number | undefined) => {
                             if (value === undefined) return ['R$ 0,00', ''];

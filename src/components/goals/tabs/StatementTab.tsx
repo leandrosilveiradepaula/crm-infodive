@@ -73,7 +73,8 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                     <div className="relative group">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeSelect
-                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[200px]"
+                            aria-label="Filtrar comissões por vendedor"
+                            className="bg-muted/30 border-border rounded-[var(--radius-panel)] pl-9 h-11 ds-type-metadata text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[200px]"
                             value={selectedUserId}
                             onChange={e => setSelectedUserId(e.target.value)}
                         >
@@ -87,7 +88,8 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                     <div className="relative group">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeSelect
-                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
+                            aria-label="Filtrar comissões por status"
+                            className="bg-muted/30 border-border rounded-[var(--radius-panel)] pl-9 h-11 ds-type-metadata text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
                             value={filterStatus}
                             onChange={e => setFilterStatus(e.target.value as any)}
                         >
@@ -101,7 +103,8 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                         <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <ThemeInput
                             type="month"
-                            className="bg-muted/30 border-border rounded-xl pl-9 h-11 text-xs text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
+                            aria-label="Filtrar comissões por mês"
+                            className="bg-muted/30 border-border rounded-[var(--radius-panel)] pl-9 h-11 ds-type-metadata text-foreground focus:ring-1 focus:ring-primary outline-none min-w-[160px]"
                             value={filterMonth}
                             onChange={e => setFilterMonth(e.target.value)}
                         />
@@ -109,11 +112,11 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                 </div>
             </FilterBar>
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div className="overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-control-ui">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-[10px] font-black text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
+                            <tr className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">
                                 <th className="px-5 py-3">Oportunidade</th>
                                 <th className="px-5 py-3">Vendedor</th>
                                 <th className="px-5 py-3">Data Fechamento</th>
@@ -150,32 +153,32 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                 return (
                                     <tr key={deal.id} className="hover:bg-muted/30 transition-colors group">
                                         <td className="px-5 py-3">
-                                            <p className="font-black text-foreground text-sm tracking-tight">{deal.title}</p>
-                                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
+                                            <p className="font-[var(--ds-type-metric-weight)] text-foreground ds-type-body tracking-tight">{deal.title}</p>
+                                            <p className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground uppercase opacity-70 mt-0.5">{(deal as any).customer?.name || deal.company || 'Empresa não informada'}</p>
                                         </td>
                                         <td className="px-5 py-3">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-md">
+                                                <div className="w-8 h-8 rounded-[var(--radius-panel)] bg-primary text-primary-foreground flex items-center justify-center ds-type-metadata font-[var(--ds-type-metric-weight)] shadow-card-ui">
                                                     {(dealOwner as any)?.avatar || (dealOwner as any)?.name?.charAt(0) || '?'}
                                                 </div>
-                                                <span className="text-sm font-bold text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
+                                                <span className="ds-type-body font-[var(--ds-type-control-weight)] text-foreground">{(dealOwner as any)?.name || 'Unknown'}</span>
                                             </div>
                                         </td>
-                                        <td className="px-5 py-3 text-[11px] font-bold text-muted-foreground">
+                                        <td className="px-5 py-3 ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground">
                                             {deal.won_at ? new Date(deal.won_at).toLocaleDateString() : '-'}
                                         </td>
-                                        <td className="px-5 py-3 text-right font-bold text-muted-foreground text-sm tabular-nums tracking-tighter">
+                                        <td className="px-5 py-3 text-right font-[var(--ds-type-control-weight)] text-muted-foreground ds-type-body tabular-nums tracking-tighter">
                                             {displayNetMargin.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                         </td>
                                         <td className="px-5 py-3 text-right">
-                                            <span className="font-black text-emerald-500 text-sm tabular-nums tracking-tighter">
+                                            <span className="font-[var(--ds-type-metric-weight)] text-success-readable ds-type-body tabular-nums tracking-tighter">
                                                 {displayCommission.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                             </span>
                                         </td>
                                         <td className="px-5 py-3 text-center">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-sm ${commissionStatus === 'paid'
-                                                ? 'bg-blue-500/10 text-blue-500 border-blue-500/20'
-                                                : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest border shadow-control-ui ${commissionStatus === 'paid'
+                                                ? 'bg-info-subtle text-primary border-info/20'
+                                                : 'bg-warning-subtle text-warning-readable border-warning/20'
                                                 }`}>
                                                 {commissionStatus === 'paid' ? 'Pago' : 'Pendente'}
                                             </span>
@@ -183,9 +186,10 @@ export function StatementTab({ deals, users }: StatementTabProps) {
                                         <td className="px-5 py-3 text-center">
                                             <button
                                                 onClick={() => handleTogglePayment(deal)}
-                                                className={`p-2 rounded-xl transition-all ${commissionStatus === 'paid'
-                                                    ? 'text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10'
-                                                    : 'text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10'
+                                                aria-label={commissionStatus === 'paid' ? "Marcar como Pendente" : "Marcar como Pago"}
+                                                className={`p-2 rounded-[var(--radius-panel)] transition-all ${commissionStatus === 'paid'
+                                                    ? 'text-muted-foreground hover:text-warning-readable hover:bg-warning-subtle'
+                                                    : 'text-muted-foreground hover:text-primary hover:bg-info-subtle'
                                                     }`}
                                                 title={commissionStatus === 'paid' ? "Marcar como Pendente" : "Marcar como Pago"}
                                             >

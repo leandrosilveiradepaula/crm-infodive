@@ -72,11 +72,12 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
     };
 
     return (
-        <div className="grid grid-cols-12 gap-4 px-5 py-3 items-center hover:bg-muted/30 transition-all duration-300 group">
+        <div className="grid min-w-[860px] grid-cols-12 gap-4 px-5 py-3 items-center hover:bg-muted/30 transition-all duration-300 group">
             <div className="col-span-6">
                 <input
                     type="text"
-                    className={`bg-muted/30 border rounded-2xl px-4 h-11 text-sm font-bold text-foreground outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'
+                    aria-label={`Nome da campanha ${campaign.name}`}
+                    className={`bg-muted/30 border rounded-[var(--radius-panel)] px-4 h-11 ds-type-body font-[var(--ds-type-control-weight)] text-foreground outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'
                         }`}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -85,16 +86,18 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             <div className="col-span-1">
                 <input
                     type="number"
-                    className={`bg-muted/30 border rounded-2xl px-3 h-11 text-center text-sm font-black text-blue-500 outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'
+                    aria-label={`Percentual de comissão de ${campaign.name}`}
+                    className={`bg-muted/30 border rounded-[var(--radius-panel)] px-3 h-11 text-center ds-type-body font-[var(--ds-type-metric-weight)] text-primary outline-none w-full transition-all ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'
                         }`}
                     value={percent}
                     onChange={(e) => setPercent(e.target.value === '' ? '' : Number(e.target.value))}
                     onFocus={(e) => e.target.select()}
                 />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-1 lg:col-span-2">
                 <ThemeCurrencyInput
-                    className={`h-11 w-full bg-muted/30 border rounded-2xl px-4 text-left text-sm font-black text-emerald-500 outline-none transition-all pl-9 ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'}`}
+                    aria-label={`Valor fixo de comissão de ${campaign.name}`}
+                    className={`h-11 w-full bg-muted/30 border rounded-[var(--radius-panel)] px-4 text-left ds-type-body font-[var(--ds-type-metric-weight)] text-success-readable outline-none transition-all pl-9 ${hasChanges ? 'border-primary ring-1 ring-primary' : 'border-border focus:ring-1 focus:ring-primary'}`}
                     value={absolute || 0}
                     onChange={(e) => setAbsolute(Number(e.target.value))}
                 />
@@ -102,8 +105,9 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
             <div className="col-span-2 text-center">
                 <button
                     onClick={handleToggleStatus}
-                    className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border shadow-sm ${campaign.active
-                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20'
+                    aria-pressed={campaign.active}
+                    className={`px-4 py-1.5 rounded-full ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest transition-all border shadow-control-ui ${campaign.active
+                        ? 'bg-success-subtle text-success-readable border-success/20 hover:bg-success-subtle'
                         : 'bg-muted text-muted-foreground border-border hover:bg-muted/80 opacity-60'
                         }`}
                 >
@@ -116,7 +120,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
                         <button
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="p-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                            className="p-2.5 bg-primary text-primary-foreground rounded-[var(--radius-panel)] hover:bg-primary/90 transition-all shadow-card-ui"
                             title="Salvar Alterações"
                         >
                             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -125,7 +129,8 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
                 ) : (
                     <button
                         onClick={handleDelete}
-                        className="p-2.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20 opacity-0 group-hover:opacity-100"
+                        aria-label={`Excluir campanha ${campaign.name}`}
+                        className="p-2.5 text-muted-foreground hover:text-destructive-readable hover:bg-destructive-subtle rounded-[var(--radius-panel)] transition-all border border-transparent hover:border-destructive/20 opacity-0 group-hover:opacity-100"
                         title="Excluir Campanha"
                     >
                         <Trash2 className="h-4 w-4" />
@@ -179,16 +184,16 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
     return (
         <div className="space-y-6">
             <FilterBar>
-                <div className="flex-1 grid grid-cols-12 gap-3 items-end">
-                    <div className="col-span-6 relative group">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
+                    <div className="col-span-1 lg:col-span-6 relative group">
                         <Megaphone className="absolute left-3 top-[34px] h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                        <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-2 pl-1">
+                        <label className="block ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-2 pl-1">
                             Nova Campanha
                         </label>
                         <input
                             type="text"
                             placeholder="Nome da campanha (ex: Black Friday)"
-                            className="w-full pl-9 h-11 bg-muted/30 border border-border rounded-2xl focus:ring-1 focus:ring-primary outline-none transition-all text-foreground placeholder-muted-foreground font-bold text-sm"
+                            className="w-full pl-9 h-11 bg-muted/30 border border-border rounded-[var(--radius-panel)] focus:ring-1 focus:ring-primary outline-none transition-all text-foreground placeholder-muted-foreground font-[var(--ds-type-control-weight)] ds-type-body"
                             value={newCampaignName}
                             onChange={(e) => setNewCampaignName(e.target.value)}
                             onKeyDown={(e) => {
@@ -196,8 +201,8 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                             }}
                         />
                     </div>
-                    <div className="col-span-2">
-                        <label className="block text-[10px] font-black text-muted-foreground mb-2 uppercase tracking-widest pl-1">
+                    <div className="col-span-1 lg:col-span-2">
+                        <label className="block ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground mb-2 uppercase tracking-widest pl-1">
                             Percentual (%)
                         </label>
                         <input
@@ -205,27 +210,27 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                             min="0"
                             max="100"
                             step="0.1"
-                            className="w-full px-4 h-11 bg-muted/30 border border-border rounded-2xl focus:ring-1 focus:ring-primary outline-none transition-all text-foreground font-black text-sm text-center"
+                            className="w-full px-4 h-11 bg-muted/30 border border-border rounded-[var(--radius-panel)] focus:ring-1 focus:ring-primary outline-none transition-all text-foreground font-[var(--ds-type-metric-weight)] ds-type-body text-center"
                             value={newCampaignPercent}
                             onChange={(e) => setNewCampaignPercent(e.target.value === '' ? '' : Number(e.target.value))}
                             onFocus={(e) => e.target.select()}
                         />
                     </div>
-                    <div className="col-span-2">
-                        <label className="block text-[10px] font-black text-muted-foreground mb-2 uppercase tracking-widest pl-1">
+                    <div className="col-span-1 lg:col-span-2">
+                        <label className="block ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground mb-2 uppercase tracking-widest pl-1">
                             Valor Fixo (R$)
                         </label>
                         <ThemeCurrencyInput
-                            className="w-full h-11 px-4 bg-muted/30 border border-border rounded-2xl pl-9 text-left focus:ring-1 focus:ring-primary outline-none transition-all text-foreground font-black text-sm"
+                            className="w-full h-11 px-4 bg-muted/30 border border-border rounded-[var(--radius-panel)] pl-9 text-left focus:ring-1 focus:ring-primary outline-none transition-all text-foreground font-[var(--ds-type-metric-weight)] ds-type-body"
                             value={newCampaignAbsolute || 0}
                             onChange={(e) => setNewCampaignAbsolute(Number(e.target.value))}
                         />
                     </div>
-                    <div className="col-span-2 pb-0">
+                    <div className="col-span-1 lg:col-span-2 pb-0">
                         <button
                             onClick={handleCreate}
                             disabled={!newCampaignName.trim() || isCreating}
-                            className="w-full h-11 bg-primary text-white font-black rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
+                            className="w-full h-11 bg-primary text-primary-foreground font-[var(--ds-type-metric-weight)] rounded-[var(--radius-panel)] hover:bg-primary/90 transition-all shadow-card-ui disabled:opacity-50 disabled:cursor-not-allowed uppercase ds-type-metadata tracking-widest flex items-center justify-center gap-2"
                         >
                             {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                             {isCreating ? 'CRIANDO...' : 'CRIAR'}
@@ -234,8 +239,8 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                 </div>
             </FilterBar>
 
-            <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-                <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-border text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/10">
+            <div className="bg-card rounded-[var(--radius-panel)] border border-border overflow-x-auto shadow-control-ui">
+                <div className="grid min-w-[860px] grid-cols-12 gap-4 px-5 py-3 border-b border-border ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest bg-muted/10">
                     <div className="col-span-6">Campanha</div>
                     <div className="col-span-1 text-center">%</div>
                     <div className="col-span-2 text-center">R$ Fixo</div>
@@ -247,7 +252,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                         <CampaignRow key={campaign.id} campaign={campaign} />
                     ))}
                     {campaigns.length === 0 && (
-                        <div className="p-8 text-center text-muted-foreground col-span-12 font-medium">
+                        <div className="p-8 text-center text-muted-foreground col-span-12 font-[var(--ds-type-label-weight)]">
                             Nenhuma campanha cadastrada.
                         </div>
                     )}

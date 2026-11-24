@@ -22,6 +22,15 @@ const locked = [
   'src/components/goals/tabs/GoalsTab.tsx',
   'src/components/goals/tabs/CommissionsTab.tsx',
   'src/components/goals/DistributionModal.tsx',
+  'src/components/goals/CommissionSimulator.tsx',
+  'src/components/goals/EnhancedProgressBar.tsx',
+  'src/components/goals/GoalInput.tsx',
+  'src/components/goals/PerformanceBadge.tsx',
+  'src/components/goals/ProfitabilityChart.tsx',
+  'src/components/goals/SeasonalityChart.tsx',
+  'src/components/goals/StatsCard.tsx',
+  'src/components/goals/tabs/CampaignsTab.tsx',
+  'src/components/goals/tabs/StatementTab.tsx',
 ];
 
 describe('Central design system — source propagation and strict migrated families', () => {
@@ -154,6 +163,24 @@ describe('Central design system — source propagation and strict migrated famil
     expect(financial).toContain('aria-pressed={isAnnual}');
     const distribution = read('src/components/goals/DistributionModal.tsx');
     expect(distribution).toContain('text-primary-foreground');
+  });
+
+  it('goals family respects semantic chart colors, keyboard controls and compatibility', () => {
+    const chart = read('src/components/goals/SeasonalityChart.tsx');
+    expect(chart).not.toContain('hsl(var(');
+    expect(chart).toContain('stroke="var(--border)"');
+    expect(chart).toContain('fill="var(--primary)"');
+    const simulator = read('src/components/goals/CommissionSimulator.tsx');
+    expect(simulator).toContain('aria-pressed={selectedProductType === type.key}');
+    expect(simulator).toContain('className="sr-only"');
+    const progress = read('src/components/goals/EnhancedProgressBar.tsx');
+    expect(progress).toContain('role="progressbar"');
+    const stats = read('src/components/goals/StatsCard.tsx');
+    expect(stats).not.toContain('bg-gradient-to-br');
+    const campaigns = read('src/components/goals/tabs/CampaignsTab.tsx');
+    expect(campaigns).toContain('aria-pressed={campaign.active}');
+    const statement = read('src/components/goals/tabs/StatementTab.tsx');
+    expect(statement).toContain('aria-label="Filtrar comissões por mês"');
   });
 
   it('requires computed-style propagation, not just source tokens or screenshots', () => {

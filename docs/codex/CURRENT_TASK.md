@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 GOALS FAMILY COMPLETION CANDIDATE
+
+Owner explicitly authorized "prossiga" after same-SHA CI and local authenticated QA PASS on PR #221 commit 5f879207 (runs 45463359093 / 45463359105). Continue SAME DRAFT PR #221 only. Verified debt 168 files / 3,593 occurrences (from run 45463359093), not UX acceptance. Authorized cohesive UI-only Goals family: CommissionSimulator, EnhancedProgressBar, GoalInput, PerformanceBadge, ProfitabilityChart, SeasonalityChart, StatsCard, CampaignsTab and StatementTab. Replace visual literals with semantic token roles, correct Recharts HSL/OKLCH mismatch, improve keyboard/ARIA and small-screen scrolling without changing commission math, goals, server actions, RBAC, tenants, database or production. Add all fully migrated files to strict guard and source contracts. Require exact final SHA CI and four-profile authenticated isolated browser QA desktop/mobile light/dark; visually compare private references before release. Do not merge automatically; #221 remains DRAFT.
+
+---
+
 ## 2026-11-24 — DS5 GOALS FAMILY CENTRALIZATION (same DRAFT PR #221)
 
 Owner said "continue" after SHA 8395895d achieved both CI and isolated authenticated QA PASS. Authorized scope: migrate presentation only in four existing Goals components (financial DRE, Goals dashboard, Commissions, Distribution) to shared semantic tokens with strict hardcode lock and regression tests. Preserve amounts, calculations, handlers, persistence, permissions and tenant isolation. Required: exact final SHA TypeScript/tests/build/axe/diff/policy CI plus isolated four-role, 22-route desktop/mobile/light/dark browser QA and visual comparison. No Supabase hosted database, migrations, API changes, production or main merge. This PR stays DRAFT pending owner review.

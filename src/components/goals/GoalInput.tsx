@@ -12,9 +12,9 @@ export const GoalInput = ({ value, onSave, hasError, className = '', label = 'Va
         setLocalValue(value);
     }, [value]);
 
-    const baseClasses = "text-center font-bold border transition-all duration-200 text-sm rounded-lg py-1.5 px-2 focus:outline-none tabular-nums shadow-none";
-    const normalClasses = "bg-transparent text-foreground border-transparent hover:border-border hover:bg-muted/30 focus:border-primary focus:bg-background focus:shadow-sm";
-    const errorClasses = "bg-red-500/5 text-red-600 border-red-500/20 hover:border-red-500 focus:border-red-500 focus:bg-red-500/10 focus:ring-0";
+    const baseClasses = "text-center font-[var(--ds-type-control-weight)] border transition-all duration-200 ds-type-body rounded-[var(--radius-panel)] py-1.5 px-2 focus:outline-none tabular-nums shadow-none";
+    const normalClasses = "bg-transparent text-foreground border-transparent hover:border-border hover:bg-muted/30 focus:border-primary focus:bg-background focus:shadow-control-ui";
+    const errorClasses = "bg-destructive-subtle text-destructive-readable border-destructive/20 hover:border-destructive focus:border-destructive focus:bg-destructive-subtle focus:ring-0";
     const focusClasses = "ring-0 scale-100";
 
     return (

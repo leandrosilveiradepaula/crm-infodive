@@ -40,6 +40,15 @@ export const fullyMigratedModules = Object.freeze([
   'src/components/goals/tabs/GoalsTab.tsx',
   'src/components/goals/tabs/CommissionsTab.tsx',
   'src/components/goals/DistributionModal.tsx',
+  'src/components/goals/CommissionSimulator.tsx',
+  'src/components/goals/EnhancedProgressBar.tsx',
+  'src/components/goals/GoalInput.tsx',
+  'src/components/goals/PerformanceBadge.tsx',
+  'src/components/goals/ProfitabilityChart.tsx',
+  'src/components/goals/SeasonalityChart.tsx',
+  'src/components/goals/StatsCard.tsx',
+  'src/components/goals/tabs/CampaignsTab.tsx',
+  'src/components/goals/tabs/StatementTab.tsx',
 ]);
 
 export function countViolations(source) {

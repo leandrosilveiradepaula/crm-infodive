@@ -19,18 +19,13 @@ export function EnhancedProgressBar({
 
     // Color based on performance
     const getColor = () => {
-        if (percentage >= 100) return 'bg-emerald-500';
-        if (percentage >= 70) return 'bg-blue-500';
-        if (percentage >= 40) return 'bg-amber-500';
-        return 'bg-red-500';
+        if (percentage >= 100) return 'bg-success';
+        if (percentage >= 70) return 'bg-primary';
+        if (percentage >= 40) return 'bg-warning';
+        return 'bg-destructive';
     };
 
-    const getGlowColor = () => {
-        if (percentage >= 100) return 'shadow-emerald-500/50';
-        if (percentage >= 70) return 'shadow-blue-500/50';
-        if (percentage >= 40) return 'shadow-amber-500/50';
-        return 'shadow-red-500/50';
-    };
+
 
     const getTextColor = () => {
         if (percentage >= 100) return 'text-success-readable';
@@ -47,15 +42,23 @@ export function EnhancedProgressBar({
 
     return (
         <div className="flex items-center gap-3">
-            <div className={`flex-1 bg-muted/50 rounded-full overflow-hidden ${sizeClasses[size]}`}>
+            <div
+                role="progressbar"
+                aria-label="Progresso da meta"
+                aria-valuemin={0}
+                aria-valuemax={max}
+                aria-valuenow={Math.min(Math.max(value, 0), max)}
+                aria-valuetext={percentage.toFixed(0) + '%'}
+                className={`flex-1 bg-muted/50 rounded-full overflow-hidden ${sizeClasses[size]}`}
+            >
                 <div
-                    className={`h-full ${getColor()} ${getGlowColor()} shadow-lg rounded-full transition-all duration-500 ease-out ${animated ? 'animate-in slide-in-from-left' : ''
+                    className={`h-full ${getColor()} shadow-card-ui rounded-full transition-all duration-500 ease-out ${animated ? 'animate-in slide-in-from-left' : ''
                         }`}
                     style={{ width: `${percentage}%` }}
                 />
             </div>
             {showLabel && (
-                <span className={`text-sm font-bold ${getTextColor()} min-w-[45px] text-right tabular-nums`}>
+                <span className={`ds-type-body font-[var(--ds-type-control-weight)] ${getTextColor()} min-w-[45px] text-right tabular-nums`}>
                     {percentage.toFixed(0)}%
                 </span>
             )}
