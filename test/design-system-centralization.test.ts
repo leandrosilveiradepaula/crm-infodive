@@ -34,6 +34,7 @@ const locked = [
   'src/components/pipeline/CommissionWidget.tsx',
   'src/components/pipeline/DealFormModal.tsx',
   'src/components/pipeline/KanbanBoard.tsx',
+  'src/app/(dashboard)/pipeline/client-page.tsx',
   'src/components/pipeline/LostDealModal.tsx',
   'src/components/pipeline/tabs/PartnersTab.tsx',
   'src/components/pipeline/tabs/StakeholdersTab.tsx',
@@ -278,6 +279,23 @@ describe('Central design system — source propagation and strict migrated famil
     expect(qa).toContain('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED');
     expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
     expect(read('src/components/pipeline/LostDealModal.tsx')).toContain('ds-overlay-backdrop');
+  });
+
+  it('proves the real /pipeline route (not an unused KanbanBoard) uses central stage tokens and QA hooks', () => {
+    const board = read('src/app/(dashboard)/pipeline/client-page.tsx');
+    const css = read('src/design-system/tokens.css');
+    for (const stage of ['qualification', 'proposal', 'negotiation', 'won', 'lost']) {
+      expect(board).toContain('bg-stage-' + stage);
+      expect(board).toContain('border-stage-' + stage);
+    }
+    expect(board).toContain('data-qa-stage={stage.id}');
+    expect(board).toContain('data-qa-stage-dot=""');
+    expect(board).toContain('min-h-[var(--ds-kanban-column-min-height)]');
+    expect(board).toContain('sm:w-[var(--ds-kanban-column-width)]');
+    expect(css).toContain('--ds-kanban-column-width:');
+    expect(css).toContain('--ds-kanban-board-min-height:');
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
   });
 
   it('requires computed-style propagation, not just source tokens or screenshots', () => {

@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 actual Pipeline board identity discovered
+
+Commit 560836ba CI success 45477099906 (295 tests, 31 strict migrated) but QA 45477099853 failed `COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED`. Actual source `src/app/(dashboard)/pipeline/client-page.tsx` renders Kanban in-place, independently from the separately migrated `KanbanBoard.tsx`, which is not imported by the live page. UI proof was therefore missing despite source tests; this is a real route integration defect. Corrective candidate maps actual DEFAULT_STAGES 5 accents/surfaces to tokens, adds data-qa-stage hooks and shared geometry variables, locks real route. Business actions unchanged. Must re-run same-SHA CI/local auth/visual QA; no prod/Supabase/main merge.
+
 ## 2026-11-24 — DS6 prepared Commercial family atop mobile Goals fixes
 
 An unreferenced cohesive DS6 candidate was rebased on top of current DS5 mobile fix 2f13339d, without touching PR #221 while its exact-SHA QA is running. Six original Pipeline/Opportunity surfaces centralize 194 previously measured local style occurrences; Kanban stage styles are compiled from static semantic classes instead of `bg-${column.color}` strings. Strict guard includes those six components. Isolated real-browser checks validate each rendered stage token and audit/capture Partners and Clientes modals in desktop/mobile light/dark without writing data. Release candidate still requires new SHA CI, QA, reference comparison and human merge; no production, Supabase hosted, migrations or financial business actions.

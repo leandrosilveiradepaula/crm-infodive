@@ -1,3 +1,9 @@
+## 2026-11-24 — DS6 fix: token roles on the ACTUAL Pipeline Kanban
+
+The real `/pipeline` client route owns `DEFAULT_STAGES`/DragDropContext itself and does not render the separately migrated `components/pipeline/KanbanBoard.tsx`. Earlier claims that this alone changed the displayed Pipeline were incorrect. The real route now binds all five stages to dedicated central stage color/surface tokens and reads width/heights from `--ds-kanban-*` geometry variables; E2E uses the real DOM data-qa-stage and dot markers to compare actual computed colors against CSS tokens. Protect route source against local hardcode regressions. No drag-drop, stage data, deal math, security or DB logic changes. Exact-SHA authenticated/browser evidence and user visual approval still required.
+
+---
+
 ## 2026-11-24 — DS6 Commercial tokens and stage-render proof candidate
 
 Continue the incremental original CRM migration in existing Draft PR #221: KanbanBoard and five opportunity-related components. Replace dynamic stage-colored Tailwind with explicit static utilities backed by central semantic stage tokens; use shared text scale, border-radius, elevation and contrast roles throughout. Add six files to the strict guard, and authenticate browser QA across five stage color dots and the Partners/Clientes secondary tabs in four viewport/theme combinations. Preserve sales values, RBAC, tenancy, server actions and existing capabilities. No claim of UI approval until same-SHA tests, screenshot inspection and human sign-off.

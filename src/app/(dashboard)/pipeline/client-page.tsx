@@ -31,11 +31,11 @@ interface PipelineClientPageProps {
 }
 
 const DEFAULT_STAGES = [
-    { id: 'qualification', title: 'Qualificação', accent: 'bg-info', surface: 'bg-info/5 border-info/20', probability: 30 },
-    { id: 'proposal', title: 'Proposta', accent: 'bg-primary', surface: 'bg-primary/5 border-primary/20', probability: 50 },
-    { id: 'negotiation', title: 'Negociação', accent: 'bg-warning', surface: 'bg-warning/5 border-warning/20', probability: 75 },
-    { id: 'won', title: 'Ganho', accent: 'bg-success', surface: 'bg-success/5 border-success/20', probability: 100 },
-    { id: 'lost', title: 'Perdido', accent: 'bg-destructive', surface: 'bg-destructive/5 border-destructive/20', probability: 0 }
+    { id: 'qualification', title: 'Qualificação', accent: 'bg-stage-qualification', surface: 'bg-stage-qualification/5 border-stage-qualification/20', probability: 30 },
+    { id: 'proposal', title: 'Proposta', accent: 'bg-stage-proposal', surface: 'bg-stage-proposal/5 border-stage-proposal/20', probability: 50 },
+    { id: 'negotiation', title: 'Negociação', accent: 'bg-stage-negotiation', surface: 'bg-stage-negotiation/5 border-stage-negotiation/20', probability: 75 },
+    { id: 'won', title: 'Ganho', accent: 'bg-stage-won', surface: 'bg-stage-won/5 border-stage-won/20', probability: 100 },
+    { id: 'lost', title: 'Perdido', accent: 'bg-stage-lost', surface: 'bg-stage-lost/5 border-stage-lost/20', probability: 0 }
 ];
 
 export const PipelineClientPage = ({ initialDeals, userProfile, distributors, allAccounts }: PipelineClientPageProps) => {
@@ -383,17 +383,17 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             ) : (
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="flex-1 overflow-visible pb-4 sm:overflow-x-auto">
-                    <div className="flex min-h-[34rem] flex-col gap-4 sm:flex-row">
+                    <div className="flex min-h-[var(--ds-kanban-board-min-height)] flex-col gap-4 sm:flex-row">
                         {DEFAULT_STAGES.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <section key={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-80">
+                                <section key={stage.id} data-qa-stage={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-[var(--ds-kanban-column-width)]">
                                     <header className="mb-2 flex items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <span aria-hidden="true" className={`size-2 rounded-full ${stage.accent}`} />
+                                                <span aria-hidden="true" data-qa-stage-dot="" className={`size-2 rounded-full ${stage.accent}`} />
                                                 <h3 className="ds-type-body font-semibold text-foreground">{stage.title}</h3>
                                             </div>
                                             <p className="mt-1 ds-type-label text-muted-foreground">{stageDeals.length} oportunidades</p>
@@ -406,8 +406,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.droppableProps}
-                                                className={`flex-1 space-y-3 rounded-[var(--radius-panel)] border p-2 transition-colors ${stage.surface} ${snapshot.isDraggingOver ? 'ring-2 ring-primary/30' : ''}`}
-                                                style={{ minHeight: '200px' }}
+                                                className={`min-h-[var(--ds-kanban-column-min-height)] flex-1 space-y-3 rounded-[var(--radius-panel)] border p-2 transition-colors ${stage.surface} ${snapshot.isDraggingOver ? 'ring-2 ring-primary/30' : ''}`}
                                             >
                                                 {stageDeals.map((deal, index) => (
                                                     <DealCard

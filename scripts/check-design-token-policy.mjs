@@ -50,6 +50,7 @@ export const fullyMigratedModules = Object.freeze([
   'src/components/goals/tabs/CampaignsTab.tsx',
   'src/components/goals/tabs/StatementTab.tsx',
   'src/components/pipeline/KanbanBoard.tsx',
+  'src/app/(dashboard)/pipeline/client-page.tsx',
   'src/components/pipeline/DealFormModal.tsx',
   'src/components/pipeline/tabs/PartnersTab.tsx',
   'src/components/pipeline/tabs/StakeholdersTab.tsx',
