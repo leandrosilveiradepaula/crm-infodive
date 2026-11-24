@@ -859,7 +859,9 @@ async function login(page, baseUrl, account, options = {}) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
                     await page.locator('html').evaluate((node, dark) => node.classList.toggle('dark', dark), theme === 'dark');
-                    await page.waitForTimeout(150);
+                    // Let global light/dark color transitions finish so axe
+                    // audits stable computed colors, not animation midpoints.
+                    await page.waitForTimeout(750);
                     await page.getByRole('button', { name: 'Entrar no Sistema' }).waitFor({ state: 'visible' });
                     // The login page intentionally has no dashboard navigation.
                     // Its own layout gate checks clipping without requiring CRM shell.
