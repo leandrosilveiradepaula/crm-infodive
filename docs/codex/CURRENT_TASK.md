@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 GOALS FAMILY CENTRALIZATION (same DRAFT PR #221)
+
+Owner said "continue" after SHA 8395895d achieved both CI and isolated authenticated QA PASS. Authorized scope: migrate presentation only in four existing Goals components (financial DRE, Goals dashboard, Commissions, Distribution) to shared semantic tokens with strict hardcode lock and regression tests. Preserve amounts, calculations, handlers, persistence, permissions and tenant isolation. Required: exact final SHA TypeScript/tests/build/axe/diff/policy CI plus isolated four-role, 22-route desktop/mobile/light/dark browser QA and visual comparison. No Supabase hosted database, migrations, API changes, production or main merge. This PR stays DRAFT pending owner review.
+
+---
+
 ## 2026-11-24 — DS4 QA isolation implementation clarification
 
 Source lockfile confirms an existing app axe-core 4.11.1 versus pinned QA axe-core 4.14.0. The shared installer must **NOT** symlink or replace anything inside the app's node_modules after Next build. Export only isolated absolute module file paths via GITHUB_ENV and make the two QA test runners read those paths. Keep runtime package integrity proof and all previous CI+authenticated QA gates. No production or hosted DB operations.
