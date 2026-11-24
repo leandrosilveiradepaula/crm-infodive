@@ -25,7 +25,9 @@ describe('Real login accessibility before synthetic credential entry', () => {
         expect(source).toContain("CRM_B4_LOGIN_A11Y_DIAGNOSTIC=");
         expect(source).toContain("const audit = await runAxe(page, options.source)");
         expect(source).toContain("['light', 'dark']");
-        expect(source).toContain('LOGIN_LAYOUT_OVERFLOW: unauthenticated page is clipped.');
+        expect(source).toContain("a11yFailedRoutes.add('/login')");
+        expect(source).toContain('layoutOverflow: overflow');
+        expect(source).toContain("if (overflow || audit.violationsCount || audit.incompleteCount)");
         expect(source).toContain('login-');
     });
 });

@@ -1,3 +1,9 @@
+### 2026-11-24 — DS8 B4 source assertion synced with fail-closed full-matrix login audit
+
+On candidate `6e30acc8`, [CRM validation 45506940592](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45506940592) FAILED exactly one obsolete static test (419/420 PASS): it expected the previous login audit to throw `LOGIN_LAYOUT_OVERFLOW` immediately. The active authorized QA now records the boolean `layoutOverflow` with a bounded `/login` failure, increments `a11yFailureCount`, and continues the full four-profile/22-route WCAG matrix (still fail-closed at end). Updated the historical contract to test that improved behavior rather than restore early exit. No WCAG exclusions, no credential or production changes. Continue only with exact-SHA CI and real authenticated QA; PR remains Draft.
+
+---
+
 ### 2026-11-24 — DS8 real login keyboard/WCAG gate caught genuine contrast defects
 
 At exact SHA `377aec48`, full [authenticated QA 45506376462](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45506376462) **FAILED EARLY** on the newly added real unauthenticated `/login` audit in desktop/light: three `color-contrast` nodes, zero incomplete. Safe computed-style evidence: submit button foreground dark on branded dark-blue background, invitation-only helper paragraph with `text-muted-foreground/60`, and copyright line with ancestor `opacity-30`. The browser never reached the full 22-route matrix on that SHA; do not claim it passed. The prepared fix restores full opacity to both visible paragraphs and removes all local login submit button theme/hover/font/height overrides except `w-full`; global `Button size="lg"` now owns the accessible primary foreground/background and central geometry. The QA harness also records login issues fail-closed while **continuing all 22 routes** instead of aborting at the first login finding. Same-SHA CI + complete real QA needed; no auth action, permission, tenant, production or DB changes.
