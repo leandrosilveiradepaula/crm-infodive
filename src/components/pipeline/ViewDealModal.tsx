@@ -81,11 +81,6 @@ interface ViewDealModalProps {
 export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors = [], allAccounts = [], initialTab = 'overview' }: ViewDealModalProps) {
     const router = useRouter();
     const returnFocusRef = React.useRef<HTMLElement | null>(null);
-    // Radix's default useId() may contain CSS-special characters. Expose
-    // stable, unambiguous IDREF targets for the dialog's accessible name.
-    const dialogId = `deal-${React.useId().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
-    const dialogTitleId = `${dialogId}-title`;
-    const dialogDescriptionId = `${dialogId}-description`;
     const { duplicateDeal } = useDeals();
     const [deal, setDeal] = useState<Deal>(initialDeal);
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -398,8 +393,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             <DialogContent
                 data-qa-region="deal-dialog"
                 showCloseButton={false}
-                aria-labelledby={dialogTitleId}
-                aria-describedby={dialogDescriptionId}
+                // This large multi-section dialog uses a direct, meaningful name
+                // rather than dynamic IDREFs. Per WAI-ARIA APG, omit the
+                // container description when content has complex structure.
+                aria-label={`Detalhes da oportunidade: ${deal.title}`}
+                aria-labelledby={undefined}
+                aria-describedby={undefined}
                 onOpenAutoFocus={() => {
                     // No DialogTrigger exists in this controlled-only modal.
                     // Capture its real opener before Radix moves focus inside.
@@ -435,10 +434,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                         </div>
                         <div className="min-w-0">
                             <DialogTitle
-                                id={dialogTitleId}
                                 className={isEditing ? 'sr-only' : 'ds-type-section-title font-semibold text-foreground'}
                             >{isEditing ? formData.title : deal.title}</DialogTitle>
-                            <DialogDescription id={dialogDescriptionId} className="sr-only">
+                            <DialogDescription className="sr-only">
                                 Visualizar e editar detalhes da oportunidade
                             </DialogDescription>
                             {isEditing && (

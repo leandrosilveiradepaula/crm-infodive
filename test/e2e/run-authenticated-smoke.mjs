@@ -572,7 +572,16 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
                 });
                 const title = element.querySelector('[data-slot="dialog-title"]');
                 const description = element.querySelector('[data-slot="dialog-description"]');
-                return { references, hasTitle: Boolean(title), hasDescription: Boolean(description) };
+                const ariaAttributeNames = Array.from(element.attributes)
+                    .map(attribute => attribute.name)
+                    .filter(name => /^aria-[a-z-]+$/.test(name))
+                    .sort();
+                // Names and booleans only: no ARIA attribute values or deal data.
+                return { references, hasTitle: Boolean(title),
+                    hasDescription: Boolean(description),
+                    hasDirectAccessibleName: Boolean(element.getAttribute('aria-label')?.trim()),
+                    ariaAttributeNames };
+
             });
             process.stderr.write('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=' +
                 JSON.stringify({ state: item.slug, violations: audit.violations,
