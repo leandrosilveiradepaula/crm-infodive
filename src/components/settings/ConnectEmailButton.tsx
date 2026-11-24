@@ -29,7 +29,7 @@ export function ConnectEmailButton() {
         <Button
             onClick={handleConnect}
             disabled={loading}
-            className="bg-[#0078D4] hover:bg-[#005a9e] text-white font-black h-11 px-6 rounded-2xl shadow-lg shadow-[#0078D4]/20 transition-all uppercase text-[10px] tracking-widest"
+            className="bg-[#0078D4] hover:bg-[#005a9e] text-white font-black h-11 px-6 rounded-[var(--radius-panel)] shadow-card-ui shadow-[#0078D4]/20 transition-all uppercase text-metadata-ui tracking-widest"
         >
             {loading ? (
                 <>
