@@ -24,6 +24,7 @@ export const policies = {
  * Extending this list is a one-way migration; do not suppress an active violation.
  */
 export const fullyMigratedModules = Object.freeze([
+  'src/components/ai/AiAssistant.tsx',
   'src/app/(dashboard)/customers/client-page.tsx',
   'src/components/dashboard/AiActionsWidget.tsx',
   'src/components/dashboard/FunnelWidget.tsx',
