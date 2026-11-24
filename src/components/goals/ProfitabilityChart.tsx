@@ -71,14 +71,12 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
-                        tick={{ fill: 'var(--muted-foreground)' }}
                     />
                     <YAxis
                         tick={false}
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
-                        tick={{ fill: 'var(--muted-foreground)' }}
                     />
                     <Tooltip
                         contentStyle={{

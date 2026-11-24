@@ -48,7 +48,6 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
                         tick={false}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
-                        tick={{ fill: 'var(--muted-foreground)' }}
                         axisLine={false}
                         tickLine={false}
                     />
@@ -57,7 +56,6 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
-                        tick={{ fill: 'var(--muted-foreground)' }}
                         axisLine={false}
                         tickLine={false}
                     />
