@@ -24,6 +24,9 @@ export const policies = {
  * Extending this list is a one-way migration; do not suppress an active violation.
  */
 export const fullyMigratedModules = Object.freeze([
+  'src/components/common/CalendarView.tsx',
+  'src/components/charts/ConversionFunnel.tsx',
+  'src/components/charts/LossReasonChart.tsx',
   'src/components/activities/AiSuggestionsPanel.tsx',
   'src/components/integrations/IntegrationKeys.tsx',
   'src/components/integrations/IntegrationWebhooks.tsx',
