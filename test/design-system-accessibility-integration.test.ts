@@ -61,6 +61,25 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     }
   });
 
+  it('restores focus, fixes Radix guards and keeps the full QA matrix fail-closed', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const dialog = read('src/components/ui/dialog.tsx');
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    const overview = read('src/components/pipeline/tabs/OverviewTab.tsx');
+    expect(modal).toContain('onOpenAutoFocus={() => {');
+    expect(modal).toContain('onCloseAutoFocus={(event) => {');
+    expect(modal).toContain('opener.focus({ preventScroll: true })');
+    expect(dialog).toContain("document.querySelectorAll<HTMLElement>('[data-radix-focus-guard][aria-hidden=\"true\"]')");
+    expect(dialog).toContain("guard.removeAttribute('aria-hidden')");
+    expect(dialog).toContain('return () => observer.disconnect()');
+    expect(runner).toContain('CRM_B4_KEYBOARD_DIAGNOSTIC=');
+    expect(runner).toContain("a11yFailedRoutes.add('/pipeline?detail:keyboard')");
+    expect(runner).toContain('const returnedToOpener = await opener.evaluate(');
+    expect(overview).toContain('onClick: onViewCommunications');
+    expect(overview).not.toContain('onClick: () => { }');
+    expect(overview).not.toContain('A última comunicação foi há 3 dias.');
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');

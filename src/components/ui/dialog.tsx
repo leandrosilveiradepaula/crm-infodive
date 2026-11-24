@@ -55,6 +55,25 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  // Radix 1.x's hideOthers can mark its own focus guards aria-hidden
+  // while keeping tabIndex=0 (radix-ui/primitives#3593). Correct that
+  // actual accessibility state, not the axe rule or the keyboard trap.
+  React.useEffect(() => {
+    const reconcileFocusGuards = () => {
+      const guards = document.querySelectorAll<HTMLElement>('[data-radix-focus-guard][aria-hidden="true"]')
+      guards.forEach(guard => guard.removeAttribute('aria-hidden'))
+    }
+    const observer = new MutationObserver(reconcileFocusGuards)
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['aria-hidden'],
+    })
+    reconcileFocusGuards()
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />

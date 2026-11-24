@@ -20,9 +20,10 @@ interface OverviewTabProps {
     deal: Deal;
     onViewStakeholders: () => void;
     onViewProducts: () => void;
+    onViewCommunications: () => void;
 }
 
-export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: OverviewTabProps) {
+export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications }: OverviewTabProps) {
     // Helper for health trend icon
     const getTrendIcon = (trend?: string) => {
         switch (trend) {
@@ -58,9 +59,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
         }
         return {
             title: "Follow-up Sugerido",
-            description: "A última comunicação foi há 3 dias. Verifique se o cliente tem dúvidas.",
-            action: "Enviar Mensagem",
-            onClick: () => { }, // Would open omnichannel
+            description: "Consulte o histórico de comunicações antes de planejar o próximo contato.",
+            action: "Ver Comunicações",
+            onClick: onViewCommunications,
             icon: MessageSquare,
             color: "text-foreground",
             bg: "bg-info-subtle"
@@ -153,7 +154,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: Overvi
                         <div>
                             <div className="flex items-center gap-1.5 mb-1">
                                 <Sparkles className="h-3 w-3 text-foreground" />
-                                <span className="ds-type-metadata font-semibold text-foreground uppercase tracking-widest">IA : Próxima Melhor Ação</span>
+                                <span className="ds-type-metadata font-semibold text-foreground uppercase tracking-widest">Próxima Ação Sugerida</span>
                             </div>
                             <h3 className="ds-type-body font-semibold text-foreground mb-0.5">{nextAction.title}</h3>
                             <p className="ds-type-label text-muted-foreground leading-relaxed">{nextAction.description}</p>

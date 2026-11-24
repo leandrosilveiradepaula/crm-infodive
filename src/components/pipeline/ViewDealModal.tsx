@@ -69,6 +69,7 @@ interface ViewDealModalProps {
 
 export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors = [], allAccounts = [], initialTab = 'overview' }: ViewDealModalProps) {
     const router = useRouter();
+    const returnFocusRef = React.useRef<HTMLElement | null>(null);
     const { duplicateDeal } = useDeals();
     const [deal, setDeal] = useState<Deal>(initialDeal);
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -385,7 +386,33 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent data-qa-region="deal-dialog" showCloseButton={false} className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col">
+            <DialogContent
+                data-qa-region="deal-dialog"
+                showCloseButton={false}
+                onOpenAutoFocus={() => {
+                    // No DialogTrigger exists in this controlled-only modal.
+                    // Capture its real opener before Radix moves focus inside.
+                    const focused = document.activeElement;
+                    if (focused instanceof HTMLElement &&
+                        focused !== document.body &&
+                        !focused.closest('[role="dialog"]')) {
+                        returnFocusRef.current = focused;
+                    }
+                }}
+                onCloseAutoFocus={(event) => {
+                    // Restore only after the shell's inert cleanup, without
+                    // stealing focus if the opener was removed by navigation.
+                    event.preventDefault();
+                    const opener = returnFocusRef.current;
+                    returnFocusRef.current = null;
+                    requestAnimationFrame(() => {
+                        if (opener?.isConnected && !opener.closest('[inert], [aria-hidden="true"]')) {
+                            opener.focus({ preventScroll: true });
+                        }
+                    });
+                }}
+                className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col"
+            >
 
                 {/* Header */}
                 <div data-qa-region="deal-header" className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
@@ -530,6 +557,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             deal={deal}
                                             onViewStakeholders={() => setActiveTab('stakeholders')}
                                             onViewProducts={() => setActiveTab('products')}
+                                            onViewCommunications={() => setActiveTab('omnichannel')}
                                         />
                                     </TabsContent>
 

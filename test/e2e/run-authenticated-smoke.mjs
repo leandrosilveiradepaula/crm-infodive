@@ -374,9 +374,18 @@ async function assertOpportunityDialogKeyboard(page, opener) {
     }
     await page.keyboard.press('Escape');
     await dialog.waitFor({ state: 'hidden', timeout: 5000 });
-    if (!(await opener.evaluate(element => element === document.activeElement))) {
-        throw new Error('Opportunity dialog did not restore focus to opener.');
-    }
+    // Restoration happens on the frame following shell cleanup, so
+    // wait for the actual focus state rather than racing the animation.
+    const returnedToOpener = await opener.evaluate(element => new Promise(resolve => {
+        let frames = 0;
+        const check = () => {
+            if (document.activeElement === element) return resolve(true);
+            if (++frames > 60) return resolve(false);
+            requestAnimationFrame(check);
+        };
+        check();
+    }));
+    if (!returnedToOpener) throw new Error('Opportunity dialog did not restore focus to opener.');
     if (await shell.evaluate(element => element.inert)) {
         throw new Error('Opportunity dialog left application shell inert after closing.');
     }
@@ -558,8 +567,23 @@ try {
                             }) + '\n');
                         }
                         await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
-                        await assertOpportunityDialogKeyboard(page, openDetails);
-                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed', keyboardIsolation: 'passed' });
+                        // Record keyboard failures separately, keeping the rest of
+                        // the 4-profile / 22-route synthetic matrix auditable.
+                        let keyboardStatus = 'passed';
+                        try {
+                            await assertOpportunityDialogKeyboard(page, openDetails);
+                        } catch {
+                            keyboardStatus = 'failed';
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/pipeline?detail:keyboard');
+                            const finding = {
+                                profileIndex, route: '/pipeline', state: 'deal-detail',
+                                viewport: viewport.name, theme, keyboardFocus: 'failed',
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_B4_KEYBOARD_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                        }
+                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed', keyboardIsolation: keyboardStatus });
                     }
                 }
             }
