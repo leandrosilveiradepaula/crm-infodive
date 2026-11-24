@@ -13,17 +13,17 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { type Deal } from '@/types/deal';
 import { formatCurrency } from '@/utils/format';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { DealActivityTimeline } from '../DealActivityTimeline';
 
 interface OverviewTabProps {
     deal: Deal;
     onViewStakeholders: () => void;
     onViewProducts: () => void;
     onViewCommunications: () => void;
+    onViewHistory: () => void;
 }
 
-export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications }: OverviewTabProps) {
+export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications, onViewHistory }: OverviewTabProps) {
     // Helper for health trend icon
     const getTrendIcon = (trend?: string) => {
         switch (trend) {
@@ -69,6 +69,10 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
     };
 
     const nextAction = getNextAction();
+    const healthScore = typeof deal.health_score === 'number' && Number.isFinite(deal.health_score)
+        ? Math.max(0, Math.min(100, deal.health_score)) : null;
+    const stakeholderCount = Array.isArray(deal.custom_fields?.stakeholders)
+        ? deal.custom_fields.stakeholders.length : null;
 
     return (
         <div className="space-y-8">
@@ -100,14 +104,17 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                             <Zap className="h-3.5 w-3.5 text-success-readable" />
                         </div>
                         <div className="flex items-center gap-1">
-                            <span className="ds-type-metadata font-semibold text-success-readable uppercase tracking-widest">{deal.health_score || 0}%</span>
+                            <span className="ds-type-metadata font-semibold text-success-readable uppercase tracking-widest">{healthScore === null ? 'Sem avaliação' : `${healthScore}%`}</span>
                             {getTrendIcon(deal.health_trend)}
                         </div>
                     </div>
                     <div>
                         <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
-                        <Progress value={deal.health_score || 0} className="h-1 bg-muted" />
-                        <p className="ds-type-metadata text-muted-foreground mt-1">Baseado em atividade</p>
+                        {healthScore === null ? (
+                            <p className="ds-type-metadata text-muted-foreground">Pontuação não registrada</p>
+                        ) : (
+                            <Progress value={healthScore} className="h-1 bg-muted" />
+                        )}
                     </div>
                 </div>
 
@@ -120,7 +127,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                     </div>
                     <div>
                         <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
-                        <h4 className="ds-type-section-title font-semibold text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
+                        <h4 className="ds-type-section-title font-semibold text-foreground tracking-tight leading-tight">{typeof deal.days_in_stage === 'number' ? `${deal.days_in_stage} dias` : 'Não disponível'}</h4>
                         <p className="ds-type-metadata text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
                     </div>
                 </div>
@@ -131,9 +138,9 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                         <div className="p-1 bg-warning-subtle rounded-[var(--radius-control)]">
                             <Users className="h-3.5 w-3.5 text-warning-readable" />
                         </div>
-                        <Badge variant="outline" className="ds-type-metadata uppercase font-semibold text-warning-readable border-warning/20 px-1.5 py-0">
-                            {deal.custom_fields?.stakeholders?.length || 1} Total
-                        </Badge>
+                        <span className="ds-type-metadata rounded-[var(--radius-control)] border border-warning/20 bg-warning-subtle px-2 py-0.5 font-semibold text-warning-readable">
+                            {stakeholderCount === null ? 'Sem contagem' : `${stakeholderCount} total`}
+                        </span>
                     </div>
                     <div>
                         <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
@@ -173,48 +180,19 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
             {/* 3. Bottom Grid: Activity & Quick Details */}
             <div className="grid grid-cols-3 gap-8">
 
-                {/* Left: Activity Timeline */}
-                <div className="col-span-2 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="ds-type-body font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <ActivityIcon className="h-4 w-4 text-foreground" />
-                            Timeline de Atividade
+                {/* Actual recorded activities only; no demonstration events or invented timestamps. */}
+                <div className="col-span-2 space-y-4">
+                    <div className="flex items-center justify-between gap-4">
+                        <h3 className="ds-type-body flex items-center gap-2 font-semibold text-muted-foreground">
+                            <ActivityIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
+                            Atividades Registradas
                         </h3>
-                        <Button variant="ghost" size="sm" className="ds-type-metadata font-bold uppercase text-muted-foreground hover:text-foreground">
-                            Ver Histórico Completo
+                        <Button type="button" variant="outline" size="sm" onClick={onViewHistory}
+                            className="ds-type-metadata font-semibold">
+                            Ver Histórico
                         </Button>
                     </div>
-
-                    <div className="relative space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-                        {[
-                            { title: 'Proposta enviada para o cliente', user: 'Leandro', date: new Date(), type: 'proposal' },
-                            { title: 'Mix de produtos atualizado', user: 'Sistema', date: new Date(Date.now() - 86400000), type: 'products' },
-                            { title: 'Negócio criado no pipeline', user: 'Leandro', date: new Date(Date.now() - 172800000), type: 'creation' }
-                        ].map((item, i) => (
-                            <div key={i} className="relative pl-10 group">
-                                <div className={`
-                                    absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-all group-hover:scale-110 shadow-control-ui
-                                    ${item.type === 'proposal' ? 'bg-info' : item.type === 'products' ? 'bg-primary' : 'bg-success'}
-                                `}>
-                                    {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-primary-foreground" /> : <ActivityIcon className="h-2.5 w-2.5 text-primary-foreground" />}
-                                </div>
-                                <div className="bg-card border border-border p-3.5 rounded-[var(--radius-panel)] hover:border-info/20 transition-all shadow-control-ui">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className="ds-type-body font-bold text-foreground">{item.title}</h4>
-                                        <span className="ds-type-metadata text-muted-foreground font-medium uppercase">
-                                            {formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
-                                            <User className="h-2.5 w-2.5 text-muted-foreground" />
-                                        </div>
-                                        <span className="ds-type-metadata text-muted-foreground font-bold">{item.user}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <DealActivityTimeline deal={deal} compact />
                 </div>
 
                 {/* Right: Quick Details */}
@@ -289,10 +267,3 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
         </div>
     );
 }
-
-// Helper component for repeated Icon + Text pattern in activity
-const FileText = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-);

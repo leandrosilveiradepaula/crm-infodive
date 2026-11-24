@@ -558,6 +558,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             onViewStakeholders={() => setActiveTab('stakeholders')}
                                             onViewProducts={() => setActiveTab('products')}
                                             onViewCommunications={() => setActiveTab('omnichannel')}
+                                            onViewHistory={() => setActiveTab('history')}
                                         />
                                     </TabsContent>
 

@@ -1,135 +1,85 @@
+'use client';
 
 import React from 'react';
-import {
-    AlertTriangle,
-    TrendingUp,
-    TrendingDown,
-    Minus,
-    ShieldCheck,
-    Activity
-} from 'lucide-react';
-import { type Deal } from '@/types/deal';
+import { Activity, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import type { Deal } from '@/types/deal';
 
-interface RiskRadarProps {
-    deal: Deal;
-}
+interface RiskRadarProps { deal: Deal }
 
 export const RiskRadar: React.FC<RiskRadarProps> = ({ deal }) => {
-    // Fallback if data is missing (e.g. before migration runs on existing deals)
-    // We will use mock data for now if props are missing
-    const score = deal.health_score ?? 100;
-    const trend = deal.health_trend ?? 'stable';
-    const factors = deal.risk_factors ?? [];
+    const score = typeof deal.health_score === 'number' && Number.isFinite(deal.health_score)
+        ? Math.max(0, Math.min(100, deal.health_score))
+        : null;
+    const trend = deal.health_trend ?? null;
+    const factors = Array.isArray(deal.risk_factors) ? deal.risk_factors : [];
 
-    const getScoreColor = (s: number) => {
-        if (s >= 80) return 'text-success-readable';
-        if (s >= 50) return 'text-warning-readable';
-        return 'text-destructive-readable';
-    };
+    if (score === null) {
+        return (
+            <section data-qa-region="deal-risk-unassessed" className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-card-ui">
+                <div className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                    <h3 className="ds-type-body font-semibold text-foreground">Risk Radar</h3>
+                </div>
+                <p className="ds-type-label mt-2 text-muted-foreground">
+                    Sem avaliação de risco registrada para esta oportunidade.
+                </p>
+                {factors.length > 0 && (
+                    <p className="ds-type-label mt-2 text-muted-foreground">
+                        Há fatores cadastrados, mas ainda não existe uma pontuação validada.
+                    </p>
+                )}
+            </section>
+        );
+    }
 
-    const getScoreBg = (s: number) => {
-        if (s >= 80) return 'bg-success';
-        if (s >= 50) return 'bg-warning';
-        return 'bg-destructive';
-    };
-
-    const getTrendIcon = () => {
-        switch (trend) {
-            case 'improving': return <TrendingUp className="h-4 w-4 text-success-readable" />;
-            case 'declining': return <TrendingDown className="h-4 w-4 text-destructive-readable" />;
-            default: return <Minus className="h-4 w-4 text-muted-foreground" />;
-        }
-    };
+    const scoreColor = score >= 80 ? 'text-success-readable'
+        : score >= 50 ? 'text-warning-readable'
+        : 'text-destructive-readable';
 
     return (
-        <div className="bg-card border border-border rounded-[var(--radius-panel)] p-5 shadow-card-ui  relative overflow-hidden group hover:shadow-overlay-ui transition-shadow duration-500">
-            {/* Background Effect */}
-            <div className={`absolute top-0 right-0 p-24 rounded-full blur-3xl opacity-[0.08] translate-x-12 -translate-y-12 ${getScoreBg(score)} transition-colors duration-1000`} />
-
-            <div className="flex items-center justify-between mb-6 relative z-10">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted/50 rounded-[var(--radius-panel)] border border-border shadow-sm">
-                        <Activity className="h-5 w-5 text-primary" />
-                    </div>
+        <section data-qa-region="deal-risk-evaluated" className="rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-card-ui">
+            <div className="mb-4 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-primary" aria-hidden="true" />
                     <div>
-                        <h3 className="ds-type-body font-bold text-foreground leading-tight">Risk Radar</h3>
-                        <p className="ds-type-metadata font-medium text-muted-foreground mt-0.5">Monitoramento Contínuo</p>
+                        <h3 className="ds-type-body font-semibold text-foreground">Risk Radar</h3>
+                        <p className="ds-type-metadata text-muted-foreground">Pontuação registrada</p>
                     </div>
                 </div>
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${trend === 'improving' ? 'bg-success-subtle border-success/30 text-success-readable' :
-                        trend === 'declining' ? 'bg-destructive-subtle border-destructive/30 text-destructive-readable' :
-                            'bg-muted/50 border-border text-muted-foreground'
-                    }`}>
-                    {getTrendIcon()}
-                    <span className="ds-type-metadata font-bold uppercase tracking-wide">
-                        {trend === 'improving' ? 'Melhorando' : trend === 'declining' ? 'Crítico' : 'Estável'}
-                    </span>
+                <div className="flex items-center gap-1 ds-type-metadata text-muted-foreground">
+                    {trend === 'improving' ? <TrendingUp className="h-4 w-4" aria-hidden="true" /> :
+                        trend === 'declining' ? <TrendingDown className="h-4 w-4" aria-hidden="true" /> :
+                            <Minus className="h-4 w-4" aria-hidden="true" />}
+                    <span>{trend === 'improving' ? 'Melhorando' :
+                        trend === 'declining' ? 'Em queda' :
+                            trend === 'stable' ? 'Estável' : 'Sem tendência registrada'}</span>
                 </div>
             </div>
 
-            <div className="flex gap-6 relative z-10">
-                {/* Score Gauge */}
-                <div className="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
-                    {/* Background Circle */}
-                    <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                            cx="40"
-                            cy="40"
-                            r="34"
-                            stroke="currentColor"
-                            strokeWidth="6"
-                            fill="transparent"
-                            className="text-border"
-                        />
-                        {/* Progress Circle */}
-                        <circle
-                            cx="40"
-                            cy="40"
-                            r="34"
-                            stroke="currentColor"
-                            strokeWidth="6"
-                            fill="transparent"
-                            strokeDasharray={213.6}
-                            strokeDashoffset={213.6 - (213.6 * score) / 100}
-                            className={`${getScoreColor(score)} transition-all duration-1000 ease-out`}
-                            strokeLinecap="round"
-                        />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`ds-type-metric font-black ${getScoreColor(score)} tracking-tighter`}>{score}</span>
-                        <span className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wider mt-[-2px]">Score</span>
-                    </div>
+            <div className="flex items-start gap-4">
+                <div className="min-w-20 rounded-[var(--radius-panel)] border border-border bg-surface-subtle p-3 text-center">
+                    <div className={`ds-type-metric font-semibold ${scoreColor}`}>{score}</div>
+                    <div className="ds-type-metadata text-muted-foreground">Score</div>
                 </div>
-
-                {/* Factors List */}
-                <div className="flex-1 min-w-0 py-1">
-                    {factors.length > 0 ? (
-                        <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                            <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                                <AlertTriangle className="h-3 w-3" /> Pontos de Atenção
+                <div className="min-w-0 flex-1">
+                    {factors.length ? (
+                        <div>
+                            <p className="ds-type-metadata mb-2 flex items-center gap-1 font-semibold text-foreground">
+                                <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" /> Fatores registrados
                             </p>
-                            <ul className="space-y-2.5">
-                                {factors.slice(0, 3).map((factor: string, idx: number) => (
-                                    <li key={idx} className="flex gap-2.5 items-start ds-type-label text-muted-foreground font-medium leading-relaxed group/item">
-                                        <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${getScoreBg(score)} opacity-60 group-hover/item:opacity-100 transition-opacity`} />
-                                        <span className="line-clamp-2">{factor}</span>
-                                    </li>
+                            <ul className="space-y-2">
+                                {factors.slice(0, 3).map((factor, i) => (
+                                    <li key={i} className="ds-type-label text-muted-foreground">{factor}</li>
                                 ))}
                             </ul>
                         </div>
                     ) : (
-                        <div className="flex flex-col justify-center h-full animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-center gap-2 text-success-readable mb-1">
-                                <ShieldCheck className="h-4 w-4" />
-                                <span className="font-bold ds-type-body">Deal Saudável</span>
-                            </div>
-                            <p className="ds-type-label text-muted-foreground leading-relaxed font-medium">
-                                Nenhuma anomalia detectada. O engajamento está positivo e dentro do esperado.
-                            </p>
-                        </div>
+                        <p className="ds-type-label text-muted-foreground">
+                            Nenhum fator de risco foi registrado nesta oportunidade.
+                        </p>
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     );
 };

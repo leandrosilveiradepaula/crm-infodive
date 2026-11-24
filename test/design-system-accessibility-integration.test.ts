@@ -80,6 +80,28 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(overview).not.toContain('A última comunicação foi há 3 dias.');
   });
 
+  it('uses genuine activities and removes fabricated history, counts and health fallbacks', () => {
+    const overview = read('src/components/pipeline/tabs/OverviewTab.tsx');
+    const history = read('src/components/pipeline/tabs/HistoryTab.tsx');
+    const timeline = read('src/components/pipeline/DealActivityTimeline.tsx');
+    const radar = read('src/components/pipeline/ai/RiskRadar.tsx');
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    expect(timeline).toContain('deal.deal_activities');
+    expect(timeline).toContain('Nenhuma atividade registrada');
+    expect(overview).toContain('<DealActivityTimeline deal={deal} compact />');
+    expect(history).toContain('<DealActivityTimeline deal={deal} />');
+    expect(modal).toContain("onViewHistory={() => setActiveTab('history')}");
+    expect(overview).not.toContain('Proposta enviada para o cliente');
+    expect(overview).not.toContain('Date.now() -');
+    expect(overview).not.toContain('deal.health_score || 0');
+    expect(overview).not.toContain('stakeholders?.length || 1');
+    expect(history).not.toContain('Generate some mock history');
+    expect(history).not.toContain('bg-blue-500');
+    expect(radar).not.toContain('deal.health_score ?? 100');
+    expect(radar).toContain('Sem avaliação de risco registrada');
+    expect(radar).not.toContain('Nenhuma anomalia detectada');
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');
