@@ -35,11 +35,20 @@ export class ContractService {
                 throw new Error('Não foi possível carregar todos os contratos. Atualize e tente novamente.');
             }
             expectedCount = count;
-            for (const row of data) {
-                if (!row || typeof row.id !== 'string' || !row.id ||
+            // PostgREST's compile-time parser cannot infer a conditional
+            // select string. Treat its result as untrusted and narrow it
+            // explicitly rather than pretending that its shape is known.
+            for (const value of data as unknown[]) {
+                if (!value || typeof value !== 'object' || Array.isArray(value)) {
+                    throw new Error('Não foi possível validar a integridade da lista de contratos.');
+                }
+                const row = value as Record<string, unknown>;
+                const deal = row.deals && typeof row.deals === 'object' && !Array.isArray(row.deals)
+                    ? row.deals as Record<string, unknown> : null;
+                if (typeof row.id !== 'string' || !row.id ||
                     row.organization_id !== organizationId || seen.has(row.id) ||
-                    (!canViewAll && (row.deals?.owner_id !== ownerId ||
-                        row.deals?.organization_id !== organizationId))) {
+                    (!canViewAll && (deal?.owner_id !== ownerId ||
+                        deal?.organization_id !== organizationId))) {
                     throw new Error('Não foi possível validar a integridade da lista de contratos.');
                 }
                 seen.add(row.id);
