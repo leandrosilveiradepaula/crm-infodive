@@ -35,11 +35,11 @@ export function AutomationHistorySheet({ automation, open, onOpenChange }: Autom
                 <div className="relative h-full flex flex-col">
                     <SheetHeader className="p-8 pb-4">
                         <div className="flex items-center gap-4 mb-4">
-                            <div className="p-3 bg-primary/10 rounded-2xl">
+                            <div className="p-3 bg-primary/10 rounded-[var(--radius-panel)]">
                                 <Zap className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <SheetTitle className="text-2xl font-black text-foreground tracking-tight">{automation.name}</SheetTitle>
+                                <SheetTitle className="text-page-title font-black text-foreground tracking-tight">{automation.name}</SheetTitle>
                                 <SheetDescription className="text-muted-foreground font-medium">Histórico de execuções recente</SheetDescription>
                             </div>
                         </div>
@@ -48,16 +48,16 @@ export function AutomationHistorySheet({ automation, open, onOpenChange }: Autom
                     <div className="flex-1 overflow-y-auto px-8 pb-8 space-y-6">
                         {/* Summary Stats */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-background/40 p-4 rounded-2xl border border-border/50">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Status Atual</p>
+                            <div className="bg-background/40 p-4 rounded-[var(--radius-panel)] border border-border/50">
+                                <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest mb-1">Status Atual</p>
                                 <div className="flex items-center gap-2">
-                                    <div className={`h-2 w-2 rounded-full ${automation.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-muted'}`} />
-                                    <span className="text-sm font-bold">{automation.enabled ? 'Ativa' : 'Pausada'}</span>
+                                    <div className={`h-2 w-2 rounded-full ${automation.enabled ? 'bg-success animate-pulse' : 'bg-muted'}`} />
+                                    <span className="text-body-ui font-bold">{automation.enabled ? 'Ativa' : 'Pausada'}</span>
                                 </div>
                             </div>
-                            <div className="bg-background/40 p-4 rounded-2xl border border-border/50">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Taxa de Sucesso</p>
-                                <span className="text-sm font-black text-emerald-500">
+                            <div className="bg-background/40 p-4 rounded-[var(--radius-panel)] border border-border/50">
+                                <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest mb-1">Taxa de Sucesso</p>
+                                <span className="text-body-ui font-black text-success-readable">
                                     {automation.executionCount > 0 
                                         ? ((automation.successCount / automation.executionCount) * 100).toFixed(0) 
                                         : '100'}%
@@ -67,27 +67,27 @@ export function AutomationHistorySheet({ automation, open, onOpenChange }: Autom
 
                         {/* Timeline */}
                         <div className="space-y-4">
-                            <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest">Logs de Atividade</h4>
+                            <h4 className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Logs de Atividade</h4>
                             
                             {history.map((log) => (
                                 <div key={log.id} className="group relative pl-8 pb-6 border-l border-border last:pb-0">
                                     {/* Icon Dot */}
                                     <div className={`absolute left-0 -translate-x-1/2 p-1.5 rounded-full border-2 border-card ${
-                                        log.status === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+                                        log.status === 'success' ? 'bg-success text-white' : 'bg-destructive text-white'
                                     }`}>
                                         {log.status === 'success' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
                                     </div>
 
-                                    <div className="bg-card border border-border/50 p-4 rounded-2xl group-hover:border-primary/30 transition-all group-hover:shadow-lg group-hover:shadow-primary/5">
+                                    <div className="bg-card border border-border/50 p-4 rounded-[var(--radius-panel)] group-hover:border-primary/30 transition-all group-hover:shadow-card-ui group-hover:shadow-primary/5">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+                                            <span className="text-metadata-ui font-bold text-muted-foreground flex items-center gap-2">
                                                 <Calendar className="h-3 w-3" /> {log.date}
                                             </span>
                                             {log.status === 'failed' && (
-                                                <span className="text-[10px] font-black bg-red-500/10 text-red-500 px-2 py-1 rounded-md">ERROR: {log.error}</span>
+                                                <span className="text-metadata-ui font-black bg-destructive/10 text-destructive-readable px-2 py-1 rounded-[var(--radius-control)]">ERROR: {log.error}</span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-foreground font-medium leading-relaxed">{log.details}</p>
+                                        <p className="text-body-ui text-foreground font-medium leading-relaxed">{log.details}</p>
                                     </div>
                                 </div>
                             ))}
@@ -95,7 +95,7 @@ export function AutomationHistorySheet({ automation, open, onOpenChange }: Autom
                     </div>
 
                     <div className="p-6 border-t border-border bg-card/50 backdrop-blur-md">
-                        <button className="w-full py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all group">
+                        <button className="w-full py-4 bg-primary text-white rounded-[var(--radius-panel)] font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all group">
                             Configurar Notificações de Erro
                             <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </button>

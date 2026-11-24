@@ -75,25 +75,25 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
 
     const renderTriggerStep = () => (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-foreground mb-4">O que deve iniciar esta automação?</h3>
+            <h3 className="text-section-title font-bold text-foreground mb-4">O que deve iniciar esta automação?</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {triggerOptions.map(option => (
                     <div
                         key={option.id}
                         onClick={() => setConfig({ ...config, triggerType: option.id })}
                         className={`
-                            p-4 border-2 rounded-xl cursor-pointer transition-all flex items-start gap-4
+                            p-4 border-2 rounded-[var(--radius-panel)] cursor-pointer transition-all flex items-start gap-4
                             ${config.triggerType === option.id
-                                ? 'border-primary bg-blue-50'
+                                ? 'border-primary bg-surface-highlight'
                                 : 'border-border hover:border-primary/50 hover:bg-muted/50'}
                         `}
                     >
-                        <div className={`p-2 rounded-lg ${config.triggerType === option.id ? 'bg-card text-primary' : 'bg-muted/50 text-muted-foreground'}`}>
+                        <div className={`p-2 rounded-[var(--radius-control)] ${config.triggerType === option.id ? 'bg-card text-primary' : 'bg-muted/50 text-muted-foreground'}`}>
                             <option.icon className="h-6 w-6" />
                         </div>
                         <div>
                             <p className={`font-bold ${config.triggerType === option.id ? 'text-primary' : 'text-foreground'}`}>{option.label}</p>
-                            <p className="text-sm text-muted-foreground mt-1">{option.description}</p>
+                            <p className="text-body-ui text-muted-foreground mt-1">{option.description}</p>
                         </div>
                     </div>
                 ))}
@@ -103,24 +103,24 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
 
     const renderActionsStep = () => (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-foreground mb-4">O que deve acontecer?</h3>
+            <h3 className="text-section-title font-bold text-foreground mb-4">O que deve acontecer?</h3>
 
             {/* Actions List */}
             <div className="space-y-3 mb-6">
                 {config.actions.map((action, index) => {
                     const option = actionOptions.find(o => o.id === action.type);
                     return (
-                        <div key={index} className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl relative group">
-                            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm">
+                        <div key={index} className="flex items-center gap-3 p-4 bg-card border border-border rounded-[var(--radius-panel)] relative group">
+                            <div className="h-8 w-8 rounded-full bg-success-subtle flex items-center justify-center text-success-readable font-bold text-body-ui">
                                 {index + 1}
                             </div>
                             <div className="flex-1">
                                 <p className="font-bold text-foreground">{option?.label || action.type}</p>
-                                <p className="text-xs text-muted-foreground">Delay: {action.delay} min</p>
+                                <p className="text-metadata-ui text-muted-foreground">Delay: {action.delay} min</p>
                             </div>
                             <button
                                 onClick={() => removeAction(index)}
-                                className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                                className="p-2 text-muted-foreground hover:text-destructive-readable transition-colors"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </button>
@@ -129,7 +129,7 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                 })}
 
                 {config.actions.length === 0 && (
-                    <div className="text-center py-8 bg-muted/50 border-2 border-dashed border-border rounded-xl text-muted-foreground">
+                    <div className="text-center py-8 bg-muted/50 border-2 border-dashed border-border rounded-[var(--radius-panel)] text-muted-foreground">
                         Nenhuma ação adicionada ainda.
                     </div>
                 )}
@@ -137,16 +137,16 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
 
             {/* Add Action Buttons */}
             <div>
-                <p className="text-sm font-bold text-muted-foreground uppercase mb-3">Adicionar Ação</p>
+                <p className="text-body-ui font-bold text-muted-foreground uppercase mb-3">Adicionar Ação</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {actionOptions.map(option => (
                         <button
                             key={option.id}
                             onClick={() => addAction(option.id)}
-                            className="flex items-center gap-2 p-3 bg-card border border-border rounded-lg hover:border-primary hover:text-primary transition-colors text-left"
+                            className="flex items-center gap-2 p-3 bg-card border border-border rounded-[var(--radius-control)] hover:border-primary hover:text-primary transition-colors text-left"
                         >
                             <option.icon className="h-4 w-4" />
-                            <span className="text-sm font-medium">{option.label}</span>
+                            <span className="text-body-ui font-medium">{option.label}</span>
                         </button>
                     ))}
                 </div>
@@ -156,34 +156,34 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
 
     const renderDetailsStep = () => (
         <div className="space-y-6">
-            <h3 className="text-lg font-bold text-foreground mb-4">Detalhes da Automação</h3>
+            <h3 className="text-section-title font-bold text-foreground mb-4">Detalhes da Automação</h3>
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Nome</label>
+                    <label className="block text-body-ui font-medium text-foreground mb-2">Nome</label>
                     <input
                         type="text"
                         value={config.name}
                         onChange={e => setConfig({ ...config, name: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        className="w-full px-4 py-2 border border-border rounded-[var(--radius-control)] focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         placeholder="Ex: Follow-up de novos leads"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Descrição</label>
+                    <label className="block text-body-ui font-medium text-foreground mb-2">Descrição</label>
                     <textarea
                         value={config.description}
                         onChange={e => setConfig({ ...config, description: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        className="w-full px-4 py-2 border border-border rounded-[var(--radius-control)] focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         placeholder="O que esta automação faz?"
                         rows={3}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Categoria</label>
+                    <label className="block text-body-ui font-medium text-foreground mb-2">Categoria</label>
                     <select
                         value={config.category}
                         onChange={e => setConfig({ ...config, category: e.target.value as any })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        className="w-full px-4 py-2 border border-border rounded-[var(--radius-control)] focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     >
                         <option value="custom">Personalizado</option>
                         <option value="followup">Follow-up</option>
@@ -194,9 +194,9 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                 </div>
             </div>
 
-            <div className="bg-muted/50 p-4 rounded-xl border border-border mt-6">
+            <div className="bg-muted/50 p-4 rounded-[var(--radius-panel)] border border-border mt-6">
                 <h4 className="font-bold text-foreground mb-2">Resumo</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground">
+                <ul className="space-y-2 text-body-ui text-muted-foreground">
                     <li className="flex items-center gap-2">
                         <Zap className="h-4 w-4 text-primary" />
                         Gatilho: <strong>{triggerOptions.find(t => t.id === config.triggerType)?.label}</strong>
@@ -211,16 +211,16 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
     );
 
     return (
-        <div className="flex flex-col h-full bg-card rounded-2xl overflow-hidden">
+        <div className="flex flex-col h-full bg-card rounded-[var(--radius-panel)] overflow-hidden">
             {/* Header */}
             <div className="bg-card border-b border-border p-6 flex items-center justify-between">
                 <div>
-                    <h2 className="text-xl font-bold text-foreground">Construtor de Automação</h2>
-                    <p className="text-sm text-muted-foreground">Configure seus gatilhos e ações</p>
+                    <h2 className="text-section-title font-bold text-foreground">Construtor de Automação</h2>
+                    <p className="text-body-ui text-muted-foreground">Configure seus gatilhos e ações</p>
                 </div>
                 <button
                     onClick={onClose}
-                    className="text-muted-foreground hover:text-muted-foreground p-2 hover:bg-muted/50 rounded-lg transition-colors"
+                    className="text-muted-foreground hover:text-muted-foreground p-2 hover:bg-muted/50 rounded-[var(--radius-control)] transition-colors"
                 >
                     <span className="sr-only">Fechar</span>
                     ✕
@@ -253,7 +253,7 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                     }}
                     disabled={currentStep === 'trigger'}
                     className={`
-                        px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-colors
+                        px-6 py-2.5 rounded-[var(--radius-panel)] font-medium flex items-center gap-2 transition-colors
                         ${currentStep === 'trigger' ? 'text-muted-foreground cursor-not-allowed' : 'text-muted-foreground hover:bg-muted/50'}
                     `}
                 >
@@ -269,10 +269,10 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                         }}
                         disabled={currentStep === 'trigger' && !config.triggerType}
                         className={`
-                            px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg
+                            px-6 py-2.5 rounded-[var(--radius-panel)] font-medium flex items-center gap-2 transition-all shadow-card-ui
                             ${(currentStep === 'trigger' && !config.triggerType)
-                                ? 'bg-gray-300 text-muted-foreground cursor-not-allowed shadow-none'
-                                : 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-blue-500/20'}
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed shadow-none'
+                                : 'bg-primary text-white hover:bg-primary/90 shadow-card-ui shadow-blue-500/20'}
                         `}
                     >
                         Próximo
@@ -283,10 +283,10 @@ export const AutomationBuilder = ({ onClose, onSave }: AutomationBuilderProps) =
                         onClick={handleFinish}
                         disabled={!config.name}
                         className={`
-                            px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all shadow-lg
+                            px-6 py-2.5 rounded-[var(--radius-panel)] font-medium flex items-center gap-2 transition-all shadow-card-ui
                             ${!config.name
-                                ? 'bg-gray-300 text-muted-foreground cursor-not-allowed shadow-none'
-                                : 'bg-green-600 text-white hover:bg-green-700 shadow-green-900/20 active:scale-95'}
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed shadow-none'
+                                : 'bg-success text-white hover:bg-success shadow-green-900/20 active:scale-95'}
                         `}
                     >
                         <Check className="h-4 w-4" />
