@@ -50,6 +50,17 @@ describe('Authenticated CRM create dialogs have real accessible semantics', () =
     expect(s).toContain('Remover tag');
   });
 
+  it('protects real company create footer against clipping and close-button overlap', () => {
+    const customerSource = read(customer);
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(customerSource).toContain('sticky bottom-0 z-10 border-t border-border bg-card');
+    expect(customerSource).toContain('sm:flex-row sm:items-center sm:justify-between');
+    expect(customerSource).toContain('pr-14');
+    expect(customerSource).toContain('w-full gap-2 text-primary');
+    expect(qa).toContain('const submitVisible = await formDialog.getByRole');
+    expect(qa).toContain('submitActionVisible: submitVisible');
+  });
+
   it('restores the previous inert state after closing any modal', () => {
     const hook = read('src/components/ui/useDialogBackgroundInert.ts');
     expect(hook).toContain("if (!open) return;");
