@@ -253,9 +253,9 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[800px] bg-card border-border text-foreground rounded-2xl max-h-[90vh] overflow-y-auto p-0">
+            <DialogContent className="sm:max-w-[800px] bg-card border-border text-foreground rounded-[var(--radius-panel)] max-h-[90vh] overflow-y-auto p-0">
                 <DialogHeader className="px-6 py-4 border-b border-border bg-muted/30 flex flex-row items-center justify-between">
-                    <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
+                    <DialogTitle className="text-section-title font-bold text-foreground tracking-tight">
                         {customer ? 'Editar Empresa' : 'Nova Empresa'}
                     </DialogTitle>
                     {!customer && (
@@ -312,7 +312,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                                     value={formData.segment}
                                     onValueChange={(val) => setFormData({ ...formData, segment: val })}
                                 >
-                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-blue-500 border">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -330,7 +330,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                                     value={formData.relationship_type}
                                     onValueChange={(val) => setFormData({ ...formData, relationship_type: val })}
                                 >
-                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-blue-500 border">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -348,7 +348,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                                     value={formData.status}
                                     onValueChange={(val) => setFormData({ ...formData, status: val as Account['status'] })}
                                 >
-                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-blue-500 border">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -362,13 +362,13 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                         {/* Payment Terms - Conditional */}
                         {formData.relationship_type === 'Distribuidor' && (
                             <div className="space-y-1 pt-2 animate-in slide-in-from-top-2">
-                                <ThemeLabel className="flex items-center gap-2 text-emerald-500">
+                                <ThemeLabel className="flex items-center gap-2 text-success-readable">
                                     <CreditCard className="h-3 w-3" /> Condições de Pagamento Padrão
                                 </ThemeLabel>
                                 <Textarea
                                     value={formData.payment_terms || ''}
                                     onChange={(e) => setFormData({ ...formData, payment_terms: e.target.value })}
-                                    className="bg-background border-border text-foreground min-h-[80px] rounded-xl text-xs font-medium focus:ring-1 focus:ring-emerald-500"
+                                    className="bg-background border-border text-foreground min-h-[80px] rounded-[var(--radius-panel)] text-metadata-ui font-medium focus:ring-1 focus:ring-success"
                                     placeholder="Ex: 30/60/90 dias, Antecipado..."
                                 />
                             </div>
@@ -395,7 +395,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                             </div>
                             <div className="flex flex-wrap gap-2">
                                 {formData.tags?.map(tag => (
-                                    <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary border border-primary/20 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+                                    <Badge key={tag} variant="secondary" className="bg-primary/10 text-primary border border-primary/20 rounded-[var(--radius-control)] px-2 py-1 text-metadata-ui font-bold uppercase tracking-wider">
                                         {tag}
                                         <button type="button" onClick={() => removeTag(tag)} className="ml-1.5 hover:text-foreground transition-colors">
                                             <X className="h-3 w-3" />
@@ -497,7 +497,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 font-bold min-w-[150px]">
+                        <Button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-white shadow-card-ui shadow-primary/20 font-bold min-w-[150px]">
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {customer ? 'Salvar Alterações' : 'Cadastrar Empresa'}
                         </Button>
