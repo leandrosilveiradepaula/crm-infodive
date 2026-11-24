@@ -18,6 +18,26 @@ export const policies = {
   'shadow-local': /\bshadow-(?:sm|md|lg|xl|[2-3]xl)\b/g,
 };
 
+/**
+ * Once migrated, these cross-family modules are strict: no palette literals,
+ * private type scale, component radius/shadow, or hardcoded gradients may return.
+ * Extending this list is a one-way migration; do not suppress an active violation.
+ */
+export const fullyMigratedModules = Object.freeze([
+  'src/components/pipeline/product-row/ProductFinancialDetails.tsx',
+  'src/app/(dashboard)/sales/tabs/DashboardTab.tsx',
+  'src/components/goals/tabs/PlanningTab.tsx',
+  'src/components/pipeline/WonDealWizard.tsx',
+  'src/app/(dashboard)/sales/tabs/OrdersTab.tsx',
+  'src/app/(dashboard)/sales/tabs/InstallmentsTab.tsx',
+  'src/app/(dashboard)/automations/client-page.tsx',
+  'src/components/supply-chain/PurchaseOrderManager.tsx',
+  'src/components/pipeline/ProductDetailsTable.tsx',
+  'src/components/proposals/ViewProposalModal.tsx',
+  'src/components/shared/DocumentsTab.tsx',
+  'src/components/proposals/ProposalGeneratorWizard.tsx',
+]);
+
 export function countViolations(source) {
   return Object.fromEntries(Object.entries(policies).map(([name, pattern]) => {
     const rx = new RegExp(pattern.source, pattern.flags);
@@ -61,6 +81,13 @@ function main() {
     const after = readFileSync(path, 'utf8');
     for (const regression of compareCounts(before, after)) failures.push({ file: path, ...regression });
   }
+  for (const file of fullyMigratedModules) {
+    const counts = countViolations(readFileSync(file, 'utf8'));
+    for (const [rule, current] of Object.entries(counts)) {
+      if (current > 0) failures.push({ file, rule, previous: 0, current });
+    }
+  }
+  console.log('DESIGN_SYSTEM_STRICT: ' + fullyMigratedModules.length + ' locked migrated modules');
   console.log('DESIGN_SYSTEM_POLICY: ' + files.length + ' changed UI file(s), ' + failures.length + ' hardcode regression(s)');
   if (failures.length) {
     for (const issue of failures) {

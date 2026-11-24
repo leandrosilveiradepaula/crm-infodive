@@ -109,27 +109,21 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
             value: leads.length,
             description: "Base completa",
             icon: Users,
-            color: "text-primary",
-            gradient: "from-primary/5 to-white dark:from-primary/10",
-            border: "border-primary/10"
+            tone: 'primary',
         },
         {
             label: "Interesse Principal",
             value: topInterest,
             description: "Maior volume",
             icon: Target,
-            color: "text-emerald-600 dark:text-emerald-400",
-            gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-            border: "border-emerald-100 dark:border-emerald-900/50"
+            tone: 'success',
         },
         {
             label: "Cidade Principal",
             value: topCity,
             description: "Localização chave",
             icon: TrendingUp,
-            color: "text-teal-600 dark:text-teal-400",
-            gradient: "from-teal-50 to-white dark:from-teal-950/20",
-            border: "border-teal-100 dark:border-teal-900/50"
+            tone: 'info',
         },
         {
             label: "Novos (Mês)",
@@ -140,9 +134,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
             }).length,
             description: "Aquisição recente",
             icon: Zap,
-            color: "text-primary dark:text-blue-400",
-            gradient: "from-blue-50 to-white dark:from-blue-950/20",
-            border: "border-blue-100 dark:border-blue-900/50"
+            tone: 'primary',
         }
     ];
 

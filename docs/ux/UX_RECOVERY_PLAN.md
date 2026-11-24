@@ -1,3 +1,18 @@
+## 2026-11-24 — DS4 cross-family consistency block (PR #221)
+
+| Confirmed baseline / issue | Workstream | Release gate |
+| --- | --- | --- |
+| 188 UI files / 5,168 local style occurrences at SHA `2891b5ec` | Global legacy utility aliases plus twelve high-debt semantic migrations | Actual policy zero debt in locked files; remeasure total from final SHA |
+| KPI colors/gradients/borders declared independently by each page | Typed `StatTone` roles; shared StatsGrid geometry; migrate Leads/Contacts/Reports/Sales/Pipeline | Authenticated browser on desktop/mobile both themes; no unstable/low contrast |
+| ThemeInput/ThemeSelect always forced empty controlled state if no `value` | Support uncontrolled input/defaultValue and existing controlled usages | Typecheck, unit and browser QA; real filters remain editable |
+| Personal theme visually optimistic even on save failure | Revert most recent failed preference save with visible error | Client test/contract plus theme A/AA in QA |
+| Organization theme screen falsely claimed it saved global default | Stop unsupported save UI; disclose current capability | No false success. Persistence remains separately gated |
+| Source-level tokens not enough to prove propagation | Computed-style 9-token probe in three real authenticated route families | Same exact SHA, 2 viewports x 2 themes, restore all overrides and axe PASS |
+
+No business calculations, tenants, RBAC, migrations, hosted Supabase, production, or proprietary references changed. UX visual acceptance and remote protected QA remain open. Existing PR #221 remains DRAFT. Final SHA evidence and residual debt required before signing off.
+
+---
+
 ### 2026-11-24 — G2/DS3.1 verification: exact SHA 340e0113
 
 Confirmed: [CI 45416569401](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45416569401) **SUCCESS** and [isolated authenticated QA 45416569442](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45416569442) **SUCCESS**, 4 profiles, 180 checks, zero recorded failures, same SHA `340e0113af5c5268c5aa1bdb0a468fc4bbe7c5eb`. Inspected QA result JSON and actual screenshot files for desktop/mobile, light/dark, Resumo and Histórico. Accurate data-based summary, 3+5 navigation and focus/axe checks worked.

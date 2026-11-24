@@ -1,3 +1,15 @@
+## DS4 compatibility and verified propagation (2026-11-24)
+
+**One source of truth:** edit values in `src/design-system/tokens.css`, never in a feature screen. The `@theme inline` compatibility bridge maps both new semantic classes and remaining Tailwind built-ins (`text-sm`, `text-lg`, `rounded-lg`, `shadow-md`) to `--ds-*` primitives. This bridge means a source value can propagate to old pages without falsely marking those pages fully migrated.
+
+**For KPI cards:** feature screens now pass `tone: 'primary' | 'info' | 'success' | 'warning' | 'destructive' | 'neutral'`, defined once in `src/design-system/stat-tones.ts`. Do not pass raw `color`, `gradient` or `border` class strings to `StatsGrid`. Shared card geometry is configured via `--ds-stat-*` values.
+
+**Automated acceptance:** `test/e2e/run-authenticated-smoke.mjs` temporarily changes and restores nine primitives in authenticated, isolated Leads, Contacts and Activities views, on desktop/mobile and light/dark. The probe verifies actual computed color, page-title size, panel radius, card shadow, body font, highlight gradient and legacy utility changes. `scripts/check-design-token-policy.mjs` rejects any measured hardcode in twelve fully migrated cross-family components. Global debt across remaining modules is separately listed by `npm run design-system:inventory`. These gates are technical proofs; human UX review remains necessary.
+
+**User-vs-org theme:** individual light/dark preference exists; organization-wide default theme **does not yet persist**. The settings panel is now explicit instead of falsely confirming an unimplemented save. That capability requires separate schema, RBAC and contrast/rollback authorization. No per-tenant theme editor is delivered by this block.
+
+---
+
 # Infodive CRM Design System core
 
 **Default visual values live in one file:** tokens.css (colors, light/dark, typography, radii, shadows, gradients, spacing, control sizes). src/app/globals.css imports it.

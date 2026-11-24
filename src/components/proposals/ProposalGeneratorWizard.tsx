@@ -150,20 +150,20 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-5xl h-[90vh] bg-card border-border text-foreground p-0 overflow-hidden flex flex-col shadow-2xl">
+            <DialogContent className="max-w-5xl h-[90vh] bg-card border-border text-foreground p-0 overflow-hidden flex flex-col shadow-overlay-ui">
                 {/* Header */}
                 <div className="p-8 border-b border-border flex justify-between items-center bg-muted/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-32 bg-blue-500/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
+                    <div className="absolute top-0 right-0 p-32 bg-primary/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
                     <div className="flex items-center gap-4">
-                        <div className="bg-primary p-3 rounded-xl">
+                        <div className="bg-primary p-3 rounded-[var(--radius-panel)]">
                             <FileText className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                            <DialogTitle className="text-xl font-bold text-foreground">Gerador de Propostas IA</DialogTitle>
+                            <DialogTitle className="text-section-title font-bold text-foreground">Gerador de Propostas IA</DialogTitle>
                             <div className="flex items-center gap-2">
-                                <p className="text-[10px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Configuração Estratégica: {deal.company}</p>
-                                {status === 'analyzing_ai' && <Badge variant="secondary" className="bg-teal-500/10 text-teal-400 border-teal-500/20 animate-pulse"><Sparkles className="h-3 w-3 mr-1" /> Analisando Deal...</Badge>}
-                                {status === 'capturing_pages' && <Badge variant="secondary" className="bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse"><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Renderizando Páginas...</Badge>}
+                                <p className="text-metadata-ui text-primary font-black uppercase tracking-widest mt-0.5">Configuração Estratégica: {deal.company}</p>
+                                {status === 'analyzing_ai' && <Badge variant="secondary" className="bg-info-subtle text-muted-foreground border-info/20 animate-pulse"><Sparkles className="h-3 w-3 mr-1" /> Analisando Deal...</Badge>}
+                                {status === 'capturing_pages' && <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 animate-pulse"><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Renderizando Páginas...</Badge>}
                             </div>
                         </div>
                     </div>
@@ -183,26 +183,26 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                     {wizardStep === 2 && (
                         <div className="space-y-8 animate-in slide-in-from-right-8 max-w-3xl mx-auto">
                             <div className="text-center space-y-4">
-                                <h3 className="text-2xl font-bold">Personalizar Conteúdo</h3>
+                                <h3 className="text-metric-ui font-bold">Personalizar Conteúdo</h3>
                                 <p className="text-muted-foreground">Selecione quais seções farão parte do documento final.</p>
                             </div>
 
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="p-6 bg-card border border-border rounded-2xl space-y-3">
+                                <div className="p-6 bg-card border border-border rounded-[var(--radius-panel)] space-y-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                                        <div className="p-2 bg-primary/10 text-primary rounded-[var(--radius-panel)]">
                                             <FileText className="h-5 w-5" />
                                         </div>
-                                        <p className="font-bold text-sm">Título da Proposta (Capa)</p>
+                                        <p className="font-bold text-body-ui">Título da Proposta (Capa)</p>
                                     </div>
                                     <input
                                         type="text"
                                         value={config.customTitle}
                                         onChange={(e) => updateConfig({ customTitle: e.target.value })}
-                                        className="w-full bg-muted border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                        className="w-full bg-muted border border-border rounded-[var(--radius-panel)] px-4 py-3 text-body-ui focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                                         placeholder="Ex: Proposta de Infraestrutura e Licenciamento"
                                     />
-                                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Este título aparecerá em destaque na capa do PDF.</p>
+                                    <p className="text-metadata-ui text-muted-foreground uppercase tracking-wider font-medium">Este título aparecerá em destaque na capa do PDF.</p>
                                 </div>
                             </div>
 
@@ -213,7 +213,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={Sparkles}
                                     checked={config.includeAISummary}
                                     onChange={(c: boolean) => updateConfig({ includeAISummary: c })}
-                                    color="text-teal-400"
+                                    color="text-muted-foreground"
                                 />
                                 <ConfigToggle
                                     label="Overview do Projeto"
@@ -221,7 +221,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={FileText}
                                     checked={config.includeOverview}
                                     onChange={(c: boolean) => updateConfig({ includeOverview: c })}
-                                    color="text-blue-400"
+                                    color="text-primary"
                                 />
                                 <ConfigToggle
                                     label="Infraestrutura Hardware"
@@ -229,7 +229,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={Zap}
                                     checked={config.includeHardware}
                                     onChange={(c: boolean) => updateConfig({ includeHardware: c })}
-                                    color="text-orange-400"
+                                    color="text-warning-readable"
                                 />
                                 <ConfigToggle
                                     label="Software & Licenças"
@@ -237,7 +237,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={Globe}
                                     checked={config.includeSoftware}
                                     onChange={(c: boolean) => updateConfig({ includeSoftware: c })}
-                                    color="text-cyan-400"
+                                    color="text-muted-foreground"
                                 />
                                 <ConfigToggle
                                     label="Estrutura de Investimento"
@@ -245,7 +245,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={Coins}
                                     checked={config.includeInvestment}
                                     onChange={(c: boolean) => updateConfig({ includeInvestment: c })}
-                                    color="text-emerald-400"
+                                    color="text-success-readable"
                                 />
                                 <ConfigToggle
                                     label="Diferenciais Infodive"
@@ -253,7 +253,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={TrendingUp}
                                     checked={config.includeDifferentials}
                                     onChange={(c: boolean) => updateConfig({ includeDifferentials: c })}
-                                    color="text-pink-400"
+                                    color="text-primary"
                                 />
                                 <ConfigToggle
                                     label="Confidencialidade"
@@ -261,7 +261,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={Shield}
                                     checked={config.includeConfidentiality}
                                     onChange={(c: boolean) => updateConfig({ includeConfidentiality: c })}
-                                    color="text-yellow-400"
+                                    color="text-warning-readable"
                                 />
                                 <ConfigToggle
                                     label="Assinatura Digital"
@@ -269,7 +269,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={FileSignature}
                                     checked={!!config.allowSignature}
                                     onChange={(c: boolean) => updateConfig({ allowSignature: c })}
-                                    color="text-green-400"
+                                    color="text-success-readable"
                                 />
                                 <ConfigToggle
                                     label="Dados de Faturamento"
@@ -277,7 +277,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={CreditCard}
                                     checked={!!config.showBillingInfo}
                                     onChange={(c: boolean) => updateConfig({ showBillingInfo: c })}
-                                    color="text-blue-400"
+                                    color="text-primary"
                                 />
                                 <ConfigToggle
                                     label="Estudo de Preços"
@@ -285,7 +285,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     icon={TrendingUp}
                                     checked={!!config.isPriceStudy}
                                     onChange={(c: boolean) => updateConfig({ isPriceStudy: c })}
-                                    color="text-amber-500"
+                                    color="text-warning-readable"
                                 />
                             </div>
                         </div>
@@ -295,24 +295,24 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                     {wizardStep === 3 && (
                         <div className="space-y-8 animate-in slide-in-from-right-8 max-w-4xl mx-auto">
                             <div className="text-center space-y-4">
-                                <h3 className="text-2xl font-bold">Revisar Conteúdo Estratégico</h3>
-                                <p className="text-muted-foreground text-sm">A IA sugeriu o conteúdo abaixo. Você pode ajustar os textos antes de gerar o arquivo final.</p>
+                                <h3 className="text-metric-ui font-bold">Revisar Conteúdo Estratégico</h3>
+                                <p className="text-muted-foreground text-body-ui">A IA sugeriu o conteúdo abaixo. Você pode ajustar os textos antes de gerar o arquivo final.</p>
                             </div>
 
                             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
                                 {/* Executive Summary */}
-                                <div className="p-6 bg-card border border-border rounded-2xl space-y-4">
+                                <div className="p-6 bg-card border border-border rounded-[var(--radius-panel)] space-y-4">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-teal-500/10 text-teal-500 rounded-lg">
+                                        <div className="p-2 bg-info-subtle text-muted-foreground rounded-[var(--radius-panel)]">
                                             <Sparkles className="h-5 w-5" />
                                         </div>
-                                        <p className="font-bold text-sm">Resumo Executivo (IA)</p>
+                                        <p className="font-bold text-body-ui">Resumo Executivo (IA)</p>
                                     </div>
                                     <textarea
                                         value={aiSummary}
                                         onChange={(e) => setAiSummary(e.target.value)}
                                         rows={6}
-                                        className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/50 transition-all resize-none"
+                                        className="w-full bg-muted/50 border border-border rounded-[var(--radius-panel)] px-4 py-3 text-body-ui focus:outline-none focus:ring-2 focus:ring-info/50 transition-all resize-none"
                                         placeholder="O resumo aparecerá aqui..."
                                     />
                                 </div>
@@ -321,16 +321,16 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 {objectives.length > 0 && (
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3 px-2">
-                                            <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
+                                            <div className="p-2 bg-primary/10 text-primary rounded-[var(--radius-panel)]">
                                                 <Target className="h-4 w-4" />
                                             </div>
-                                            <p className="font-bold text-sm">Objetivos Estratégicos</p>
+                                            <p className="font-bold text-body-ui">Objetivos Estratégicos</p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             {objectives.map((obj, i) => (
-                                                <div key={i} className="p-4 bg-card border border-border rounded-xl space-y-3">
+                                                <div key={i} className="p-4 bg-card border border-border rounded-[var(--radius-panel)] space-y-3">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black bg-blue-500 text-white w-5 h-5 rounded-full flex items-center justify-center">{obj.number}</span>
+                                                        <span className="text-metadata-ui font-black bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center">{obj.number}</span>
                                                         <input
                                                             value={obj.title}
                                                             onChange={(e) => {
@@ -338,7 +338,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                                                 newObjs[i].title = e.target.value;
                                                                 setObjectives(newObjs);
                                                             }}
-                                                            className="flex-1 bg-transparent border-none p-0 text-xs font-bold focus:ring-0"
+                                                            className="flex-1 bg-transparent border-none p-0 text-metadata-ui font-bold focus:ring-0"
                                                         />
                                                     </div>
                                                     <textarea
@@ -349,7 +349,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                                             setObjectives(newObjs);
                                                         }}
                                                         rows={2}
-                                                        className="w-full bg-muted/30 border-none rounded-lg p-2 text-[11px] focus:ring-0 resize-none"
+                                                        className="w-full bg-muted/30 border-none rounded-[var(--radius-panel)] p-2 text-metadata-ui focus:ring-0 resize-none"
                                                     />
                                                 </div>
                                             ))}
@@ -363,10 +363,10 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                     {/* Step 4: Success */}
                     {wizardStep === 4 && (
                         <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in zoom-in-95">
-                            <div className="h-24 w-24 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                                <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+                            <div className="h-24 w-24 bg-success-subtle rounded-full flex items-center justify-center border border-success/20">
+                                <CheckCircle2 className="h-12 w-12 text-success-readable" />
                             </div>
-                            <h3 className="text-3xl font-bold">Proposta Criada!</h3>
+                            <h3 className="text-metric-ui font-bold">Proposta Criada!</h3>
                             <p className="text-muted-foreground text-center max-w-md">
                                 O download do PDF iniciou automaticamente. O documento também foi salvo no histórico do deal.
                             </p>
@@ -378,7 +378,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                 {/* Footer Navigation */}
                 {wizardStep < 4 && (
                     <div className="p-8 border-t border-border flex justify-between items-center bg-card/80 backdrop-blur-md">
-                        <Button variant="ghost" onClick={() => wizardStep > 1 ? setWizardStep(s => s - 1) : onOpenChange(false)} className="font-bold text-xs uppercase tracking-widest px-6">
+                        <Button variant="ghost" onClick={() => wizardStep > 1 ? setWizardStep(s => s - 1) : onOpenChange(false)} className="font-bold text-metadata-ui uppercase tracking-widest px-6">
                             {wizardStep === 1 ? 'Cancelar' : <><ArrowLeft className="h-3.5 w-3.5 mr-2" /> Voltar</>}
                         </Button>
 
@@ -423,7 +423,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                         }
                                     })}
                                     disabled={loading || generatingDocx}
-                                    className="border-blue-500/20 hover:bg-blue-500/5 text-blue-500"
+                                    className="border-primary/20 hover:bg-primary/10 text-primary"
                                 >
                                     {generatingDocx ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <FileText className="h-4 w-4 mr-2" />}
                                     Gerar DOCX
@@ -432,7 +432,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                     variant="outline"
                                     onClick={() => handleDownloadPpt({ id: deal.id, title: deal.title, company_name: deal.company, number: proposalNumber, content: { config, aiSummary, objectives } }, { coverRef, overviewRef, hardwareRef, softwareRef, investmentRef, differentialsRef, confidentialityRef, customNotesRef })}
                                     disabled={loading || generatingPpt}
-                                    className="border-orange-500/20 hover:bg-orange-500/5 text-orange-500"
+                                    className="border-warning/20 hover:bg-warning-subtle text-warning-readable"
                                 >
                                     {generatingPpt ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
                                     Gerar PPT
@@ -440,7 +440,7 @@ export function ProposalGeneratorWizard({ deal, open, onOpenChange, onSuccess, d
                                 <Button
                                     onClick={handleGenerateClick}
                                     disabled={loading}
-                                    className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 border-0"
+                                    className="ds-gradient-context from-primary to-info-subtle hover:from-primary hover:to-info-subtle border-0"
                                 >
                                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
                                     {loading ? 'Finalizando...' : 'Concluir & Baixar'}

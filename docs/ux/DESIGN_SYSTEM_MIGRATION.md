@@ -1,3 +1,15 @@
+## 2026-11-24 — DS4 structural centralization and semantic screen-family contracts
+
+**Source baseline:** exact `2891b5ecc82cc54dcc242338a0f946d89a25138c` GitHub run 45418898557 records **188 files / 5,168 local style decisions**; counts use `scripts/report-design-system-debt.mjs`. Values are occurrences, not visual bug counts. The original 196 / 5,536 figure has been superseded by this measured baseline.
+
+**Implementation candidate:** a compatibility bridge in `src/design-system/tokens.css` routes legacy Tailwind font scales, radius and shadow scales through centrally editable `--ds-*` primitives; this helps unmigrated routes respond without misleadingly erasing their debt counts. A typed `StatTone` contract replaces per-page `color`/`gradient`/`border` inputs on shared KPI cards and Pipeline summary. Twelve large source components across Pipeline, Sales, Goals, Automations, Proposals, Procurement and document handling are migrated to semantic palette, type, radius, shadow and background roles; strict policy blocks those files from reintroducing measured local decisions. A genuinely uncontrolled input/select must remain editable. 
+
+**Required operational proof:** the new synthetic authenticated QA must change and restore individual central tokens in real browser components (primary, page title, panel radius, card shadow, body font, highlight gradient, plus legacy text/radius/shadow) on Leads, Contacts and Activities, at both desktop/mobile and light/dark. Exact final SHA CI+QA must pass; user-provided 19 screenshots are reference for layout patterns, not content/branding to copy. Confirm actual post-commit debt count before stating a migrated percentage.
+
+**Known separate gate:** the organization default-theme setting is not persistent today; user preference persists individually. The UI must never claim organization-wide save while `updateOrgTheme` does not store a `default_theme`. Adding real org-level theme persistence requires schema, permission validation, contrast validation and rollback authorization. This block makes the UI truthful, but **does not deliver a tenant runtime theme editor** or finish all visual route families. Never call the system universally complete based only on green CI.
+
+---
+
 ## 2026-11-24 — DS3.1 opportunity visual family continuation
 
 Work continues in the existing DRAFT PR #221. An actual comparison of authenticated synthetic `37dfb820` opportunity-detail screenshots against the private user reference found an eight-tab two-to-four-row navigation and oversized KPI dashboard over core business details. The current DS3.1 block reorganizes that **existing** information with `--ds-deal-*` tokens and shared `ds-deal-overview-*` classes, retaining every tab and business action; source data remains `Deal`, never fabricated history/contact/AI/forecast. Real QA on the new SHA (desktop/mobile, light/dark, primary + secondary history) and design-token non-regression remain release gates. No claim is made that all 196 baseline UI files or 5,536 inventoried decisions have been migrated; re-measure those counts before changing the baseline.

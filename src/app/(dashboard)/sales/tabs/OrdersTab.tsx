@@ -46,12 +46,12 @@ import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 const STATUS_CONFIG = {
-    pedido_gerado: { label: 'Pedido Gerado', color: 'bg-blue-500/10 text-blue-500', icon: FileText },
-    nf_emitida: { label: 'NF Emitida', color: 'bg-teal-500/10 text-teal-500', icon: FileCheck },
-    entregue: { label: 'Entregue', color: 'bg-orange-500/10 text-orange-500', icon: Truck },
-    cliente_pagou: { label: 'Cliente Pagou', color: 'bg-emerald-500/10 text-emerald-500', icon: CreditCard },
-    distribuidor_pagou: { label: 'Distr. Pagou', color: 'bg-blue-500/10 text-blue-500', icon: DollarSign },
-    comissao_paga: { label: 'Comissão Paga', color: 'bg-green-500/10 text-green-500', icon: CheckCircle2 },
+    pedido_gerado: { label: 'Pedido Gerado', color: 'bg-primary/10 text-primary', icon: FileText },
+    nf_emitida: { label: 'NF Emitida', color: 'bg-info-subtle text-muted-foreground', icon: FileCheck },
+    entregue: { label: 'Entregue', color: 'bg-warning-subtle text-warning-readable', icon: Truck },
+    cliente_pagou: { label: 'Cliente Pagou', color: 'bg-success-subtle text-success-readable', icon: CreditCard },
+    distribuidor_pagou: { label: 'Distr. Pagou', color: 'bg-primary/10 text-primary', icon: DollarSign },
+    comissao_paga: { label: 'Comissão Paga', color: 'bg-success-subtle text-success-readable', icon: CheckCircle2 },
 };
 
 interface OrdersTabProps {
@@ -226,19 +226,19 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                     return (
                         <div
                             key={key}
-                            className={`border transition-all duration-300 cursor-pointer overflow-hidden group rounded-2xl p-3 flex flex-col items-center justify-center space-y-1.5 text-center relative ${isSelected
-                                ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-lg shadow-primary/5'
-                                : 'border-border bg-card hover:border-primary/30 hover:bg-muted/30 shadow-sm'
+                            className={`border transition-all duration-300 cursor-pointer overflow-hidden group rounded-[var(--radius-panel)] p-3 flex flex-col items-center justify-center space-y-1.5 text-center relative ${isSelected
+                                ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-overlay-ui shadow-primary/5'
+                                : 'border-border bg-card hover:border-primary/30 hover:bg-muted/30 shadow-control-ui'
                                 }`}
                             onClick={() => setFilterStatus(isSelected ? null : key as any)}
                         >
-                            <div className={`p-1.5 rounded-xl transition-all ${isSelected ? 'bg-primary text-white scale-110' : config.color + ' group-hover:scale-110'}`}>
+                            <div className={`p-1.5 rounded-[var(--radius-panel)] transition-all ${isSelected ? 'bg-primary text-white scale-110' : config.color + ' group-hover:scale-110'}`}>
                                 <config.icon className="w-3.5 h-3.5" />
                             </div>
-                            <div className={`text-lg font-black tracking-tighter transition-colors ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                            <div className={`text-section-title font-black tracking-tighter transition-colors ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                                 {count}
                             </div>
-                            <div className={`text-[8px] uppercase font-black tracking-[0.15em] leading-none ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                            <div className={`text-metadata-ui uppercase font-black tracking-[0.15em] leading-none ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
                                 {config.label}
                             </div>
                         </div>
@@ -251,7 +251,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
                         placeholder="Buscar por pedido ou cliente..."
-                        className="pl-11 h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-2xl"
+                        className="pl-11 h-11 bg-muted/30 border-border focus:bg-background transition-all rounded-[var(--radius-panel)]"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -259,15 +259,15 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
             </FilterBar>
 
             {/* Orders Table */}
-            <div className="rounded-xl border border-border bg-card/30 overflow-hidden shadow-sm">
-                <table className="w-full text-sm">
+            <div className="rounded-[var(--radius-panel)] border border-border bg-card/30 overflow-hidden shadow-control-ui">
+                <table className="w-full text-body-ui">
                     <thead>
                         <tr className="bg-muted/50 text-muted-foreground text-left">
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Pedido / Deal</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Responsável NF</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Valor</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Status Atual</th>
-                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-[10px]">Próxima Etapa</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-metadata-ui">Pedido / Deal</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-metadata-ui">Responsável NF</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-metadata-ui">Valor</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-metadata-ui">Status Atual</th>
+                            <th className="px-5 py-3 font-medium uppercase tracking-wider text-metadata-ui">Próxima Etapa</th>
                             <th className="px-5 py-3"></th>
                         </tr>
                     </thead>
@@ -297,7 +297,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                     >
                                         <td className="px-5 py-3">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                                                <span className="text-body-ui font-black text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
                                                     {expandedOrderId === order.id ? (
                                                         <ChevronRight className="w-3.5 h-3.5 transition-transform rotate-90 text-primary" />
                                                     ) : (
@@ -305,7 +305,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     )}
                                                     {order.deal?.title || 'Pedido S/ N'}
                                                 </span>
-                                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
+                                                <span className="text-metadata-ui text-muted-foreground flex items-center gap-1 mt-0.5 ml-5 font-bold uppercase tracking-wider">
                                                     <User className="w-3 h-3" />
                                                     {order.deal?.customer?.name || 'Cliente final'}
                                                 </span>
@@ -315,16 +315,16 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             <Badge 
                                                 variant="outline" 
                                                 onClick={(e) => e.stopPropagation()}
-                                                className={`text-[9px] uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
+                                                className={`text-metadata-ui uppercase font-black ${order.billing_entity === 'infodive' ? 'border-primary/50 text-primary bg-primary/5' : 'border-muted-foreground/30'}`}
                                             >
                                                 {order.billing_entity === 'infodive' ? 'Infodive' : 'Distribuidor'}
                                             </Badge>
                                         </td>
-                                        <td className="px-5 py-3 font-black text-sm tracking-tight">
+                                        <td className="px-5 py-3 font-black text-body-ui tracking-tight">
                                             {formatCurrency(order.total_value)}
                                         </td>
                                         <td className="px-5 py-3">
-                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase border border-white/5 shadow-sm ${config.color}`}>
+                                            <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[var(--radius-panel)] text-metadata-ui font-black uppercase border border-white/5 shadow-control-ui ${config.color}`}>
                                                 <config.icon className="w-3 h-3" />
                                                 {config.label}
                                             </div>
@@ -343,38 +343,38 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             onStatusUpdate(order.id, nextStatus);
                                                         }
                                                     }}
-                                                    className="text-[9px] h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-black tracking-widest gap-1.5 rounded-xl border border-primary/10"
+                                                    className="text-metadata-ui h-8 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-black tracking-widest gap-1.5 rounded-[var(--radius-panel)] border border-primary/10"
                                                 >
                                                     Mudar para {STATUS_CONFIG[nextStatus].label}
                                                     <ChevronRight className="w-3 h-3" />
                                                 </Button>
                                             ) : (
-                                                <span className="text-[9px] text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
+                                                <span className="text-metadata-ui text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
                                             )}
                                         </td>
                                         <td className="px-5 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-1 lg:group-hover:translate-x-0">
-                                                <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={(e) => { e.stopPropagation(); setExpandedOrderId(prev => prev === order.id ? null : order.id); }}>
+                                                <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-[var(--radius-panel)]" onClick={(e) => { e.stopPropagation(); setExpandedOrderId(prev => prev === order.id ? null : order.id); }}>
                                                     <Eye className="w-4 h-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" title="Upload de NF" className="h-8 w-8 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-xl" onClick={(e) => { e.stopPropagation(); setSelectedOrderId(order.id); setIsUploadModalOpen(true); }}>
+                                                <Button variant="ghost" size="icon" title="Upload de NF" className="h-8 w-8 text-muted-foreground hover:text-success-readable hover:bg-success-subtle rounded-[var(--radius-panel)]" onClick={(e) => { e.stopPropagation(); setSelectedOrderId(order.id); setIsUploadModalOpen(true); }}>
                                                     <FileCheck className="w-4 h-4" />
                                                 </Button>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-xl">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-[var(--radius-panel)]">
                                                             <MoreVertical className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-2xl border-white/10 shadow-2xl">
-                                                        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">Ações do Pedido</div>
-                                                        <DropdownMenuItem className="gap-2 cursor-pointer text-xs font-bold p-3 rounded-xl" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
+                                                    <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-[var(--radius-panel)] border-white/10 shadow-overlay-ui">
+                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground/50">Ações do Pedido</div>
+                                                        <DropdownMenuItem className="gap-2 cursor-pointer text-metadata-ui font-bold p-3 rounded-[var(--radius-panel)]" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
                                                             <FileText className="w-4 h-4" /> Ver Parcelas/Detalhes
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator className="bg-white/5 my-1" />
-                                                        <div className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 text-warning">Forçar Status</div>
+                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground/50 text-warning">Forçar Status</div>
                                                         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                                                            <DropdownMenuItem key={key} onClick={() => onStatusUpdate(order.id, key as SalesOrder['status'])} className="gap-2 cursor-pointer text-[10px] uppercase font-bold hover:bg-primary/5 hover:text-primary p-3 rounded-xl">
+                                                            <DropdownMenuItem key={key} onClick={() => onStatusUpdate(order.id, key as SalesOrder['status'])} className="gap-2 cursor-pointer text-metadata-ui uppercase font-bold hover:bg-primary/5 hover:text-primary p-3 rounded-[var(--radius-panel)]">
                                                                 <cfg.icon className="w-3 h-3" />
                                                                 {cfg.label}
                                                             </DropdownMenuItem>
@@ -391,7 +391,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                             <td colSpan={6} className="bg-muted/10 p-0 overflow-hidden">
                                                 <div className="p-6 border-y border-border space-y-4 shadow-inner">
                                                     <div className="flex items-center justify-between">
-                                                        <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                                                        <h4 className="text-metadata-ui font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                                                             <DollarSign className="w-4 h-4" /> Parcelas / Boletos do Pedido
                                                         </h4>
                                                     </div>
@@ -399,22 +399,22 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     {order.installments && order.installments.length > 0 ? (
                                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                                             {order.installments.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).map((inst, index) => (
-                                                                <div key={inst.id} className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition-colors ${inst.status === 'paid' ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-background border-border hover:border-primary/30'}`}>
+                                                                <div key={inst.id} className={`p-4 rounded-[var(--radius-panel)] border flex flex-col justify-between space-y-3 transition-colors ${inst.status === 'paid' ? 'bg-success-subtle border-success/20' : 'bg-background border-border hover:border-primary/30'}`}>
                                                                     <div className="flex justify-between items-start">
-                                                                        <Badge variant="outline" className={`text-[9px] font-bold ${inst.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border-none' : 'bg-muted text-muted-foreground'}`}>
+                                                                        <Badge variant="outline" className={`text-metadata-ui font-bold ${inst.status === 'paid' ? 'bg-success-subtle text-success-readable border-none' : 'bg-muted text-muted-foreground'}`}>
                                                                             PARCELA {index + 1}
                                                                         </Badge>
-                                                                        <span className={`text-xs font-mono font-bold ${inst.status === 'paid' ? 'text-emerald-600' : 'text-primary'}`}>
+                                                                        <span className={`text-metadata-ui font-mono font-bold ${inst.status === 'paid' ? 'text-success-readable' : 'text-primary'}`}>
                                                                             {new Date(inst.due_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                                                                         </span>
                                                                     </div>
-                                                                    <div className="text-xl font-black text-foreground">
+                                                                    <div className="text-section-title font-black text-foreground">
                                                                         {formatCurrency(inst.amount)}
                                                                     </div>
                                                                     <Button
                                                                         variant={inst.status === 'paid' ? "outline" : "default"}
                                                                         size="sm"
-                                                                        className={`w-full text-[10px] h-8 uppercase font-bold tracking-widest ${inst.status === 'paid' ? 'text-muted-foreground border-dashed hover:text-orange-500' : 'bg-primary hover:bg-primary/90 shadow'} transition-all`}
+                                                                        className={`w-full text-metadata-ui h-8 uppercase font-bold tracking-widest ${inst.status === 'paid' ? 'text-muted-foreground border-dashed hover:text-warning-readable' : 'bg-primary hover:bg-primary/90 shadow'} transition-all`}
                                                                         onClick={async () => {
                                                                             const newStatus = inst.status === 'paid' ? 'pending' : 'paid';
                                                                             const success = await onInstallmentUpdate(inst.id, newStatus);
@@ -434,16 +434,16 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                             ))}
                                                         </div>
                                                     ) : (
-                                                        <div className="p-8 text-center text-muted-foreground rounded-lg border border-dashed border-border flex flex-col items-center">
+                                                        <div className="p-8 text-center text-muted-foreground rounded-[var(--radius-panel)] border border-dashed border-border flex flex-col items-center">
                                                             <FileText className="w-8 h-8 opacity-20 mb-2" />
-                                                            <p className="text-sm font-medium">Nenhuma parcela cadastrada</p>
-                                                            <p className="text-xs opacity-70 mt-1">Faça o upload da Nota Fiscal para gerar as parcelas automaticamente.</p>
+                                                            <p className="text-body-ui font-medium">Nenhuma parcela cadastrada</p>
+                                                            <p className="text-metadata-ui opacity-70 mt-1">Faça o upload da Nota Fiscal para gerar as parcelas automaticamente.</p>
                                                         </div>
                                                     )}
                                                     {/* Documents Section */}
                                                     {order.deal_id && (
                                                         <div className="mt-4 border-t border-border pt-4">
-                                                            <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-3">
+                                                            <h4 className="text-metadata-ui font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 mb-3">
                                                                 <FolderOpen className="w-4 h-4" /> Documentos / Notas Fiscais
                                                             </h4>
                                                             <DocumentsTab
@@ -493,22 +493,22 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className={`py-8 flex flex-col items-center justify-center border-2 border-dashed rounded-xl transition-all relative ${invoiceFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-border bg-muted/20 hover:border-primary/50'}`}>
+                    <div className={`py-8 flex flex-col items-center justify-center border-2 border-dashed rounded-[var(--radius-panel)] transition-all relative ${invoiceFile ? 'border-success/50 bg-success-subtle' : 'border-border bg-muted/20 hover:border-primary/50'}`}>
                         {invoiceFile ? (
                             <div className="flex flex-col items-center">
-                                <div className="bg-emerald-500 text-white p-2 rounded-full mb-2">
+                                <div className="bg-success text-white p-2 rounded-full mb-2">
                                     <Check className="w-5 h-5" />
                                 </div>
-                                <p className="text-sm font-bold text-emerald-600">{invoiceFile.name}</p>
-                                <button onClick={() => { setInvoiceFile(null); setCapturedData(null); }} className="text-[10px] uppercase font-bold text-muted-foreground hover:text-rose-500 mt-2">
+                                <p className="text-body-ui font-bold text-success-readable">{invoiceFile.name}</p>
+                                <button onClick={() => { setInvoiceFile(null); setCapturedData(null); }} className="text-metadata-ui uppercase font-bold text-muted-foreground hover:text-destructive-readable mt-2">
                                     Trocar Arquivo
                                 </button>
                             </div>
                         ) : (
                             <>
                                 <Upload className="w-10 h-10 text-muted-foreground mb-2" />
-                                <p className="text-sm font-medium">Selecione ou arraste o arquivo da NF</p>
-                                <p className="text-[10px] text-muted-foreground mt-1 uppercase font-bold tracking-widest">Suporta XML e PDF</p>
+                                <p className="text-body-ui font-medium">Selecione ou arraste o arquivo da NF</p>
+                                <p className="text-metadata-ui text-muted-foreground mt-1 uppercase font-bold tracking-widest">Suporta XML e PDF</p>
                             </>
                         )}
                         <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".xml,.pdf" onChange={handleFileChange} />
@@ -516,44 +516,44 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
 
                     {capturedData && (
                         <div className="mt-6 border-t pt-6">
-                            <div className="rounded-xl border border-primary/20 bg-card p-5 space-y-4 shadow-sm ring-1 ring-primary/5">
+                            <div className="rounded-[var(--radius-panel)] border border-primary/20 bg-card p-5 space-y-4 shadow-control-ui ring-1 ring-primary/5">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest">
+                                    <div className="flex items-center gap-2 text-primary font-bold text-metadata-ui uppercase tracking-widest">
                                         <Sparkles className="w-3 h-3" />
                                         Review de Dados Capturados
                                     </div>
-                                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-none text-[9px]">VALIDADO</Badge>
+                                    <Badge variant="outline" className="bg-success-subtle text-success-readable border-none text-metadata-ui">VALIDADO</Badge>
                                 </div>
                                 <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                                     <div className="space-y-1">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight">Número da NF</p>
-                                        <p className="text-sm font-semibold text-foreground">{capturedData.number}</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight">Número da NF</p>
+                                        <p className="text-body-ui font-semibold text-foreground">{capturedData.number}</p>
                                     </div>
                                     <div className="space-y-1 text-right">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight">Data Emissão</p>
-                                        <p className="text-sm font-semibold text-foreground">{capturedData.date}</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight">Data Emissão</p>
+                                        <p className="text-body-ui font-semibold text-foreground">{capturedData.date}</p>
                                     </div>
                                     <div className="col-span-2 py-2 border-y border-border/50">
-                                        <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-tight mb-1 font-mono">Emitente / Fornecedor</p>
-                                        <p className="text-sm font-medium text-foreground truncate">{capturedData.issuer}</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight mb-1 font-mono">Emitente / Fornecedor</p>
+                                        <p className="text-body-ui font-medium text-foreground truncate">{capturedData.issuer}</p>
                                     </div>
-                                    <div className="col-span-2 bg-muted/30 p-3 rounded-lg flex justify-between items-center">
-                                        <p className="text-[10px] text-muted-foreground uppercase font-bold">Valor Total da NF</p>
-                                        <p className="text-lg font-black text-primary">{formatCurrency(capturedData.total)}</p>
+                                    <div className="col-span-2 bg-muted/30 p-3 rounded-[var(--radius-panel)] flex justify-between items-center">
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Valor Total da NF</p>
+                                        <p className="text-section-title font-black text-primary">{formatCurrency(capturedData.total)}</p>
                                     </div>
 
                                     {capturedData.boletos && capturedData.boletos.length > 0 && (
                                         <div className="col-span-2 mt-2 border-t pt-4">
-                                            <p className="text-[10px] text-primary uppercase font-bold tracking-widest mb-3 flex items-center gap-2">
+                                            <p className="text-metadata-ui text-primary uppercase font-bold tracking-widest mb-3 flex items-center gap-2">
                                                 <FileText className="w-3 h-3" />
                                                 Boletos / Parcelas ({capturedData.boletos.length})
                                             </p>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                                 {capturedData.boletos.map((boleto: any, idx: number) => (
-                                                    <div key={idx} className="bg-background border border-primary/10 rounded-lg p-3 flex flex-col items-center justify-center text-center shadow-sm hover:border-primary/30 transition-colors">
-                                                        <Badge variant="outline" className="mb-2 text-[8px] tracking-widest bg-primary/5 text-primary border-primary/20">PARCELA {idx + 1}</Badge>
-                                                        <span className="text-sm font-black text-foreground">{formatCurrency(boleto.amount)}</span>
-                                                        <span className="text-[10px] text-muted-foreground font-bold font-mono mt-1">Venc: <span className="text-primary">{boleto.dueDate}</span></span>
+                                                    <div key={idx} className="bg-background border border-primary/10 rounded-[var(--radius-panel)] p-3 flex flex-col items-center justify-center text-center shadow-control-ui hover:border-primary/30 transition-colors">
+                                                        <Badge variant="outline" className="mb-2 text-metadata-ui tracking-widest bg-primary/5 text-primary border-primary/20">PARCELA {idx + 1}</Badge>
+                                                        <span className="text-body-ui font-black text-foreground">{formatCurrency(boleto.amount)}</span>
+                                                        <span className="text-metadata-ui text-muted-foreground font-bold font-mono mt-1">Venc: <span className="text-primary">{boleto.dueDate}</span></span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -570,7 +570,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                         </Button>
 
                         {invoiceFile && !capturedData && invoiceFile.name.toLowerCase().endsWith('.pdf') && (
-                            <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 shadow-lg shadow-primary/20" disabled={uploadingInvoice} onClick={() => handleProcessInvoice(false)}>
+                            <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-6 shadow-overlay-ui shadow-primary/20" disabled={uploadingInvoice} onClick={() => handleProcessInvoice(false)}>
                                 {uploadingInvoice ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analisando PDF...</>
                                 ) : (
@@ -580,7 +580,7 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                         )}
 
                         {capturedData && (
-                            <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-lg shadow-blue-500/20" disabled={uploadingInvoice} onClick={() => handleProcessInvoice(true)}>
+                            <Button className="bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-overlay-ui shadow-blue-500/20" disabled={uploadingInvoice} onClick={() => handleProcessInvoice(true)}>
                                 {uploadingInvoice ? (
                                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Gravando...</>
                                 ) : (

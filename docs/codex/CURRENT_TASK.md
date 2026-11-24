@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-24: DS4 CENTRAL PROPAGATION + MULTI-FAMILY MIGRATION
+
+**Owner authorization:** “Ok, prossiga, quero o design system em perfeito funcionamento.” Continue in the SAME DRAFT PR #221 from exact head `2891b5ecc82cc54dcc242338a0f946d89a25138c`. No main merge or production deployment.
+
+**Confirmed baseline:** Last CI 45418898557 SUCCESS on prior head. Its read-only design debt report measured 188 UI files and 5,168 local-style occurrences, down from the original 196/5,536 baseline. These are counted occurrences, not independent bugs. Shared StatItem still accepted per-page color/gradient/border strings, legacy Tailwind font/shadow utilities were not all tied to the new configurable primitives, ThemeInput/ThemeSelect forced `value=""` when callers omitted value, and OrganizationThemeSettings claimed organizational default theme saved even though its server action ignores the theme argument.
+
+**Authorized cohesive block:** Upgrade central `tokens.css` compatibility bridge for Tailwind font/radius/shadow utilities, implement typed semantic stat tones, migrate StatGrid consumers (Leads, Contacts, Reports, Sales, Pipeline) and twelve high-debt existing UI components across commercial, pipeline, operation, analytics, proposals and procurement. Lock migrated modules with strict zero-local-hardcode policy. Make uncontrolled shared fields editable, revert failed personal-theme saves, and stop claiming the unsupported organization theme is persistent. Add a local authenticated browser **computed-style propagation test**: modify and restore one token at a time, verifying shared header, stats, button, font and gradient in light/dark across multiple routes; do not persist any temporary value. Update tests and docs.
+
+**Denied:** schema/migrations, Supabase hosted DB, API/Server Actions, auth/RLS/RBAC, financial calculations, tenant theme storage, dependencies, credentials, Vercel or production, auto merge, copying private visual references to GitHub. Org default-theme persistence requires separately scoped schema+authorization gate; do not fake its success.
+
+**Required QA:** CI TypeScript/unit tests/build/axe/design policy/diff, exact SHA local isolated authenticated QA, 4 roles, 22 authorized routes, desktop+mobile and light+dark, zero WCAG violations/incompletes, keyboard/navigation and token propagation probe PASS. Inspect source screenshots and document actual remaining debt on final SHA; do not claim full 188-file migration or universal UX acceptance without evidence. Keep PR #221 DRAFT.
+
+---
+
 # CURRENT_TASK — 2026-11-24: DS3.1 OPPORTUNITY INFORMATION HIERARCHY AND SECTION NAVIGATION
 
 **Owner authorization:** "prossiga" after G2/DS3 local isolated authenticated QA PASS, 176 checks, CI PASS on `37dfb820`. Extend **only** DRAFT PR #221 on existing branch, no merge to main.

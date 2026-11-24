@@ -188,6 +188,73 @@ async function assertLayout(page) {
     if (layout.scrollWidth > layout.viewportWidth) throw new Error(`Document overflows viewport (${layout.scrollWidth}px > ${layout.viewportWidth}px).`);
 }
 
+/**
+ * Verify real shared components across multiple authenticated route families.
+ * The browser changes exactly ONE primitive at a time, measures the computed
+ * style and restores the inline override. No settings are persisted and no
+ * tenant data is modified. This is a propagation test, not a screenshot-only claim.
+ */
+async function assertDesignTokenPropagation(page) {
+    return page.evaluate(async () => {
+        const root = document.documentElement;
+        const title = document.querySelector('[data-slot="crm-page-header"] h1');
+        const tile = document.querySelector('[data-slot="stats-tile"]');
+        const primary = document.querySelector('[data-slot="button"][data-variant="default"]');
+        if (!title || !tile || !primary) {
+            throw new Error('Design-token propagation lacks real header, stat tile or primary button.');
+        }
+        const gradient = document.createElement('div');
+        gradient.className = 'ds-gradient-context';
+        gradient.setAttribute('aria-hidden', 'true');
+        gradient.style.cssText = 'position:fixed;left:-9999px;pointer-events:none;width:32px;height:32px;';
+        document.body.append(gradient);
+        const legacy = document.createElement('div');
+        legacy.className = 'text-sm rounded-xl shadow-md';
+        legacy.setAttribute('aria-hidden', 'true');
+        legacy.style.cssText = 'position:fixed;left:-9999px;pointer-events:none;width:32px;height:32px;';
+        document.body.append(legacy);
+        const specs = [
+            ['primary', '--ds-base-primary', 'oklch(0.37 0.1 230)', primary, 'backgroundColor'],
+            ['title-size', '--ds-type-page-title-size', '2.125rem', title, 'fontSize'],
+            ['panel-radius', '--ds-base-radius-panel', '1.625rem', tile, 'borderTopLeftRadius'],
+            ['card-shadow', '--ds-shadow-card', '0 0 0 6px rgba(13, 33, 56, 0.32)', tile, 'boxShadow'],
+            ['body-font', '--ds-font-family-body', 'Georgia, serif', document.body, 'fontFamily'],
+            ['highlight-gradient', '--ds-highlight-start', 'oklch(0.72 0.06 210)', gradient, 'backgroundImage'],
+            ['legacy-text-size', '--ds-type-body-size', '1.125rem', legacy, 'fontSize'],
+            ['legacy-radius', '--ds-base-radius-panel', '1.75rem', legacy, 'borderTopLeftRadius'],
+            ['legacy-shadow', '--ds-shadow-card', '0 0 0 3px rgba(23, 43, 61, 0.4)', legacy, 'boxShadow'],
+        ];
+        const completed = [];
+        try {
+            for (const [name, token, value, node, property] of specs) {
+                const element = node;
+                const previous = root.style.getPropertyValue(token);
+                const priority = root.style.getPropertyPriority(token);
+                const transition = element.style.transition;
+                const before = getComputedStyle(element)[property];
+                element.style.transition = 'none';
+                try {
+                    root.style.setProperty(token, value);
+                    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    const after = getComputedStyle(element)[property];
+                    if (!before || !after || before === after) {
+                        throw new Error('Central design token did not propagate: ' + name);
+                    }
+                    completed.push(name);
+                } finally {
+                    if (previous) root.style.setProperty(token, previous, priority);
+                    else root.style.removeProperty(token);
+                    element.style.transition = transition;
+                }
+            }
+        } finally {
+            gradient.remove();
+            legacy.remove();
+        }
+        return completed;
+    });
+}
+
 async function assertMobileNavigation(page, baseUrl) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(routeUrl(baseUrl, '/dashboard'), { waitUntil: 'networkidle' });
@@ -539,6 +606,18 @@ try {
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
                     await setTheme(page, theme);
+                    if (local && profileIndex === 0 &&
+                        ['/leads', '/contacts', '/activities'].includes(route)) {
+                        const propagated = await assertDesignTokenPropagation(page);
+                        if (propagated.length !== 9) {
+                            throw new Error('Design-system propagation matrix is incomplete.');
+                        }
+                        profileResult.checks.push({
+                            route, viewport: viewport.name, theme,
+                            state: 'design-token-propagation',
+                            primitiveCount: propagated.length, status: 'passed',
+                        });
+                    }
                     // The original pre-QA could report green even if a route
                     // rendered an empty product catalog. Local QA must prove
                     // that the actual seeded tenant data reached the Next.js page.

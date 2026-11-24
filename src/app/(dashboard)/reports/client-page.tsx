@@ -220,36 +220,28 @@ export function ReportsClientPage() {
                     value: formatCompact(stats.dealMetrics.totalValue),
                     description: "Receita de negócios ganhos",
                     icon: DollarSign,
-                    color: "text-primary",
-
-                    border: "border-primary/10"
+                    tone: 'primary',
                 },
                 {
                     label: "Taxa de Conversão",
                     value: formatPercentage(stats.dealMetrics.conversionRate),
                     description: "Negócios ganhos sobre fechados",
                     icon: Target,
-                    color: "text-foreground",
-
-                    border: "border-teal-100 dark:border-teal-900/50"
+                    tone: 'neutral',
                 },
                 {
                     label: "Ciclo Médio",
                     value: `${Math.round(stats.dealMetrics.avgCycleTime)}d`,
                     description: "Tempo médio até o fechamento",
                     icon: Calendar,
-                    color: "text-warning-readable",
-
-                    border: "border-orange-100 dark:border-orange-900/50"
+                    tone: 'warning',
                 },
                 {
                     label: "Pipeline Ativo",
                     value: formatCompact(stats.dealMetrics.pipelineValue),
                     description: `Ponderado: ${formatCompact(stats.dealMetrics.weightedValue)}`,
                     icon: TrendingUp,
-                    color: "text-foreground",
-
-                    border: "border-cyan-100 dark:border-cyan-900/50"
+                    tone: 'neutral',
                 }
             ]} />
 

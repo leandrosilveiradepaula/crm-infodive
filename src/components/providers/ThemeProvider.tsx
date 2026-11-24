@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { updateUserTheme } from '@/app/actions/theme-actions';
+import { toast } from 'sonner';
 
 type Theme = 'light' | 'dark';
 
@@ -22,25 +23,33 @@ export function ThemeProvider({
 }) {
     // Initialize with server-provided theme to avoid hydration mismatch
     const [theme, setThemeState] = useState<Theme>(initialTheme);
-    const [mounted, setMounted] = useState(false);
+    const preferredTheme = useRef<Theme>(initialTheme);
+    const requestSequence = useRef(0);
 
     useEffect(() => {
-        setMounted(true);
-        // Apply initial theme class
+        preferredTheme.current = initialTheme;
+        setThemeState(initialTheme);
         document.documentElement.classList.toggle('dark', initialTheme === 'dark');
     }, [initialTheme]);
 
     const setTheme = async (newTheme: Theme) => {
-        // Optimistic update
+        const previous = preferredTheme.current;
+        const sequence = ++requestSequence.current;
+        preferredTheme.current = newTheme;
         setThemeState(newTheme);
         document.documentElement.classList.toggle('dark', newTheme === 'dark');
 
         try {
-            // Persist to DB
             await updateUserTheme(newTheme);
         } catch (error) {
             console.error('Failed to save theme preference:', error);
-            // Revert on failure? Probably not critical enough to revert UI for theme
+            // Only the most recent change is allowed to roll back UI state.
+            // Older failed requests may not undo a newer user choice.
+            if (sequence !== requestSequence.current) return;
+            preferredTheme.current = previous;
+            setThemeState(previous);
+            document.documentElement.classList.toggle('dark', previous === 'dark');
+            toast.error('Não foi possível salvar o tema. A aparência anterior foi restaurada.');
         }
     };
 

@@ -15,6 +15,7 @@ import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useDeals } from '@/hooks/useDeals';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { statToneClasses } from '@/design-system/stat-tones';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { DollarSign, Sparkles } from 'lucide-react';
@@ -225,38 +226,30 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
             value: formatCompact(metrics.totalValue),
             description: "Valor bruto total",
             icon: TrendingUp,
-            color: "text-primary",
-
-            border: "border-primary/10"
+            tone: 'primary',
         },
         {
             label: "Ponderado",
             value: formatCompact(metrics.weightedValue),
             description: "Valor real estimado",
             icon: Sparkles,
-            color: "text-emerald-600 dark:text-emerald-400",
-
-            border: "border-emerald-100 dark:border-emerald-900/50"
+            tone: 'success',
         },
         {
             label: "Comissão Garantida",
             value: formatCompact(metrics.guaranteed),
             description: "Negócios ganhos",
             icon: DollarSign,
-            color: "text-amber-600 dark:text-amber-400",
-
-            border: "border-amber-100 dark:border-amber-900/50"
+            tone: 'warning',
         },
         {
             label: "Comissão Projetada",
             value: formatCompact(metrics.projected),
             description: "Baseada em probabilidade",
             icon: TrendingUp,
-            color: "text-teal-600 dark:text-teal-400",
-
-            border: "border-teal-100 dark:border-teal-900/50"
+            tone: 'info',
         }
-    ];
+    ] as const;
 
     return (
         <div className="min-h-full flex flex-col relative space-y-6 pb-20">
@@ -287,7 +280,7 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             key={stat.label}
                             className={`flex min-w-0 items-center gap-3 px-4 py-3 ${index > 0 ? 'border-l border-border' : ''} ${index === 2 ? 'border-t lg:border-t-0' : ''} ${index === 3 ? 'border-l-0 border-t lg:border-l lg:border-t-0' : ''}`}
                         >
-                            <div className={`grid size-8 shrink-0 place-items-center rounded-[var(--radius-control)] bg-muted ${stat.color}`}>
+                            <div className={`grid size-8 shrink-0 place-items-center rounded-[var(--radius-control)] ${statToneClasses[stat.tone]}`}>
                                 <Icon className="size-4" />
                             </div>
                             <div className="min-w-0">

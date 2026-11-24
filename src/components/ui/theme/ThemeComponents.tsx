@@ -29,6 +29,9 @@ export const ThemeLabel = ({ children, className, ...props }: { children: ReactN
 );
 
 // --- Inputs & Interactive ---
+// Do not synthesize value="" when callers omit value: that would turn
+// legitimate uncontrolled input/select fields into locked, read-only controls.
+// Both controlled value and uncontrolled defaultValue flows are supported.
 
 interface ThemeInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     fullWidth?: boolean;
@@ -45,7 +48,7 @@ export const ThemeInput = React.forwardRef<HTMLInputElement, ThemeInputProps>(
                     className
                 )}
                 {...props}
-                value={props.value ?? ''}
+
             />
         );
     }
@@ -62,12 +65,12 @@ export const ThemeSelect = React.forwardRef<HTMLSelectElement, ThemeSelectProps>
             <select
                 ref={ref}
                 className={cn(
-                    "h-[34px] rounded-[var(--radius-control)] border border-input bg-surface-raised px-2 py-1.5 ds-type-control text-foreground outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                    "h-[var(--ds-control-height-default)] rounded-[var(--radius-control)] border border-input bg-surface-raised px-2 py-1.5 ds-type-control text-foreground outline-none transition-[color,box-shadow,border-color] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
                     fullWidth && "w-full",
                     className
                 )}
                 {...props}
-                value={props.value ?? ''}
+
             >
                 {children}
             </select>
@@ -79,7 +82,7 @@ ThemeSelect.displayName = "ThemeSelect";
 // --- Read-Only Displays ---
 
 export const ThemeReadOnlyField = ({ children, className }: { children: ReactNode, className?: string }) => (
-    <div className={cn("bg-muted border border-border rounded-[var(--radius-control)] px-3 py-2 ds-type-control text-muted-foreground h-[34px] flex items-center truncate", className)}>
+    <div className={cn("bg-muted border border-border rounded-[var(--radius-control)] px-3 py-2 ds-type-control text-muted-foreground h-[var(--ds-control-height-default)] flex items-center truncate", className)}>
         {children || '---'}
     </div>
 );
