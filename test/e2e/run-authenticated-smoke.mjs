@@ -861,12 +861,16 @@ async function login(page, baseUrl, account, options = {}) {
                     await page.locator('html').evaluate((node, dark) => node.classList.toggle('dark', dark), theme === 'dark');
                     await page.waitForTimeout(150);
                     await page.getByRole('button', { name: 'Entrar no Sistema' }).waitFor({ state: 'visible' });
-                    await assertLayout(page);
+                    // The login page intentionally has no dashboard navigation.
+                    // Its own layout gate checks clipping without requiring CRM shell.
+                    const overflow = await page.evaluate(() =>
+                        document.documentElement.scrollWidth > window.innerWidth + 1);
+                    if (overflow) throw new Error('LOGIN_LAYOUT_OVERFLOW: unauthenticated page is clipped.');
                     const audit = await runAxe(page, options.source);
                     if (audit.violationsCount || audit.incompleteCount) {
                         process.stderr.write('CRM_B4_LOGIN_A11Y_DIAGNOSTIC=' +
                             JSON.stringify({ viewport: viewport.name, theme,
-                                violations: audit.violations, incomplete: audit.incomplete }) + '\\n');
+                                violations: audit.violations, incomplete: audit.incomplete }) + '\n');
                         throw new Error('LOGIN_ACCESSIBILITY_FAILED: unauthenticated route must have zero WCAG A/AA violations and incomplete checks.');
                     }
                     if (options.capture) {
