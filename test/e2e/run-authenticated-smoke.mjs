@@ -1154,14 +1154,30 @@ try {
                             return box.width > 0 && box.height > 0 &&
                                 box.left >= -1 && box.right <= window.innerWidth + 1;
                         });
+                        const submitLabel = {
+                            '/customers': 'Cadastrar Empresa',
+                            '/contacts': 'Cadastrar Contato',
+                            '/leads': 'Cadastrar Lead',
+                        }[route];
+                        const submitVisible = await formDialog.getByRole('button', { name: submitLabel })
+                            .evaluate(button => {
+                                const box = button.getBoundingClientRect();
+                                const dialog = button.closest('[role="dialog"]');
+                                const frame = dialog?.getBoundingClientRect();
+                                return !!frame && box.width > 0 && box.height > 0 &&
+                                    box.left >= frame.left - 1 && box.right <= frame.right + 1 &&
+                                    box.top >= frame.top - 1 && box.bottom <= frame.bottom + 1 &&
+                                    box.bottom <= window.innerHeight + 1;
+                            });
                         const modalAudit = await runAxe(page, source);
                         const modalIssues = modalAudit.violationsCount + modalAudit.incompleteCount;
-                        if (!dialogLayout || modalIssues) {
+                        if (!dialogLayout || !submitVisible || modalIssues) {
                             a11yFailureCount += 1;
                             a11yFailedRoutes.add(route + '?create');
                             const finding = {
                                 profileIndex, route, state: 'create-dialog',
                                 viewport: viewport.name, theme, dialogFitsViewport: dialogLayout,
+                                submitActionVisible: submitVisible,
                                 violations: modalAudit.violations, incomplete: modalAudit.incomplete,
                             };
                             if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
@@ -1181,7 +1197,7 @@ try {
                         await formDialog.waitFor({ state: 'hidden', timeout: 7_000 });
                         profileResult.checks.push({
                             route, state: 'create-dialog', viewport: viewport.name, theme,
-                            status: dialogLayout && !modalIssues ? 'passed' : 'failed',
+                            status: dialogLayout && submitVisible && !modalIssues ? 'passed' : 'failed',
                         });
                     }
                     // Source-level component tests cannot certify the four Goals
