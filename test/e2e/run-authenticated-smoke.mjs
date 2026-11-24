@@ -1124,6 +1124,16 @@ try {
                                 fullPage: true,
                             });
                         }
+                        // Escape must dismiss and restore focus to the opener.
+                        await page.keyboard.press('Escape');
+                        await assistantDialog.waitFor({ state: 'hidden', timeout: 7_000 });
+                        const focusRestored = await page.evaluate(() =>
+                            document.activeElement?.getAttribute('title') === 'Watson AI');
+                        if (!focusRestored) {
+                            throw new Error('AI_DRAWER_FOCUS_RESTORE_FAILED: trigger did not regain focus.');
+                        }
+                        await page.getByRole('button', { name: 'Watson AI' }).first().click();
+                        await assistantDialog.waitFor({ state: 'visible', timeout: 7_000 });
                         await page.getByRole('button', { name: 'Fechar Watson AI' }).click();
                         await assistantDialog.waitFor({ state: 'hidden', timeout: 7_000 });
                         profileResult.checks.push({

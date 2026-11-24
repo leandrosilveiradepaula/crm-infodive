@@ -23,6 +23,17 @@ describe('Actual CRM Watson AI drawer consumes semantic design primitives', () =
     expect(s).not.toMatch(/\b(?:bg|text|border|ring|from|via|to)-(?:blue|red|green|yellow|amber|emerald|rose|teal|cyan|sky|violet|purple|pink|indigo|orange|lime|slate|gray|zinc|neutral|stone)-\d{2,3}(?:\/\d{1,3})?\b/);
     expect(s).not.toMatch(/\btext-(?:xs|sm|base|lg|xl|[2-9]xl)\b/);
   });
+  it('traps Tab, closes with Escape and returns focus to the opener', () => {
+    const assistant = read('src/components/ai/AiAssistant.tsx');
+    expect(assistant).toContain('const dialogRef = useRef<HTMLDivElement>(null)');
+    expect(assistant).toContain('const inputRef = useRef<HTMLInputElement>(null)');
+    expect(assistant).toContain("if (event.key === 'Escape')");
+    expect(assistant).toContain("if (event.key !== 'Tab') return;");
+    expect(assistant).toContain('previouslyFocused?.focus();');
+    expect(assistant).toContain('inputRef.current?.focus();');
+    expect(assistant).toContain('ref={dialogRef} tabIndex={-1}');
+  });
+
   it('audits actual drawer before marking UX gate passed', () => {
     const qa = read('test/e2e/run-authenticated-smoke.mjs');
     expect(qa).toContain('CRM_B4_ASSISTANT_DRAWER_DIAGNOSTIC=');
