@@ -175,6 +175,11 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(css).toContain('--ds-deal-facts-columns: 2;');
     expect(modal).toContain('data-section-selected={activeTab === tab.id}');
     expect(modal).toContain('aria-selected={activeTab === tab.id}');
+    expect(modal).toContain("backgroundColor: activeTab === tab.id ? 'var(--primary)' : 'transparent'");
+    expect(modal).toContain("transition: 'none',");
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(runner).toContain('visuallySelectedPrimary');
+    expect(runner).toContain('Opportunity navigation visually highlights a primary tab in a secondary section.');
     expect(css).toContain('--ds-deal-more-width:');
     expect(css).toContain('.ds-deal-overview-section {');
     expect(css).toContain('.ds-deal-overview-grid {');

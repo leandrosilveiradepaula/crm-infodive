@@ -425,6 +425,18 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
             node.getAttribute('data-section-selected') === 'true'
         ));
     if (stalePrimary) throw new Error('Opportunity navigation incorrectly highlights a primary tab in a secondary section.');
+    // ARIA-only assertions missed a still-blue Propostas pill in real
+    // screenshot evidence for 340e0113. Assert computed rendering too.
+    const visuallySelectedPrimary = await dialog.locator('[data-qa-region="deal-tabs"] [role="tab"]')
+        .evaluateAll(nodes => {
+            const sample = document.createElement('span');
+            sample.style.backgroundColor = 'var(--primary)';
+            document.body.appendChild(sample);
+            const primary = getComputedStyle(sample).backgroundColor;
+            sample.remove();
+            return nodes.some(node => getComputedStyle(node).backgroundColor === primary);
+        });
+    if (visuallySelectedPrimary) throw new Error('Opportunity navigation visually highlights a primary tab in a secondary section.');
     if (capture) {
         await page.screenshot({ path: resolve(artifactDir, screenshotPrefix + '-history.png'), fullPage: true });
     }

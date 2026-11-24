@@ -528,12 +528,16 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             <TabsTrigger key={tab.id} value={tab.id}
                                                 data-section-selected={activeTab === tab.id}
                                                 aria-selected={activeTab === tab.id}
-                                                // Radix may retain the last active visual when
-                                                // navigating to a secondary Select-only destination.
-                                                // Inline values reference the same central tokens.
-                                                style={secondaryTabs.some(item => item.value === activeTab)
-                                                    ? { backgroundColor: 'var(--surface-subtle)', color: 'var(--foreground)', boxShadow: 'none' }
-                                                    : undefined}
+                                                // The selected section, not Radix's last focused
+                                                // primary tab, owns the visual state. Disabling the
+                                                // color transition prevents a stale blue pill in
+                                                // the immediately captured History state.
+                                                style={{
+                                                    backgroundColor: activeTab === tab.id ? 'var(--primary)' : 'transparent',
+                                                    color: activeTab === tab.id ? 'var(--primary-foreground)' : 'var(--foreground)',
+                                                    boxShadow: 'none',
+                                                    transition: 'none',
+                                                }}
                                                 className="text-label-ui font-medium normal-case tracking-normal text-foreground data-[state=active]:text-primary-foreground">
                                                 <tab.icon className="hidden h-4 w-4 shrink-0 sm:inline" aria-hidden="true" />
                                                 <span className="truncate">{tab.label}</span>
