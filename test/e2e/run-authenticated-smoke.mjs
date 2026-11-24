@@ -123,11 +123,23 @@ async function setTheme(page, theme) {
     // The former 100ms wait sampled CSS halfway through 500–700ms dark/light
     // transitions, producing false axe violations/incomplete results.
     if (dark !== wantDark) await page.getByTitle('Alternar Tema').click();
-    await page.waitForFunction(
-        expectedDark => document.documentElement.classList.contains('dark') === expectedDark,
-        wantDark,
-        { timeout: 5_000 },
-    );
+    try {
+        await page.waitForFunction(
+            expectedDark => document.documentElement.classList.contains('dark') === expectedDark,
+            wantDark,
+            { timeout: 5_000 },
+        );
+    } catch {
+        // Bounded, non-sensitive diagnostic: a failing save must not be hidden
+        // by forcing a class on the document in the QA runner.
+        const signal = await page.evaluate(() => ({
+            dark: document.documentElement.classList.contains('dark'),
+            saveErrorVisible: Array.from(document.querySelectorAll('[role="status"],[data-sonner-toast]'))
+                .some(node => node.textContent?.includes('Não foi possível salvar o tema')),
+        }));
+        throw new Error('CRM_THEME_PERSISTENCE_BLOCKED: wantedDark=' + wantDark +
+            ', renderedDark=' + signal.dark + ', saveErrorVisible=' + signal.saveErrorVisible);
+    }
     // Wait for actual styles and fonts, not just the HTML theme class. This is
     // deterministic visual stabilization; axe rules remain unchanged.
     await page.evaluate(() => document.fonts.ready);

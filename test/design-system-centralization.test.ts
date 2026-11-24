@@ -84,6 +84,9 @@ describe('Central design system — source propagation and strict migrated famil
     expect(form).toContain('h-[var(--ds-control-height-default)]');
     const theme = read('src/components/providers/ThemeProvider.tsx');
     expect(theme).toContain('setThemeState(previous)');
+    expect(theme).toContain("document.documentElement.classList.toggle('dark', preferredTheme.current === 'dark')");
+    expect(theme).not.toContain('setThemeState(initialTheme);');
+    expect(theme).toContain("const newTheme = preferredTheme.current === 'light' ? 'dark' : 'light';");
     expect(theme).toContain("toast.error('Não foi possível salvar o tema.");
     const org = read('src/components/settings/OrganizationThemeSettings.tsx');
     expect(org).not.toContain('updateOrgTheme(');

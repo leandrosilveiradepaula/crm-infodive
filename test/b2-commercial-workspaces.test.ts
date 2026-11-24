@@ -66,7 +66,7 @@ describe('CRM #214 B2 commercial workspaces', () => {
         const stats = source('src/components/layout/StatsGrid.tsx');
         expect(stats).not.toContain('disabled={!isClickable}');
         expect(stats).toContain('return isClickable ? (');
-        expect(stats).toContain('<div key={index} className={tileClasses}>');
+        expect(stats).toContain('<div key={index} data-slot="stats-tile" className={tileClasses}>');
     });
 
 });

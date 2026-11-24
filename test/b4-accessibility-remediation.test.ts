@@ -164,7 +164,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         const automation = source('src/app/(dashboard)/automations/client-page.tsx');
         expect(automation).not.toContain('pb-10 animate-in fade-in');
         expect(automation).not.toContain('border-border backdrop-blur-sm');
-        expect(automation).toContain('bg-surface-subtle p-4 rounded-xl');
+        expect(automation).toContain('bg-surface-subtle p-4 rounded-[var(--radius-panel)]');
         const settings = source('src/app/(dashboard)/settings/client-page.tsx');
         expect(settings).not.toContain('bg-muted/20 border-border');
         expect(settings).toContain('bg-surface-raised border-border');
@@ -239,9 +239,9 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         const src = source('src/app/(dashboard)/automations/client-page.tsx');
         // Axe authenticated #84 and local run #44331065048 identified one count
         // span and one history button on desktop in both themes.
-        expect(src).toContain('<span className="bg-surface-raised text-xs px-3 py-1 rounded-full text-foreground">');
-        expect(src).not.toContain('bg-muted text-xs px-3 py-1 rounded-full text-muted-foreground');
-        expect(src).toContain('gap-2 text-foreground font-black text-xs underline underline-offset-4');
+        expect(src).toContain('<span className="bg-surface-raised text-metadata-ui px-3 py-1 rounded-full text-foreground">');
+        expect(src).not.toContain('bg-muted text-metadata-ui px-3 py-1 rounded-full text-muted-foreground');
+        expect(src).toContain('gap-2 text-foreground font-black text-metadata-ui underline underline-offset-4');
         expect(src).not.toContain('gap-2 text-primary font-black text-xs hover:text-foreground');
     });
 

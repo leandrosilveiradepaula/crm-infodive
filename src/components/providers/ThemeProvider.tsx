@@ -27,10 +27,12 @@ export function ThemeProvider({
     const requestSequence = useRef(0);
 
     useEffect(() => {
-        preferredTheme.current = initialTheme;
-        setThemeState(initialTheme);
-        document.documentElement.classList.toggle('dark', initialTheme === 'dark');
-    }, [initialTheme]);
+        // Initialize the document once for this provider instance. A Next.js
+        // Server Action may revalidate the root layout after a save; an old
+        // server prop must not silently override the user's latest client
+        // choice while persistence is being reconciled.
+        document.documentElement.classList.toggle('dark', preferredTheme.current === 'dark');
+    }, []);
 
     const setTheme = async (newTheme: Theme) => {
         const previous = preferredTheme.current;
@@ -54,7 +56,7 @@ export function ThemeProvider({
     };
 
     const toggleTheme = () => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
+        const newTheme = preferredTheme.current === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
     };
 

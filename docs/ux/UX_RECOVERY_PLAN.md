@@ -1,3 +1,10 @@
+### 2026-11-24 — DS4 first CI/authenticated QA: failures and corrective actions
+
+**Observed on SHA `9b9ba175`:** [CRM validation 45426703443](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45426703443) FAIL at three static source-contract assertions: prior tests required raw Tailwind class spelling (`text-xs`, `rounded-xl`) or `StatsGrid` container markup that was intentionally migrated to shared semantic classes/data-slot attributes. The underlying color/contrast source behavior remains required; update exact expectations to the new centralized roles, do not remove tests. [Local isolated authenticated QA 45426703397](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45426703397) FAIL at theme switching with `page.waitForFunction: Timeout 5000ms`. This is a real theme persistence/initialization stability concern, not permission to force class overrides in the QA runner.
+
+**Corrections:** static B2/B4 contracts assert the migrated markup/semantics. ThemeProvider initializes its class once and prevents a stale revalidated root `initialTheme` prop from undoing a more recent client selection; the last failed save still rolls back the UI and displays a failure. Browser E2E now fails with bounded, non-sensitive `CRM_THEME_PERSISTENCE_BLOCKED` diagnostic that distinguishes a save rollback from an unresponsive toggle. Same-SHA full CI, real authenticated QA and nine-token propagation must be repeated before acceptance.
+
+---
 ## 2026-11-24 — DS4 cross-family consistency block (PR #221)
 
 | Confirmed baseline / issue | Workstream | Release gate |
