@@ -140,7 +140,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(panel).not.toContain('animate-in fade-in duration-500');
         expect(panel).not.toContain('opacity-50 pointer-events-none');
         expect(panel).not.toContain('disabled:opacity-50');
-        expect(panel).toContain('bg-card border border-border shadow-sm');
+        expect(panel).toContain('bg-card border border-border shadow-control-ui');
 
         const performers = source('src/components/dashboard/TopPerformersWidget.tsx');
         expect(performers).toContain('text-success-readable');
@@ -217,8 +217,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(stats).toContain('ds-type-label');
         expect(source('src/components/layout/PageHeader.tsx')).toContain('<Typography as="p" variant="body" className="max-w-3xl text-muted-foreground">');
         expect(source('src/components/ui/PremiumEmptyState.tsx')).toContain('text-foreground max-w-xs');
-        expect(source('src/components/leads/LeadCard.tsx')).toContain('text-foreground text-[8px]');
-        expect(source('src/components/contacts/ContactCard.tsx')).toContain('text-foreground text-[9px]');
+        expect(source('src/components/leads/LeadCard.tsx')).toContain('text-foreground text-metadata-ui');
+        expect(source('src/components/contacts/ContactCard.tsx')).toContain('text-foreground text-metadata-ui');
         const fixture = source('test/e2e/component-qa/main.tsx');
         expect(fixture).toContain('<StatsGrid items={[');
         expect(fixture).toContain('<LeadCard lead={{');
@@ -249,8 +249,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
 
     it('keeps real product SKU readable and removes the translucent card glow', () => {
         const src = source('src/components/products/ProductCard.tsx');
-        expect(src).toContain('<p className="text-[9px] text-foreground font-mono');
-        expect(src).not.toContain('<p className="text-[9px] text-primary font-mono');
+        expect(src).toContain('<p className="text-metadata-ui text-foreground font-mono');
+        expect(src).not.toContain('<p className="text-metadata-ui text-primary font-mono');
         expect(src).not.toContain('bg-primary/5 blur-[40px]');
         expect(src).toContain('bg-surface-subtle text-foreground border-border');
         const runner = source('test/e2e/run-authenticated-smoke.mjs');

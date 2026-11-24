@@ -1,3 +1,9 @@
+## 2026-11-24 — DS8 reconcile B4 historical source assertions with new semantic classes
+
+[Exact-SHA code CI 45506376439](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45506376439) reached 418 tests; 415 passed and exactly 3 existing static source assertions failed because they expected earlier hardcoded classes `shadow-sm`, `text-[8px]`/`text-[9px]` from AiSuggestionsPanel, LeadCard, ContactCard and ProductCard. These modules correctly moved to `shadow-control-ui`/`text-metadata-ui` under centralized tokens and remain legible. Historical tests now assert the **new semantic contracts**, including primary/foreground readability, without rolling back legitimate DS migrations. No skips, test removals or bypass of real WCAG. New exact-SHA TypeScript/unit/build/policy and authenticated browser must pass; maintain PR Draft and separate visual UX acceptance.
+
+---
+
 ## 2026-11-24 — honest inventory split: web theme vs @react-pdf export
 
 The full read-only inventory continues to count every visual literal, including print. It now adds a `bySurface` breakdown separating `src/components/proposals/pdf/` (React PDF JS renderer) from CSS/Tailwind-based CRM web and previews. This does NOT erase or exempt the PDF literals from the global total; it prevents the false claim that changing `tokens.css` necessarily changes non-browser `StyleSheet.create` exported documents. The independent proposal output theme already accepts explicit `themePrimary`/`themeAccent`; a future aligned central PDF token contract must preserve serialized PDF visuals and tenant brand settings. This is not authorization for unsafe PDF style replacement, production changes or hosted DB mutations. Maintain a truthful debt ledger on the final SHA.
