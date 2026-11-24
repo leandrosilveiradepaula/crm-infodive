@@ -1,3 +1,7 @@
+## 2026-11-24 — DS5 Goals family semantic conversion
+
+The user continued the approved central DS migration after PR #221 SHA 8395895d passed CI 45432758424 and isolated authenticated QA 45432758930 (192 visual route checks, four real local roles). Exact measured baseline: 172 files/3,834 local style occurrences versus original 196/5,536. This subsequent block migrated GoalsTab, FinancialSummaryCard (DRE), CommissionsTab, and DistributionModal to centralized semantic tones, typography, radii and shadows; removed ineffective StatsGrid local color/gradient/border overrides; added pressed-state accessibility and strict per-module design hardcode guards. Local matching style occurrences in these four files decreased by 241 (66+62+56+57) to zero, subject to final SHA recount. No financial formulas, server actions, DB, RBAC, prod or hosted services changed. Same-SHA CI/isolated QA and visual acceptance must be independently verified before merge; #221 remains DRAFT.
+
 ## 2026-11-24 — DS4 strict QA toolchain separation
 
 The CRM lockfile already includes axe-core 4.11.1; isolated QA requires 4.14.0. Symlinking pinned QA packages into root node_modules risks replacing a preexisting app dependency. Updated isolated installer and both QA runners to resolve pinned browser/axe modules by explicit external file paths from GITHUB_ENV, with NO root node_modules modification. Next/React/package-lock SHA256 integrity remains the release gate. Still pending exact-SHA CI+authenticated QA.
