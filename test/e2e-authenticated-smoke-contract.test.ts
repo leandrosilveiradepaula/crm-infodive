@@ -5,6 +5,19 @@ import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
 
+describe('Actual CRM customer/contact/lead create dialog QA', () => {
+    it('opens each existing creation dialog read-only with real axe and layout checks', () => {
+        const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
+        for (const route of ["'/customers'", "'/contacts'", "'/leads'"]) {
+            expect(source).toContain(route);
+        }
+        expect(source).toContain('CRM_B4_CREATE_DIALOG_DIAGNOSTIC=');
+        expect(source).toContain('const modalAudit = await runAxe(page, source)');
+        expect(source).toContain("await formDialog.waitFor({ state: 'visible'");
+        expect(source).toContain("await page.keyboard.press('Escape')");
+    });
+});
+
 describe('Real login accessibility before synthetic credential entry', () => {
     it('audits both light/dark and desktop/mobile with axe and no credentials in screenshots', () => {
         const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');

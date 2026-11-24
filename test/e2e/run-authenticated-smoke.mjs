@@ -1044,6 +1044,56 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // Exercise real migrated lead/contact/customer creation dialogs
+                    // without submitting or changing the synthetic QA database.
+                    // A static source test cannot see focus, scrollbar clipping
+                    // or color contrast inside an actual Radix modal.
+                    if (local && profileIndex === 0 && [
+                        '/customers', '/contacts', '/leads',
+                    ].includes(route)) {
+                        const createLabel = {
+                            '/customers': 'Novo Cadastro',
+                            '/contacts': 'Novo Contato',
+                            '/leads': 'Novo Lead',
+                        }[route];
+                        await page.getByRole('button', { name: createLabel, exact: true }).first().click();
+                        const formDialog = page.getByRole('dialog').first();
+                        await formDialog.waitFor({ state: 'visible', timeout: 8_000 });
+                        const dialogLayout = await formDialog.evaluate(node => {
+                            const box = node.getBoundingClientRect();
+                            return box.width > 0 && box.height > 0 &&
+                                box.left >= -1 && box.right <= window.innerWidth + 1;
+                        });
+                        const modalAudit = await runAxe(page, source);
+                        const modalIssues = modalAudit.violationsCount + modalAudit.incompleteCount;
+                        if (!dialogLayout || modalIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add(route + '?create');
+                            const finding = {
+                                profileIndex, route, state: 'create-dialog',
+                                viewport: viewport.name, theme, dialogFitsViewport: dialogLayout,
+                                violations: modalAudit.violations, incomplete: modalAudit.incomplete,
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_B4_CREATE_DIALOG_DIAGNOSTIC=' +
+                                    JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) {
+                            await page.screenshot({
+                                path: resolve(artifactDir,
+                                    `${account.label}-${route.slice(1)}-create-${viewport.name}-${theme}.png`),
+                                fullPage: true,
+                            });
+                        }
+                        await page.keyboard.press('Escape');
+                        await formDialog.waitFor({ state: 'hidden', timeout: 7_000 });
+                        profileResult.checks.push({
+                            route, state: 'create-dialog', viewport: viewport.name, theme,
+                            status: dialogLayout && !modalIssues ? 'passed' : 'failed',
+                        });
+                    }
                     // Source-level component tests cannot certify the four Goals
                     // tabs or the Recharts theme colors. Exercise actual UI
                     // transitions with local synthetic data on the SAME SHA.
