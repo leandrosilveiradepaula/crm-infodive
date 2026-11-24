@@ -1,3 +1,9 @@
+## 2026-11-24 — DS9 proposal document family completion (DETACHED, not yet published)
+
+The print-safe single palette extracted in the previous candidate now also covers 11 remaining HTML proposal and React PDF pages: confidentiality, custom notes, differentiators, overview, software groups, cover and hardware PDF fragments. Replaces an additional 101 literal hex colors without changing RGB values, renderer APIs, prices, classification, billing logic or brand override props. Added document primitives for slate700/red50/red200 and expanded source regression coverage. **Total 322 duplicate print colors in 18 components centralized**, independent of CSS dark/light, with PDF output parity NOT accepted until actual exports are compared. This detached commit is staged behind ongoing exact-SHA QA of `aa7bafd6`; do not change live PR head until the previous run completes and its outcome is incorporated. No migrations, hosted DB, production or auto-merge.
+
+---
+
 ## 2026-11-24 — DS8 QA closure for two description overlap risks
 
 Run 45508860943 (SHA 4acaa857) audited full 4-role/22-route matrix and failed ONLY 4 desktop light/dark description-text contrast *incompletes* in Lead/Contact creation dialogs, with zero contrast violations. Inspected real mobile Contact screenshot: cramped forced-row header causes title/subtitle to wrap unnaturally. Remediation: shared readable description typography and breakpoint-aware stacked header/action. Preserve all form data/actions and WCAG strict failure gate; require exact new SHA CI+isolated auth QA and image comparison before completion. Single Draft PR #221; no merge, hosted changes or production.

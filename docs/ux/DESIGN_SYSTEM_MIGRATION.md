@@ -1,3 +1,9 @@
+## 2026-11-24 — DS9 proposal document family completion (DETACHED, not yet published)
+
+The print-safe single palette extracted in the previous candidate now also covers 11 remaining HTML proposal and React PDF pages: confidentiality, custom notes, differentiators, overview, software groups, cover and hardware PDF fragments. Replaces an additional 101 literal hex colors without changing RGB values, renderer APIs, prices, classification, billing logic or brand override props. Added document primitives for slate700/red50/red200 and expanded source regression coverage. **Total 322 duplicate print colors in 18 components centralized**, independent of CSS dark/light, with PDF output parity NOT accepted until actual exports are compared. This detached commit is staged behind ongoing exact-SHA QA of `aa7bafd6`; do not change live PR head until the previous run completes and its outcome is incorporated. No migrations, hosted DB, production or auto-merge.
+
+---
+
 ## 2026-11-24 — DS9 print-safe unified proposal-document primitive palette (staged behind QA)
 
 This cohesive release candidate centralizes 221 repeated six-digit color literals across seven HTML proposal-preview and React PDF rendering source modules into one dependency-free `src/design-system/proposal-document-colors.ts`. The source retains the original literal RGB values (no change in the output color intended), the original `PdfColors` role names, and the existing organization-level `themePrimary`/`themeAccent` override behavior. React-PDF's `defaultColors` now derives from the same typed document roles; both JS inline styles and PDF `StyleSheet.create` refer to those primitives.

@@ -12,6 +12,17 @@ const renderedDocuments = [
   'src/components/proposals/ProposalHardwarePage.tsx',
   'src/components/proposals/pdf/pdfStyles.ts',
   'src/components/proposals/pdf/PdfInvestmentPage.tsx',
+  'src/components/proposals/ProposalConfidentialityPage.tsx',
+  'src/components/proposals/ProposalCustomNotesPage.tsx',
+  'src/components/proposals/ProposalDifferentialsPage.tsx',
+  'src/components/proposals/ProposalOverviewPage.tsx',
+  'src/components/proposals/ProposalSoftwareComponents.tsx',
+  'src/components/proposals/ProposalSoftwarePage.tsx',
+  'src/components/proposals/pdf/PdfCoverPage.tsx',
+  'src/components/proposals/pdf/PdfDifferentialsPage.tsx',
+  'src/components/proposals/pdf/PdfHardwarePage.tsx',
+  'src/components/proposals/pdf/PdfOverviewPage.tsx',
+  'src/components/proposals/pdf/PdfSoftwarePage.tsx',
 ] as const;
 
 describe('Commercial proposal paper and React PDF palette stays centrally configurable', () => {
@@ -54,6 +65,15 @@ describe('Commercial proposal paper and React PDF palette stays centrally config
     const preview = source('src/components/proposals/ProposalInvestmentComponents.tsx');
     expect(preview).toContain('themePrimary || proposalDocumentPrimitives.defaultPrimary');
     expect(preview).toContain('themeAccent || proposalDocumentPrimitives.defaultAccent');
+  });
+
+  it('retains printed software/scope classification and PDF color-theme contracts', () => {
+    const web = source('src/components/proposals/ProposalSoftwarePage.tsx');
+    const software = source('src/components/proposals/ProposalSoftwareComponents.tsx');
+    const pdf = source('src/components/proposals/pdf/PdfSoftwarePage.tsx');
+    expect(web).toContain('themePrimary || proposalDocumentPrimitives.defaultPrimary');
+    expect(software).toContain('themeAccent || proposalDocumentPrimitives.defaultAccent');
+    expect(pdf).toContain('proposalDocumentPrimitives');
   });
 
   it('keeps financial proposal display and classification logic intact', () => {
