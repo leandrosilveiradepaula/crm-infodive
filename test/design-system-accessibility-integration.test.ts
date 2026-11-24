@@ -102,6 +102,14 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(radar).not.toContain('Nenhuma anomalia detectada');
   });
 
+  it('ensures all inactive opportunity tab labels have fully readable semantic foreground text', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const tabs = read('src/components/ui/tabs.tsx');
+    expect(modal).toContain('className="text-foreground data-[state=active]:text-primary-foreground"');
+    expect(tabs).toContain('data-[state=active]:bg-primary data-[state=active]:text-primary-foreground');
+    expect(modal).toContain('data-qa-region="deal-tabs"');
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');

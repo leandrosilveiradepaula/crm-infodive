@@ -543,6 +543,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <TabsTrigger
                                             key={tab.id}
                                             value={tab.id}
+                                            className="text-foreground data-[state=active]:text-primary-foreground"
                                         >
                                             <tab.icon className="w-3.5 h-3.5" />
                                             {tab.label}
