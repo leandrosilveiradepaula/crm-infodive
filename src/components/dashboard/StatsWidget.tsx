@@ -18,25 +18,25 @@ interface StatCardProps {
 const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, change, onClick }: StatCardProps) => (
     <div
         onClick={onClick}
-        className="glass-card p-4 rounded-2xl relative overflow-hidden group interactive-item cursor-pointer border border-border h-full"
+        className="glass-card p-4 rounded-[var(--radius-panel)] relative overflow-hidden group interactive-item cursor-pointer border border-border h-full"
     >
         <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-surface-subtle shadow-inner group-hover:scale-110 transition-transform`}>
+                <div className={`w-9 h-9 rounded-[var(--radius-panel)] flex items-center justify-center bg-surface-subtle shadow-inner group-hover:scale-110 transition-transform`}>
                     <Icon className={`h-4.5 w-4.5 ${colorClass.replace('bg-', 'text-')}`} />
                 </div>
                 {change && (
-                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success-subtle text-foreground' : 'bg-destructive-subtle text-foreground'} uppercase tracking-widest`}>
+                    <span className={`text-metadata-ui font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success-subtle text-foreground' : 'bg-destructive-subtle text-foreground'} uppercase tracking-widest`}>
                         {change}
                     </span>
                 )}
             </div>
 
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none">{title}</p>
-            <h3 className="text-2xl font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
+            <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest leading-none">{title}</p>
+            <h3 className="text-page-title font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
 
             {subtitle && (
-                <p className="text-[10px] text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight">
+                <p className="text-metadata-ui text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight">
                     <span className="w-1 h-1 rounded-full bg-primary/40"></span>
                     {subtitle}
                 </p>
