@@ -1,17 +1,53 @@
-import { createAdminClient } from '@/lib/supabase/admin';
-import { type Contract } from '@/types/contract';
+import { createAdminClient } from '../lib/supabase/admin';
+import { type Contract } from '../types/contract';
 
 export class ContractService {
-    static async getContracts(organizationId: string) {
+    // Current callers render the complete collection, not one page.
+    // Fetch bounded pages and reject partial results; never hide later contracts.
+    static async getContracts(organizationId: string, ownerId: string | null, canViewAll: boolean) {
+        const PAGE_SIZE = 100;
+        const MAX_PAGES = 10000;
+        if (!organizationId || typeof canViewAll !== 'boolean' || (!canViewAll && !ownerId)) {
+            throw new Error('Não foi possível determinar a autoridade para ler contratos.');
+        }
         const supabase = createAdminClient();
-        const { data, error } = await supabase
-            .from('contracts')
-            .select('*')
-            .eq('organization_id', organizationId)
-            .order('created_at', { ascending: false });
+        const result: Record<string, any>[] = [];
+        const seen = new Set<string>();
+        let expectedCount: number | undefined;
 
-        if (error) throw new Error('Não foi possível carregar os contratos.');
-        return data;
+        for (let page = 0; page < MAX_PAGES; page++) {
+            const start = result.length;
+            let query = supabase.from('contracts')
+                .select(canViewAll ? '*' : '*, deals!inner(owner_id,organization_id)', { count: 'exact' })
+                .eq('organization_id', organizationId);
+            if (!canViewAll) {
+                query = query.eq('deals.organization_id', organizationId)
+                    .eq('deals.owner_id', ownerId);
+            }
+            const { data, error, count } = await query
+                .order('created_at', { ascending: false, nullsFirst: false })
+                .order('id', { ascending: false })
+                .range(start, start + PAGE_SIZE - 1);
+            if (error || !Array.isArray(data) || typeof count !== 'number' ||
+                !Number.isSafeInteger(count) || count < 0 || data.length > PAGE_SIZE ||
+                (expectedCount !== undefined && count !== expectedCount) ||
+                start + data.length > count || (data.length === 0 && start < count)) {
+                throw new Error('Não foi possível carregar todos os contratos. Atualize e tente novamente.');
+            }
+            expectedCount = count;
+            for (const row of data) {
+                if (!row || typeof row.id !== 'string' || !row.id ||
+                    row.organization_id !== organizationId || seen.has(row.id) ||
+                    (!canViewAll && (row.deals?.owner_id !== ownerId ||
+                        row.deals?.organization_id !== organizationId))) {
+                    throw new Error('Não foi possível validar a integridade da lista de contratos.');
+                }
+                seen.add(row.id);
+                result.push(row);
+            }
+            if (result.length === expectedCount) return result;
+        }
+        throw new Error('Não foi possível carregar todos os contratos dentro do limite seguro.');
     }
 
     static async createContract(organizationId: string, contract: Partial<Contract>) {
