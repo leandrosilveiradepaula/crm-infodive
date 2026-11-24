@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 GOALS REAL VISUAL AND AXE DEFECTS FOUND
+
+Owner directed autonomous completion. Exact SHA bf69f1dd CI 45468723328 SUCCESS, isolated authenticated QA 45468723316 **FAIL**. Sanitized logs identify five nested Goals states: Commissions 2 contrast violations; Campaigns 3 contrast + 2 unlabeled fields; Planning 40 contrast + 7 unlabeled fields + 5 axe incomplete; Seasonality 7 labels + 20 incomplete SVG; Statement 2 contrast. Real desktop screenshot additionally proves P1 planning layout: FilterBar occupies one column of a 12-grid, displacing right results below left, and a duplicated inner grid wrapper crushes goal mode options. Do NOT claim UX accepted. Fix actual grid composition, labels, chart SVG accessibility and tab animation sampling, using central tokens. No change to math, Server Actions, access control or hosted DB. Same-SHA CI/real QA must prove zero violations and zero incompletes in all nested states across both viewports/themes.
+
+---
+
 ## 2026-11-24 — DS5 AUTHENTICATED GOALS STATE QA BLOCKER
 
 Owner said "prossiga" after full CI success at d68b9e82 (run 45466924408), but real isolated authenticated QA 45466924462 **FAIL** at commissions nested tab: one WCAG violation, unknown rule. This is a genuine blocker, not UX approval. Continue SAME DRAFT PR #221 with a narrow responsive/accessibility correction for CommissionsTab and safe, redacted axe diagnostics for ALL nested Goals tab states, rather than masking or bypassing the violation. Strict zero-hardcode lock and commercial calculations/actions must remain unchanged. Re-run TypeScript, unit, build, policy and same-SHA isolated 4-role 22-route QA; inspect the actual failing rule before asserting fix. No hosted Supabase, migration, production or merge.

@@ -1,3 +1,17 @@
+### 2026-11-24 — P1 Goals nested screens: confirmed root causes and remediation candidate
+
+**Proof:** SHA bf69f1dd CI [45468723328](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45468723328) SUCCESS, isolated authenticated QA [45468723316](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45468723316) **FAIL**. Sanitized axe diagnostics:
+- Commissions: `color-contrast` 2 affected nodes (tab trigger state sampled immediately after transition)
+- Campaigns: `color-contrast` 3 nodes; `label` 2 inputs
+- Planning: `color-contrast` 40 nodes, `label` 7 inputs, `incomplete/color-contrast` 5 (Recharts)
+- Seasonality: `label` 7, `incomplete/color-contrast` 20 SVG/chart labels
+- Statement: `color-contrast` 2 buttons
+These counts are **node counts**, not distinct WCAG rules. Real screenshot `profile-1-goals-family-desktop-light-planning.png` in artifact `crm-b4-local-visual-evidence-bf69f1dd...` shows severe structural P1: the `FilterBar` is a free child of a 12-column grid, consuming one column before the 5+7 layout and pushing the results sidebar under the inputs. A duplicate wrapper in the goal mode grid squeezes three options into one small cell. No screenshots may be called visually approved until fixed.
+
+**Candidate remedies:** put FilterBar in a full-span grid cell; eliminate nested wrapper; add semantic accessible names to live and expandable form inputs; wait for genuine tab/enter animations before axe without disabling checks; provide native `AccessibleChart` fallback data and suppress ambiguous SVG tick text while retaining interactive tooltips. Verify screenshot output and zero violations/incompletes on exact new SHA in both themes and sizes; keep P1 **OPEN** until demonstrated. No app data mutations or source reference copies.
+
+---
+
 ### 2026-11-24 — P1: nested Goals/Commissions real WCAG violation
 
 **Observed exact SHA d68b9e82:** [CI run 45466924408](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45466924408) SUCCESS; [isolated authenticated QA 45466924462](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45466924462) FAILED when opening the previously untested **Regras de Comissão** tab: `GOALS_FAMILY_ACCESSIBILITY_FAILED: commissions; violations=1, incomplete=0`. This is not a numerical inventory issue; it blocks visual/UX acceptance. Prior E2E tested the default Goals tab only. The existing axe safety projection already strips selectors, text, HTML, IDs and user data, but the nested-tab assertion threw before serializing the safe failure rules. Next candidate captures the bounded rule ID/allowlisted computed style on each nested state and keeps the full state sequence running; it also fixes the Commissions two-column fixed-width layout on mobile and exposes selected user via aria-pressed. No data mutation actions involved. **Release gate:** exact-SHA CI+authenticated QA PASS with zero WCAG violations/incompletes in every nested Goals state, inspect screenshots in four viewport/theme combinations, then mark blocker resolved. Until then: OPEN.

@@ -1,3 +1,7 @@
+## 2026-11-24 — DS5 real Goals visual/axe defects from expanded QA
+
+After bf69f1dd CI PASS, real isolated QA run 45468723316 FAIL in ALL five newly tested Goals sub-states. Logs: commissions contrast 2; campaigns contrast 3 + labels 2; planning contrast 40 + labels 7 + incomplete 5; seasonal chart labels 7 + incomplete 20; statement contrast 2. Actual desktop screenshot proves severe Planning layout bug: a free FilterBar occupies one grid column, displacing results, plus duplicated nested goal selector. Candidate fixes real grid hierarchy, labels, shared accessible chart disclosure, semantic text and transition sampling. No server actions/tenant/RBAC/DB/production modifications; #221 stays DRAFT; require same-SHA CI+QA and screenshot review.
+
 ## 2026-11-24 — nested Goals QA detects genuine WCAG issue
 
 The fully automated four-role QA on commit d68b9e82 (run 45466924462) failed inside Commissions state with one axe WCAG violation, no incompletes. CI 45466924408 was green, but it does NOT prove UX. This candidate adds safe rule-identifier and numeric style logging, continues through all Goals tab audits before failing, and changes Commissions fixed desktop layout to a responsive focusable list. Requires same-SHA tests, actual evidence and P1 closure. PR #221 DRAFT; no hosted DB or production changes.

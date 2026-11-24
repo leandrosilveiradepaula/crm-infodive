@@ -595,6 +595,10 @@ async function assertGoalsFamilyStates(page, source, capture, artifactDir, scree
         } else {
             await page.getByRole('table').first().waitFor({ state: 'visible', timeout: 10_000 });
         }
+        // Wait for the real Radix tab and nested panel fade transitions to settle.
+        // Axe still checks the final rendered styles and rejects every real defect.
+        await page.waitForTimeout(800);
+        await page.evaluate(() => document.fonts.ready);
         await audit(state.slug);
         if (state.slug === 'planning') {
             await page.getByRole('button', { name: 'Curva de Sazonalidade', exact: true }).click();
@@ -616,6 +620,7 @@ async function assertGoalsFamilyStates(page, source, capture, artifactDir, scree
             if (!correctlyThemedBar) {
                 throw new Error('GOALS_CHART_COLOR_NOT_PROPAGATED: chart fill must use current primary token');
             }
+            await page.waitForTimeout(500);
             await audit('seasonality');
         }
     }

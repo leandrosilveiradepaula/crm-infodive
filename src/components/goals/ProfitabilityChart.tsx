@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface ProfitabilityChartProps {
@@ -50,21 +51,30 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(value);
 
     return (
-        <div className="w-full h-[300px] bg-card rounded-[var(--radius-panel)] border border-border p-4 shadow-control-ui">
+        <div className="w-full min-w-0 bg-card rounded-[var(--radius-panel)] border border-border p-4 shadow-control-ui">
             <h3 className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-4 ml-2">
                 Análise de Ponto de Equilíbrio
             </h3>
-            <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[260px]">
+                <AccessibleChart
+                    label="Curvas de faturamento, custo total e lucro"
+                    entries={data.map(point =>
+                        `Receita ${formatCurrency(point.revenue)}, custo ${formatCurrency(point.totalCost)}, lucro ${formatCurrency(point.profit)}`
+                    )}
+                >
+                <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis
                         dataKey="sales"
+                        tick={false}
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
                         tick={{ fill: 'var(--muted-foreground)' }}
                     />
                     <YAxis
+                        tick={false}
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
@@ -121,7 +131,9 @@ export const ProfitabilityChart = ({ fixedCosts, variableCostPercent, targetReve
                         />
                     )}
                 </LineChart>
-            </ResponsiveContainer>
+                </ResponsiveContainer>
+                </AccessibleChart>
+            </div>
         </div>
     );
 };

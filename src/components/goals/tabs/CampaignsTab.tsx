@@ -108,7 +108,7 @@ function CampaignRow({ campaign }: { campaign: Campaign }) {
                     aria-pressed={campaign.active}
                     className={`px-4 py-1.5 rounded-full ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest transition-all border shadow-control-ui ${campaign.active
                         ? 'bg-success-subtle text-success-readable border-success/20 hover:bg-success-subtle'
-                        : 'bg-muted text-muted-foreground border-border hover:bg-muted/80 opacity-60'
+                        : 'bg-muted text-foreground border-border hover:bg-muted/80'
                         }`}
                 >
                     {campaign.active ? 'Ativa' : 'Inativa'}
@@ -192,6 +192,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                         </label>
                         <input
                             type="text"
+                            aria-label="Nome da nova campanha"
                             placeholder="Nome da campanha (ex: Black Friday)"
                             className="w-full pl-9 h-11 bg-muted/30 border border-border rounded-[var(--radius-panel)] focus:ring-1 focus:ring-primary outline-none transition-all text-foreground placeholder-muted-foreground font-[var(--ds-type-control-weight)] ds-type-body"
                             value={newCampaignName}
@@ -207,6 +208,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                         </label>
                         <input
                             type="number"
+                            aria-label="Percentual da nova campanha"
                             min="0"
                             max="100"
                             step="0.1"
@@ -221,6 +223,7 @@ export function CampaignsTab({ campaigns }: CampaignsTabProps) {
                             Valor Fixo (R$)
                         </label>
                         <ThemeCurrencyInput
+                            aria-label="Valor fixo da nova campanha"
                             className="w-full h-11 px-4 bg-muted/30 border border-border rounded-[var(--radius-panel)] pl-9 text-left focus:ring-1 focus:ring-primary outline-none transition-all text-foreground font-[var(--ds-type-metric-weight)] ds-type-body"
                             value={newCampaignAbsolute || 0}
                             onChange={(e) => setNewCampaignAbsolute(Number(e.target.value))}

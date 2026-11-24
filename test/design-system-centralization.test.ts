@@ -205,6 +205,30 @@ describe('Central design system — source propagation and strict migrated famil
     expect(e2e).toContain("getComputedStyle(bar).fill === expected");
   });
 
+  it('keeps planning in a true full-row toolbar plus 5/7 split and labels inputs', () => {
+    const planning = read('src/components/goals/tabs/PlanningTab.tsx');
+    expect(planning).toContain('full grid row before the 5/7 split');
+    expect(planning).toContain('className="col-span-12 min-w-0"');
+    expect(planning).not.toContain('className="col-span-2 md:col-span-1">\\n                                <div');
+    for (const label of [
+      'Meta financeira mensal do cenário', 'Ticket médio da venda',
+      'Conversão de oportunidades em porcentagem', 'Meta sazonal do trimestre',
+      'Encargos da folha em porcentagem', 'Nome do cenário financeiro',
+    ]) expect(planning).toContain(label);
+    const campaigns = read('src/components/goals/tabs/CampaignsTab.tsx');
+    for (const label of ['Nome da nova campanha', 'Percentual da nova campanha', 'Valor fixo da nova campanha']) {
+      expect(campaigns).toContain(label);
+    }
+    const profit = read('src/components/goals/ProfitabilityChart.tsx');
+    const season = read('src/components/goals/SeasonalityChart.tsx');
+    for (const code of [profit, season]) {
+      expect(code).toContain('AccessibleChart');
+      expect(code).toContain('tick={false}');
+    }
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(runner).toContain('Wait for the real Radix tab');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

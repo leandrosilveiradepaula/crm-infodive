@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 real nested-screen QA catch (same PR #221)
+
+Visual inspection of authenticated QA artifact `crm-b4-local-visual-evidence-bf69f1dd...` uncovered a structural Planning grid defect despite prior green default-route tests: the top FilterBar consumed one of 12 columns and forced the results column to a lower row; duplicated goal-mode wrapper caused compressed and overlapping options. Real axe found unlabeled inputs and insufficient/ambiguous chart contrast. The next cohesive remediation fixes the DOM layout hierarchy, input naming, semantic on-primary text and uses the shared AccessibleChart contract (native HTML data alongside SVG graphics). The browser runner waits for actual UI transitions to settle before sampling contrast; this does not suppress any WCAG findings. Full same-SHA authenticated certification and visual review remain required.
+
+---
+
 ## 2026-11-24 — Goals family authenticated UI state coverage
 
 Static migration alone cannot validate controls mounted only inside nested Goals tabs. The isolated browser QA now clicks Regras de Comissão, Gestão de Campanhas, Planejamento Financeiro (including the Curva de Sazonalidade chart) and Extrato de Comissões in the original Next.js CRM under the first authorized synthetic profile, on desktop/mobile and light/dark. It validates actual selected state, visible content, no document overflow, WCAG/axe violations **or incompletes**, captures sanitized screenshots for each state, and checks the Recharts bar's computed fill against the central primary token. This does not create, update, pay or persist business records. Exact commit SHA CI and E2E must pass before this is treated as proof. Owner visual comparison and broader untouched module debt remain open.

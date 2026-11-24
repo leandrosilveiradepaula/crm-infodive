@@ -248,14 +248,15 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 scenarioName={distributionModal.scenario?.name ?? ''}
             />
 
-            {/* --- TOP ACTIONS BAR --- */}
-            <FilterBar>
+            {/* --- TOP ACTIONS BAR: full grid row before the 5/7 split --- */}
+            <div className="col-span-12 min-w-0">
+                <FilterBar>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
                     <div>
                         <h2 className="text-body-ui font-black text-foreground uppercase tracking-tight">
                             Planejamento de Cenários Financeiros
                         </h2>
-                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase opacity-70 tracking-widest leading-none mt-1">
+                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1">
                             Simule equipe, custos e rentabilidade do negócio
                         </p>
                     </div>
@@ -268,13 +269,14 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         </button>
                         <button
                             onClick={() => setIsScenarioModalOpen(true)}
-                            className="bg-primary hover:bg-primary/90 text-white px-5 h-11 rounded-[var(--radius-panel)] text-metadata-ui font-black uppercase tracking-widest transition-all shadow-overlay-ui shadow-primary/20 flex items-center gap-2"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 h-11 rounded-[var(--radius-panel)] text-metadata-ui font-black uppercase tracking-widest transition-all shadow-overlay-ui shadow-primary/20 flex items-center gap-2"
                         >
                             <Save className="h-3.5 w-3.5" /> Salvar Cenário
                         </button>
                     </div>
                 </div>
-            </FilterBar>
+                </FilterBar>
+            </div>
 
             {/* --- LEFT COLUMN: INPUTS (Accordion Style) --- */}
             <div className="col-span-12 lg:col-span-5 space-y-4">
@@ -282,6 +284,8 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 {/* --- ACCORDION 1: Metas & Sazonalidade --- */}
                 <div className="bg-card rounded-[var(--radius-panel)] border border-border shadow-control-ui overflow-hidden">
                     <button
+                        type="button"
+                        aria-expanded={expandedSection === 'goals'}
                         onClick={() => setExpandedSection(expandedSection === 'goals' ? 'goals' : 'goals')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'goals' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
@@ -296,42 +300,47 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         <div className="p-6 pt-2 border-t border-border/50 space-y-6 animate-in slide-in-from-top-2 duration-300">
                             {/* Metas & Conversão */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2 md:col-span-1">
-                                <div className="col-span-2 md:col-span-1">
+                                <div className="col-span-2 md:col-span-1 min-w-0">
                                     <label className="text-metadata-ui font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         Definir Meta Por:
                                     </label>
-                                    <div className="flex bg-muted/30 p-1 rounded-[var(--radius-panel)] border border-border h-11 items-center">
+                                    <div className="flex min-w-0 flex-wrap gap-1 rounded-[var(--radius-panel)] border border-border bg-muted/30 p-1 sm:flex-nowrap">
                                         <button
+                                            type="button"
+                                            aria-pressed={goalMode === 'revenue'}
                                             onClick={() => setGoalMode('revenue')}
-                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'revenue' ? 'bg-primary text-white shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'revenue' ? 'bg-primary text-primary-foreground shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                         >
                                             Faturamento
                                         </button>
                                         <button
+                                            type="button"
+                                            aria-pressed={goalMode === 'profit_absolute'}
                                             onClick={() => setGoalMode('profit_absolute')}
-                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'profit_absolute' ? 'bg-primary text-white shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'profit_absolute' ? 'bg-primary text-primary-foreground shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Lucro Absoluto (R$)"
                                         >
                                             Lucro (R$)
                                         </button>
                                         <button
+                                            type="button"
+                                            aria-pressed={goalMode === 'profit_percent'}
                                             onClick={() => setGoalMode('profit_percent')}
-                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'profit_percent' ? 'bg-primary text-white shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${goalMode === 'profit_percent' ? 'bg-primary text-primary-foreground shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                             title="Margem de Lucro (%)"
                                         >
                                             Margem (%)
                                         </button>
                                     </div>
                                 </div>
-                                </div>
-                                <div className="col-span-2 md:col-span-1">
+                                <div className="col-span-2 md:col-span-1 min-w-0">
                                     <label className="text-metadata-ui font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         {goalMode === 'revenue' ? 'Meta Faturamento (Mensal)' : goalMode === 'profit_absolute' ? 'Lucro Desejado (Mensal)' : 'Margem Alvo'}
                                     </label>
                                     <div className="relative group">
                                         {goalMode !== 'profit_percent' ? (
                                             <ThemeCurrencyInput
+                                                aria-label="Meta financeira mensal do cenário"
                                                 className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] text-body-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none h-11 pl-9 text-left transition-all"
                                                 value={goalValue || 0}
                                                 onChange={(e) => setGoalValue(e.target.value)}
@@ -340,6 +349,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             <>
                                                 <input
                                                     type="number"
+                                                    aria-label="Margem de lucro alvo em porcentagem"
                                                     className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] text-body-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none px-4 h-11 transition-all text-center"
                                                     value={goalValue}
                                                     onChange={(e) => setGoalValue(e.target.value)}
@@ -352,6 +362,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                 <div className="col-span-1">
                                     <label className="text-metadata-ui font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">Ticket Médio</label>
                                     <ThemeCurrencyInput
+                                        aria-label="Ticket médio da venda"
                                         className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] pl-9 pr-4 h-11 text-body-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none text-left transition-all"
                                         value={avgTicket || 0}
                                         onChange={(e) => setAvgTicket(e.target.value)}
@@ -362,6 +373,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div className="relative group">
                                         <input
                                             type="number"
+                                            aria-label="Conversão de oportunidades em porcentagem"
                                             className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] px-4 h-11 text-body-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none transition-all text-center"
                                             value={conversionRate}
                                             onChange={(e) => setConversionRate(e.target.value)}
@@ -387,6 +399,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                                 <div className="relative">
                                                     <input
                                                         type="number"
+                                                        aria-label={`Meta sazonal do trimestre Q${q} em porcentagem`}
                                                         className="w-full bg-background border border-border rounded-[var(--radius-panel)] text-center text-body-ui font-bold focus:ring-1 focus:ring-primary outline-none py-1.5"
                                                         value={qPct[key]}
                                                         onChange={(e) => setQPct({ ...qPct, [key]: Number(e.target.value) })}
@@ -411,6 +424,8 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 {/* --- ACCORDION 2: Staffing --- */}
                 <div className="bg-card rounded-[var(--radius-panel)] border border-border shadow-control-ui overflow-hidden">
                     <button
+                        type="button"
+                        aria-expanded={expandedSection === 'staff'}
                         onClick={() => setExpandedSection(expandedSection === 'staff' ? 'staff' : 'staff')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'staff' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
@@ -429,6 +444,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div className="relative w-12">
                                         <input
                                             type="number"
+                                            aria-label="Encargos da folha em porcentagem"
                                             className="w-full bg-transparent text-right text-metadata-ui font-bold text-accent-foreground outline-none p-0 focus:ring-0 border-none"
                                             value={payrollTax}
                                             onChange={(e) => setPayrollTax(Number(e.target.value))}
@@ -446,6 +462,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div key={item.id} className="grid grid-cols-12 gap-3 items-center group bg-muted/10 p-3 rounded-[var(--radius-panel)] border border-border/40 hover:border-border transition-all">
                                         <div className="col-span-4 translate-y-[2px]">
                                             <input
+                                                aria-label={`Cargo de ${item.role}`}
                                                 className="w-full bg-transparent border-none text-body-ui font-black text-foreground focus:ring-0 outline-none pb-1"
                                                 value={item.role}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'role', e.target.value)}
@@ -455,6 +472,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                         </div>
                                         <div className="col-span-3">
                                             <ThemeCurrencyInput
+                                                aria-label={`Salário mensal de ${item.role}`}
                                                 className="w-full bg-muted/40 border border-border rounded-[var(--radius-panel)] px-3 h-9 text-right text-metadata-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none pl-7 transition-all"
                                                 value={item.salary}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'salary', Number(e.target.value))}
@@ -464,6 +482,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             <span className="text-metadata-ui font-black text-muted-foreground uppercase">x</span>
                                             <input
                                                 type="number"
+                                                aria-label={`Quantidade de profissionais no cargo ${item.role}`}
                                                 className="w-full bg-muted/40 border border-border rounded-[var(--radius-panel)] h-9 text-center text-metadata-ui font-black text-foreground focus:ring-1 focus:ring-primary outline-none transition-all"
                                                 value={item.count}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'count', Number(e.target.value))}
@@ -472,6 +491,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                         <div className="col-span-2 relative">
                                             <input
                                                 type="number"
+                                                aria-label={`Meses de ramp-up de ${item.role}`}
                                                 className="w-full bg-warning-subtle border border-warning/20 rounded-[var(--radius-panel)] h-9 text-center text-metadata-ui font-black text-warning-readable focus:ring-1 focus:ring-warning outline-none transition-all pr-4"
                                                 value={item.rampUp || 0}
                                                 onChange={(e) => handleUpdateStaff(item.id, 'rampUp', Number(e.target.value))}
@@ -500,6 +520,8 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 {/* --- ACCORDION 3: Custos Operacionais --- */}
                 <div className="bg-card rounded-[var(--radius-panel)] border border-border shadow-control-ui overflow-hidden">
                     <button
+                        type="button"
+                        aria-expanded={expandedSection === 'costs'}
                         onClick={() => setExpandedSection(expandedSection === 'costs' ? 'costs' : 'costs')}
                         className={`w-full flex justify-between items-center px-6 py-4 focus:outline-none transition-colors ${expandedSection === 'costs' ? 'bg-muted/10' : 'hover:bg-muted/30'}`}
                     >
@@ -535,6 +557,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     {fixedCostItems.map((item, idx) => (
                                         <div key={item.id} className="flex gap-2 text-metadata-ui group items-center">
                                             <input
+                                                aria-label={`Descrição do custo fixo ${item.name}`}
                                                 className="flex-1 bg-transparent border-b border-border/50 text-muted-foreground focus:text-foreground focus:border-primary outline-none py-1"
                                                 value={item.name}
                                                 onChange={(e) => {
@@ -545,6 +568,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             />
                                             <div className="w-24">
                                                 <ThemeCurrencyInput
+                                                    aria-label={`Valor mensal do custo fixo ${item.name}`}
                                                     className="w-full bg-transparent border-b border-t-0 border-r-0 border-l-0 border-border/50 rounded-none text-right font-medium focus:ring-0 focus:border-primary outline-none py-0.5 h-auto pl-6"
                                                     value={item.value}
                                                     onChange={(e) => {
@@ -588,6 +612,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     {variableCostItems.map((item, idx) => (
                                         <div key={item.id} className="flex gap-2 text-metadata-ui group items-center">
                                             <input
+                                                aria-label={`Descrição do custo variável ${item.name}`}
                                                 className="flex-1 bg-transparent border-b border-border/50 text-muted-foreground focus:text-foreground focus:border-primary outline-none py-1"
                                                 value={item.name}
                                                 onChange={(e) => {
@@ -599,6 +624,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                             <div className="relative w-20">
                                                 <input
                                                     type="number"
+                                                    aria-label={`Percentual do custo variável ${item.name}`}
                                                     className="w-full bg-transparent border-b border-border/50 text-right font-medium focus:border-primary outline-none py-1 pr-4"
                                                     value={item.value}
                                                     onChange={(e) => {
@@ -675,14 +701,18 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 <div className="bg-card p-4 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
                     <div className="flex bg-muted/40 p-1 rounded-[var(--radius-panel)] border border-border mb-6 h-12 items-center">
                         <button
+                            type="button"
+                            aria-pressed={activeChartTab === 'profitability'}
                             onClick={() => setActiveChartTab('profitability')}
-                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${activeChartTab === 'profitability' ? 'bg-primary text-white shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${activeChartTab === 'profitability' ? 'bg-primary text-primary-foreground shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Ponto de Equilíbrio (P&L)
                         </button>
                         <button
+                            type="button"
+                            aria-pressed={activeChartTab === 'seasonality'}
                             onClick={() => setActiveChartTab('seasonality')}
-                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${activeChartTab === 'seasonality' ? 'bg-primary text-white shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex-1 text-metadata-ui font-black uppercase tracking-widest py-2 rounded-[var(--radius-panel)] transition-all h-full flex items-center justify-center ${activeChartTab === 'seasonality' ? 'bg-primary text-primary-foreground shadow-overlay-ui shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                         >
                             Curva de Sazonalidade
                         </button>
@@ -736,6 +766,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                     <div className="flex w-full md:w-auto gap-2">
                                         <input
                                             type="text"
+                                            aria-label="Nome do cenário financeiro"
                                             placeholder="Nome Ex: 'Cenário Otimista'"
                                             className="bg-background border border-border rounded-[var(--radius-panel)] px-4 py-2 text-body-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none flex-1 md:w-64"
                                             value={scenarioName}
@@ -745,7 +776,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                         <button
                                             onClick={() => { handleSave(); setIsScenarioModalOpen(false); }}
                                             disabled={!scenarioName.trim()}
-                                            className="bg-primary hover:bg-primary text-white px-5 py-2 rounded-[var(--radius-panel)] text-body-ui font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
+                                            className="bg-primary hover:bg-primary text-primary-foreground px-5 py-2 rounded-[var(--radius-panel)] text-body-ui font-bold transition-colors disabled:opacity-50 flex items-center gap-2"
                                         >
                                             <Save className="h-4 w-4" /> Salvar
                                         </button>

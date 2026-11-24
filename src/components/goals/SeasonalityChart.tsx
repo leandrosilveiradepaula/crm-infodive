@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Target } from 'lucide-react';
 
@@ -31,15 +32,20 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(value);
 
     return (
-        <div className="w-full h-[300px] bg-card rounded-[var(--radius-panel)] border border-border p-5 shadow-control-ui">
+        <div className="w-full min-w-0 bg-card rounded-[var(--radius-panel)] border border-border p-5 shadow-control-ui">
             <h3 className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
                 <Target className="h-4 w-4" /> Distribuição Sazonal (Ano)
             </h3>
-            <ResponsiveContainer width="100%" height="80%">
+            <div className="h-[250px]">
+                <AccessibleChart label="Metas mensais de sazonalidade" entries={data.map(point =>
+                    `${point.month}: ${formatCurrency(point.target)} (proporção mensal ${point.pct}%)`
+                )}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                     <XAxis
                         dataKey="month"
+                        tick={false}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
                         tick={{ fill: 'var(--muted-foreground)' }}
@@ -47,6 +53,7 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
                         tickLine={false}
                     />
                     <YAxis
+                        tick={false}
                         tickFormatter={formatCurrency}
                         stroke="var(--muted-foreground)"
                         fontSize="var(--ds-type-metadata-size)"
@@ -75,7 +82,9 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
                         ))}
                     </Bar>
                 </BarChart>
-            </ResponsiveContainer>
+                </ResponsiveContainer>
+                </AccessibleChart>
+            </div>
         </div>
     );
 };
