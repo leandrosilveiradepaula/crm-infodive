@@ -184,7 +184,7 @@ function LoginForm() {
                         Já tem uma conta? Voltar para o Login
                     </button>
                 ) : (
-                    <p className="text-metadata-ui text-muted-foreground/60 font-black uppercase tracking-widest cursor-default">
+                    <p className="text-metadata-ui text-muted-foreground font-medium tracking-wide cursor-default">
                         O cadastro no sistema é feito exclusivamente por convite
                     </p>
                 )}
@@ -216,7 +216,7 @@ export default function LoginPage() {
                 <LoginForm />
             </Suspense>
 
-            <div className="mt-12 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest opacity-30 select-none">
+            <div className="mt-12 text-metadata-ui font-medium text-muted-foreground tracking-wide select-none">
                 © 2026 INFODIVE S.A. | Todos os direitos reservados
             </div>
         </div>

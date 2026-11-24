@@ -12,6 +12,15 @@ const files = [
   "src/app/login/page.tsx"
 ] as const;
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), 'utf8');
+describe('Login readable metadata in both root themes', () => {
+  it('does not fade user-facing invitation or copyright text', () => {
+    const login = read('src/app/login/page.tsx');
+    expect(login).not.toContain('text-muted-foreground/60');
+    expect(login).not.toContain('opacity-30 select-none');
+    expect(login).toContain('text-muted-foreground tracking-wide select-none');
+  });
+});
+
 describe('Semantic colors and typography on charts, calendars, opportunity AI summary and login', () => {
   it.each(files)('%s does not hardcode Tailwind palettes, font scales or component geometry', path => {
     const s = read(path);
