@@ -1,3 +1,9 @@
+### 2026-11-24 — DS6 real authenticated proof: orphan tabpanel fixed, genuine Stakeholders contrast P1
+
+Exact SHA `2c82a0e4` passed [CRM validation 45502306282](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45502306282) (302 tests, TypeScript, build, WCAG preflight) but isolated [authenticated QA 45502306283](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45502306283) FAILED four Stakeholders combinations. **Prior `aria-valid-attr-value/noIdShadow` is resolved:** zero incomplete from all four secondary states. New independently validated real `color-contrast` violation, one `p` within the empty Clients/Stakeholders panel, light/dark desktop/mobile, matching the `opacity-70` on its whole empty-state container. Removing ancestor opacity retains foreground/muted foreground semantic tokens without reducing legibility. A strict source regression test protects this. New candidate awaits exact-SHA four-profile authenticated browser retest; do NOT waive axe findings, merge, deploy or claim visual acceptance.
+
+---
+
 ## 2026-11-24 — DS7: cohesive Operations/Admin family migration, keep Draft pending real QA
 
 Owner explicitly requested the Design System completion, not repeated micro-PRs. Prepared a substantial **single-PR** migration on 26 original CRM operational and administration TSX modules: Settings/Users/Security, Activities, Automations, Contracts and Service Desk. Existing Tailwind palette names, sub-12px font sizes, locally chosen type scales, radius and shadow classes are replaced by the shared light/dark semantic palette, typography, control/panel radius and elevation roles. No new identity; all default values remain in `src/design-system/tokens.css`. Strict no-hardcode policy now locks 16 newly clean modules. Original read-only visual source screenshots were examined privately; no third-party assets published.

@@ -296,7 +296,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
                 {/* Empty State */}
                 {allStakeholders.length === 0 && (
-                    <div className="bg-card border-2 border-dashed border-border/50 rounded-[var(--radius-panel)] p-10 flex flex-col items-center text-center opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="bg-card border-2 border-dashed border-border/50 rounded-[var(--radius-panel)] p-10 flex flex-col items-center text-center">
                         <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mb-4">
                             <Users className="h-8 w-8 text-muted-foreground opacity-60" />
                         </div>

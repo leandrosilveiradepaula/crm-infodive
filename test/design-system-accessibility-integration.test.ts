@@ -208,6 +208,15 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(runner).toContain("slug: 'omnichannel'");
   });
 
+  it('keeps stakeholder empty-state text at full opacity in both themes', () => {
+    const component = read('src/components/pipeline/tabs/StakeholdersTab.tsx');
+    const state = component.split('{allStakeholders.length === 0 && (')[1]?.split('{/* Stakeholders List */}')[0] || '';
+    expect(state).toContain('bg-card');
+    expect(state).toContain('ds-type-body text-muted-foreground');
+    expect(state).not.toContain('opacity-70 hover:opacity-100');
+    expect(state).not.toContain('text-center opacity-70');
+  });
+
   it('uses recorded sales facts without fabricated contact roles or AI-generated recommendations', () => {
     const overview = read('src/components/pipeline/tabs/OverviewTab.tsx');
     expect(overview).toContain('data-qa-region="deal-overview"');
