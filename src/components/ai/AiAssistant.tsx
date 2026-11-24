@@ -98,26 +98,27 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
     return (
         <>
             {/* Backdrop for mobile */}
-            <div
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+            <button
+                type="button"
+                className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden" aria-label="Fechar assistente"
                 onClick={onClose}
             />
 
             {/* Sidebar */}
-            <div className={cn(
-                "fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background shadow-2xl z-50 transform transition-transform duration-300 ease-in-out border-l border-border flex flex-col",
+            <div role="dialog" aria-label="Watson AI" aria-modal="true" className={cn(
+                "fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background shadow-overlay-ui z-50 transform transition-transform duration-300 ease-in-out border-l border-border flex flex-col",
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             )}>
                 {/* Header */}
                 <div className="p-4 border-b border-primary bg-primary text-primary-foreground flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary-foreground/10 rounded-lg">
+                        <div className="p-2 bg-primary-foreground/10 rounded-[var(--radius-control)]">
                             <Bot className="h-6 w-6 text-primary-foreground" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-lg">IBM Watson AI</h2>
-                            <p className="text-xs text-primary-foreground/80 flex items-center gap-1">
-                                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                            <h2 className="font-bold text-section-title">IBM Watson AI</h2>
+                            <p className="text-metadata-ui text-primary-foreground flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                                 Online e pronto para ajudar
                             </p>
                         </div>
@@ -127,6 +128,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                         variant="ghost"
                         size="icon"
                         className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/10"
+                        aria-label="Fechar Watson AI"
                         title="Fechar Watson AI"
                     >
                         <X className="h-6 w-6" />
@@ -135,31 +137,31 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
 
                 {/* Insights Section */}
                 <div className="p-4 bg-muted/30 border-b border-border">
-                    <h3 className="text-xs font-bold text-muted-foreground uppercase mb-3 flex items-center gap-2">
+                    <h3 className="text-metadata-ui font-bold text-muted-foreground uppercase mb-3 flex items-center gap-2">
                         <Sparkles className="h-3 w-3 text-primary" />
                         Insights Prioritários
                     </h3>
                     <div className="space-y-3">
                         {mockInsights.map(insight => (
-                            <div key={insight.id} className="bg-card p-3 rounded-lg border border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+                            <div key={insight.id} className="bg-card p-3 rounded-[var(--radius-panel)] border border-border shadow-control-ui hover:shadow-card-ui transition-shadow group">
                                 <div className="flex justify-between items-start mb-1">
                                     <div className="flex items-center gap-2">
-                                        {insight.type === 'opportunity' && <TrendingUp className="h-4 w-4 text-emerald-500" />}
+                                        {insight.type === 'opportunity' && <TrendingUp className="h-4 w-4 text-success-readable" />}
                                         {insight.type === 'risk' && <AlertTriangle className="h-4 w-4 text-destructive" />}
-                                        <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                                        <span className="font-bold text-body-ui text-foreground">
                                             {insight.title}
                                         </span>
                                     </div>
                                     {insight.score && (
                                         <span className={cn(
-                                            "text-xs font-bold px-1.5 py-0.5 rounded",
-                                            insight.score > 70 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-destructive/10 text-destructive'
+                                            "text-metadata-ui font-bold px-1.5 py-0.5 rounded-[var(--radius-control)]",
+                                            insight.score > 70 ? 'bg-success-subtle text-success-readable' : 'bg-destructive/10 text-destructive'
                                         )}>
                                             {insight.score}
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                <p className="text-metadata-ui text-muted-foreground leading-relaxed">
                                     {insight.description}
                                 </p>
                             </div>
@@ -175,7 +177,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div className={cn(
-                                "max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+                                "max-w-[85%] p-3 rounded-[var(--radius-panel)] text-body-ui leading-relaxed shadow-control-ui",
                                 msg.role === 'user'
                                     ? 'bg-primary text-primary-foreground rounded-tr-none'
                                     : 'bg-muted text-foreground rounded-tl-none'
@@ -186,9 +188,9 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                     ))}
                     {isTyping && (
                         <div className="flex justify-start">
-                            <div className="bg-muted p-4 rounded-2xl rounded-tl-none flex items-center gap-2">
+                            <div className="bg-muted p-4 rounded-[var(--radius-panel)] rounded-tl-none flex items-center gap-2">
                                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                                <span className="text-xs text-muted-foreground font-medium">Analisando CRM...</span>
+                                <span className="text-metadata-ui text-muted-foreground font-medium">Analisando CRM...</span>
                             </div>
                         </div>
                     )}
@@ -204,17 +206,19 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                             placeholder="Faça uma pergunta sobre seus leads..."
+                            aria-label="Mensagem para Watson AI"
                             className="w-full pr-12 bg-muted/50 border-input focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground"
                         />
                         <button
                             onClick={() => handleSend()}
                             disabled={!inputValue.trim() || isTyping}
-                            className="absolute right-2 p-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors"
+                            aria-label="Enviar mensagem ao Watson AI"
+                            className="absolute right-2 p-1.5 bg-primary text-primary-foreground rounded-[var(--radius-control)] hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors"
                         >
                             <Send className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="text-center text-[10px] text-muted-foreground mt-2">
+                    <p className="text-center text-metadata-ui text-muted-foreground mt-2">
                         O Watson AI pode cometer erros. Verifique informações importantes.
                     </p>
                 </div>
