@@ -36,6 +36,10 @@ export const fullyMigratedModules = Object.freeze([
   'src/components/proposals/ViewProposalModal.tsx',
   'src/components/shared/DocumentsTab.tsx',
   'src/components/proposals/ProposalGeneratorWizard.tsx',
+  'src/components/goals/FinancialSummaryCard.tsx',
+  'src/components/goals/tabs/GoalsTab.tsx',
+  'src/components/goals/tabs/CommissionsTab.tsx',
+  'src/components/goals/DistributionModal.tsx',
 ]);
 
 export function countViolations(source) {
