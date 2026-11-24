@@ -1,3 +1,9 @@
+## 2026-11-24 — DS8: customer lifecycle, activity/integration, inbox-related and leaderboard migration
+
+Continue the SAME Draft PR #221: after DS7's substantial Operation/Admin + Commercial migration, this next pre-reviewed block centralizes 32 original React UI modules spanning Customers, Contacts, Leads, Email, Omnichannel, Integrations, Activities, Gamification and a proposal selector card. Removes 746 categorized local-style occurrences in this batch (measured by the current matching categories, not distinct UX bugs). Adds 21 newly zero-debt modules to the strict anti-hardcode guard, plus family-level source contracts. Existing typed state, Server Actions, permission checks, calculation functions and response data are unchanged. Existing specialized email/marketing decorations and user-facing output still require separate visual evidence; never claim global completion based only on regex counts. The live browser must retest all existing full route/profile/viewport/theme conditions on the EXACT final SHA, including keyboard, WCAG zero violation/incomplete, token propagation, auth, and snapshots. Human main merge gate; no hosted DB, migrations or production.
+
+---
+
 ## 2026-11-24 — legacy font weight and letter-spacing compatibility bridge
 
 The central token core now controls not only Tailwind's inherited text scale, radius and elevation, but also weight and tracking utilities consumed by the yet-unmigrated source files. Default weight/spacing values match the existing Tailwind visual baseline and are editable in `tokens.css` through `--ds-type-strong-weight`, `--ds-type-heavy-weight`, and `--ds-tracking-*`. This is a compatibility bridge, not a declaration that every component has semantic role assignment. CI must prove CSS compilation and real computed-style propagation. No hosted data or production change.
