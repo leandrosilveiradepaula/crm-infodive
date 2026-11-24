@@ -167,7 +167,7 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     }
     for (const extra of ['partners', 'stakeholders', 'documents', 'omnichannel', 'history']) {
       expect(modal).toContain(`{ value: '${extra}',`);
-      expect(modal).toContain(`value="${extra}"`);
+      expect(modal).toContain(`data-qa-secondary-section="${extra}"`);
     }
     expect(modal).toContain('aria-label="Outras seções da oportunidade"');
     expect(modal).toContain('onValueChange={setActiveTab}');
@@ -183,6 +183,29 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(css).toContain('--ds-deal-more-width:');
     expect(css).toContain('.ds-deal-overview-section {');
     expect(css).toContain('.ds-deal-overview-grid {');
+  });
+
+  it('renders overflow destinations as labelled regions rather than orphan Radix tabpanels', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    const secondary = {
+      partners: 'Parceiros',
+      stakeholders: 'Clientes',
+      documents: 'Documentos',
+      omnichannel: 'Comunicações',
+      history: 'Histórico',
+    };
+    for (const [slug, label] of Object.entries(secondary)) {
+      expect(modal).toContain(`{activeTab === '${slug}' && (`);
+      expect(modal).toContain(`data-qa-secondary-section="${slug}" role="region" aria-label="${label}"`);
+      expect(modal).not.toContain(`<TabsContent value="${slug}"`);
+    }
+    expect(runner).toContain('const assertSecondaryRegion = async (slug, expectedLabel) => {');
+    expect(runner).toContain("!node.closest('[role=\"tabpanel\"]')");
+    expect(runner).toContain("some(id => !document.getElementById(id))");
+    expect(runner).toContain("await assertSecondaryRegion('history', 'Histórico')");
+    expect(runner).toContain('await assertSecondaryRegion(item.slug, item.label)');
+    expect(runner).toContain("slug: 'omnichannel'");
   });
 
   it('uses recorded sales facts without fabricated contact roles or AI-generated recommendations', () => {

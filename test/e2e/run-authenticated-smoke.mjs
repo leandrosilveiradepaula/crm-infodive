@@ -517,6 +517,24 @@ async function assertOpportunityDialogKeyboard(page, opener) {
 }
 
 async function assertOpportunitySections(page, dialog, capture, artifactDir, screenshotPrefix, source) {
+    // A secondary destination belongs to the labelled region selected by the
+    // combobox, not to a Radix tabpanel whose trigger does not exist.
+    const assertSecondaryRegion = async (slug, expectedLabel) => {
+        const region = dialog.locator(`[data-qa-secondary-section="${slug}"]`);
+        await region.waitFor({ state: 'visible', timeout: 7_000 });
+        const valid = await region.evaluate((node, label) => {
+            const danglingIdRef = [...node.querySelectorAll('[aria-labelledby]')]
+                .some(child => (child.getAttribute('aria-labelledby') || '')
+                    .trim().split(/\s+/).filter(Boolean)
+                    .some(id => !document.getElementById(id)));
+            return node.getAttribute('role') === 'region' &&
+                node.getAttribute('aria-label') === label &&
+                !node.hasAttribute('aria-labelledby') &&
+                !node.closest('[role="tabpanel"]') &&
+                !danglingIdRef;
+        }, expectedLabel);
+        if (!valid) throw new Error('Opportunity overflow section has invalid ARIA region semantics.');
+    };
     const tabs = ['Resumo', 'Produtos', 'Propostas'];
     for (const label of tabs) {
         const tab = dialog.getByRole('tab', { name: label, exact: true });
@@ -541,6 +559,7 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
         }
     }
     await page.getByRole('option', { name: 'Histórico', exact: true }).click();
+    await assertSecondaryRegion('history', 'Histórico');
     await dialog.getByText('Atividades registradas', { exact: true }).first()
         .waitFor({ state: 'visible', timeout: 5_000 });
     // A secondary destination cannot leave a misleading primary tab selected.
@@ -572,6 +591,7 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
     ]) {
         await more.click();
         await page.getByRole('option', { name: item.label, exact: true }).click();
+        await assertSecondaryRegion(item.slug, item.label);
         await dialog.getByText(item.heading, { exact: false }).first()
             .waitFor({ state: 'visible', timeout: 7_000 });
         await page.waitForTimeout(500);
@@ -723,6 +743,15 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
                 fullPage: true,
             });
         }
+    }
+    // Exercise the remaining secondary destinations without changing records.
+    for (const item of [
+        { label: 'Documentos', slug: 'documents' },
+        { label: 'Comunicações', slug: 'omnichannel' },
+    ]) {
+        await more.click();
+        await page.getByRole('option', { name: item.label, exact: true }).click();
+        await assertSecondaryRegion(item.slug, item.label);
     }
     const summary = dialog.getByRole('tab', { name: 'Resumo', exact: true });
     await summary.click();
