@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 AUTHENTICATED GOALS STATE QA BLOCKER
+
+Owner said "prossiga" after full CI success at d68b9e82 (run 45466924408), but real isolated authenticated QA 45466924462 **FAIL** at commissions nested tab: one WCAG violation, unknown rule. This is a genuine blocker, not UX approval. Continue SAME DRAFT PR #221 with a narrow responsive/accessibility correction for CommissionsTab and safe, redacted axe diagnostics for ALL nested Goals tab states, rather than masking or bypassing the violation. Strict zero-hardcode lock and commercial calculations/actions must remain unchanged. Re-run TypeScript, unit, build, policy and same-SHA isolated 4-role 22-route QA; inspect the actual failing rule before asserting fix. No hosted Supabase, migration, production or merge.
+
+---
+
 ## 2026-11-24 — DS5 GOALS FAMILY COMPLETION CANDIDATE
 
 Owner explicitly authorized "prossiga" after same-SHA CI and local authenticated QA PASS on PR #221 commit 5f879207 (runs 45463359093 / 45463359105). Continue SAME DRAFT PR #221 only. Verified debt 168 files / 3,593 occurrences (from run 45463359093), not UX acceptance. Authorized cohesive UI-only Goals family: CommissionSimulator, EnhancedProgressBar, GoalInput, PerformanceBadge, ProfitabilityChart, SeasonalityChart, StatsCard, CampaignsTab and StatementTab. Replace visual literals with semantic token roles, correct Recharts HSL/OKLCH mismatch, improve keyboard/ARIA and small-screen scrolling without changing commission math, goals, server actions, RBAC, tenants, database or production. Add all fully migrated files to strict guard and source contracts. Require exact final SHA CI and four-profile authenticated isolated browser QA desktop/mobile light/dark; visually compare private references before release. Do not merge automatically; #221 remains DRAFT.

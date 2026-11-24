@@ -1,3 +1,7 @@
+## 2026-11-24 — nested Goals QA detects genuine WCAG issue
+
+The fully automated four-role QA on commit d68b9e82 (run 45466924462) failed inside Commissions state with one axe WCAG violation, no incompletes. CI 45466924408 was green, but it does NOT prove UX. This candidate adds safe rule-identifier and numeric style logging, continues through all Goals tab audits before failing, and changes Commissions fixed desktop layout to a responsive focusable list. Requires same-SHA tests, actual evidence and P1 closure. PR #221 DRAFT; no hosted DB or production changes.
+
 ## 2026-11-24 — DS5 Goals stateful authenticated coverage
 
 After the 9-component Goals family migration, added fail-closed real-browser checks for Commissions/Campaigns/Planning/Seasonality/Statement screens in four viewport/theme combinations, including actual computed SVG fill against --primary. Unit checks alone did not cover these nested tab states; a green default route smoke is insufficient. No mutation actions are triggered. Still requires same-SHA CI and authenticated isolated QA completion; PR #221 stays DRAFT.

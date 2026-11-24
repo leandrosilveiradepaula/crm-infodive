@@ -183,6 +183,16 @@ describe('Central design system — source propagation and strict migrated famil
     expect(statement).toContain('aria-label="Filtrar comissões por mês"');
   });
 
+  it('records bounded real axe defects and keeps commissions navigable on mobile', () => {
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('CRM_B4_GOALS_A11Y_DIAGNOSTIC=');
+    expect(qa).toContain('goalsA11yFailures.push(state)');
+    const commissions = read('src/components/goals/tabs/CommissionsTab.tsx');
+    expect(commissions).toContain('data-qa-region="goals-commissions"');
+    expect(commissions).toContain('lg:flex-row');
+    expect(commissions).toContain('aria-pressed={selectedUserId === (user.user_id || user.id)}');
+  });
+
   it('proves Goals family tabs and actual theme-based chart fill in authenticated QA', () => {
     const e2e = read('test/e2e/run-authenticated-smoke.mjs');
     expect(e2e).toContain('async function assertGoalsFamilyStates(');

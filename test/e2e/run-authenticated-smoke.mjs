@@ -353,7 +353,7 @@ async function runAxe(page, source) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
             const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
             // Persist only structural and numeric data. Never store HTML,
@@ -416,7 +416,7 @@ async function runAxe(page, source) {
             const style = getComputedStyle(element);
             const tag = element.tagName?.toLowerCase() || '';
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             return {
                 resolved: true,
                 tag: staticTags.has(tag) ? tag : 'other',
@@ -560,12 +560,20 @@ async function assertGoalsFamilyStates(page, source, capture, artifactDir, scree
         { name: 'Extrato de Comissões', landmark: null, slug: 'statement' },
     ];
     let checked = 0;
+    const goalsA11yFailures = [];
     const audit = async (state) => {
         await assertLayout(page);
         const report = await runAxe(page, source);
         if (report.violationsCount || report.incompleteCount) {
-            throw new Error('GOALS_FAMILY_ACCESSIBILITY_FAILED: ' + state +
-                '; violations=' + report.violationsCount + ', incomplete=' + report.incompleteCount);
+            // Existing runAxe output contains ONLY allowlisted rule IDs,
+            // tag names, booleans and sanitized numeric computed styles.
+            // Never print axe raw targets, text, HTML, URLs or user data.
+            process.stderr.write('CRM_B4_GOALS_A11Y_DIAGNOSTIC=' + JSON.stringify({
+                state,
+                violations: report.violations,
+                incomplete: report.incomplete,
+            }) + '\n');
+            goalsA11yFailures.push(state);
         }
         if (capture) {
             await page.screenshot({
@@ -610,6 +618,9 @@ async function assertGoalsFamilyStates(page, source, capture, artifactDir, scree
             }
             await audit('seasonality');
         }
+    }
+    if (goalsA11yFailures.length) {
+        throw new Error('GOALS_FAMILY_ACCESSIBILITY_FAILED: ' + goalsA11yFailures.join(', '));
     }
     return checked;
 }
