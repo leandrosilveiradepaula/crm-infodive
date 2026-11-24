@@ -1,3 +1,9 @@
+## 2026-11-24 — DS9 real CommandBar theme/keyboard module prepared (detached)
+
+Code inspection confirmed `src/components/layout/CommandBar.tsx` imports the actual `CommandPalette.css`, which independently defined a white panel, fixed blue #0530ad selected background, gray text, arbitrary radii/shadows and invalid CSS `font-weight: 600px`. This is a real design-system centralization defect, not an unused demo stylesheet. Prepared a cohesive shared semantic CSS migration for overlay, popover, selected/hover/focus foreground, keyboard chips, typography and geometry, backed by four `--ds-command-*` variables and a CI contract. The command actions/search/keyboard handlers are unchanged. **Must inspect real CommandBar UI in authenticated light/dark/mobile once the code is published; no claim of acceptance from source assertions.** This candidate is detached behind ongoing exact-SHA QA of `aa7bafd6`, not yet published. No hosted DB, production, merge or migrations.
+
+---
+
 ## 2026-11-24 — DS9 proposal document family completion (DETACHED, not yet published)
 
 The print-safe single palette extracted in the previous candidate now also covers 11 remaining HTML proposal and React PDF pages: confidentiality, custom notes, differentiators, overview, software groups, cover and hardware PDF fragments. Replaces an additional 101 literal hex colors without changing RGB values, renderer APIs, prices, classification, billing logic or brand override props. Added document primitives for slate700/red50/red200 and expanded source regression coverage. **Total 322 duplicate print colors in 18 components centralized**, independent of CSS dark/light, with PDF output parity NOT accepted until actual exports are compared. This detached commit is staged behind ongoing exact-SHA QA of `aa7bafd6`; do not change live PR head until the previous run completes and its outcome is incorporated. No migrations, hosted DB, production or auto-merge.
