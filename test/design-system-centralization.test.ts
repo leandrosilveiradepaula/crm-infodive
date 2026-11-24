@@ -245,6 +245,17 @@ describe('Central design system — source propagation and strict migrated famil
     expect(financial).toContain('text-muted-foreground');
   });
 
+  it('keeps mobile Goals selection readable, scrollable tables keyboard-operable, and mobile headers non-overlapping', () => {
+    const commissions = read('src/components/goals/tabs/CommissionsTab.tsx');
+    expect(commissions).toContain('grid grid-cols-1 gap-2 sm:grid-cols-2 lg:block');
+    expect(commissions).not.toContain('min-w-[200px] shrink-0');
+    const statement = read('src/components/goals/tabs/StatementTab.tsx');
+    expect(statement).toContain('tabIndex={0} role="region" aria-label="Tabela de comissões, rolável horizontalmente"');
+    const header = read('src/components/layout/PageHeader.tsx');
+    expect(header).toContain('md:sticky md:top-0 md:z-20');
+    expect(header).not.toContain('className="sticky top-0 z-20');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

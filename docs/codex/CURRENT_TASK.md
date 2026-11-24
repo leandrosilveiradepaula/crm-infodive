@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 MOBILE ACCESSIBILITY CERTIFICATION BLOCK
+
+Owner authorized continue after CI success on 93bc4b95. First real QA attempt 45472526797 failed in the local-only Supabase Docker setup due an occupied inbucket host port 54324; rerunning just the failed job (attempt 2) reached the authenticated browser and exposed new mobile-only issues: Commissions had one color-contrast `incomplete` on clipped user name in a horizontally scrolling button list (numeric box [316,448,124,16]); Statement had one `scrollable-region-focusable` violation on the horizontally scrolling table (box [24,556,340,124]); Seasonality had an axe overlap `incomplete` in the sticky page-header subtitle (box [12,96,368,36]) after scrolling to the graph. Fix all three coherently: mobile users grid with fully visible buttons; focusable named table scroll region; non-sticky mobile PageHeader, retaining md+ sticky. Preserve all DB/actions/RBAC/commissions; run new exact-SHA CI and isolated four-profile 22-route light/dark desktop/mobile QA before Commercial candidate. PR #221 stays DRAFT.
+
+---
+
 ## 2026-11-24 — DS5 SINGLE REMAINING DRE CONTRAST VIOLATION
 
 Real QA SHA 9d8956ae (run 45471381437) has exactly one failing Goals state, Planning, with one `color-contrast` node. Direct evidence coordinates [836,452,156,16] on actual screenshot identify the `Ineficiência Ramp-up` label inside FinancialSummaryCard. The row had `opacity-80` on the whole text container, making it less readable. Remove this unnecessary opacity only, preserving all values and business logic, plus permanent source contract. Re-run exact-SHA CI, authenticated four-role 22-route QA, both themes/mobile/desktop and inspect screenshot. PR #221 stays DRAFT. Do not publish subsequent Commercial candidate until this gate passes; no hosted DB/production/main merge.

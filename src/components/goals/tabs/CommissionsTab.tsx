@@ -56,14 +56,14 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                     <h3 className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-[0.2em] mb-1">Selecione o Usuário</h3>
                     <p className="ds-type-metadata text-muted-foreground">Configure as comissões individuais</p>
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:block lg:space-y-2">
                     {users.map((user: any) => (
                         <button
                             key={user.user_id || user.id}
                             type="button"
                             aria-pressed={selectedUserId === (user.user_id || user.id)}
                             onClick={() => setSelectedUserId(user.user_id || user.id)}
-                            className={`flex min-w-[200px] shrink-0 items-center gap-3 p-3 lg:w-full lg:min-w-0 lg:p-4 focus-ring rounded-[var(--radius-panel)] text-left transition-all duration-300 border-2 ${selectedUserId === (user.user_id || user.id)
+                            className={`flex w-full min-w-0 items-center gap-3 p-3 lg:p-4 focus-ring rounded-[var(--radius-panel)] text-left transition-all duration-300 border-2 ${selectedUserId === (user.user_id || user.id)
                                 ? 'bg-primary text-primary-foreground shadow-overlay-ui border-primary scale-105'
                                 : 'text-muted-foreground hover:bg-muted/50 border-transparent hover:border-border/50 hover:text-foreground hover:scale-102'
                                 }`}
@@ -79,7 +79,7 @@ export function CommissionsTab({ users }: CommissionsTabProps) {
                                     }`}>
                                     {user.name}
                                 </p>
-                                <p className={`ds-type-metadata uppercase tracking-wider font-[var(--ds-type-label-weight)] ${selectedUserId === (user.user_id || user.id) ? 'text-primary-foreground' : 'text-muted-foreground'
+                                <p className={`ds-type-metadata truncate uppercase tracking-wider font-[var(--ds-type-label-weight)] ${selectedUserId === (user.user_id || user.id) ? 'text-primary-foreground' : 'text-muted-foreground'
                                     }`}>
                                     {user.role}
                                 </p>

@@ -113,7 +113,7 @@ export function StatementTab({ deals, users }: StatementTabProps) {
             </FilterBar>
 
             <div className="overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-control-ui">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Tabela de comissões, rolável horizontalmente">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest border-b border-border bg-muted/10">

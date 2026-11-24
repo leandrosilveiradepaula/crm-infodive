@@ -9,7 +9,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
     return (
-        <div data-slot="crm-page-header" className="sticky top-0 z-20 -mx-3  flex flex-col gap-[var(--ds-page-header-gap)] border-b border-border bg-background ds-page-header sm:-mx-4  lg:-mx-6   md:flex-row md:items-center md:justify-between">
+        <div data-slot="crm-page-header" className="relative z-10 -mx-3 flex flex-col gap-[var(--ds-page-header-gap)] border-b border-border bg-background ds-page-header sm:-mx-4 md:sticky md:top-0 md:z-20 lg:-mx-6 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 space-y-1">
                 <Typography as="h1" variant="pageTitle">{title}</Typography>
                 {description && (
