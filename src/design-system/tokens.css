@@ -334,6 +334,10 @@
   --ds-table-cell-inline: 0.75rem;
   --ds-table-cell-padding: 0.75rem;
   --ds-control-height-default: 2.25rem;
+  --ds-command-overlay: rgb(0 0 0 / 0.5);
+  --ds-command-max-width: 40rem;
+  --ds-command-list-max-height: 25rem;
+  --ds-command-input-size: 1rem;
   --ds-form-dialog-max-height: 90dvh;
   --ds-form-dialog-gutter: 1.5rem;
   --ds-control-height-small: 2rem;
