@@ -24,6 +24,23 @@ export const policies = {
  * Extending this list is a one-way migration; do not suppress an active violation.
  */
 export const fullyMigratedModules = Object.freeze([
+  'src/components/sales/SalesOrderList.tsx',
+  'src/components/sales/SalesOrderDetails.tsx',
+  'src/app/(dashboard)/sales/SalesList.tsx',
+  'src/app/(dashboard)/sales/tabs/CommissionsTab.tsx',
+  'src/app/(dashboard)/products/client-page.tsx',
+  'src/components/proposals/editor/ProposalEditorClient.tsx',
+  'src/components/pipeline/ProductSearch.tsx',
+  'src/components/pipeline/DealProductsTab.tsx',
+  'src/components/pipeline/ImportDealProductsModal.tsx',
+  'src/components/pipeline/TechnicalDetailsEditor.tsx',
+  'src/components/pipeline/DealProductMapper.tsx',
+  'src/components/pipeline/product-row/ProductRowHeader.tsx',
+  'src/components/proposals/ProposalVersionHistory.tsx',
+  'src/components/proposals/ProposalTemplateSelector.tsx',
+  'src/components/proposals/ProposalsTab.tsx',
+  'src/components/proposals/ProposalRow.tsx',
+  'src/components/proposals/editor/ClientLogoUpload.tsx',
   'src/components/settings/UsersTab.tsx',
   'src/components/settings/UsersSettings.tsx',
   'src/components/settings/AuditLogTab.tsx',
