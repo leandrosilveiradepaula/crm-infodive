@@ -226,7 +226,7 @@ export function DealFormModal({ open, onOpenChange, deal }: DealFormModalProps) 
                                             <div
                                                 className={`h-full rounded-full transition-all duration-500 \${
                                                     (formData.probability || 0) < 30 ? 'bg-destructive' :
-                                                    (formData.probability || 0) < 70 ? 'bg-warning' : 
+                                                    (formData.probability || 0) < 70 ? 'bg-warning' :
                                                     'bg-success'
                                                 }`}
                                                 style={{ width: `\${formData.probability || 0}%` }}
