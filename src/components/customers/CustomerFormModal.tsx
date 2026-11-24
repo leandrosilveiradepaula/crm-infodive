@@ -257,7 +257,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[800px] bg-card border-border text-foreground rounded-[var(--radius-panel)] max-h-[var(--ds-form-dialog-max-height)] overflow-y-auto p-0">
-                <DialogHeader className="px-6 py-4 border-b border-border bg-surface-subtle flex flex-row items-center justify-between">
+                <DialogHeader className="flex flex-col items-stretch gap-3 border-b border-border bg-surface-subtle px-6 py-4 pr-14 sm:flex-row sm:items-center sm:justify-between">
                     <DialogTitle className="text-section-title font-bold text-foreground tracking-tight">
                         {customer ? 'Editar Empresa' : 'Nova Empresa'}
                     </DialogTitle>
@@ -267,7 +267,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                             variant="outline"
                             size="sm"
                             onClick={() => setIsParserOpen(true)}
-                            className="gap-2 text-primary border-primary/20 hover:bg-primary/10 hover:text-primary"
+                            className="w-full gap-2 text-primary border-primary/20 hover:bg-primary/10 hover:text-primary sm:w-auto"
                         >
                             <Sparkles className="h-4 w-4" />
                             Preencher com IA (CNPJ/Print)
@@ -497,7 +497,7 @@ export function CustomerFormModal({ open, onOpenChange, customer }: CustomerForm
                     />
 
 
-                    <DialogFooter>
+                    <DialogFooter className="sticky bottom-0 z-10 border-t border-border bg-card px-4 py-3 sm:px-6">
                         <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="text-muted-foreground">
                             Cancelar
                         </Button>
