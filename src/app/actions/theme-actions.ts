@@ -8,15 +8,37 @@ import { SettingsService } from '@/services/SettingsService';
 export async function updateUserTheme(theme: 'light' | 'dark') {
     // A theme is an individual preference. Preserve trusted session identity;
     // service-role writes must still target the authenticated profile only.
-    const { userId } = await requireSessionContext();
-    const supabase = createAdminClient();
+    let userId: string;
+    try {
+        ({ userId } = await requireSessionContext());
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=AUTH');
+        throw new Error('Failed to authorize theme preference');
+    }
 
-    const { data, error } = await supabase
-        .from('profiles')
-        .update({ theme_preference: theme })
-        .eq('id', userId)
-        .select('id,theme_preference')
-        .maybeSingle();
+    let supabase: ReturnType<typeof createAdminClient>;
+    try {
+        supabase = createAdminClient();
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=CLIENT');
+        throw new Error('Failed to initialize theme preference storage');
+    }
+
+    let data: { id: string; theme_preference: string | null } | null = null;
+    let error: { code?: string } | null = null;
+    try {
+        const result = await supabase
+            .from('profiles')
+            .update({ theme_preference: theme })
+            .eq('id', userId)
+            .select('id,theme_preference')
+            .maybeSingle();
+        data = result.data;
+        error = result.error;
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=TRANSPORT');
+        throw new Error('Failed to contact theme preference storage');
+    }
 
     // Update without a returned row is NOT proof of persistence; fail closed.
     if (error || !data || data.theme_preference !== theme) {

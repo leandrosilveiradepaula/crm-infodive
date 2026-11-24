@@ -1,3 +1,7 @@
+## 2026-11-24 DS4 persisted theme diagnosis
+
+Local authenticated QA on `8baeb597` remained blocked by failed theme write before any storage error code was emitted. Added safe stage-only codes AUTH/CLIENT/TRANSPORT to theme Server Action, preserving requireSessionContext, trusted per-user ID predicate, no hostname/secrets/SQL logging. No bypass, no production DB actions. Exact-SHA retry pending.
+
 ## 2026-11-24 — DS4 theme write failure isolated and bounded server action scope
 
 Head `34fb0b39` CI [45428977985](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45428977985) **SUCCESS**, reduced measured design debt to **172 files/3,834 occurrences**, with 12 strictly locked migrated components and zero hardcode regression. Isolated authenticated QA [45428977868](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45428977868) **FAIL**: the client actually received a failed personal-theme save (`saveState=failed`) when switching dark to light, so the theme state correctly rolled back but the feature is not operational. As a narrow correction to the existing design theme feature, the personal `updateUserTheme` Server Action now requires a verified returned updated row from the trusted user profile, omits root-layout revalidation that could race client theme state and throws on absent/mismatched write. QA captures bounded safe backend error code only on failure and verifies persistence after page reload. No hosted SQL, migrations, new RBAC or tenant theme storage; full same-SHA certification still pending.

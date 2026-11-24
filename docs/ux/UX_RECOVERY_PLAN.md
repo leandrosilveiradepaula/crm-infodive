@@ -1,3 +1,9 @@
+### 2026-11-24 DS4 theme action isolated diagnostic follow-up
+
+After `8baeb597`, CI [45430181597](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181597) SUCCESS, but local authenticated QA [45430181395](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181395) still FAIL with `saveState=failed`. Its new sanitized Server Action code stream was empty, so the failed path happened *before* the DB-result verification branch. The precise cause is not yet known; no production diagnosis is assumed. Add bounded, non-sensitive failure-stage categories to the individual preference action: AUTH (trusted session), CLIENT (server-only Supabase client), TRANSPORT (request failure), or a PostgREST error code/NO_ROW/WRITE_MISMATCH. The isolated QA workflow may print only these fixed codes, never user/session identifiers or raw errors. Re-run exact-SHA CI + full authenticated QA, no bypass of auth and no theme persistence mock. 
+
+---
+
 ### 2026-11-24 DS4 personal-theme persistence QA blocker and targeted correction
 
 **CI proven on `34fb0b39`:** [run 45428977985](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45428977985) SUCCESS. Measured design debt fell from 188 files/5,168 occurrences to **172 files/3,834 occurrences** (16 fewer files, 1,334 fewer local decisions); strict locked migration count 12, zero new hardcodes. This is a real static migration improvement, **not full visual acceptance**.

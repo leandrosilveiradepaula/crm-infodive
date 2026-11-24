@@ -104,6 +104,9 @@ describe('Central design system — source propagation and strict migrated famil
     expect(write).toContain(".eq('id', userId)");
     expect(write).toContain(".select('id,theme_preference')");
     expect(write).toContain('data.theme_preference !== theme');
+    for (const code of ['AUTH', 'CLIENT', 'TRANSPORT']) {
+      expect(write).toContain(`CRM_THEME_WRITE_DIAGNOSTIC=${code}`);
+    }
     expect(write).not.toContain("revalidatePath('/')");
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('CRM_THEME_READ_AFTER_WRITE_FAILED');
