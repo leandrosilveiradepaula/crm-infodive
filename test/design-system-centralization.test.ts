@@ -336,6 +336,16 @@ describe('Central design system — source propagation and strict migrated famil
     expect(qa).toContain("throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug)");
   });
 
+  it('runs axe from one clean initialized instance per page without relaxing WCAG rules', () => {
+    const e2e = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(e2e).toContain('if (!loaded) await page.addScriptTag({ content: source });');
+    expect(e2e).toContain('window.axe.reset();');
+    expect(e2e).toContain("values: ['wcag2a', 'wcag2aa']");
+    expect(e2e).toContain('idrefProbe');
+    expect(e2e).toContain('aomSupported');
+    expect(e2e).toContain('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

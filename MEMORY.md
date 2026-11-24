@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 a208b6b0 QA root cause investigation
+
+CI 45487106786 PASS; real auth QA 45487106841 FAIL all four Partners states only because axe-core 4.14 returns `aria-valid-attr-value` incomplete with key `noIdShadow` for attributeName `aria-labelledby`, despite actual dialog having ONLY aria-label, title/description mounted and read-only neutral-label probe also failing. Not proven that HTML ARIA is invalid. Existing E2E injected axe script repeatedly per audit into same Radix page. Candidate one-time axe load + reset per real audit (all WCAG rules remain enabled) and additional strictly redacted IDREF/AOM structural diagnostics; require same-SHA QA. No production/hosted DB/business logic change. PR #221 stays Draft.
+
 ## 2026-11-24 — DS6 root axe error isolated diagnostically without further UI guessing
 
 Commit aa599f1b CI 45485021450 PASS (298 unit tests, 32 strict modules), but auth QA 45485021426 FAIL 4 combos only root `aria-valid-attr-value` incomplete (zero violations), despite non-empty single `aria-label` and ZERO IDREF attrs. Root title and description mounted; mobile Partners scroll passes. Two previous structural guesses eliminated IDREFs yet never resolved axe incomplete. Added QA-only bounded root-cause probe to log axe-core's allowlisted `messageKey` + attribute NAME, and compare original vs neutral literal label in a direct rule run; always restore attribute and DO NOT bypass main axe failure. Requires same-SHA CI/E2E evidence. PR #221 Draft; no prod/hosted DB or merge.

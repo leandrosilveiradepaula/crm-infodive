@@ -305,8 +305,13 @@ async function assertMobileNavigation(page, baseUrl) {
 }
 
 async function runAxe(page, source) {
-    await page.addScriptTag({ content: source });
+    // Inject axe once per authenticated page. Repeated script injection in the
+    // same dynamically changing Radix dialog can invalidate internal virtual
+    // trees; axe.reset() resets cached evaluation state without disabling rules.
+    const loaded = await page.evaluate(() => Boolean(window.axe?.run && window.axe?.reset));
+    if (!loaded) await page.addScriptTag({ content: source });
     const report = await page.evaluate(async () => {
+        window.axe.reset();
         const result = await window.axe.run(document, {
             runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] },
         });
@@ -635,9 +640,26 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
                 }
                 return { available: true, results, axeVersion: window.axe.version };
             });
+            // The engine reported noIdShadow on an absent aria-labelledby.
+            // Inspect only attribute NAMES and IDREF presence/counts so the
+            // failure can be distinguished from stale axe virtual-node state.
+            const idrefProbe = await dialog.evaluate(root => {
+                const ariaNames = ['aria-labelledby', 'aria-describedby', 'aria-controls', 'aria-owns'];
+                const refs = ariaNames.map(name => {
+                    const value = root.getAttribute(name);
+                    const parts = value ? value.trim().split(/\s+/).filter(Boolean) : [];
+                    return { name, present: value !== null, count: parts.length,
+                        allInSameTree: parts.every(id => root.getRootNode().getElementById?.(id) !== null),
+                        duplicateIds: parts.some(id => document.querySelectorAll('[id]').length > 0 &&
+                            Array.from(document.querySelectorAll('[id]')).filter(el => el.id === id).length > 1) };
+                });
+                const aom = root.ariaLabelledByElements;
+                return { refs, aomSupported: aom !== undefined,
+                    aomCount: Array.isArray(aom) ? aom.length : null };
+            });
             process.stderr.write('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=' +
                 JSON.stringify({ state: item.slug, violations: audit.violations,
-                    incomplete: audit.incomplete, dialogAria, ariaProbe }) + '\n');
+                    incomplete: audit.incomplete, dialogAria, ariaProbe, idrefProbe }) + '\n');
             throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug);
         }
         if (capture) {
