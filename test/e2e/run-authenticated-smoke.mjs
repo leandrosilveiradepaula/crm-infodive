@@ -241,7 +241,7 @@ async function assertDesignTokenPropagation(page) {
         gradient.style.cssText = 'position:fixed;left:-9999px;pointer-events:none;width:32px;height:32px;';
         document.body.append(gradient);
         const legacy = document.createElement('div');
-        legacy.className = 'text-sm rounded-xl shadow-md';
+        legacy.className = 'text-sm rounded-xl shadow-md font-black tracking-widest';
         legacy.setAttribute('aria-hidden', 'true');
         legacy.style.cssText = 'position:fixed;left:-9999px;pointer-events:none;width:32px;height:32px;';
         document.body.append(legacy);
@@ -255,6 +255,8 @@ async function assertDesignTokenPropagation(page) {
             ['legacy-text-size', '--ds-type-body-size', '1.125rem', legacy, 'fontSize'],
             ['legacy-radius', '--ds-base-radius-panel', '1.75rem', legacy, 'borderTopLeftRadius'],
             ['legacy-shadow', '--ds-shadow-card', '0 0 0 3px rgba(23, 43, 61, 0.4)', legacy, 'boxShadow'],
+            ['legacy-weight', '--ds-type-heavy-weight', '650', legacy, 'fontWeight'],
+            ['legacy-letter-spacing', '--ds-tracking-widest', '0.2em', legacy, 'letterSpacing'],
         ];
         const completed = [];
         try {
@@ -938,7 +940,7 @@ try {
                     if (local && profileIndex === 0 &&
                         ['/leads', '/contacts', '/activities'].includes(route)) {
                         const propagated = await assertDesignTokenPropagation(page);
-                        if (propagated.length !== 9) {
+                        if (propagated.length !== 11) {
                             throw new Error('Design-system propagation matrix is incomplete.');
                         }
                         profileResult.checks.push({

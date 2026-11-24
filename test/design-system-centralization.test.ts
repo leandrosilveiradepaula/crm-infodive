@@ -363,6 +363,7 @@ describe('Central design system — source propagation and strict migrated famil
     for (const role of [
       'primary', 'title-size', 'panel-radius', 'card-shadow', 'body-font',
       'highlight-gradient', 'legacy-text-size', 'legacy-radius', 'legacy-shadow',
+      'legacy-weight', 'legacy-letter-spacing',
     ]) expect(runner).toContain(role);
     expect(runner).toContain("['/leads', '/contacts', '/activities']");
     expect(runner).toContain("state: 'design-token-propagation'");
