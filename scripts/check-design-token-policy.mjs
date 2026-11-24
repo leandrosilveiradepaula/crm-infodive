@@ -49,6 +49,12 @@ export const fullyMigratedModules = Object.freeze([
   'src/components/goals/StatsCard.tsx',
   'src/components/goals/tabs/CampaignsTab.tsx',
   'src/components/goals/tabs/StatementTab.tsx',
+  'src/components/pipeline/KanbanBoard.tsx',
+  'src/components/pipeline/DealFormModal.tsx',
+  'src/components/pipeline/tabs/PartnersTab.tsx',
+  'src/components/pipeline/tabs/StakeholdersTab.tsx',
+  'src/components/pipeline/LostDealModal.tsx',
+  'src/components/pipeline/CommissionWidget.tsx',
 ]);
 
 export function countViolations(source) {

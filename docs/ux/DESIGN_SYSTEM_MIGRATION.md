@@ -1,3 +1,9 @@
+## 2026-11-24 — DS6 Commercial tokens and stage-render proof candidate
+
+Continue the incremental original CRM migration in existing Draft PR #221: KanbanBoard and five opportunity-related components. Replace dynamic stage-colored Tailwind with explicit static utilities backed by central semantic stage tokens; use shared text scale, border-radius, elevation and contrast roles throughout. Add six files to the strict guard, and authenticate browser QA across five stage color dots and the Partners/Clientes secondary tabs in four viewport/theme combinations. Preserve sales values, RBAC, tenancy, server actions and existing capabilities. No claim of UI approval until same-SHA tests, screenshot inspection and human sign-off.
+
+---
+
 ## 2026-11-24 — DS5 real nested-screen QA catch (same PR #221)
 
 Visual inspection of authenticated QA artifact `crm-b4-local-visual-evidence-bf69f1dd...` uncovered a structural Planning grid defect despite prior green default-route tests: the top FilterBar consumed one of 12 columns and forced the results column to a lower row; duplicated goal-mode wrapper caused compressed and overlapping options. Real axe found unlabeled inputs and insufficient/ambiguous chart contrast. The next cohesive remediation fixes the DOM layout hierarchy, input naming, semantic on-primary text and uses the shared AccessibleChart contract (native HTML data alongside SVG graphics). The browser runner waits for actual UI transitions to settle before sampling contrast; this does not suppress any WCAG findings. Full same-SHA authenticated certification and visual review remain required.

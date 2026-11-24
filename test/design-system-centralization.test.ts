@@ -31,6 +31,12 @@ const locked = [
   'src/components/goals/StatsCard.tsx',
   'src/components/goals/tabs/CampaignsTab.tsx',
   'src/components/goals/tabs/StatementTab.tsx',
+  'src/components/pipeline/CommissionWidget.tsx',
+  'src/components/pipeline/DealFormModal.tsx',
+  'src/components/pipeline/KanbanBoard.tsx',
+  'src/components/pipeline/LostDealModal.tsx',
+  'src/components/pipeline/tabs/PartnersTab.tsx',
+  'src/components/pipeline/tabs/StakeholdersTab.tsx',
 ];
 
 describe('Central design system — source propagation and strict migrated families', () => {
@@ -254,6 +260,24 @@ describe('Central design system — source propagation and strict migrated famil
     const header = read('src/components/layout/PageHeader.tsx');
     expect(header).toContain('md:sticky md:top-0 md:z-20');
     expect(header).not.toContain('className="sticky top-0 z-20');
+  });
+
+  it('renders typed semantic Pipeline stage colors and audits real secondary opportunity screens', () => {
+    const kanban = read('src/components/pipeline/KanbanBoard.tsx');
+    expect(kanban).toContain('STAGE_TONE_CLASSES[column.id]');
+    expect(kanban).toContain('data-qa-stage={column.id}');
+    expect(kanban).toContain('data-qa-stage-dot=""');
+    expect(kanban).not.toContain('column.color');
+    expect(kanban).not.toContain('bg-gradient-to-br');
+    for (const stage of ['qualification', 'proposal', 'negotiation', 'won', 'lost']) {
+      expect(kanban).toContain('bg-stage-' + stage);
+      expect(kanban).toContain('border-stage-' + stage);
+    }
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
+    expect(qa).toContain('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED');
+    expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
+    expect(read('src/components/pipeline/LostDealModal.tsx')).toContain('ds-overlay-backdrop');
   });
 
   it('requires computed-style propagation, not just source tokens or screenshots', () => {

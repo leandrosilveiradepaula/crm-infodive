@@ -495,7 +495,7 @@ async function assertOpportunityDialogKeyboard(page, opener) {
     }
 }
 
-async function assertOpportunitySections(page, dialog, capture, artifactDir, screenshotPrefix) {
+async function assertOpportunitySections(page, dialog, capture, artifactDir, screenshotPrefix, source) {
     const tabs = ['Resumo', 'Produtos', 'Propostas'];
     for (const label of tabs) {
         const tab = dialog.getByRole('tab', { name: label, exact: true });
@@ -543,6 +543,32 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
     if (visuallySelectedPrimary) throw new Error('Opportunity navigation visually highlights a primary tab in a secondary section.');
     if (capture) {
         await page.screenshot({ path: resolve(artifactDir, screenshotPrefix + '-history.png'), fullPage: true });
+    }
+    // Navigate the actual nested partner and stakeholder panels without writes.
+    for (const item of [
+        { label: 'Parceiros', heading: 'Ecosistema de Parceiros', slug: 'partners' },
+        { label: 'Clientes', heading: 'Clientes & Stakeholders', slug: 'stakeholders' },
+    ]) {
+        await more.click();
+        await page.getByRole('option', { name: item.label, exact: true }).click();
+        await dialog.getByText(item.heading, { exact: false }).first()
+            .waitFor({ state: 'visible', timeout: 7_000 });
+        await page.waitForTimeout(500);
+        await assertLayout(page);
+        const audit = await runAxe(page, source);
+        if (audit.violationsCount || audit.incompleteCount) {
+            // Sanitized axe data: allowlisted rule names and computed styles only.
+            process.stderr.write('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=' +
+                JSON.stringify({ state: item.slug, violations: audit.violations,
+                    incomplete: audit.incomplete }) + '\n');
+            throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug);
+        }
+        if (capture) {
+            await page.screenshot({
+                path: resolve(artifactDir, screenshotPrefix + '-' + item.slug + '.png'),
+                fullPage: true,
+            });
+        }
     }
     const summary = dialog.getByRole('tab', { name: 'Resumo', exact: true });
     await summary.click();
@@ -813,6 +839,25 @@ try {
                     // inspector. Capture one read-only drawer state from the synthetic
                     // admin fixture without changing stage, products, or any deal data.
                     if (capture && local && profileIndex === 0 && route === '/pipeline') {
+                        // Verify compiled Tailwind stage role classes match central CSS tokens.
+                        const stageTokensRendered = await page.evaluate(() => {
+                            const columns = Array.from(document.querySelectorAll('[data-qa-stage]'));
+                            if (columns.length !== 5) return false;
+                            return columns.every(column => {
+                                const stage = column.getAttribute('data-qa-stage');
+                                if (!['qualification', 'proposal', 'negotiation', 'won', 'lost'].includes(stage)) return false;
+                                const dot = column.querySelector('[data-qa-stage-dot]');
+                                if (!dot) return false;
+                                const sample = document.createElement('span');
+                                sample.style.backgroundColor = 'var(--stage-' + stage + ')';
+                                document.body.appendChild(sample);
+                                const expected = getComputedStyle(sample).backgroundColor;
+                                sample.remove();
+                                return expected !== 'rgba(0, 0, 0, 0)' &&
+                                    getComputedStyle(dot).backgroundColor === expected;
+                            });
+                        });
+                        if (!stageTokensRendered) throw new Error('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
                         const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
                         await openDetails.click();
                         const dialog = page.getByRole('dialog');
@@ -863,7 +908,7 @@ try {
                         let sectionNavigationStatus = 'passed';
                         try {
                             await assertOpportunitySections(page, dialog, capture, artifactDir,
-                                `${account.label}-pipeline-deal-detail-${viewport.name}-${theme}`);
+                                `${account.label}-pipeline-deal-detail-${viewport.name}-${theme}`, source);
                         } catch {
                             sectionNavigationStatus = 'failed';
                             a11yFailureCount += 1;
