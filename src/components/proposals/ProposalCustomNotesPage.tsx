@@ -71,7 +71,7 @@ export function ProposalCustomNotesPage({
                     whiteSpace: 'pre-wrap', 
                     fontSize: '14px', 
                     lineHeight: '1.6', 
-                    color: proposalDocumentPrimitives.slate700 
+                    color: proposalDocumentPrimitives.slate700
                 }}>
                     {content}
                 </div>
