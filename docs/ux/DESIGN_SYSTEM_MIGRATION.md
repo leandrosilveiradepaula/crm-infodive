@@ -1,3 +1,13 @@
+## 2026-11-24 — DS5 Goals, Commissions and DRE semantic migration candidate
+
+**Verified baseline SHA:** 8395895d. [CI 45432758424](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45432758424) SUCCESS, 286 tests and WCAG preflight; [isolated authenticated QA 45432758930](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45432758930) SUCCESS, four real local role profiles and 192 visual route checks. Measured debt: 172 affected files/3,834 local class occurrences vs original 196/5,536.
+
+**New candidate scope:** GoalsTab, FinancialSummaryCard/DRE, CommissionsTab and DistributionModal converted to central semantic color/tone, typography, radius and shadow roles. Goals now passes typed semantic `tone` values to StatsGrid, instead of ineffective per-item `color`, `gradient` and `border` classes. The four source files had respectively 62, 66, 56 and 57 measured local decisions (241 total) before migration; they are now added to the strict zero-local-hardcode guard. Financial calculations, per-user commission rules, distribution weight formulas, server actions, tenants, databases, credentials and production are unchanged.
+
+**Gates still open:** exact candidate SHA CI, isolated authenticated 22-route/four-role QA and browser visual comparison in desktop/mobile/light/dark. Re-run the authoritative full repository inventory to establish the new aggregate. Keep PR #221 DRAFT; do not claim 100% DS migration or user visual acceptance.
+
+---
+
 ## 2026-11-24 — DS4 structural centralization and semantic screen-family contracts
 
 **Source baseline:** exact `2891b5ecc82cc54dcc242338a0f946d89a25138c` GitHub run 45418898557 records **188 files / 5,168 local style decisions**; counts use `scripts/report-design-system-debt.mjs`. Values are occurrences, not visual bug counts. The original 196 / 5,536 figure has been superseded by this measured baseline.
