@@ -41,10 +41,10 @@ export const NotificationCenter = ({
 
     const getColor = (type: NotificationType) => {
         switch (type) {
-            case 'success': return 'text-green-600 bg-green-50 border-green-200';
-            case 'error': return 'text-red-600 bg-red-50 border-red-200';
-            case 'warning': return 'text-orange-600 bg-orange-50 border-orange-200';
-            case 'info': return 'text-primary bg-blue-50 border-blue-200';
+            case 'success': return 'text-success-readable bg-success-subtle border-success';
+            case 'error': return 'text-destructive-readable bg-destructive-subtle border-destructive';
+            case 'warning': return 'text-warning-readable bg-warning-subtle border-warning';
+            case 'info': return 'text-primary bg-surface-highlight border-primary';
         }
     };
 
@@ -66,11 +66,11 @@ export const NotificationCenter = ({
             {/* Bell Icon */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="relative p-2.5 text-muted-foreground hover:text-primary hover:bg-blue-50 rounded-xl transition-all duration-200 group"
+                className="relative p-2.5 text-muted-foreground hover:text-primary hover:bg-surface-highlight rounded-[var(--radius-panel)] transition-all duration-200 group"
             >
                 <Bell className="h-5 w-5 group-hover:animate-pulse" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 h-5 w-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
+                    <span className="absolute top-1.5 right-1.5 h-5 w-5 bg-destructive text-white text-metadata-ui font-bold rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
@@ -86,14 +86,14 @@ export const NotificationCenter = ({
                     />
 
                     {/* Panel */}
-                    <div className="absolute right-0 top-full mt-2 w-96 bg-card rounded-2xl shadow-2xl border border-border/50 z-50 overflow-hidden animate-slide-up">
+                    <div className="absolute right-0 top-full mt-2 w-96 bg-card rounded-[var(--radius-panel)] shadow-card-ui border border-border/50 z-50 overflow-hidden animate-slide-up">
                         {/* Header */}
-                        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary to-blue-900">
+                        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary to-primary">
                             <div className="flex items-center gap-2">
                                 <Bell className="h-5 w-5 text-white" />
                                 <h3 className="font-bold text-white">Notificações</h3>
                                 {unreadCount > 0 && (
-                                    <span className="bg-card/20 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                                    <span className="bg-card/20 text-white px-2 py-0.5 rounded-full text-metadata-ui font-bold">
                                         {unreadCount} novas
                                     </span>
                                 )}
@@ -112,7 +112,7 @@ export const NotificationCenter = ({
                                 <div className="p-8 text-center">
                                     <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                                     <p className="text-muted-foreground font-medium">Nenhuma notificação</p>
-                                    <p className="text-muted-foreground text-sm mt-1">Você está em dia!</p>
+                                    <p className="text-muted-foreground text-body-ui mt-1">Você está em dia!</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
@@ -123,17 +123,17 @@ export const NotificationCenter = ({
                                         return (
                                             <div
                                                 key={notification.id}
-                                                className={`p-4 hover:bg-muted/50 transition-colors ${!notification.read ? 'bg-blue-50/30' : ''}`}
+                                                className={`p-4 hover:bg-muted/50 transition-colors ${!notification.read ? 'bg-surface-highlight/30' : ''}`}
                                                 onClick={() => onMarkAsRead(notification.id)}
                                             >
                                                 <div className="flex gap-3">
-                                                    <div className={`flex-shrink-0 w-8 h-8 rounded-lg border flex items-center justify-center ${colorClass}`}>
+                                                    <div className={`flex-shrink-0 w-8 h-8 rounded-[var(--radius-control)] border flex items-center justify-center ${colorClass}`}>
                                                         <Icon className="h-4 w-4" />
                                                     </div>
 
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-start justify-between gap-2 mb-1">
-                                                            <h4 className="font-bold text-foreground text-sm">
+                                                            <h4 className="font-bold text-foreground text-body-ui">
                                                                 {notification.title}
                                                             </h4>
                                                             <button
@@ -141,18 +141,18 @@ export const NotificationCenter = ({
                                                                     e.stopPropagation();
                                                                     onRemove(notification.id);
                                                                 }}
-                                                                className="text-muted-foreground hover:text-red-600 transition-colors"
+                                                                className="text-muted-foreground hover:text-destructive-readable transition-colors"
                                                             >
                                                                 <X className="h-4 w-4" />
                                                             </button>
                                                         </div>
 
-                                                        <p className="text-sm text-muted-foreground mb-2">
+                                                        <p className="text-body-ui text-muted-foreground mb-2">
                                                             {notification.message}
                                                         </p>
 
                                                         <div className="flex items-center justify-between">
-                                                            <span className="text-xs text-muted-foreground">
+                                                            <span className="text-metadata-ui text-muted-foreground">
                                                                 {formatTime(notification.timestamp)}
                                                             </span>
 
@@ -162,7 +162,7 @@ export const NotificationCenter = ({
                                                                         e.stopPropagation();
                                                                         notification.onAction?.();
                                                                     }}
-                                                                    className="text-xs font-bold text-primary hover:text-blue-700 transition-colors"
+                                                                    className="text-metadata-ui font-bold text-primary hover:text-primary transition-colors"
                                                                 >
                                                                     {notification.actionLabel}
                                                                 </button>
@@ -182,7 +182,7 @@ export const NotificationCenter = ({
                             <div className="p-3 border-t border-border/50 bg-muted/50">
                                 <button
                                     onClick={onClearAll}
-                                    className="w-full py-2 text-sm font-bold text-muted-foreground hover:text-primary transition-colors"
+                                    className="w-full py-2 text-body-ui font-bold text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     Limpar todas
                                 </button>

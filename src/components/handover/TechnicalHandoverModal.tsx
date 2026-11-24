@@ -83,20 +83,20 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-            <div className="bg-card border border-border rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-card border border-border rounded-[var(--radius-panel)] w-full max-w-2xl shadow-card-ui overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="flex items-center justify-between p-6 border-b border-border bg-muted/50">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-emerald-500/10 rounded-xl">
-                            <CheckSquare className="h-6 w-6 text-emerald-500" />
+                        <div className="p-3 bg-success/10 rounded-[var(--radius-panel)]">
+                            <CheckSquare className="h-6 w-6 text-success-readable" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-foreground">Handover Técnico</h2>
-                            <p className="text-sm text-muted-foreground">
+                            <h2 className="text-section-title font-bold text-foreground">Handover Técnico</h2>
+                            <p className="text-body-ui text-muted-foreground">
                                 {deal.title} • {deal.company}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-[var(--radius-control)] transition-colors text-muted-foreground hover:text-foreground">
                         <X className="h-6 w-6" />
                     </button>
                 </div>
@@ -105,14 +105,14 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
                     {!handover ? (
                         <div className="text-center py-12">
                             <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                            <h3 className="text-lg font-medium text-foreground mb-2">Iniciar Processo de Handover</h3>
+                            <h3 className="text-section-title font-medium text-foreground mb-2">Iniciar Processo de Handover</h3>
                             <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
                                 Este processo criará um checklist técnico para acompanhar a entrega do projeto.
                             </p>
                             <button
                                 onClick={handleCreateHandover}
                                 disabled={loading}
-                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-colors"
+                                className="px-6 py-3 bg-success hover:bg-success text-white rounded-[var(--radius-panel)] font-medium transition-colors"
                             >
                                 {loading ? 'Criando...' : 'Iniciar Handover'}
                             </button>
@@ -120,24 +120,24 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
                     ) : (
                         <div className="space-y-8">
                             <div>
-                                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Checklist de Entrega</h3>
+                                <h3 className="text-body-ui font-bold text-muted-foreground uppercase tracking-wider mb-4">Checklist de Entrega</h3>
                                 <div className="space-y-3">
                                     {checklistItems.map(item => (
                                         <div
                                             key={item.key}
                                             onClick={() => toggleCheckItem(item.key)}
                                             className={`
-                                                flex items-center p-4 rounded-xl border transition-all cursor-pointer select-none
+                                                flex items-center p-4 rounded-[var(--radius-panel)] border transition-all cursor-pointer select-none
                                                 ${checklist[item.key]
-                                                    ? 'bg-emerald-500/10 border-emerald-500/50'
+                                                    ? 'bg-success/10 border-success/50'
                                                     : 'bg-card border-border hover:border-border/80 hover:bg-muted/50'
                                                 }
                                             `}
                                         >
                                             <div className={`
-                                                h-6 w-6 rounded-lg border-2 flex items-center justify-center mr-4 transition-colors
+                                                h-6 w-6 rounded-[var(--radius-control)] border-2 flex items-center justify-center mr-4 transition-colors
                                                 ${checklist[item.key]
-                                                    ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                    ? 'bg-success border-success text-white'
                                                     : 'border-muted-foreground/30'
                                                 }
                                             `}>
@@ -151,12 +151,12 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
                                 </div>
                             </div>
 
-                            <div className="bg-muted/30 rounded-xl p-6 border border-border">
-                                <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Documentação</h3>
+                            <div className="bg-muted/30 rounded-[var(--radius-panel)] p-6 border border-border">
+                                <h3 className="text-body-ui font-bold text-muted-foreground uppercase tracking-wider mb-4">Documentação</h3>
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-foreground font-medium">Termo de Aceite</p>
-                                        <p className="text-sm text-muted-foreground">Gere o documento para assinatura do cliente</p>
+                                        <p className="text-body-ui text-muted-foreground">Gere o documento para assinatura do cliente</p>
                                     </div>
                                     <button
                                         onClick={() => generateAcceptanceTermPDF({
@@ -171,7 +171,7 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
                                             checklist: checklist,
                                             technicalLeadName: userEmail || 'Técnico Responsável'
                                         })}
-                                        className="flex items-center gap-2 px-4 py-2 bg-background hover:bg-muted border border-border rounded-lg text-sm text-foreground transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 bg-background hover:bg-muted border border-border rounded-[var(--radius-control)] text-body-ui text-foreground transition-colors"
                                     >
                                         <Download className="h-4 w-4" />
                                         Baixar PDF
@@ -193,7 +193,7 @@ export const TechnicalHandoverModal: React.FC<TechnicalHandoverModalProps> = ({ 
                         <button
                             onClick={handleSave}
                             disabled={loading}
-                            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                            className="px-6 py-2 bg-success hover:bg-success text-white rounded-[var(--radius-control)] font-medium transition-colors flex items-center gap-2"
                         >
                             <Save className="h-4 w-4" />
                             Salvar Progresso

@@ -61,27 +61,27 @@ export function EmailList({ emails, selectedEmailId, onSelectEmail }: EmailListP
                             key={email.id}
                             onClick={() => onSelectEmail(email.id)}
                             className={cn(
-                                "flex flex-col gap-2 p-3 rounded-lg border text-left transition-all hover:bg-accent/50",
+                                "flex flex-col gap-2 p-3 rounded-[var(--radius-control)] border text-left transition-all hover:bg-accent/50",
                                 selectedEmailId === email.id
-                                    ? "bg-accent border-primary/20 shadow-sm"
+                                    ? "bg-accent border-primary/20 shadow-control-ui"
                                     : "bg-card border-transparent hover:border-border"
                             )}
                         >
                             <div className="flex items-center justify-between w-full">
                                 <span className={cn(
-                                    "font-semibold text-sm truncate pr-2",
+                                    "font-semibold text-body-ui truncate pr-2",
                                     !email.read && "text-foreground"
                                 )}>
                                     {email.sender.name}
                                 </span>
-                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                <span className="text-metadata-ui text-muted-foreground whitespace-nowrap">
                                     {formatDistanceToNow(email.date, { addSuffix: true, locale: ptBR })}
                                 </span>
                             </div>
 
                             <div className="flex items-center justify-between gap-2">
                                 <span className={cn(
-                                    "text-xs truncate font-medium",
+                                    "text-metadata-ui truncate font-medium",
                                     !email.read ? "text-foreground" : "text-muted-foreground"
                                 )}>
                                     {email.subject}
@@ -89,17 +89,17 @@ export function EmailList({ emails, selectedEmailId, onSelectEmail }: EmailListP
                                 {email.hasAttachment && <Paperclip className="h-3 w-3 text-muted-foreground flex-shrink-0" />}
                             </div>
 
-                            <p className="text-xs text-muted-foreground line-clamp-2">
+                            <p className="text-metadata-ui text-muted-foreground line-clamp-2">
                                 {email.preview}
                             </p>
 
                             <div className="flex items-center gap-2 mt-1">
                                 {email.labels.map(label => (
-                                    <Badge key={label} variant="secondary" className="text-[10px] h-5 px-1.5 font-normal">
+                                    <Badge key={label} variant="secondary" className="text-metadata-ui h-5 px-1.5 font-normal">
                                         {label}
                                     </Badge>
                                 ))}
-                                {email.isStarred && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 ml-auto" />}
+                                {email.isStarred && <Star className="h-3 w-3 fill-warning text-warning-readable ml-auto" />}
                             </div>
                         </button>
                     ))}
