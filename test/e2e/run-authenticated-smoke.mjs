@@ -1068,6 +1068,9 @@ try {
                         await page.getByRole('button', { name: createLabel, exact: true }).first().click();
                         const formDialog = page.getByRole('dialog').first();
                         await formDialog.waitFor({ state: 'visible', timeout: 8_000 });
+                        // Measure settled styling after Radix's 200ms open animation.
+                        // Do not suppress any real axe failure or incomplete check.
+                        await page.waitForTimeout(450);
                         const dialogLayout = await formDialog.evaluate(node => {
                             const box = node.getBoundingClientRect();
                             return box.width > 0 && box.height > 0 &&

@@ -28,7 +28,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                     <div key={contact.id} className="grid grid-cols-12 gap-3 items-center bg-card p-3 rounded-[var(--radius-panel)] border border-border group hover:border-muted-foreground/30 transition-colors">
                         <div className="col-span-3">
                             <ThemeInput
-                                placeholder="Nome"
+                                aria-label="Nome do contato" placeholder="Nome"
                                 value={contact.name || ''}
                                 onChange={(e) => onUpdateContact(contact.id, 'name', e.target.value)}
                                 className="h-[30px] text-metadata-ui bg-transparent border-transparent focus:bg-muted/50 focus:border-border"
@@ -36,7 +36,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                         </div>
                         <div className="col-span-3">
                             <ThemeInput
-                                placeholder="Email"
+                                aria-label="Email do contato" placeholder="Email"
                                 value={contact.email || ''}
                                 onChange={(e) => onUpdateContact(contact.id, 'email', e.target.value)}
                                 className="h-[30px] text-metadata-ui bg-transparent border-transparent focus:bg-muted/50 focus:border-border"
@@ -44,7 +44,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                         </div>
                         <div className="col-span-3">
                             <ThemeInput
-                                placeholder="Telefone"
+                                aria-label="Telefone do contato" placeholder="Telefone"
                                 value={contact.mobile_phone || ''}
                                 onChange={(e) => onUpdateContact(contact.id, 'mobile_phone', e.target.value)}
                                 className="h-[30px] text-metadata-ui bg-transparent border-transparent focus:bg-muted/50 focus:border-border"
@@ -60,7 +60,7 @@ export function CustomerContactsSection({ contacts, onAddContact, onUpdateContac
                             </Badge>
                         </div>
                         <div className="col-span-1 flex justify-end">
-                            <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive-readable hover:bg-destructive/10 rounded-[var(--radius-control)]" onClick={() => onRemoveContact(contact.id)}>
+                            <Button type="button" size="icon" variant="ghost" aria-label="Remover contato" className="h-7 w-7 text-muted-foreground hover:text-destructive-readable hover:bg-destructive/10 rounded-[var(--radius-control)]" onClick={() => onRemoveContact(contact.id)}>
                                 <X className="h-3.5 w-3.5" />
                             </Button>
                         </div>

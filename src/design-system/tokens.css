@@ -334,6 +334,8 @@
   --ds-table-cell-inline: 0.75rem;
   --ds-table-cell-padding: 0.75rem;
   --ds-control-height-default: 2.25rem;
+  --ds-form-dialog-max-height: 90dvh;
+  --ds-form-dialog-gutter: 1.5rem;
   --ds-control-height-small: 2rem;
   --ds-control-height-large: 2.5rem;
   --ds-control-height-xs: 1.5rem;

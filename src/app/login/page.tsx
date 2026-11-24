@@ -206,18 +206,11 @@ export default function LoginPage() {
                 <div className="text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.4em] mt-2">Next Gen Business Intelligence</div>
             </div>
 
-            {/* Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-                <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]" />
-                <div className="absolute top-[40%] right-[10%] w-[40%] h-[40%] bg-info/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
-            </div>
-
             <Suspense fallback={<div className="text-muted-foreground animate-pulse font-black uppercase text-metadata-ui tracking-widest">Carregando ambiente...</div>}>
                 <LoginForm />
             </Suspense>
 
-            <div className="mt-12 text-metadata-ui font-medium text-muted-foreground tracking-wide select-none">
+            <div className="relative z-10 mt-12 bg-background text-metadata-ui font-medium text-muted-foreground tracking-wide select-none">
                 © 2026 INFODIVE S.A. | Todos os direitos reservados
             </div>
         </div>

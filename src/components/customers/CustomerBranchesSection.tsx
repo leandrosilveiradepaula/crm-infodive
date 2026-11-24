@@ -29,7 +29,7 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
                             <div className="grid grid-cols-2 gap-3 flex-1">
                                 <div className="col-span-2 flex justify-between items-center bg-muted/20 p-2 rounded-[var(--radius-control)] border border-border/50">
                                     <ThemeInput
-                                        placeholder="Nome da Filial"
+                                        aria-label="Nome da Filial" placeholder="Nome da Filial"
                                         value={branch.name || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'name', e.target.value)}
                                         className="h-[30px] text-metadata-ui border-transparent bg-transparent focus:bg-background"
@@ -48,53 +48,53 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
 
                                 <div className="flex gap-2">
                                     <ThemeInput
-                                        placeholder="CEP"
+                                        aria-label="CEP" placeholder="CEP"
                                         value={branch.zip || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'zip', e.target.value)}
                                         className="h-[30px] text-metadata-ui w-24"
                                     />
                                     <ThemeInput
-                                        placeholder="Cidade"
+                                        aria-label="Cidade" placeholder="Cidade"
                                         value={branch.city || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'city', e.target.value)}
                                         className="h-[30px] text-metadata-ui flex-1"
                                     />
                                 </div>
                                 <ThemeInput
-                                    placeholder="CNPJ Filial"
+                                    aria-label="CNPJ Filial" placeholder="CNPJ Filial"
                                     value={branch.cnpj || ''}
                                     onChange={(e) => onUpdateBranch(branch.id, 'cnpj', e.target.value)}
                                     className="h-[30px] text-metadata-ui"
                                 />
                                 <ThemeInput
-                                    placeholder="Logradouro"
+                                    aria-label="Logradouro" placeholder="Logradouro"
                                     value={branch.street || ''}
                                     onChange={(e) => onUpdateBranch(branch.id, 'street', e.target.value)}
                                     className="h-[30px] text-metadata-ui"
                                 />
                                 <div className="flex gap-2">
                                     <ThemeInput
-                                        placeholder="Número"
+                                        aria-label="Número" placeholder="Número"
                                         value={branch.number || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'number', e.target.value)}
                                         className="h-[30px] text-metadata-ui w-20"
                                     />
                                     <ThemeInput
-                                        placeholder="Bairro"
+                                        aria-label="Bairro" placeholder="Bairro"
                                         value={branch.neighborhood || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'neighborhood', e.target.value)}
                                         className="h-[30px] text-metadata-ui flex-1"
                                     />
                                 </div>
                                 <ThemeInput
-                                    placeholder="Inscrição Estadual"
+                                    aria-label="Inscrição Estadual" placeholder="Inscrição Estadual"
                                     value={branch.ie || ''}
                                     onChange={(e) => onUpdateBranch(branch.id, 'ie', e.target.value)}
                                     className="h-[30px] text-metadata-ui"
                                 />
                                 <div className="col-span-2 mt-1">
                                     <textarea
-                                        placeholder="Condições e Prazos de Pagamento (Específicos da filial)"
+                                        aria-label="Condições e prazos de pagamento da filial" placeholder="Condições e Prazos de Pagamento (Específicos da filial)"
                                         value={branch.payment_terms || ''}
                                         onChange={(e) => onUpdateBranch(branch.id, 'payment_terms', e.target.value)}
                                         rows={2}
@@ -102,7 +102,7 @@ export function CustomerBranchesSection({ branches, onAddBranch, onUpdateBranch,
                                     />
                                 </div>
                             </div>
-                            <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive-readable hover:bg-destructive/10 rounded-[var(--radius-control)] mt-1" onClick={() => onRemoveBranch(branch.id)}>
+                            <Button type="button" size="icon" variant="ghost" aria-label="Remover filial" className="h-7 w-7 text-muted-foreground hover:text-destructive-readable hover:bg-destructive/10 rounded-[var(--radius-control)] mt-1" onClick={() => onRemoveBranch(branch.id)}>
                                 <X className="h-3.5 w-3.5" />
                             </Button>
                         </div>
