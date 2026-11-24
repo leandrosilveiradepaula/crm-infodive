@@ -5,6 +5,25 @@ import { describe, expect, it } from 'vitest';
 const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const tokens = read('src/design-system/tokens.css');
 
+describe('Legacy Tailwind typography inherits configurable Design System weight and tracking', () => {
+  it('connects weight and spacing utilities to one core token file', () => {
+    const css = read('src/design-system/tokens.css');
+    for (const [utility, token] of [
+      ['--font-weight-normal:', '--ds-type-body-weight'],
+      ['--font-weight-medium:', '--ds-type-label-weight'],
+      ['--font-weight-semibold:', '--ds-type-control-weight'],
+      ['--font-weight-bold:', '--ds-type-metric-weight'],
+      ['--font-weight-extrabold:', '--ds-type-strong-weight'],
+      ['--font-weight-black:', '--ds-type-heavy-weight'],
+      ['--tracking-widest:', '--ds-tracking-widest'],
+      ['--tracking-wider:', '--ds-tracking-wider'],
+      ['--tracking-tight:', '--ds-tracking-tight'],
+    ]) {
+      expect(css).toContain(`${utility} var(${token})`);
+    }
+  });
+});
+
 describe('Configurable single-source Infodive Design System', () => {
   it('centralizes primitive values, semantic aliases and Tailwind v4 mappings', () => {
     const css = read('src/app/globals.css');

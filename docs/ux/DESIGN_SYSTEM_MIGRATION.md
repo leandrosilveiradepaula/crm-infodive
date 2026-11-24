@@ -1,3 +1,9 @@
+## 2026-11-24 — legacy font weight and letter-spacing compatibility bridge
+
+The central token core now controls not only Tailwind's inherited text scale, radius and elevation, but also weight and tracking utilities consumed by the yet-unmigrated source files. Default weight/spacing values match the existing Tailwind visual baseline and are editable in `tokens.css` through `--ds-type-strong-weight`, `--ds-type-heavy-weight`, and `--ds-tracking-*`. This is a compatibility bridge, not a declaration that every component has semantic role assignment. CI must prove CSS compilation and real computed-style propagation. No hosted data or production change.
+
+---
+
 ## 2026-11-24 — DS7 commercial family integrated with Operation/Admin bulk migration
 
 Owner requested to finish the existing centrally configurable Design System in ONE cohesive PR #221, not additional micro-PRs. After the 26 Operations/Admin source files, this candidate migrates 24 more original CRM TSX modules across Sales, Sales Order, Product catalog, Pipeline product workflows, proposal editor/versions, public proposal and customer portal. Private Tailwind palette/font/geometry declarations now reference the existing centralized light/dark roles in `src/design-system/tokens.css`. Existing data/API/payment/financial/tenant/role behavior remains untouched; branded output defaults and existing decorative gradients remain under explicit residual review rather than silently altered. Added 17 new strictly locked clean modules and a source contract covering all 24 commercial modules, in addition to the prior Operations/Admin family contract. This is structural source centralization, not universal UX acceptance.

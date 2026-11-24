@@ -93,6 +93,21 @@
   --shadow-xl: var(--ds-shadow-overlay);
   --shadow-2xl: var(--ds-shadow-overlay);
 
+  /* Legacy Tailwind font weights and tracking are centrally configurable too.
+     Their starting values preserve Tailwind's existing visual behavior. */
+  --font-weight-normal: var(--ds-type-body-weight);
+  --font-weight-medium: var(--ds-type-label-weight);
+  --font-weight-semibold: var(--ds-type-control-weight);
+  --font-weight-bold: var(--ds-type-metric-weight);
+  --font-weight-extrabold: var(--ds-type-strong-weight);
+  --font-weight-black: var(--ds-type-heavy-weight);
+  --tracking-tighter: var(--ds-tracking-tighter);
+  --tracking-tight: var(--ds-tracking-tight);
+  --tracking-normal: var(--ds-tracking-normal);
+  --tracking-wide: var(--ds-tracking-wide);
+  --tracking-wider: var(--ds-tracking-wider);
+  --tracking-widest: var(--ds-tracking-widest);
+
   /* Dynamic semantic typography and component variants (Tailwind v4). */
   --font-ui: var(--ds-font-family-body);
   --font-display: var(--ds-font-family-heading);
@@ -359,6 +374,14 @@
   --ds-type-control-weight: 600;
   --ds-type-metric-size: 1.5rem;
   --ds-type-metric-weight: 700;
+  --ds-type-strong-weight: 800;
+  --ds-type-heavy-weight: 900;
+  --ds-tracking-tighter: -0.05em;
+  --ds-tracking-tight: -0.025em;
+  --ds-tracking-normal: 0em;
+  --ds-tracking-wide: 0.025em;
+  --ds-tracking-wider: 0.05em;
+  --ds-tracking-widest: 0.1em;
   --ds-type-metric-leading: 1.25;
   --ds-type-table-heading-transform: uppercase;
   --ds-type-table-heading-letter-spacing: 0.04em;
