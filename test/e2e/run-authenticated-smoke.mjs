@@ -867,13 +867,22 @@ async function login(page, baseUrl, account, options = {}) {
                     // Its own layout gate checks clipping without requiring CRM shell.
                     const overflow = await page.evaluate(() =>
                         document.documentElement.scrollWidth > window.innerWidth + 1);
-                    if (overflow) throw new Error('LOGIN_LAYOUT_OVERFLOW: unauthenticated page is clipped.');
                     const audit = await runAxe(page, options.source);
-                    if (audit.violationsCount || audit.incompleteCount) {
-                        process.stderr.write('CRM_B4_LOGIN_A11Y_DIAGNOSTIC=' +
-                            JSON.stringify({ viewport: viewport.name, theme,
-                                violations: audit.violations, incomplete: audit.incomplete }) + '\n');
-                        throw new Error('LOGIN_ACCESSIBILITY_FAILED: unauthenticated route must have zero WCAG A/AA violations and incomplete checks.');
+                    if (overflow || audit.violationsCount || audit.incompleteCount) {
+                        // Keep the strict fail-closed result, but still audit the
+                        // complete 22-route matrix instead of stopping after login.
+                        a11yFailureCount += 1;
+                        a11yFailedRoutes.add('/login');
+                        const finding = {
+                            profileIndex: 0, route: '/login',
+                            viewport: viewport.name, theme, layoutOverflow: overflow,
+                            violations: audit.violations, incomplete: audit.incomplete,
+                        };
+                        if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                            results.failures.push(finding);
+                            process.stderr.write('CRM_B4_LOGIN_A11Y_DIAGNOSTIC=' +
+                                JSON.stringify(finding) + '\n');
+                        }
                     }
                     if (options.capture) {
                         await page.screenshot({ path: resolve(options.artifactDir,
