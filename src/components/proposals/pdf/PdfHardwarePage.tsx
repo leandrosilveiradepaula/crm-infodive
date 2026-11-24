@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -76,13 +77,13 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
                 {title === 'Hardware & Infraestrutura' && allHighlightedSpecs.length > 0 && (
                     <View wrap={false} style={{
                         flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12,
-                        backgroundColor: '#f1f5f9', padding: 10, borderRadius: 10,
-                        borderWidth: 1, borderColor: '#cbd5e1'
+                        backgroundColor: proposalDocumentPrimitives.slate100, padding: 10, borderRadius: 10,
+                        borderWidth: 1, borderColor: proposalDocumentPrimitives.slate300
                     }}>
                         {allHighlightedSpecs.map((spec, i) => (
                             <View key={i} style={{
                                 width: '31%', backgroundColor: pdfColors.white, padding: 8,
-                                borderRadius: 6, borderWidth: 1, borderColor: '#cbd5e1',
+                                borderRadius: 6, borderWidth: 1, borderColor: proposalDocumentPrimitives.slate300,
                                 alignItems: 'center', justifyContent: 'center'
                             }}>
                                 <Text style={{ fontSize: 7.5, color: pdfColors.textLight, textTransform: 'uppercase', fontWeight: 'bold', marginBottom: 2 }}>
@@ -222,7 +223,7 @@ export function PdfHardwarePage({ products, simplifiedProductNames = {}, pdfColo
                 position: 'absolute', bottom: 20, left: 60, right: 60,
                 paddingTop: 8,
                 borderTopWidth: 1,
-                borderTopColor: '#f1f5f9',
+                borderTopColor: proposalDocumentPrimitives.slate100,
                 alignItems: 'center',
             }}>
                 <Text style={pdfStyles.footerText}>Infodive IT Solutions - Confidencial</Text>

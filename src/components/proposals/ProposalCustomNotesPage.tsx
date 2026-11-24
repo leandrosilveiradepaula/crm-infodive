@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 
 interface ProposalCustomNotesPageProps {
@@ -15,8 +16,8 @@ export function ProposalCustomNotesPage({
     themeAccent, 
     layout = 'portrait' 
 }: ProposalCustomNotesPageProps) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -33,7 +34,7 @@ export function ProposalCustomNotesPage({
             style={{
                 width: width,
                 height: height,
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
@@ -70,7 +71,7 @@ export function ProposalCustomNotesPage({
                     whiteSpace: 'pre-wrap', 
                     fontSize: '14px', 
                     lineHeight: '1.6', 
-                    color: '#334155' 
+                    color: proposalDocumentPrimitives.slate700 
                 }}>
                     {content}
                 </div>

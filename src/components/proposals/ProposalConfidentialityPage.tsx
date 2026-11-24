@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 
 export function ProposalConfidentialityPage({
@@ -9,8 +10,8 @@ export function ProposalConfidentialityPage({
     themeAccent?: string;
     layout?: 'portrait' | 'landscape';
 }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -21,7 +22,7 @@ export function ProposalConfidentialityPage({
             style={{
                 width: width,
                 height: height,
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 display: 'flex',
                 position: 'relative',
                 overflow: 'hidden',
@@ -71,7 +72,7 @@ export function ProposalConfidentialityPage({
                 {/* Content Text */}
                 <div style={{
                     fontSize: '14px',
-                    color: '#374151',
+                    color: proposalDocumentPrimitives.gray700,
                     lineHeight: '1.8',
                     marginBottom: isLandscape ? '20px' : '40px',
                     textAlign: 'justify'

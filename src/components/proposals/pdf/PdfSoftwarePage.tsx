@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -33,9 +34,9 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
     ];
 
     const tileColors = [
-        { bg: '#f0f9ff', border: '#bfdbfe', text: pdfColors.primary },
-        { bg: '#fef2f2', border: '#fecaca', text: pdfColors.accent },
-        { bg: '#f0fdf4', border: '#bbf7d0', text: '#16a34a' },
+        { bg: proposalDocumentPrimitives.sky50, border: proposalDocumentPrimitives.blue200, text: pdfColors.primary },
+        { bg: proposalDocumentPrimitives.red50, border: proposalDocumentPrimitives.red200, text: pdfColors.accent },
+        { bg: proposalDocumentPrimitives.green50, border: proposalDocumentPrimitives.green200, text: proposalDocumentPrimitives.green600 },
     ];
 
     const highlights = softwareHighlights && softwareHighlights.length > 0
@@ -93,7 +94,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                     <Text style={{
                         fontSize: 18,
                         fontWeight: 'bold',
-                        color: '#ffffff',
+                        color: proposalDocumentPrimitives.paperWhite,
                         marginBottom: 16,
                     }}>
                         {simplifiedProductNames[mainSoftware.name] || mainSoftware.display_name || mainSoftware.name}
@@ -113,7 +114,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                 </Text>
                                 <Text style={{
                                     fontSize: 11,
-                                    color: '#e5e7eb',
+                                    color: proposalDocumentPrimitives.gray200,
                                     lineHeight: 1.6,
                                 }}>
                                     {h.value}
@@ -147,7 +148,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                 <Text style={{
                                     fontSize: 10,
                                     fontWeight: 'bold',
-                                    color: '#ffffff',
+                                    color: proposalDocumentPrimitives.paperWhite,
                                     textTransform: 'uppercase',
                                     letterSpacing: 1,
                                 }}>
@@ -181,7 +182,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                     )}
                                     <Text style={{
                                         fontSize: 11,
-                                        color: '#f3f4f6',
+                                        color: proposalDocumentPrimitives.gray100,
                                         flex: 1,
                                         lineHeight: 1.4,
                                     }}>
@@ -219,7 +220,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                 </Text>
                                 <Text style={{
                                     fontSize: 9,
-                                    color: '#4b5563',
+                                    color: proposalDocumentPrimitives.gray600,
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase',
                                     textAlign: 'center',
@@ -238,7 +239,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                         <View style={{
                             flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
                         }}>
-                            <View style={{ width: 4, height: 14, backgroundColor: '#16a34a', borderRadius: 2 }} />
+                            <View style={{ width: 4, height: 14, backgroundColor: proposalDocumentPrimitives.green600, borderRadius: 2 }} />
                             <Text style={{ fontSize: 13, fontWeight: 'bold', color: pdfColors.primary, textTransform: 'uppercase' }}>
                                 Itens de Licenciamento Adicional
                             </Text>
@@ -246,11 +247,11 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                         {softwareProducts.map((p, idx) => (
                             <View key={idx} wrap={false} style={{
                                 flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12,
-                                borderBottomWidth: 1, borderBottomColor: '#e5e7eb',
+                                borderBottomWidth: 1, borderBottomColor: proposalDocumentPrimitives.gray200,
                                 alignItems: 'flex-start',
                             }}>
                                 <View style={{ flex: 1, paddingRight: 10 }}>
-                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#374151', marginBottom: 2 }}>{simplifiedProductNames[p.name] || p.display_name || p.name}</Text>
+                                    <Text style={{ fontSize: 11, fontWeight: 'bold', color: proposalDocumentPrimitives.gray700, marginBottom: 2 }}>{simplifiedProductNames[p.name] || p.display_name || p.name}</Text>
 
                                     {/* Render Product Specs */}
                                     {(() => {
@@ -277,8 +278,8 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                                     <View style={{ marginTop: 4, paddingLeft: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
                                                         {specsLines.map((spec, sIdx) => (
                                                             <View key={sIdx} style={{ flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                                                                <Text style={{ fontSize: 9, color: '#1e3a5f', marginRight: 3, marginTop: -0.5 }}>{spec.qty}x</Text>
-                                                                <Text style={{ fontSize: 8.5, color: '#64748b', flex: 1, lineHeight: 1.2 }}>
+                                                                <Text style={{ fontSize: 9, color: proposalDocumentPrimitives.defaultPrimary, marginRight: 3, marginTop: -0.5 }}>{spec.qty}x</Text>
+                                                                <Text style={{ fontSize: 8.5, color: proposalDocumentPrimitives.slate500, flex: 1, lineHeight: 1.2 }}>
                                                                     {spec.description}
                                                                 </Text>
                                                             </View>
@@ -291,7 +292,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                                     })()}
                                 </View>
                                 <View style={{ width: 40, alignItems: 'center' }}>
-                                    <Text style={{ fontSize: 10, color: '#64748b' }}>x{p.quantity || 1}</Text>
+                                    <Text style={{ fontSize: 10, color: proposalDocumentPrimitives.slate500 }}>x{p.quantity || 1}</Text>
                                 </View>
                             </View>
                         ))}
@@ -305,7 +306,7 @@ export function PdfSoftwarePage({ products, simplifiedProductNames = {}, softwar
                 position: 'absolute', bottom: 20, left: 60, right: 60,
                 paddingTop: 8,
                 borderTopWidth: 1,
-                borderTopColor: '#f1f5f9',
+                borderTopColor: proposalDocumentPrimitives.slate100,
                 alignItems: 'center',
             }}>
                 <Text style={pdfStyles.footerText}>Infodive IT Solutions - Confidencial</Text>
