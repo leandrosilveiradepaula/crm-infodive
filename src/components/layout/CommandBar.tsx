@@ -100,6 +100,8 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
             open={open}
             onOpenChange={onOpenChange}
             label="Pesquisa e comandos do CRM"
+            overlayClassName="command-dialog-overlay"
+            contentClassName="command-dialog-content"
             className="command-palette"
             onKeyDown={(e) => {
                 if (e.key === 'Escape' && pages.length > 0) {

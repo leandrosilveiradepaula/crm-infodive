@@ -46,6 +46,18 @@ describe('Live CommandBar uses centrally configurable Design System styling', ()
     expect(command).not.toContain('className="font-semibold text-white"');
   });
 
+  it('positions the actual Radix cmdk dialog container, not only its nested Command node', () => {
+    const command = read('src/components/layout/CommandBar.tsx');
+    const css = read('src/components/layout/CommandPalette.css');
+    expect(command).toContain('overlayClassName="command-dialog-overlay"');
+    expect(command).toContain('contentClassName="command-dialog-content"');
+    expect(css).toContain('.command-dialog-content {');
+    expect(css).toContain('.command-dialog-overlay {');
+    expect(css).toContain('width: min(calc(100vw - 2rem), var(--ds-command-max-width));');
+    expect(css).toContain('z-index: 9999;');
+    expect(css).not.toContain('.command-palette {\n    position: fixed;');
+  });
+
   it('centralizes overlay and command dimensions without adding a second palette', () => {
     for(const token of ['--ds-command-overlay:', '--ds-command-max-width:',
       '--ds-command-list-max-height:', '--ds-command-input-size:'])expect(tokens).toContain(token);
