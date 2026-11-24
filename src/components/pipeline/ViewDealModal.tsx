@@ -53,6 +53,7 @@ import type { Proposal } from '@/types/proposal';
 import { SmartTimeline } from '../omnichannel/SmartTimeline';
 import { formatCurrency } from '@/utils/format';
 import { calculateDealValue } from '@/utils/dealCalculations';
+import { DealActivityTimeline } from './DealActivityTimeline';
 import { useDeals } from '@/hooks/useDeals';
 
 import { Account } from '@/types/account';
@@ -334,33 +335,20 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             setIsProductsLoading(true);
             const freshDeal = await getDealDetails(deal.id);
             if (freshDeal) {
-                const freshProducts = freshDeal.deal_products || [];
-                const newTotalValue = calculateDealValue(freshProducts);
-
-                // Safeguard: If the loaded value differs from the actual product sum, sync it
-                if (Math.abs((freshDeal.value || 0) - newTotalValue) > 0.01) {
-                    await updateDeal(deal.id, { value: newTotalValue });
-                }
-
-                setDeal(prev => {
-                    const updatedDeal = {
-                        ...prev,
-                        ...freshDeal,
-                        deal_products: freshProducts,
-                        value: newTotalValue,
-                        account_id: freshDeal.account_id || prev.account_id,
-                        client_contact_id: freshDeal.client_contact_id || prev.client_contact_id,
-                        commission_deduction: prev.commission_deduction ?? freshDeal.commission_deduction,
-                        owner_profile: freshDeal.owner_profile || prev.owner_profile
-                    };
-                    return updatedDeal;
-                });
-
-                // Keep formData in sync
-                setFormData(prev => ({
+                // Viewing a deal must not rewrite its financial value.
+                // Explicit product mutations already recalculate and persist
+                // totals in DealProductsTab. Never synchronize on a GET/read.
+                setDeal(prev => ({
                     ...prev,
-                    value: newTotalValue
+                    ...freshDeal,
+                    deal_products: freshDeal.deal_products || [],
+                    value: freshDeal.value,
+                    account_id: freshDeal.account_id || prev.account_id,
+                    client_contact_id: freshDeal.client_contact_id || prev.client_contact_id,
+                    commission_deduction: prev.commission_deduction ?? freshDeal.commission_deduction,
+                    owner_profile: freshDeal.owner_profile || prev.owner_profile
                 }));
+                setFormData(prev => ({ ...prev, value: freshDeal.value }));
             }
         } catch (error) {
             console.error('Error refreshing deal products:', error);
@@ -383,6 +371,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
     }, [isOpen]);
 
     if (!isOpen) return null;
+
+    const pricedProductTotal = calculateDealValue(deal.deal_products || []);
+    const estimatedValue = typeof deal.value === 'number' && Number.isFinite(deal.value) ? deal.value : null;
+    const hasPricedItems = Array.isArray(deal.deal_products) && deal.deal_products.length > 0;
+    const pricingMismatch = !isProductsLoading && estimatedValue !== null && hasPricedItems &&
+        Math.abs(estimatedValue - pricedProductTotal) > 0.01;
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -411,38 +405,38 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                         }
                     });
                 }}
-                className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col"
+                className="ds-deal-dialog w-[var(--ds-deal-dialog-responsive-width)] max-w-[var(--ds-deal-dialog-responsive-width)] h-[var(--ds-deal-dialog-height)] rounded-[var(--ds-deal-dialog-radius)] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col"
             >
 
                 {/* Header */}
-                <div data-qa-region="deal-header" className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
-                    <div className="flex items-center gap-6">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-control-ui ${deal.stage === 'won' ? 'bg-success-subtle text-success-readable' :
+                <div data-qa-region="deal-header" className="ds-deal-header border-b border-border bg-card">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className={`shrink-0 rounded-[var(--radius-panel)] p-[var(--ds-deal-header-icon-padding)] flex items-center justify-center shadow-control-ui ${deal.stage === 'won' ? 'bg-success-subtle text-success-readable' :
                             deal.stage === 'lost' ? 'bg-destructive-subtle text-destructive-readable' : 'bg-primary/20 text-info'
                             }`}>
-                            <DollarSign className="w-6 h-6" />
+                            <DollarSign className="size-[var(--ds-nav-icon-size)]" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             {isEditing ? (
                                 <Input
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                    className="h-8 text-lg font-bold bg-muted/50 border-border w-[400px]"
+                                    className="w-[var(--ds-deal-title-edit-width)] max-w-full border-border bg-muted/50 ds-type-section-title"
                                 />
                             ) : (
                                 <div>
-                                    <DialogTitle className="text-xl font-bold tracking-tight text-foreground">{deal.title}</DialogTitle>
+                                    <DialogTitle className="ds-type-section-title font-semibold text-foreground">{deal.title}</DialogTitle>
                                     <DialogDescription className="sr-only">Visualizar e editar detalhes da oportunidade</DialogDescription>
                                 </div>
                             )}
-                            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground w-full">
+                            <div className="mt-1 flex flex-wrap items-center gap-2 ds-type-label text-muted-foreground">
                                 <Building2 className="w-3.5 h-3.5 text-info/60 shrink-0" />
                                 {isEditing ? (
                                     <Select
                                         value={formData.account_id || 'none'}
                                         onValueChange={handleAccountChange}
                                     >
-                                        <SelectTrigger className="h-7 py-0 px-2 text-xs border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors max-w-[250px] rounded-lg">
+                                        <SelectTrigger className="h-7 py-0 px-2 text-xs border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors max-w-[var(--ds-deal-account-select-width)] rounded-lg">
                                             <SelectValue placeholder="Vincular Empresa..." />
                                         </SelectTrigger>
                                         <SelectContent className="rounded-xl border-border/60 shadow-xl max-h-[300px]">
@@ -463,73 +457,57 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-1 border border-border">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                                className="text-muted-foreground hover:text-foreground h-8 font-bold ds-type-metadata uppercase tracking-widest"
-                            >
-                                {isEditing ? <Save className="w-3.5 h-3.5 mr-2 text-success-readable" /> : <Edit2 className="w-3.5 h-3.5 mr-2" />}
-                                {isEditing ? 'Salvar' : 'Editar'}
-                            </Button>
-                            <div className="w-px h-4 bg-border mx-1" />
-                            {['qualification', 'proposal', 'negotiation', 'won', 'lost'].map((stage) => {
-                                const stageLabels: Record<string, string> = {
-                                    'qualification': 'Qualificação',
-                                    'proposal': 'Proposta',
-                                    'negotiation': 'Negociação',
-                                    'won': 'Ganho',
-                                    'lost': 'Perdido'
-                                };
-                                return (
-                                    <button
-                                        key={stage}
-                                        onClick={() => handleStageChange(stage)}
-                                        className={`px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${deal.stage === stage
-                                            ? 'bg-primary text-primary-foreground shadow-lg'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                                            }`}
-                                    >
-                                        {stageLabels[stage]}
-                                    </button>
-                                );
-                            })}
+                    <div className="ds-deal-header-actions flex flex-wrap items-center gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="ds-type-metadata font-semibold text-muted-foreground">Etapa</span>
+                            <Select value={deal.stage} onValueChange={handleStageChange}>
+                                <SelectTrigger aria-label="Alterar etapa da oportunidade"
+                                    className="w-[var(--ds-deal-stage-select-width)] max-w-full border-border bg-surface ds-type-control">
+                                    <SelectValue placeholder="Selecionar etapa" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[
+                                        { id: 'qualification', label: 'Qualificação' },
+                                        { id: 'proposal', label: 'Proposta' },
+                                        { id: 'negotiation', label: 'Negociação' },
+                                        { id: 'won', label: 'Ganho' },
+                                        { id: 'lost', label: 'Perdido' },
+                                    ].map(stage => (
+                                        <SelectItem key={stage.id} value={stage.id}>{stage.label}</SelectItem>
+                                    ))}
+                                    {!['qualification', 'proposal', 'negotiation', 'won', 'lost'].includes(deal.stage) && (
+                                        <SelectItem value={deal.stage}>{deal.stage}</SelectItem>
+                                    )}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <div className="flex items-center gap-1 border-l border-border pl-4 ml-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={handleDuplicate}
-                                disabled={isLoading}
-                                title="Duplicar Oportunidade"
-                                className="hover:bg-info-subtle hover:text-primary rounded-full h-10 w-10 transition-colors"
-                            >
-                                <Copy className="w-5 h-5 text-foreground/70" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onClose}
-                                aria-label="Fechar detalhes da oportunidade"
-                                className="hover:bg-destructive-subtle hover:text-destructive-readable rounded-full h-10 w-10 transition-colors"
-                            >
-                                <X className="w-6 h-6 text-foreground/70" />
-                            </Button>
-                        </div>
+                        <Button variant="outline" size="sm" disabled={isLoading}
+                            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                            className="ds-type-control">
+                            {isEditing ? <Save className="h-4 w-4" /> : <Edit2 className="h-4 w-4" />}
+                            {isEditing ? 'Salvar' : 'Editar'}
+                        </Button>
+                        <Button variant="ghost" size="icon" disabled={isLoading}
+                            onClick={handleDuplicate} aria-label="Duplicar oportunidade"
+                            title="Duplicar oportunidade">
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={onClose}
+                            aria-label="Fechar detalhes da oportunidade">
+                            <X className="h-5 w-5" />
+                        </Button>
                     </div>
                 </div>
 
                 {/* Main Content Grid */}
-                <div className="flex-1 grid grid-cols-[1fr_400px] overflow-hidden">
+                <div className="ds-deal-body">
 
                     {/* Main Tabs Area */}
 
-                    <div className="flex flex-col bg-background h-full overflow-hidden border-r border-border">
+                    <div className="ds-deal-main flex flex-col border-r border-border bg-background">
                         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                            <div data-qa-region="deal-tabs" className="px-4 py-3 border-b border-border/40 bg-background/95 backdrop-blur z-10 sticky top-0">
-                                <TabsList className="w-full justify-start gap-1 overflow-x-auto no-scrollbar">
+                            <div data-qa-region="deal-tabs" className="ds-deal-tabbar border-b border-border bg-surface">
+                                <TabsList className="ds-deal-tablist grid w-full gap-[var(--ds-deal-tabs-gap)] border-0 bg-surface-subtle p-0">
                                     {[
                                         { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
                                         { id: 'proposals', label: 'Propostas', icon: FileText },
@@ -553,13 +531,12 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             </div>
                             <div className="flex-1 overflow-hidden relative">
                                 <div className="absolute inset-0 flex flex-col">
-                                    <TabsContent value="overview" className="mt-0 overflow-y-auto custom-scrollbar p-8 pb-20 flex-1 h-full w-full">
+                                    <TabsContent value="overview" className="ds-deal-content-scroll mt-0 overflow-y-auto custom-scrollbar flex-1 h-full w-full">
                                         <OverviewTab
                                             deal={deal}
                                             onViewStakeholders={() => setActiveTab('stakeholders')}
                                             onViewProducts={() => setActiveTab('products')}
                                             onViewCommunications={() => setActiveTab('omnichannel')}
-                                            onViewHistory={() => setActiveTab('history')}
                                         />
                                     </TabsContent>
 
@@ -590,7 +567,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         isLoading={isProductsLoading}
                                     />
 
-                                    <TabsContent value="partners" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="partners" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                         <PartnersTab
                                             deal={deal}
                                             isEditing={isEditing}
@@ -601,11 +578,11 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     </TabsContent>
 
 
-                                    <TabsContent value="omnichannel" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="omnichannel" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                         <SmartTimeline dealId={deal.id} />
                                     </TabsContent>
 
-                                    <TabsContent value="stakeholders" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="stakeholders" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                         <StakeholdersTab
                                             deal={isEditing ? { ...deal, account_id: formData.account_id } : deal}
                                             setDeal={setDeal}
@@ -618,7 +595,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <FilesTab deal={deal} />
                                     </TabsContent>
 
-                                    <TabsContent value="history" className="m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar p-8 pb-20 h-full">
+                                    <TabsContent value="history" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                         <HistoryTab deal={deal} />
                                     </TabsContent>
                                 </div>
@@ -627,80 +604,89 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     </div >
 
                     {/* Sidebar Command Center */}
-                    <div data-qa-region="deal-sidebar" className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-                            {/* Financial Cockpit Section */}
-                            <section data-qa-region="deal-financial" className="ds-panel-financial border p-4 relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-info pointer-events-none" />
-                                <div className="flex items-center gap-2 mb-6 relative z-10">
-                                    <div className="p-1.5 bg-info-subtle rounded-lg border border-info/30">
-                                        <Zap className="h-4 w-4 text-primary" />
+                    <aside data-qa-region="deal-sidebar" className="ds-deal-inspector border-l border-border bg-card antialiased">
+                        <div className="ds-deal-inspector-content flex-1 overflow-y-auto custom-scrollbar">
+                            {/* Separate stored estimate from product-derived pricing. */}
+                            <section data-qa-region="deal-financial" className="ds-panel-financial ds-deal-financial">
+                                <h3 className="ds-type-body font-semibold text-foreground">Valores e previsão</h3>
+                                <dl className="mt-3 grid gap-3">
+                                    <div className="flex items-baseline justify-between gap-3">
+                                        <dt className="ds-type-label text-muted-foreground">Valor estimado</dt>
+                                        <dd className="ds-type-body font-semibold text-foreground">
+                                            {estimatedValue === null ? 'Não informado' : formatCurrency(estimatedValue)}
+                                        </dd>
                                     </div>
-                                    <h4 className="ds-type-metadata font-bold text-foreground uppercase tracking-wide">Cockpit Financeiro</h4>
+                                    <div className="flex items-baseline justify-between gap-3">
+                                        <dt className="ds-type-label text-muted-foreground">Total dos itens</dt>
+                                        <dd className="ds-type-body font-semibold text-foreground">
+                                            {isProductsLoading ? 'Carregando…' :
+                                                hasPricedItems ? formatCurrency(pricedProductTotal) : 'Sem itens'}
+                                        </dd>
+                                    </div>
+                                </dl>
+                                {pricingMismatch && (
+                                    <div data-qa-region="deal-pricing-discrepancy" role="note"
+                                        className="mt-3 rounded-[var(--radius-control)] border border-warning/30 bg-warning-subtle p-3">
+                                        <p className="ds-type-label font-medium text-warning-readable">
+                                            O valor estimado difere da soma dos itens precificados.
+                                            Confira os preços antes de preparar uma proposta.
+                                        </p>
+                                        <Button type="button" size="sm" variant="outline"
+                                            className="mt-2 ds-type-control" onClick={() => setActiveTab('products')}>
+                                            Revisar itens
+                                        </Button>
+                                    </div>
+                                )}
+                                <div className="mt-4 border-t border-border pt-3">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="ds-type-label text-muted-foreground">Probabilidade de fechamento</span>
+                                        <strong className="ds-type-body text-foreground">{formData.probability}%</strong>
+                                    </div>
+                                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                                        <div className="h-full rounded-full bg-primary transition-[width]"
+                                            style={{ width: `${formData.probability}%` }} />
+                                    </div>
+                                    {isEditing && (
+                                        <input type="range" min="0" max="100" step="10"
+                                            className="mt-2 w-full accent-primary"
+                                            aria-label="Probabilidade de fechamento"
+                                            value={formData.probability}
+                                            onChange={event => setFormData({ ...formData, probability: Number(event.target.value) })} />
+                                    )}
                                 </div>
-                                {/* Stats Container */}
-                                <div className="space-y-3 relative z-10">
-                                    {/* Value Display */}
-                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 shadow-sm">
-                                        <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide mb-1">Valor Total (Forecast)</p>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="ds-type-metadata font-bold text-primary">R$</span>
-                                            <span className="ds-type-metric text-foreground tracking-tight">
-                                                {formatCurrency(calculateDealValue(deal.deal_products || [])).replace('R$', '').trim()}
-                                            </span>
-                                        </div>
+                                <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+                                    <div>
+                                        <p className="ds-type-label text-muted-foreground">Previsão de fechamento</p>
+                                        {isEditing ? (
+                                            <input type="date" aria-label="Previsão de fechamento"
+                                                className="ds-type-control mt-1 max-w-full rounded-[var(--radius-control)] border border-border bg-background p-2 text-foreground"
+                                                value={formData.expected_close_date || ''}
+                                                onChange={event => setFormData({ ...formData, expected_close_date: event.target.value })} />
+                                        ) : (
+                                            <p className="ds-type-body font-medium text-foreground">
+                                                {deal.expected_close_date
+                                                    ? deal.expected_close_date.split('T')[0].split('-').reverse().join('/')
+                                                    : 'Não definida'}
+                                            </p>
+                                        )}
                                     </div>
-
-                                    {/* Probability Gauge */}
-                                    <div className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 shadow-sm">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide">Confiança no Fechamento</p>
-                                            <span className={`ds-type-metadata font-black uppercase ${formData.probability > 70 ? 'text-success-readable' : 'text-primary'}`}>
-                                                {formData.probability}%
-                                            </span>
-                                        </div>
-                                        <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
-                                            {isEditing ? (
-                                                <input
-                                                    type="range" min="0" max="100" step="10"
-                                                    className="w-full h-full opacity-0 cursor-pointer absolute inset-0"
-                                                    value={formData.probability}
-                                                    onChange={e => setFormData({ ...formData, probability: Number(e.target.value) })}
-                                                />
-                                            ) : null}
-                                            <div
-                                                className={`h-full rounded-full transition-all duration-1000 ${formData.probability > 70 ? 'bg-success shadow-control-ui' : 'bg-info shadow-control-ui'}`}
-                                                style={{ width: `${formData.probability}%` }}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Expected Close Date */}
-                                    <div
-                                        className="bg-card p-3 rounded-lg border border-border group-hover:border-info/40 transition-all relative z-10 cursor-pointer hover:bg-muted/50 shadow-sm"
-                                        onClick={() => !isEditing && setIsEditing(true)}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-wide mb-1">Data de Fechamento</p>
-                                                <p className="text-sm font-bold text-foreground">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="date"
-                                                            className="bg-transparent border-none focus:ring-0 p-0 w-full cursor-pointer font-bold text-foreground text-sm"
-                                                            value={formData.expected_close_date || ''}
-                                                            onChange={e => setFormData({ ...formData, expected_close_date: e.target.value })}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                    ) : (
-                                                        deal.expected_close_date ? deal.expected_close_date.split('T')[0].split('-').reverse().join('/') : 'Não Definido'
-                                                    )}
-                                                </p>
-                                            </div>
-                                            <Calendar className="h-8 w-8 text-info/20" />
-                                        </div>
-                                    </div>
+                                    {!isEditing && (
+                                        <Button type="button" size="sm" variant="ghost"
+                                            aria-label="Editar previsão de fechamento"
+                                            onClick={() => setIsEditing(true)}>
+                                            <Calendar className="h-4 w-4" />
+                                        </Button>
+                                    )}
                                 </div>
+                            </section>
+
+                            <section data-qa-region="deal-recent-activities" className="ds-deal-inspector-section">
+                                <div className="mb-3 flex items-center justify-between gap-2">
+                                    <h3 className="ds-type-body font-semibold text-foreground">Atividades recentes</h3>
+                                    <Button type="button" size="sm" variant="ghost" className="ds-type-label"
+                                        onClick={() => setActiveTab('history')}>Ver histórico</Button>
+                                </div>
+                                <DealActivityTimeline deal={deal} compact />
                             </section>
 
                             {deal.stage === 'lost' && (
@@ -795,7 +781,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <section>
                                 <h4 className="ds-type-metadata font-black text-muted-foreground uppercase tracking-widest mb-4">Segmentação & Tags</h4>
                                 <div className="flex flex-wrap gap-2">
-                                    {(deal.tags || ['Enterprise', 'High Priority']).map(tag => (
+                                    {(deal.tags || []).map(tag => (
                                         <span key={tag} className="px-2.5 py-1 rounded-full bg-info-subtle ds-type-metadata font-black text-info border border-info/30 uppercase tracking-tighter">
                                             {tag}
                                         </span>
@@ -805,7 +791,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                         </div>
 
                         {/* Sidebar Action Buttons Footer */}
-                        <div className="p-8 border-t border-border bg-card space-y-3">
+                        <div className="ds-deal-inspector-footer border-t border-border bg-card space-y-3">
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => router.push(`/pipeline/proposals/editor/${deal.id}`)}
@@ -834,7 +820,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 </button>
                             )}
                         </div>
-                    </div >
+                    </aside >
                 </div >
 
                 {/* Modals & Drawers */}

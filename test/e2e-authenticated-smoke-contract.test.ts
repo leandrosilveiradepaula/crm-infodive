@@ -40,7 +40,9 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
         expect(source).toContain('candidateSha, target:');
         expect(source).toContain("state: 'deal-detail'");
-        expect(source).toContain('pipeline-deal-detail-desktop-light.png');
+        expect(source).toContain('pipeline-deal-detail-${viewport.name}-${theme}.png');
+        expect(source).toContain("if (capture && local && profileIndex === 0 && route === '/pipeline')");
+        expect(source).toContain('Opportunity detail extends outside the device viewport.');
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];

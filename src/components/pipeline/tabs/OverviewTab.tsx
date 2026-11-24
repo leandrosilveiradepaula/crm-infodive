@@ -13,17 +13,15 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { type Deal } from '@/types/deal';
 import { formatCurrency } from '@/utils/format';
-import { DealActivityTimeline } from '../DealActivityTimeline';
 
 interface OverviewTabProps {
     deal: Deal;
     onViewStakeholders: () => void;
     onViewProducts: () => void;
     onViewCommunications: () => void;
-    onViewHistory: () => void;
 }
 
-export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications, onViewHistory }: OverviewTabProps) {
+export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications }: OverviewTabProps) {
     // Helper for health trend icon
     const getTrendIcon = (trend?: string) => {
         switch (trend) {
@@ -75,17 +73,17 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
         ? deal.custom_fields.stakeholders.length : null;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-[var(--ds-deal-section-gap)]">
 
             {/* 1. Metrics Row */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-[var(--ds-deal-section-gap)] sm:grid-cols-2 xl:grid-cols-4">
                 {/* Metric: Value & Forecast */}
                 <div className="bg-card border border-border p-3 rounded-[var(--radius-panel)] flex flex-col justify-between group hover:border-info/30 transition-all shadow-control-ui min-h-[90px]">
                     <div className="flex justify-between items-start mb-2">
                         <div className="p-1 bg-info-subtle rounded-[var(--radius-control)]">
                             <Target className="h-3.5 w-3.5 text-foreground" />
                         </div>
-                        <Badge variant="outline" className="ds-type-metadata uppercase font-semibold text-foreground border-info/20 px-1.5 py-0">Forecast</Badge>
+                        <Badge variant="outline" className="ds-type-metadata uppercase font-semibold text-foreground border-info/20 px-1.5 py-0">Estimativa</Badge>
                     </div>
                     <div>
                         <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
@@ -104,7 +102,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                             <Zap className="h-3.5 w-3.5 text-success-readable" />
                         </div>
                         <div className="flex items-center gap-1">
-                            <span className="ds-type-metadata font-semibold text-success-readable uppercase tracking-widest">{healthScore === null ? 'Sem avaliação' : `${healthScore}%`}</span>
+                            <span className={`ds-type-metadata font-semibold ${healthScore === null ? 'text-muted-foreground' : 'text-success-readable'}`}>{healthScore === null ? 'Sem avaliação' : `${healthScore}%`}</span>
                             {getTrendIcon(deal.health_trend)}
                         </div>
                     </div>
@@ -151,9 +149,8 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
             </div>
 
             {/* 2. AI Next Best Action spotlight */}
-            <div className="relative overflow-hidden ds-panel-highlight border p-4 group">
-                <div className="absolute top-0 right-0 p-20 bg-info-subtle rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none opacity-20" />
-                <div className="relative z-10 flex items-center justify-between gap-6">
+            <div className="ds-panel-highlight border p-[var(--ds-deal-content-padding)]">
+                <div className="flex flex-wrap items-center justify-between gap-[var(--ds-deal-section-gap)]">
                     <div className="flex gap-4 items-center max-w-2xl">
                         <div className="h-10 w-10 rounded-[var(--radius-control)] bg-primary flex items-center justify-center shadow-control-ui shrink-0">
                             <Bot className="h-5 w-5 text-primary-foreground" />
@@ -178,25 +175,10 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
             </div>
 
             {/* 3. Bottom Grid: Activity & Quick Details */}
-            <div className="grid grid-cols-3 gap-8">
-
-                {/* Actual recorded activities only; no demonstration events or invented timestamps. */}
-                <div className="col-span-2 space-y-4">
-                    <div className="flex items-center justify-between gap-4">
-                        <h3 className="ds-type-body flex items-center gap-2 font-semibold text-muted-foreground">
-                            <ActivityIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
-                            Atividades Registradas
-                        </h3>
-                        <Button type="button" variant="outline" size="sm" onClick={onViewHistory}
-                            className="ds-type-metadata font-semibold">
-                            Ver Histórico
-                        </Button>
-                    </div>
-                    <DealActivityTimeline deal={deal} compact />
-                </div>
+            <div className="grid grid-cols-1 gap-[var(--ds-deal-section-gap)]">
 
                 {/* Right: Quick Details */}
-                <div className="space-y-8">
+                <div className="grid grid-cols-1 gap-[var(--ds-deal-section-gap)] sm:grid-cols-2">
                     {/* Mix de Produtos Summary */}
                     <div className="space-y-4">
                         <h3 className="ds-type-body font-semibold text-muted-foreground uppercase tracking-widest flex items-center gap-2">

@@ -6,6 +6,8 @@ import type { Deal } from '@/types/deal';
 import type { Activity } from '@/types/activity';
 
 type Props = { deal: Deal; compact?: boolean };
+type PersistedActivity = Activity & { created_at?: string };
+const recordedDate = (activity: PersistedActivity) => activity.createdAt || activity.created_at;
 
 const STATUS: Record<Activity['status'], string> = {
     pending: 'Pendente',
@@ -25,11 +27,11 @@ function activityDate(value: string | undefined): string {
 export function DealActivityTimeline({ deal, compact = false }: Props) {
     // Never fabricate events. The view intentionally uses the deal's actual
     // related activities only; an absent array is a legitimate empty state.
-    const recorded = Array.isArray(deal.deal_activities) ? deal.deal_activities : [];
+    const recorded = Array.isArray(deal.deal_activities) ? deal.deal_activities as PersistedActivity[] : [];
     const sorted = [...recorded].filter(item => item && typeof item.title === 'string')
         .sort((a, b) => {
-            const left = new Date(a.createdAt || '').getTime();
-            const right = new Date(b.createdAt || '').getTime();
+            const left = new Date(recordedDate(a) || '').getTime();
+            const right = new Date(recordedDate(b) || '').getTime();
             return (Number.isFinite(right) ? right : 0) - (Number.isFinite(left) ? left : 0);
         });
     const items = compact ? sorted.slice(0, 3) : sorted;
@@ -41,7 +43,7 @@ export function DealActivityTimeline({ deal, compact = false }: Props) {
                     <div className="flex items-start justify-between gap-3">
                         <h4 className="ds-type-body font-semibold text-foreground">{item.title}</h4>
                         <span className="ds-type-metadata shrink-0 text-muted-foreground">
-                            {activityDate(item.createdAt)}
+                            {activityDate(recordedDate(item))}
                         </span>
                     </div>
                     {item.description && (

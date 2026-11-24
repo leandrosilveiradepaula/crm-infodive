@@ -1,3 +1,7 @@
+## 2026-11-24 — DS3 opportunity inspector and financial reconciliation (work on #221)
+
+Owner authorized continuation after technical local QA PASS at SHA `141c128a`. A real synthetic screenshot displayed value estimated R$ 15,000 while the sidebar displayed product-calculated value R$ 0. Code inspection confirmed separate sources: `deal.value` vs `calculateDealValue(deal.deal_products)`, and an unsafe automatic `updateDeal(value)` on detail fetch. Product mutations already explicitly persist totals; do not change the financial calculator or server actions. Current block must make opening details read-only, label values separately, flag mismatch and reorganize the existing original CRM opportunity inspector using semantic layout tokens. Capture desktop/mobile and light/dark for the exact SHA before accepting. Remote protected QA, visual reviewer signoff and global 196-file migration remain PENDING. No main merge/production/Supabase hosted operations authorized.
+
 # MEMORY — CRM Infodive UX/UI source of truth
 
 ## 2026-11-23 — G1/DS2 shell and commercial workspace integration

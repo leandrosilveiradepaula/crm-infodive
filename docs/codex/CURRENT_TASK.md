@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-24: DS3 OPPORTUNITY INSPECTOR + FINANCIAL PRESENTATION
+
+**Owner authorization:** "prossiga" after #221 local CI and authenticated QA passed at `141c128a`. Extend the same DRAFT PR #221, never merge main or deploy.
+
+**Confirmed defect:** The Opportunity dialog showed the stored deal estimate (R$15,000.00 in synthetic QA) alongside a second "Forecast" computed from product `unit_price` (R$0.00). The two values have different sources, but labels did not explain that. Worse, opening the dialog invoked `handleProductsUpdate`, which could silently execute `updateDeal({value: calculated})` during a read-only view. Explicit mutations in `DealProductsTab` already persist recalculated totals.
+
+**Allowed cohesive block:** Presentation-only refactor of `ViewDealModal`, `OverviewTab`, `DealActivityTimeline` and centralized `src/design-system/tokens.css`; no business calculation changes. Distinguish estimated vs product-derived amounts and display an explicit reconciliation warning; make opening a deal read-only; keep existing stage transitions, product edit, proposal, contract, AI and portal functionality accessible. Reduce header/tab crowding and align main details/right-side context to the owner-provided opportunity drawer reference. Update isolated local authenticated QA to capture detail desktop/mobile, light/dark, tests and UX evidence ledger.
+
+**Denied:** SQL/migrations, hosted Supabase, APIs/services, tenant/RBAC policy, financial calculation formula, production deploy, integrations, credential changes, automatic merge. The 196-file global design-system migration remains unfinished. This task is NOT visual UX acceptance of the entire CRM.
+
+**Required gates:** Exact SHA TypeScript, unit tests, Next build, design-token guard and real synthetic authenticated QA; 4 dialog screenshots (desktop/mobile x light/dark), WCAG/incomplete fail closed, keyboard focus, no document overflow and no automatic write from read paths. Review source-vs-QA screenshots and ledger. Keep #221 DRAFT until genuine human merge and remote QA gate.
+
+---
+
 # CURRENT_TASK — 2026-11-23: INTEGRATE G1 SHELL AND PIPELINE ON CENTRAL DESIGN SYSTEM
 
 **Owner authorization:** “prossiga com a próxima tarefa” after Design System PR #221. Extend the existing DRAFT PR #221; use the implementation from DRAFT PR #220 only where consistent with global semantic tokens. Do not merge any branch into main.

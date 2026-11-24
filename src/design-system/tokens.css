@@ -241,6 +241,28 @@
   --ds-toggle-container-padding: 0.25rem;
   --ds-filter-gap: 0.75rem;
   --ds-filter-padding: 0.75rem;
+  /* Opportunity inspector: responsive layout configured only in the DS. */
+  --ds-deal-dialog-width: 78rem;
+  --ds-deal-dialog-responsive-width: min(96vw, var(--ds-deal-dialog-width));
+  --ds-deal-dialog-height: 94dvh;
+  --ds-deal-dialog-radius: var(--radius-panel);
+  --ds-deal-header-padding-inline: 1.5rem;
+  --ds-deal-header-padding-block: 0.75rem;
+  --ds-deal-header-gap: 1rem;
+  --ds-deal-header-icon-padding: 0.75rem;
+  --ds-deal-title-edit-width: 22rem;
+  --ds-deal-account-select-width: 16rem;
+  --ds-deal-stage-select-width: 10.5rem;
+  --ds-deal-inspector-width: 21rem;
+  --ds-deal-content-padding: 1.5rem;
+  --ds-deal-section-gap: 1rem;
+  --ds-deal-tabs-gap: 0.375rem;
+  --ds-deal-tabs-padding: 0.625rem;
+  --ds-deal-tabs-columns: 4;
+  --ds-deal-tab-padding-block: 0.625rem;
+  --ds-deal-tab-padding-inline: 0.75rem;
+  --ds-deal-inspector-padding: 1rem;
+
   --ds-progress-primary-start: var(--primary);
   --ds-progress-primary-end: color-mix(in oklab, var(--primary) 60%, transparent);
   --ds-progress-success-start: var(--success);
@@ -526,5 +548,131 @@
   }
   .ds-gradient-context {
     background-image: var(--ds-gradient-context);
+  }
+}
+
+/* Opportunity detail family: geometry, responsive behavior and semantic
+   surfaces are shared values; JSX owns actions and data, not visual constants. */
+@layer components {
+  .ds-deal-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ds-deal-header-gap);
+    padding: var(--ds-deal-header-padding-block) var(--ds-deal-header-padding-inline);
+    min-height: 0;
+  }
+  .ds-deal-header-actions {
+    margin-inline-start: auto;
+  }
+  .ds-deal-body {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr) var(--ds-deal-inspector-width);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .ds-deal-main {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .ds-deal-tabbar {
+    position: relative;
+    z-index: 1;
+    padding: var(--ds-deal-tabs-padding);
+    flex: 0 0 auto;
+  }
+  .ds-deal-tablist {
+    grid-template-columns: repeat(var(--ds-deal-tabs-columns), minmax(0, 1fr));
+  }
+  .ds-deal-tablist [data-slot="tabs-trigger"] {
+    min-width: 0;
+    padding: var(--ds-deal-tab-padding-block) var(--ds-deal-tab-padding-inline);
+    border-radius: var(--radius-control);
+    font-family: var(--ds-font-family-body);
+    font-size: var(--ds-type-label-size);
+    line-height: var(--ds-type-label-leading);
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+  }
+  .ds-deal-content-scroll {
+    padding: var(--ds-deal-content-padding);
+  }
+  .ds-deal-inspector {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .ds-deal-inspector-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-deal-section-gap);
+    padding: var(--ds-deal-inspector-padding);
+  }
+  .ds-deal-financial,
+  .ds-deal-inspector-section {
+    padding: var(--ds-deal-inspector-padding);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    background-color: var(--card);
+  }
+  .ds-deal-inspector-footer {
+    padding: var(--ds-deal-inspector-padding);
+  }
+}
+@media (min-width: 1600px) {
+  :root { --ds-deal-tabs-columns: 8; }
+}
+@media (max-width: 1050px) {
+  :root {
+    --ds-deal-inspector-width: 100%;
+    --ds-deal-content-padding: 1rem;
+  }
+  .ds-deal-body {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .ds-deal-main {
+    height: min(60dvh, 40rem);
+    min-height: 25rem;
+    flex: none;
+  }
+  .ds-deal-inspector {
+    height: auto;
+    overflow: visible;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .ds-deal-inspector-content {
+    overflow: visible;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --ds-deal-dialog-responsive-width: 100vw;
+    --ds-deal-dialog-height: 100dvh;
+    --ds-deal-dialog-radius: 0;
+    --ds-deal-header-padding-inline: 0.75rem;
+    --ds-deal-header-padding-block: 0.625rem;
+    --ds-deal-header-gap: 0.5rem;
+    --ds-deal-tabs-columns: 2;
+    --ds-deal-tab-padding-inline: 0.5rem;
+    --ds-deal-tab-padding-block: 0.5rem;
+    --ds-deal-content-padding: 0.75rem;
+    --ds-deal-inspector-padding: 0.75rem;
+  }
+  .ds-deal-header-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-inline-start: 0;
+  }
+  .ds-deal-main {
+    height: min(66dvh, 38rem);
+    min-height: 24rem;
   }
 }

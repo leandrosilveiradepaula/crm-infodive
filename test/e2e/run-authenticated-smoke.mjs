@@ -542,11 +542,22 @@ try {
                     // The board screenshot alone cannot prove the focused opportunity
                     // inspector. Capture one read-only drawer state from the synthetic
                     // admin fixture without changing stage, products, or any deal data.
-                    if (capture && local && profileIndex === 0 && route === '/pipeline' && viewport.name === 'desktop' && theme === 'light') {
+                    if (capture && local && profileIndex === 0 && route === '/pipeline') {
                         const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
                         await openDetails.click();
                         const dialog = page.getByRole('dialog');
                         await dialog.waitFor({ state: 'visible', timeout: 12_000 });
+                        // Wait for the actual dialog opening animation to settle
+                        // before measuring text contrast and keyboard behavior.
+                        await page.waitForTimeout(350);
+                        await assertLayout(page);
+                        const bounds = await dialog.evaluate(el => {
+                            const rect = el.getBoundingClientRect();
+                            return { left: rect.left, right: rect.right, width: innerWidth };
+                        });
+                        if (bounds.left < -1 || bounds.right > bounds.width + 1) {
+                            throw new Error('Opportunity detail extends outside the device viewport.');
+                        }
                         const detailAxe = await runAxe(page, source);
                         const detailIssues = detailAxe.incompleteCount + detailAxe.violationsCount;
                         if (detailIssues) {
@@ -566,7 +577,8 @@ try {
                                 violations: finding.violations.map((rule) => ({ ...rule, samples: rule.samples.slice(0, 4) })),
                             }) + '\n');
                         }
-                        await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
+                        const detailScreenshotName = `${account.label}-pipeline-deal-detail-${viewport.name}-${theme}.png`;
+                        await page.screenshot({ path: resolve(artifactDir, detailScreenshotName), fullPage: true });
                         // Record keyboard failures separately, keeping the rest of
                         // the 4-profile / 22-route synthetic matrix auditable.
                         let keyboardStatus = 'passed';

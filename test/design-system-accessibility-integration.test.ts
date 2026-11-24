@@ -88,9 +88,9 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     const modal = read('src/components/pipeline/ViewDealModal.tsx');
     expect(timeline).toContain('deal.deal_activities');
     expect(timeline).toContain('Nenhuma atividade registrada');
-    expect(overview).toContain('<DealActivityTimeline deal={deal} compact />');
+    expect(modal).toContain('<DealActivityTimeline deal={deal} compact />');
     expect(history).toContain('<DealActivityTimeline deal={deal} />');
-    expect(modal).toContain("onViewHistory={() => setActiveTab('history')}");
+    expect(modal).toContain("onClick={() => setActiveTab('history')}");
     expect(overview).not.toContain('Proposta enviada para o cliente');
     expect(overview).not.toContain('Date.now() -');
     expect(overview).not.toContain('deal.health_score || 0');
@@ -100,6 +100,40 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(radar).not.toContain('deal.health_score ?? 100');
     expect(radar).toContain('Sem avaliação de risco registrada');
     expect(radar).not.toContain('Nenhuma anomalia detectada');
+  });
+
+  it('separates the stored opportunity estimate from product pricing and forbids write-on-open', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const products = read('src/components/pipeline/DealProductsTab.tsx');
+    const refresh = modal.split('const handleProductsUpdate = async () => {')[1]
+      ?.split('// Modal content is portalled')[0] || '';
+    expect(refresh).toContain('getDealDetails(deal.id)');
+    expect(refresh).toContain('value: freshDeal.value');
+    expect(refresh).not.toContain('await updateDeal(');
+    expect(modal).toContain('const pricingMismatch =');
+    expect(modal).toContain('data-qa-region="deal-pricing-discrepancy"');
+    expect(modal).toContain('formatCurrency(pricedProductTotal)');
+    expect(modal).toContain('formatCurrency(estimatedValue)');
+    expect(modal).toContain('Revisar itens');
+    expect(products).toContain('await updateDeal(deal.id, { value: newTotalValue });');
+  });
+
+  it('uses central layout tokens for responsive opportunity detail and retains every action', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const css = read('src/design-system/tokens.css');
+    expect(modal).toContain('className="ds-deal-body"');
+    expect(modal).toContain('className="ds-deal-tablist grid');
+    expect(modal).toContain('ds-deal-inspector');
+    expect(modal).toContain('Alterar etapa da oportunidade');
+    expect(modal).toContain("onValueChange={handleStageChange}");
+    expect(modal).toContain('onClick={handleDuplicate}');
+    expect(modal).toContain('onClick={() => isEditing ? handleSave() : setIsEditing(true)}');
+    expect(modal).toContain('onClick={() => setShowContractBuilder(true)}');
+    expect(modal).toContain('onClick={() => setActiveTab(\'history\')}');
+    for (const name of ['--ds-deal-dialog-width:', '--ds-deal-inspector-width:', '--ds-deal-content-padding:', '--ds-deal-tabs-columns:']) {
+      expect(css).toContain(name);
+    }
+    expect(css).toContain('@media (max-width: 640px)');
   });
 
   it('ensures all inactive opportunity tab labels have fully readable semantic foreground text', () => {

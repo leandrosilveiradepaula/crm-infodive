@@ -1,3 +1,19 @@
+## 2026-11-24 — Opportunity detail G2/DS3 comparative ledger (PR #221)
+
+**Baseline:** authenticated synthetic screenshot from SHA `141c128a` (GitHub run 45404387684, technical PASS) compared directly with the private reference `Captura de tela 2026-11-17 093410(1).png`. The owner-provided reference shows a compact top-level status/action bar, calm editable central details and a separate right history/notes inspector. Its clinic-specific data and branding are NOT Infodive features.
+
+| Area | Baseline gap | Severity | DS3 target | Acceptance |
+| --- | --- | --- | --- | --- |
+| Financial disclosure | "Valor estimado" displays stored `deal.value`, adjacent "Forecast" displays independent product sum; values differ without explanation | P1 (misleading decision) | Label each source; visible reconciliation warning; no auto-write on detail read; product calculator untouched | **PENDING final SHA browser audit** |
+| Header and stage actions | 5 stage buttons + Edit/Duplicate/Close compete with deal title at desktop width | P1 | One accessible stage selector retaining current stage transition handlers and all actions; coherent density | PENDING |
+| Opportunity subnavigation | 8 compressed tabs, history clipped in desktop evidence | P1 | Every tab visible in token-controlled responsive grid, keyboard-accessible | PENDING |
+| Information hierarchy | Large financial/AI sidebar, duplicated timeline in primary section, 400px hardcoded inspector | P2 | Narrow token-controlled inspector with honest compact financial summary and real activity history; product/contact information remains in main | PENDING |
+| Narrow layout | Opportunity detail only certified in desktop/light, mobile/dark not captured | P1 | Capture detail at desktop/mobile and light/dark, no clipping, full keyboard and WCAG | PENDING |
+
+**Evidence discipline:** must update on the precise final commit; never transfer the reference screenshots or customer data to public GitHub. Local synthetic CI PASS does not certify aesthetic parity. Do not promote to production or merge automatically.
+
+---
+
 # UX RECOVERY PLAN — issue #214, continued after technical B4
 
 **STATUS as of 2026-11-19: UX NOT ACCEPTED.** B1–B4 PRs #215–#218 merged, QA technically green, but owner rejected visual/nav uniformity in production. Do not create a new "B4 PASS" by merely rerunning the old test. This is a new acceptance phase on the same original CRM.
