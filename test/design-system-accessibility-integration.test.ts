@@ -197,7 +197,7 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     };
     for (const [slug, label] of Object.entries(secondary)) {
       expect(modal).toContain(`{activeTab === '${slug}' && (`);
-      expect(modal).toContain(`data-qa-secondary-section="${slug}" role="region" aria-label="${label}"`);
+      expect(modal).toContain(`data-qa-secondary-section="${slug}" role="region" aria-label="${label}" tabIndex={0}`);
       expect(modal).not.toContain(`<TabsContent value="${slug}"`);
     }
     expect(runner).toContain('const assertSecondaryRegion = async (slug, expectedLabel) => {');

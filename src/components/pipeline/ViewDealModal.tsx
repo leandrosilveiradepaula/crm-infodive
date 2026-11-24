@@ -609,7 +609,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     {/* These sections are selected by a combobox, not a Radix tab trigger.
                                         Render named regions instead of orphan tabpanels with missing aria-labelledby IDs. */}
                                     {activeTab === 'partners' && (
-                                        <section data-qa-secondary-section="partners" role="region" aria-label="Parceiros" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
+                                        <section data-qa-secondary-section="partners" role="region" aria-label="Parceiros" tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                             <PartnersTab
                                                 deal={deal}
                                                 isEditing={isEditing}
@@ -622,13 +622,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
 
                                     {activeTab === 'omnichannel' && (
-                                        <section data-qa-secondary-section="omnichannel" role="region" aria-label="Comunicações" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
+                                        <section data-qa-secondary-section="omnichannel" role="region" aria-label="Comunicações" tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                             <SmartTimeline dealId={deal.id} />
                                         </section>
                                     )}
 
                                     {activeTab === 'stakeholders' && (
-                                        <section data-qa-secondary-section="stakeholders" role="region" aria-label="Clientes" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
+                                        <section data-qa-secondary-section="stakeholders" role="region" aria-label="Clientes" tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                             <StakeholdersTab
                                                 deal={isEditing ? { ...deal, account_id: formData.account_id } : deal}
                                                 setDeal={setDeal}
@@ -639,13 +639,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     )}
 
                                     {activeTab === 'documents' && (
-                                        <section data-qa-secondary-section="documents" role="region" aria-label="Documentos" className="m-0 flex-1 min-h-0 overflow-hidden h-full">
+                                        <section data-qa-secondary-section="documents" role="region" aria-label="Documentos" tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring m-0 flex-1 min-h-0 overflow-hidden h-full">
                                             <FilesTab deal={deal} />
                                         </section>
                                     )}
 
                                     {activeTab === 'history' && (
-                                        <section data-qa-secondary-section="history" role="region" aria-label="Histórico" className="ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
+                                        <section data-qa-secondary-section="history" role="region" aria-label="Histórico" tabIndex={0} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ds-deal-content-scroll m-0 flex-1 min-h-0 overflow-y-auto custom-scrollbar h-full">
                                             <HistoryTab deal={deal} />
                                         </section>
                                     )}
