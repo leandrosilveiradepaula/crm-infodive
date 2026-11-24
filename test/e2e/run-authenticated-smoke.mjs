@@ -254,9 +254,36 @@ async function runAxe(page, source) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial']);
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
             const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
+            // Persist only structural and numeric data. Never store HTML,
+            // text, selectors, identifiers, customer data or URLs in reports.
+            const box = element.getBoundingClientRect();
+            const inViewport = box.width > 0 && box.height > 0 &&
+                box.left < innerWidth && box.top < innerHeight &&
+                box.right > 0 && box.bottom > 0;
+            const centerX = inViewport ? Math.max(0, Math.min(innerWidth - 1, box.left + box.width / 2)) : -1;
+            const centerY = inViewport ? Math.max(0, Math.min(innerHeight - 1, box.top + box.height / 2)) : -1;
+            const hit = inViewport ? document.elementFromPoint(centerX, centerY) : null;
+            const hitTest = !hit ? 'none' : hit === element || element.contains(hit) ? 'clear' :
+                hit.contains(element) ? 'ancestor' : 'other';
+            const pseudoPresent = (selector) => {
+                const content = getComputedStyle(element, selector).content;
+                return content !== 'none' && content !== 'normal' && content !== '';
+            };
+            const geometry = {
+                inDialog: Boolean(element.closest('[role="dialog"]')),
+                radixFocusGuard: element.hasAttribute('data-radix-focus-guard'),
+                inAriaHidden: Boolean(element.closest('[aria-hidden="true"]')),
+                inInert: Boolean(element.closest('[inert]')),
+                tabIndex: Number.isInteger(element.tabIndex) ? element.tabIndex : -1,
+                inViewport,
+                bounds: inViewport ? [box.x, box.y, box.width, box.height].map(n => Math.round(n / 4) * 4) : [],
+                hitTest,
+                pseudoBefore: pseudoPresent('::before'),
+                pseudoAfter: pseudoPresent('::after'),
+            };
             const levels = [];
             let current = element;
             for (let depth = 0; current && depth < 10; depth += 1) {
@@ -274,7 +301,7 @@ async function runAxe(page, source) {
                 });
                 current = current.parentElement;
             }
-            return { resolved: true, region, isSvg: Boolean(element.closest('svg')), levels };
+            return { resolved: true, region, isSvg: Boolean(element.closest('svg')), geometry, levels };
         };
         const sanitizeRule = (id) => /^[a-z][a-z0-9-]{0,70}$/.test(id || '')
             ? id : 'unknown-rule';
@@ -290,7 +317,7 @@ async function runAxe(page, source) {
             const style = getComputedStyle(element);
             const tag = element.tagName?.toLowerCase() || '';
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions']);
+            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial']);
             return {
                 resolved: true,
                 tag: staticTags.has(tag) ? tag : 'other',
@@ -327,6 +354,32 @@ async function runAxe(page, source) {
         };
     });
     return report;
+}
+
+async function assertOpportunityDialogKeyboard(page, opener) {
+    const dialog = page.getByRole('dialog');
+    const shell = page.locator('[data-slot="crm-dashboard-shell"]');
+    if (!(await shell.evaluate(element => element.inert))) {
+        throw new Error('Opportunity dialog background is not inert.');
+    }
+    await dialog.locator('button:not([disabled])').first().focus();
+    for (const key of ['Tab', 'Tab', 'Tab', 'Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab']) {
+        await page.keyboard.press(key);
+        const isolated = await page.evaluate(() => {
+            const active = document.activeElement;
+            const dialog = document.querySelector('[role="dialog"]');
+            return Boolean(active && dialog?.contains(active) && !active.closest('[aria-hidden="true"], [inert]'));
+        });
+        if (!isolated) throw new Error('Opportunity dialog leaked focus outside active modal.');
+    }
+    await page.keyboard.press('Escape');
+    await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+    if (!(await opener.evaluate(element => element === document.activeElement))) {
+        throw new Error('Opportunity dialog did not restore focus to opener.');
+    }
+    if (await shell.evaluate(element => element.inert)) {
+        throw new Error('Opportunity dialog left application shell inert after closing.');
+    }
 }
 
 async function login(page, baseUrl, account) {
@@ -505,7 +558,8 @@ try {
                             }) + '\n');
                         }
                         await page.screenshot({ path: resolve(artifactDir, `${account.label}-pipeline-deal-detail-desktop-light.png`), fullPage: true });
-                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed' });
+                        await assertOpportunityDialogKeyboard(page, openDetails);
+                        profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed', keyboardIsolation: 'passed' });
                     }
                 }
             }

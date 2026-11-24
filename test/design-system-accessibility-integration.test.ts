@@ -47,6 +47,20 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(modal).toContain('}, [isOpen]);');
   });
 
+  it('requires real dialog focus and bounded overlap diagnostics instead of hiding axe incompletes', () => {
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    expect(runner).toContain('assertOpportunityDialogKeyboard(page, openDetails)');
+    expect(runner).toContain("radixFocusGuard: element.hasAttribute('data-radix-focus-guard')");
+    expect(runner).toContain('hitTest,');
+    expect(runner).toContain("pseudoBefore: pseudoPresent('::before')");
+    expect(runner).toContain("await page.keyboard.press('Escape')");
+    expect(runner).toContain('const detailIssues = detailAxe.incompleteCount + detailAxe.violationsCount');
+    for (const region of ['deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial']) {
+      expect(modal).toContain(`data-qa-region="${region}"`);
+    }
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');

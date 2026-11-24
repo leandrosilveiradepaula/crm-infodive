@@ -385,10 +385,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent showCloseButton={false} className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col">
+            <DialogContent data-qa-region="deal-dialog" showCloseButton={false} className="max-w-[95vw] h-[95vh] p-0 gap-0 bg-background border-border text-foreground overflow-hidden flex flex-col">
 
                 {/* Header */}
-                <div className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
+                <div data-qa-region="deal-header" className="h-20 border-b border-border flex items-center justify-between px-8 bg-card">
                     <div className="flex items-center gap-6">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-control-ui ${deal.stage === 'won' ? 'bg-success-subtle text-success-readable' :
                             deal.stage === 'lost' ? 'bg-destructive-subtle text-destructive-readable' : 'bg-primary/20 text-info'
@@ -501,7 +501,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                     <div className="flex flex-col bg-background h-full overflow-hidden border-r border-border">
                         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                            <div className="px-4 py-3 border-b border-border/40 bg-background/95 backdrop-blur z-10 sticky top-0">
+                            <div data-qa-region="deal-tabs" className="px-4 py-3 border-b border-border/40 bg-background/95 backdrop-blur z-10 sticky top-0">
                                 <TabsList className="w-full justify-start gap-1 overflow-x-auto no-scrollbar">
                                     {[
                                         { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
@@ -597,10 +597,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     </div >
 
                     {/* Sidebar Command Center */}
-                    <div className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
+                    <div data-qa-region="deal-sidebar" className="bg-card border-l border-border flex flex-col h-full overflow-hidden antialiased">
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                             {/* Financial Cockpit Section */}
-                            <section className="ds-panel-financial border p-4 relative overflow-hidden group">
+                            <section data-qa-region="deal-financial" className="ds-panel-financial border p-4 relative overflow-hidden group">
                                 <div className="absolute top-0 right-0 p-20 rounded-full blur-3xl opacity-10 translate-x-10 -translate-y-10 bg-info pointer-events-none" />
                                 <div className="flex items-center gap-2 mb-6 relative z-10">
                                     <div className="p-1.5 bg-info-subtle rounded-lg border border-info/30">
