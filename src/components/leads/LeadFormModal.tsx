@@ -81,7 +81,7 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                         </div>
                         {lead ? 'Editar Lead' : 'Novo Lead'}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em] mt-2">
+                    <DialogDescription className="ds-type-body text-muted-foreground mt-2 leading-relaxed">
                         Gerencie as informações do seu potencial cliente
                     </DialogDescription>
                 </DialogHeader>

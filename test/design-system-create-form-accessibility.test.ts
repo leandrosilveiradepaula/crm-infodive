@@ -57,6 +57,17 @@ describe('Authenticated CRM create dialogs have real accessible semantics', () =
     expect(hook).toContain('shell.inert = previouslyInert;');
   });
 
+  it('renders readable plain-language descriptions and stacks the contact modal header on mobile', () => {
+    const leadSource = read(lead);
+    const contactSource = read(contact);
+    for (const source of [leadSource, contactSource]) {
+      expect(source).toContain('className="ds-type-body text-muted-foreground mt-2 leading-relaxed"');
+      expect(source).not.toContain('text-metadata-ui font-black uppercase tracking-[0.2em] mt-2');
+    }
+    expect(contactSource).toContain('flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between');
+    expect(contactSource).toContain('w-full shrink-0 sm:w-auto');
+  });
+
   it('login uses solid footer without overlapping decorative blur effects', () => {
     const s = read('src/app/login/page.tsx');
     expect(s).not.toContain('blur-[120px]');

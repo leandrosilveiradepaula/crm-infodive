@@ -135,7 +135,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 max-h-[var(--ds-form-dialog-max-height)] overflow-y-auto rounded-[var(--radius-panel)] shadow-card-ui">
-                <DialogHeader className="bg-surface-subtle p-[var(--ds-form-dialog-gutter)] border-b border-border flex flex-row items-center justify-between relative">
+                <DialogHeader className="bg-surface-subtle p-[var(--ds-form-dialog-gutter)] border-b border-border flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between relative">
                     <div className="relative z-10">
                         <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3">
                             <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">
@@ -143,7 +143,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                             </div>
                             {contact ? 'Editar Contato' : 'Novo Contato'}
                         </DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em] mt-2">
+                        <DialogDescription className="ds-type-body text-muted-foreground mt-2 leading-relaxed">
                             Gerencie as informações do seu contato
                         </DialogDescription>
                     </div>
@@ -152,7 +152,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                             variant="outline"
                             size="sm"
                             onClick={() => setIsParserOpen(true)}
-                            className="relative z-10 gap-2"
+                            className="relative z-10 gap-2 w-full shrink-0 sm:w-auto"
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
                             Importar de Assinatura

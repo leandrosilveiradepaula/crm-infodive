@@ -1,3 +1,9 @@
+## 2026-11-24 — DS8 QA closure for two description overlap risks
+
+Run 45508860943 (SHA 4acaa857) audited full 4-role/22-route matrix and failed ONLY 4 desktop light/dark description-text contrast *incompletes* in Lead/Contact creation dialogs, with zero contrast violations. Inspected real mobile Contact screenshot: cramped forced-row header causes title/subtitle to wrap unnaturally. Remediation: shared readable description typography and breakpoint-aware stacked header/action. Preserve all form data/actions and WCAG strict failure gate; require exact new SHA CI+isolated auth QA and image comparison before completion. Single Draft PR #221; no merge, hosted changes or production.
+
+---
+
 ## 2026-11-24 — DS9 pending proposal document palette certification
 
 Owner wants one centralized CRM visual configuration. Seven source files supplying HTML proposal pages and React-PDF exports used 221 duplicate raw colors despite existing PDF roles. New dependency-free document primitive palette unifies those fixed values, preserves organization themes and business math, and adds source contracts. Keep this as a cohesive block **in the same PR #221** only after the preceding exact-SHA accessibility QA is read; this detached candidate is not yet pushed to the PR. Run final SHA build, tests, production-safe isolated 4-role QA, PDF output checks and genuine reference visual review. Never mark the CRM/UX completed from source-color counts.
