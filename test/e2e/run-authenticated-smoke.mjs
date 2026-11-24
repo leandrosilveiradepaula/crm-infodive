@@ -548,6 +548,72 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
     }
 }
 
+// Every migrated Goals family must be exercised in the REAL authenticated CRM
+// on both viewport sizes and themes, not only captured on its default tab.
+// This helper is read-only: it never creates a campaign, pays a commission,
+// updates a goal or persists a planning scenario.
+async function assertGoalsFamilyStates(page, source, capture, artifactDir, screenshotPrefix) {
+    const states = [
+        { name: 'Regras de Comissão', landmark: 'Selecione o Usuário', slug: 'commissions' },
+        { name: 'Gestão de Campanhas', landmark: 'Nova Campanha', slug: 'campaigns' },
+        { name: 'Planejamento Financeiro', landmark: 'Metas e Sazonalidade', slug: 'planning' },
+        { name: 'Extrato de Comissões', landmark: null, slug: 'statement' },
+    ];
+    let checked = 0;
+    const audit = async (state) => {
+        await assertLayout(page);
+        const report = await runAxe(page, source);
+        if (report.violationsCount || report.incompleteCount) {
+            throw new Error('GOALS_FAMILY_ACCESSIBILITY_FAILED: ' + state +
+                '; violations=' + report.violationsCount + ', incomplete=' + report.incompleteCount);
+        }
+        if (capture) {
+            await page.screenshot({
+                path: resolve(artifactDir, screenshotPrefix + '-' + state + '.png'),
+                fullPage: true,
+            });
+        }
+        checked += 1;
+    };
+    for (const state of states) {
+        const trigger = page.getByRole('tab', { name: state.name, exact: true });
+        await trigger.click();
+        if (await trigger.getAttribute('aria-selected') !== 'true') {
+            throw new Error('GOALS_FAMILY_TAB_NOT_SELECTED: ' + state.slug);
+        }
+        if (state.landmark) {
+            await page.getByText(state.landmark, { exact: false }).first()
+                .waitFor({ state: 'visible', timeout: 10_000 });
+        } else {
+            await page.getByRole('table').first().waitFor({ state: 'visible', timeout: 10_000 });
+        }
+        await audit(state.slug);
+        if (state.slug === 'planning') {
+            await page.getByRole('button', { name: 'Curva de Sazonalidade', exact: true }).click();
+            await page.getByText('Distribuição Sazonal (Ano)', { exact: false }).first()
+                .waitFor({ state: 'visible', timeout: 10_000 });
+            await page.locator('.recharts-bar-rectangle path').first().waitFor({
+                state: 'attached', timeout: 10_000,
+            });
+            const correctlyThemedBar = await page.evaluate(() => {
+                const bar = document.querySelector('.recharts-bar-rectangle path');
+                if (!bar) return false;
+                const sample = document.createElement('span');
+                sample.style.color = 'var(--primary)';
+                document.body.appendChild(sample);
+                const expected = getComputedStyle(sample).color;
+                sample.remove();
+                return getComputedStyle(bar).fill === expected;
+            });
+            if (!correctlyThemedBar) {
+                throw new Error('GOALS_CHART_COLOR_NOT_PROPAGATED: chart fill must use current primary token');
+            }
+            await audit('seasonality');
+        }
+    }
+    return checked;
+}
+
 async function login(page, baseUrl, account) {
     await page.goto(routeUrl(baseUrl, '/login'), { waitUntil: 'networkidle' });
     await page.locator('input[name="email"]').fill(account.email);
@@ -708,6 +774,19 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // Source-level component tests cannot certify the four Goals
+                    // tabs or the Recharts theme colors. Exercise actual UI
+                    // transitions with local synthetic data on the SAME SHA.
+                    if (local && profileIndex === 0 && route === '/goals') {
+                        const states = await assertGoalsFamilyStates(
+                            page, source, capture, artifactDir,
+                            `${account.label}-goals-family-${viewport.name}-${theme}`,
+                        );
+                        profileResult.checks.push({
+                            route: '/goals', state: 'goals-family-sections',
+                            viewport: viewport.name, theme, checkedStates: states, status: 'passed',
+                        });
+                    }
 
                     // The board screenshot alone cannot prove the focused opportunity
                     // inspector. Capture one read-only drawer state from the synthetic

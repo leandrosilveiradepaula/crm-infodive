@@ -1,3 +1,7 @@
+## 2026-11-24 — DS5 Goals stateful authenticated coverage
+
+After the 9-component Goals family migration, added fail-closed real-browser checks for Commissions/Campaigns/Planning/Seasonality/Statement screens in four viewport/theme combinations, including actual computed SVG fill against --primary. Unit checks alone did not cover these nested tab states; a green default route smoke is insufficient. No mutation actions are triggered. Still requires same-SHA CI and authenticated isolated QA completion; PR #221 stays DRAFT.
+
 ## 2026-11-24 — DS5 Goals family continuation and chart correctness
 
 Latest confirmed PR #221 commit 5f879207: CI 45463359093 SUCCESS (287 tests, four WCAG synthetic combinations, strict policy 16, no regressions), authenticated isolated QA 45463359105 SUCCESS (4 local roles, 192 route checks). Debt measured 168 UI files / 3,593 occurrences. Owner said "prossiga". Next Goals family cohesive candidate migrates nine remaining UI surfaces (simulation, input, progress/badge, financial charts, stat tile, campaigns and statement) onto semantic tokens with strict hardcode locks. Source identified a real SeasonalityChart bug: hsl(var(--border/primary/etc)) is incompatible with current OKLCH CSS variables; use var() directly. Preserve formulas and persistence. No public Clinia image, server actions, hosted Supabase, production or main merge touched. New SHA CI and actual visual QA remain release gates.

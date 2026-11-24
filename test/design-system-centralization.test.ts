@@ -183,6 +183,18 @@ describe('Central design system — source propagation and strict migrated famil
     expect(statement).toContain('aria-label="Filtrar comissões por mês"');
   });
 
+  it('proves Goals family tabs and actual theme-based chart fill in authenticated QA', () => {
+    const e2e = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(e2e).toContain('async function assertGoalsFamilyStates(');
+    for (const state of ['commissions', 'campaigns', 'planning', 'statement', 'seasonality']) {
+      expect(e2e).toContain("'"+state+"'");
+    }
+    expect(e2e).toContain('GOALS_CHART_COLOR_NOT_PROPAGATED');
+    expect(e2e).toContain("route === '/goals'");
+    expect(e2e).toContain("profileIndex === 0");
+    expect(e2e).toContain("getComputedStyle(bar).fill === expected");
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

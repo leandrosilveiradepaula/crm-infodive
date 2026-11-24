@@ -1,3 +1,9 @@
+## 2026-11-24 — Goals family authenticated UI state coverage
+
+Static migration alone cannot validate controls mounted only inside nested Goals tabs. The isolated browser QA now clicks Regras de Comissão, Gestão de Campanhas, Planejamento Financeiro (including the Curva de Sazonalidade chart) and Extrato de Comissões in the original Next.js CRM under the first authorized synthetic profile, on desktop/mobile and light/dark. It validates actual selected state, visible content, no document overflow, WCAG/axe violations **or incompletes**, captures sanitized screenshots for each state, and checks the Recharts bar's computed fill against the central primary token. This does not create, update, pay or persist business records. Exact commit SHA CI and E2E must pass before this is treated as proof. Owner visual comparison and broader untouched module debt remain open.
+
+---
+
 ## 2026-11-24 — DS5 Goals, Commissions and DRE semantic migration candidate
 
 **Verified baseline SHA:** 8395895d. [CI 45432758424](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45432758424) SUCCESS, 286 tests and WCAG preflight; [isolated authenticated QA 45432758930](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45432758930) SUCCESS, four real local role profiles and 192 visual route checks. Measured debt: 172 affected files/3,834 local class occurrences vs original 196/5,536.
