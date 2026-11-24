@@ -6,20 +6,30 @@ import { revalidatePath } from 'next/cache';
 import { SettingsService } from '@/services/SettingsService';
 
 export async function updateUserTheme(theme: 'light' | 'dark') {
+    // A theme is an individual preference. Preserve trusted session identity;
+    // service-role writes must still target the authenticated profile only.
     const { userId } = await requireSessionContext();
     const supabase = createAdminClient();
 
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('profiles')
         .update({ theme_preference: theme })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select('id,theme_preference')
+        .maybeSingle();
 
-    if (error) {
-        console.error('Error updating user theme:', error);
-        throw new Error('Failed to update theme preference');
+    // Update without a returned row is NOT proof of persistence; fail closed.
+    if (error || !data || data.theme_preference !== theme) {
+        // Safe bounded code only, never user IDs, SQL, content or credentials.
+        const storageCode = error?.code && /^[A-Z0-9_]{2,32}$/i.test(error.code)
+            ? error.code : !data ? 'NO_ROW' : 'WRITE_MISMATCH';
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=' + storageCode);
+        throw new Error('Failed to persist theme preference');
     }
 
-    revalidatePath('/');
+    // A root-layout revalidation can race the already-applied client theme and
+    // reset it from an older Server Component payload. The next navigation
+    // or page reload reads the persisted profile preference as usual.
     return { success: true };
 }
 

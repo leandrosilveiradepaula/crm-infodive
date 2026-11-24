@@ -95,6 +95,22 @@ describe('Central design system — source propagation and strict migrated famil
     expect(org).toContain('Nenhuma alteração global será simulada');
   });
 
+  it('persists individual themes by confirmed profile update without root revalidation races', () => {
+    const action = read('src/app/actions/theme-actions.ts');
+    const write = action.split('export async function updateUserTheme(')[1]
+      ?.split('export async function updateOrgTheme(')[0] || '';
+    expect(write).toContain('requireSessionContext()');
+    expect(write).toContain(".update({ theme_preference: theme })");
+    expect(write).toContain(".eq('id', userId)");
+    expect(write).toContain(".select('id,theme_preference')");
+    expect(write).toContain('data.theme_preference !== theme');
+    expect(write).not.toContain("revalidatePath('/')");
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(runner).toContain('CRM_THEME_READ_AFTER_WRITE_FAILED');
+    expect(runner).toContain('CRM_THEME_SAVE_NOT_CONFIRMED');
+    expect(runner).toContain("route === '/leads' && viewport.name === 'desktop'");
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

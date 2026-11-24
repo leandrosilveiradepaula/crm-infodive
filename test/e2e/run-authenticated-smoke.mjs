@@ -117,7 +117,7 @@ function routeUrl(baseUrl, route) {
     return url.toString();
 }
 
-async function setTheme(page, theme) {
+async function setTheme(page, theme, verifyPersistence = false) {
     const wantDark = theme === 'dark';
     const dark = await page.locator('html').evaluate(element => element.classList.contains('dark'));
     // The former 100ms wait sampled CSS halfway through 500–700ms dark/light
@@ -139,6 +139,26 @@ async function setTheme(page, theme) {
         }));
         throw new Error('CRM_THEME_PERSISTENCE_BLOCKED: wantedDark=' + wantDark +
             ', renderedDark=' + signal.dark + ', saveState=' + signal.saveState);
+    }
+    if (verifyPersistence) {
+        if (dark !== wantDark) {
+            await page.waitForFunction(
+                () => ['saved', 'failed'].includes(document.documentElement.dataset.themeSaveState),
+                null,
+                { timeout: 8_000 },
+            );
+            const status = await page.locator('html').getAttribute('data-theme-save-state');
+            if (status !== 'saved') {
+                throw new Error('CRM_THEME_SAVE_NOT_CONFIRMED: server action did not verify the profile write.');
+            }
+        }
+        // A new authenticated request MUST read the preference from the server,
+        // rather than relying on a client-only temporary CSS class.
+        await page.reload({ waitUntil: 'networkidle' });
+        const persistedDark = await page.locator('html').evaluate(element => element.classList.contains('dark'));
+        if (persistedDark !== wantDark) {
+            throw new Error('CRM_THEME_READ_AFTER_WRITE_FAILED: profile preference did not survive reload.');
+        }
     }
     // Wait for actual styles and fonts, not just the HTML theme class. This is
     // deterministic visual stabilization; axe rules remain unchanged.
@@ -617,7 +637,8 @@ try {
                     const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
-                    await setTheme(page, theme);
+                    await setTheme(page, theme,
+                        local && profileIndex === 0 && route === '/leads' && viewport.name === 'desktop');
                     if (local && profileIndex === 0 &&
                         ['/leads', '/contacts', '/activities'].includes(route)) {
                         const propagated = await assertDesignTokenPropagation(page);

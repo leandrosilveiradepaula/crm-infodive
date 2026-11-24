@@ -1,3 +1,15 @@
+# CURRENT_TASK — 2026-11-24: DS4 PERSONAL THEME PERSISTENCE CERTIFICATION
+
+**Explicit goal:** user requested the Design System working perfectly, including the currently existing individual light/dark preference. Continue SAME DRAFT PR #221, no main merge.
+
+**Observed:** Candidates `9b9ba175` and `6b342382` failed real local authenticated QA while switching light/dark. Candidate `34fb0b39` passed full CI (run 45428977985) but failed local authenticated QA (45428977868) with `CRM_THEME_PERSISTENCE_BLOCKED: wantedDark=false, renderedDark=true, saveState=failed`. The preference Server Action truly rejected the write; earlier purely optimistic toggle masked this. The current priority is a narrow root-cause correction and receipt, not additional cosmetic changes.
+
+**Narrow exception to prior task:** allowed to correct **only** `updateUserTheme` in `src/app/actions/theme-actions.ts` as part of the requested individual Design System theme feature. Keep `requireSessionContext` and per-user `profiles.id` scope, ensure an actual updated record is returned and matches the requested theme, omit unnecessary root `revalidatePath('/')`, fail closed and log only bounded non-sensitive backend code for isolated QA. No other Server Action, API, tenant permission/schema, commercial logic or hosted DB operation is authorized.
+
+**Required gates:** real same-SHA isolated browser QA verifies click, server save confirmation, and that the theme survives a full authenticated page reload, on desktop/light/dark with 4 profiles/22 routes; the existing 9-token propagation and all WCAG checks must still pass. CI TypeScript/unit/build/diff/design policy/axe; compare screenshots against private reference. Keep the PR DRAFT.
+
+---
+
 # CURRENT_TASK — 2026-11-24: DS4 CENTRAL PROPAGATION + MULTI-FAMILY MIGRATION
 
 **Owner authorization:** “Ok, prossiga, quero o design system em perfeito funcionamento.” Continue in the SAME DRAFT PR #221 from exact head `2891b5ecc82cc54dcc242338a0f946d89a25138c`. No main merge or production deployment.
