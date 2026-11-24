@@ -66,10 +66,10 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
 
     const getTypeColor = (type: string) => {
         switch (type) {
-            case 'whatsapp': return 'bg-green-500';
-            case 'email': return 'bg-blue-500';
+            case 'whatsapp': return 'bg-success';
+            case 'email': return 'bg-primary';
             case 'linkedin': return 'bg-primary/90';
-            default: return 'bg-gray-500';
+            default: return 'bg-muted';
         }
     };
 
@@ -90,20 +90,20 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
     const filteredMessages = messages.filter(m => filter === 'all' || m.type === filter);
 
     return (
-        <div className="flex flex-col h-[600px] bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
+        <div className="flex flex-col h-[600px] bg-card rounded-[var(--radius-panel)] border border-border overflow-hidden shadow-control-ui">
             {/* Header / Tabs */}
-            <div className="flex items-center justify-between p-5 border-b border-border bg-gradient-to-r from-gray-50 to-white">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-gradient-to-r from-surface-subtle to-white">
                 <h3 className="font-bold text-foreground flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary" />
                     Timeline Inteligente
                 </h3>
-                <div className="flex bg-muted/50 p-1 rounded-lg border border-border">
+                <div className="flex bg-muted/50 p-1 rounded-[var(--radius-control)] border border-border">
                     {['all', 'whatsapp', 'email'].map(t => (
                         <button
                             key={t}
                             onClick={() => setFilter(t as any)}
-                            className={`px-4 py-1.5 text-xs font-bold rounded-md capitalize transition-all ${filter === t
-                                ? 'bg-card text-foreground shadow-sm'
+                            className={`px-4 py-1.5 text-metadata-ui font-bold rounded-[var(--radius-control)] capitalize transition-all ${filter === t
+                                ? 'bg-card text-foreground shadow-control-ui'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
@@ -125,14 +125,14 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
                         >
                             <div className={`max-w-[80%] flex gap-3 ${msg.direction === 'outbound' ? 'flex-row-reverse' : 'flex-row'}`}>
                                 {/* Avatar/Icon */}
-                                <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white shadow-md ${getTypeColor(msg.type)}`}>
+                                <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white shadow-control-ui ${getTypeColor(msg.type)}`}>
                                     {getTypeIcon(msg.type)}
                                 </div>
 
                                 {/* Bubble */}
                                 <div className={`flex flex-col ${msg.direction === 'outbound' ? 'items-end' : 'items-start'}`}>
                                     <div className={`
-                                        p-4 rounded-2xl text-sm relative shadow-sm
+                                        p-4 rounded-[var(--radius-panel)] text-body-ui relative shadow-control-ui
                                         ${msg.direction === 'outbound'
                                             ? 'bg-primary text-primary-foreground rounded-tr-sm'
                                             : 'bg-card text-card-foreground border border-border rounded-tl-sm'}
@@ -140,7 +140,7 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
                                         <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
 
                                         {msg.details && (
-                                            <div className="mt-2 pt-2 border-t border-border text-[10px] opacity-70">
+                                            <div className="mt-2 pt-2 border-t border-border text-metadata-ui opacity-70">
                                                 {msg.details}
                                             </div>
                                         )}
@@ -148,7 +148,7 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
 
                                     {/* Meta */}
                                     <div className="flex items-center gap-2 mt-1.5 px-1">
-                                        <span className="text-[10px] text-muted-foreground font-medium">
+                                        <span className="text-metadata-ui text-muted-foreground font-medium">
                                             {msg.senderName} • {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                         {msg.direction === 'outbound' && (
@@ -165,11 +165,11 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
             {/* Input Area */}
             <div className="p-4 bg-card border-t border-border">
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Responder via:</span>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg text-[10px] font-bold border border-green-200 dark:border-green-500/20 hover:bg-green-500/20 transition-colors">
+                    <span className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">Responder via:</span>
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 text-success-readable dark:text-success-readable rounded-[var(--radius-control)] text-metadata-ui font-bold border border-success dark:border-success/20 hover:bg-success/20 transition-colors">
                         <MessageCircle className="h-3 w-3" /> WhatsApp
                     </button>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-primary dark:text-blue-400 rounded-lg text-[10px] font-bold border border-blue-200 dark:border-blue-500/20 hover:bg-blue-500/20 transition-colors">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary dark:text-primary rounded-[var(--radius-control)] text-metadata-ui font-bold border border-primary dark:border-primary/20 hover:bg-primary/20 transition-colors">
                         <Mail className="h-3 w-3" /> Email
                     </button>
                 </div>
@@ -179,16 +179,16 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
                         placeholder="Digite sua mensagem..."
-                        className="w-full bg-muted border border-border rounded-xl pl-4 pr-12 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none"
+                        className="w-full bg-muted border border-border rounded-[var(--radius-panel)] pl-4 pr-12 py-3 text-body-ui text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none"
                         rows={2}
                     />
                     <div className="absolute right-2 bottom-2 flex gap-1">
-                        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-muted">
+                        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-[var(--radius-control)] hover:bg-muted">
                             <Paperclip className="h-4 w-4" />
                         </button>
                         <button
                             onClick={handleSend}
-                            className="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+                            className="p-2 bg-primary text-primary-foreground rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors shadow-control-ui"
                         >
                             <Send className="h-4 w-4" />
                         </button>

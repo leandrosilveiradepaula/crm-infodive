@@ -42,7 +42,7 @@ export default function IntegrationsClientPage({
         switch (provider) {
             case 'ibm_cloud': return 'bg-primary/10 text-primary';
             case 'lenovo': return 'bg-lenovo-red/10 text-lenovo-red';
-            case 'whatsapp': return 'bg-green-50 text-green-600';
+            case 'whatsapp': return 'bg-success-subtle text-success-readable';
             default: return 'bg-muted/50 text-muted-foreground';
         }
     };
@@ -86,36 +86,36 @@ export default function IntegrationsClientPage({
                 <TabsContent value="apps" className="mt-0 outline-none">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {initialIntegrations.map(app => (
-                        <article key={app.id} className="group relative overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md">
+                        <article key={app.id} className="group relative overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-control-ui">
                             {app.status === 'connected' && (
-                                <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-emerald-600 text-white px-5 py-2 text-[10px] font-black uppercase tracking-widest rounded-bl-2xl shadow-lg z-10 animate-in slide-in-from-right-full duration-500">
+                                <div className="absolute top-0 right-0 bg-gradient-to-l from-success to-success text-white px-5 py-2 text-metadata-ui font-black uppercase tracking-widest rounded-bl-2xl shadow-card-ui z-10 animate-in slide-in-from-right-full duration-500">
                                     Conectado
                                 </div>
                             )}
 
                             <div className="flex items-start justify-between mb-8">
-                                <div className={`h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500 ${getIconColor(app.provider)} border border-border`}>
+                                <div className={`h-16 w-16 rounded-[var(--radius-panel)] flex items-center justify-center shadow-card-ui group-hover:scale-110 transition-transform duration-500 ${getIconColor(app.provider)} border border-border`}>
                                     {getAppIcon(app.provider)}
                                 </div>
-                                <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground bg-muted px-3 py-1.5 rounded-xl border border-border backdrop-blur-sm">{app.provider.replace('_', ' ')}</span>
+                                <span className="text-metadata-ui uppercase font-black tracking-widest text-muted-foreground bg-muted px-3 py-1.5 rounded-[var(--radius-panel)] border border-border backdrop-blur-sm">{app.provider.replace('_', ' ')}</span>
                             </div>
 
-                            <h3 className="font-black text-foreground text-2xl mb-2 tracking-tight">{app.name}</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-2 h-10">{getDescription(app.provider)}</p>
+                            <h3 className="font-black text-foreground text-page-title mb-2 tracking-tight">{app.name}</h3>
+                            <p className="text-body-ui text-muted-foreground leading-relaxed mb-6 line-clamp-2 h-10">{getDescription(app.provider)}</p>
 
                             {/* Feature Pills */}
                             <div className="flex flex-wrap gap-2 mb-8 h-16 content-start">
                                 {getFeatures(app.provider).map(f => (
-                                    <span key={f} className="text-[10px] font-bold text-muted-foreground border border-border bg-muted px-2.5 py-1 rounded-lg hover:bg-muted/80 transition-colors cursor-default">{f}</span>
+                                    <span key={f} className="text-metadata-ui font-bold text-muted-foreground border border-border bg-muted px-2.5 py-1 rounded-[var(--radius-control)] hover:bg-muted/80 transition-colors cursor-default">{f}</span>
                                 ))}
                             </div>
 
                             <button
                                 type="button"
                                 onClick={() => handleToggle(app.id, app.status)}
-                                className={`focus-ring flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] text-sm font-semibold transition-colors ${app.status === 'connected'
+                                className={`focus-ring flex h-10 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] text-body-ui font-semibold transition-colors ${app.status === 'connected'
                                     ? 'border border-border bg-secondary text-secondary-foreground hover:bg-destructive/10 hover:text-destructive'
-                                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm'
+                                    : 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-control-ui'
                                     }`}
                             >
                                 {app.status === 'connected' ? (
@@ -129,11 +129,11 @@ export default function IntegrationsClientPage({
 
                     {/* Request Integration Feature */}
                     <div className="group flex min-h-[350px] flex-col items-center justify-center rounded-[var(--radius-panel)] border border-dashed border-border p-6 text-center transition-colors hover:border-primary/40 hover:bg-primary/5">
-                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:shadow-2xl group-hover:shadow-primary/20 transition-all duration-500">
+                        <div className="h-20 w-20 rounded-full bg-card border border-border flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white group-hover:shadow-card-ui group-hover:shadow-primary/20 transition-all duration-500">
                             <Plus className="h-8 w-8 text-muted-foreground group-hover:text-white group-hover:rotate-180 transition-all duration-500" />
                         </div>
-                        <h3 className="font-black text-muted-foreground group-hover:text-primary text-xl mb-2 transition-colors">Solicitar Integração</h3>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-[200px] leading-relaxed font-medium group-hover:text-muted-foreground">Não encontrou o que precisa?<br />Nossa equipe desenvolve para você.</p>
+                        <h3 className="font-black text-muted-foreground group-hover:text-primary text-section-title mb-2 transition-colors">Solicitar Integração</h3>
+                        <p className="text-body-ui text-muted-foreground mt-2 max-w-[200px] leading-relaxed font-medium group-hover:text-muted-foreground">Não encontrou o que precisa?<br />Nossa equipe desenvolve para você.</p>
                     </div>
                 </div>
                 </TabsContent>

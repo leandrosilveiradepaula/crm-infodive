@@ -15,10 +15,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Helper to map icon string to Component
 const getBadgeIcon = (iconName: string) => {
     switch (iconName) {
-        case 'Trophy': return <Trophy className="h-4 w-4 text-yellow-500" />;
-        case 'Crown': return <Crown className="h-4 w-4 text-yellow-500" />;
-        case 'Zap': return <Zap className="h-4 w-4 text-blue-400" />;
-        case 'Share2': return <TrendingUp className="h-4 w-4 text-green-400" />;
+        case 'Trophy': return <Trophy className="h-4 w-4 text-warning-readable" />;
+        case 'Crown': return <Crown className="h-4 w-4 text-warning-readable" />;
+        case 'Zap': return <Zap className="h-4 w-4 text-primary" />;
+        case 'Share2': return <TrendingUp className="h-4 w-4 text-success-readable" />;
         default: return <Medal className="h-4 w-4 text-muted-foreground" />;
     }
 };
@@ -64,19 +64,19 @@ export const SalesLeaderboard: React.FC = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-10">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-yellow-500/20 rounded-2xl backdrop-blur-md border border-yellow-500/30">
-                        <Trophy className="h-8 w-8 text-yellow-500" />
+                    <div className="p-3 bg-warning/20 rounded-[var(--radius-panel)] backdrop-blur-md border border-warning/30">
+                        <Trophy className="h-8 w-8 text-warning-readable" />
                     </div>
                     <div>
-                        <h1 className={`${isTvMode ? 'text-5xl' : 'text-3xl'} font-black italic tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500`}>
+                        <h1 className={`${isTvMode ? 'text-metric-ui' : 'text-metric-ui'} font-black italic tracking-tighter text-foreground`}>
                             SALES LEADERBOARD
                         </h1>
-                        <p className="text-muted-foreground font-medium tracking-widest text-sm uppercase">Performance em Tempo Real</p>
+                        <p className="text-muted-foreground font-medium tracking-widest text-body-ui uppercase">Performance em Tempo Real</p>
                     </div>
                 </div>
                 <button
                     onClick={toggleTvMode}
-                    className="p-3 bg-muted hover:bg-muted/80 rounded-xl border border-border transition-colors text-muted-foreground hover:text-foreground"
+                    className="p-3 bg-muted hover:bg-muted/80 rounded-[var(--radius-panel)] border border-border transition-colors text-muted-foreground hover:text-foreground"
                 >
                     {isTvMode ? <Minimize2 className="h-6 w-6" /> : <Maximize2 className="h-6 w-6" />}
                 </button>
@@ -86,16 +86,16 @@ export const SalesLeaderboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 items-end max-w-5xl mx-auto">
                 {/* 2nd Place */}
                 <div className="order-2 lg:order-1 flex flex-col items-center">
-                    <div className="w-24 h-24 rounded-full border-4 border-muted-foreground/30 bg-muted flex items-center justify-center text-2xl font-bold text-muted-foreground relative mb-4 shadow-lg">
+                    <div className="w-24 h-24 rounded-full border-4 border-muted-foreground/30 bg-muted flex items-center justify-center text-page-title font-bold text-muted-foreground relative mb-4 shadow-card-ui">
                         2
                         <div className="absolute -top-3 w-8 h-8 bg-muted-foreground rounded-full flex items-center justify-center border-2 border-background">
                             <Medal className="h-4 w-4 text-background" />
                         </div>
                     </div>
-                    <div className="bg-card/80 backdrop-blur-md border border-border/50 w-full p-6 rounded-t-2xl text-center h-[200px] flex flex-col justify-end shadow-xl">
-                        <h3 className="text-xl font-bold mb-1 text-foreground">{scores[1]?.user?.name || '---'}</h3>
-                        <p className="text-3xl font-black text-muted-foreground">{scores[1]?.total_score || 0} pts</p>
-                        <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide font-bold">
+                    <div className="bg-card/80 backdrop-blur-md border border-border/50 w-full p-6 rounded-t-2xl text-center h-[200px] flex flex-col justify-end shadow-card-ui">
+                        <h3 className="text-section-title font-bold mb-1 text-foreground">{scores[1]?.user?.name || '---'}</h3>
+                        <p className="text-metric-ui font-black text-muted-foreground">{scores[1]?.total_score || 0} pts</p>
+                        <p className="text-metadata-ui text-muted-foreground mt-2 uppercase tracking-wide font-bold">
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(scores[1]?.revenue_generated || 0)}
                         </p>
                     </div>
@@ -109,16 +109,16 @@ export const SalesLeaderboard: React.FC = () => {
                         transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                         className="absolute -top-16"
                     >
-                        <Crown className="h-12 w-12 text-yellow-500 fill-yellow-500/20" />
+                        <Crown className="h-12 w-12 text-warning-readable fill-warning/20" />
                     </motion.div>
-                    <div className="w-32 h-32 rounded-full border-4 border-yellow-500 bg-yellow-500/10 flex items-center justify-center text-4xl font-bold text-yellow-500 relative mb-4 shadow-[0_0_50px_rgba(234,179,8,0.3)]">
+                    <div className="w-32 h-32 rounded-full border-4 border-warning bg-warning/10 flex items-center justify-center text-metric-ui font-bold text-warning-readable relative mb-4 shadow-overlay-ui">
                         1
                     </div>
-                    <div className="bg-gradient-to-b from-yellow-500/10 to-card/90 backdrop-blur-md border border-yellow-500/30 w-full p-6 rounded-t-3xl text-center h-[260px] flex flex-col justify-end relative overflow-hidden shadow-2xl">
+                    <div className="bg-surface-subtle backdrop-blur-md border border-warning/30 w-full p-6 rounded-t-3xl text-center h-[260px] flex flex-col justify-end relative overflow-hidden shadow-card-ui">
                         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 mix-blend-overlay"></div>
-                        <h3 className="text-2xl font-black mb-1 text-foreground">{scores[0]?.user?.name || '---'}</h3>
-                        <p className="text-5xl font-black text-yellow-500 mb-2">{scores[0]?.total_score || 0} pts</p>
-                        <p className="text-sm text-yellow-600 dark:text-yellow-400 uppercase tracking-wide font-bold bg-yellow-500/10 py-1 rounded-lg">
+                        <h3 className="text-page-title font-black mb-1 text-foreground">{scores[0]?.user?.name || '---'}</h3>
+                        <p className="text-metric-ui font-black text-warning-readable mb-2">{scores[0]?.total_score || 0} pts</p>
+                        <p className="text-body-ui text-warning-readable dark:text-warning-readable uppercase tracking-wide font-bold bg-warning/10 py-1 rounded-[var(--radius-control)]">
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(scores[0]?.revenue_generated || 0)}
                         </p>
                     </div>
@@ -126,16 +126,16 @@ export const SalesLeaderboard: React.FC = () => {
 
                 {/* 3rd Place */}
                 <div className="order-3 lg:order-3 flex flex-col items-center">
-                    <div className="w-24 h-24 rounded-full border-4 border-orange-700 bg-orange-900/10 flex items-center justify-center text-2xl font-bold text-orange-700 relative mb-4 shadow-lg">
+                    <div className="w-24 h-24 rounded-full border-4 border-warning bg-warning/10 flex items-center justify-center text-page-title font-bold text-warning-readable relative mb-4 shadow-card-ui">
                         3
-                        <div className="absolute -top-3 w-8 h-8 bg-orange-700 rounded-full flex items-center justify-center border-2 border-background">
+                        <div className="absolute -top-3 w-8 h-8 bg-warning rounded-full flex items-center justify-center border-2 border-background">
                             <Medal className="h-4 w-4 text-background" />
                         </div>
                     </div>
-                    <div className="bg-card/80 backdrop-blur-md border border-orange-700/30 w-full p-6 rounded-t-2xl text-center h-[180px] flex flex-col justify-end shadow-xl">
-                        <h3 className="text-xl font-bold mb-1 text-foreground">{scores[2]?.user?.name || '---'}</h3>
-                        <p className="text-3xl font-black text-orange-600 dark:text-orange-500">{scores[2]?.total_score || 0} pts</p>
-                        <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wide font-bold">
+                    <div className="bg-card/80 backdrop-blur-md border border-warning/30 w-full p-6 rounded-t-2xl text-center h-[180px] flex flex-col justify-end shadow-card-ui">
+                        <h3 className="text-section-title font-bold mb-1 text-foreground">{scores[2]?.user?.name || '---'}</h3>
+                        <p className="text-metric-ui font-black text-warning-readable dark:text-warning-readable">{scores[2]?.total_score || 0} pts</p>
+                        <p className="text-metadata-ui text-muted-foreground mt-2 uppercase tracking-wide font-bold">
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(scores[2]?.revenue_generated || 0)}
                         </p>
                     </div>
@@ -143,16 +143,16 @@ export const SalesLeaderboard: React.FC = () => {
             </div>
 
             {/* List for the rest */}
-            <div className="max-w-4xl mx-auto bg-card/50 backdrop-blur border border-border rounded-2xl overflow-hidden shadow-lg">
+            <div className="max-w-4xl mx-auto bg-card/50 backdrop-blur border border-border rounded-[var(--radius-panel)] overflow-hidden shadow-card-ui">
                 <table className="w-full">
                     <thead className="bg-muted/50">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-muted-foreground uppercase tracking-widest">Posição</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-muted-foreground uppercase tracking-widest">Vendedor</th>
-                            <th className="px-6 py-4 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest">Badges</th>
-                            <th className="px-6 py-4 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest">Streak</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold text-muted-foreground uppercase tracking-widest">Deals</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold text-muted-foreground uppercase tracking-widest">Pontuação</th>
+                            <th className="px-6 py-4 text-left text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Posição</th>
+                            <th className="px-6 py-4 text-left text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Vendedor</th>
+                            <th className="px-6 py-4 text-center text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Badges</th>
+                            <th className="px-6 py-4 text-center text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Streak</th>
+                            <th className="px-6 py-4 text-right text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Deals</th>
+                            <th className="px-6 py-4 text-right text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Pontuação</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -160,7 +160,7 @@ export const SalesLeaderboard: React.FC = () => {
                             <tr key={idx} className="hover:bg-muted/50 transition-colors">
                                 <td className="px-6 py-4 font-bold text-muted-foreground">#{idx + 4}</td>
                                 <td className="px-6 py-4 font-bold text-foreground flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs text-foreground">
+                                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-metadata-ui text-foreground">
                                         {score.user?.name.charAt(0)}
                                     </div>
                                     {score.user?.name}
@@ -174,8 +174,8 @@ export const SalesLeaderboard: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4 text-center">
                                     {score.current_streak > 2 && (
-                                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-500/10 text-orange-500 rounded text-xs font-bold border border-orange-500/20">
-                                            <Flame className="h-3 w-3 fill-orange-500" />
+                                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-warning/10 text-warning-readable rounded text-metadata-ui font-bold border border-warning/20">
+                                            <Flame className="h-3 w-3 fill-warning" />
                                             {score.current_streak} dias
                                         </div>
                                     )}
