@@ -366,15 +366,15 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             <div
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-border rounded-3xl p-12 text-center hover:border-primary/50 transition-colors cursor-pointer group bg-muted/10"
+                className="border-2 border-dashed border-border rounded-[var(--radius-panel)] p-12 text-center hover:border-primary/50 transition-colors cursor-pointer group bg-muted/10"
                 onClick={() => fileInputRef.current?.click()}
             >
                 <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                     <Upload className="h-10 w-10 text-primary" />
                 </div>
-                <p className="text-lg font-black text-foreground mb-2">Arraste seus arquivos aqui</p>
-                <p className="text-sm text-muted-foreground font-bold mb-4">ou clique para selecionar</p>
-                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground font-mono">
+                <p className="text-section-title font-black text-foreground mb-2">Arraste seus arquivos aqui</p>
+                <p className="text-body-ui text-muted-foreground font-bold mb-4">ou clique para selecionar</p>
+                <div className="flex items-center justify-center gap-4 text-metadata-ui text-muted-foreground font-mono">
                     <span className="flex items-center gap-1"><FileSpreadsheet className="h-3 w-3" /> XLS/CSV</span>
                     <span className="flex items-center gap-1"><FileCode className="h-3 w-3" /> XML</span>
                     <span className="flex items-center gap-1"><ImageIcon className="h-3 w-3" /> IMG/PDF</span>
@@ -401,21 +401,21 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
 
             {/* Bundle Configuration */}
             {targetProduct ? (
-                <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4">
-                    <p className="text-[10px] text-primary font-bold uppercase tracking-widest mb-2">Importando dados para:</p>
+                <div className="bg-primary/10 border border-primary/20 rounded-[var(--radius-panel)] p-4">
+                    <p className="text-metadata-ui text-primary font-bold uppercase tracking-widest mb-2">Importando dados para:</p>
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-black">
+                        <div className="h-10 w-10 bg-primary/20 rounded-[var(--radius-control)] flex items-center justify-center text-primary font-black">
                             {targetProduct.name.charAt(0)}
                         </div>
                         <div>
-                            <h4 className="text-sm font-bold text-foreground leading-none">{targetProduct.name}</h4>
-                            <p className="text-xs text-muted-foreground font-mono mt-1">{targetProduct.sku}</p>
+                            <h4 className="text-body-ui font-bold text-foreground leading-none">{targetProduct.name}</h4>
+                            <p className="text-metadata-ui text-muted-foreground font-mono mt-1">{targetProduct.sku}</p>
                         </div>
                     </div>
                 </div>
             ) : (
                 <div className="space-y-3">
-                    <div className="bg-muted/30 border border-border rounded-2xl p-4">
+                    <div className="bg-muted/30 border border-border rounded-[var(--radius-panel)] p-4">
                         <div className="flex items-center gap-3 mb-3">
                             <input
                                 type="checkbox"
@@ -424,7 +424,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                                 onChange={(e) => setIsBundle(e.target.checked)}
                                 className="rounded border-border bg-card text-primary focus:ring-primary"
                             />
-                            <label htmlFor="isBundle" className="text-sm font-bold text-foreground cursor-pointer select-none">
+                            <label htmlFor="isBundle" className="text-body-ui font-bold text-foreground cursor-pointer select-none">
                                 Agrupar itens em um único produto (Bundle)
                             </label>
                         </div>
@@ -432,12 +432,12 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                         {isBundle && (
                             <div className="animate-in fade-in slide-in-from-top-2 duration-200 pl-7">
                                 {selectedBundleProduct ? (
-                                    <div className="bg-card border border-border rounded-xl p-3 flex items-center justify-between group hover:border-primary/50 transition-colors">
+                                    <div className="bg-card border border-border rounded-[var(--radius-panel)] p-3 flex items-center justify-between group hover:border-primary/50 transition-colors">
                                         <div>
-                                            <h4 className="text-sm font-bold text-foreground">{selectedBundleProduct.name}</h4>
-                                            <p className="text-xs text-muted-foreground font-mono">{selectedBundleProduct.sku}</p>
+                                            <h4 className="text-body-ui font-bold text-foreground">{selectedBundleProduct.name}</h4>
+                                            <p className="text-metadata-ui text-muted-foreground font-mono">{selectedBundleProduct.sku}</p>
                                         </div>
-                                        <button onClick={() => setSelectedBundleProduct(null)} className="p-1.5 hover:bg-red-500/10 hover:text-red-500 text-muted-foreground rounded-lg">
+                                        <button onClick={() => setSelectedBundleProduct(null)} className="p-1.5 hover:bg-destructive/10 hover:text-destructive-readable text-muted-foreground rounded-[var(--radius-control)]">
                                             <X className="h-4 w-4" />
                                         </button>
                                     </div>
@@ -451,7 +451,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             )}
 
             {/* Import Options */}
-            <div className="bg-muted/30 border border-border rounded-2xl p-4 space-y-3">
+            <div className="bg-muted/30 border border-border rounded-[var(--radius-panel)] p-4 space-y-3">
                 <div className="flex items-center gap-3">
                     <input
                         type="checkbox"
@@ -460,7 +460,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                         onChange={(e) => setImportPrices(e.target.checked)}
                         className="rounded border-border bg-card text-primary focus:ring-primary"
                     />
-                    <label htmlFor="importPrices" className="text-sm font-bold text-foreground cursor-pointer">
+                    <label htmlFor="importPrices" className="text-body-ui font-bold text-foreground cursor-pointer">
                         Importar Custos/Preços da Origem
                     </label>
                 </div>
@@ -473,7 +473,7 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
                             onChange={(e) => setImportAsSingleUnit(e.target.checked)}
                             className="rounded border-border bg-card text-primary"
                         />
-                        <label htmlFor="importAsSingleUnit" className="text-xs text-muted-foreground font-bold">
+                        <label htmlFor="importAsSingleUnit" className="text-metadata-ui text-muted-foreground font-bold">
                             Consolidar quantidade em 1 unidade (Totalizar Custo)
                         </label>
                     </div>
@@ -482,29 +482,29 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
 
             {/* Actions */}
             <div className="flex gap-3">
-                <button onClick={() => setStep('upload')} className="flex-1 bg-muted text-foreground border border-border hover:bg-muted/80 px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-colors">Voltar</button>
-                <button onClick={handlePreview} disabled={!mapping.name || !mapping.cost || (isBundle && !selectedBundleProduct)} className="flex-1 bg-primary text-white px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-blue-500/30 hover:bg-primary disabled:opacity-50 transition-colors">Continuar</button>
+                <button onClick={() => setStep('upload')} className="flex-1 bg-muted text-foreground border border-border hover:bg-muted/80 px-6 py-4 rounded-[var(--radius-panel)] font-black text-body-ui uppercase tracking-widest transition-colors">Voltar</button>
+                <button onClick={handlePreview} disabled={!mapping.name || !mapping.cost || (isBundle && !selectedBundleProduct)} className="flex-1 bg-primary text-white px-6 py-4 rounded-[var(--radius-panel)] font-black text-body-ui uppercase tracking-widest shadow-card-ui shadow-blue-500/30 hover:bg-primary disabled:opacity-50 transition-colors">Continuar</button>
             </div>
         </div>
     );
 
     const renderPreviewStep = () => (
         <div className="p-8">
-            <div className="bg-card border border-border rounded-2xl overflow-hidden max-h-[50vh] overflow-y-auto mb-6">
+            <div className="bg-card border border-border rounded-[var(--radius-panel)] overflow-hidden max-h-[50vh] overflow-y-auto mb-6">
                 <table className="w-full text-left">
                     <thead className="bg-muted sticky top-0">
                         <tr>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase">Produto</th>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase text-right">Qtd</th>
-                            <th className="px-4 py-3 text-[10px] font-black text-muted-foreground uppercase text-right">Total</th>
+                            <th className="px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase">Produto</th>
+                            <th className="px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase text-right">Qtd</th>
+                            <th className="px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase text-right">Total</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                         {previewProducts.map((p, i) => (
                             <tr key={i} className="hover:bg-muted/50 transition-colors">
-                                <td className="px-4 py-3 text-sm text-foreground font-bold">{p.name}</td>
-                                <td className="px-4 py-3 text-sm text-muted-foreground text-right">{p.quantity}</td>
-                                <td className="px-4 py-3 text-sm text-primary font-bold text-right">
+                                <td className="px-4 py-3 text-body-ui text-foreground font-bold">{p.name}</td>
+                                <td className="px-4 py-3 text-body-ui text-muted-foreground text-right">{p.quantity}</td>
+                                <td className="px-4 py-3 text-body-ui text-primary font-bold text-right">
                                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((p.cost || 0) * p.quantity)}
                                 </td>
                             </tr>
@@ -514,8 +514,8 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
             </div>
 
             <div className="flex gap-3">
-                <button onClick={() => setStep('mapping')} className="flex-1 bg-muted text-foreground border border-border hover:bg-muted/80 px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-colors">Voltar</button>
-                <button onClick={handleConfirmImport} className="flex-1 bg-primary text-white px-6 py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:bg-primary transition-colors">Importar</button>
+                <button onClick={() => setStep('mapping')} className="flex-1 bg-muted text-foreground border border-border hover:bg-muted/80 px-6 py-4 rounded-[var(--radius-panel)] font-black text-body-ui uppercase tracking-widest transition-colors">Voltar</button>
+                <button onClick={handleConfirmImport} className="flex-1 bg-primary text-white px-6 py-4 rounded-[var(--radius-panel)] font-black text-body-ui uppercase tracking-widest shadow-card-ui hover:bg-primary transition-colors">Importar</button>
             </div>
         </div>
     );
@@ -523,22 +523,22 @@ export const ImportDealProductsModal: React.FC<ImportDealProductsModalProps> = (
     const renderProcessingStep = () => (
         <div className="p-12 text-center">
             <Loader className="h-10 w-10 text-primary animate-spin mx-auto mb-4" />
-            <p className="text-lg font-black text-foreground">Processando...</p>
+            <p className="text-section-title font-black text-foreground">Processando...</p>
         </div>
     );
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-            <div className="bg-card rounded-[32px] border border-border shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto text-foreground">
+            <div className="bg-card rounded-[32px] border border-border shadow-card-ui max-w-2xl w-full max-h-[90vh] overflow-y-auto text-foreground">
                 <div className="p-8 border-b border-border flex justify-between items-center">
                     <div>
-                        <h2 className="text-2xl font-black text-foreground">Importar Itens</h2>
-                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">Processamento multimodal (XLS, XML, Print, PDF)</p>
+                        <h2 className="text-page-title font-black text-foreground">Importar Itens</h2>
+                        <p className="text-metadata-ui text-muted-foreground font-bold uppercase tracking-widest">Processamento multimodal (XLS, XML, Print, PDF)</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-xl transition-colors"><X className="text-muted-foreground" /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-[var(--radius-panel)] transition-colors"><X className="text-muted-foreground" /></button>
                 </div>
 
-                {error && <div className="mx-8 mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-500 text-sm">{error}</div>}
+                {error && <div className="mx-8 mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-[var(--radius-panel)] text-destructive-readable text-body-ui">{error}</div>}
 
                 {step === 'upload' && renderUploadStep()}
                 {step === 'mapping' && renderMappingStep()}

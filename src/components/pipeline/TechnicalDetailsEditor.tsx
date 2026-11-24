@@ -112,12 +112,12 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
         <div className="space-y-4">
             <div className="flex justify-between items-center mb-2">
                 <div>
-                    <h4 className="text-sm font-bold text-foreground">Editor de Detalhes Técnicos</h4>
-                    <p className="text-xs text-muted-foreground">Arraste para reordenar. Oculte ou destaque itens na proposta final.</p>
+                    <h4 className="text-body-ui font-bold text-foreground">Editor de Detalhes Técnicos</h4>
+                    <p className="text-metadata-ui text-muted-foreground">Arraste para reordenar. Oculte ou destaque itens na proposta final.</p>
                 </div>
                 <button
                     onClick={handleAdd}
-                    className="flex items-center gap-1.5 text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 text-metadata-ui font-bold bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1.5 rounded-[var(--radius-control)] transition-colors"
                 >
                     <Plus className="h-3.5 w-3.5" />
                     Adicionar Item
@@ -125,14 +125,14 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
             </div>
 
             {/* Normalizer Toolbar */}
-            <div className={`bg-primary/5 border border-primary/20 rounded-xl p-3 flex flex-wrap items-center justify-between gap-4 ${(!parentQuantity || parentQuantity <= 1) ? 'opacity-50 grayscale' : ''}`}>
+            <div className={`bg-primary/5 border border-primary/20 rounded-[var(--radius-panel)] p-3 flex flex-wrap items-center justify-between gap-4 ${(!parentQuantity || parentQuantity <= 1) ? 'opacity-50 grayscale' : ''}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-[var(--radius-control)] bg-primary/10 flex items-center justify-center">
                         <LayoutTemplate className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mb-1">Normalizador Automático</p>
-                        <p className="text-[11px] text-muted-foreground font-medium">Dividir itens internos pela quantidade do produto ({parentQuantity} un).</p>
+                        <p className="text-metadata-ui font-black text-primary uppercase tracking-widest leading-none mb-1">Normalizador Automático</p>
+                        <p className="text-metadata-ui text-muted-foreground font-medium">Dividir itens internos pela quantidade do produto ({parentQuantity} un).</p>
                     </div>
                 </div>
 
@@ -140,31 +140,31 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                     <button
                         onClick={handleNormalize}
                         disabled={!parentQuantity || parentQuantity <= 1 || details.length === 0}
-                        className="h-9 px-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-primary disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-2 shadow-sm"
+                        className="h-9 px-4 bg-primary text-white text-metadata-ui font-black uppercase tracking-widest rounded-[var(--radius-control)] hover:bg-primary disabled:opacity-30 disabled:grayscale transition-all flex items-center gap-2 shadow-control-ui"
                     >
                         Normalizar para 1 un.
                     </button>
                 </div>
             </div>
 
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="bg-card border border-border rounded-[var(--radius-panel)] overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-muted">
                         <tr>
                             <th className="w-8 px-3 py-2"></th>
-                            <th className="px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider">Descrição Técnico/Comercial</th>
-                            <th className="w-20 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Qtd</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Custo (Unit)</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-right">Venda (Unit)</th>
-                            <th className="w-20 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider text-center">Proposta</th>
-                            <th className="w-32 px-3 py-2 text-[10px] font-black text-muted-foreground uppercase tracking-wider">Destaque</th>
+                            <th className="px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider">Descrição Técnico/Comercial</th>
+                            <th className="w-20 px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider text-right">Qtd</th>
+                            <th className="w-32 px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider text-right">Custo (Unit)</th>
+                            <th className="w-32 px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider text-right">Venda (Unit)</th>
+                            <th className="w-20 px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider text-center">Proposta</th>
+                            <th className="w-32 px-3 py-2 text-metadata-ui font-black text-muted-foreground uppercase tracking-wider">Destaque</th>
                             <th className="w-10 px-3 py-2"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                         {details.length === 0 ? (
                             <tr>
-                                <td colSpan={8} className="px-4 py-8 text-center text-sm text-muted-foreground font-medium">
+                                <td colSpan={8} className="px-4 py-8 text-center text-body-ui text-muted-foreground font-medium">
                                     Nenhum detalhe técnico. Adicione itens para compor este produto.
                                 </td>
                             </tr>
@@ -184,7 +184,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
 
                                     <td className="px-3 py-2">
                                         <div className="flex flex-col">
-                                            {item.sku && <span className="text-[10px] font-mono text-muted-foreground">{item.sku}</span>}
+                                            {item.sku && <span className="text-metadata-ui font-mono text-muted-foreground">{item.sku}</span>}
                                             <input
                                                 ref={editingId === item.id ? descriptionInputRef : null}
                                                 type="text"
@@ -194,7 +194,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                     setEditingId(item.id);
                                                     e.target.select();
                                                 }}
-                                                className={`bg-transparent border-0 p-1 -ml-1 text-sm font-semibold focus:ring-1 focus:ring-primary rounded w-full ${item.is_visible_on_proposal !== true ? 'text-muted-foreground' : 'text-foreground'}`}
+                                                className={`bg-transparent border-0 p-1 -ml-1 text-body-ui font-semibold focus:ring-1 focus:ring-primary rounded w-full ${item.is_visible_on_proposal !== true ? 'text-muted-foreground' : 'text-foreground'}`}
                                                 placeholder="Descrição do item..."
                                             />
                                         </div>
@@ -209,14 +209,14 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                 e.target.select();
                                             }}
                                             onChange={(e) => handleUpdate(item.id, 'quantity', parseInt(e.target.value) || 1)}
-                                            className="bg-transparent hover:bg-muted border border-transparent focus:border-primary focus:bg-background px-1.5 py-1 text-xs text-right font-medium outline-none focus:ring-0 rounded-md w-full transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            className="bg-transparent hover:bg-muted border border-transparent focus:border-primary focus:bg-background px-1.5 py-1 text-metadata-ui text-right font-medium outline-none focus:ring-0 rounded-[var(--radius-control)] w-full transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             min="1"
                                         />
                                     </td>
 
                                     <td className="px-3 py-2 text-right">
-                                        <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-md transition-all">
-                                            <span className="pl-2.5 text-[10px] font-bold text-muted-foreground/50">R$</span>
+                                        <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-[var(--radius-control)] transition-all">
+                                            <span className="pl-2.5 text-metadata-ui font-bold text-muted-foreground/50">R$</span>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -226,15 +226,15 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                     e.target.select();
                                                 }}
                                                 onChange={(e) => handleUpdate(item.id, 'unit_cost', parseFloat(e.target.value) || 0)}
-                                                className="bg-transparent border-0 px-2 py-1 text-xs text-right font-bold outline-none focus:ring-0 w-full text-emerald-600 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                className="bg-transparent border-0 px-2 py-1 text-metadata-ui text-right font-bold outline-none focus:ring-0 w-full text-success-readable [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 placeholder="0,00"
                                             />
                                         </div>
                                     </td>
 
                                     <td className="px-3 py-2 text-right">
-                                        <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-md transition-all">
-                                            <span className="pl-2.5 text-[10px] font-bold text-muted-foreground/50">R$</span>
+                                        <div className="relative h-9 flex items-center bg-transparent hover:bg-muted border border-transparent focus-within:border-primary focus-within:ring-1 focus-within:ring-primary focus-within:bg-background rounded-[var(--radius-control)] transition-all">
+                                            <span className="pl-2.5 text-metadata-ui font-bold text-muted-foreground/50">R$</span>
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -244,7 +244,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                     e.target.select();
                                                 }}
                                                 onChange={(e) => handleUpdate(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
-                                                className="bg-transparent border-0 px-2 py-1 text-xs text-right font-bold outline-none focus:ring-0 w-full text-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                className="bg-transparent border-0 px-2 py-1 text-metadata-ui text-right font-bold outline-none focus:ring-0 w-full text-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 placeholder="0,00"
                                             />
                                         </div>
@@ -253,7 +253,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                     <td className="px-3 py-2 text-center">
                                         <button
                                             onClick={() => handleUpdate(item.id, 'is_visible_on_proposal', item.is_visible_on_proposal === true ? false : true)}
-                                            className={`p-1.5 rounded-lg transition-colors ${item.is_visible_on_proposal === true ? 'text-emerald-500 hover:bg-emerald-500/10' : 'text-muted-foreground hover:bg-muted'}`}
+                                            className={`p-1.5 rounded-[var(--radius-control)] transition-colors ${item.is_visible_on_proposal === true ? 'text-success-readable hover:bg-success/10' : 'text-muted-foreground hover:bg-muted'}`}
                                             title={item.is_visible_on_proposal === true ? 'Aparece na proposta' : 'Oculto na proposta'}
                                         >
                                             {item.is_visible_on_proposal === true ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
@@ -265,7 +265,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                             <button
                                                 onClick={() => handleUpdate(item.id, 'is_highlighted_on_grid', !item.is_highlighted_on_grid)}
                                                 disabled={item.is_visible_on_proposal !== true}
-                                                className={`p-1.5 rounded-lg transition-colors ${item.is_highlighted_on_grid ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'} disabled:opacity-30`}
+                                                className={`p-1.5 rounded-[var(--radius-control)] transition-colors ${item.is_highlighted_on_grid ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'} disabled:opacity-30`}
                                                 title="Destacar no sumário"
                                             >
                                                 <LayoutTemplate className="h-4 w-4" />
@@ -275,7 +275,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                                     type="text"
                                                     value={item.grid_label || ''}
                                                     onChange={(e) => handleUpdate(item.id, 'grid_label', e.target.value)}
-                                                    className="text-[10px] px-2 py-1 border border-border rounded bg-background focus:border-primary focus:ring-0 w-24 h-7"
+                                                    className="text-metadata-ui px-2 py-1 border border-border rounded bg-background focus:border-primary focus:ring-0 w-24 h-7"
                                                     placeholder="Rótulo..."
                                                 />
                                             )}
@@ -285,7 +285,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                                     <td className="px-3 py-2 text-right">
                                         <button
                                             onClick={() => handleRemove(item.id)}
-                                            className="p-1.5 text-muted-foreground/30 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                            className="p-1.5 text-muted-foreground/30 hover:text-destructive-readable hover:bg-destructive/10 rounded-[var(--radius-control)] transition-colors opacity-0 group-hover:opacity-100"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
@@ -297,9 +297,9 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                     {details.length > 0 && (
                         <tfoot className="bg-muted/30 border-t border-border">
                             <tr className="divide-x divide-border/10">
-                                <td colSpan={3} className="px-3 py-1.5 text-[9px] font-bold text-muted-foreground uppercase text-right">Subtotal Composição:</td>
-                                <td className="px-3 py-1.5 text-right text-[10px] font-black text-emerald-600/80">{formatCurrency(totals.cost)}</td>
-                                <td className="px-3 py-1.5 text-right text-[10px] font-black text-primary/80">{formatCurrency(totals.price)}</td>
+                                <td colSpan={3} className="px-3 py-1.5 text-metadata-ui font-bold text-muted-foreground uppercase text-right">Subtotal Composição:</td>
+                                <td className="px-3 py-1.5 text-right text-metadata-ui font-black text-success-readable/80">{formatCurrency(totals.cost)}</td>
+                                <td className="px-3 py-1.5 text-right text-metadata-ui font-black text-primary/80">{formatCurrency(totals.price)}</td>
                                 <td colSpan={3}></td>
                             </tr>
                         </tfoot>
@@ -307,7 +307,7 @@ export const TechnicalDetailsEditor: React.FC<TechnicalDetailsEditorProps> = ({ 
                 </table>
             </div>
 
-            <div className="flex gap-2 text-[10px] font-medium text-muted-foreground bg-muted/30 p-2 rounded-lg">
+            <div className="flex gap-2 text-metadata-ui font-medium text-muted-foreground bg-muted/30 p-2 rounded-[var(--radius-control)]">
                 <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Determina se a linha aparecerá na lista detalhada da proposta.</span>
                 <span className="flex items-center gap-1 ml-4"><LayoutTemplate className="h-3 w-3" /> Cria um "Card" especial na capa do sumário de hardware.</span>
             </div>

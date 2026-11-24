@@ -352,15 +352,15 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
         <TabsContent value="products" className="mt-0 flex flex-col flex-1 h-full w-full overflow-hidden p-8">
             <div className="flex justify-between items-center mb-6">
                 <div className="flex-1">
-                    <h2 className="text-xl font-bold text-foreground">Produtos & Serviços</h2>
-                    <p className="text-sm text-muted-foreground">Gerencie o escopo desta oportunidade</p>
+                    <h2 className="text-section-title font-bold text-foreground">Produtos & Serviços</h2>
+                    <p className="text-body-ui text-muted-foreground">Gerencie o escopo desta oportunidade</p>
                 </div>
                 <div className="flex gap-3 items-center">
                     {selectedProducts.size > 0 && (
                         <Button
                             variant="destructive"
                             onClick={handleBulkDelete}
-                            className="h-11 px-4 rounded-xl gap-2 animate-in fade-in"
+                            className="h-11 px-4 rounded-[var(--radius-panel)] gap-2 animate-in fade-in"
                         >
                             <Trash2 className="w-4 h-4" />
                             <span className="hidden sm:inline">Excluir ({selectedProducts.size})</span>
@@ -381,7 +381,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                         setTargetImportProductId(null);
                                         setShowImportModal(true);
                                     }}
-                                    className="border-input hover:bg-accent hover:text-accent-foreground h-11 px-6 rounded-xl font-bold text-xs uppercase tracking-widest transition-all hover:border-primary/30"
+                                    className="border-input hover:bg-accent hover:text-accent-foreground h-11 px-6 rounded-[var(--radius-panel)] font-bold text-metadata-ui uppercase tracking-widest transition-all hover:border-primary/30"
                                 >
                                     <FileSpreadsheet className="w-4 h-4 mr-2 text-primary" />
                                     Importar
@@ -390,7 +390,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
 
                             <Button
                                 className={`
-                                    h-11 px-8 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg
+                                    h-11 px-8 rounded-[var(--radius-panel)] font-bold text-metadata-ui uppercase tracking-widest transition-all shadow-card-ui
                                     ${showProductSearch
                                         ? "bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20"
                                         : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 hover:shadow-primary/40"
@@ -408,23 +408,23 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
 
             {isEditing && selectedCatalogProduct && (
                 <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                    <div className="bg-muted/50 border border-border rounded-xl p-4 flex items-center justify-between">
+                    <div className="bg-muted/50 border border-border rounded-[var(--radius-panel)] p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <div className="h-12 w-12 bg-primary/10 rounded-[var(--radius-control)] flex items-center justify-center">
                                 <Package className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <h4 className="text-base font-black text-foreground uppercase tracking-tight">{selectedCatalogProduct.name}</h4>
+                                <h4 className="text-body-ui font-black text-foreground uppercase tracking-tight">{selectedCatalogProduct.name}</h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded tracking-tighter">{selectedCatalogProduct.sku}</span>
-                                    <span className="text-[10px] text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded">{selectedCatalogProduct.brand}</span>
+                                    <span className="text-metadata-ui text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded tracking-tighter">{selectedCatalogProduct.sku}</span>
+                                    <span className="text-metadata-ui text-primary font-bold bg-primary/10 px-1.5 py-0.5 rounded">{selectedCatalogProduct.brand}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-6">
                             <div className="text-right">
-                                <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest block mb-1">Quantidade</label>
+                                <label className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest block mb-1">Quantidade</label>
                                 <Input
                                     type="number"
                                     min="1"
@@ -436,7 +436,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                             </div>
                             <Button
                                 onClick={handleConfirmAddProduct}
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 font-black text-xs uppercase tracking-widest px-8 shadow-lg shadow-primary/20 rounded-xl"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 font-black text-metadata-ui uppercase tracking-widest px-8 shadow-card-ui shadow-primary/20 rounded-[var(--radius-panel)]"
                             >
                                 Incluir na Oportunidade
                             </Button>
@@ -445,25 +445,25 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                 </div>
             )}
 
-            <div className="bg-card rounded-[32px] border border-border shadow-sm flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            <div className="bg-card rounded-[32px] border border-border shadow-control-ui flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
                     <table className="w-full text-left table-fixed">
-                        <thead className="text-[10px] text-muted-foreground uppercase font-bold tracking-wide bg-muted/30">
+                        <thead className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-wide bg-muted/30">
                             <tr>
                                 <th className="w-10"></th>
                                 <th className="pl-6 py-5 w-16 text-center">
                                     <div className="flex flex-col items-center gap-1">
-                                        {isEditing && <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
+                                        {isEditing && <span className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide">Sel.</span>}
                                     </div>
                                 </th>
-                                <th className="px-4 py-5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
-                                <th className="px-4 py-5 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
-                                <th className="px-4 py-5 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
-                                <th className="px-6 py-5 text-right text-[10px] font-bold text-foreground uppercase tracking-wide w-32">Total</th>
+                                <th className="px-4 py-5 text-left text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide">Produto / SKU</th>
+                                <th className="px-4 py-5 text-center text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide w-24">Qtd</th>
+                                <th className="px-4 py-5 text-right text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide w-32">Preço Unit.</th>
+                                <th className="px-6 py-5 text-right text-metadata-ui font-bold text-foreground uppercase tracking-wide w-32">Total</th>
                                 <th className="w-10"></th>
                             </tr>
                         </thead>
@@ -477,7 +477,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                         <td colSpan={7} className="px-6 py-12 text-center">
                                             <div className="flex flex-col items-center justify-center space-y-4">
                                                 <Package className="h-10 w-10 text-muted-foreground/50" />
-                                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Nenhum produto adicionado</p>
+                                                <p className="text-body-ui font-bold text-muted-foreground uppercase tracking-wide">Nenhum produto adicionado</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -522,22 +522,22 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                 <td colSpan={3} className="px-6 py-6 align-top">
                                     <div className="flex items-start justify-end gap-20">
                                         <div className="flex flex-col items-end gap-1">
-                                            <span className="text-sm font-black text-muted-foreground">
+                                            <span className="text-body-ui font-black text-muted-foreground">
                                                 {formatCurrency(calculateDealTotalCost(deal.deal_products || []))}
                                             </span>
-                                            <p className="text-[9px] text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total</p>
+                                            <p className="text-metadata-ui text-muted-foreground/70 font-bold uppercase tracking-wide">Custo Total</p>
                                         </div>
 
                                         <div className="flex flex-col items-end gap-2">
                                             <div className="flex flex-col items-end">
-                                                <span className="text-2xl font-black text-primary tracking-tight whitespace-nowrap">
+                                                <span className="text-page-title font-black text-primary tracking-tight whitespace-nowrap">
                                                     {formatCurrency(calculateDealValue(deal.deal_products || []))}
                                                 </span>
-                                                <p className="text-[9px] text-primary font-bold uppercase tracking-wide">Valor de Venda</p>
+                                                <p className="text-metadata-ui text-primary font-bold uppercase tracking-wide">Valor de Venda</p>
                                             </div>
 
-                                            <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                                                <span className="text-[10px] font-bold text-emerald-500">
+                                            <div className="flex items-center gap-2 px-2 py-1 bg-success/10 rounded-[var(--radius-control)] border border-success/20">
+                                                <span className="text-metadata-ui font-bold text-success-readable">
                                                     {(() => {
                                                         const totalCost = calculateDealTotalCost(deal.deal_products || []);
                                                         const totalSales = calculateDealValue(deal.deal_products || []);
@@ -546,7 +546,7 @@ export function DealProductsTab({ deal, setDeal, isEditing, setIsEditing, distri
                                                         return `${margin.toFixed(1)} % `;
                                                     })()}
                                                 </span>
-                                                <span className="text-[9px] font-bold text-emerald-500/70 uppercase">Margem</span>
+                                                <span className="text-metadata-ui font-bold text-success-readable/70 uppercase">Margem</span>
                                             </div>
                                         </div>
                                     </div>

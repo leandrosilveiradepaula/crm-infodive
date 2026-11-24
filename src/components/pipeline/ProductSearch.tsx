@@ -159,7 +159,7 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
         const parts = text.split(new RegExp(`(${search})`, 'gi'));
         return parts.map((part, i) =>
             part.toLowerCase() === search.toLowerCase() ?
-                <span key={i} className="bg-primary/30 text-primary font-black px-0.5 rounded-sm">{part}</span> : part
+                <span key={i} className="bg-primary/30 text-primary font-black px-0.5 rounded-[var(--radius-control)]">{part}</span> : part
         );
     };
 
@@ -177,7 +177,7 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                 </div>
                 <input
                     type="text"
-                    className="w-full pl-11 pr-32 py-3 text-sm bg-muted/50 border border-border rounded-2xl text-foreground placeholder-muted-foreground focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-lg"
+                    className="w-full pl-11 pr-32 py-3 text-body-ui bg-muted/50 border border-border rounded-[var(--radius-panel)] text-foreground placeholder-muted-foreground focus:border-primary/50 focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-card-ui"
                     placeholder="Pesquisar catálogo..."
                     value={searchTerm}
                     onChange={(e) => {
@@ -190,7 +190,7 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                     {hasActiveFilters && (
                         <button
                             onClick={handleClearSearch}
-                            className="p-1.5 hover:bg-muted rounded-xl transition-colors text-muted-foreground hover:text-foreground"
+                            className="p-1.5 hover:bg-muted rounded-[var(--radius-panel)] transition-colors text-muted-foreground hover:text-foreground"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -198,9 +198,9 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                     <button
                         onClick={() => setShowFilters(!showFilters)}
                         className={`
-                            flex items-center gap-2 h-8 px-2.5 rounded-xl transition-all border text-[9px] font-black uppercase tracking-wider
+                            flex items-center gap-2 h-8 px-2.5 rounded-[var(--radius-panel)] transition-all border text-metadata-ui font-black uppercase tracking-wider
                             ${showFilters
-                                ? 'bg-primary border-primary/50 text-white shadow-lg shadow-blue-500/20'
+                                ? 'bg-primary border-primary/50 text-white shadow-card-ui shadow-blue-500/20'
                                 : 'bg-muted/50 border-border text-muted-foreground hover:text-foreground hover:bg-muted'
                             }
                         `}
@@ -217,15 +217,15 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="mt-2 p-4 bg-card rounded-2xl shadow-2xl border border-border"
+                        className="mt-2 p-4 bg-card rounded-[var(--radius-panel)] shadow-card-ui border border-border"
                     >
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Categoria</label>
+                                <label className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest px-1">Categoria</label>
                                 <select
                                     value={categoryFilter}
                                     onChange={(e) => setCategoryFilter(e.target.value)}
-                                    className="w-full text-xs bg-muted border border-border rounded-xl px-3 py-2.5 text-foreground focus:border-primary outline-none appearance-none cursor-pointer hover:border-border/80 transition-colors"
+                                    className="w-full text-metadata-ui bg-muted border border-border rounded-[var(--radius-panel)] px-3 py-2.5 text-foreground focus:border-primary outline-none appearance-none cursor-pointer hover:border-border/80 transition-colors"
                                 >
                                     {categories.map(cat => (
                                         <option key={cat} value={cat}>{cat === 'all' ? 'Todas as Categorias' : cat}</option>
@@ -233,11 +233,11 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                                 </select>
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest px-1">Fabricante</label>
+                                <label className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest px-1">Fabricante</label>
                                 <select
                                     value={brandFilter}
                                     onChange={(e) => setBrandFilter(e.target.value)}
-                                    className="w-full text-xs bg-muted border border-border rounded-xl px-3 py-2.5 text-foreground focus:border-primary outline-none appearance-none cursor-pointer hover:border-border/80 transition-colors"
+                                    className="w-full text-metadata-ui bg-muted border border-border rounded-[var(--radius-panel)] px-3 py-2.5 text-foreground focus:border-primary outline-none appearance-none cursor-pointer hover:border-border/80 transition-colors"
                                 >
                                     {brands.map(brand => (
                                         <option key={brand} value={brand}>{brand === 'all' ? 'Todos os Fabricantes' : brand}</option>
@@ -250,30 +250,30 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
             </AnimatePresence>
 
             {showDropdown && (debouncedSearch.trim() || categoryFilter !== 'all' || brandFilter !== 'all') && (
-                <div className="absolute z-[100] w-full mt-2 bg-card rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-border overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                <div className="absolute z-[100] w-full mt-2 bg-card rounded-[var(--radius-panel)] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-border overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                     {error ? (
                         <div className="px-8 py-10 text-center">
-                            <div className="h-16 w-16 bg-red-500/10 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-                                <AlertCircle className="h-8 w-8 text-red-500" />
+                            <div className="h-16 w-16 bg-destructive/10 rounded-[var(--radius-panel)] flex items-center justify-center mx-auto mb-4 border border-destructive/20">
+                                <AlertCircle className="h-8 w-8 text-destructive-readable" />
                             </div>
-                            <h4 className="text-lg font-black text-foreground mb-1">Erro ao carregar catálogo</h4>
-                            <p className="text-xs text-red-500 font-bold mb-2">{error}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Contate o suporte técnico.</p>
+                            <h4 className="text-section-title font-black text-foreground mb-1">Erro ao carregar catálogo</h4>
+                            <p className="text-metadata-ui text-destructive-readable font-bold mb-2">{error}</p>
+                            <p className="text-metadata-ui text-muted-foreground uppercase tracking-widest">Contate o suporte técnico.</p>
                         </div>
                     ) : loading ? (
                         // Show loading skeleton while products are being fetched from Supabase
                         <div className="px-8 py-10 text-center">
                             <Loader2 className="h-8 w-8 text-primary animate-spin mx-auto mb-4" />
-                            <p className="text-sm font-black text-foreground mb-1">Carregando catálogo...</p>
-                            <p className="text-xs text-muted-foreground font-bold">Aguarde um instante</p>
+                            <p className="text-body-ui font-black text-foreground mb-1">Carregando catálogo...</p>
+                            <p className="text-metadata-ui text-muted-foreground font-bold">Aguarde um instante</p>
                         </div>
                     ) : filteredProducts.length > 0 ? (
                         <div className="flex flex-col max-h-[450px]">
                             <div className="px-5 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
-                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">
                                     {filteredProducts.length} {filteredProducts.length === 1 ? 'Produto' : 'Produtos'} encontrados
                                 </p>
-                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold">
+                                <div className="flex items-center gap-1.5 text-metadata-ui text-muted-foreground font-bold">
                                     <Database className="h-3 w-3" />
                                     <span>IBM Catalog</span>
                                 </div>
@@ -293,20 +293,20 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                                                 onMouseEnter={() => setSelectedIndex(index)}
                                                 className={`w-full text-left px-5 py-4 flex items-center gap-4 transition-all border-b border-border last:border-none ${isSelected ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                                             >
-                                                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-inner group ${isSelected ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
+                                                <div className={`h-12 w-12 rounded-[var(--radius-panel)] flex items-center justify-center shrink-0 shadow-inner group ${isSelected ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
                                                     <Icon className="h-6 w-6" />
                                                 </div>
 
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-start mb-1">
                                                         <div>
-                                                            <p className="text-sm font-black text-foreground leading-none mb-1.5 truncate">
+                                                            <p className="text-body-ui font-black text-foreground leading-none mb-1.5 truncate">
                                                                 {highlightMatch(product.name, debouncedSearch)}
                                                             </p>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="text-[10px] text-muted-foreground font-mono tracking-tight">{product.sku}</span>
+                                                                <span className="text-metadata-ui text-muted-foreground font-mono tracking-tight">{product.sku}</span>
                                                                 <span className="w-1 h-1 rounded-full bg-border" />
-                                                                <span className="text-[10px] text-primary font-black uppercase tracking-widest">{product.brand}</span>
+                                                                <span className="text-metadata-ui text-primary font-black uppercase tracking-widest">{product.brand}</span>
                                                             </div>
                                                         </div>
 
@@ -316,25 +316,25 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                                                             className="flex flex-col items-end gap-1.5 group/stock cursor-pointer"
                                                         >
                                                             {checkingStock[product.sku] ? (
-                                                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 border border-border rounded-lg">
+                                                                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 border border-border rounded-[var(--radius-control)]">
                                                                     <Loader2 className="h-3 w-3 text-primary animate-spin" />
-                                                                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tighter">Consultando...</span>
+                                                                    <span className="text-metadata-ui font-black text-muted-foreground uppercase tracking-tighter">Consultando...</span>
                                                                 </div>
                                                             ) : stock ? (
                                                                 <div className={`
-                                                                    flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all
-                                                                    ${stock.status === 'in_stock' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' :
-                                                                        stock.status === 'low_stock' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500' :
-                                                                            'bg-red-500/10 border-red-500/30 text-red-500'}
+                                                                    flex items-center gap-2 px-3 py-1.5 rounded-[var(--radius-control)] border transition-all
+                                                                    ${stock.status === 'in_stock' ? 'bg-success/10 border-success/30 text-success-readable' :
+                                                                        stock.status === 'low_stock' ? 'bg-warning/10 border-warning/30 text-warning-readable' :
+                                                                            'bg-destructive/10 border-destructive/30 text-destructive-readable'}
                                                                 `}>
                                                                     {stock.status === 'in_stock' ? <CheckCircle2 className="h-3 w-3" /> :
                                                                         stock.status === 'low_stock' ? <AlertCircle className="h-3 w-3" /> :
                                                                             <Inbox className="h-3 w-3" />}
-                                                                    <span className="text-[11px] font-black">{stock.quantity} UN</span>
+                                                                    <span className="text-metadata-ui font-black">{stock.quantity} UN</span>
                                                                 </div>
                                                             ) : (
-                                                                <div className="px-3 py-1.5 bg-muted/50 hover:bg-primary/20 hover:text-primary border border-border rounded-lg transition-all">
-                                                                    <span className="text-[9px] font-black text-muted-foreground group-hover/stock:text-primary uppercase tracking-tighter">Ver Estoque</span>
+                                                                <div className="px-3 py-1.5 bg-muted/50 hover:bg-primary/20 hover:text-primary border border-border rounded-[var(--radius-control)] transition-all">
+                                                                    <span className="text-metadata-ui font-black text-muted-foreground group-hover/stock:text-primary uppercase tracking-tighter">Ver Estoque</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -348,15 +348,15 @@ export const ProductSearch = ({ onSelect }: ProductSearchProps) => {
                         </div>
                     ) : (
                         <div className="px-8 py-16 text-center">
-                            <div className="h-16 w-16 bg-muted/50 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-border">
+                            <div className="h-16 w-16 bg-muted/50 rounded-[var(--radius-panel)] flex items-center justify-center mx-auto mb-4 border border-border">
                                 <Search className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h4 className="text-lg font-black text-foreground mb-1">Sem resultados</h4>
-                            <p className="text-xs text-muted-foreground font-bold mb-6">Tente ajustar seus termos de busca ou filtros.</p>
+                            <h4 className="text-section-title font-black text-foreground mb-1">Sem resultados</h4>
+                            <p className="text-metadata-ui text-muted-foreground font-bold mb-6">Tente ajustar seus termos de busca ou filtros.</p>
                             {hasActiveFilters && (
                                 <button
                                     onClick={handleClearSearch}
-                                    className="px-6 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                    className="px-6 py-3 bg-primary/10 text-primary hover:bg-primary/20 rounded-[var(--radius-panel)] text-metadata-ui font-black uppercase tracking-widest transition-all"
                                 >
                                     Limpar todos os filtros
                                 </button>
