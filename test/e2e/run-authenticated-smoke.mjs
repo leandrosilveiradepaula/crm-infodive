@@ -428,6 +428,11 @@ async function runAxe(page, source) {
                 hasVisibleText: Boolean((element.innerText || '').trim()),
                 hasSvgIcon: Boolean(element.querySelector('svg')),
                 isSvg: Boolean(element.closest('svg')),
+                // Quantized bounding box only; no names, content or selectors.
+                bounds: (() => {
+                    const rect = element.getBoundingClientRect();
+                    return [rect.x, rect.y, rect.width, rect.height].map(n => Math.round(n / 4) * 4);
+                })(),
                 color: safeColor(style.color),
                 background: safeColor(style.backgroundColor),
                 hasBackgroundImage: style.backgroundImage !== 'none',

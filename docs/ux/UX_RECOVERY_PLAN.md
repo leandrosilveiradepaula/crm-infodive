@@ -1,3 +1,9 @@
+### 2026-11-24 — DS5 P1 residual Planning contrast and responsive selector
+
+**Observed SHA 28cca4b0:** [CI 45470307615](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45470307615) SUCCESS (291 tests); [authenticated QA 45470307748](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45470307748) FAILED only in Planning and Seasonality nested states. Contrast issue counts dropped from five failing states to two, and labels/most color failures disappeared. Remaining: one actual Planning paragraph contrast violation; three Planning axe `incomplete` (one goal-mode option overlap, two funnel metrics), and three Seasonality `incomplete` (funnel metrics/paragraph). Visual screenshot verified the severely broken first-column layout is now repaired and DRE sits beside Planning, but three goal-mode choices are still compressed to half-column width; funnel uses translucent blue panel with decorative 10%-opacity overlay. Next candidate allocates full width to mode selector and monthly goal, replaces translucent funnel surface with solid semantic surface, removes decorative icon, creates responsive metric grid and enriches safe diagnostics with quantized numeric bounding coordinates for any remaining contrast failure. Keep P1 OPEN until same-SHA real QA zero violations **and** zero incompletes, plus visual inspection in both themes/sizes. No financial formula, business write, production or hosted DB change.
+
+---
+
 ### 2026-11-24 — P1 Goals nested screens: confirmed root causes and remediation candidate
 
 **Proof:** SHA bf69f1dd CI [45468723328](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45468723328) SUCCESS, isolated authenticated QA [45468723316](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45468723316) **FAIL**. Sanitized axe diagnostics:

@@ -229,6 +229,15 @@ describe('Central design system — source propagation and strict migrated famil
     expect(runner).toContain('Wait for the real Radix tab');
   });
 
+  it('prevents clipped financial mode choices and contrast-ambiguous decorative overlays', () => {
+    const planning = read('src/components/goals/tabs/PlanningTab.tsx');
+    expect(planning).not.toContain('col-span-2 md:col-span-1 min-w-0');
+    expect(planning).toContain('bg-surface-subtle p-5 sm:p-6');
+    expect(planning).not.toContain('absolute top-0 right-0 p-4 opacity-10');
+    const e2e = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(e2e).toContain('Quantized bounding box only');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

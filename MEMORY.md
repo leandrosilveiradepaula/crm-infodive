@@ -1,3 +1,7 @@
+## 2026-11-24 — Goals stateful QA progressed to two residual states
+
+Commit 28cca4b0 CI 45470307615 SUCCESS (291 tests, 25 strict components); isolated QA 45470307748 FAIL only in Planning and Seasonality after previous failures in all five nested states. New real screenshot confirms fixed 12-col toolbar/5+7 financial layout, with DRE on the right; residual clipped three-way goal selector at half width and translucent funnel surfaces causing axe contrast incomplete. Targeted code correction gives full-span mode selector and monthly goal, solid semantic funnel surface, no decorative opacity overlay, responsive 3-metric grid. Safe diagnostics add quantized bounds for remaining p-contrast issue. No math/actions/data/RBAC/DB/production change. PR #221 Draft and same-SHA QA gate remain.
+
 ## 2026-11-24 — DS5 real Goals visual/axe defects from expanded QA
 
 After bf69f1dd CI PASS, real isolated QA run 45468723316 FAIL in ALL five newly tested Goals sub-states. Logs: commissions contrast 2; campaigns contrast 3 + labels 2; planning contrast 40 + labels 7 + incomplete 5; seasonal chart labels 7 + incomplete 20; statement contrast 2. Actual desktop screenshot proves severe Planning layout bug: a free FilterBar occupies one grid column, displacing results, plus duplicated nested goal selector. Candidate fixes real grid hierarchy, labels, shared accessible chart disclosure, semantic text and transition sampling. No server actions/tenant/RBAC/DB/production modifications; #221 stays DRAFT; require same-SHA CI+QA and screenshot review.

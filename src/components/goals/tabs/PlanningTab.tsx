@@ -300,7 +300,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                         <div className="p-6 pt-2 border-t border-border/50 space-y-6 animate-in slide-in-from-top-2 duration-300">
                             {/* Metas & Conversão */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2 md:col-span-1 min-w-0">
+                                <div className="col-span-2 min-w-0">
                                     <label className="text-metadata-ui font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         Definir Meta Por:
                                     </label>
@@ -333,7 +333,7 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                                         </button>
                                     </div>
                                 </div>
-                                <div className="col-span-2 md:col-span-1 min-w-0">
+                                <div className="col-span-2 min-w-0">
                                     <label className="text-metadata-ui font-black uppercase text-muted-foreground tracking-widest block mb-2 px-1">
                                         {goalMode === 'revenue' ? 'Meta Faturamento (Mensal)' : goalMode === 'profit_absolute' ? 'Lucro Desejado (Mensal)' : 'Margem Alvo'}
                                     </label>
@@ -667,24 +667,21 @@ export function PlanningTab({ scenarios, currentUserId, users }: PlanningTabProp
                 />
 
                 {/* 2. Reverse Funnel Calculator */}
-                <div className="bg-primary/5 border border-primary/20 rounded-[var(--radius-panel)] p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <Target className="h-32 w-32" />
-                    </div>
+                <div className="rounded-[var(--radius-panel)] border border-border bg-surface-subtle p-5 sm:p-6">
                     <h3 className="text-body-ui font-black text-primary uppercase tracking-widest mb-4">
                         Calculadora Reversa de Funil
                     </h3>
-                    <div className="flex items-center justify-between relative z-10">
+                    <div className="grid grid-cols-1 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)]">
                         <div className="text-center">
                             <p className="text-metric-ui font-black text-foreground">{requiredOpportunities}</p>
                             <p className="text-metadata-ui font-bold text-muted-foreground uppercase mt-1">Oportunidades</p>
                         </div>
-                        <ArrowRight className="h-6 w-6 text-muted-foreground/50" />
+                        <ArrowRight className="hidden h-6 w-6 text-muted-foreground sm:block" />
                         <div className="text-center">
                             <p className="text-metric-ui font-black text-foreground">{Math.round(requiredDeals)}</p>
                             <p className="text-metadata-ui font-bold text-muted-foreground uppercase mt-1">Fechamentos</p>
                         </div>
-                        <ArrowRight className="h-6 w-6 text-muted-foreground/50" />
+                        <ArrowRight className="hidden h-6 w-6 text-muted-foreground sm:block" />
                         <div className="text-center">
                             <p className="text-metric-ui font-black text-success-readable">
                                 {monthlyRevenueGoal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' })}
