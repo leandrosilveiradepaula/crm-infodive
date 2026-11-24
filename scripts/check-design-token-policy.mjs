@@ -24,6 +24,22 @@ export const policies = {
  * Extending this list is a one-way migration; do not suppress an active violation.
  */
 export const fullyMigratedModules = Object.freeze([
+  'src/components/settings/UsersTab.tsx',
+  'src/components/settings/UsersSettings.tsx',
+  'src/components/settings/AuditLogTab.tsx',
+  'src/components/settings/ProfileSettings.tsx',
+  'src/components/settings/InviteUserModal.tsx',
+  'src/components/settings/EditUserModal.tsx',
+  'src/components/settings/RoleSelect.tsx',
+  'src/app/(dashboard)/activities/client-page.tsx',
+  'src/app/(dashboard)/activities/components/CalendarView.tsx',
+  'src/components/automations/AutomationBuilder.tsx',
+  'src/components/automations/HistorySheet.tsx',
+  'src/components/contracts/ContractViewer.tsx',
+  'src/components/contracts/SignatureModal.tsx',
+  'src/app/(dashboard)/service-desk/service-desk-client.tsx',
+  'src/app/(dashboard)/contracts/client-page.tsx',
+  'src/app/(dashboard)/service-desk/knowledge/knowledge-client.tsx',
   'src/components/pipeline/product-row/ProductFinancialDetails.tsx',
   'src/app/(dashboard)/sales/tabs/DashboardTab.tsx',
   'src/components/goals/tabs/PlanningTab.tsx',
