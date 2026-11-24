@@ -29,12 +29,12 @@ import { type Automation } from '@/types/automation';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator 
+    DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
@@ -118,7 +118,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
     const totalExecutions = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.executionCount || 0), 0);
     const totalSuccessCount = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.successCount || 0), 0);
-    const successRate = totalExecutions > 0 
+    const successRate = totalExecutions > 0
         ? ((totalSuccessCount / totalExecutions) * 100).toFixed(1)
         : "0";
 
@@ -158,11 +158,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     const filteredAutomations = initialAutomations.filter((a: Automation) => {
         const matchesSearch = a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             a.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         if (filterType === 'failed') return matchesSearch && (a.failureCount || 0) > 0;
         if (filterType === 'active') return matchesSearch && a.enabled;
         if (filterType === 'inactive') return matchesSearch && !a.enabled;
-        
+
         return matchesSearch;
     });
 
@@ -271,7 +271,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-body-ui font-black text-foreground uppercase tracking-[0.2em]">Receitas Recomendadas</h2>
-                    <button 
+                    <button
                         onClick={() => setShowGallery(true)}
                         className="text-metadata-ui font-bold text-primary hover:underline transition-all"
                     >
@@ -306,7 +306,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <h2 className="text-section-title font-bold flex items-center gap-3 text-foreground">
-                        Fluxos de Trabalho 
+                        Fluxos de Trabalho
                         {filterType && (
                             <span className="text-metadata-ui font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
                                 <AlertCircle className="h-3 w-3" /> Filtrado: {filterType}
@@ -324,8 +324,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <PremiumEmptyState
                             icon={Zap}
                             title="Nenhuma automação encontrada"
-                            description={searchTerm || filterType 
-                                ? "Não encontramos fluxos com os filtros aplicados." 
+                            description={searchTerm || filterType
+                                ? "Não encontramos fluxos com os filtros aplicados."
                                 : "Você ainda não criou nenhuma automação. Use a IA acima para começar agora!"
                             }
                             actionLabel="Criar Automação"
@@ -371,7 +371,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             />
                                             <div className="w-12 h-6.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border"></div>
                                         </label>
-                                        
+
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <button type="button" aria-label="Opções da automação" className="p-2 text-muted-foreground hover:text-foreground transition-colors">
@@ -379,29 +379,29 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                                 </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10 p-2 rounded-[var(--radius-panel)] shadow-overlay-ui">
-                                                <DropdownMenuItem 
+                                                <DropdownMenuItem
                                                     onClick={() => {
                                                         setInitialModalData(automation);
                                                         setShowNewModal(true);
                                                     }}
                                                     className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-white/10 transition-all font-bold group"
                                                 >
-                                                    <Edit className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" /> 
+                                                    <Edit className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                                                     Editar Fluxo
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem 
+                                                <DropdownMenuItem
                                                     onClick={() => handleDuplicate(automation)}
                                                     className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-white/10 transition-all font-bold group"
                                                 >
-                                                    <Copy className="h-4 w-4 text-success-readable group-hover:scale-110 transition-transform" /> 
+                                                    <Copy className="h-4 w-4 text-success-readable group-hover:scale-110 transition-transform" />
                                                     Duplicar
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator className="bg-white/5 my-1" />
-                                                <DropdownMenuItem 
+                                                <DropdownMenuItem
                                                     onClick={() => handleDelete(automation.id)}
                                                     className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-destructive-subtle text-destructive-readable transition-all font-bold group"
                                                 >
-                                                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform text-destructive-readable" /> 
+                                                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform text-destructive-readable" />
                                                     Excluir
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
@@ -447,7 +447,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             </span>
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setSelectedAutomation(automation);
                                             setShowHistory(true);
@@ -531,8 +531,8 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 <div>
                     <h4 className="font-black text-foreground text-body-ui uppercase tracking-widest">Dica da Antigravity AI</h4>
                     <p className="text-muted-foreground text-body-ui mt-1">
-                        Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação. 
-                        <button 
+                        Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação.
+                        <button
                             onClick={() => {
                                 setSearchTerm("Mandar e-mail ao estagnar por 7 dias");
                                 handleAIBuilder();

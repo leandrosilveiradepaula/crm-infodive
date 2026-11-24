@@ -134,11 +134,11 @@ async function setTheme(page, theme) {
         // by forcing a class on the document in the QA runner.
         const signal = await page.evaluate(() => ({
             dark: document.documentElement.classList.contains('dark'),
-            saveErrorVisible: Array.from(document.querySelectorAll('[role="status"],[data-sonner-toast]'))
-                .some(node => node.textContent?.includes('Não foi possível salvar o tema')),
+            saveState: ['saving', 'saved', 'failed'].includes(document.documentElement.dataset.themeSaveState)
+                ? document.documentElement.dataset.themeSaveState : 'unobserved',
         }));
         throw new Error('CRM_THEME_PERSISTENCE_BLOCKED: wantedDark=' + wantDark +
-            ', renderedDark=' + signal.dark + ', saveErrorVisible=' + signal.saveErrorVisible);
+            ', renderedDark=' + signal.dark + ', saveState=' + signal.saveState);
     }
     // Wait for actual styles and fonts, not just the HTML theme class. This is
     // deterministic visual stabilization; axe rules remain unchanged.

@@ -58,7 +58,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
     const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
     const [filter, setFilter] = React.useState<'all' | 'pending' | 'paid' | 'overdue'>('all');
     const [searchTerm, setSearchTerm] = React.useState('');
-    
+
     // AI Reconciliation State
     const [isAIOpen, setIsAIOpen] = React.useState(false);
     const [statementText, setStatementText] = React.useState('');
@@ -66,8 +66,8 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
     const [aiMatches, setAiMatches] = React.useState<any[]>([]);
 
     const now = new Date();
-    
-    const allInstallments: InstallmentItem[] = React.useMemo(() => 
+
+    const allInstallments: InstallmentItem[] = React.useMemo(() =>
         orders.flatMap(o => (o.installments || []).map(i => ({
             ...i,
             orderId: o.id,
@@ -77,16 +77,16 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
 
     const filtered = React.useMemo(() => allInstallments.filter(i => {
         const isOverdue = i.status !== 'paid' && new Date(i.due_date) < now;
-        
-        const matchesFilter = 
-            filter === 'all' || 
+
+        const matchesFilter =
+            filter === 'all' ||
             (filter === 'pending' && i.status === 'pending') ||
             (filter === 'paid' && i.status === 'paid') ||
             (filter === 'overdue' && isOverdue);
 
         const matchesSearch = i.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
             i.dealTitle?.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
         return matchesFilter && matchesSearch;
     }).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()), [allInstallments, filter, searchTerm]);
 
@@ -146,7 +146,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
     const applyAIMatches = async () => {
         const matchesToApply = aiMatches.filter(m => m.confidence > 0.8);
         if (matchesToApply.length === 0) return;
-        
+
         const toastId = toast.loading(`Aplicando ${matchesToApply.length} conciliações...`);
         try {
             await Promise.all(matchesToApply.map(m => onUpdateStatus(m.installment_id, 'paid')));
@@ -201,7 +201,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                
+
                 <div className="flex bg-muted/50 p-1 rounded-[var(--radius-panel)] border border-border overflow-hidden">
                     {(['all', 'pending', 'paid', 'overdue'] as const).map((f) => (
                         <button
@@ -233,13 +233,13 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                         </DialogHeader>
                         <div className="py-4 space-y-4">
                             <p className="text-metadata-ui text-muted-foreground font-medium">Cole o texto do extrato bancário para que a IA Watson cruze os dados automaticamente.</p>
-                            <Textarea 
-                                placeholder="Ex: 10/05 PIX RECEBIDO - JOAO SILVA R$ 1.500,00..." 
+                            <Textarea
+                                placeholder="Ex: 10/05 PIX RECEBIDO - JOAO SILVA R$ 1.500,00..."
                                 className="min-h-[200px] bg-background/50 text-metadata-ui font-mono leading-relaxed rounded-[var(--radius-panel)] border-border focus:ring-primary/20"
                                 value={statementText}
                                 onChange={(e) => setStatementText(e.target.value)}
                             />
-                            
+
                             {aiMatches.length > 0 && (
                                 <div className="border border-border rounded-[var(--radius-panel)] overflow-hidden animate-in fade-in slide-in-from-top-2">
                                     <div className="bg-muted/50 p-3 border-b border-border">
@@ -268,8 +268,8 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                         Confirmar e Baixar {aiMatches.filter(m => m.confidence > 0.8).length} Parcelas
                                     </Button>
                                 ) : (
-                                    <Button 
-                                        onClick={handleAIReconcile} 
+                                    <Button
+                                        onClick={handleAIReconcile}
                                         disabled={isAnalyzing || !statementText.trim()}
                                         className="text-metadata-ui font-black uppercase tracking-widest gap-2 bg-primary hover:bg-primary/90 h-11 px-8 rounded-[var(--radius-panel)] shadow-overlay-ui shadow-primary/20"
                                     >
@@ -289,7 +289,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                     <TableHeader className="bg-muted/50">
                         <TableRow className="border-border hover:bg-transparent">
                             <TableHead className="w-12 py-5">
-                                <Checkbox 
+                                <Checkbox
                                     checked={filtered.length > 0 && selectedIds.length === filtered.filter(f => f.status !== 'paid').length}
                                     onCheckedChange={toggleSelectAll}
                                     className="border-muted-foreground/30 data-[state=checked]:bg-primary rounded-[var(--radius-control)]"
@@ -309,8 +309,8 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                     <PremiumEmptyState
                                         icon={CreditCard}
                                         title="Nenhuma parcela encontrada"
-                                        description={searchTerm || filter !== 'all' 
-                                            ? "Não encontramos parcelas com os filtros aplicados." 
+                                        description={searchTerm || filter !== 'all'
+                                            ? "Não encontramos parcelas com os filtros aplicados."
                                             : "Não há parcelas registradas para os pedidos atuais."
                                         }
                                         variant="compact"
@@ -324,7 +324,7 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                     <TableRow key={i.id} className="border-border/50 hover:bg-primary/[0.02] transition-colors group">
                                         <TableCell className="py-5">
                                             {i.status !== 'paid' ? (
-                                                <Checkbox 
+                                                <Checkbox
                                                     checked={selectedIds.includes(i.id)}
                                                     onCheckedChange={() => toggleSelect(i.id)}
                                                     className="border-muted-foreground/30 data-[state=checked]:bg-primary rounded-[var(--radius-control)]"
@@ -336,11 +336,11 @@ export function InstallmentsTab({ orders, onUpdateStatus }: InstallmentsTabProps
                                             )}
                                         </TableCell>
                                         <TableCell className="py-5">
-                                            <Badge 
-                                                variant="outline" 
+                                            <Badge
+                                                variant="outline"
                                                 className={`text-metadata-ui font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
-                                                    i.status === 'paid' ? 'bg-success-subtle text-success-readable border-success/20' : 
-                                                    isOverdue ? 'bg-destructive-subtle text-destructive-readable border-destructive/20' : 
+                                                    i.status === 'paid' ? 'bg-success-subtle text-success-readable border-success/20' :
+                                                    isOverdue ? 'bg-destructive-subtle text-destructive-readable border-destructive/20' :
                                                     'bg-warning-subtle text-warning-readable border-warning/20'
                                                 }`}
                                             >
