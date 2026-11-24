@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { Deal, DealProduct } from '@/types/deal';
 import { ProposalHardwareProduct } from './ProposalHardwareProduct';
@@ -15,9 +16,9 @@ interface ProposalHardwarePageProps {
 const getGroupStyles = (label: string, primary: string, accent: string) => {
     const defaultStyles: Record<string, { color: string; accent: string }> = {
         'Hardware & Infraestrutura': { color: primary, accent: primary },
-        'Suporte & Garantia': { color: '#7c3aed', accent: '#7c3aed' },
-        'Serviços Profissionais': { color: '#059669', accent: '#059669' },
-        'Geral': { color: '#64748b', accent: '#64748b' },
+        'Suporte & Garantia': { color: proposalDocumentPrimitives.violet600, accent: proposalDocumentPrimitives.violet600 },
+        'Serviços Profissionais': { color: proposalDocumentPrimitives.emerald600, accent: proposalDocumentPrimitives.emerald600 },
+        'Geral': { color: proposalDocumentPrimitives.slate500, accent: proposalDocumentPrimitives.slate500 },
     };
     return defaultStyles[label] || defaultStyles['Geral'];
 };
@@ -57,16 +58,16 @@ function TechnicalSummaryGrid({ specs, primaryColor }: { specs: Array<{ label: s
     return (
         <div style={{
             display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px',
-            backgroundColor: '#f1f5f9', padding: '15px', borderRadius: '12px',
-            border: '1px solid #cbd5e1'
+            backgroundColor: proposalDocumentPrimitives.slate100, padding: '15px', borderRadius: '12px',
+            border: `1px solid ${proposalDocumentPrimitives.slate300}`
         }}>
             {specs.map((spec, i) => (
                 <div key={i} style={{
-                    flex: '1 1 calc(33.333% - 10px)', minWidth: '140px', backgroundColor: '#ffffff', padding: '10px',
-                    borderRadius: '8px', border: '1px solid #e2e8f0',
+                    flex: '1 1 calc(33.333% - 10px)', minWidth: '140px', backgroundColor: proposalDocumentPrimitives.paperWhite, padding: '10px',
+                    borderRadius: '8px', border: `1px solid ${proposalDocumentPrimitives.slate200}`,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
                 }}>
-                    <span style={{ fontSize: '9px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '9px', color: proposalDocumentPrimitives.slate500, textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '4px' }}>
                         {spec.label}
                     </span>
                     <span style={{ fontSize: '13px', color: primaryColor, fontWeight: '900', textAlign: 'center' }}>
@@ -81,8 +82,8 @@ function TechnicalSummaryGrid({ specs, primaryColor }: { specs: Array<{ label: s
 type RenderItem = { type: 'header'; label: string } | { type: 'product'; product: DealProduct } | { type: 'grid'; specs: Array<{ label: string; value: string }> };
 
 export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalHardwarePageProps & { layout?: 'portrait' | 'landscape' }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -211,7 +212,7 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
                     style={{
                         width: width,
                         height: height,
-                        backgroundColor: '#ffffff',
+                        backgroundColor: proposalDocumentPrimitives.paperWhite,
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
@@ -253,7 +254,7 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
                             }}>
                                 Especificação <span style={{ color: accentColor }}>Técnica</span>
                                 {pages.length > 1 && (
-                                    <span style={{ fontSize: '16px', color: '#64748b', marginLeft: '12px', fontWeight: '400' }}>
+                                    <span style={{ fontSize: '16px', color: proposalDocumentPrimitives.slate500, marginLeft: '12px', fontWeight: '400' }}>
                                         ({chunkIndex + 1}/{pages.length})
                                     </span>
                                 )}
@@ -261,7 +262,7 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
                             <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                             <p style={{
                                 fontSize: '14px',
-                                color: '#64748b',
+                                color: proposalDocumentPrimitives.slate500,
                                 fontWeight: '600',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.5px'
@@ -290,8 +291,8 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
                         paddingTop: '20px',
                         display: 'flex',
                         justifyContent: 'center',
-                        borderTop: '1px solid #f1f5f9',
-                        color: '#9ca3af',
+                        borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`,
+                        color: proposalDocumentPrimitives.gray400,
                         fontSize: '11px'
                     }}>
                         Infodive IT Solutions - Pag {chunkIndex + 1} de {pages.length}
@@ -304,7 +305,7 @@ export function ProposalHardwarePage({ deal, simplifiedProductNames = {}, themeP
                         right: '-20px',
                         width: '100px',
                         height: '100px',
-                        backgroundColor: '#f8fafc',
+                        backgroundColor: proposalDocumentPrimitives.slate50,
                         borderRadius: '50%',
                         zIndex: -1
                     }} />

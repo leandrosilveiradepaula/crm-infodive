@@ -1,29 +1,11 @@
+import { proposalDocumentPrimitives, proposalDocumentColors } from '@/design-system/proposal-document-colors';
 import { StyleSheet, Font } from '@react-pdf/renderer';
 
 // Disable hyphenation globally to prevent word breaking (e.g., "Stor-age")
 Font.registerHyphenationCallback(word => [word]);
 
 // ── Color Tokens ──────────────────────────────────────────────────────
-export const defaultColors = {
-    primary: '#1e3a5f',       // Default Navy
-    accent: '#E31837',        // Default Red
-    text: '#374151',          // gray-700
-    textLight: '#64748b',     // slate-500
-    textMuted: '#9ca3af',     // gray-400
-    border: '#e5e7eb',        // gray-200
-    borderLight: '#f1f5f9',   // slate-100
-    bgLight: '#f8f9fa',       // near-white
-    bgLighter: '#f3f4f6',     // gray-100
-    white: '#ffffff',
-    black: '#111827',         // gray-900
-    green: '#059669',
-    emerald: '#16a34a',
-    purple: '#7c3aed',
-    cyan: '#0891b2',
-    amber: '#b45309',
-    yellowLight: '#fef3c7',
-    yellowBorder: '#fde68a',
-};
+export const defaultColors = proposalDocumentColors;
 
 export type PdfColors = typeof defaultColors;
 export const colors = defaultColors;
@@ -198,35 +180,35 @@ export type TemplatePalette = {
 
 export const templatePalettes: Record<string, TemplatePalette> = {
     executivo: {
-        primary: '#1e3a5f',
-        accent: '#E31837',
-        headerBg: '#f8f9fa',
-        cardBg: '#f0f4f8',
-        cardBorder: '#d1dce8',
+        primary: proposalDocumentPrimitives.defaultPrimary,
+        accent: proposalDocumentPrimitives.defaultAccent,
+        headerBg: proposalDocumentPrimitives.printNearWhite,
+        cardBg: proposalDocumentPrimitives.printSteel50,
+        cardBorder: proposalDocumentPrimitives.printSteelBorder,
         label: 'Executivo Master',
     },
     tecnico: {
-        primary: '#0f172a',
-        accent: '#3b82f6',
-        headerBg: '#f0f9ff',
-        cardBg: '#eff6ff',
-        cardBorder: '#bfdbfe',
+        primary: proposalDocumentPrimitives.slate900,
+        accent: proposalDocumentPrimitives.blue500,
+        headerBg: proposalDocumentPrimitives.sky50,
+        cardBg: proposalDocumentPrimitives.blue50,
+        cardBorder: proposalDocumentPrimitives.blue200,
         label: 'Mergulho Técnico',
     },
     detalhado: {
-        primary: '#312e81',
-        accent: '#7c3aed',
-        headerBg: '#faf5ff',
-        cardBg: '#f5f3ff',
-        cardBorder: '#c4b5fd',
+        primary: proposalDocumentPrimitives.indigo900,
+        accent: proposalDocumentPrimitives.violet600,
+        headerBg: proposalDocumentPrimitives.purple50,
+        cardBg: proposalDocumentPrimitives.violet50,
+        cardBorder: proposalDocumentPrimitives.violet300,
         label: 'Especificação Detalhada',
     },
     rapido: {
-        primary: '#064e3b',
-        accent: '#059669',
-        headerBg: '#f0fdf4',
-        cardBg: '#ecfdf5',
-        cardBorder: '#a7f3d0',
+        primary: proposalDocumentPrimitives.emerald900,
+        accent: proposalDocumentPrimitives.emerald600,
+        headerBg: proposalDocumentPrimitives.green50,
+        cardBg: proposalDocumentPrimitives.emerald50,
+        cardBorder: proposalDocumentPrimitives.emerald200,
         label: 'Via Rápida',
     },
 };

@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -134,7 +135,7 @@ export function PdfInvestmentPage({
                                 flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12,
                                 borderBottomWidth: 1, borderBottomColor: pdfColors.border,
                                 alignItems: 'flex-start',
-                                backgroundColor: idx % 2 === 0 ? pdfColors.white : '#fafbfc',
+                                backgroundColor: idx % 2 === 0 ? pdfColors.white : proposalDocumentPrimitives.paperCoolWhite,
                             }}>
                                 <View style={{ width: 100 }}>
                                     <Text style={{ fontSize: 10, fontWeight: 'bold', color: pdfColors.primary }}>
@@ -197,7 +198,7 @@ export function PdfInvestmentPage({
                             alignItems: 'baseline', justifyContent: 'flex-end',
                         }}>
                             <Text style={{
-                                fontSize: 13, fontWeight: 'bold', color: '#4b5563',
+                                fontSize: 13, fontWeight: 'bold', color: proposalDocumentPrimitives.gray600,
                                 textTransform: 'uppercase', marginRight: 20, letterSpacing: 0.5,
                             }}>
                                 {total.totalLabel}
@@ -215,7 +216,7 @@ export function PdfInvestmentPage({
                         <View style={{
                             flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12,
                         }}>
-                            <View style={{ width: 8, height: 8, backgroundColor: '#f59e0b', borderRadius: 4 }} />
+                            <View style={{ width: 8, height: 8, backgroundColor: proposalDocumentPrimitives.amber500, borderRadius: 4 }} />
                             <Text style={{
                                 fontSize: 13, fontWeight: 'bold', color: pdfColors.amber,
                                 textTransform: 'uppercase',
@@ -229,7 +230,7 @@ export function PdfInvestmentPage({
                                 <View key={idx} wrap={false} style={{
                                     flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 16,
                                     borderBottomWidth: 1, borderBottomColor: pdfColors.yellowBorder,
-                                    alignItems: 'flex-start', backgroundColor: '#fffbf0',
+                                    alignItems: 'flex-start', backgroundColor: proposalDocumentPrimitives.amberPaper,
                                 }}>
                                     <View style={{ flex: 1 }}>
                                         <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.primary }}>
@@ -253,8 +254,8 @@ export function PdfInvestmentPage({
                 {/* Price Study Validity */}
                 {isPriceStudy && (
                     <View wrap={false} style={{
-                        marginTop: 20, padding: 16, backgroundColor: '#eff6ff',
-                        borderRadius: 12, borderWidth: 1, borderColor: '#bfdbfe',
+                        marginTop: 20, padding: 16, backgroundColor: proposalDocumentPrimitives.blue50,
+                        borderRadius: 12, borderWidth: 1, borderColor: proposalDocumentPrimitives.blue200,
                         alignItems: 'center',
                     }}>
                         <Text style={{ fontSize: 11, fontWeight: 'bold', color: pdfColors.primary }}>
@@ -271,7 +272,7 @@ export function PdfInvestmentPage({
                         }}>
                             <View style={{ width: 3, height: 12, backgroundColor: pdfColors.accent, borderRadius: 2 }} />
                             <Text style={{
-                                fontSize: 9, fontWeight: 'bold', color: '#64748b',
+                                fontSize: 9, fontWeight: 'bold', color: proposalDocumentPrimitives.slate500,
                                 textTransform: 'uppercase', letterSpacing: 0.8,
                             }}>
                                 Informações de Faturamento
@@ -334,16 +335,16 @@ export function PdfInvestmentPage({
                                 return (
                                     <View key={bIdx} wrap={false} style={{
                                         padding: 16,
-                                        backgroundColor: isReseller ? '#f8fafc' : '#ffffff',
+                                        backgroundColor: isReseller ? proposalDocumentPrimitives.slate50 : proposalDocumentPrimitives.paperWhite,
                                         borderRadius: 10,
                                         borderWidth: 1,
-                                        borderColor: isReseller ? '#e2e8f0' : '#fecdd3',
+                                        borderColor: isReseller ? proposalDocumentPrimitives.slate200 : proposalDocumentPrimitives.rose200,
                                         borderLeftWidth: 4,
-                                        borderLeftColor: isReseller ? '#64748b' : pdfColors.accent,
+                                        borderLeftColor: isReseller ? proposalDocumentPrimitives.slate500 : pdfColors.accent,
                                         marginBottom: bIdx < billingGroups.length - 1 ? 10 : 0,
                                     }}>
                                         <Text style={{
-                                            fontSize: 8, fontWeight: 'bold', color: isReseller ? '#64748b' : pdfColors.accent,
+                                            fontSize: 8, fontWeight: 'bold', color: isReseller ? proposalDocumentPrimitives.slate500 : pdfColors.accent,
                                             textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6,
                                         }}>
                                             {group.title}
@@ -355,17 +356,17 @@ export function PdfInvestmentPage({
                                         <View style={{ flexDirection: 'row', gap: 20, marginBottom: isReseller ? 0 : 8 }}>
                                             <View style={{ flexDirection: 'row' }}>
                                                 <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>CNPJ: </Text>
-                                                <Text style={{ fontSize: 9, color: '#475569' }}>{formatCNPJ(group.displayCnpj)}</Text>
+                                                <Text style={{ fontSize: 9, color: proposalDocumentPrimitives.slate600 }}>{formatCNPJ(group.displayCnpj)}</Text>
                                             </View>
                                             <View style={{ flexDirection: 'row' }}>
                                                 <Text style={{ fontSize: 9, fontWeight: 'bold', color: pdfColors.primary }}>IE: </Text>
-                                                <Text style={{ fontSize: 9, color: '#475569' }}>Isento</Text>
+                                                <Text style={{ fontSize: 9, color: proposalDocumentPrimitives.slate600 }}>Isento</Text>
                                             </View>
                                         </View>
 
                                         {/* Products in this billing entity */}
-                                        <View style={{ marginTop: isReseller ? 8 : 0, padding: 8, backgroundColor: '#f1f5f9', borderRadius: 6, marginBottom: isReseller ? 0 : 8 }}>
-                                            <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 3 }}>
+                                        <View style={{ marginTop: isReseller ? 8 : 0, padding: 8, backgroundColor: proposalDocumentPrimitives.slate100, borderRadius: 6, marginBottom: isReseller ? 0 : 8 }}>
+                                            <Text style={{ fontSize: 7, fontWeight: 'bold', color: proposalDocumentPrimitives.slate500, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 3 }}>
                                                 Produtos neste faturamento:
                                             </Text>
                                             <Text style={{ fontSize: 9, color: pdfColors.primary, fontWeight: 'bold', lineHeight: 1.4 }}>
@@ -383,8 +384,8 @@ export function PdfInvestmentPage({
                                         {/* Payment Terms (Direct Billing only) */}
                                         {!isReseller && group.displayTerms && (
                                             <View style={{
-                                                padding: 12, backgroundColor: '#fff1f2',
-                                                borderRadius: 8, borderWidth: 1, borderColor: '#fecdd3',
+                                                padding: 12, backgroundColor: proposalDocumentPrimitives.rose50,
+                                                borderRadius: 8, borderWidth: 1, borderColor: proposalDocumentPrimitives.rose200,
                                             }}>
                                                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                                                     <View style={{ width: 4, height: 4, backgroundColor: pdfColors.accent, borderRadius: 2 }} />
@@ -398,7 +399,7 @@ export function PdfInvestmentPage({
                                                         return (
                                                             <View key={pIdx} wrap={false} style={{ flexDirection: 'row', gap: 6, marginBottom: 4 }}>
                                                                 <Text style={{ fontSize: 10, color: pdfColors.accent }}>•</Text>
-                                                                <Text style={{ fontSize: 9, color: '#9f1239', fontWeight: 'bold', flex: 1, lineHeight: 1.4 }}>
+                                                                <Text style={{ fontSize: 9, color: proposalDocumentPrimitives.rose800, fontWeight: 'bold', flex: 1, lineHeight: 1.4 }}>
                                                                     {part.trim()}
                                                                 </Text>
                                                             </View>
@@ -421,7 +422,7 @@ export function PdfInvestmentPage({
                 position: 'absolute', bottom: 20, left: 60, right: 60,
                 paddingTop: 8,
                 borderTopWidth: 1,
-                borderTopColor: '#f1f5f9',
+                borderTopColor: proposalDocumentPrimitives.slate100,
                 alignItems: 'center',
             }}>
                 <Text style={pdfStyles.footerText}>Infodive IT Solutions - Confidencial</Text>
