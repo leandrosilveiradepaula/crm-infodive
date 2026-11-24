@@ -5,6 +5,18 @@ import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
 
+describe('Real login accessibility before synthetic credential entry', () => {
+    it('audits both light/dark and desktop/mobile with axe and no credentials in screenshots', () => {
+        const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
+        expect(source).toContain('inspectLogin: local && profileIndex === 0');
+        expect(source).toContain("CRM_B4_LOGIN_A11Y_DIAGNOSTIC=");
+        expect(source).toContain("const audit = await runAxe(page, options.source)");
+        expect(source).toContain("['light', 'dark']");
+        expect(source).toContain('await assertLayout(page)');
+        expect(source).toContain('login-');
+    });
+});
+
 describe('authenticated E2E smoke contract', () => {
     it('requires a legitimate isolated target and never manufactures an authenticated session', () => {
         expect(source).toContain("CRM_E2E_TEST_TARGET must be exactly \"isolated\"");

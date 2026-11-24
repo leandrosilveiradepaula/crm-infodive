@@ -846,8 +846,40 @@ async function assertGoalsFamilyStates(page, source, capture, artifactDir, scree
     return checked;
 }
 
-async function login(page, baseUrl, account) {
+async function login(page, baseUrl, account, options = {}) {
     await page.goto(routeUrl(baseUrl, '/login'), { waitUntil: 'networkidle' });
+    // Before entering any credentials, prove the REAL unauthenticated Next.js
+    // login screen in both themes/viewport sizes. Captures contain no email,
+    // password or personally identifying values. Test-only classes are restored.
+    if (options.inspectLogin) {
+        const originalViewport = page.viewportSize();
+        const originalDark = await page.locator('html').evaluate(node => node.classList.contains('dark'));
+        try {
+            for (const viewport of viewports) {
+                await page.setViewportSize(viewport);
+                for (const theme of ['light', 'dark']) {
+                    await page.locator('html').evaluate((node, dark) => node.classList.toggle('dark', dark), theme === 'dark');
+                    await page.waitForTimeout(150);
+                    await page.getByRole('button', { name: 'Entrar no Sistema' }).waitFor({ state: 'visible' });
+                    await assertLayout(page);
+                    const audit = await runAxe(page, options.source);
+                    if (audit.violationsCount || audit.incompleteCount) {
+                        process.stderr.write('CRM_B4_LOGIN_A11Y_DIAGNOSTIC=' +
+                            JSON.stringify({ viewport: viewport.name, theme,
+                                violations: audit.violations, incomplete: audit.incomplete }) + '\\n');
+                        throw new Error('LOGIN_ACCESSIBILITY_FAILED: unauthenticated route must have zero WCAG A/AA violations and incomplete checks.');
+                    }
+                    if (options.capture) {
+                        await page.screenshot({ path: resolve(options.artifactDir,
+                            `login-${viewport.name}-${theme}.png`), fullPage: true });
+                    }
+                }
+            }
+        } finally {
+            await page.locator('html').evaluate((node, dark) => node.classList.toggle('dark', dark), originalDark);
+            if (originalViewport) await page.setViewportSize(originalViewport);
+        }
+    }
     await page.locator('input[name="email"]').fill(account.email);
     await page.locator('input[name="password"]').fill(account.password);
     await page.getByRole('button', { name: 'Entrar no Sistema' }).click();
@@ -917,7 +949,7 @@ try {
             });
         }
         const page = await context.newPage();
-        await login(page, baseUrl, account);
+        await login(page, baseUrl, account, { inspectLogin: local && profileIndex === 0, source, capture, artifactDir });
         if (!Array.isArray(account.routes) || account.routes.length === 0 || !account.routes.every((route) => defaultRoutes.includes(route))) {
             throw new Error('Every test profile must define one or more valid routes from the verified CRM inventory.');
         }
