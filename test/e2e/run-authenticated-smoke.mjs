@@ -627,9 +627,64 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
                             typeof data.messageKey === 'string' &&
                             ['noId', 'noIdShadow', 'ariaCurrent', 'idrefs', 'empty', 'controlsWithinPopup'].includes(data.messageKey)
                             ? data.messageKey : 'unclassified';
+                        // Axe targets can be multi-segment paths into shadow DOM
+                        // or frames. Treating target[0] as the final element may
+                        // falsely attribute a child failure to DialogContent.
+                        // Resolve the path IN MEMORY and report structure only.
+                        const node = first?.nodes?.[0] || null;
+                        const target = node?.target || [];
+                        const resolveTarget = () => {
+                            let tree = document;
+                            let found = null;
+                            for (let outer = 0; outer < target.length; outer += 1) {
+                                const segment = target[outer];
+                                const selectors = Array.isArray(segment) ? segment : [segment];
+                                for (let idx = 0; idx < selectors.length; idx += 1) {
+                                    if (!tree || typeof selectors[idx] !== 'string') return null;
+                                    try { found = tree.querySelector(selectors[idx]); }
+                                    catch { return null; }
+                                    if (!found) return null;
+                                    if (idx < selectors.length - 1) tree = found.shadowRoot;
+                                }
+                                if (outer < target.length - 1) tree = found.contentDocument;
+                            }
+                            return found;
+                        };
+                        const actual = resolveTarget();
+                        const relevantAria = ['aria-label', 'aria-labelledby', 'aria-describedby',
+                            'aria-controls', 'aria-owns', 'aria-errormessage'];
+                        const ariaAttributes = actual ? relevantAria.filter(name => actual.hasAttribute(name)) : [];
+                        const checkText = typeof data?.needsReview === 'string' ? data.needsReview : '';
+                        // Parse ONLY in memory. NEVER log any ID, raw attribute value,
+                        // HTML, CSS selector, customer title or personal information.
+                        const referenceMatch = /^aria-([a-z-]+)="([^"]*)"\s*$/.exec(checkText);
+                        const ids = referenceMatch ? referenceMatch[2].trim().split(/\s+/).filter(Boolean) : [];
+                        const treeRoot = actual?.getRootNode?.();
+                        const sourceAttribute = referenceMatch ? 'aria-' + referenceMatch[1] : 'other';
+                        const targetInfo = {
+                            targetLayers: Array.isArray(target) ? target.length : 0,
+                            nestedSelectorLayers: Array.isArray(target)
+                                ? target.filter(Array.isArray).map(part => part.length) : [],
+                            actualResolved: Boolean(actual),
+                            actualTag: actual && ['div','button','span','input','select','textarea',
+                                'section','dialog','a','p','svg'].includes(actual.localName)
+                                ? actual.localName : 'other',
+                            isDialogContent: actual === root,
+                            insideDialog: Boolean(actual && root.contains(actual)),
+                            insideShadowRoot: Boolean(treeRoot && treeRoot !== document),
+                            ariaAttributes,
+                            htmlHadLabelledby: Boolean(node?.html && /\baria-labelledby\s*=/.test(node.html)),
+                            referencedAttribute: relevantAria.includes(sourceAttribute) ? sourceAttribute : 'other',
+                            referenceCount: ids.length,
+                            referencesPresentInDocument: ids.map(id => Boolean(document.getElementById(id))),
+                            referencesInOwnTree: ids.map(id => Boolean(treeRoot?.getElementById?.(id))),
+                            currentAttributeMatchesCheck: Boolean(actual &&
+                                sourceAttribute !== 'other' && actual.getAttribute(sourceAttribute) ===
+                                    (referenceMatch ? referenceMatch[2] : null)),
+                        };
                         results.push({ label, incomplete: report.incomplete.length,
                             violations: report.violations.length, passed: report.passes.length,
-                            messageKey });
+                            messageKey, targetInfo });
                     }
                 } catch {
                     results.push({ label: 'probe-exception', incomplete: null,

@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 b4e5bd7a same-SHA QA and full axe target diagnostics
+
+CI 45491164463 PASS; real local auth QA 45491164346 FAIL all four Partners states, only aria-valid-attr-value incomplete with noIdShadow. Fresh axe instance/reset did not fix. Source of axe-core 4.14 indicates noIdShadow is an unresolved aria-labelledby IDREF if any shadowRoot exists. Previous harness analyzed only node.target[0], possibly a shadow host/ancestor, not the actual failing child. Next read-only probe resolves complete target layers in memory and logs only safe ARIA attribute names, reference count/existence and sanitized tag; do not disclose selectors/IDs. No rule disabled or skipped. Keep PR #221 Draft and require same SHA full auth QA to localize actual node. No hosted DB/production/user records touched.
+
 ## 2026-11-24 — DS6 a208b6b0 QA root cause investigation
 
 CI 45487106786 PASS; real auth QA 45487106841 FAIL all four Partners states only because axe-core 4.14 returns `aria-valid-attr-value` incomplete with key `noIdShadow` for attributeName `aria-labelledby`, despite actual dialog having ONLY aria-label, title/description mounted and read-only neutral-label probe also failing. Not proven that HTML ARIA is invalid. Existing E2E injected axe script repeatedly per audit into same Radix page. Candidate one-time axe load + reset per real audit (all WCAG rules remain enabled) and additional strictly redacted IDREF/AOM structural diagnostics; require same-SHA QA. No production/hosted DB/business logic change. PR #221 stays Draft.

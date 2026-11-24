@@ -346,6 +346,17 @@ describe('Central design system — source propagation and strict migrated famil
     expect(e2e).toContain('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED');
   });
 
+  it('resolves actual multi-layer axe target nodes and logs only safe ARIA structure', () => {
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('const resolveTarget = () => {');
+    expect(qa).toContain('target.filter(Array.isArray)');
+    expect(qa).toContain('insideShadowRoot: Boolean(treeRoot && treeRoot !== document)');
+    expect(qa).toContain('referencesPresentInDocument: ids.map');
+    expect(qa).toContain('currentAttributeMatchesCheck');
+    expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
+    expect(qa).toContain("throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED:");
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');
