@@ -326,6 +326,16 @@ describe('Central design system — source propagation and strict migrated famil
     expect(qa).toContain('ariaAttributeNames');
   });
 
+  it('preserves strict axe findings while isolating exact dialog ARIA check failure causes', () => {
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
+    expect(qa).toContain('attributeName: safeAttributeName');
+    expect(qa).toContain("neutral-test-label");
+    expect(qa).toContain("root.setAttribute('aria-label', original)");
+    expect(qa).toContain("runOnly: { type: 'rule', values: ['aria-valid-attr-value'] }");
+    expect(qa).toContain("throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug)");
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

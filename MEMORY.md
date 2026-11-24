@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 root axe error isolated diagnostically without further UI guessing
+
+Commit aa599f1b CI 45485021450 PASS (298 unit tests, 32 strict modules), but auth QA 45485021426 FAIL 4 combos only root `aria-valid-attr-value` incomplete (zero violations), despite non-empty single `aria-label` and ZERO IDREF attrs. Root title and description mounted; mobile Partners scroll passes. Two previous structural guesses eliminated IDREFs yet never resolved axe incomplete. Added QA-only bounded root-cause probe to log axe-core's allowlisted `messageKey` + attribute NAME, and compare original vs neutral literal label in a direct rule run; always restore attribute and DO NOT bypass main axe failure. Requires same-SHA CI/E2E evidence. PR #221 Draft; no prod/hosted DB or merge.
+
 ## 2026-11-24 — DS6 dialog ARIA repeat failure and standards-grounded alternative
 
 SHA 4eea8f5a CI 45483291071 PASS, QA 45483291054 FAIL four combinations only on root dialog `aria-valid-attr-value` incomplete; prior mobile Partners scroll violation gone. Explicit CSS-safe IDREFs did not fix incomplete, disproving our earlier hypothesis as sufficient. WAI-ARIA allows direct accessible dialog name via aria-label; APG advises omitting describedby on complex multi-section dialog. New candidate uses direct dynamic label on DialogContent and omits IDREF attrs while preserving DialogTitle, DialogDescription and focus management; safe logs record only attribute names/direct-label boolean. Must re-run same-SHA full CI and authenticated QA. #221 DRAFT; no hosted DB, prod, merge.

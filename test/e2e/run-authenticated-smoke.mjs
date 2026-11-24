@@ -337,7 +337,23 @@ async function runAxe(page, source) {
                 /1:1 contrast|equal.*ratio/.test(message) ? 'equal-ratio' :
                 /short.*text/.test(message) ? 'short-text' :
                 'undetermined';
-            return { id, reason };
+            // axe-core's incomplete result has a structured messageKey.
+            // Report only allowlisted categories and ARIA ATTRIBUTE NAMES,
+            // never attribute values (which may contain a customer's title).
+            const data = check.data;
+            const messageKey = data && typeof data === 'object' &&
+                typeof data.messageKey === 'string' &&
+                ['noId', 'noIdShadow', 'ariaCurrent', 'idrefs', 'empty', 'controlsWithinPopup'].includes(data.messageKey)
+                ? data.messageKey : 'unclassified';
+            const needsReview = data && typeof data === 'object' && typeof data.needsReview === 'string'
+                ? data.needsReview : '';
+            const attributeName = /^aria-[a-z-]+/.exec(needsReview)?.[0] || 'unclassified';
+            const safeAttributeName = [
+                'aria-label', 'aria-labelledby', 'aria-describedby', 'aria-controls',
+                'aria-owns', 'aria-current', 'aria-hidden', 'aria-errormessage',
+            ].includes(attributeName) ? attributeName : 'other-aria-attribute';
+            return { id, reason, messageKey, attributeName: safeAttributeName,
+                dataKind: Array.isArray(data) ? 'array' : data === null ? 'null' : typeof data };
         };
         const staticTags = new Set([
             'html', 'body', 'main', 'header', 'nav', 'aside', 'section', 'article',
@@ -583,9 +599,45 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
                     ariaAttributeNames };
 
             });
+            // Read-only, fail-closed diagnostic. Compare axe's rule behavior
+            // for the actual name and a neutral literal. Restore the DOM
+            // immediately; the ORIGINAL full audit still fails unchanged.
+            const ariaProbe = await page.evaluate(async () => {
+                const root = document.querySelector('[data-qa-region="deal-dialog"]');
+                if (!root || !window.axe) return { available: false };
+                const original = root.getAttribute('aria-label');
+                const results = [];
+                try {
+                    for (const label of ['original', 'neutral-test-label']) {
+                        if (label === 'neutral-test-label') {
+                            root.setAttribute('aria-label', 'Detalhes da oportunidade');
+                        }
+                        const report = await window.axe.run(root, {
+                            runOnly: { type: 'rule', values: ['aria-valid-attr-value'] },
+                        });
+                        const first = report.incomplete.find(entry => entry.id === 'aria-valid-attr-value');
+                        const firstCheck = first?.nodes?.[0]?.all?.[0] || null;
+                        const data = firstCheck?.data;
+                        const messageKey = data && typeof data === 'object' &&
+                            typeof data.messageKey === 'string' &&
+                            ['noId', 'noIdShadow', 'ariaCurrent', 'idrefs', 'empty', 'controlsWithinPopup'].includes(data.messageKey)
+                            ? data.messageKey : 'unclassified';
+                        results.push({ label, incomplete: report.incomplete.length,
+                            violations: report.violations.length, passed: report.passes.length,
+                            messageKey });
+                    }
+                } catch {
+                    results.push({ label: 'probe-exception', incomplete: null,
+                        violations: null, passed: null, messageKey: 'unclassified' });
+                } finally {
+                    if (original === null) root.removeAttribute('aria-label');
+                    else root.setAttribute('aria-label', original);
+                }
+                return { available: true, results, axeVersion: window.axe.version };
+            });
             process.stderr.write('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=' +
                 JSON.stringify({ state: item.slug, violations: audit.violations,
-                    incomplete: audit.incomplete, dialogAria }) + '\n');
+                    incomplete: audit.incomplete, dialogAria, ariaProbe }) + '\n');
             throw new Error('COMMERCIAL_FAMILY_ACCESSIBILITY_FAILED: ' + item.slug);
         }
         if (capture) {
