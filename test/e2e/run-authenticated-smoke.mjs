@@ -1053,6 +1053,43 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // The actual Dashboard header mounts the Watson AI drawer.
+                    // Exercise open/close and axe in the real isolated CRM without
+                    // submitting prompts or calling any external AI provider.
+                    if (local && profileIndex === 0 && route === '/dashboard') {
+                        await page.getByRole('button', { name: 'Watson AI' }).first().click();
+                        const assistantDialog = page.getByRole('dialog', { name: 'Watson AI' });
+                        await assistantDialog.waitFor({ state: 'visible', timeout: 8_000 });
+                        const assistantAxe = await runAxe(page, source);
+                        const assistantIssues = assistantAxe.violationsCount + assistantAxe.incompleteCount;
+                        if (assistantIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/dashboard?assistant');
+                            const finding = {
+                                profileIndex, route: '/dashboard', state: 'ai-drawer',
+                                viewport: viewport.name, theme,
+                                violations: assistantAxe.violations, incomplete: assistantAxe.incomplete,
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_B4_ASSISTANT_DRAWER_DIAGNOSTIC=' +
+                                    JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) {
+                            await page.screenshot({
+                                path: resolve(artifactDir,
+                                    `${account.label}-dashboard-ai-drawer-${viewport.name}-${theme}.png`),
+                                fullPage: true,
+                            });
+                        }
+                        await page.getByRole('button', { name: 'Fechar Watson AI' }).click();
+                        await assistantDialog.waitFor({ state: 'hidden', timeout: 7_000 });
+                        profileResult.checks.push({
+                            route, state: 'ai-drawer', viewport: viewport.name, theme,
+                            status: assistantIssues ? 'failed' : 'passed',
+                        });
+                    }
                     // Exercise real migrated lead/contact/customer creation dialogs
                     // without submitting or changing the synthetic QA database.
                     // A static source test cannot see focus, scrollbar clipping
