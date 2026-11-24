@@ -173,3 +173,9 @@
     outline: 2px solid var(--ring);
     outline-offset: -2px;
 }
+
+.command-item[aria-selected="true"] .text-muted-foreground,
+.command-item:hover .text-muted-foreground,
+.command-item:focus-visible .text-muted-foreground {
+    color: var(--primary-foreground);
+}
