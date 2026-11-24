@@ -10,7 +10,8 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { setTimeout as pause } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright-core';
+// QA uses a pinned isolated browser runtime; never mutate the compiled app's node_modules.
+const { chromium } = await import(process.env.PLAYWRIGHT_CORE_PATH || 'playwright-core');
 
 const repo = resolve(fileURLToPath(new URL('.', import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
@@ -62,7 +63,7 @@ try {
                     throw new Error('Synthetic components not mounted: flags=' + JSON.stringify(flags) +
                         ' browserErrors=' + JSON.stringify(browserErrors) + ' vite=' + serverOutput.slice(-1200));
                 }
-                await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
+                await page.addScriptTag({ path: (process.env.CRM_QA_AXE_MIN_PATH || require.resolve('axe-core/axe.min.js')) });
                 const result = await page.evaluate(async () => {
                     const report = await window.axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } });
                     const diagnose = node => {

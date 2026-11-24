@@ -74,8 +74,8 @@ jobs:
         run: node test/e2e/local-qa/provision-local-auth.mjs
       - name: Compile real Next.js application against local-only backend
         run: npm run build
-      - name: Install pinned browser toolchain for full authenticated matrix
-        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
+      - name: Install pinned browser QA tools with runtime integrity verification
+        run: node scripts/install-isolated-browser-qa.mjs
       - name: Audit real Next.js pages (four roles, 22-route matrix, mobile/desktop, both themes)
         shell: bash
         run: |

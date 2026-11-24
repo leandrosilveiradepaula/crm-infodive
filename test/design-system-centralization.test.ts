@@ -114,6 +114,28 @@ describe('Central design system — source propagation and strict migrated famil
     expect(runner).toContain("route === '/leads' && viewport.name === 'desktop'");
   });
 
+  it('keeps compiled Next.js runtime packages unchanged when installing browser QA tools', () => {
+    const installer = read('scripts/install-isolated-browser-qa.mjs');
+    const local = read('.github/workflows/crm-b4-local-authenticated.yml');
+    const validation = read('.github/workflows/crm-validation.yml');
+    for (const source of [local, validation]) {
+      expect(source).toContain('node scripts/install-isolated-browser-qa.mjs');
+      expect(source).not.toContain('run: npm install --no-save');
+    }
+    expect(installer).toContain("'install', '--prefix', scratch");
+    expect(installer).toContain("join(modules, 'next/package.json')");
+    expect(installer).toContain("join(modules, 'react/package.json')");
+    expect(installer).toContain("join(modules, 'react-dom/package.json')");
+    expect(installer).not.toContain('symlinkSync');
+    expect(installer).toContain('PLAYWRIGHT_CORE_PATH=');
+    expect(installer).toContain('CRM_QA_AXE_MIN_PATH=');
+    expect(installer).toContain('CRM_B4_BROWSER_TOOLS=ISOLATED');
+    expect(read('test/e2e/run-component-a11y.mjs')).toContain('process.env.PLAYWRIGHT_CORE_PATH');
+    expect(read('test/e2e/run-component-a11y.mjs')).toContain('process.env.CRM_QA_AXE_MIN_PATH');
+    expect(read('test/e2e/run-authenticated-smoke.mjs')).toContain('process.env.CRM_QA_AXE_MIN_PATH');
+    expect(installer).not.toContain("execFileSync('npm', ['install', '--no-save'");
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

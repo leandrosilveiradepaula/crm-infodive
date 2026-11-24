@@ -1,6 +1,12 @@
+### 2026-11-24 — DS4 QA isolation refinement after lockfile verification
+
+Verified `package-lock.json` on candidate `d288a526`: Next.js 16.1.6, React 19.2.3 and an already-installed axe-core 4.11.1, while B4 QA requires pinned axe-core 4.14.0. Linking the new pinned axe package into the application tree would still replace an existing package and invalidate runtime isolation. The QA installer instead exports two **absolute isolated entrypoint paths** through `GITHUB_ENV` (`PLAYWRIGHT_CORE_PATH` and `CRM_QA_AXE_MIN_PATH`) and both test runners load these directly. No repository root package is replaced or symlinked. The same automated hashes validate the package lock, Next, React and React DOM manifests before/after tool installation. This correction awaits exact-SHA real QA and is NOT yet acceptance.
+
+---
+
 ### 2026-11-24 DS4 theme action isolated diagnostic follow-up
 
-After `8baeb597`, CI [45430181597](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181597) SUCCESS, but local authenticated QA [45430181395](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181395) still FAIL with `saveState=failed`. Its new sanitized Server Action code stream was empty, so the failed path happened *before* the DB-result verification branch. The precise cause is not yet known; no production diagnosis is assumed. Add bounded, non-sensitive failure-stage categories to the individual preference action: AUTH (trusted session), CLIENT (server-only Supabase client), TRANSPORT (request failure), or a PostgREST error code/NO_ROW/WRITE_MISMATCH. The isolated QA workflow may print only these fixed codes, never user/session identifiers or raw errors. Re-run exact-SHA CI + full authenticated QA, no bypass of auth and no theme persistence mock. 
+After `8baeb597`, CI [45430181597](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181597) SUCCESS, but local authenticated QA [45430181395](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45430181395) still FAIL with `saveState=failed`. Its new sanitized Server Action code stream was empty, so the failed path happened *before* the DB-result verification branch. The precise cause is not yet known; no production diagnosis is assumed. Add bounded, non-sensitive failure-stage categories to the individual preference action: AUTH (trusted session), CLIENT (server-only Supabase client), TRANSPORT (request failure), or a PostgREST error code/NO_ROW/WRITE_MISMATCH. The isolated QA workflow may print only these fixed codes, never user/session identifiers or raw errors. Re-run exact-SHA CI + full authenticated QA, no bypass of auth and no theme persistence mock.
 
 ---
 

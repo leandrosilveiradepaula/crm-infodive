@@ -1,3 +1,7 @@
+## 2026-11-24 — DS4 strict QA toolchain separation
+
+The CRM lockfile already includes axe-core 4.11.1; isolated QA requires 4.14.0. Symlinking pinned QA packages into root node_modules risks replacing a preexisting app dependency. Updated isolated installer and both QA runners to resolve pinned browser/axe modules by explicit external file paths from GITHUB_ENV, with NO root node_modules modification. Next/React/package-lock SHA256 integrity remains the release gate. Still pending exact-SHA CI+authenticated QA.
+
 ## 2026-11-24 DS4 persisted theme diagnosis
 
 Local authenticated QA on `8baeb597` remained blocked by failed theme write before any storage error code was emitted. Added safe stage-only codes AUTH/CLIENT/TRANSPORT to theme Server Action, preserving requireSessionContext, trusted per-user ID predicate, no hostname/secrets/SQL logging. No bypass, no production DB actions. Exact-SHA retry pending.

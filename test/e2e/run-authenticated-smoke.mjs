@@ -104,7 +104,7 @@ async function loadPlaywright() {
 
 function axeSource() {
     try {
-        return readFile(require.resolve('axe-core/axe.min.js'), 'utf8');
+        return readFile(process.env.CRM_QA_AXE_MIN_PATH || require.resolve('axe-core/axe.min.js'), 'utf8');
     } catch {
         throw new Error('axe-core is unavailable in the QA toolchain.');
     }
