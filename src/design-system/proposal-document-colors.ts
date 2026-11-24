@@ -36,7 +36,7 @@ export const proposalDocumentPrimitives = {
   printSteel50: '#f0f4f8',
   printSteelBorder: '#d1dce8',
   defaultPrimary: '#1e3a5f',
-  defaultAccent: '#e31837',
+  defaultAccent: '#E31837',
   blue50: '#eff6ff',
   blue100: '#dbeafe',
   blue200: '#bfdbfe',

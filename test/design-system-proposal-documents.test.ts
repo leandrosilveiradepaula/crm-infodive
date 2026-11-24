@@ -25,7 +25,7 @@ describe('Commercial proposal paper and React PDF palette stays centrally config
   it('preserves the approved paper defaults and readable ink without browser dark mode', () => {
     expect(proposalDocumentColors).toEqual({
       primary: '#1e3a5f',
-      accent: '#e31837',
+      accent: '#E31837',
       text: '#374151',
       textLight: '#64748b',
       textMuted: '#9ca3af',
