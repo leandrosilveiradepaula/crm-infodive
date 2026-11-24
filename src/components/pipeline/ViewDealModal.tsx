@@ -81,6 +81,11 @@ interface ViewDealModalProps {
 export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors = [], allAccounts = [], initialTab = 'overview' }: ViewDealModalProps) {
     const router = useRouter();
     const returnFocusRef = React.useRef<HTMLElement | null>(null);
+    // Radix's default useId() may contain CSS-special characters. Expose
+    // stable, unambiguous IDREF targets for the dialog's accessible name.
+    const dialogId = `deal-${React.useId().replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+    const dialogTitleId = `${dialogId}-title`;
+    const dialogDescriptionId = `${dialogId}-description`;
     const { duplicateDeal } = useDeals();
     const [deal, setDeal] = useState<Deal>(initialDeal);
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -393,6 +398,8 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
             <DialogContent
                 data-qa-region="deal-dialog"
                 showCloseButton={false}
+                aria-labelledby={dialogTitleId}
+                aria-describedby={dialogDescriptionId}
                 onOpenAutoFocus={() => {
                     // No DialogTrigger exists in this controlled-only modal.
                     // Capture its real opener before Radix moves focus inside.
@@ -427,17 +434,20 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <DollarSign className="size-[var(--ds-nav-icon-size)]" />
                         </div>
                         <div className="min-w-0">
-                            {isEditing ? (
+                            <DialogTitle
+                                id={dialogTitleId}
+                                className={isEditing ? 'sr-only' : 'ds-type-section-title font-semibold text-foreground'}
+                            >{isEditing ? formData.title : deal.title}</DialogTitle>
+                            <DialogDescription id={dialogDescriptionId} className="sr-only">
+                                Visualizar e editar detalhes da oportunidade
+                            </DialogDescription>
+                            {isEditing && (
                                 <Input
+                                    aria-label="Título da oportunidade"
                                     value={formData.title}
                                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     className="w-[var(--ds-deal-title-edit-width)] max-w-full border-border bg-muted/50 ds-type-section-title"
                                 />
-                            ) : (
-                                <div>
-                                    <DialogTitle className="ds-type-section-title font-semibold text-foreground">{deal.title}</DialogTitle>
-                                    <DialogDescription className="sr-only">Visualizar e editar detalhes da oportunidade</DialogDescription>
-                                </div>
                             )}
                             <div className="mt-1 flex flex-wrap items-center gap-2 ds-type-label text-muted-foreground">
                                 <Building2 className="w-3.5 h-3.5 text-info/60 shrink-0" />

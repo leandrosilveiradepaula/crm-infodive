@@ -307,6 +307,22 @@ describe('Central design system — source propagation and strict migrated famil
     expect(qa).toContain('CRM_B4_COMMERCIAL_A11Y_DIAGNOSTIC=');
   });
 
+  it('keeps the opportunity dialog labeled even in edit mode and makes Partners scroll keyboard-accessible', () => {
+    const dialog = read('src/components/pipeline/ViewDealModal.tsx');
+    expect(dialog).toContain("React.useId().replace(/[^a-zA-Z0-9_-]/g, '_')");
+    expect(dialog).toContain('aria-labelledby={dialogTitleId}');
+    expect(dialog).toContain('aria-describedby={dialogDescriptionId}');
+    expect(dialog).toContain('<DialogTitle');
+    expect(dialog).toContain('id={dialogTitleId}');
+    expect(dialog).toContain('id={dialogDescriptionId}');
+    expect(dialog).toContain('aria-label="Título da oportunidade"');
+    const partners = read('src/components/pipeline/tabs/PartnersTab.tsx');
+    expect(partners).toContain('role="region"');
+    expect(partners).toContain('aria-label="Parceiros e distribuidores da oportunidade"');
+    expect(partners).toContain('tabIndex={0}');
+    expect(partners).toContain('focus-visible:ring-2 focus-visible:ring-ring');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

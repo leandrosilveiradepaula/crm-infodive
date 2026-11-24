@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 real Partners scroll and dialog IDREF follow-up
+
+At SHA d7e10385 CI 45481474035 PASS; local auth QA 45481473896 FAIL 4 combinations. Previous button-name violations fixed, but mobile Partners scroll region at [12,160,368,436] lacked focus and all combinations retained one root-dialog `aria-valid-attr-value` incomplete. Safe diagnostic proves one valid existing target each for aria-labelledby/describedby with mounted title/description; exact cause unresolved. Candidate adds named tab-focusable Partners scroll, unique CSS-safe useId-derived title/description targets explicitly wired on ViewDealModal DialogContent, keeps those elements present also when editing. No disabling axe/CI tests, no business logic or hosted DB/prod changes. Needs same-SHA CI and QA before claiming resolved. Draft PR #221; user requested autonomy.
+
 ## 2026-11-24 — DS6 Partners QA real defects
 
 SHA 2a1a36d7 CI 45478409187 PASS, authenticated local QA 45478409438 FAIL all 4 theme/viewport combinations in Partners: unnamed inert ExternalLink-only button (WCAG `button-name`) and one `aria-valid-attr-value` incomplete associated with dialog. Candidate replaces decorative icon button with aria-hidden span, adds safe IDREF existence booleans for root cause. No bypass of axe; no business changes. Keep #221 DRAFT, repeat same-SHA CI+QA and visual checks.

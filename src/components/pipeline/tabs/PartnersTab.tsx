@@ -153,7 +153,12 @@ export const PartnersTab = ({
     );
 
     return (
-        <div className="flex h-full min-w-0 flex-col space-y-6 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div
+            role="region"
+            aria-label="Parceiros e distribuidores da oportunidade"
+            tabIndex={0}
+            className="flex h-full min-w-0 flex-col space-y-6 overflow-y-auto p-4 sm:p-6 lg:p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
             <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-info-subtle rounded-[var(--radius-panel)]"><Globe className="h-6 w-6 text-primary" /></div>
                 <div>
