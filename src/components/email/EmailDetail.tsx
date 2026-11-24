@@ -28,7 +28,7 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
             <div className="flex-1 flex items-center justify-center p-8 text-center text-muted-foreground bg-background">
                 <div className="space-y-4">
                     <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-                        <span className="text-2xl">📧</span>
+                        <span className="text-page-title">📧</span>
                     </div>
                     <p>Selecione um email para ler</p>
                 </div>
@@ -59,7 +59,7 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button variant="ghost" size="icon">
-                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                    <Trash2 className="h-4 w-4 text-destructive-readable" />
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent>Excluir</TooltipContent>
@@ -74,13 +74,13 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
                         </Tooltip>
                     </TooltipProvider>
                     <Separator orientation="vertical" className="h-6 mx-2" />
-                    <Button variant="outline" size="sm" className="gap-2 text-teal-600 border-teal-200 bg-teal-50 hover:bg-teal-100">
+                    <Button variant="outline" size="sm" className="gap-2 text-info border-info bg-info-subtle hover:bg-info-subtle">
                         <Sparkles className="h-4 w-4" />
                         Gerar Resposta IA
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground mr-2">
+                    <span className="text-metadata-ui text-muted-foreground mr-2">
                         {format(email.date, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR })}
                     </span>
                     <Button variant="ghost" size="icon">
@@ -93,7 +93,7 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
             <div className="flex-1 overflow-y-auto p-8 space-y-8">
                 {/* Header */}
                 <div className="space-y-4">
-                    <h1 className="text-2xl font-bold tracking-tight">{email.subject}</h1>
+                    <h1 className="text-page-title font-bold tracking-tight">{email.subject}</h1>
 
                     <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
@@ -102,11 +102,11 @@ export function EmailDetail({ email, onBack }: EmailDetailProps) {
                                 <AvatarFallback>{email.sender.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <div className="font-semibold text-sm">
+                                <div className="font-semibold text-body-ui">
                                     {email.sender.name}
-                                    <span className="text-muted-foreground font-normal ml-2 text-xs">&lt;{email.sender.email}&gt;</span>
+                                    <span className="text-muted-foreground font-normal ml-2 text-metadata-ui">&lt;{email.sender.email}&gt;</span>
                                 </div>
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-metadata-ui text-muted-foreground">
                                     Para: <span className="text-foreground">Eu</span>
                                 </div>
                             </div>

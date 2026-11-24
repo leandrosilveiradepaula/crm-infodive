@@ -70,16 +70,16 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-2xl animate-in zoom-in-95 duration-300">
+            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-card-ui animate-in zoom-in-95 duration-300">
                 <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border relative">
                     <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
-                    <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-3">
-                        <div className="p-2.5 bg-primary/20 rounded-xl">
+                    <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3">
+                        <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">
                             <User className="w-5 h-5 text-primary" />
                         </div>
                         {lead ? 'Editar Lead' : 'Novo Lead'}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2">
+                    <DialogDescription className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em] mt-2">
                         Gerencie as informações do seu potencial cliente
                     </DialogDescription>
                 </DialogHeader>
@@ -157,14 +157,14 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                     </div>
 
                     <DialogFooter className="col-span-2 border-t border-border pt-10 mt-4 flex items-center justify-end gap-3">
-                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
+                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-[var(--radius-panel)] transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-metadata-ui tracking-widest flex items-center gap-2">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                                <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                                <div className="p-1 bg-white/20 rounded-[var(--radius-control)] group-hover:scale-110 transition-transform">
                                     <User className="h-3 w-3" />
                                 </div>
                             )}

@@ -178,7 +178,7 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             {/* Compact banner */}
             <button
                 onClick={() => setExpanded(!expanded)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-lg text-sm hover:bg-muted transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-[var(--radius-control)] text-body-ui hover:bg-muted transition-colors"
             >
                 <span className="flex items-center gap-2 text-foreground font-medium">
                     <Sparkles className="h-3.5 w-3.5" />
@@ -195,16 +195,16 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
             {expanded && (
                 <div className="mt-2 space-y-2 animate-in slide-in-from-top-2 duration-200">
                     {suggestions.map((suggestion) => (
-                        <div key={suggestion.id} className="flex items-center justify-between p-2.5 bg-background rounded-lg border border-border text-sm">
+                        <div key={suggestion.id} className="flex items-center justify-between p-2.5 bg-background rounded-[var(--radius-control)] border border-border text-body-ui">
                             <div className="min-w-0 flex-1">
                                 <p className="font-medium text-foreground truncate flex items-center gap-1.5">
                                     <UserPlus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                     <span className="truncate">{suggestion.name || 'Sem nome'}</span>
                                 </p>
-                                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5 ml-5">
+                                <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-metadata-ui text-muted-foreground mt-0.5 ml-5">
                                     {suggestion.email && <span className="truncate">{suggestion.email}</span>}
                                     {suggestion.company_name && (
-                                        <span className="flex items-center text-amber-600 dark:text-amber-400">
+                                        <span className="flex items-center text-warning-readable dark:text-warning-readable">
                                             <Building2 className="h-3 w-3 mr-0.5" />
                                             {suggestion.company_name}
                                         </span>
@@ -224,7 +224,7 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
                                 <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleReject(suggestion.id)} title="Descartar">
                                     <X className="h-3.5 w-3.5" />
                                 </Button>
-                                <Button size="sm" className="h-7 px-2.5 text-xs bg-primary hover:bg-primary/90" onClick={() => handleApproveClick(suggestion)}>
+                                <Button size="sm" className="h-7 px-2.5 text-metadata-ui bg-primary hover:bg-primary/90" onClick={() => handleApproveClick(suggestion)}>
                                     <Check className="h-3.5 w-3.5 mr-1" />
                                     Aprovar
                                 </Button>
@@ -245,18 +245,18 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Empresa Identificada pela IA:</label>
-                            <p className="text-sm text-muted-foreground p-2 bg-muted rounded-md font-mono">
+                            <label className="text-body-ui font-medium">Empresa Identificada pela IA:</label>
+                            <p className="text-body-ui text-muted-foreground p-2 bg-muted rounded-[var(--radius-control)] font-mono">
                                 {selectedSuggestion?.company_name || 'Desconhecida'}
                             </p>
                         </div>
                         <div className="space-y-4">
-                            <label className="text-sm font-medium flex items-center justify-between">
+                            <label className="text-body-ui font-medium flex items-center justify-between">
                                 <span>{isCreatingNewAccount ? 'Nome da Nova Empresa' : 'Vincular à Empresa Existente'} <span className="text-destructive">*</span></span>
                                 <Button
                                     variant="link"
                                     size="sm"
-                                    className="h-auto p-0 text-xs text-primary"
+                                    className="h-auto p-0 text-metadata-ui text-primary"
                                     onClick={() => setIsCreatingNewAccount(!isCreatingNewAccount)}
                                 >
                                     {isCreatingNewAccount ? 'Selecione uma existente' : '+ Criar Nova Empresa'}
@@ -267,7 +267,7 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
                                 <div className="space-y-3">
                                     <input
                                         type="text"
-                                        className="w-full px-3 py-2 border rounded-md text-sm bg-transparent"
+                                        className="w-full px-3 py-2 border rounded-[var(--radius-control)] text-body-ui bg-transparent"
                                         placeholder="Nome da Empresa (ex: ACME Corp)"
                                         value={newAccountName}
                                         onChange={(e) => setNewAccountName(e.target.value)}
@@ -276,14 +276,14 @@ export function ContactSuggestionsWidget({ initialAccounts = [] }: { initialAcco
                                     <div className="grid grid-cols-2 gap-3">
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border rounded-md text-sm bg-transparent"
+                                            className="w-full px-3 py-2 border rounded-[var(--radius-control)] text-body-ui bg-transparent"
                                             placeholder="CNPJ"
                                             value={newAccountCnpj}
                                             onChange={(e) => setNewAccountCnpj(e.target.value)}
                                         />
                                         <input
                                             type="text"
-                                            className="w-full px-3 py-2 border rounded-md text-sm bg-transparent"
+                                            className="w-full px-3 py-2 border rounded-[var(--radius-control)] text-body-ui bg-transparent"
                                             placeholder="Inscr. Estadual"
                                             value={newAccountIe}
                                             onChange={(e) => setNewAccountIe(e.target.value)}
