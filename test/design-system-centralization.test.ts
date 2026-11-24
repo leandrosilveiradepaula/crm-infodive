@@ -40,6 +40,16 @@ const locked = [
   'src/components/pipeline/tabs/StakeholdersTab.tsx',
 ];
 
+describe('Design debt report distinguishes web CRM from PDF export', () => {
+  it('preserves the complete inventory while separately grouping PDF renderers', () => {
+    const code = read('scripts/report-design-system-debt.mjs');
+    expect(code).toContain("file.startsWith('src/components/proposals/pdf/')");
+    expect(code).toContain('const bySurface = {}');
+    expect(code).toContain('byFamily, bySurface, highestDebtFiles');
+    expect(code).toContain('localDecisions: total');
+  });
+});
+
 describe('Central design system — source propagation and strict migrated families', () => {
   it('maps legacy font, shadow and radius scales to the same editable primitives', () => {
     const css = read('src/design-system/tokens.css');

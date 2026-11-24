@@ -19,6 +19,14 @@ function walk(folder) {
   }
   return results;
 }
+function surfaceKind(file) {
+  // @react-pdf/renderer uses JS style objects, not browser CSS variables.
+  // Retain all counted debt but report those documents separately instead of
+  // implying the main web theme alone can propagate to exported PDF pages.
+  return file.startsWith('src/components/proposals/pdf/')
+    ? 'PDF export renderer'
+    : 'Web CRM and preview';
+}
 function family(path) {
   const normalized = path.split(sep).join('/');
   if (/\/pipeline\/|\/DealCard|\/DealModal|\/DealForm/.test(normalized)) return 'Pipeline e drawers';
@@ -32,7 +40,7 @@ function family(path) {
 const rows = roots.flatMap(walk).map(path => {
   const file = relative('.', path).split(sep).join('/');
   const counts = countViolations(readFileSync(path, 'utf8'));
-  return { file, family: family(file), ...counts, total: Object.values(counts).reduce((sum, n) => sum + n, 0) };
+  return { file, family: family(file), surface: surfaceKind(file), ...counts, total: Object.values(counts).reduce((sum, n) => sum + n, 0) };
 }).filter(row => row.total > 0).sort((a, b) => b.total - a.total || a.file.localeCompare(b.file));
 const categories = Object.keys(countViolations(''));
 const total = rows.reduce((sum, row) => sum + row.total, 0);
@@ -42,10 +50,14 @@ if (process.argv.includes('--markdown')) {
   for (const row of rows) console.log('| ' + row.family + ' | ' + row.file + ' | ' + categories.map(name => row[name]).join(' | ') + ' | ' + row.total + ' |');
 } else {
   const byFamily = {};
+  const bySurface = {};
   for (const row of rows) {
+    const surface = bySurface[row.surface] ??= { files: 0, decisions: 0 };
+    surface.files += 1;
+    surface.decisions += row.total;
     const acc = byFamily[row.family] ??= { files: 0, decisions: 0 };
     acc.files += 1;
     acc.decisions += row.total;
   }
-  console.log(JSON.stringify({ affectedFiles: rows.length, localDecisions: total, byFamily, highestDebtFiles: rows.slice(0, 12).map(row => ({ path: row.file, count: row.total })) }, null, 2));
+  console.log(JSON.stringify({ affectedFiles: rows.length, localDecisions: total, byFamily, bySurface, highestDebtFiles: rows.slice(0, 12).map(row => ({ path: row.file, count: row.total })) }, null, 2));
 }

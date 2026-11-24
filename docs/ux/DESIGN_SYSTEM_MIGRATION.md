@@ -1,3 +1,9 @@
+## 2026-11-24 — honest inventory split: web theme vs @react-pdf export
+
+The full read-only inventory continues to count every visual literal, including print. It now adds a `bySurface` breakdown separating `src/components/proposals/pdf/` (React PDF JS renderer) from CSS/Tailwind-based CRM web and previews. This does NOT erase or exempt the PDF literals from the global total; it prevents the false claim that changing `tokens.css` necessarily changes non-browser `StyleSheet.create` exported documents. The independent proposal output theme already accepts explicit `themePrimary`/`themeAccent`; a future aligned central PDF token contract must preserve serialized PDF visuals and tenant brand settings. This is not authorization for unsafe PDF style replacement, production changes or hosted DB mutations. Maintain a truthful debt ledger on the final SHA.
+
+---
+
 ## 2026-11-24 — DS8 integrated dashboard, shared command and catalog styling
 
 The single centralized CRM Design System Draft PR #221 now includes 16 additional original Dashboard/Products/Email/CommandBar/Notifications/Handover components with private Tailwind palette, type-scale and geometry substitutions to existing central `tokens.css` roles. Measured category reduction in these files: 71 + 142 = 213 local occurrences, not 213 independent user-facing defects. Adds 14 newly clean modules to strict anti-hardcode policy; source tests verify all 16 family members. Colors and font weights remain centrally configurable and light/dark semantic; no product, backend, Auth, financial rules, live data or migrations changed. This batch is NOT globally visually certified until exact new SHA browser proofs and the approved private screenshots are compared. Preserve PR Draft and human main merge.
