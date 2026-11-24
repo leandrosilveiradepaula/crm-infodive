@@ -4,6 +4,7 @@ import React from 'react';
 import { ArrowRight, Building2, ClipboardList, Mail, Package, Phone, UserRound, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Deal } from '@/types/deal';
+import { formatCurrency } from '@/utils/format';
 
 interface OverviewTabProps {
     deal: Deal;
@@ -32,6 +33,13 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
     const stakeholderCount = Array.isArray(deal.custom_fields?.stakeholders)
         ? deal.custom_fields.stakeholders.length : null;
     const ownerName = deal.owner_profile?.full_name || deal.owner;
+    const estimatedValue = typeof deal.value === 'number' && Number.isFinite(deal.value)
+        ? formatCurrency(deal.value) : 'Não informado';
+    const recordedProbability = typeof deal.probability === 'number' && Number.isFinite(deal.probability)
+        ? `${deal.probability}%` : 'Não informado';
+    const expectedClose = deal.expected_close_date
+        ? deal.expected_close_date.split('T')[0].split('-').reverse().join('/')
+        : 'Não definida';
     const nextAction = products.length === 0
         ? {
             title: 'Incluir produtos ou serviços',
@@ -60,6 +68,20 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                     <Building2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                     <h3 id="deal-overview-details" className="ds-type-section-title text-foreground">Detalhes da oportunidade</h3>
                 </div>
+                <dl className="ds-deal-primary-facts">
+                    <div>
+                        <dt className="ds-type-label text-muted-foreground">Valor estimado</dt>
+                        <dd className="ds-type-section-title font-semibold text-foreground">{estimatedValue}</dd>
+                    </div>
+                    <div>
+                        <dt className="ds-type-label text-muted-foreground">Probabilidade de fechamento</dt>
+                        <dd className="ds-type-body font-semibold text-foreground">{recordedProbability}</dd>
+                    </div>
+                    <div>
+                        <dt className="ds-type-label text-muted-foreground">Previsão de fechamento</dt>
+                        <dd className="ds-type-body font-semibold text-foreground">{expectedClose}</dd>
+                    </div>
+                </dl>
                 <dl className="ds-deal-facts">
                     <div className="ds-deal-fact">
                         <dt className="ds-type-label text-muted-foreground">Empresa</dt>
@@ -123,7 +145,7 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                                         {product.display_name || product.name || 'Item sem nome'}
                                     </span>
                                     <span className="ds-type-label shrink-0 text-muted-foreground">
-                                        {product.quantity} un.
+                                        Qtd. {product.quantity}
                                     </span>
                                 </li>
                             ))}
@@ -143,29 +165,29 @@ export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCo
                         <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                         <h3 id="deal-linked-contact" className="ds-type-section-title text-foreground">Contato</h3>
                     </div>
-                    <dl className="space-y-3">
+                    <div className="space-y-3">
                         <div className="flex items-start gap-2">
                             <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                             <div>
-                                <dt className="ds-type-metadata text-muted-foreground">Nome</dt>
-                                <dd className="ds-type-label font-medium text-foreground">{recorded(deal.contact_name)}</dd>
+                                <p className="ds-type-metadata text-muted-foreground">Nome</p>
+                                <p className="ds-type-label font-medium text-foreground">{recorded(deal.contact_name)}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2">
                             <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                             <div className="min-w-0">
-                                <dt className="ds-type-metadata text-muted-foreground">E-mail</dt>
-                                <dd className="ds-type-label break-all text-foreground">{recorded(deal.contact_email)}</dd>
+                                <p className="ds-type-metadata text-muted-foreground">E-mail</p>
+                                <p className="ds-type-label break-all text-foreground">{recorded(deal.contact_email)}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2">
                             <Phone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                             <div>
-                                <dt className="ds-type-metadata text-muted-foreground">Telefone</dt>
-                                <dd className="ds-type-label text-foreground">{recorded(deal.contact_phone)}</dd>
+                                <p className="ds-type-metadata text-muted-foreground">Telefone</p>
+                                <p className="ds-type-label text-foreground">{recorded(deal.contact_phone)}</p>
                             </div>
                         </div>
-                    </dl>
+                    </div>
                     {stakeholderCount !== null && (
                         <p className="ds-type-metadata mt-3 text-muted-foreground">{stakeholderCount} contatos complementares registrados.</p>
                     )}

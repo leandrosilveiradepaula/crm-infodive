@@ -186,6 +186,14 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(overview).toContain('recorded(deal.next_step)');
     expect(overview).toContain('products.slice(0, 4)');
     expect(overview).toContain('Saúde registrada');
+    expect(overview).toContain('className="ds-deal-primary-facts"');
+    expect(overview).toContain('formatCurrency(deal.value)');
+    expect(overview).toContain('recordedProbability');
+    expect(overview).toContain('expectedClose');
+    const contactSection = overview.split('aria-labelledby="deal-linked-contact"')[1]?.split('</section>')[0] || '';
+    expect(contactSection).not.toContain('<dl className="space-y-3">');
+    expect(contactSection).not.toContain('<dt');
+    expect(contactSection).not.toContain('<dd');
     expect(overview).toContain('Sem avaliação');
     expect(overview).not.toContain('Tomador de Decisão');
     expect(overview).not.toContain('Decisor não definido');

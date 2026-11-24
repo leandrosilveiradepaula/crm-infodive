@@ -1,3 +1,8 @@
+### 2026-11-24 DS3.1 local QA diagnostic and remediation
+
+Original candidate `f882c704`: [CI 45413419162](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45413419162) **SUCCESS**; [full authenticated QA 45413418733](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45413418733) **FAIL**, four opportunity-detail combinations (desktop/mobile, light/dark). No section navigation, color contrast, header clipping or keyboard diagnostic failure was emitted. Axe reported `definition-list` (1) and `dlitem` (6) in every detail state: the new contact panel nested label/value terms inside non-semantic wrappers instead of a valid description list. This is a real accessibility defect; it was not suppressed. Remediation renders contact rows with labels and text pairs without orphaned `dt`/`dd`, and preserves a compact high-visibility trio of stored estimated value, recorded probability and expected close date at the top of the overview (especially needed on mobile). New SHA CI+authenticated QA and screenshot visual review **PENDING**, PR remains DRAFT. 
+
+---
 ## 2026-11-24 — G2/DS3.1 comparative visual workstream: section navigation and true commercial details
 
 **Baseline (observed):** `37dfb820` CI PASS and isolated local authenticated QA PASS: 4 profiles, 176 checks, no recorded failure. Real evidence: `profile-1-pipeline-deal-detail-{desktop,mobile}-{light,dark}.png`, artifact `crm-b4-local-visual-evidence-37dfb820...`, compared directly against private `Captura de tela 2026-11-17 093410(1).png`. No production data used.

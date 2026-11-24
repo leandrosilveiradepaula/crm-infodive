@@ -394,8 +394,13 @@ async function assertOpportunityDialogKeyboard(page, opener) {
 async function assertOpportunitySections(page, dialog, capture, artifactDir, screenshotPrefix) {
     const tabs = ['Resumo', 'Produtos', 'Propostas'];
     for (const label of tabs) {
-        if (!(await dialog.getByRole('tab', { name: label, exact: true }).isVisible())) {
+        const tab = dialog.getByRole('tab', { name: label, exact: true });
+        if (!(await tab.isVisible())) {
             throw new Error('A primary opportunity section is not visible on this viewport.');
+        }
+        await tab.click();
+        if (await tab.getAttribute('data-state') !== 'active') {
+            throw new Error('A primary opportunity section did not activate when selected.');
         }
     }
     const barOverflows = await dialog.locator('[data-qa-region="deal-tabs"]').evaluate(element =>

@@ -263,6 +263,7 @@
   --ds-deal-overview-section-padding: 1rem;
   --ds-deal-overview-fact-gap: 0.875rem;
   --ds-deal-overview-grid-columns: 2;
+  --ds-deal-primary-facts-columns: 3;
   --ds-deal-tab-padding-block: 0.625rem;
   --ds-deal-tab-padding-inline: 0.75rem;
   --ds-deal-inspector-padding: 1rem;
@@ -641,6 +642,19 @@
     gap: var(--ds-deal-fact-gap, 0.5rem);
     margin-bottom: var(--ds-deal-overview-fact-gap);
   }
+  .ds-deal-primary-facts {
+    display: grid;
+    grid-template-columns: repeat(var(--ds-deal-primary-facts-columns), minmax(0, 1fr));
+    gap: var(--ds-deal-overview-fact-gap);
+    padding-bottom: var(--ds-deal-overview-section-padding);
+    margin-bottom: var(--ds-deal-overview-section-padding);
+    border-bottom: 1px solid var(--border);
+  }
+  .ds-deal-primary-facts dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    margin-top: var(--ds-deal-tabs-gap);
+  }
   .ds-deal-facts,
   .ds-deal-note-list {
     display: grid;
@@ -741,11 +755,15 @@
     --ds-deal-tabs-columns: 3;
     --ds-deal-more-width: 7.5rem;
     --ds-deal-overview-grid-columns: 1;
+    --ds-deal-primary-facts-columns: 2;
     --ds-deal-overview-section-padding: 0.75rem;
     --ds-deal-tab-padding-inline: 0.5rem;
     --ds-deal-tab-padding-block: 0.5rem;
     --ds-deal-content-padding: 0.75rem;
     --ds-deal-inspector-padding: 0.75rem;
+  }
+  .ds-deal-primary-facts > :first-child {
+    grid-column: 1 / -1;
   }
   .ds-deal-header-actions {
     width: 100%;
