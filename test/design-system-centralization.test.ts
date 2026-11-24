@@ -18,6 +18,10 @@ const locked = [
   'src/components/proposals/ViewProposalModal.tsx',
   'src/components/shared/DocumentsTab.tsx',
   'src/components/proposals/ProposalGeneratorWizard.tsx',
+  'src/components/goals/FinancialSummaryCard.tsx',
+  'src/components/goals/tabs/GoalsTab.tsx',
+  'src/components/goals/tabs/CommissionsTab.tsx',
+  'src/components/goals/DistributionModal.tsx',
 ];
 
 describe('Central design system — source propagation and strict migrated families', () => {
@@ -134,6 +138,22 @@ describe('Central design system — source propagation and strict migrated famil
     expect(read('test/e2e/run-component-a11y.mjs')).toContain('process.env.CRM_QA_AXE_MIN_PATH');
     expect(read('test/e2e/run-authenticated-smoke.mjs')).toContain('process.env.CRM_QA_AXE_MIN_PATH');
     expect(installer).not.toContain("execFileSync('npm', ['install', '--no-save'");
+  });
+
+  it('migrates Goals, DRE, Commissions and distribution to semantic roles', () => {
+    const goals = read('src/components/goals/tabs/GoalsTab.tsx');
+    for (const tone of ['primary', 'success', 'info', 'warning']) {
+      expect(goals).toContain("tone: '" + tone + "'");
+    }
+    expect(goals).not.toMatch(/gradient:\s*"from-/);
+    expect(goals).toContain("aria-pressed={isSelected}");
+    const commissions = read('src/components/goals/tabs/CommissionsTab.tsx');
+    expect(commissions).toContain('iconToneClasses[product.tone]');
+    const financial = read('src/components/goals/FinancialSummaryCard.tsx');
+    expect(financial).toContain('aria-pressed={!isAnnual}');
+    expect(financial).toContain('aria-pressed={isAnnual}');
+    const distribution = read('src/components/goals/DistributionModal.tsx');
+    expect(distribution).toContain('text-primary-foreground');
   });
 
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
