@@ -418,12 +418,23 @@ async function assertOpportunitySections(page, dialog, capture, artifactDir, scr
     await page.getByRole('option', { name: 'Histórico', exact: true }).click();
     await dialog.getByText('Atividades registradas', { exact: true }).first()
         .waitFor({ state: 'visible', timeout: 5_000 });
+    // A secondary destination cannot leave a misleading primary tab selected.
+    const stalePrimary = await dialog.locator('[data-qa-region="deal-tabs"] [role="tab"]')
+        .evaluateAll(nodes => nodes.some(node =>
+            node.getAttribute('aria-selected') === 'true' ||
+            node.getAttribute('data-section-selected') === 'true'
+        ));
+    if (stalePrimary) throw new Error('Opportunity navigation incorrectly highlights a primary tab in a secondary section.');
     if (capture) {
         await page.screenshot({ path: resolve(artifactDir, screenshotPrefix + '-history.png'), fullPage: true });
     }
-    await dialog.getByRole('tab', { name: 'Resumo', exact: true }).click();
+    const summary = dialog.getByRole('tab', { name: 'Resumo', exact: true });
+    await summary.click();
     await dialog.getByText('Detalhes da oportunidade', { exact: true }).first()
         .waitFor({ state: 'visible', timeout: 5_000 });
+    if (await summary.getAttribute('aria-selected') !== 'true') {
+        throw new Error('Opportunity summary tab was not selected after returning from History.');
+    }
 }
 
 async function login(page, baseUrl, account) {

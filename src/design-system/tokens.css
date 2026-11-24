@@ -264,6 +264,7 @@
   --ds-deal-overview-fact-gap: 0.875rem;
   --ds-deal-overview-grid-columns: 2;
   --ds-deal-primary-facts-columns: 3;
+  --ds-deal-facts-columns: 2;
   --ds-deal-tab-padding-block: 0.625rem;
   --ds-deal-tab-padding-inline: 0.75rem;
   --ds-deal-inspector-padding: 1rem;
@@ -661,6 +662,11 @@
     grid-template-columns: repeat(var(--ds-deal-overview-grid-columns), minmax(0, 1fr));
     column-gap: var(--ds-deal-overview-section-padding);
     row-gap: var(--ds-deal-overview-fact-gap);
+  }
+  /* Keep recorded facts scannable in two columns on narrow screens; only
+     large narrative/contact panels collapse to a single column. */
+  .ds-deal-facts {
+    grid-template-columns: repeat(var(--ds-deal-facts-columns), minmax(0, 1fr));
   }
   .ds-deal-fact {
     min-width: 0;

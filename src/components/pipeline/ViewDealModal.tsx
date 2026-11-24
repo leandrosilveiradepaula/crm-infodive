@@ -526,6 +526,14 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                             { id: 'proposals', label: 'Propostas', icon: FileText },
                                         ].map(tab => (
                                             <TabsTrigger key={tab.id} value={tab.id}
+                                                data-section-selected={activeTab === tab.id}
+                                                aria-selected={activeTab === tab.id}
+                                                // Radix may retain the last active visual when
+                                                // navigating to a secondary Select-only destination.
+                                                // Inline values reference the same central tokens.
+                                                style={secondaryTabs.some(item => item.value === activeTab)
+                                                    ? { backgroundColor: 'var(--surface-subtle)', color: 'var(--foreground)', boxShadow: 'none' }
+                                                    : undefined}
                                                 className="text-label-ui font-medium normal-case tracking-normal text-foreground data-[state=active]:text-primary-foreground">
                                                 <tab.icon className="hidden h-4 w-4 shrink-0 sm:inline" aria-hidden="true" />
                                                 <span className="truncate">{tab.label}</span>

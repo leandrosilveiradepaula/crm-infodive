@@ -172,6 +172,9 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(modal).toContain('aria-label="Outras seções da oportunidade"');
     expect(modal).toContain('onValueChange={setActiveTab}');
     expect(css).toContain('--ds-deal-tabs-columns: 3;');
+    expect(css).toContain('--ds-deal-facts-columns: 2;');
+    expect(modal).toContain('data-section-selected={activeTab === tab.id}');
+    expect(modal).toContain('aria-selected={activeTab === tab.id}');
     expect(css).toContain('--ds-deal-more-width:');
     expect(css).toContain('.ds-deal-overview-section {');
     expect(css).toContain('.ds-deal-overview-grid {');

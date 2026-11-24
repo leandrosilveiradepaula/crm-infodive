@@ -45,6 +45,7 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain('Opportunity detail extends outside the device viewport.');
         expect(source).toContain('assertOpportunitySections(page, dialog, capture, artifactDir,');
         expect(source).toContain('CRM_B4_SECTION_NAV_DIAGNOSTIC=');
+        expect(source).toContain('Opportunity navigation incorrectly highlights a primary tab in a secondary section.');
         expect(source).toContain("a11yFailedRoutes.add('/pipeline?detail:sections')");
         expect(source).toContain("for (const label of ['Parceiros', 'Clientes', 'Documentos', 'Comunicações', 'Histórico'])");
         expect(source).toContain("getByRole('tab', { name: 'Resumo', exact: true })");
