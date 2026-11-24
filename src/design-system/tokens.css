@@ -555,6 +555,8 @@
    surfaces are shared values; JSX owns actions and data, not visual constants. */
 @layer components {
   .ds-deal-header {
+    /* Never let the modal body collapse the identity/actions row. */
+    flex: 0 0 auto;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

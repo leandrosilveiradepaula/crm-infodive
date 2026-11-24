@@ -521,7 +521,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <TabsTrigger
                                             key={tab.id}
                                             value={tab.id}
-                                            className="text-foreground data-[state=active]:text-primary-foreground"
+                                            className="text-label-ui font-medium normal-case tracking-normal text-foreground data-[state=active]:text-primary-foreground"
                                         >
                                             <tab.icon className="w-3.5 h-3.5" />
                                             {tab.label}
@@ -617,7 +617,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         </dd>
                                     </div>
                                     <div className="flex items-baseline justify-between gap-3">
-                                        <dt className="ds-type-label text-muted-foreground">Total dos itens</dt>
+                                        <dt className="ds-type-label text-muted-foreground">Valor calculado dos itens</dt>
                                         <dd className="ds-type-body font-semibold text-foreground">
                                             {isProductsLoading ? 'Carregando…' :
                                                 hasPricedItems ? formatCurrency(pricedProductTotal) : 'Sem itens'}
@@ -628,7 +628,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                     <div data-qa-region="deal-pricing-discrepancy" role="note"
                                         className="mt-3 rounded-[var(--radius-control)] border border-warning/30 bg-warning-subtle p-3">
                                         <p className="ds-type-label font-medium text-warning-readable">
-                                            O valor estimado difere da soma dos itens precificados.
+                                            O valor estimado difere do valor calculado dos itens.
                                             Confira os preços antes de preparar uma proposta.
                                         </p>
                                         <Button type="button" size="sm" variant="outline"

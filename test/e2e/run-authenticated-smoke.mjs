@@ -558,6 +558,17 @@ try {
                         if (bounds.left < -1 || bounds.right > bounds.width + 1) {
                             throw new Error('Opportunity detail extends outside the device viewport.');
                         }
+                        // Regression for the clipped title/company/actions seen in
+                        // the real 96d8253c mobile and desktop QA screenshots.
+                        const headerClipped = await dialog.evaluate(node => {
+                            const header = node.querySelector('[data-qa-region="deal-header"]');
+                            if (!header) return true;
+                            const bottom = header.getBoundingClientRect().bottom;
+                            return Array.from(header.children).some(child => (
+                                child.getBoundingClientRect().bottom > bottom + 1
+                            ));
+                        });
+                        if (headerClipped) throw new Error('Opportunity header content is clipped or obscured.');
                         const detailAxe = await runAxe(page, source);
                         const detailIssues = detailAxe.incompleteCount + detailAxe.violationsCount;
                         if (detailIssues) {

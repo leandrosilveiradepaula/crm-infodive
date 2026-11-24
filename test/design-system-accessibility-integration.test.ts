@@ -136,10 +136,24 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(css).toContain('@media (max-width: 640px)');
   });
 
+  it('keeps header/actions visible and AI primary action contrast semantic in both themes', () => {
+    const css = read('src/design-system/tokens.css');
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const doctor = read('src/components/pipeline/ai/DealDoctorFinal.tsx');
+    const runner = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(css).toContain('flex: 0 0 auto;');
+    expect(modal).toContain('text-label-ui font-medium normal-case tracking-normal');
+    expect(modal).toContain('Valor calculado dos itens');
+    expect(modal).not.toContain('O valor estimado difere da soma dos itens precificados.');
+    expect(doctor).toContain('bg-primary text-primary-foreground');
+    expect(doctor).not.toContain('bg-primary text-white');
+    expect(runner).toContain('Opportunity header content is clipped or obscured.');
+  });
+
   it('ensures all inactive opportunity tab labels have fully readable semantic foreground text', () => {
     const modal = read('src/components/pipeline/ViewDealModal.tsx');
     const tabs = read('src/components/ui/tabs.tsx');
-    expect(modal).toContain('className="text-foreground data-[state=active]:text-primary-foreground"');
+    expect(modal).toContain('text-foreground data-[state=active]:text-primary-foreground"');
     expect(tabs).toContain('data-[state=active]:bg-primary data-[state=active]:text-primary-foreground');
     expect(modal).toContain('data-qa-region="deal-tabs"');
   });

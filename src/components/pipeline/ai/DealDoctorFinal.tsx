@@ -73,7 +73,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         </p>
                         <button
                             onClick={handleAnalyze}
-                            className="text-xs font-bold bg-primary text-white px-4 py-2.5 rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-control-ui"
+                            className="text-xs font-bold bg-primary text-primary-foreground px-4 py-2.5 rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-control-ui"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
                             Iniciar Diagnóstico
