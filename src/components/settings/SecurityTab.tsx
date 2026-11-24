@@ -15,15 +15,15 @@ export const SecurityTab = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* 2FA Section */}
-            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
+            <div className="bg-muted/10 p-6 rounded-[var(--radius-panel)] border border-border">
                 <div className="flex items-start justify-between relative z-10">
                     <div className="flex gap-6">
-                        <div className="bg-primary/10 p-3 rounded-xl h-fit">
+                        <div className="bg-primary/10 p-3 rounded-[var(--radius-panel)] h-fit">
                             <Shield className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-foreground tracking-tight">Autenticação de Dois Fatores (2FA)</h3>
-                            <p className="text-muted-foreground text-sm mt-2 max-w-lg font-medium leading-relaxed">
+                            <h3 className="text-section-title font-black text-foreground tracking-tight">Autenticação de Dois Fatores (2FA)</h3>
+                            <p className="text-muted-foreground text-body-ui mt-2 max-w-lg font-medium leading-relaxed">
                                 Adicione uma camada extra de segurança à sua conta exigindo um código do seu aplicativo autenticador ao fazer login.
                             </p>
                         </div>
@@ -39,24 +39,24 @@ export const SecurityTab = () => {
                     </label>
                 </div>
                 {is2FAEnabled && (
-                    <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
-                        <div className="bg-emerald-500/20 p-1.5 rounded-lg">
-                            <Check className="h-4 w-4 text-emerald-400" />
+                    <div className="mt-8 p-4 bg-success/10 border border-success/20 rounded-[var(--radius-panel)] flex items-center gap-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-success/20 p-1.5 rounded-[var(--radius-control)]">
+                            <Check className="h-4 w-4 text-success-readable" />
                         </div>
-                        <span className="text-sm font-bold text-emerald-400">2FA está ativado e protegendo sua conta.</span>
+                        <span className="text-body-ui font-bold text-success-readable">2FA está ativado e protegendo sua conta.</span>
                     </div>
                 )}
             </div>
 
             {/* Password Change Section */}
-            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
+            <div className="bg-muted/10 p-6 rounded-[var(--radius-panel)] border border-border">
                 <div className="flex gap-5 mb-6">
-                    <div className="bg-orange-500/10 p-3 rounded-xl h-fit">
-                        <Key className="h-6 w-6 text-orange-500" />
+                    <div className="bg-warning/10 p-3 rounded-[var(--radius-panel)] h-fit">
+                        <Key className="h-6 w-6 text-warning-readable" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight">Alterar Senha</h3>
-                        <p className="text-muted-foreground text-sm mt-2 font-medium">
+                        <h3 className="text-section-title font-black text-foreground tracking-tight">Alterar Senha</h3>
+                        <p className="text-muted-foreground text-body-ui mt-2 font-medium">
                             Escolha uma senha forte com no mínimo 8 caracteres.
                         </p>
                     </div>
@@ -64,11 +64,11 @@ export const SecurityTab = () => {
 
                 <form onSubmit={handleSavePassword} className="max-w-xl space-y-6 relative z-10">
                     <div>
-                        <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Senha Atual</label>
+                        <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Senha Atual</label>
                         <div className="relative group">
                             <ThemeInput
                                 type={showPassword ? "text" : "password"}
-                                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground pr-12 focus:scale-[1.01] shadow-sm"
+                                className="w-full bg-background border border-border rounded-[var(--radius-panel)] px-4 py-3 text-body-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground pr-12 focus:scale-[1.01] shadow-control-ui"
                                 placeholder="Digite sua senha atual..."
                                 value={passwords.current}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPasswords({ ...passwords, current: e.target.value })}
@@ -85,11 +85,11 @@ export const SecurityTab = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Nova Senha</label>
+                            <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Nova Senha</label>
                             <div className="relative group">
                                 <ThemeInput
                                     type={showPassword ? "text" : "password"}
-                                    className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-bold text-foreground focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground pr-12 focus:scale-[1.01] shadow-sm"
+                                    className="w-full bg-background border border-border rounded-[var(--radius-panel)] px-4 py-3 text-body-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground pr-12 focus:scale-[1.01] shadow-control-ui"
                                     placeholder="Digite sua nova senha..."
                                     value={passwords.new}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPasswords({ ...passwords, new: e.target.value })}
@@ -98,11 +98,11 @@ export const SecurityTab = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Confirmar Nova Senha</label>
+                            <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-2">Confirmar Nova Senha</label>
                             <div className="relative group">
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    className="w-full pl-12 pr-10 py-3.5 bg-background border border-border rounded-2xl text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder-muted-foreground group-hover:bg-muted"
+                                    className="w-full pl-12 pr-10 py-3.5 bg-background border border-border rounded-[var(--radius-panel)] text-foreground font-bold focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all placeholder-muted-foreground group-hover:bg-muted"
                                     placeholder="••••••••"
                                     required
                                     value={passwords.confirm}
@@ -117,12 +117,12 @@ export const SecurityTab = () => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="text-xs font-bold text-muted-foreground hover:text-foreground flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted transition-all uppercase tracking-wider"
+                            className="text-metadata-ui font-bold text-muted-foreground hover:text-foreground flex items-center gap-2 px-3 py-2 rounded-[var(--radius-control)] hover:bg-muted transition-all uppercase tracking-wider"
                         >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             {showPassword ? 'Ocultar Senhas' : 'Mostrar Senhas'}
                         </button>
-                        <button type="submit" className="bg-primary text-white px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]">
+                        <button type="submit" className="bg-primary text-white px-8 py-3 rounded-[var(--radius-panel)] font-black text-metadata-ui uppercase tracking-widest hover:bg-primary transition-all shadow-card-ui shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]">
                             Atualizar Senha
                         </button>
                     </div>
@@ -130,49 +130,49 @@ export const SecurityTab = () => {
             </div>
 
             {/* Active Sessions */}
-            <div className="bg-muted/10 p-6 rounded-2xl border border-border">
+            <div className="bg-muted/10 p-6 rounded-[var(--radius-panel)] border border-border">
                 <div className="flex gap-5 mb-6">
-                    <div className="bg-teal-500/10 p-3 rounded-xl h-fit">
-                        <Smartphone className="h-6 w-6 text-teal-400" />
+                    <div className="bg-info/10 p-3 rounded-[var(--radius-panel)] h-fit">
+                        <Smartphone className="h-6 w-6 text-info" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black text-foreground tracking-tight uppercase">Sessões Ativas</h3>
-                        <p className="text-muted-foreground text-sm mt-2 font-medium">
+                        <h3 className="text-section-title font-black text-foreground tracking-tight uppercase">Sessões Ativas</h3>
+                        <p className="text-muted-foreground text-body-ui mt-2 font-medium">
                             Gerencie os dispositivos conectados à sua conta ultimamente.
                         </p>
                     </div>
                 </div>
 
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border hover:border-primary/30 transition-all group">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-[var(--radius-panel)] border border-border hover:border-primary/30 transition-all group">
                         <div className="flex items-center gap-6">
-                            <div className="h-10 w-10 bg-background rounded-xl flex items-center justify-center border border-border group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                <span className="text-2xl">💻</span>
+                            <div className="h-10 w-10 bg-background rounded-[var(--radius-panel)] flex items-center justify-center border border-border group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                <span className="text-page-title">💻</span>
                             </div>
                             <div>
-                                <p className="font-black text-foreground text-base tracking-tight">Windows PC - Chrome</p>
-                                <p className="text-[10px] text-emerald-500 font-black flex items-center gap-2 mt-1 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md w-fit">
-                                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#34d399]"></span> Ativo agora
+                                <p className="font-black text-foreground text-body-ui tracking-tight">Windows PC - Chrome</p>
+                                <p className="text-metadata-ui text-success-readable font-black flex items-center gap-2 mt-1 uppercase tracking-widest bg-success/10 px-2 py-0.5 rounded-[var(--radius-control)] w-fit">
+                                    <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse shadow-[0_0_10px_#34d399]"></span> Ativo agora
                                 </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
-                            <span className="hidden sm:block text-[10px] font-mono font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-xl border border-border/50">IP: 192.168.1.10 • Brasil</span>
+                            <span className="hidden sm:block text-metadata-ui font-mono font-bold text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-[var(--radius-panel)] border border-border/50">IP: 192.168.1.10 • Brasil</span>
                             <div className="w-px h-10 bg-border/50 ml-2" />
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border opacity-70 hover:opacity-100 transition-all hover:border-border group">
+                    <div className="flex items-center justify-between p-4 bg-card rounded-[var(--radius-panel)] border border-border opacity-70 hover:opacity-100 transition-all hover:border-border group">
                         <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 bg-background rounded-xl flex items-center justify-center border border-border">
-                                <span className="text-2xl">📱</span>
+                            <div className="h-10 w-10 bg-background rounded-[var(--radius-panel)] flex items-center justify-center border border-border">
+                                <span className="text-page-title">📱</span>
                             </div>
                             <div>
-                                <p className="font-bold text-foreground text-base tracking-tight">iPhone 14 - App</p>
-                                <p className="text-[10px] text-muted-foreground font-black mt-1 uppercase tracking-widest">Último acesso: 2h atrás</p>
+                                <p className="font-bold text-foreground text-body-ui tracking-tight">iPhone 14 - App</p>
+                                <p className="text-metadata-ui text-muted-foreground font-black mt-1 uppercase tracking-widest">Último acesso: 2h atrás</p>
                             </div>
                         </div>
-                        <button className="text-red-500 hover:text-white p-2.5 hover:bg-red-500 rounded-xl transition-all border border-border hover:border-red-400" title="Encerrar Sessão">
+                        <button className="text-destructive-readable hover:text-white p-2.5 hover:bg-destructive rounded-[var(--radius-panel)] transition-all border border-border hover:border-destructive" title="Encerrar Sessão">
                             <LogOut className="h-5 w-5" />
                         </button>
                     </div>

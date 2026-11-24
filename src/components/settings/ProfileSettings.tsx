@@ -49,40 +49,40 @@ export function ProfileSettings() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
+                <div className="p-2.5 bg-primary/10 rounded-[var(--radius-panel)]">
                     <User className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-foreground tracking-tight">Meu Perfil</h3>
-                    <p className="text-xs text-muted-foreground font-medium">Informações da sua conta pessoal no sistema.</p>
+                    <h3 className="text-section-title font-black text-foreground tracking-tight">Meu Perfil</h3>
+                    <p className="text-metadata-ui text-muted-foreground font-medium">Informações da sua conta pessoal no sistema.</p>
                 </div>
             </div>
 
             <div className="space-y-8">
                 {/* Avatar Section */}
-                <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-muted/20 rounded-2xl border border-border/50">
+                <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-muted/20 rounded-[var(--radius-panel)] border border-border/50">
                     <div className="relative group">
-                        <Avatar className="h-24 w-24 border-2 border-background shadow-lg ring-1 ring-border group-hover:ring-primary/50 transition-all">
+                        <Avatar className="h-24 w-24 border-2 border-background shadow-card-ui ring-1 ring-border group-hover:ring-primary/50 transition-all">
                             <AvatarImage src={profile.avatar_url || undefined} />
-                            <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">
+                            <AvatarFallback className="bg-primary/10 text-primary text-page-title font-black">
                                 {initials}
                             </AvatarFallback>
                         </Avatar>
                         <div className="absolute inset-0 bg-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer backdrop-blur-[2px]">
-                            <p className="text-[10px] font-bold uppercase text-white tracking-widest">Alterar</p>
+                            <p className="text-metadata-ui font-bold uppercase text-white tracking-widest">Alterar</p>
                         </div>
                     </div>
                     <div className="flex-1 text-center md:text-left space-y-2">
                         <div>
-                            <h3 className="text-xl font-black text-foreground tracking-tight">{fullName || 'Usuário'}</h3>
-                            <p className="text-sm text-muted-foreground font-medium">{user?.email}</p>
+                            <h3 className="text-section-title font-black text-foreground tracking-tight">{fullName || 'Usuário'}</h3>
+                            <p className="text-body-ui text-muted-foreground font-medium">{user?.email}</p>
                         </div>
                         <div className="flex flex-wrap justify-center md:justify-start gap-2">
-                            <Badge className="bg-primary/10 text-primary border border-primary/20 font-bold uppercase text-[9px] tracking-wider px-2.5 py-0.5 rounded-lg">
+                            <Badge className="bg-primary/10 text-primary border border-primary/20 font-bold uppercase text-metadata-ui tracking-wider px-2.5 py-0.5 rounded-[var(--radius-control)]">
                                 <Shield className="h-3 w-3 mr-1" />
                                 {profile.role || 'admin'}
                             </Badge>
-                            <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-lg border-border">
+                            <Badge variant="outline" className="text-metadata-ui font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-[var(--radius-control)] border-border">
                                 Membro Ativo
                             </Badge>
                         </div>
@@ -92,58 +92,58 @@ export function ProfileSettings() {
                 {/* Fields Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nome Completo</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Nome Completo</Label>
                         <div className="relative group">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 value={fullName}
                                 onChange={e => setFullName(e.target.value)}
-                                className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                                className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                                 placeholder="Digite seu nome completo..."
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Email Principal</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Email Principal</Label>
                         <div className="relative group">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 value={user?.email || ''}
                                 disabled
-                                className="pl-10 h-[38px] bg-muted/30 border-border text-muted-foreground cursor-not-allowed rounded-xl font-bold text-sm italic"
+                                className="pl-10 h-[38px] bg-muted/30 border-border text-muted-foreground cursor-not-allowed rounded-[var(--radius-panel)] font-bold text-body-ui italic"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Telefone / WhatsApp</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Telefone / WhatsApp</Label>
                         <div className="relative group">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 value={phone}
                                 onChange={e => setPhone(e.target.value)}
-                                className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-xl font-bold text-sm"
+                                className="pl-10 h-[38px] bg-muted/20 border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                                 placeholder="(00) 00000-0000"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nível de Acesso</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Nível de Acesso</Label>
                         <div className="relative group">
                             <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Input
                                 value={profile.role || ''}
                                 disabled
-                                className="pl-10 h-[38px] bg-muted/30 border-border text-muted-foreground cursor-not-allowed rounded-xl font-bold text-sm uppercase tracking-widest"
+                                className="pl-10 h-[38px] bg-muted/30 border-border text-muted-foreground cursor-not-allowed rounded-[var(--radius-panel)] font-bold text-body-ui uppercase tracking-widest"
                             />
                         </div>
                     </div>
                 </div>
 
                 <div className="flex justify-end pt-4 border-t border-border">
-                    <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/20 transition-all">
+                    <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 transition-all">
                         {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                         Atualizar Perfil
                     </Button>
