@@ -19,6 +19,50 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // The assistant is a modal drawer. Keep keyboard focus inside and return
+    // focus to the opener when the dialog closes, without altering CRM data.
+    useEffect(() => {
+        if (!isOpen) return;
+        const previouslyFocused = document.activeElement instanceof HTMLElement
+            ? document.activeElement : null;
+        inputRef.current?.focus();
+        const onDrawerKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                onClose();
+                return;
+            }
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+            ) || []).filter(element => element.getClientRects().length > 0);
+            if (!focusable.length) {
+                event.preventDefault();
+                dialogRef.current?.focus();
+                return;
+            }
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (!dialogRef.current?.contains(document.activeElement)) {
+                event.preventDefault();
+                first.focus();
+            } else if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', onDrawerKeyDown);
+        return () => {
+            document.removeEventListener('keydown', onDrawerKeyDown);
+            previouslyFocused?.focus();
+        };
+    }, [isOpen, onClose]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,7 +149,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
             />
 
             {/* Sidebar */}
-            <div role="dialog" aria-label="Watson AI" aria-modal="true" className={cn(
+            <div ref={dialogRef} tabIndex={-1} role="dialog" aria-label="Watson AI" aria-modal="true" className={cn(
                 "fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background shadow-overlay-ui z-50 transform transition-transform duration-300 ease-in-out border-l border-border flex flex-col",
                 isOpen ? 'translate-x-0' : 'translate-x-full'
             )}>
@@ -201,6 +245,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                 <div className="p-4 border-t border-border bg-background">
                     <div className="relative flex items-center">
                         <Input
+                            ref={inputRef}
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
