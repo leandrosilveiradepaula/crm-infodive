@@ -391,6 +391,36 @@ async function assertOpportunityDialogKeyboard(page, opener) {
     }
 }
 
+async function assertOpportunitySections(page, dialog, capture, artifactDir, screenshotPrefix) {
+    const tabs = ['Resumo', 'Produtos', 'Propostas'];
+    for (const label of tabs) {
+        if (!(await dialog.getByRole('tab', { name: label, exact: true }).isVisible())) {
+            throw new Error('A primary opportunity section is not visible on this viewport.');
+        }
+    }
+    const barOverflows = await dialog.locator('[data-qa-region="deal-tabs"]').evaluate(element =>
+        element.scrollWidth > element.clientWidth + 1
+    );
+    if (barOverflows) throw new Error('Opportunity section navigation overflows the viewport.');
+
+    const more = dialog.getByRole('combobox', { name: 'Outras seções da oportunidade' });
+    await more.click();
+    for (const label of ['Parceiros', 'Clientes', 'Documentos', 'Comunicações', 'Histórico']) {
+        if (!(await page.getByRole('option', { name: label, exact: true }).isVisible())) {
+            throw new Error('An existing opportunity section is not reachable from the overflow menu.');
+        }
+    }
+    await page.getByRole('option', { name: 'Histórico', exact: true }).click();
+    await dialog.getByText('Atividades registradas', { exact: true }).first()
+        .waitFor({ state: 'visible', timeout: 5_000 });
+    if (capture) {
+        await page.screenshot({ path: resolve(artifactDir, screenshotPrefix + '-history.png'), fullPage: true });
+    }
+    await dialog.getByRole('tab', { name: 'Resumo', exact: true }).click();
+    await dialog.getByText('Detalhes da oportunidade', { exact: true }).first()
+        .waitFor({ state: 'visible', timeout: 5_000 });
+}
+
 async function login(page, baseUrl, account) {
     await page.goto(routeUrl(baseUrl, '/login'), { waitUntil: 'networkidle' });
     await page.locator('input[name="email"]').fill(account.email);
@@ -590,6 +620,25 @@ try {
                         }
                         const detailScreenshotName = `${account.label}-pipeline-deal-detail-${viewport.name}-${theme}.png`;
                         await page.screenshot({ path: resolve(artifactDir, detailScreenshotName), fullPage: true });
+                        let sectionNavigationStatus = 'passed';
+                        try {
+                            await assertOpportunitySections(page, dialog, capture, artifactDir,
+                                `${account.label}-pipeline-deal-detail-${viewport.name}-${theme}`);
+                        } catch {
+                            sectionNavigationStatus = 'failed';
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/pipeline?detail:sections');
+                            const finding = {
+                                profileIndex, route: '/pipeline', state: 'deal-detail-sections',
+                                viewport: viewport.name, theme, sectionNavigation: 'failed',
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_B4_SECTION_NAV_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                        }
+                        profileResult.checks.push({
+                            route: '/pipeline', state: 'deal-detail-sections',
+                            viewport: viewport.name, theme, sectionNavigation: sectionNavigationStatus,
+                        });
                         // Record keyboard failures separately, keeping the rest of
                         // the 4-profile / 22-route synthetic matrix auditable.
                         let keyboardStatus = 'passed';

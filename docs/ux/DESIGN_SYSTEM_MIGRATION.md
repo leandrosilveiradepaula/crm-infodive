@@ -1,3 +1,9 @@
+## 2026-11-24 — DS3.1 opportunity visual family continuation
+
+Work continues in the existing DRAFT PR #221. An actual comparison of authenticated synthetic `37dfb820` opportunity-detail screenshots against the private user reference found an eight-tab two-to-four-row navigation and oversized KPI dashboard over core business details. The current DS3.1 block reorganizes that **existing** information with `--ds-deal-*` tokens and shared `ds-deal-overview-*` classes, retaining every tab and business action; source data remains `Deal`, never fabricated history/contact/AI/forecast. Real QA on the new SHA (desktop/mobile, light/dark, primary + secondary history) and design-token non-regression remain release gates. No claim is made that all 196 baseline UI files or 5,536 inventoried decisions have been migrated; re-measure those counts before changing the baseline.
+
+---
+
 # CRM Infodive — centralized Design System migration (2026-11-23)
 
 **Goal:** a visual configuration changes the entire ORIGINAL CRM without modifying individual pages. This strategy supersedes "make each module look right" as the immediate UX implementation priority. Do not change business logic, routes, permissions, tenant isolation, data or external integrations.

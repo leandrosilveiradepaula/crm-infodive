@@ -158,6 +158,41 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(modal).toContain('data-qa-region="deal-tabs"');
   });
 
+  it('keeps all eight existing opportunity sections accessible with compact navigation', () => {
+    const modal = read('src/components/pipeline/ViewDealModal.tsx');
+    const css = read('src/design-system/tokens.css');
+    const nav = modal.split('data-qa-region="deal-tabs"')[1]?.split('flex-1 overflow-hidden relative')[0] || '';
+    for (const primary of ['overview', 'products', 'proposals']) {
+      expect(nav).toContain(`{ id: '${primary}',`);
+    }
+    for (const extra of ['partners', 'stakeholders', 'documents', 'omnichannel', 'history']) {
+      expect(modal).toContain(`{ value: '${extra}',`);
+      expect(modal).toContain(`value="${extra}"`);
+    }
+    expect(modal).toContain('aria-label="Outras seções da oportunidade"');
+    expect(modal).toContain('onValueChange={setActiveTab}');
+    expect(css).toContain('--ds-deal-tabs-columns: 3;');
+    expect(css).toContain('--ds-deal-more-width:');
+    expect(css).toContain('.ds-deal-overview-section {');
+    expect(css).toContain('.ds-deal-overview-grid {');
+  });
+
+  it('uses recorded sales facts without fabricated contact roles or AI-generated recommendations', () => {
+    const overview = read('src/components/pipeline/tabs/OverviewTab.tsx');
+    expect(overview).toContain('data-qa-region="deal-overview"');
+    expect(overview).toContain('recorded(deal.lead_source)');
+    expect(overview).toContain('recorded(ownerName)');
+    expect(overview).toContain('recorded(deal.contact_name)');
+    expect(overview).toContain('recorded(deal.next_step)');
+    expect(overview).toContain('products.slice(0, 4)');
+    expect(overview).toContain('Saúde registrada');
+    expect(overview).toContain('Sem avaliação');
+    expect(overview).not.toContain('Tomador de Decisão');
+    expect(overview).not.toContain('Decisor não definido');
+    expect(overview).not.toContain('Mock Next Best Action');
+    expect(overview).not.toContain('A última comunicação foi há 3 dias.');
+  });
+
   it('does not present fabricated trends and renders honest empty reports on authorized fixtures', () => {
     const report = read('src/app/(dashboard)/reports/client-page.tsx');
     const charts = read('src/components/charts/ReportsCharts.tsx');

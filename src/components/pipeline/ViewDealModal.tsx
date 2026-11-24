@@ -59,6 +59,16 @@ import { useDeals } from '@/hooks/useDeals';
 import { Account } from '@/types/account';
 import { Contact } from '@/types/contact';
 
+// All sections remain mounted under the same existing Radix Tabs instance.
+// The overflow selector reduces tab density without removing a destination.
+const secondaryTabs = [
+    { value: 'partners', label: 'Parceiros' },
+    { value: 'stakeholders', label: 'Clientes' },
+    { value: 'documents', label: 'Documentos' },
+    { value: 'omnichannel', label: 'Comunicações' },
+    { value: 'history', label: 'Histórico' },
+] as const;
+
 interface ViewDealModalProps {
     deal: Deal;
     isOpen: boolean;
@@ -507,27 +517,36 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                     <div className="ds-deal-main flex flex-col border-r border-border bg-background">
                         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                             <div data-qa-region="deal-tabs" className="ds-deal-tabbar border-b border-border bg-surface">
-                                <TabsList className="ds-deal-tablist grid w-full gap-[var(--ds-deal-tabs-gap)] border-0 bg-surface-subtle p-0">
-                                    {[
-                                        { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
-                                        { id: 'proposals', label: 'Propostas', icon: FileText },
-                                        { id: 'products', label: 'Produtos', icon: Package },
-                                        { id: 'partners', label: 'Parceiros', icon: Building2 },
-                                        { id: 'stakeholders', label: 'Clientes', icon: Users },
-                                        { id: 'documents', label: 'Documentos', icon: FolderOpen },
-                                        { id: 'omnichannel', label: 'Comunicações', icon: MessageSquare },
-                                        { id: 'history', label: 'Histórico', icon: History },
-                                    ].map((tab) => (
-                                        <TabsTrigger
-                                            key={tab.id}
-                                            value={tab.id}
-                                            className="text-label-ui font-medium normal-case tracking-normal text-foreground data-[state=active]:text-primary-foreground"
-                                        >
-                                            <tab.icon className="w-3.5 h-3.5" />
-                                            {tab.label}
-                                        </TabsTrigger>
-                                    ))}
-                                </TabsList>
+                                <div className="ds-deal-tabs-row">
+                                    <TabsList aria-label="Seções principais da oportunidade"
+                                        className="ds-deal-tablist grid w-full gap-[var(--ds-deal-tabs-gap)] border-0 bg-surface-subtle p-0">
+                                        {[
+                                            { id: 'overview', label: 'Resumo', icon: LayoutDashboard },
+                                            { id: 'products', label: 'Produtos', icon: Package },
+                                            { id: 'proposals', label: 'Propostas', icon: FileText },
+                                        ].map(tab => (
+                                            <TabsTrigger key={tab.id} value={tab.id}
+                                                className="text-label-ui font-medium normal-case tracking-normal text-foreground data-[state=active]:text-primary-foreground">
+                                                <tab.icon className="hidden h-4 w-4 shrink-0 sm:inline" aria-hidden="true" />
+                                                <span className="truncate">{tab.label}</span>
+                                            </TabsTrigger>
+                                        ))}
+                                    </TabsList>
+                                    <Select value={secondaryTabs.some(tab => tab.value === activeTab) ? activeTab : ''}
+                                        onValueChange={setActiveTab}>
+                                        <SelectTrigger
+                                            aria-label="Outras seções da oportunidade"
+                                            data-qa-region="deal-more-sections"
+                                            className="ds-deal-more-trigger ds-type-control border-border bg-card text-foreground">
+                                            <SelectValue placeholder="Mais seções" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {secondaryTabs.map(tab => (
+                                                <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
                             <div className="flex-1 overflow-hidden relative">
                                 <div className="absolute inset-0 flex flex-col">

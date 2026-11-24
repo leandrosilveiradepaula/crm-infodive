@@ -1,3 +1,17 @@
+# CURRENT_TASK — 2026-11-24: DS3.1 OPPORTUNITY INFORMATION HIERARCHY AND SECTION NAVIGATION
+
+**Owner authorization:** "prossiga" after G2/DS3 local isolated authenticated QA PASS, 176 checks, CI PASS on `37dfb820`. Extend **only** DRAFT PR #221 on existing branch, no merge to main.
+
+**Direct evidence:** inspected all four real authenticated synthetic QA detail captures for `37dfb820` (desktop/mobile, light/dark), plus the owner's private `Captura de tela 2026-11-17 093410(1).png`. The CRM modal's 8 equal-weight tabs require two rows desktop and four rows mobile. Four broad KPI cards and duplicated status summaries dominate the central panel, obscuring the core company/contact/context/details found in the reference. Prior technical PASS does not equal visual acceptance.
+
+**Allowed block:** Keep all eight real section destinations and server actions, but expose 3 high-frequency direct tabs plus 5 secondary destinations through an accessible selector, and move the overview to a dense readable definition-list composition using recorded deal fields only. All spacing, layout columns, widths and surface roles live in `src/design-system/tokens.css`. Update contract tests, actual authenticated browser navigation and screenshots, and the visual evidence ledger. Do not fake contact roles, AI recommendations, activity dates, prices or engagement events.
+
+**Prohibited:** business/service/API behavior changes, financial calculation or persisted-value synchronization changes, RLS/RBAC/tenancy, migrations, hosted Supabase, external integrations, production, automated merge, screenshot publication to this public repo.
+
+**Required proof:** exact final SHA CI (TypeScript, unit tests, Next build, token guard, WCAG preflight), real isolated synthetic authenticated QA (four profiles, 22 routes, both themes and viewport sizes), modal tab destinations via keyboard and pointer, overflow absence, screenshots of overview AND secondary History at desktop/mobile × light/dark, evidence-based comparison with the private visual source. Keep UX and main merge gate open until human visual review and remote protected QA if required. The complete 196-file migration is NOT finished.
+
+---
+
 # CURRENT_TASK — 2026-11-24: DS3 OPPORTUNITY INSPECTOR + FINANCIAL PRESENTATION
 
 **Owner authorization:** "prossiga" after #221 local CI and authenticated QA passed at `141c128a`. Extend the same DRAFT PR #221, never merge main or deploy.

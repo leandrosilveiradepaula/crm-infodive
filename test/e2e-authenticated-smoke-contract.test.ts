@@ -43,6 +43,13 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain('pipeline-deal-detail-${viewport.name}-${theme}.png');
         expect(source).toContain("if (capture && local && profileIndex === 0 && route === '/pipeline')");
         expect(source).toContain('Opportunity detail extends outside the device viewport.');
+        expect(source).toContain('assertOpportunitySections(page, dialog, capture, artifactDir,');
+        expect(source).toContain('CRM_B4_SECTION_NAV_DIAGNOSTIC=');
+        expect(source).toContain("a11yFailedRoutes.add('/pipeline?detail:sections')");
+        expect(source).toContain("for (const label of ['Parceiros', 'Clientes', 'Documentos', 'Comunicações', 'Histórico'])");
+        expect(source).toContain("getByRole('tab', { name: 'Resumo', exact: true })");
+        expect(source).toContain("'-history.png'");
+
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];

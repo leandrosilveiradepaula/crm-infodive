@@ -1,3 +1,18 @@
+## 2026-11-24 — G2/DS3.1 comparative visual workstream: section navigation and true commercial details
+
+**Baseline (observed):** `37dfb820` CI PASS and isolated local authenticated QA PASS: 4 profiles, 176 checks, no recorded failure. Real evidence: `profile-1-pipeline-deal-detail-{desktop,mobile}-{light,dark}.png`, artifact `crm-b4-local-visual-evidence-37dfb820...`, compared directly against private `Captura de tela 2026-11-17 093410(1).png`. No production data used.
+
+| Difference observed in baseline | Impact | DS3.1 target | Acceptance status |
+| --- | --- | --- | --- |
+| Eight tabs displayed with equal priority, 2 rows desktop / 4 mobile | P1 navigation density and discoverability | 3 direct tabs + 5 secondary entries with keyboard access; all original eight destinations preserved | Pending exact-SHA browser evidence |
+| Four KPI cards dominate the center, leaving empty space and scattering real commercial details | P2 information hierarchy | Compact recorded company/owner/stage/source, actual contact and product summaries, description and next step in central pane | Pending visual comparison |
+| "Tomador de Decisão" label shown for a generic contact without a role assertion | P2 potentially misleading content | Label actual registered contact without inventing decision authority | Pending QA |
+| Right inspector shows financial reconciliation and recent activity | Baseline retained | Preserve distinct stored estimate versus product calculation, historical activity and existing buttons | Regression gate |
+
+The source reference guides hierarchy only; no clinic features or copyrighted visual assets are copied. Technical CI/axe and screenshots alone do not approve G2/DS3.1 aesthetically. Keep PR #221 DRAFT; remote protected QA, global theme propagation and other route-family migration remain open.
+
+---
+
 ## 2026-11-24 — Opportunity detail G2/DS3 comparative ledger (PR #221)
 
 **Baseline:** authenticated synthetic screenshot from SHA `141c128a` (GitHub run 45404387684, technical PASS) compared directly with the private reference `Captura de tela 2026-11-17 093410(1).png`. The owner-provided reference shows a compact top-level status/action bar, calm editable central details and a separate right history/notes inspector. Its clinic-specific data and branding are NOT Infodive features.
