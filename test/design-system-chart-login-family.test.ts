@@ -12,6 +12,18 @@ const files = [
   "src/app/login/page.tsx"
 ] as const;
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), 'utf8');
+describe('Login primary action consumes shared Button contrast in light and dark', () => {
+  it('does not replace semantic primary foreground with local styling', () => {
+    const src = read('src/app/login/page.tsx');
+    const button = read('src/components/ui/button.tsx');
+    expect(src).toContain('size="lg"');
+    expect(src).toContain('className="w-full"');
+    expect(src).not.toContain('shadow-primary/20 transition-all uppercase');
+    expect(button).toContain('bg-primary text-primary-foreground');
+    expect(button).toContain('hover:bg-primary/90');
+  });
+});
+
 describe('Login readable metadata in both root themes', () => {
   it('does not fade user-facing invitation or copyright text', () => {
     const login = read('src/app/login/page.tsx');

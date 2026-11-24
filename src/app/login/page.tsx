@@ -162,7 +162,8 @@ function LoginForm() {
                     </div>
 
                     <Button
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-black py-6 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 transition-all uppercase tracking-[0.2em] text-metadata-ui"
+                        size="lg"
+                        className="w-full"
                         disabled={loading}
                     >
                         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
