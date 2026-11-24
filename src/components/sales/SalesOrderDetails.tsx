@@ -108,21 +108,21 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-card border border-border rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-card border border-border rounded-[var(--radius-panel)] w-full max-w-5xl h-[90vh] flex flex-col shadow-card-ui overflow-hidden animate-in fade-in zoom-in duration-200">
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-border bg-muted/30">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-primary/10 rounded-xl">
+                        <div className="p-2.5 bg-primary/10 rounded-[var(--radius-panel)]">
                             <Package className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h2>
-                            <p className="text-xs text-muted-foreground">
+                            <h2 className="text-section-title font-bold text-foreground">Pedido #{order.id.slice(0, 8)}</h2>
+                            <p className="text-metadata-ui text-muted-foreground">
                                 {order.deal?.customer?.name} • {new Date(order.created_at).toLocaleDateString()}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-[var(--radius-control)] transition-colors text-muted-foreground hover:text-foreground">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
@@ -131,13 +131,13 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                     {/* Left Column: Details */}
                     <div className="flex-1 overflow-y-auto p-5 border-r border-border">
                         <div className="mb-6">
-                            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
-                                <DollarSign className="h-4 w-4 text-emerald-500" />
+                            <h3 className="text-body-ui font-semibold text-foreground mb-3 flex items-center gap-2">
+                                <DollarSign className="h-4 w-4 text-success-readable" />
                                 Itens do Pedido
                             </h3>
-                            <div className="bg-muted/10 rounded-xl border border-border overflow-hidden">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-muted text-muted-foreground uppercase text-xs">
+                            <div className="bg-muted/10 rounded-[var(--radius-panel)] border border-border overflow-hidden">
+                                <table className="w-full text-body-ui text-left">
+                                    <thead className="bg-muted text-muted-foreground uppercase text-metadata-ui">
                                         <tr>
                                             <th className="px-4 py-3">Produto</th>
                                             <th className="px-4 py-3 text-right">Qtd</th>
@@ -150,7 +150,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                             <tr key={item.id}>
                                                 <td className="px-4 py-3">
                                                     <div className="font-medium text-foreground">{item.product_name}</div>
-                                                    <div className="text-xs text-muted-foreground">{item.product_sku}</div>
+                                                    <div className="text-metadata-ui text-muted-foreground">{item.product_sku}</div>
                                                 </td>
                                                 <td className="px-4 py-3 text-right">{item.quantity}</td>
                                                 <td className="px-4 py-3 text-right">{formatCurrency(item.unit_price)}</td>
@@ -161,7 +161,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                         ))}
                                         <tr className="bg-muted/20">
                                             <td colSpan={3} className="px-4 py-3 text-right font-medium text-muted-foreground">Total Geral</td>
-                                            <td className="px-4 py-3 text-right font-bold text-emerald-500 text-base">
+                                            <td className="px-4 py-3 text-right font-bold text-success-readable text-body-ui">
                                                 {formatCurrency(Number(order.total_value))}
                                             </td>
                                         </tr>
@@ -171,33 +171,33 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                         </div>
 
                         <div>
-                            <h3 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+                            <h3 className="text-body-ui font-semibold text-foreground mb-3 flex items-center gap-2">
                                 <FileText className="h-4 w-4 text-primary" />
                                 Nota Fiscal e Documentos
                             </h3>
-                            <div className="bg-muted/10 rounded-xl border border-border p-4">
+                            <div className="bg-muted/10 rounded-[var(--radius-panel)] border border-border p-4">
                                 <div className="space-y-4">
-                                    <label className="block text-sm font-medium text-muted-foreground">URL da Nota Fiscal (NF-e)</label>
+                                    <label className="block text-body-ui font-medium text-muted-foreground">URL da Nota Fiscal (NF-e)</label>
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
                                             value={invoiceUrl}
                                             onChange={e => setInvoiceUrl(e.target.value)}
                                             placeholder="https://..."
-                                            className="flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
+                                            className="flex-1 bg-background border border-border rounded-[var(--radius-control)] px-4 py-2 text-foreground focus:ring-2 focus:ring-primary/50 outline-none"
                                         />
                                         {invoiceUrl !== order.invoice_url && (
                                             <button
                                                 onClick={() => handleStatusChange(order.status)} // Just save
                                                 disabled={loading}
-                                                className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors"
+                                                className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-[var(--radius-control)] transition-colors"
                                             >
                                                 <Save className="h-5 w-5" />
                                             </button>
                                         )}
                                     </div>
 
-                                    <div className="relative border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors group">
+                                    <div className="relative border-2 border-dashed border-border rounded-[var(--radius-panel)] p-8 text-center hover:border-primary/50 transition-colors group">
                                         <input
                                             type="file"
                                             accept=".pdf,.xml"
@@ -207,7 +207,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                         />
                                         <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
                                             <Upload className={`h-8 w-8 ${uploading ? 'animate-bounce' : ''}`} />
-                                            <span className="text-sm font-medium">
+                                            <span className="text-body-ui font-medium">
                                                 {uploading ? 'Enviando...' : 'Clique ou arraste o arquivo da NF-e aqui'}
                                             </span>
                                         </div>
@@ -217,7 +217,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                         <button
                                             onClick={() => handleOpenInvoice(order.invoice_url!)}
                                             disabled={openingInvoice}
-                                            className="block mt-2 text-xs text-primary hover:text-primary/80 underline text-center w-full disabled:opacity-50"
+                                            className="block mt-2 text-metadata-ui text-primary hover:text-primary/80 underline text-center w-full disabled:opacity-50"
                                         >
                                             {openingInvoice ? 'Abrindo...' : 'Visualizar Nota Fiscal Atual'}
                                         </button>
@@ -229,7 +229,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
                     {/* Right Column: Timeline & Actions */}
                     <div className="w-[350px] bg-muted/30 border-l border-border p-5 flex flex-col">
-                        <h3 className="text-base font-semibold text-foreground mb-4">Status do Pedido</h3>
+                        <h3 className="text-body-ui font-semibold text-foreground mb-4">Status do Pedido</h3>
 
                         <div className="space-y-8 relative">
                             {/* Vertical Line */}
@@ -243,9 +243,9 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                 return (
                                     <div key={step.id} className="relative flex items-start gap-4">
                                         <div className={`relative z-10 p-2 rounded-full border-2 transition-all duration-300 ${isCompleted
-                                            ? 'bg-emerald-500 border-emerald-500 text-white'
+                                            ? 'bg-success border-success text-white'
                                             : isCurrent
-                                                ? 'bg-blue-500 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                                                ? 'bg-primary border-primary text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]'
                                                 : 'bg-card border-border text-muted-foreground'
                                             }`}>
                                             <step.icon className="h-5 w-5" />
@@ -256,7 +256,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                                     {step.label}
                                                 </h4>
                                                 {isCurrent && (
-                                                    <span className="text-[10px] uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                                    <span className="text-metadata-ui uppercase font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                                         Atual
                                                     </span>
                                                 )}
@@ -264,12 +264,12 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
 
                                             {/* Status specific timestamps */}
                                             {step.id === 'nf_emitida' && order.billed_at && (
-                                                <p className="text-xs text-muted-foreground mt-1">
+                                                <p className="text-metadata-ui text-muted-foreground mt-1">
                                                     {new Date(order.billed_at).toLocaleDateString()}
                                                 </p>
                                             )}
                                             {step.id === 'entregue' && order.delivered_at && (
-                                                <p className="text-xs text-muted-foreground mt-1">
+                                                <p className="text-metadata-ui text-muted-foreground mt-1">
                                                     {new Date(order.delivered_at).toLocaleDateString()}
                                                 </p>
                                             )}
@@ -279,7 +279,7 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                                                 <button
                                                     onClick={() => handleStatusChange(step.id as SalesOrder['status'])}
                                                     disabled={loading}
-                                                    className="mt-3 w-full py-2 px-4 bg-muted hover:bg-muted/80 border border-border rounded-lg text-sm text-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 group"
+                                                    className="mt-3 w-full py-2 px-4 bg-muted hover:bg-muted/80 border border-border rounded-[var(--radius-control)] text-body-ui text-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 group"
                                                 >
                                                     Avançar para {step.label}
                                                     <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
@@ -292,10 +292,10 @@ export const SalesOrderDetails: React.FC<SalesOrderDetailsProps> = ({ order, onC
                         </div>
 
                         {order.status === 'comissao_paga' && (
-                            <div className="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                                <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-2" />
-                                <h4 className="text-emerald-600 font-bold">Comissão Recebida</h4>
-                                <p className="text-sm text-emerald-600/70 mt-1">
+                            <div className="mt-8 p-4 bg-success/10 border border-success/20 rounded-[var(--radius-panel)] text-center">
+                                <CheckCircle2 className="h-8 w-8 text-success-readable mx-auto mb-2" />
+                                <h4 className="text-success-readable font-bold">Comissão Recebida</h4>
+                                <p className="text-body-ui text-success-readable/70 mt-1">
                                     Ciclo da venda finalizado com sucesso.
                                 </p>
                             </div>

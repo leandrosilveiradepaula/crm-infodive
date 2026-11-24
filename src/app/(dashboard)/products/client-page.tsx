@@ -97,18 +97,18 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
             value: existingCategories.length,
             description: "Segmentação técnica",
             icon: Layers,
-            color: "text-teal-600 dark:text-teal-400",
-            gradient: "from-teal-50 to-white dark:from-teal-950/20",
-            border: "border-teal-100 dark:border-teal-900/50"
+            color: "text-info dark:text-info",
+            gradient: "from-info-subtle to-white dark:from-info/20",
+            border: "border-info dark:border-info/50"
         },
         {
             label: "Fabricantes",
             value: existingBrands.length,
             description: "Marcas e Vendors",
             icon: Shield,
-            color: "text-emerald-600 dark:text-emerald-400",
-            gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-            border: "border-emerald-100 dark:border-emerald-900/50"
+            color: "text-success-readable dark:text-success-readable",
+            gradient: "from-success-subtle to-white dark:from-success/20",
+            border: "border-success dark:border-success/50"
         },
         {
             label: "Média p/ Cat.",
@@ -117,9 +117,9 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                 : '0.0',
             description: "Produtos por categoria",
             icon: Tag,
-            color: "text-amber-600 dark:text-amber-400",
-            gradient: "from-amber-50 to-white dark:from-amber-950/20",
-            border: "border-amber-100 dark:border-amber-900/50"
+            color: "text-warning-readable dark:text-warning-readable",
+            gradient: "from-warning-subtle to-white dark:from-warning/20",
+            border: "border-warning dark:border-warning/50"
         }
     ];
 

@@ -64,7 +64,7 @@ export default function PublicProposalPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-highlight to-surface-highlight">
                 <div className="text-center">
                     <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-muted-foreground">Carregando proposta...</p>
@@ -75,10 +75,10 @@ export default function PublicProposalPage() {
 
     if (error || !proposal) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-highlight to-surface-highlight">
                 <div className="text-center max-w-md">
                     <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h1 className="text-2xl font-bold mb-2">Proposta Não Encontrada</h1>
+                    <h1 className="text-page-title font-bold mb-2">Proposta Não Encontrada</h1>
                     <p className="text-muted-foreground">
                         {error || 'Esta proposta não existe ou não está mais disponível.'}
                     </p>
@@ -90,16 +90,16 @@ export default function PublicProposalPage() {
     const getStatusBadge = (status: string) => {
         const configs = {
             draft: { label: 'Rascunho', color: 'bg-muted/50 text-foreground' },
-            sent: { label: 'Enviada', color: 'bg-blue-100 text-blue-800' },
-            viewed: { label: 'Visualizada', color: 'bg-teal-100 text-teal-800' },
-            signed: { label: 'Assinada', color: 'bg-green-100 text-green-800' },
-            rejected: { label: 'Rejeitada', color: 'bg-red-100 text-red-800' },
+            sent: { label: 'Enviada', color: 'bg-surface-highlight text-primary' },
+            viewed: { label: 'Visualizada', color: 'bg-info-subtle text-info' },
+            signed: { label: 'Assinada', color: 'bg-success-subtle text-success-readable' },
+            rejected: { label: 'Rejeitada', color: 'bg-destructive-subtle text-destructive-readable' },
         };
 
         const config = configs[status as keyof typeof configs] || configs.draft;
 
         return (
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-body-ui font-medium ${config.color}`}>
                 {config.label}
             </span>
         );
@@ -110,13 +110,13 @@ export default function PublicProposalPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-12 px-4">
+            <div className="min-h-screen bg-gradient-to-br from-surface-highlight to-surface-highlight py-12 px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header Card */}
-                    <div className="bg-card rounded-xl shadow-lg p-8 mb-6">
+                    <div className="bg-card rounded-[var(--radius-panel)] shadow-card-ui p-8 mb-6">
                         <div className="flex items-start justify-between mb-6">
                             <div>
-                                <h1 className="text-3xl font-bold text-foreground mb-2">{proposal.title}</h1>
+                                <h1 className="text-metric-ui font-bold text-foreground mb-2">{proposal.title}</h1>
                                 <p className="text-muted-foreground">Proposta #{proposal.number}</p>
                             </div>
                             <div>
@@ -129,7 +129,7 @@ export default function PublicProposalPage() {
                             <div className="flex items-center gap-3">
                                 <Calendar className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Data de Criação</p>
+                                    <p className="text-metadata-ui text-muted-foreground">Data de Criação</p>
                                     <p className="font-medium">{new Date(proposal.createdAt).toLocaleDateString('pt-BR')}</p>
                                 </div>
                             </div>
@@ -138,7 +138,7 @@ export default function PublicProposalPage() {
                                 <div className="flex items-center gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground" />
                                     <div>
-                                        <p className="text-xs text-muted-foreground">Válida Até</p>
+                                        <p className="text-metadata-ui text-muted-foreground">Válida Até</p>
                                         <p className="font-medium">{new Date(proposal.validUntil).toLocaleDateString('pt-BR')}</p>
                                     </div>
                                 </div>
@@ -147,7 +147,7 @@ export default function PublicProposalPage() {
                             <div className="flex items-center gap-3">
                                 <Eye className="h-5 w-5 text-muted-foreground" />
                                 <div>
-                                    <p className="text-xs text-muted-foreground">Versão</p>
+                                    <p className="text-metadata-ui text-muted-foreground">Versão</p>
                                     <p className="font-medium">v{proposal.version}</p>
                                 </div>
                             </div>
@@ -160,12 +160,12 @@ export default function PublicProposalPage() {
                                 <span className="font-medium">{formatCurrency(proposal.subtotal)}</span>
                             </div>
                             {proposal.discount > 0 && (
-                                <div className="flex justify-between items-center mb-2 text-green-600">
+                                <div className="flex justify-between items-center mb-2 text-success-readable">
                                     <span>Desconto ({proposal.discountPercentage}%)</span>
                                     <span>-{formatCurrency(proposal.discount)}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center text-xl font-bold border-t pt-4">
+                            <div className="flex justify-between items-center text-section-title font-bold border-t pt-4">
                                 <span>Total</span>
                                 <span className="text-primary">{formatCurrency(proposal.total)}</span>
                             </div>
@@ -176,7 +176,7 @@ export default function PublicProposalPage() {
                             <div className="mt-6">
                                 <Button
                                     onClick={() => setShowSignatureModal(true)}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-lg"
+                                    className="w-full bg-success hover:bg-success text-white h-12 text-section-title"
                                 >
                                     <CheckCircle2 className="h-5 w-5 mr-2" />
                                     Assinar Proposta
@@ -185,11 +185,11 @@ export default function PublicProposalPage() {
                         )}
 
                         {isSigned && (
-                            <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                                <CheckCircle2 className="h-6 w-6 text-green-600" />
+                            <div className="mt-6 bg-success-subtle border border-success rounded-[var(--radius-control)] p-4 flex items-center gap-3">
+                                <CheckCircle2 className="h-6 w-6 text-success-readable" />
                                 <div>
-                                    <p className="font-semibold text-green-900">Proposta Assinada</p>
-                                    <p className="text-sm text-green-700">
+                                    <p className="font-semibold text-success-readable">Proposta Assinada</p>
+                                    <p className="text-body-ui text-success-readable">
                                         Esta proposta foi assinada em {proposal.signedAt && new Date(proposal.signedAt).toLocaleString('pt-BR')}
                                     </p>
                                 </div>
@@ -198,9 +198,9 @@ export default function PublicProposalPage() {
                     </div>
 
                     {/* Content Preview */}
-                    <div className="bg-card rounded-xl shadow-lg p-8 overflow-hidden">
+                    <div className="bg-card rounded-[var(--radius-panel)] shadow-card-ui p-8 overflow-hidden">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold">Conteúdo da Proposta</h2>
+                            <h2 className="text-page-title font-bold">Conteúdo da Proposta</h2>
                             <Button variant="outline" size="sm" onClick={() => window.print()}>
                                 <FileText className="h-4 w-4 mr-2" />
                                 Imprimir / Salvar PDF
@@ -209,7 +209,7 @@ export default function PublicProposalPage() {
 
                         {/* Render proposal content */}
                         {proposal.content ? (
-                            <div className="flex flex-col items-center gap-8 bg-muted/50 p-8 rounded-xl border border-dashed border-gray-300">
+                            <div className="flex flex-col items-center gap-8 bg-muted/50 p-8 rounded-[var(--radius-panel)] border border-dashed border-border">
                                 {/* Construct Pseudo-Deal for Components */}
                                 {(() => {
                                     const config = proposal.content.config || {};
@@ -226,7 +226,7 @@ export default function PublicProposalPage() {
                                     return (
                                         <div className="scale-[0.6] origin-top space-y-8" style={{ width: '210mm' }}>
                                             {config.includeCover && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalCoverPage
                                                         dealTitle={pseudoDeal.title}
                                                         companyName={pseudoDeal.company}
@@ -237,37 +237,37 @@ export default function PublicProposalPage() {
                                             )}
 
                                             {config.includeConfidentiality && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalConfidentialityPage />
                                                 </div>
                                             )}
 
                                             {config.includeOverview && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalOverviewPage dealTitle={pseudoDeal.title} aiSummary={proposal.content?.aiSummary} />
                                                 </div>
                                             )}
 
                                             {config.includeHardware && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalHardwarePage deal={pseudoDeal} />
                                                 </div>
                                             )}
 
                                             {config.includeSoftware && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalSoftwarePage deal={pseudoDeal} />
                                                 </div>
                                             )}
 
                                             {config.includeInvestment && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalInvestmentPage deal={pseudoDeal} />
                                                 </div>
                                             )}
 
                                             {config.includeDifferentials && (
-                                                <div className="shadow-2xl">
+                                                <div className="shadow-card-ui">
                                                     <ProposalDifferentialsPage />
                                                 </div>
                                             )}
@@ -283,7 +283,7 @@ export default function PublicProposalPage() {
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-8 text-center text-sm text-muted-foreground">
+                    <div className="mt-8 text-center text-body-ui text-muted-foreground">
                         <p>Esta é uma visualização pública da proposta. O link é confidencial e intransferível.</p>
                     </div>
                 </div>
