@@ -217,6 +217,20 @@ describe('Global visual contract in real Pipeline and reporting states', () => {
     expect(state).not.toContain('text-center opacity-70');
   });
 
+  it('uses the shared primary Button for Microsoft connect in both themes', () => {
+    const connect = read('src/components/settings/ConnectEmailButton.tsx');
+    const button = read('src/components/ui/button.tsx');
+    expect(connect).toContain('size="lg"');
+    expect(connect).toContain('onClick={handleConnect}');
+    expect(connect).toContain('await connectEmailAction()');
+    expect(connect).not.toContain('#0078D4');
+    expect(connect).not.toContain('#005a9e');
+    expect(connect).not.toContain('text-white');
+    expect(connect).not.toContain('shadow-[#');
+    expect(button).toContain('bg-primary text-primary-foreground');
+    expect(button).toContain('hover:bg-primary/90');
+  });
+
   it('uses recorded sales facts without fabricated contact roles or AI-generated recommendations', () => {
     const overview = read('src/components/pipeline/tabs/OverviewTab.tsx');
     expect(overview).toContain('data-qa-region="deal-overview"');
