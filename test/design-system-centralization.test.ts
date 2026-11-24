@@ -238,6 +238,13 @@ describe('Central design system — source propagation and strict migrated famil
     expect(e2e).toContain('Quantized bounding box only');
   });
 
+  it('does not fade the DRE Ramp-up label below readable contrast', () => {
+    const financial = read('src/components/goals/FinancialSummaryCard.tsx');
+    expect(financial).not.toContain('group relative opacity-80');
+    expect(financial).toContain('Ineficiência Ramp-up');
+    expect(financial).toContain('text-muted-foreground');
+  });
+
   it('requires computed-style propagation, not just source tokens or screenshots', () => {
     const runner = read('test/e2e/run-authenticated-smoke.mjs');
     expect(runner).toContain('async function assertDesignTokenPropagation(page)');

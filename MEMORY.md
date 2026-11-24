@@ -1,3 +1,7 @@
+## 2026-11-24 — DS5 actual final DRE contrast root cause
+
+SHA 9d8956ae passed CI 45471381649 (292 tests). Full local authenticated QA 45471381437 failed only one Planning contrast node, with safe box [836,452,156,16]. Inspected actual planning QA screenshot: exactly `(-) Ineficiência Ramp-up` inside FinancialSummaryCard; container `opacity-80` was reducing text contrast. Removed the row opacity without changing DRE values or formulas; source test added. The other four nested Goals states including seasonality have passed their audit. Same-SHA CI/QA must re-run; no UX approval until zero failures and visual review. Commercial migration exists only as unreferenced candidate commit c4118ce8, not on #221 while Goals gate open.
+
 ## 2026-11-24 — Goals stateful QA progressed to two residual states
 
 Commit 28cca4b0 CI 45470307615 SUCCESS (291 tests, 25 strict components); isolated QA 45470307748 FAIL only in Planning and Seasonality after previous failures in all five nested states. New real screenshot confirms fixed 12-col toolbar/5+7 financial layout, with DRE on the right; residual clipped three-way goal selector at half width and translucent funnel surfaces causing axe contrast incomplete. Targeted code correction gives full-span mode selector and monthly goal, solid semantic funnel surface, no decorative opacity overlay, responsive 3-metric grid. Safe diagnostics add quantized bounds for remaining p-contrast issue. No math/actions/data/RBAC/DB/production change. PR #221 Draft and same-SHA QA gate remain.

@@ -77,7 +77,7 @@ export const FinancialSummaryCard = ({
             {/* Ramp Up Loss (if any) */}
             {rampUpLoss > 0 && (
                 <>
-                    <div className="flex justify-between items-center group relative opacity-80">
+                    <div className="flex justify-between items-center group relative">
                         <div className="absolute left-3 top-8 bottom-0 w-0.5 bg-border -z-10"></div>
                         <div className="flex items-center gap-2.5">
                             <div className="p-1.5 bg-destructive-subtle rounded-[var(--radius-panel)] text-destructive-readable">

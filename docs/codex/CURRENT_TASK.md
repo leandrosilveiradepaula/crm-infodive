@@ -1,3 +1,9 @@
+## 2026-11-24 — DS5 SINGLE REMAINING DRE CONTRAST VIOLATION
+
+Real QA SHA 9d8956ae (run 45471381437) has exactly one failing Goals state, Planning, with one `color-contrast` node. Direct evidence coordinates [836,452,156,16] on actual screenshot identify the `Ineficiência Ramp-up` label inside FinancialSummaryCard. The row had `opacity-80` on the whole text container, making it less readable. Remove this unnecessary opacity only, preserving all values and business logic, plus permanent source contract. Re-run exact-SHA CI, authenticated four-role 22-route QA, both themes/mobile/desktop and inspect screenshot. PR #221 stays DRAFT. Do not publish subsequent Commercial candidate until this gate passes; no hosted DB/production/main merge.
+
+---
+
 ## 2026-11-24 — DS5 GOALS REAL VISUAL AND AXE DEFECTS FOUND
 
 Owner directed autonomous completion. Exact SHA bf69f1dd CI 45468723328 SUCCESS, isolated authenticated QA 45468723316 **FAIL**. Sanitized logs identify five nested Goals states: Commissions 2 contrast violations; Campaigns 3 contrast + 2 unlabeled fields; Planning 40 contrast + 7 unlabeled fields + 5 axe incomplete; Seasonality 7 labels + 20 incomplete SVG; Statement 2 contrast. Real desktop screenshot additionally proves P1 planning layout: FilterBar occupies one column of a 12-grid, displacing right results below left, and a duplicated inner grid wrapper crushes goal mode options. Do NOT claim UX accepted. Fix actual grid composition, labels, chart SVG accessibility and tab animation sampling, using central tokens. No change to math, Server Actions, access control or hosted DB. Same-SHA CI/real QA must prove zero violations and zero incompletes in all nested states across both viewports/themes.
