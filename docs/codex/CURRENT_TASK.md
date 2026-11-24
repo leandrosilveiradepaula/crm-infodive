@@ -1,3 +1,9 @@
+## 2026-11-24 — DS6 SYNCHRONIZE HISTORICAL B2/B4 SOURCE TEST CONTRACTS
+
+Exact SHA 81953310 real /pipeline route correctly changed five stage accents to centrally configured `bg-stage-*` classes and column geometry to `sm:w-[var(--ds-kanban-column-width)]`. CI run 45478015290 FAILED with exactly two existing source-contract assertions, which still expected old `bg-info`/`bg-success` stage classes and hardcoded `sm:w-80`. Update the old tests to assert NEW semantic-stage literals, DOM QA hook and central column variable. Do NOT revert the actual route to satisfy historical test literals. Preserve all business logic and compare same-SHA CI and real authenticated four-profile QA before considering DS6 certified. Same DRAFT PR #221, no merge, hosted DB or production.
+
+---
+
 ## 2026-11-24 — DS6 REAL PIPELINE BOARD ROUTING CORRECTION
 
 Owner's original centralized Design System priority remains active, same DRAFT PR #221. Exact CI SHA 560836ba passed 295 tests and strict policy (31 locked modules; 153 affected files/3,214 occurrences), but local authenticated QA 45477099853 FAILED at `COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED` before opportunity modal checks. Root cause verified in the REAL source: `src/app/(dashboard)/pipeline/client-page.tsx` renders its own `DragDropContext` and `DEFAULT_STAGES`; `src/components/pipeline/KanbanBoard.tsx` migrated in DS6 is NOT imported by that live page. Update the actual route's existing five static stage accents/surfaces to `bg-stage-*`/semantic borders, add QA hooks to real rendered stages, and centralize column dimensions in tokens.css; preserve drag-and-drop and business logic. Lock the actual route under strict guard (confirmed zero pre-existing palette/font/radius/shadow-local occurrences). Require new exact-SHA full CI, authenticated local QA, screenshot review and zero WCAG violations/incompletes before asserting Commercial complete. No prod, Supabase hosted or merge.

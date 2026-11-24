@@ -1,3 +1,7 @@
+## 2026-11-24 — DS6 historical B2/B4 source tests realigned
+
+At SHA 81953310, CI 45478015290 failed only two source assertions that hardcoded obsolete classes in the *real* /pipeline UI: B2 expected bg-info and bg-success surfaces, B4 expected sm:w-80. The actual route was intentionally migrated to --stage-* semantics and --ds-kanban-column-width. Update tests to check semantic-stage source and shared width token, not revert working central design. Requires exact-SHA CI+authenticated browser recheck. No production, migrations, hosted DB or merge; PR #221 draft.
+
 ## 2026-11-24 — DS6 actual Pipeline board identity discovered
 
 Commit 560836ba CI success 45477099906 (295 tests, 31 strict migrated) but QA 45477099853 failed `COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED`. Actual source `src/app/(dashboard)/pipeline/client-page.tsx` renders Kanban in-place, independently from the separately migrated `KanbanBoard.tsx`, which is not imported by the live page. UI proof was therefore missing despite source tests; this is a real route integration defect. Corrective candidate maps actual DEFAULT_STAGES 5 accents/surfaces to tokens, adds data-qa-stage hooks and shared geometry variables, locks real route. Business actions unchanged. Must re-run same-SHA CI/local auth/visual QA; no prod/Supabase/main merge.
