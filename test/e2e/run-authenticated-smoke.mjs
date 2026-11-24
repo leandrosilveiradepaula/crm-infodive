@@ -1053,6 +1053,47 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // Verify that the actual global search control is an action,
+                    // not a fake input. No search is submitted or data changed here.
+                    if (local && profileIndex === 0 && route === '/dashboard') {
+                        await page.getByRole('button', { name: 'Buscar no CRM' }).first().click();
+                        const commandDialog = page.getByRole('dialog', { name: 'Pesquisa e comandos do CRM' });
+                        await commandDialog.waitFor({ state: 'visible', timeout: 8_000 });
+                        const commandAxe = await runAxe(page, source);
+                        const commandIssues = commandAxe.violationsCount + commandAxe.incompleteCount;
+                        if (commandIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/dashboard?global-search');
+                            const finding = {
+                                profileIndex, route: '/dashboard', state: 'global-search',
+                                viewport: viewport.name, theme,
+                                violations: commandAxe.violations, incomplete: commandAxe.incomplete,
+                            };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_B4_COMMAND_DIALOG_DIAGNOSTIC=' +
+                                    JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) {
+                            await page.screenshot({
+                                path: resolve(artifactDir,
+                                    `${account.label}-dashboard-command-search-${viewport.name}-${theme}.png`),
+                                fullPage: true,
+                            });
+                        }
+                        await page.keyboard.press('Escape');
+                        await commandDialog.waitFor({ state: 'hidden', timeout: 7_000 });
+                        // The global Ctrl+K shortcut must reopen the same control.
+                        await page.keyboard.press('Control+k');
+                        await commandDialog.waitFor({ state: 'visible', timeout: 7_000 });
+                        await page.keyboard.press('Escape');
+                        await commandDialog.waitFor({ state: 'hidden', timeout: 7_000 });
+                        profileResult.checks.push({
+                            route, state: 'global-search', viewport: viewport.name, theme,
+                            status: commandIssues ? 'failed' : 'passed',
+                        });
+                    }
                     // The actual Dashboard header mounts the Watson AI drawer.
                     // Exercise open/close and axe in the real isolated CRM without
                     // submitting prompts or calling any external AI provider.
