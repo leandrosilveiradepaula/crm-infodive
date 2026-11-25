@@ -36,7 +36,7 @@ export function PdfCustomNotesPage({ title, content, pdfColors, pdfStyles }: Pdf
                         style={{ 
                             fontSize: 10, 
                             lineHeight: 1.6, 
-                            color: proposalDocumentPrimitives.slate700, 
+                            color: proposalDocumentPrimitives.slate700,
                             marginBottom: para.trim() ? 8 : 4,
                             textAlign: 'justify' 
                         }}

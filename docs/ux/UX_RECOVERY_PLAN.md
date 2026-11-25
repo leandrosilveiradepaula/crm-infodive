@@ -1,3 +1,11 @@
+### 2026-11-25 — DS12 final validation repair and actual proposal export evidence
+
+Candidate `bf71c217` failed TypeScript and the isolated application build due to an empty conditional expression in TemplateCard. Replacement `152e7737` restored the existing template button, semantic pressed-state and primary foreground. [CI 45524315217](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45524315217) subsequently passed TypeScript, 474 tests (including the actual full-source zero-debt assertion), Next.js build and all four synthetic WCAG combinations. The remaining failure was strictly three trailing whitespace lines in settings and PDF custom notes, before the CLI inventory step. Remove those three reported whitespace issues. No relaxation of the guard.
+
+The next candidate adds a real renderer-only proof using the same ProposalPdfDocument and renderToBuffer as the authenticated server export. It renders all eight sections twice from synthetic fixtures, checks actual text, BRL/USD pricing, page count, and rasterized primary/accent colors, and publishes both PDFs plus all page PNGs as sanitized evidence. It does not call the export API, allocate proposal numbers, connect to databases, or mutate tenant state. Validation checkout is explicitly pinned to PR head. This proof is a candidate until the exact new CI and authenticated QA pass; visual comparison of the generated evidence is still required. The source inventory zero applies only to the seven historical categories, not every possible visual value syntax.
+
+---
+
 ### 2026-11-25 — DS12 full-inventory graduation candidate
 
 The exact predecessor `60df4bbc` passed [CI 45521798757](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45521798757) (471/471 tests, TypeScript, build, synthetic WCAG, 112 locked modules, 189 changed UI files and no hardcode regressions), and [real isolated authenticated QA 45521799142](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45521799142) (4 profiles, 216 visual route checks, artifact 14981431026). Its measured inventory was 59 files / 180 categorized local decisions (179 web, 1 PDF), against the original 196 files / 5,536 decisions.

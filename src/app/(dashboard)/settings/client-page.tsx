@@ -83,7 +83,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor primária da marca"
-                                    value={form.primary_color || organizationBrandDefaults.primary} 
+                                    value={form.primary_color || organizationBrandDefaults.primary}
                                     onChange={e => setForm({ ...form, primary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
@@ -96,7 +96,7 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor secundária da marca"
-                                    value={form.secondary_color || organizationBrandDefaults.secondary} 
+                                    value={form.secondary_color || organizationBrandDefaults.secondary}
                                     onChange={e => setForm({ ...form, secondary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
