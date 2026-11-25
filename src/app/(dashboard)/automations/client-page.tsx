@@ -40,7 +40,7 @@ import { toast } from 'sonner';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 import { Button } from '@/components/ui/button';
-import { automationSummary, automationTriggerLabel, automationActionLabel } from '@/components/automations/automation-presentation';
+import { automationSummary, automationTriggerLabel, automationActionLabel, requireConfirmedAutomationMutation } from '@/components/automations/automation-presentation';
 
 interface AutomationsClientPageProps {
     initialAutomations: Automation[];
@@ -156,29 +156,34 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
     });
 
     const handleSave = async (automation: Partial<Automation>) => {
-        if (automation.id) {
-            await updateAutomation(automation.id, automation);
-            toast.success('Automação atualizada com sucesso!');
-        } else {
-            await createAutomation(automation);
-            toast.success('Automação criada com sucesso!');
-        }
+        const result = automation.id
+            ? await updateAutomation(automation.id, automation)
+            : await createAutomation(automation);
+        requireConfirmedAutomationMutation(result);
+        toast.success(automation.id ? 'Configuração atualizada' : 'Configuração salva');
         setShowNewModal(false);
         setInitialModalData(undefined);
         router.refresh();
     };
 
     const handleToggle = async (id: string, enabled: boolean) => {
-        await toggleAutomation(id, enabled);
-        toast.success(enabled ? 'Automação ativada' : 'Automação pausada');
-        router.refresh();
+        try {
+            requireConfirmedAutomationMutation(await toggleAutomation(id, enabled));
+            toast.success(enabled ? 'Fluxo habilitado na configuração' : 'Fluxo pausado');
+            router.refresh();
+        } catch {
+            toast.error('Não foi possível alterar o status do fluxo.');
+        }
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm('Tem certeza que deseja excluir esta automação?')) {
-            await deleteAutomation(id);
+        if (!confirm('Tem certeza que deseja excluir esta automação?')) return;
+        try {
+            requireConfirmedAutomationMutation(await deleteAutomation(id));
             toast.success('Automação excluída');
             router.refresh();
+        } catch {
+            toast.error('Não foi possível excluir a automação.');
         }
     };
 
@@ -189,9 +194,13 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             name: `${automation.name} (Cópia)`,
             enabled: false
         } as any;
-        await createAutomation(copy);
-        toast.success('Automação duplicada');
-        router.refresh();
+        try {
+            requireConfirmedAutomationMutation(await createAutomation(copy));
+            toast.success('Automação duplicada');
+            router.refresh();
+        } catch {
+            toast.error('Não foi possível duplicar a automação.');
+        }
     };
 
     const getCategoryIcon = (category?: string) => {
@@ -208,7 +217,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
-                description="Crie, configure e acompanhe fluxos de trabalho automáticos."
+                description="Configure fluxos de trabalho e consulte os indicadores registrados."
             >
                 <div className="flex flex-wrap items-center gap-2">
                     <Button asChild variant="outline">
@@ -251,6 +260,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     </div>
                 </div>
             </section>
+
+            <div role="note" className="flex items-start gap-3 rounded-[var(--radius-panel)] border border-border bg-surface-subtle p-3">
+                <AlertCircle className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <p className="text-body-ui text-foreground">Os fluxos podem ser configurados aqui. A execução automática e o histórico detalhado ainda não foram validados neste módulo.</p>
+            </div>
 
             {/* Premium Stats Grid */}
             <StatsGrid items={stats} />
@@ -442,7 +456,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                         className="flex items-center gap-2 text-foreground font-black text-metadata-ui underline underline-offset-4 hover:text-primary transition-colors group/btn"
                                     >
                                         <History className="h-4 w-4" />
-                                        Ver Histórico
+                                        Ver execuções
                                         <ArrowUpRight className="h-3 w-3 opacity-0 -translate-y-1 group-hover/btn:opacity-100 group-hover/btn:translate-y-0 transition-all" />
                                     </button>
                                 </div>
@@ -455,7 +469,7 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             <section id="automation-modelos" tabIndex={-1} aria-label="Biblioteca de receitas" data-qa-region="automation-recipes" className="space-y-3">
                 <div>
                     <h2 className="text-section-title font-semibold text-foreground">Biblioteca de modelos</h2>
-                    <p className="mt-1 text-body-ui text-muted-foreground">Escolha um dos {recipes.length} modelos e revise o gatilho e as ações antes de salvar.</p>
+                    <p className="mt-1 text-body-ui text-muted-foreground">Escolha um dos {recipes.length} modelos e revise o gatilho e as ações antes de salvar. Os modelos são pontos de partida, sem condições específicas configuradas.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {recipes.map(recipe => (

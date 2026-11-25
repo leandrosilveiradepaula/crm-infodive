@@ -1146,6 +1146,37 @@ try {
                         await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Usar modelo Notificar VIP');
                         await savedFlow.waitFor({ state: 'visible' });
                         profileResult.checks.push({ route, state: 'automation-library-filter-cancel', viewport: viewport.name, theme, status: 'passed' });
+                        // Confirm the recorded counters, not a fabricated event timeline.
+                        const historyButton = page.getByRole('button', { name: 'Ver execuções' }).first();
+                        await historyButton.click();
+                        const historyDialog = page.getByRole('dialog', { name: 'Execuções de automação' });
+                        await historyDialog.waitFor({ state: 'visible', timeout: 8000 });
+                        await historyDialog.getByText('Histórico detalhado indisponível', { exact: true }).waitFor({ state: 'visible' });
+                        if (await historyDialog.getByText(/cliente@email\.com|TIMEOUT|Configurar Notificações de Erro/).count()) {
+                            throw new Error('AUTOMATION_HISTORY_CONTAINS_SIMULATED_EVENTS');
+                        }
+                        await page.waitForTimeout(350);
+                        const historyAxe = await runAxe(page, source);
+                        const historyIssues = historyAxe.violationsCount + historyAxe.incompleteCount;
+                        if (historyIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/automations?history');
+                            const finding = { profileIndex, route, state: 'automation-history',
+                                viewport: viewport.name, theme, violations: historyAxe.violations, incomplete: historyAxe.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_AUTOMATION_HISTORY_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-automations-history-' + viewport.name + '-' + theme + '.png'),
+                            fullPage: true,
+                        });
+                        await page.keyboard.press('Escape');
+                        await historyDialog.waitFor({ state: 'hidden', timeout: 8000 });
+                        await page.waitForFunction(() => document.activeElement?.textContent?.includes('Ver execuções'));
+                        profileResult.checks.push({ route, state: 'automation-history', viewport: viewport.name, theme,
+                            status: historyIssues ? 'failed' : 'passed' });
                     }
                     // Verify that the actual global search control is an action,
                     // not a fake input. No search is submitted or data changed here.

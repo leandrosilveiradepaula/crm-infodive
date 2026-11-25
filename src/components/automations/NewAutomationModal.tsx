@@ -29,6 +29,7 @@ interface NewAutomationModalProps {
 export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomationModalProps) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [saveError, setSaveError] = useState(false);
     const opener = useRef<HTMLElement | null>(null);
 
     const [formData, setFormData] = useState<Partial<Automation>>({
@@ -74,7 +75,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     const handleBack = () => setStep(s => s - 1);
 
     const handleSubmit = async () => {
+        if (loading) return;
         setLoading(true);
+        setSaveError(false);
         try {
             await onSave({
                 ...formData,
@@ -84,8 +87,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 failureCount: initialData?.failureCount || 0
             });
             onClose();
-        } catch (error) {
-            console.error(error);
+        } catch {
+            setSaveError(true);
         } finally {
             setLoading(false);
         }
@@ -324,20 +327,25 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                 <p className="text-body-ui text-muted-foreground font-medium">
                                     {initialData?.id
                                         ? `As alterações mantêm o fluxo ${formData.enabled ? "ativo" : "pausado"}.`
-                                        : "O fluxo será ativado quando você concluir. Confira as configurações antes de salvar."}
+                                        : "Ao salvar, o fluxo ficará habilitado na configuração. Isso não confirma a execução automática."}
                                 </p>
                             </div>
                         </div>
                     )}
                 </div>
 
+                {saveError && (
+                    <p role="alert" className="shrink-0 border-t border-border bg-destructive-subtle px-4 py-3 text-body-ui text-destructive-readable sm:px-6">
+                        Não foi possível salvar o fluxo. Suas alterações permanecem no formulário; tente novamente.
+                    </p>
+                )}
                 <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-card p-4 sm:px-6">
                     <Button type="button" variant="outline" onClick={step === 1 ? onClose : handleBack} disabled={loading}>
                         {step === 1 ? 'Cancelar' : <><ArrowLeft aria-hidden="true" /> Voltar</>}
                     </Button>
                     <Button type="button" onClick={step === 3 ? handleSubmit : handleNext} disabled={loading || (step === 1 && !formData.name?.trim())}>
                         {loading ? 'Salvando...' : step === 3 ? (
-                            <>{initialData?.id ? 'Salvar alterações' : 'Concluir e Ativar'} <CheckCircle2 aria-hidden="true" /></>
+                            <>{initialData?.id ? 'Salvar alterações' : 'Salvar fluxo'} <CheckCircle2 aria-hidden="true" /></>
                         ) : (
                             <>Próximo <ArrowRight aria-hidden="true" /></>
                         )}

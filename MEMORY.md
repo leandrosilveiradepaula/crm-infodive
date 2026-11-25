@@ -1,3 +1,15 @@
+### 2026-11-25 — Automation integrity and capability disclosure
+
+On `e7ec0041`, [CI 45536866831](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45536866831) passed all 480 tests / 39 suites, TypeScript, build, PDF rendering, 4/4 synthetic WCAG and the global zero-debt guard. The authenticated run 45536866870 was still in progress at the time of this review. Do not transfer those results to the next SHA.
+
+P1 discovered by source inspection: HistorySheet manufactured four event records (email, task, SMTP error, stagnant trigger), showed 100% for no execution, and displayed a non-functional notification button. CRUD handlers also reported success when server actions returned `{success:false}`. Additionally the repository's `src/lib/automations.ts` legacy `checkAutomations` is a dummy function. The current repository does not establish operational automatic execution, and the isolated schema for automations/logs differs from some fields used by AutomationService. Do not infer working execution or production persistence from the existing read-only smoke.
+
+Within the existing UX block, replace fabricated history with actual returned aggregate counters and an explicit unavailable-detail state, remove the nonfunctional CTA, use the existing accessible Dialog with focus restoration, make capability wording precise (configured status is not proof of execution), and guard successful mutation feedback on the explicit server result. A failed save leaves the draft open and gives an actionable error. Existing save/create/update/delete/toggle actions, tenant context, permissions and persistence code are unchanged. Retain the six recipes as initial templates, not guarantees of VIP/amount conditions. Test actual browser opening/closing of the summary, accessibility in all four combinations, and unit-level confirmed/rejected mutation outcomes. No mutation is performed in the real browser proof.
+
+**Unresolved product blocker, outside UX scope:** independently establish the authoritative production-compatible storage contract and automation engine/execution log behavior before any claim of a fully functioning automation system. No migration, hosted database access, real execution, external messages, or deployment authorized in this UX task. Do not invent history or silently activate flows to make a test pass. Keep #220 Draft until exact candidate CI, real isolated QA, and visual review pass.
+
+---
+
 ### 2026-11-25 — Post-merge UX reconciliation: automation workspace (PR #220)
 
 The owner merged #221. main `cdf7a5ba05289c0fab81f85a8794e6c0fb24f07d` has exactly the tree of the certified `7305fdd` candidate. Evidence: [CI 45524688734](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45524688734), [authenticated QA 45524688814](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45524688814), 474 tests, 216 browser checks, zero in the seven original inventory categories, 171 locked modules, 132 token propagation checks and 16 PDF page renders. These are baseline results, not certification of the next revision.

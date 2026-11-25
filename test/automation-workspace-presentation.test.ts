@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { automationSummary, automationTriggerLabel, automationActionLabel } from '../src/components/automations/automation-presentation';
+import { automationSummary, automationTriggerLabel, automationActionLabel, requireConfirmedAutomationMutation } from '../src/components/automations/automation-presentation';
 
 describe('Automation workspace after Design System integration', () => {
     it('uses actual persisted execution counts and distinguishes no runs from zero success', () => {
@@ -11,6 +11,28 @@ describe('Automation workspace after Design System integration', () => {
             { enabled: true, executionCount: 2, successCount: 2 },
             { enabled: false, executionCount: 8, successCount: 3 },
         ])).toEqual({ active: 1, inactive: 1, executions: 10, successRate: 50 });
+    });
+    it('rejects an unconfirmed server mutation, even when the promise resolves', () => {
+        expect(() => requireConfirmedAutomationMutation({ success: true })).not.toThrow();
+        expect(() => requireConfirmedAutomationMutation({ success: false })).toThrow();
+        expect(() => requireConfirmedAutomationMutation(undefined)).toThrow();
+    });
+    it('never presents invented history or confirms an unverified execution', () => {
+        const history = readFileSync('src/components/automations/HistorySheet.tsx', 'utf8');
+        const page = readFileSync('src/app/(dashboard)/automations/client-page.tsx', 'utf8');
+        const wizard = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
+        expect(history).toContain('Histórico detalhado indisponível');
+        expect(history).toContain("summary.successRate === null ? '—'");
+        expect(history).not.toContain('cliente@email.com');
+        expect(history).not.toContain('TIMEOUT');
+        expect(history).not.toContain('Configurar Notificações de Erro');
+        expect(page).toContain('requireConfirmedAutomationMutation(result)');
+        expect(page).toContain('requireConfirmedAutomationMutation(await toggleAutomation');
+        expect(page).toContain('requireConfirmedAutomationMutation(await deleteAutomation');
+        expect(page).toContain('requireConfirmedAutomationMutation(await createAutomation(copy))');
+        expect(wizard).toContain('setSaveError(true)');
+        expect(wizard).toContain('role="alert"');
+        expect(wizard).toContain('Isso não confirma a execução automática');
     });
     it('translates known action and trigger IDs without changing persisted identifiers', () => {
         expect(automationTriggerLabel('deal_stagnant')).toBe('Oportunidade estagnada');

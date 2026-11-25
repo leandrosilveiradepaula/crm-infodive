@@ -37,3 +37,8 @@ export function automationSummary(flows: Pick<Automation, 'enabled' | 'execution
     const successes = flows.reduce((sum, flow) => sum + (flow.successCount || 0), 0);
     return { active, inactive: flows.length - active, executions, successRate: executions > 0 ? successes / executions * 100 : null };
 }
+
+/** A resolved server action is not evidence of a successful write. */
+export function requireConfirmedAutomationMutation(result: { success: boolean } | null | undefined): void {
+    if (result?.success !== true) throw new Error('Operação não confirmada pelo servidor.');
+}
