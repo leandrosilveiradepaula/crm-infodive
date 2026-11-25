@@ -469,8 +469,10 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 ) : (
                                     <span className="text-muted-foreground font-medium">{deal.company || 'Sem empresa vinculada'}</span>
                                 )}
-                                <span className="text-muted-foreground/30 px-1">|</span>
-                                <span className="ds-type-metadata uppercase font-bold tracking-tighter text-muted-foreground">ID: #{deal.id.slice(0, 8)}</span>
+                                <span aria-hidden="true" className="hidden sm:inline text-muted-foreground/30 px-1">|</span>
+                                {/* Keep the stable ID available to assistive technology, but
+                                    prevent it colliding with the company label on mobile. */}
+                                <span className="sr-only sm:not-sr-only ds-type-metadata uppercase font-bold tracking-tighter text-muted-foreground">ID: #{deal.id.slice(0, 8)}</span>
                             </div>
                         </div>
                     </div>

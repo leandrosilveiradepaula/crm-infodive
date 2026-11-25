@@ -4,6 +4,15 @@ import { describe, expect, it } from 'vitest';
 
 const read = (file: string) => readFileSync(resolve(process.cwd(), file), 'utf8');
 
+describe('Opportunity mobile header identity is not visually overlapping', () => {
+  it('keeps full ID for assistive technology without cramming it beside mobile company title', () => {
+    const deal = read('src/components/pipeline/ViewDealModal.tsx');
+    expect(deal).toContain('sr-only sm:not-sr-only ds-type-metadata');
+    expect(deal).toContain('ID: #{deal.id.slice(0, 8)}');
+    expect(deal).toContain('aria-hidden="true" className="hidden sm:inline');
+  });
+});
+
 describe('Global visual contract in real Pipeline and reporting states', () => {
   it('keeps text-bearing panels on deterministic solid surfaces, never behind decorative gradients', () => {
     const css = read('src/design-system/tokens.css');
