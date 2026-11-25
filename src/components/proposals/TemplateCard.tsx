@@ -18,6 +18,8 @@ export const TemplateCard = ({
     return (
         <button
             onClick={onSelect}
+            type="button"
+            aria-pressed={isSelected}
             className={`
                 relative p-8 rounded-[var(--radius-panel)] text-left transition-all duration-300 w-full group overflow-hidden
                 ${isSelected
@@ -34,7 +36,7 @@ export const TemplateCard = ({
             {/* Icon */}
             <div className={`
                 inline-flex p-3 rounded-[var(--radius-panel)] mb-6 transition-all duration-300
-                ${isSelected ? 'bg-primary text-white shadow-card-ui shadow-primary/30' : 'bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10'}
+                ${isSelected ? 'bg-primary text-primary-foreground shadow-card-ui shadow-primary/30' : 'bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10'}
             `}>
                 <Icon className="h-6 w-6" />
             </div>
@@ -57,17 +59,14 @@ export const TemplateCard = ({
                 <span className={`
                     inline-flex items-center gap-2 text-metadata-ui font-black px-4 py-1.5 rounded-full transition-all duration-300 uppercase tracking-widest
                     ${isSelected
-                        ? 'bg-primary text-white shadow-inner'
-                        : 'bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-white'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground'
                     }
                 `}>
                     {isSelected ? '✓ SELECIONADO' : 'SELECIONAR MODELO'}
                 </span>
             </div>
 
-            {/* Glow effect when selected */}
-            {isSelected && (
-            )}
         </button>
     );
 };

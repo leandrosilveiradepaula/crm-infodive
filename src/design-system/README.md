@@ -1,3 +1,11 @@
+## DS12 graduation and verification
+
+The global design-system guard now requires zero categorized local decisions across every inventoried file in `src/app` and `src/components`, with no exclusions. See `npm run design-system:inventory` for the full matrix and `npm run lint:design-system` for the enforced gate. The historical seven categories are unchanged, not a comprehensive parser for every possible styling syntax. Keep all web theme values in `tokens.css`, and use `proposal-document-colors.ts` for stable, printable proposal defaults and organization brand overrides. Editable business-domain fallback colors are separately named in `domain-visual-defaults.ts`; they are not a runtime web-theme editor.
+
+All acceptance is SHA-bound. The candidate bf71c217 failed TypeScript and the actual isolated browser build at TemplateCard.tsx:70, before any new runtime QA. An empty conditional remained after removing a purely decorative gradient. This follow-up removes the empty expression and uses semantic foreground and pressed state on the existing template selection button. The replacement must independently pass CI, authenticated browser QA, and proposal rendering; do not inherit earlier PASS results.
+
+---
+
 ## DS4 compatibility and verified propagation (2026-11-24)
 
 **One source of truth:** edit values in `src/design-system/tokens.css`, never in a feature screen. The `@theme inline` compatibility bridge maps both new semantic classes and remaining Tailwind built-ins (`text-sm`, `text-lg`, `rounded-lg`, `shadow-md`) to `--ds-*` primitives. This bridge means a source value can propagate to old pages without falsely marking those pages fully migrated.
