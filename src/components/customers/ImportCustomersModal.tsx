@@ -106,7 +106,7 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-4xl bg-card border-border text-foreground p-0 overflow-hidden">
-                <DialogHeader className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-info/10">
+                <DialogHeader className="p-6 border-b border-border bg-surface-subtle">
                     <DialogTitle className="flex items-center gap-2 text-section-title font-bold">
                         <div className="p-2 bg-primary/10 rounded-[var(--radius-control)] border border-primary/20">
                             <FileSpreadsheet className="h-5 w-5 text-primary" />

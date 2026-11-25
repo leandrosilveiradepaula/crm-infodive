@@ -51,7 +51,7 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 overflow-hidden max-h-[90vh] flex flex-col">
-                <DialogHeader className="bg-gradient-to-r from-success/10 to-transparent p-6 border-b border-border shrink-0">
+                <DialogHeader className="bg-success-subtle p-6 border-b border-border shrink-0">
                     <DialogTitle className="text-section-title font-black tracking-tight text-foreground flex gap-2 items-center">
                         <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                         Converter Lead

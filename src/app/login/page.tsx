@@ -85,7 +85,7 @@ function LoginForm() {
     return (
         <Card className="w-full max-w-md bg-card border-border text-foreground relative z-10 shadow-card-ui animate-in fade-in zoom-in duration-300">
             <CardHeader className="text-center space-y-4 pt-8">
-                <div className="h-16 w-16 bg-gradient-to-br from-primary to-info rounded-[var(--radius-panel)] flex items-center justify-center mx-auto shadow-card-ui shadow-primary/30">
+                <div className="h-16 w-16 bg-primary rounded-[var(--radius-panel)] flex items-center justify-center mx-auto shadow-card-ui shadow-primary/30">
                     <User className="h-8 w-8 text-primary-foreground" />
                 </div>
                 <div className="space-y-1">

@@ -73,7 +73,6 @@ E, por estarem assim justos e contratados, firmam o presente instrumento.`
         <div className="flex flex-col h-full bg-background rounded-[40px] overflow-hidden border border-border shadow-card-ui animate-in zoom-in-95 duration-300">
             {/* Header */}
             <div className="bg-background border-b border-border p-8 flex items-center justify-between relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
                 <div className="flex items-center gap-5 relative z-10">
                     <div className="w-14 h-14 rounded-[var(--radius-panel)] bg-primary/10 border border-primary/20 flex items-center justify-center">
                         <FileText className="h-7 w-7 text-primary" />

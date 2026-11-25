@@ -88,19 +88,19 @@ export const NotificationCenter = ({
                     {/* Panel */}
                     <div className="absolute right-0 top-full mt-2 w-96 bg-card rounded-[var(--radius-panel)] shadow-card-ui border border-border/50 z-50 overflow-hidden animate-slide-up">
                         {/* Header */}
-                        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary to-primary">
+                        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-primary text-primary-foreground">
                             <div className="flex items-center gap-2">
-                                <Bell className="h-5 w-5 text-white" />
-                                <h3 className="font-bold text-white">Notificações</h3>
+                                <Bell className="h-5 w-5 text-primary-foreground" />
+                                <h3 className="font-bold text-primary-foreground">Notificações</h3>
                                 {unreadCount > 0 && (
-                                    <span className="bg-card/20 text-white px-2 py-0.5 rounded-full text-metadata-ui font-bold">
+                                    <span className="bg-primary-foreground/10 text-primary-foreground px-2 py-0.5 rounded-full text-metadata-ui font-bold">
                                         {unreadCount} novas
                                     </span>
                                 )}
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="text-white/70 hover:text-white transition-colors"
+                                className="text-primary-foreground hover:text-primary-foreground transition-colors"
                             >
                                 <X className="h-5 w-5" />
                             </button>

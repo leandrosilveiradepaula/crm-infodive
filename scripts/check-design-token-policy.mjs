@@ -5,7 +5,8 @@
  * Centralized values in src/design-system/tokens.css are not UI hardcodes.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export const policies = {
@@ -25,6 +26,65 @@ export const policies = {
  */
 export const fullyMigratedModules = Object.freeze([
   'src/components/ai/AiAssistant.tsx',
+  'src/components/pipeline/ai/DealDoctorFinal.tsx',
+  'src/app/(dashboard)/dashboard/client-page.tsx',
+  'src/components/pipeline/ViewDealModal.tsx',
+  'src/components/ui/button.tsx',
+  'src/components/ui/dialog.tsx',
+  'src/components/ui/alert.tsx',
+  'src/components/ui/avatar.tsx',
+  'src/components/ui/badge.tsx',
+  'src/components/ui/checkbox.tsx',
+  'src/components/ui/label.tsx',
+  'src/components/ui/sheet.tsx',
+  'src/components/ui/tabs.tsx',
+  'src/components/ui/textarea.tsx',
+  'src/components/ui/tooltip.tsx',
+  'src/app/(dashboard)/settings/client-page.tsx',
+  'src/components/pipeline/ai/AIDealSummaryHeader.tsx',
+  'src/components/ui/PremiumEmptyState.tsx',
+  'src/app/portal/[id]/page.tsx',
+  'src/app/proposals/public/[token]/page.tsx',
+  'src/components/charts/AccessibleChart.tsx',
+  'src/components/proposals/pdf/PdfCustomNotesPage.tsx',
+  'src/components/layout/Header.tsx',
+  'src/app/debug/page.tsx',
+  'src/components/proposals/ProposalContentPage.tsx',
+  'src/app/(dashboard)/activities/components/ActivityModal.tsx',
+  'src/app/(dashboard)/integrations/client-page.tsx',
+  'src/app/(dashboard)/reports/client-page.tsx',
+  'src/app/login/page.tsx',
+  'src/app/(dashboard)/service-desk/page.tsx',
+  'src/components/activities/ActivityModal.tsx',
+  'src/components/automations/NewAutomationModal.tsx',
+  'src/components/charts/ProductAnalysis.tsx',
+  'src/components/charts/RevenueForecast.tsx',
+  'src/components/charts/SalesPerformance.tsx',
+  'src/components/contacts/SignatureParserModal.tsx',
+  'src/components/contracts/ContractBuilder.tsx',
+  'src/components/contracts/SignaturePad.tsx',
+  'src/components/customers/CompanyParserModal.tsx',
+  'src/components/customers/ImportCustomersModal.tsx',
+  'src/components/layout/NotificationCenter.tsx',
+  'src/components/leads/LeadConversionModal.tsx',
+  'src/components/leads/LeadEnrichmentModal.tsx',
+  'src/components/omnichannel/SmartTimeline.tsx',
+  'src/components/pipeline/ai/AIEmailDrafter.tsx',
+  'src/components/portal/DealRoomPortal.tsx',
+  'src/components/products/ProductFormModal.tsx',
+  'src/components/proposals/TemplateCard.tsx',
+  'src/components/settings/PipelineSettings.tsx',
+  'src/components/proposals/ProposalConfidentialityPage.tsx',
+  'src/components/proposals/ProposalCoverPage.tsx',
+  'src/components/proposals/ProposalCustomNotesPage.tsx',
+  'src/components/proposals/ProposalDifferentialsPage.tsx',
+  'src/components/proposals/ProposalHardwarePage.tsx',
+  'src/components/proposals/ProposalInvestmentPage.tsx',
+  'src/components/proposals/ProposalOverviewPage.tsx',
+  'src/components/proposals/ProposalSoftwarePage.tsx',
+  'src/components/settings/ArchiveUserModal.tsx',
+  'src/components/settings/SecurityTab.tsx',
+  'src/app/(dashboard)/inbox/page.tsx',
   'src/components/ui/dropdown-menu.tsx',
   'src/components/ui/select.tsx',
   'src/components/proposals/ConfigToggle.tsx',
@@ -145,6 +205,26 @@ export function countViolations(source) {
   }));
 }
 
+/** Same complete source scope as the historical migration inventory, without exemptions. */
+export function listVisualSourceFiles(roots = ['src/app', 'src/components']) {
+  function walk(folder) {
+    return readdirSync(folder, { withFileTypes: true }).flatMap(item => {
+      const path = join(folder, item.name);
+      if (item.isDirectory()) return walk(path);
+      return item.isFile() && /\.(tsx?|jsx?|css)$/.test(item.name) ? [path] : [];
+    });
+  }
+  return roots.flatMap(walk).map(path => relative('.', path).split(sep).join('/')).sort();
+}
+
+export function inspectVisualSourceDebt(roots) {
+  return listVisualSourceFiles(roots).flatMap(file => {
+    const counts = countViolations(readFileSync(file, 'utf8'));
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    return total ? [{ file, counts, total }] : [];
+  });
+}
+
 export function compareCounts(before, after) {
   const oldCounts = countViolations(before), newCounts = countViolations(after);
   return Object.keys(policies)
@@ -185,6 +265,19 @@ function main() {
     const counts = countViolations(readFileSync(file, 'utf8'));
     for (const [rule, current] of Object.entries(counts)) {
       if (current > 0) failures.push({ file, rule, previous: 0, current });
+    }
+  }
+  // Graduation gate: no remaining categorized debt in ANY inventoried source,
+  // including login, public pages, old debug routes and document renderers.
+  // Do not add ignore patterns or exceptions merely to make the gate pass.
+  const globalDebt = inspectVisualSourceDebt();
+  const totalDebt = globalDebt.reduce((sum, row) => sum + row.total, 0);
+  console.log('DESIGN_SYSTEM_GLOBAL: ' + totalDebt + ' local decisions across ' + globalDebt.length + ' files (required: 0)');
+  for (const { file, counts } of globalDebt) {
+    for (const [rule, current] of Object.entries(counts)) {
+      if (current > 0 && !failures.some(issue => issue.file === file && issue.rule === rule)) {
+        failures.push({ file, rule, previous: 0, current });
+      }
     }
   }
   console.log('DESIGN_SYSTEM_STRICT: ' + fullyMigratedModules.length + ' locked migrated modules');

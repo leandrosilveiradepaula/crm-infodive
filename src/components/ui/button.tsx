@@ -22,11 +22,11 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-[var(--ds-control-height-default)] px-[var(--ds-control-padding-default)] py-2 has-[>svg]:px-3",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        xs: "h-6 gap-1 rounded-[var(--radius-control)] px-2 text-metadata-ui has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-[var(--ds-control-height-small)] rounded-[var(--radius-control)] gap-1.5 px-[var(--ds-control-padding-small)] has-[>svg]:px-2.5",
         lg: "h-[var(--ds-control-height-large)] rounded-[var(--radius-control)] px-[var(--ds-control-padding-large)] has-[>svg]:px-4",
         icon: "size-[var(--ds-control-height-default)]",
-        "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        "icon-xs": "size-6 rounded-[var(--radius-control)] [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-8",
         "icon-lg": "size-10",
       },

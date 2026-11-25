@@ -152,7 +152,7 @@ export const SecurityTab = () => {
                             <div>
                                 <p className="font-black text-foreground text-body-ui tracking-tight">Windows PC - Chrome</p>
                                 <p className="text-metadata-ui text-success-readable font-black flex items-center gap-2 mt-1 uppercase tracking-widest bg-success/10 px-2 py-0.5 rounded-[var(--radius-control)] w-fit">
-                                    <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse shadow-[0_0_10px_#34d399]"></span> Ativo agora
+                                    <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse shadow-control-ui"></span> Ativo agora
                                 </p>
                             </div>
                         </div>

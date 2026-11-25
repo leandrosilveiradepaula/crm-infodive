@@ -21,7 +21,7 @@ export function AccessibleChart({ label, entries, children, onSelect }: Accessib
     return (
         <div className="h-full w-full">
             <div className="h-full w-full">{children}</div>
-            <details className="relative z-10 mt-2 rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground">
+            <details className="relative z-10 mt-2 rounded-[var(--radius-control)] border border-border bg-card px-2 py-1 text-metadata-ui text-foreground">
                 <summary className="focus-ring cursor-pointer font-semibold">
                     Ver dados: {label}
                 </summary>
@@ -32,7 +32,7 @@ export function AccessibleChart({ label, entries, children, onSelect }: Accessib
                             {onSelect ? (
                                 <button
                                     type="button"
-                                    className="focus-ring w-full rounded-md bg-muted px-2 py-1 text-left text-foreground hover:bg-surface-subtle"
+                                    className="focus-ring w-full rounded-[var(--radius-control)] bg-muted px-2 py-1 text-left text-foreground hover:bg-surface-subtle"
                                     onClick={() => onSelect(index)}
                                 >
                                     {entry}

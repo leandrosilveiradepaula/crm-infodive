@@ -107,3 +107,8 @@ export const proposalDocumentColors = {
   yellowLight: proposalDocumentPrimitives.amber100,
   yellowBorder: proposalDocumentPrimitives.amber200,
 };
+
+/** Shared print/web proposal brand band. Preserve the exact historical gradient and organization overrides. */
+export function proposalDocumentBand(accent: string, primary: string): string {
+  return `linear-gradient(90deg, ${accent} 0%, ${primary} 100%)`;
+}

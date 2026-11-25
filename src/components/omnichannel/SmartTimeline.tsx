@@ -92,7 +92,7 @@ export const SmartTimeline: React.FC<{ dealId: string }> = ({ dealId }) => {
     return (
         <div className="flex flex-col h-[600px] bg-card rounded-[var(--radius-panel)] border border-border overflow-hidden shadow-control-ui">
             {/* Header / Tabs */}
-            <div className="flex items-center justify-between p-5 border-b border-border bg-gradient-to-r from-surface-subtle to-white">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-surface-subtle">
                 <h3 className="font-bold text-foreground flex items-center gap-2">
                     <Clock className="h-4 w-4 text-primary" />
                     Timeline Inteligente

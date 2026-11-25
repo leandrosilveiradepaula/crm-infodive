@@ -1,4 +1,4 @@
-import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { Deal, DealProduct } from '@/types/deal';
 import { ProposalSoftwareMainHighlight, ProposalSoftwareAdditional } from './ProposalSoftwareComponents';
@@ -97,7 +97,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     right: 0,
                     width: '100%',
                     height: '6px',
-                    background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)`
+                    background: proposalDocumentBand(accentColor, primaryColor)
                 }} />
 
                 {/* Header */}
@@ -178,7 +178,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                         marginBottom: index < extraChunks.length - 1 ? '40px' : 0
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ marginBottom: isLandscape ? '25px' : '50px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '20px' : '40px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />

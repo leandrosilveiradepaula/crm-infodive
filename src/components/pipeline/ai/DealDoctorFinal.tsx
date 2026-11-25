@@ -57,23 +57,23 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
     if (!analysis && !loading) {
         return (
-            <div className="bg-card rounded-[var(--radius-panel)] border border-border p-6 shadow-control-ui hover:shadow-md transition-all relative group">
+            <div className="bg-card rounded-[var(--radius-panel)] border border-border p-6 shadow-control-ui hover:shadow-card-ui transition-all relative group">
                 <div className="flex items-start gap-5">
                     <div className="p-3 bg-info-subtle rounded-[var(--radius-panel)] border border-info/30">
                         <Brain className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                            <h3 className="text-section-title font-bold text-foreground flex items-center gap-2">
                                 Diagnóstico de Oportunidade
                             </h3>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                        <p className="text-body-ui text-muted-foreground mb-4 leading-relaxed">
                             Obtenha uma análise instantânea desta oportunidade. A IA identificará riscos, calculará a saúde do negócio e sugerirá os próximos passos.
                         </p>
                         <button
                             onClick={handleAnalyze}
-                            className="text-xs font-bold bg-primary text-primary-foreground px-4 py-2.5 rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-control-ui"
+                            className="text-metadata-ui font-bold bg-primary text-primary-foreground px-4 py-2.5 rounded-[var(--radius-control)] hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-control-ui"
                         >
                             <Sparkles className="h-3.5 w-3.5" />
                             Iniciar Diagnóstico
@@ -88,8 +88,8 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
         return (
             <div className="bg-card rounded-[var(--radius-panel)] border border-border p-8 flex flex-col items-center justify-center min-h-[200px] relative">
                 <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
-                <h3 className="text-sm font-bold text-foreground">Analisando Pipeline...</h3>
-                <p className="text-xs text-muted-foreground mt-1">Processando dados do negócio</p>
+                <h3 className="text-body-ui font-bold text-foreground">Analisando Pipeline...</h3>
+                <p className="text-metadata-ui text-muted-foreground mt-1">Processando dados do negócio</p>
             </div>
         );
     }
@@ -99,18 +99,18 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
             <div className="bg-destructive-subtle rounded-[var(--radius-panel)] border border-destructive/30 p-6 relative">
                 <button
                     onClick={handleReset}
-                    className="absolute top-4 right-4 p-2 bg-destructive-subtle text-destructive-readable rounded-[var(--radius-control)] hover:bg-destructive-subtle transition-colors text-xs font-bold"
+                    className="absolute top-4 right-4 p-2 bg-destructive-subtle text-destructive-readable rounded-[var(--radius-control)] hover:bg-destructive-subtle transition-colors text-metadata-ui font-bold"
                 >
                     FECHAR
                 </button>
                 <div className="flex items-center gap-3 mb-2">
                     <AlertCircle className="h-5 w-5 text-destructive-readable" />
-                    <h3 className="text-sm font-bold text-destructive-readable">Falha na Análise</h3>
+                    <h3 className="text-body-ui font-bold text-destructive-readable">Falha na Análise</h3>
                 </div>
-                <p className="text-xs text-destructive-readable mb-4">{error}</p>
+                <p className="text-metadata-ui text-destructive-readable mb-4">{error}</p>
                 <button
                     onClick={handleAnalyze}
-                    className="text-xs font-bold text-destructive-readable hover:text-destructive-readable underline decoration-destructive/40 underline-offset-4"
+                    className="text-metadata-ui font-bold text-destructive-readable hover:text-destructive-readable underline decoration-destructive/40 underline-offset-4"
                 >
                     Tentar Novamente
                 </button>
@@ -134,13 +134,13 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 h-9">
-                                <h3 className="text-lg font-bold text-foreground whitespace-nowrap">
+                                <h3 className="text-section-title font-bold text-foreground whitespace-nowrap">
                                     Relatório AI
                                 </h3>
                             </div>
                             <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Score:</span>
-                                <span className={`text-base font-bold ${analysis.healthScore >= 70 ? 'text-success-readable' : analysis.healthScore >= 40 ? 'text-warning-readable' : 'text-destructive-readable'
+                                <span className="text-metadata-ui font-medium text-muted-foreground whitespace-nowrap">Score:</span>
+                                <span className={`text-section-title font-bold ${analysis.healthScore >= 70 ? 'text-success-readable' : analysis.healthScore >= 40 ? 'text-warning-readable' : 'text-destructive-readable'
                                     }`}>
                                     {analysis.healthScore}/100
                                 </span>
@@ -176,7 +176,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
             <div className="p-6 space-y-8">
                 {/* Insights */}
                 <div>
-                    <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+                    <h4 className="text-metadata-ui font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
                         <Sparkles className="h-3.5 w-3.5 text-foreground" />
                         Insights
                     </h4>
@@ -184,7 +184,7 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                         {analysis.insights.map((insight, i) => (
                             <div key={i} className="flex gap-3 p-3 bg-muted/50 rounded-[var(--radius-control)] border border-border">
                                 <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-info flex-shrink-0" />
-                                <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
+                                <p className="text-body-ui text-muted-foreground leading-relaxed">{insight}</p>
                             </div>
                         ))}
                     </div>
@@ -193,13 +193,13 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
                 <div className="grid md:grid-cols-2 gap-6">
                     {/* Mitigation */}
                     <div>
-                        <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <h4 className="text-metadata-ui font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
                             <ShieldCheck className="h-3.5 w-3.5 text-success-readable" />
                             Mitigação
                         </h4>
                         <ul className="space-y-3">
                             {analysis.recommendations.map((rec, i) => (
-                                <li key={i} className="flex gap-2.5 items-start text-sm text-muted-foreground">
+                                <li key={i} className="flex gap-2.5 items-start text-body-ui text-muted-foreground">
                                     <CheckCircle2 className="h-4 w-4 text-success-readable mt-0.5 flex-shrink-0" />
                                     <span>{rec}</span>
                                 </li>
@@ -209,17 +209,17 @@ export const DealDoctorFinal = ({ deal, onClose, onAnalysisComplete }: DealDocto
 
                     {/* Next Steps */}
                     <div>
-                        <h4 className="text-xs font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <h4 className="text-metadata-ui font-bold text-foreground uppercase tracking-wide mb-4 flex items-center gap-2">
                             <Target className="h-3.5 w-3.5 text-primary" />
                             Próximos Passos
                         </h4>
                         <ul className="space-y-2">
                             {analysis.nextSteps.map((step, i) => (
                                 <li key={i} className="flex items-center gap-3 p-2 rounded-[var(--radius-control)] hover:bg-muted/50 transition-colors">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-info-subtle dark:bg-info-subtle text-foreground dark:text-foreground ds-type-metadata font-bold">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-[var(--radius-control)] bg-info-subtle dark:bg-info-subtle text-foreground dark:text-foreground ds-type-metadata font-bold">
                                         {i + 1}
                                     </span>
-                                    <span className="text-sm text-foreground font-medium">{step}</span>
+                                    <span className="text-body-ui text-foreground font-medium">{step}</span>
                                 </li>
                             ))}
                         </ul>

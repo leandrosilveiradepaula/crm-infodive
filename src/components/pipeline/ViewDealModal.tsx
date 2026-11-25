@@ -454,13 +454,13 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         value={formData.account_id || 'none'}
                                         onValueChange={handleAccountChange}
                                     >
-                                        <SelectTrigger className="h-7 py-0 px-2 text-xs border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors max-w-[var(--ds-deal-account-select-width)] rounded-lg">
+                                        <SelectTrigger className="h-7 py-0 px-2 text-metadata-ui border-border/60 bg-muted/30 hover:bg-muted/50 transition-colors max-w-[var(--ds-deal-account-select-width)] rounded-[var(--radius-control)]">
                                             <SelectValue placeholder="Vincular Empresa..." />
                                         </SelectTrigger>
-                                        <SelectContent className="rounded-xl border-border/60 shadow-xl max-h-[300px]">
+                                        <SelectContent className="rounded-[var(--radius-panel)] border-border/60 shadow-overlay-ui max-h-[300px]">
                                             <SelectItem value="none" className="text-muted-foreground italic">Sem empresa vinculada</SelectItem>
                                             {accounts.map(acc => (
-                                                <SelectItem key={acc.id} value={acc.id} className="text-xs font-medium">
+                                                <SelectItem key={acc.id} value={acc.id} className="text-metadata-ui font-medium">
                                                     {acc.name}
                                                 </SelectItem>
                                             ))}
@@ -748,9 +748,9 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                         <AlertCircle className="h-4 w-4 text-destructive-readable fill-destructive-subtle" />
                                         <h4 className="ds-type-metadata font-black text-destructive-readable uppercase tracking-widest">Feedback de Perda</h4>
                                     </div>
-                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border/40 transition-all hover:bg-surface-raised hover:border-primary/20 group">
+                                    <div className="bg-surface-subtle p-4 rounded-[var(--radius-panel)] border border-border/40 transition-all hover:bg-surface-raised hover:border-primary/20 group">
                                         <p className="ds-type-metadata font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Motivo Principal</p>
-                                        <p className="text-sm font-bold text-destructive-readable">{deal.loss_reason || 'Não informado'}</p>
+                                        <p className="text-body-ui font-bold text-destructive-readable">{deal.loss_reason || 'Não informado'}</p>
                                         {deal.lost_at && (
                                             <p className="ds-type-metadata text-destructive-readable/50 font-medium mt-1">
                                                 Registrado em: {new Date(deal.lost_at).toLocaleDateString('pt-BR')}
@@ -793,7 +793,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                                 </div>
                                 <div className="relative z-10 space-y-4">
                                     <div>
-                                        <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">
+                                        <h3 className="text-body-ui font-bold text-foreground mb-1 flex items-center gap-2">
                                             <Globe className="h-4 w-4 text-primary" />
                                             Portal do Cliente
                                         </h3>
@@ -848,7 +848,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => router.push(`/pipeline/proposals/editor/${deal.id}`)}
-                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-info/40"
+                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-[var(--radius-panel)] font-bold text-metadata-ui transition-colors flex items-center justify-center gap-2 border border-border hover:border-info/40"
                                 >
                                     <FileText className="h-4 w-4 text-info" />
                                     Proposta
@@ -856,7 +856,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
 
                                 <button
                                     onClick={() => setShowContractBuilder(true)}
-                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-border hover:border-success/40"
+                                    className="flex-1 bg-muted/50 hover:bg-muted/50 text-foreground py-3 px-4 rounded-[var(--radius-panel)] font-bold text-metadata-ui transition-colors flex items-center justify-center gap-2 border border-border hover:border-success/40"
                                 >
                                     <Scroll className="h-4 w-4 text-success-readable" />
                                     Contrato
@@ -866,7 +866,7 @@ export function ViewDealModal({ deal: initialDeal, isOpen, onClose, distributors
                             {deal.stage === 'won' && (
                                 <button
                                     onClick={() => setShowHandoverModal(true)}
-                                    className="w-full py-3 bg-success-subtle hover:bg-success-subtle text-success-readable rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-2 border border-success/30"
+                                    className="w-full py-3 bg-success-subtle hover:bg-success-subtle text-success-readable rounded-[var(--radius-panel)] font-bold text-metadata-ui transition-colors flex items-center justify-center gap-2 border border-success/30"
                                 >
                                     <CheckSquare className="h-4 w-4" />
                                     Iniciar Handover Técnico

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { organizationBrandDefaults } from '@/design-system/domain-visual-defaults';
 import { useState, useEffect } from 'react';
 import { PipelineSettings } from '@/components/settings/PipelineSettings';
 import { OrganizationThemeSettings } from '@/components/settings/OrganizationThemeSettings';
@@ -81,11 +83,11 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor primária da marca"
-                                    value={form.primary_color || '#3b82f6'} 
+                                    value={form.primary_color || organizationBrandDefaults.primary} 
                                     onChange={e => setForm({ ...form, primary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
-                                <span className="font-mono text-metadata-ui font-bold">{form.primary_color || '#3b82f6'}</span>
+                                <span className="font-mono text-metadata-ui font-bold">{form.primary_color || organizationBrandDefaults.primary}</span>
                             </div>
                         </div>
                         <div className="p-4 bg-muted/20 rounded-[var(--radius-panel)] border border-border">
@@ -94,11 +96,11 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor secundária da marca"
-                                    value={form.secondary_color || '#1e293b'} 
+                                    value={form.secondary_color || organizationBrandDefaults.secondary} 
                                     onChange={e => setForm({ ...form, secondary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
-                                <span className="font-mono text-metadata-ui font-bold">{form.secondary_color || '#1e293b'}</span>
+                                <span className="font-mono text-metadata-ui font-bold">{form.secondary_color || organizationBrandDefaults.secondary}</span>
                             </div>
                         </div>
                     </div>

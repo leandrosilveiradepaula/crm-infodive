@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { pipelineStageDefaultColor } from '@/design-system/domain-visual-defaults';
 import { getPipelineStages, savePipelineStages } from '@/app/(dashboard)/settings/actions';
 import type { PipelineStage } from '@/services/SettingsService';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,7 @@ export function PipelineSettings() {
     const addStage = () => setStages([...stages, {
         id: crypto.randomUUID(),
         name: 'Nova Etapa',
-        color: '#888888',
+        color: pipelineStageDefaultColor,
         order_index: stages.length
     }]);
 

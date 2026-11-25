@@ -24,7 +24,7 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
 
             {/* Top Product */}
             {topProduct && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-surface-highlight to-surface-highlight rounded-[var(--radius-panel)] border border-primary">
+                <div className="mb-6 p-4 bg-surface-highlight rounded-[var(--radius-panel)] border border-primary">
                     <div className="flex items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
                             <Package className="h-6 w-6 text-white" />

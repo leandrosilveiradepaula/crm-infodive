@@ -36,21 +36,21 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center z-[70] p-4">
-            <div className="bg-card rounded-[40px] shadow-[0_0_100px_rgba(0,0,0,0.5)] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-300">
+            <div className="bg-card rounded-[var(--radius-panel)] shadow-overlay-ui w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col border border-border animate-in zoom-in-95 duration-300">
                 {/* Header */}
-                <div className="p-8 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary to-primary">
+                <div className="p-8 border-b border-border flex items-center justify-between bg-primary text-primary-foreground">
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-[var(--radius-panel)] bg-card/20 flex items-center justify-center backdrop-blur-xl border border-white/20 shadow-card-ui">
-                            <Sparkles className="h-7 w-7 text-white animate-pulse" />
+                        <div className="w-14 h-14 rounded-[var(--radius-panel)] bg-card/20 flex items-center justify-center backdrop-blur-xl border border-primary-foreground/20 shadow-card-ui">
+                            <Sparkles className="h-7 w-7 text-primary-foreground animate-pulse" />
                         </div>
                         <div>
-                            <h2 className="text-page-title font-black text-white uppercase tracking-tighter">AI Email Drafter</h2>
-                            <p className="text-metadata-ui font-black text-white/60 uppercase tracking-widest mt-1">Inteligência Artificial Generativa</p>
+                            <h2 className="text-page-title font-black text-primary-foreground uppercase tracking-tighter">AI Email Drafter</h2>
+                            <p className="text-metadata-ui font-black text-primary-foreground uppercase tracking-widest mt-1">Inteligência Artificial Generativa</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="h-12 w-12 rounded-[var(--radius-panel)] bg-card/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-card/20 transition-all border border-white/10"
+                        className="h-12 w-12 rounded-[var(--radius-panel)] bg-card/10 flex items-center justify-center text-white/80 hover:text-primary-foreground hover:bg-card/20 transition-all border border-white/10"
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -62,8 +62,8 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                         <div className="flex flex-col items-center justify-center h-full text-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="relative mb-10">
                                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-                                <div className="w-24 h-24 rounded-[32px] bg-gradient-to-br from-primary to-primary flex items-center justify-center relative z-10 shadow-card-ui">
-                                    <Mail className="h-10 w-10 text-white" />
+                                <div className="w-24 h-24 rounded-[var(--radius-panel)] bg-primary text-primary-foreground flex items-center justify-center relative z-10 shadow-card-ui">
+                                    <Mail className="h-10 w-10 text-primary-foreground" />
                                 </div>
                             </div>
                             <h3 className="text-page-title font-black text-foreground mb-3 uppercase tracking-tighter">Gere um Email de Follow-up</h3>
@@ -72,7 +72,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                             </p>
                             <button
                                 onClick={handleGenerate}
-                                className="px-10 py-4 bg-foreground text-card rounded-[20px] font-black text-metadata-ui uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center gap-3 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-0"
+                                className="px-10 py-4 bg-foreground text-card rounded-[20px] font-black text-metadata-ui uppercase tracking-[0.2em] hover:bg-primary hover:text-primary-foreground transition-all flex items-center gap-3 shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-0"
                             >
                                 <Sparkles className="h-4 w-4" />
                                 Iniciar Geração IA
@@ -95,7 +95,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                         <div className="p-6 bg-destructive/10 border border-destructive/20 rounded-[24px] text-destructive-readable text-body-ui flex items-start gap-4 animate-in shake duration-500">
                             <X className="h-5 w-5 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="font-black text-white uppercase tracking-tighter mb-1">Erro na Geração</p>
+                                <p className="font-black text-primary-foreground uppercase tracking-tighter mb-1">Erro na Geração</p>
                                 <p className="opacity-80">{error}</p>
                             </div>
                         </div>
@@ -117,11 +117,10 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                                 </button>
                             </div>
                             <div className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-br from-primary/20 to-transparent rounded-[32px] blur opacity-50 group-hover:opacity-100 transition duration-500"></div>
                                 <textarea
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full h-[350px] p-8 bg-card border border-border rounded-[32px] focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none resize-none font-sans text-body-ui text-foreground leading-relaxed shadow-card-ui relative z-10"
+                                    className="w-full h-[350px] p-8 bg-card border border-border rounded-[var(--radius-panel)] focus:ring-2 focus:ring-primary/30 focus:border-primary outline-none resize-none font-sans text-body-ui text-foreground leading-relaxed shadow-card-ui relative z-10"
                                     placeholder="O email gerado aparecerá aqui..."
                                 />
                             </div>
@@ -155,7 +154,7 @@ export const AIEmailDrafter = ({ deal, onClose }: AIEmailDrafterProps) => {
                             </button>
                             <button
                                 onClick={handleCopy}
-                                className="px-10 py-4 bg-primary text-white rounded-[var(--radius-panel)] font-black text-metadata-ui uppercase tracking-widest hover:bg-primary transition-all shadow-[0_15px_30px_rgba(0,102,255,0.3)] hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
+                                className="px-10 py-4 bg-primary text-primary-foreground rounded-[var(--radius-panel)] font-black text-metadata-ui uppercase tracking-widest hover:bg-primary transition-all shadow-[0_15px_30px_rgba(0,102,255,0.3)] hover:-translate-y-1 active:translate-y-0 flex items-center gap-3"
                             >
                                 <Copy className="h-4 w-4" /> Copiar para o Clipboard
                             </button>

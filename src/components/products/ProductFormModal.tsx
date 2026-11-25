@@ -120,7 +120,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-card-ui animate-in zoom-in-95 duration-300">
-                <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border relative">
+                <DialogHeader className="bg-surface-subtle p-10 border-b border-border relative">
                     <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
                     <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3 relative z-10">
                         <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">

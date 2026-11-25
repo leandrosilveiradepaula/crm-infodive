@@ -67,7 +67,6 @@ export const TemplateCard = ({
 
             {/* Glow effect when selected */}
             {isSelected && (
-                <div className="absolute inset-0 rounded-[var(--radius-panel)] bg-gradient-to-br from-primary/5 to-info/5 pointer-events-none" />
             )}
         </button>
     );

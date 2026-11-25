@@ -61,7 +61,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-card border border-border w-full max-w-lg rounded-[var(--radius-panel)] shadow-card-ui overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-8 border-b border-border bg-gradient-to-r from-primary/10 via-stage-proposal/5 to-transparent relative overflow-hidden">
+                <div className="p-8 border-b border-border bg-surface-subtle relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
                     <div className="flex items-center justify-between relative z-10">
                         <div className="flex items-center gap-4">

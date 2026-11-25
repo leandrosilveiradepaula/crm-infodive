@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import { useRef, useEffect, useState } from 'react';
 import { Eraser, Check } from 'lucide-react';
 
@@ -27,7 +28,7 @@ export const SignaturePad = ({ onSave, onCancel }: SignaturePadProps) => {
 
                 // Reset style
                 const isDark = document.documentElement.classList.contains('dark');
-                ctx.strokeStyle = isDark ? '#ffffff' : '#000000';
+                ctx.strokeStyle = isDark ? proposalDocumentPrimitives.paperWhite : proposalDocumentPrimitives.trueBlack;
                 ctx.lineWidth = 2;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';

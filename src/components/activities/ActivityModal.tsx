@@ -75,19 +75,19 @@ export function ActivityModal({ isOpen, onClose, onSave, onDelete, activity }: A
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent showCloseButton={false} className="sm:max-w-2xl bg-card border-border text-foreground p-0 gap-0 overflow-hidden">
-                {/* Header with Gradient */}
-                <div className="bg-gradient-to-r from-primary to-info px-8 py-6 flex items-center justify-between border-b border-white/10">
+                {/* Header */}
+                <div className="bg-primary text-primary-foreground px-8 py-6 flex items-center justify-between border-b border-primary-foreground/20">
                     <div>
-                        <h2 className="text-page-title font-black text-white tracking-tight">
+                        <h2 className="text-page-title font-black text-primary-foreground tracking-tight">
                             {activity ? 'Editar Atividade' : 'Nova Atividade'}
                         </h2>
-                        <p className="text-primary text-metadata-ui mt-1 font-bold uppercase tracking-widest opacity-80">
+                        <p className="text-primary-foreground text-body-ui mt-1 font-medium">
                             {activity ? 'Visualizar e editar detalhes' : 'Agendar nova tarefa ou reunião'}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 bg-card/10 hover:bg-card/20 rounded-[var(--radius-panel)] transition-all text-white border border-white/10"
+                        className="p-2 bg-card/10 hover:bg-card/20 rounded-[var(--radius-panel)] transition-all text-primary-foreground border border-white/10"
                     >
                         <X className="h-6 w-6" />
                     </button>

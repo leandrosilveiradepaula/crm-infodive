@@ -1,4 +1,4 @@
-import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { Deal, DealProduct } from '@/types/deal';
 import type { Account } from '@/types/account';
@@ -123,7 +123,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     paddingBottom: isLandscape ? '20px' : '40px'
                 }}
             >
-                <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
 
                 <div style={{ padding: isLandscape ? '25px 80px 15px 80px' : '40px 80px 20px 80px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
@@ -222,7 +222,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         marginBottom: '40px'
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ padding: isLandscape ? '25px 80px 10px 80px' : '40px 80px 10px 80px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
@@ -299,7 +299,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         marginBottom: '40px'
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ padding: isLandscape ? '30px 80px 20px 80px' : '60px 80px 20px 80px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '30px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />

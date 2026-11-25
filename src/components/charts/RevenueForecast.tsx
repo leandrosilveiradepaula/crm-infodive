@@ -28,7 +28,7 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-gradient-to-br from-success-subtle to-success-subtle rounded-[var(--radius-panel)] border border-success">
+                <div className="p-4 bg-success-subtle rounded-[var(--radius-panel)] border border-success">
                     <div className="flex items-center gap-2 mb-2">
                         <TrendingUp className="h-4 w-4 text-success-readable" />
                         <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Total Previsto</p>
@@ -36,7 +36,7 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                     <p className="text-page-title font-bold text-success-readable">{formatCurrency(totalForecast, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-surface-highlight to-surface-highlight rounded-[var(--radius-panel)] border border-primary">
+                <div className="p-4 bg-surface-highlight rounded-[var(--radius-panel)] border border-primary">
                     <div className="flex items-center gap-2 mb-2">
                         <Calendar className="h-4 w-4 text-primary" />
                         <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Média Mensal</p>
@@ -44,7 +44,7 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                     <p className="text-page-title font-bold text-primary">{formatCurrency(avgMonthly, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-info-subtle to-surface-highlight rounded-[var(--radius-panel)] border border-info">
+                <div className="p-4 bg-info-subtle rounded-[var(--radius-panel)] border border-info">
                     <div className="flex items-center gap-2 mb-2">
                         <TrendingUp className="h-4 w-4 text-info" />
                         <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Crescimento</p>

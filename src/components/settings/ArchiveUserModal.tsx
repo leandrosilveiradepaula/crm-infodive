@@ -41,7 +41,7 @@ export const ArchiveUserModal = ({ isOpen, onClose, user, otherUsers, onSuccess 
             <div className="relative bg-card border border-border rounded-[var(--radius-panel)] shadow-card-ui w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
                 
                 {/* Header decorativo perigo */}
-                <div className="h-1.5 bg-gradient-to-r from-warning via-destructive to-warning"></div>
+                <div className="h-1.5 bg-warning"></div>
 
                 <div className="p-6">
                     <div className="flex justify-between items-start mb-6">

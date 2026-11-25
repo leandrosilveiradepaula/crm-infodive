@@ -64,7 +64,7 @@ export default function PublicProposalPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-highlight to-surface-highlight">
+            <div className="min-h-screen flex items-center justify-center bg-surface-highlight">
                 <div className="text-center">
                     <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
                     <p className="text-muted-foreground">Carregando proposta...</p>
@@ -75,7 +75,7 @@ export default function PublicProposalPage() {
 
     if (error || !proposal) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-surface-highlight to-surface-highlight">
+            <div className="min-h-screen flex items-center justify-center bg-surface-highlight">
                 <div className="text-center max-w-md">
                     <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                     <h1 className="text-page-title font-bold mb-2">Proposta Não Encontrada</h1>
@@ -110,7 +110,7 @@ export default function PublicProposalPage() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-surface-highlight to-surface-highlight py-12 px-4">
+            <div className="min-h-screen bg-surface-highlight py-12 px-4">
                 <div className="max-w-4xl mx-auto">
                     {/* Header Card */}
                     <div className="bg-card rounded-[var(--radius-panel)] shadow-card-ui p-8 mb-6">
@@ -176,7 +176,7 @@ export default function PublicProposalPage() {
                             <div className="mt-6">
                                 <Button
                                     onClick={() => setShowSignatureModal(true)}
-                                    className="w-full bg-success hover:bg-success text-white h-12 text-section-title"
+                                    className="w-full h-[var(--ds-control-height-large)]"
                                 >
                                     <CheckCircle2 className="h-5 w-5 mr-2" />
                                     Assinar Proposta

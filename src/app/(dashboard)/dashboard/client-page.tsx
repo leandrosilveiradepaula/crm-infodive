@@ -201,7 +201,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                 aria-label="Selecionar ano do Dashboard"
                                 value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
+                                className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-metadata-ui font-medium text-foreground outline-none"
                             >
                                 {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -214,7 +214,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                className={`focus-ring h-8 whitespace-nowrap rounded-[var(--radius-control)] px-3 text-metadata-ui font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-control-ui' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -238,8 +238,8 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                     : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`focus-ring relative h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected
-                                            ? 'bg-primary text-primary-foreground shadow-sm'
+                                        className={`focus-ring relative h-8 whitespace-nowrap rounded-[var(--radius-control)] px-3 text-metadata-ui font-medium transition-colors ${isSelected
+                                            ? 'bg-primary text-primary-foreground shadow-control-ui'
                                             : hasSelectionsInOtherYears
                                                 ? 'bg-secondary text-secondary-foreground hover:bg-accent'
                                                 : 'text-muted-foreground hover:text-foreground hover:bg-muted'
@@ -263,7 +263,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                         onClick={() => setShowConfig(!showConfig)}
                         aria-expanded={showConfig}
                         aria-controls="dashboard-layout-options"
-                        className={`focus-ring rounded-[var(--radius-control)] p-2 transition-colors ${showConfig ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                        className={`focus-ring rounded-[var(--radius-control)] p-2 transition-colors ${showConfig ? 'bg-primary text-primary-foreground shadow-control-ui' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                         title="Configurar Layout"
                     >
                         <Settings className="h-4 w-4" />
@@ -273,16 +273,16 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                     {showConfig && (
                         <div id="dashboard-layout-options" className="absolute right-0 top-full z-50 mt-2 w-80 rounded-[var(--radius-panel)] border border-border bg-popover p-4 text-popover-foreground shadow-[var(--shadow-overlay)]">
                             <div className="mb-4 flex items-center justify-between">
-                                <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                <h3 className="flex items-center gap-2 text-section-title font-semibold text-foreground">
                                     <LayoutIcon className="h-4 w-4 text-primary" /> Personalizar
                                 </h3>
-                                <button aria-label="Fechar configuração de layout" onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4" /></button>
+                                <button aria-label="Fechar configuração de layout" onClick={() => setShowConfig(false)} className="text-muted-foreground hover:text-foreground p-1 hover:bg-muted rounded-[var(--radius-control)] transition-colors"><X className="h-4 w-4" /></button>
                             </div>
 
                             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                                 {widgets.map((widget) => (
                                     <label key={widget.id} className="group flex cursor-pointer items-center justify-between rounded-[var(--radius-control)] border border-border p-3 transition-colors hover:bg-muted">
-                                        <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground">{getWidgetLabel(widget.id)}</span>
+                                        <span className="text-metadata-ui font-medium text-muted-foreground group-hover:text-foreground">{getWidgetLabel(widget.id)}</span>
                                         <div className="relative inline-flex items-center cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -298,7 +298,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
 
                             <button
                                 onClick={resetLayout}
-                                className="focus-ring mt-4 flex w-full items-center justify-center gap-2 border-t border-border py-3 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                                className="focus-ring mt-4 flex w-full items-center justify-center gap-2 border-t border-border py-3 text-metadata-ui font-medium text-muted-foreground transition-colors hover:text-foreground"
                             >
                                 <RotateCcw className="h-3 w-3" /> Restaurar Padrão
                             </button>
@@ -324,7 +324,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 data-qa-region={widget.id}
-                                                className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-2xl' : ''}`}
+                                                className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-overlay-ui' : ''}`}
                                             >
                                                 <>
                                                     <span
@@ -337,7 +337,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                                         {...provided.dragHandleProps}
                                                         aria-label={`Mover widget ${getWidgetLabel(widget.id)}`}
                                                         aria-describedby={`dashboard-drag-instructions-${widget.id}`}
-                                                        className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 rounded-full border border-border bg-card p-1.5 text-foreground shadow-lg cursor-grab active:cursor-grabbing opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                        className="absolute -top-3 left-1/2 -translate-x-1/2 z-50 rounded-full border border-border bg-card p-1.5 text-foreground shadow-overlay-ui cursor-grab active:cursor-grabbing opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                                         title="Arrastar Widget"
                                                     >
                                                         <GripHorizontal className="h-4 w-4" aria-hidden="true" />

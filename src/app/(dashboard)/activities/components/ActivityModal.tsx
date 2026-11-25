@@ -63,19 +63,19 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-card rounded-[var(--radius-panel)] w-full max-w-2xl overflow-hidden shadow-card-ui animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border">
-                {/* Header with Gradient */}
-                <div className="bg-gradient-to-r from-primary to-stage-proposal px-8 py-6 flex items-center justify-between border-b border-border/10">
+                {/* Header */}
+                <div className="bg-primary text-primary-foreground px-8 py-6 flex items-center justify-between border-b border-border/10">
                     <div>
-                        <h2 className="text-page-title font-black text-white tracking-tight">
+                        <h2 className="text-page-title font-black text-primary-foreground tracking-tight">
                             {activity ? 'Editar Atividade' : 'Nova Atividade'}
                         </h2>
-                        <p className="text-white/80 text-metadata-ui mt-1 font-black uppercase tracking-[0.2em]">
+                        <p className="text-primary-foreground text-body-ui mt-1 font-medium">
                             {activity ? 'Visualizar e editar detalhes' : 'Agendar nova tarefa ou reunião'}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 bg-card/10 hover:bg-card/20 rounded-[var(--radius-panel)] transition-all text-white border border-white/10"
+                        className="p-2 bg-card/10 hover:bg-card/20 rounded-[var(--radius-panel)] transition-all text-primary-foreground border border-primary-foreground/20"
                     >
                         <X className="h-6 w-6" />
                     </button>

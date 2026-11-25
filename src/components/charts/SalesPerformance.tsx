@@ -26,7 +26,7 @@ export const SalesPerformance = ({ data }: SalesPerformanceProps) => {
 
             {/* Top Performer Highlight */}
             {topPerformer && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-warning-subtle to-warning-subtle rounded-[var(--radius-panel)] border border-warning">
+                <div className="mb-6 p-4 bg-warning-subtle rounded-[var(--radius-panel)] border border-warning">
                     <div className="flex items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-warning flex items-center justify-center">
                             <Award className="h-6 w-6 text-white" />

@@ -341,7 +341,7 @@ export function ReportsClientPage() {
                                     </td>
                                     <td className="py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-6 w-6 rounded-[var(--radius-control)] bg-surface-subtle flex items-center justify-center text-[10px] font-bold text-foreground">
+                                            <div className="h-6 w-6 rounded-[var(--radius-control)] bg-surface-subtle flex items-center justify-center text-metadata-ui font-bold text-foreground">
                                                 {deal.owner?.charAt(0)}
                                             </div>
                                             <span className="ds-type-body text-foreground">{deal.owner}</span>

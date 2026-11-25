@@ -54,7 +54,7 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                         <Menu className={cn("h-5 w-5 transition-transform duration-300", isSidebarCollapsed && "rotate-90")} />
                     </button>
                 </div>
-                <p className="truncate ds-type-body font-medium text-muted-foreground sm:text-base">Olá, <span className="font-semibold text-foreground">{firstName}</span></p>
+                <p className="truncate ds-type-body font-medium text-muted-foreground sm:text-body-ui">Olá, <span className="font-semibold text-foreground">{firstName}</span></p>
             </div>
 
             <div className="flex shrink-0 items-center gap-1 sm:gap-2 lg:gap-3">

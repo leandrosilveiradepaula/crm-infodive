@@ -90,7 +90,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-card w-full max-w-2xl rounded-[var(--radius-panel)] border border-border shadow-card-ui overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Header */}
-                <div className="p-4 px-6 border-b border-border flex items-center justify-between bg-gradient-to-r from-primary/5 to-transparent">
+                <div className="p-4 px-6 border-b border-border flex items-center justify-between bg-surface-subtle">
                     <div className="flex items-center gap-4">
                         <div className="h-12 w-12 rounded-[var(--radius-panel)] bg-primary flex items-center justify-center shadow-card-ui shadow-primary/20">
                             <Zap className="h-6 w-6 text-primary-foreground" />
@@ -220,7 +220,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="h-10 w-0.5 bg-gradient-to-b from-primary/50 to-primary/10" />
+                                    <div className="h-10 w-0.5 bg-border" />
                                 </div>
 
                                 {formData.actions?.map((action, idx) => (

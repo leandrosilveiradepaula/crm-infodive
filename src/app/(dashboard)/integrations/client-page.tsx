@@ -88,7 +88,7 @@ export default function IntegrationsClientPage({
                     {initialIntegrations.map(app => (
                         <article key={app.id} className="group relative overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-control-ui">
                             {app.status === 'connected' && (
-                                <div className="absolute top-0 right-0 bg-gradient-to-l from-success to-success text-white px-5 py-2 text-metadata-ui font-black uppercase tracking-widest rounded-bl-2xl shadow-card-ui z-10 animate-in slide-in-from-right-full duration-500">
+                                <div className="absolute top-0 right-0 bg-success-subtle text-success-readable px-5 py-2 text-metadata-ui font-black uppercase tracking-widest rounded-bl-[var(--radius-panel)] shadow-card-ui z-10 animate-in slide-in-from-right-full duration-500">
                                     Conectado
                                 </div>
                             )}

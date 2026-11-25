@@ -1,4 +1,4 @@
-import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 
 interface ProposalDifferentialsPageProps {
@@ -54,7 +54,7 @@ export function ProposalDifferentialsPage({ themePrimary, themeAccent, layout = 
                 right: 0,
                 width: '100%',
                 height: '6px',
-                background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)`
+                background: proposalDocumentBand(accentColor, primaryColor)
             }} />
 
             {/* Standardized Header */}
