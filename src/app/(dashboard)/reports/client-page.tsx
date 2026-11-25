@@ -316,15 +316,15 @@ export function ReportsClientPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                <div role="region" aria-label="Tabela de oportunidades nos relatórios" tabIndex={0} className="min-w-0 max-w-full overflow-x-auto focus-ring">
+                    <table aria-label="Oportunidades nos relatórios" className="w-full min-w-[var(--ds-directory-table-min-width)] text-left border-collapse">
                         <thead>
                             <tr className="border-b border-border">
-                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Oportunidade</th>
-                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Empresa</th>
-                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Vendedor</th>
-                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Status</th>
-                                <th className="pb-4 text-right ds-type-label font-semibold text-muted-foreground">Valor</th>
+                                <th scope="col" className="pb-4 ds-type-label font-semibold text-muted-foreground">Oportunidade</th>
+                                <th scope="col" className="pb-4 ds-type-label font-semibold text-muted-foreground">Empresa</th>
+                                <th scope="col" className="pb-4 ds-type-label font-semibold text-muted-foreground">Vendedor</th>
+                                <th scope="col" className="pb-4 ds-type-label font-semibold text-muted-foreground">Status</th>
+                                <th scope="col" className="pb-4 text-right ds-type-label font-semibold text-muted-foreground">Valor</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">

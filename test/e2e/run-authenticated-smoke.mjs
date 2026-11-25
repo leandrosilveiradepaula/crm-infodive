@@ -1078,6 +1078,44 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // Shared family contract: visible KPI values and reachable workspace tabs.
+                    if (local && profileIndex === 0) {
+                        const presentation = await page.evaluate(mobile => {
+                            const visible = node => node.getClientRects().length > 0;
+                            const stats = [...document.querySelectorAll('[data-qa-region="stats"]')].filter(visible);
+                            const tabs = [...document.querySelectorAll('[data-slot="tabs-list"][data-layout="workspace"]')].filter(visible);
+                            const statsFit = stats.every(grid => {
+                                const tiles = [...grid.querySelectorAll('[data-slot="stats-tile"]')].filter(visible);
+                                const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+                                return (!mobile || tiles.length < 2 || columns === 2) && tiles.every(tile =>
+                                    tile.scrollWidth <= tile.clientWidth + 1 &&
+                                    [...tile.querySelectorAll('p')].every(p => p.scrollWidth <= p.clientWidth + 1));
+                            });
+                            const tabsFit = tabs.every(list => {
+                                const bounds = list.getBoundingClientRect();
+                                return [...list.querySelectorAll('[role="tab"]')].filter(visible).every(tab => {
+                                    const b = tab.getBoundingClientRect();
+                                    return b.left >= bounds.left - 1 && b.right <= bounds.right + 1 &&
+                                        b.top >= bounds.top - 1 && b.bottom <= bounds.bottom + 1 &&
+                                        tab.scrollWidth <= tab.clientWidth + 1;
+                                });
+                            });
+                            return { stats: stats.length, tabs: tabs.length, statsFit, tabsFit };
+                        }, viewport.name === 'mobile');
+                        if (presentation.stats || presentation.tabs) {
+                            const ok = presentation.statsFit && presentation.tabsFit;
+                            if (!ok) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?presentation');
+                                const finding = { profileIndex, route, state: 'workspace-presentation',
+                                    viewport: viewport.name, theme, ...presentation };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                                process.stderr.write('CRM_WORKSPACE_LAYOUT_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                            profileResult.checks.push({ route, state: 'workspace-presentation', viewport: viewport.name,
+                                theme, status: ok ? 'passed' : 'failed', ...presentation });
+                        }
+                    }
                     // Real read-only interaction proof for the automation workspace.
                     // Do not submit, toggle, delete, duplicate or execute any workflow.
                     if (local && profileIndex === 0 && route === '/automations') {
@@ -1306,16 +1344,17 @@ try {
                         });
                     }
                     // Read-only authenticated directory UX. No AI request, export or writes.
-                    if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers'].includes(route)) {
+                    if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers', '/products'].includes(route)) {
                         const spec = {
                             '/leads': { search: 'Buscar leads', term: 'Prospecto', reset: 'Limpar filtros de leads', table: 'Leads' },
                             '/contacts': { search: 'Buscar contatos', term: 'aurora@example.invalid', reset: 'Limpar filtros de contatos', table: 'Contatos' },
                             '/customers': { search: 'Buscar empresas', term: 'Aurora', reset: 'Limpar filtros de empresas', table: 'Empresas' },
+                            '/products': { search: 'Buscar produtos', term: 'QA-SRV-001', reset: 'Limpar filtros de produtos', table: 'Produtos' },
                         }[route];
                         const search = page.getByRole('textbox', { name: spec.search, exact: true });
                         const waitCount = expected => page.waitForFunction(value =>
                             document.querySelector('[data-qa-region="directory-results"] [role="status"]')?.textContent?.trim() === value, expected);
-                        const summary = page.locator('[data-qa-region="stats"][data-density="directory"]');
+                        const summary = page.locator('[data-qa-region="stats"]').first();
                         if (await summary.locator('[data-slot="stats-tile"]').count() !== 4) throw new Error('CRM_DIRECTORY_SUMMARY_MISSING: ' + route);
                         const summaryLayout = await summary.evaluate(node => {
                             const tiles = [...node.querySelectorAll('[data-slot="stats-tile"]')];
@@ -1340,7 +1379,7 @@ try {
                             const b = node.getBoundingClientRect();
                             return b.left >= -1 && b.right <= innerWidth + 1 &&
                                 getComputedStyle(node).overflowX === 'auto' &&
-                                node.querySelectorAll('th[scope="col"]').length >= 6;
+                                node.querySelectorAll('th[scope="col"]').length >= 5;
                         });
                         if (!frameFits) throw new Error('CRM_DIRECTORY_TABLE_CLIPPING: ' + route);
                         await page.waitForTimeout(250);
@@ -1365,6 +1404,7 @@ try {
                         }
                         if (route === '/leads') {
                             const opener = table.getByRole('button', { name: /^Pesquisar empresa do lead / }).first();
+                            const openerLabel = await opener.getAttribute('aria-label');
                             await opener.click();
                             const research = page.getByRole('dialog', { name: 'Pesquisa comercial' });
                             await research.waitFor({ state: 'visible', timeout: 8000 });
@@ -1387,7 +1427,6 @@ try {
                                 path: resolve(artifactDir, account.label + '-leads-research-' + viewport.name + '-' + theme + '.png'),
                                 fullPage: true,
                             });
-                            const openerLabel = await opener.getAttribute('aria-label');
                             await page.keyboard.press('Escape');
                             await research.waitFor({ state: 'hidden', timeout: 8000 });
                             await page.waitForFunction(label => document.activeElement?.getAttribute('aria-label') === label &&
@@ -1487,6 +1526,47 @@ try {
                         });
                     }
 
+                    // Read-only Pipeline list and proposal section, with actual seeded deal.
+                    if (local && profileIndex === 0 && route === '/pipeline') {
+                        const search = page.getByRole('textbox', { name: 'Buscar oportunidades', exact: true });
+                        await search.fill('Servidores');
+                        await page.getByRole('button', { name: 'Visualização em lista', exact: true }).click();
+                        const table = page.getByRole('table', { name: 'Oportunidades', exact: true });
+                        const opener = table.getByRole('button', { name: 'Abrir oportunidade Oportunidade Fictícia Servidores', exact: true });
+                        await opener.waitFor({ state: 'visible', timeout: 10000 });
+                        if (await table.getByRole('row').count() !== 2) throw new Error('CRM_PIPELINE_LIST_FILTER_FAILED');
+                        const listAudit = await runAxe(page, source);
+                        const listIssues = listAudit.incompleteCount + listAudit.violationsCount;
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-pipeline-list-' + viewport.name + '-' + theme + '.png'), fullPage: true,
+                        });
+                        await opener.click();
+                        const dialog = page.getByRole('dialog');
+                        await dialog.waitFor({ state: 'visible', timeout: 10000 });
+                        await dialog.getByRole('tab', { name: 'Propostas', exact: true }).click();
+                        await dialog.getByRole('button', { name: 'Abrir proposta Proposta Fictícia Aurora', exact: true }).waitFor({ state: 'visible', timeout: 12000 });
+                        await dialog.getByRole('button', { name: /^Rascunhos/ }).click();
+                        await dialog.getByRole('button', { name: 'Abrir proposta Proposta Fictícia Aurora', exact: true }).waitFor({ state: 'visible' });
+                        await page.waitForTimeout(350);
+                        const proposalsAudit = await runAxe(page, source);
+                        const proposalsIssues = proposalsAudit.incompleteCount + proposalsAudit.violationsCount;
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-pipeline-proposals-' + viewport.name + '-' + theme + '.png'), fullPage: true,
+                        });
+                        for (const [state, audit, issues] of [['pipeline-list', listAudit, listIssues], ['pipeline-proposals', proposalsAudit, proposalsIssues]]) {
+                            if (issues) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?' + state);
+                                const finding = { profileIndex, route, state, viewport: viewport.name, theme, violations: audit.violations, incomplete: audit.incomplete };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                                process.stderr.write('CRM_WORKSPACE_INTERACTION_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                            profileResult.checks.push({ route, state, viewport: viewport.name, theme, status: issues ? 'failed' : 'passed' });
+                        }
+                        await assertOpportunityDialogKeyboard(page, opener);
+                        await page.getByRole('button', { name: 'Limpar filtros de oportunidades', exact: true }).click();
+                        await page.getByRole('button', { name: 'Visualização em quadro', exact: true }).click();
+                    }
                     // The board screenshot alone cannot prove the focused opportunity
                     // inspector. Capture one read-only drawer state from the synthetic
                     // admin fixture without changing stage, products, or any deal data.

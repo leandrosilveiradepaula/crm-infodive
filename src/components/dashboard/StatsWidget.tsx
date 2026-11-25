@@ -4,46 +4,7 @@ import { DollarSign, Target, TrendingUp, Activity } from 'lucide-react';
 import { formatCompact } from '../../utils/analytics';
 import type { DashboardMetrics } from '../../hooks/useDashboardMetrics';
 
-interface StatCardProps {
-    title: string;
-    value: string;
-    subtitle?: string;
-    icon: any;
-    colorClass: string;
-    trend?: 'up' | 'down';
-    change?: string;
-    onClick?: () => void;
-}
-
-const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, trend, change, onClick }: StatCardProps) => (
-    <div
-        onClick={onClick}
-        className="glass-card p-4 rounded-[var(--radius-panel)] relative overflow-hidden group interactive-item cursor-pointer border border-border h-full"
-    >
-        <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-                <div className={`w-9 h-9 rounded-[var(--radius-panel)] flex items-center justify-center bg-surface-subtle shadow-inner group-hover:scale-110 transition-transform`}>
-                    <Icon className={`h-4.5 w-4.5 ${colorClass.replace('bg-', 'text-')}`} />
-                </div>
-                {change && (
-                    <span className={`text-metadata-ui font-black px-1.5 py-0.5 rounded-full ${trend === 'up' ? 'bg-success-subtle text-foreground' : 'bg-destructive-subtle text-foreground'} uppercase tracking-widest`}>
-                        {change}
-                    </span>
-                )}
-            </div>
-
-            <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest leading-none">{title}</p>
-            <h3 className="text-page-title font-black text-foreground mt-1 group-hover:text-primary transition-colors">{value}</h3>
-
-            {subtitle && (
-                <p className="text-metadata-ui text-muted-foreground mt-1.5 font-bold flex items-center gap-1.5 uppercase tracking-tight">
-                    <span className="w-1 h-1 rounded-full bg-primary/40"></span>
-                    {subtitle}
-                </p>
-            )}
-        </div>
-    </div>
-);
+import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 
 interface StatsWidgetProps {
     metrics: DashboardMetrics;
@@ -52,47 +13,40 @@ interface StatsWidgetProps {
 export const StatsWidget = ({ metrics }: StatsWidgetProps) => {
     const router = useRouter();
 
-    const stats = [
+    const stats: StatItem[] = [
         {
-            title: "Pipeline Total",
+            label: "Pipeline Total",
             value: formatCompact(metrics.totalPipeline),
-            subtitle: `${metrics.totalDeals - metrics.wonDeals - metrics.lostDeals} deals ativos`,
+            sublabel: `${metrics.totalDeals - metrics.wonDeals - metrics.lostDeals} oportunidades ativas`,
             icon: DollarSign,
-            colorClass: "bg-primary",
+            tone: "primary",
             onClick: () => router.push('/pipeline')
         },
         {
-            title: "Previsão Ponderada",
+            label: "Previsão Ponderada",
             value: formatCompact(metrics.weightedForecast),
-            subtitle: "Baseada em probabilidade",
+            sublabel: "Baseada em probabilidade",
             icon: Target,
-            colorClass: "bg-info",
+            tone: "info",
             onClick: () => router.push('/pipeline')
         },
         {
-            title: "Ganho no Mês",
+            label: "Ganho no Mês",
             value: formatCompact(metrics.wonThisMonth),
-            change: "+12.5%",
-            trend: "up" as const,
+            description: "Valor das oportunidades ganhas",
             icon: TrendingUp,
-            colorClass: "bg-success",
+            tone: "success",
             onClick: () => router.push('/pipeline')
         },
         {
-            title: "Win Rate",
+            label: "Taxa de conversão",
             value: `${metrics.winRate.toFixed(1)}%`,
-            subtitle: `${metrics.wonDeals} ganhos / ${metrics.wonDeals + metrics.lostDeals} fechados`,
+            sublabel: `${metrics.wonDeals} ganhos / ${metrics.wonDeals + metrics.lostDeals} fechados`,
             icon: Activity,
-            colorClass: "bg-primary",
+            tone: "primary",
             onClick: () => router.push('/reports')
         },
     ];
 
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
-            {stats.map((stat, i) => (
-                <StatCard key={i} {...stat} />
-            ))}
-        </div>
-    );
+    return <StatsGrid items={stats} />;
 };

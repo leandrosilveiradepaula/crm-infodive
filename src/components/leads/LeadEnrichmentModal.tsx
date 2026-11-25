@@ -90,7 +90,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                     <DialogDescription>Gere sugestões de abordagem com IA a partir do nome da empresa. Nenhum dado é gravado no lead.</DialogDescription>
                 </header>
                 <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-                    <p className="rounded-[var(--radius-panel)] border border-border bg-surface-subtle p-3 text-body-ui text-foreground">
+                    <p className="text-body-ui leading-relaxed text-foreground">
                         As sugestões usam o conhecimento do modelo, não uma pesquisa verificada na internet. Confira as informações antes de usá-las.
                     </p>
                     {!result ? (

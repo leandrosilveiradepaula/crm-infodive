@@ -295,7 +295,7 @@
   --ds-deal-account-select-width: 16rem;
   --ds-deal-stage-select-width: 10.5rem;
   /* Shared opportunity board geometry, configured here for every rendered stage. */
-  --ds-kanban-column-width: 20rem;
+  --ds-kanban-column-width: 18rem;
   --ds-kanban-board-min-height: 34rem;
   --ds-kanban-column-min-height: 12.5rem;
   --ds-deal-inspector-width: 21rem;
@@ -351,9 +351,9 @@
   --ds-control-padding-field: 0.75rem;
   --ds-control-padding-y: 0.25rem;
   --ds-page-header-inline: 0.75rem;
-  --ds-page-header-block: 1rem;
+  --ds-page-header-block: 0.75rem;
   --ds-page-header-gap: 0.75rem;
-  --ds-page-header-bottom: 1.25rem;
+  --ds-page-header-bottom: 0.5rem;
 
   --ds-type-legacy-base-size: 1rem;
   --ds-type-legacy-prominent-size: 1.25rem;
@@ -534,7 +534,7 @@
 }
 
 @media (min-width: 1024px) {
-  :root { --ds-page-header-inline: 1.5rem; --ds-page-header-bottom: 1.5rem; }
+  :root { --ds-page-header-inline: 1.5rem; --ds-page-header-bottom: 0.75rem; }
 }
 
 @layer components {

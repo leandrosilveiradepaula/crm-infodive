@@ -20,9 +20,11 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
             </div>
             
             {/* Action Items (Buttons, Filters, Toolbars) */}
-            <div className="flex flex-wrap items-center gap-2">
-                {children}
-            </div>
+            {children && (
+                <div data-slot="crm-page-actions" className="flex min-w-0 flex-wrap items-center gap-2 md:justify-end">
+                    {children}
+                </div>
+            )}
         </div>
     );
 }

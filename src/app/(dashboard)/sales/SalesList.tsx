@@ -58,7 +58,7 @@ export default function SalesList() {
 
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 gap-1 p-1 sm:inline-flex sm:w-auto sm:flex-wrap">
+            <TabsList layout="workspace" aria-label="Seções de vendas">
                 <TabsTrigger value="dashboard" className="gap-2">
                     <LayoutDashboard className="w-4 h-4" />
                     Visão Geral

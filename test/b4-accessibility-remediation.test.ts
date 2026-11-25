@@ -160,7 +160,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(goals).toContain('<thead className="bg-surface-raised');
         const goalsPage = source('src/app/(dashboard)/goals/client-page.tsx');
         expect(goalsPage).not.toContain('pb-10 animate-in fade-in');
-        expect(goalsPage).toContain('grid-cols-1 gap-1 sm:grid-cols-2');
+        expect(goalsPage).toContain('<TabsList layout="workspace"');
         const automation = source('src/app/(dashboard)/automations/client-page.tsx');
         expect(automation).not.toContain('pb-10 animate-in fade-in');
         expect(automation).not.toContain('border-border backdrop-blur-sm');
@@ -181,7 +181,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(customers).toContain('grid-cols-1 gap-3 px-2 sm:grid-cols-2');
         expect(customers).not.toContain('md:w-auto overflow-x-auto no-scrollbar');
         const sales = source('src/app/(dashboard)/sales/SalesList.tsx');
-        expect(sales).toContain('grid-cols-2 gap-1 p-1 sm:inline-flex');
+        expect(sales).toContain('<TabsList layout="workspace"');
+        expect(source('src/components/ui/tabs.tsx')).toContain('grid w-full grid-cols-2 gap-1 sm:flex sm:flex-wrap sm:justify-start');
         const design = source('src/app/(dashboard)/design-preview/page.tsx');
         expect(design).toContain('<Table className="table-fixed">');
         expect(design).toContain('whitespace-normal break-words');

@@ -319,7 +319,7 @@ export function SettingsClientPage({ initialOrgSettings, initialStages }: { init
             />
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">
+                <TabsList layout="workspace" aria-label="Seções de configurações" className="mb-3">
                     <TabsTrigger value="general">
                         <Building2 className="h-4 w-4" /> Geral
                     </TabsTrigger>

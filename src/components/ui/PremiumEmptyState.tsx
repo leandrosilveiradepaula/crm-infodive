@@ -24,10 +24,10 @@ export function PremiumEmptyState({
     const isCompact = variant === 'compact';
 
     return (
-        <div className={`flex flex-col items-center justify-center rounded-[var(--radius-panel)] border border-dashed border-border bg-card ${isCompact ? 'p-6' : 'p-12'} text-center`}>
-            <div className={`relative ${isCompact ? 'mb-4' : 'mb-6'}`}>
-                <div className={`grid place-items-center bg-primary/10 ${isCompact ? 'size-14 rounded-[var(--radius-control)]' : 'size-20 rounded-[var(--radius-panel)]'}`}>
-                    <Icon className={`${isCompact ? 'size-7' : 'size-10'} text-primary`} />
+        <div className={`flex flex-col items-center justify-center rounded-[var(--radius-panel)] border border-border bg-card ${isCompact ? 'p-4 sm:p-6' : 'p-6 sm:p-10'} text-center`}>
+            <div className={`relative ${isCompact ? 'mb-3' : 'mb-4'}`}>
+                <div className={`grid place-items-center bg-primary/10 ${isCompact ? 'size-10 rounded-[var(--radius-control)]' : 'size-12 rounded-[var(--radius-panel)]'}`}>
+                    <Icon className={`${isCompact ? 'size-5' : 'size-6'} text-primary`} aria-hidden="true" />
                 </div>
             </div>
 

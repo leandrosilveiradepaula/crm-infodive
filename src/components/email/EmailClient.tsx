@@ -62,12 +62,12 @@ export function EmailClient() {
 
     if (error === 'needs_auth') {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] bg-card border border-border rounded-[var(--radius-panel)] p-8 text-center space-y-6">
-                <div className="w-20 h-20 bg-surface-highlight dark:bg-primary/30 rounded-full flex items-center justify-center mx-auto">
-                    <AlertCircle className="h-10 w-10 text-primary dark:text-primary" />
+            <div className="flex flex-col items-center justify-center bg-card border border-border rounded-[var(--radius-panel)] p-6 text-center space-y-4 sm:p-10">
+                <div className="grid size-12 place-items-center rounded-[var(--radius-control)] bg-info-subtle mx-auto">
+                    <AlertCircle className="size-6 text-foreground" aria-hidden="true" />
                 </div>
                 <div>
-                    <h2 className="text-page-title font-bold mb-2">Conecte sua conta Office 365</h2>
+                    <h2 className="text-section-title font-semibold mb-2">Conecte sua conta Office 365</h2>
                     <p className="text-muted-foreground max-w-md mx-auto">
                         Para visualizar e enviar emails diretamente do CRM, você precisa conectar sua conta Microsoft.
                     </p>

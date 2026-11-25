@@ -25,28 +25,29 @@ interface StatsGridProps {
 }
 
 export function StatsGrid({ items, density = 'standard' }: StatsGridProps) {
-    const directory = density === 'directory';
+    const columns = items.length === 1 ? 'grid-cols-1' : 'grid-cols-2';
+    const desktopColumns = items.length === 3 ? 'xl:grid-cols-3' : 'xl:grid-cols-4';
     return (
-        <section aria-label="Resumo" data-qa-region="stats" data-density={density} className={`grid ${directory ? 'grid-cols-2' : 'grid-cols-1'} gap-[var(--ds-stat-gap)] sm:grid-cols-2 xl:grid-cols-4`}>
+        <section aria-label="Resumo" data-qa-region="stats" data-density={density} className={`grid ${columns} gap-[var(--ds-stat-gap)] sm:grid-cols-2 ${desktopColumns}`}>
             {items.map((stat, index) => {
                 const Icon = stat.icon;
                 const isClickable = !!stat.onClick;
                 const tone = stat.tone ?? 'neutral';
-                const tileClasses = `group relative min-w-0 ${directory ? 'p-[var(--ds-stat-compact-padding)] sm:min-h-[var(--ds-stat-min-height)] sm:p-[var(--ds-stat-padding)]' : 'min-h-[var(--ds-stat-min-height)] p-[var(--ds-stat-padding)]'} overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card text-left shadow-card-ui transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-ui focus-ring' : 'cursor-default'}`;
+                const tileClasses = `group relative min-w-0 p-[var(--ds-stat-compact-padding)] sm:min-h-[var(--ds-stat-min-height)] sm:p-[var(--ds-stat-padding)] ${items.length > 1 && items.length % 2 === 1 && index === items.length - 1 ? 'col-span-2 sm:col-span-1' : ''} overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card text-left shadow-card-ui transition-[border-color,box-shadow,transform] ${isClickable ? 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card-ui focus-ring' : 'cursor-default'}`;
                 const tileContent = (
                     <>
                         <div className="relative flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                                <p className="ds-type-label font-medium text-foreground">{stat.label}</p>
-                                <p className={`ds-type-metric font-semibold tracking-tight text-foreground ${directory ? 'mt-1 break-words sm:mt-2' : 'mt-2 truncate'}`}>
+                                <p className="ds-type-label font-medium text-foreground [overflow-wrap:anywhere]">{stat.label}</p>
+                                <p className="ds-type-metric mt-1 [overflow-wrap:anywhere] font-semibold tracking-tight text-foreground sm:mt-2">
                                     {stat.value}
                                 </p>
                             </div>
-                            <div data-slot="stat-icon" data-tone={tone} className={`${directory ? 'hidden sm:grid' : 'grid'} size-[var(--ds-stat-icon-size)] shrink-0 place-items-center rounded-[var(--radius-control)] ${statToneClasses[tone]}`}>
+                            <div data-slot="stat-icon" data-tone={tone} className={`hidden sm:grid size-[var(--ds-stat-icon-size)] shrink-0 place-items-center rounded-[var(--radius-control)] ${statToneClasses[tone]}`}>
                                 <Icon className="size-4" aria-hidden="true" />
                             </div>
                         </div>
-                        <p className={`relative ds-type-label text-muted-foreground ${directory ? 'mt-1 break-words sm:mt-2' : 'mt-2 truncate'}`}>{stat.description}</p>
+                        <p className="relative mt-1 ds-type-label text-muted-foreground [overflow-wrap:anywhere] sm:mt-2">{stat.description}</p>
                     </>
                 );
 

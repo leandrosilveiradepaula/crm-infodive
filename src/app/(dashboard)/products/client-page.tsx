@@ -15,6 +15,7 @@ import { invalidateProductsCache } from '@/hooks/useProducts';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
+import { DirectoryResults } from '@/components/layout/DirectoryResults';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface ProductsClientPageProps {
@@ -148,18 +149,19 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar produtos"
                         placeholder="Buscar por nome, SKU ou fabricante..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
                     <ThemeSelect
                         aria-label="Filtrar produtos por marca"
                         value={filterBrand}
                         onChange={e => setFilterBrand(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Marca: Todas</option>
                         {existingBrands.map(brand => (
@@ -171,7 +173,7 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                         aria-label="Filtrar produtos por categoria"
                         value={filterCategory}
                         onChange={e => setFilterCategory(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Categoria: Todas</option>
                         {existingCategories.map(cat => (
@@ -184,7 +186,15 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
             </FilterBar>
 
             {/* Grid / Table */}
-            {view === 'cards' ? (
+            <DirectoryResults
+                shown={filteredProducts.length}
+                total={initialProducts.length}
+                hasFilters={searchTerm !== '' || filterBrand !== 'all' || filterCategory !== 'all'}
+                onReset={() => { setSearchTerm(''); setFilterBrand('all'); setFilterCategory('all'); }}
+                resetLabel="Limpar filtros de produtos"
+            />
+
+            {filteredProducts.length > 0 && (view === 'cards' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredProducts.map(product => (
                         <ProductCard
@@ -203,19 +213,14 @@ export default function ProductsClientPage({ initialProducts, manufacturers }: P
                     onDelete={handleDelete}
                     onDuplicate={handleDuplicate}
                 />
-            )}
+            ))}
 
             {filteredProducts.length === 0 && (
                 <PremiumEmptyState
                     icon={Package}
                     title="Nenhum produto encontrado"
                     description="Não encontramos produtos com os filtros aplicados. Tente ajustar sua busca."
-                    actionLabel="Limpar Filtros"
-                    onAction={() => {
-                        setSearchTerm('');
-                        setFilterBrand('all');
-                        setFilterCategory('all');
-                    }}
+                    variant="default"
                 />
             )}
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FileText, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 import { fetchProposals } from '@/app/(dashboard)/pipeline/actions';
 import { ProposalRow } from './ProposalRow';
 import type { Proposal } from '@/types/proposal';
@@ -60,11 +61,11 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
     ];
 
     return (
-        <div className="flex flex-col h-full w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex min-w-0 flex-col h-full w-full gap-4 p-3 sm:p-5">
             {/* Header / Actions */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-wrap justify-between items-start gap-3">
                 <div>
-                    <h2 className="text-section-title font-bold text-foreground flex items-center gap-3">
+                    <h2 className="text-section-title font-semibold text-foreground flex items-center gap-2">
                         <FileText className="h-6 w-6 text-primary" />
                         Propostas
                     </h2>
@@ -72,7 +73,7 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
                 </div>
                 <Button
                     onClick={onGenerate}
-                    className="bg-primary hover:bg-primary/90 text-white font-bold px-6 h-10 flex items-center gap-2 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 transition-all"
+                    type="button"
                 >
                     <Plus className="h-4 w-4" /> Nova Proposta
                 </Button>
@@ -80,35 +81,30 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
 
             {/* Dashboard / Status Filters */}
             {proposals.length > 0 && (
-                <div className="flex gap-3 mb-6 overflow-x-auto pb-2 custom-scrollbar">
+                <div role="group" aria-label="Filtrar propostas por status" className="flex flex-wrap gap-2">
                     {statusConfig.map(status => (
-                        <button
+                        <Button
                             key={status.id || 'all'}
+                            type="button"
+                            size="sm"
+                            variant={statusFilter === status.id ? 'default' : 'outline'}
+                            aria-pressed={statusFilter === status.id}
                             onClick={() => setStatusFilter(status.id)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-panel)] border transition-all ${statusFilter === status.id
-                                ? 'ring-2 ring-primary/50 border-primary shadow-control-ui ' + status.bg
-                                : 'border-border shadow-control-ui ' + status.bg
-                                }`}
                         >
-                            <status.icon className={`w-4 h-4 ${status.color}`} />
-                            <span className={`text-body-ui font-semibold ${statusFilter === status.id ? status.color : 'text-muted-foreground'}`}>
-                                {status.label}
-                            </span>
-                            {status.id !== null && status.count > 0 && (
-                                <span className={`text-metadata-ui font-bold px-2 py-0.5 rounded-full ${statusFilter === status.id ? 'bg-white/80' : 'bg-background'} ${status.color}`}>
-                                    {status.count}
-                                </span>
-                            )}
-                        </button>
+                            <status.icon aria-hidden="true" />
+                            {status.label}
+                            {status.id !== null && status.count > 0 && <span>({status.count})</span>}
+                        </Button>
                     ))}
                 </div>
             )}
 
             {/* Search */}
             {proposals.length > 0 && (
-                <div className="relative mb-6">
+                <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
+                        aria-label="Buscar propostas da oportunidade"
                         placeholder="Buscar por título ou número..."
                         className="pl-10 bg-background border-border rounded-[var(--radius-control)]"
                         value={searchTerm}
@@ -124,15 +120,12 @@ export function ProposalsTab({ dealId, onGenerate, onView }: ProposalsTabProps) 
                         {[1, 2, 3].map(i => <div key={i} className="h-32 w-full bg-muted rounded-[var(--radius-panel)] animate-pulse" />)}
                     </div>
                 ) : filteredProposals.length === 0 ? (
-                    <div className="h-64 flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-[var(--radius-panel)] bg-muted/30 space-y-4">
-                        <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
-                            <FileText className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                        <div>
-                            <p className="text-foreground font-medium">Nenhuma proposta encontrada</p>
-                            <p className="text-body-ui text-muted-foreground mt-1">Clique em "Nova Proposta" para começar.</p>
-                        </div>
-                    </div>
+                    <PremiumEmptyState
+                        icon={FileText}
+                        title="Nenhuma proposta encontrada"
+                        description={proposals.length === 0 ? 'Use Nova Proposta para começar.' : 'Ajuste a busca ou os filtros de status para ver outras propostas.'}
+                        variant="compact"
+                    />
                 ) : (
                     <>
                         {filteredProposals.map((proposal) => (
