@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation'; // Next.js adaptation
 import {
     LayoutDashboard, Briefcase, Users, Plus, Sparkles, ArrowRight, Loader2
@@ -96,22 +97,26 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
     };
 
     return (
-        <Command.Dialog
-            open={open}
-            onOpenChange={onOpenChange}
-            label="Pesquisa e comandos do CRM"
-            overlayClassName="command-dialog-overlay"
-            contentClassName="command-dialog-content"
-            className="command-palette"
-            onKeyDown={(e) => {
-                if (e.key === 'Escape' && pages.length > 0) {
-                    e.preventDefault();
-                    popPage();
-                }
-            }}
-            shouldFilter={false}
-        >
-            <div className="command-palette-wrapper">
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent
+                showCloseButton={false}
+                className="w-full max-w-[var(--ds-command-max-width)] max-h-[90dvh] overflow-hidden rounded-[var(--radius-panel)] border border-border bg-popover p-0 text-popover-foreground shadow-overlay-ui"
+            >
+                <DialogTitle className="sr-only">Pesquisa e comandos do CRM</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Pesquise oportunidades, empresas e navegue entre páginas do CRM.
+                </DialogDescription>
+                <Command
+                    className="command-palette"
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape' && pages.length > 0) {
+                            e.preventDefault();
+                            popPage();
+                        }
+                    }}
+                    shouldFilter={false}
+                >
+                    <div className="command-palette-wrapper">
                 <Command.Input
                     placeholder={!activePage ? "Digite um comando ou pesquise..." : activePage === 'move-deal' ? "Selecione a oportunidade..." : "Selecione o estágio..."}
                     value={search}
@@ -295,6 +300,8 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                     </div>
                 </div>
             </div>
-        </Command.Dialog>
+                </Command>
+            </DialogContent>
+        </Dialog>
     );
 };

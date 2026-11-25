@@ -1,39 +1,10 @@
-/* cmdk composes Radix Dialog.Content OUTSIDE the Command root.
-   Style the actual accessible dialog node; a fixed child alone does not
-   give its parent a visual bounding box. */
-.command-dialog-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-    background: var(--ds-command-overlay);
-    backdrop-filter: blur(8px);
-    animation: fadeIn 0.15s ease-out;
-}
-
-.command-dialog-content {
-    position: fixed;
-    top: min(15dvh, 8rem);
-    left: 50%;
-    z-index: 9999;
-    width: min(calc(100vw - 2rem), var(--ds-command-max-width));
-    max-height: 85dvh;
-    transform: translateX(-50%);
-    outline: none;
-}
-
+/* The accessible Radix portal, heading and focus lifecycle come from the
+   shared CRM Dialog. cmdk supplies keyboard search/list interactions only. */
 .command-palette {
     display: block;
     width: 100%;
     max-width: 100%;
     background: transparent;
-}
-
-@media (max-width: 640px) {
-    .command-dialog-content {
-        top: 5dvh;
-        width: calc(100vw - 1.5rem);
-        max-height: 90dvh;
-    }
 }
 
 .command-palette-wrapper {
