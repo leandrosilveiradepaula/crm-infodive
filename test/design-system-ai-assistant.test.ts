@@ -19,6 +19,8 @@ describe('Actual CRM Watson AI drawer consumes semantic design primitives', () =
     expect(s).toContain('aria-label="Enviar mensagem ao Watson AI"');
     expect(s).toContain('aria-label="Mensagem para Watson AI"');
     expect(s).toContain('bg-success-subtle text-success-readable');
+    expect(s).toContain('bg-destructive-subtle text-destructive-readable');
+    expect(s).not.toContain('bg-destructive/10 text-destructive');
     expect(s).toContain('shadow-overlay-ui');
     expect(s).not.toMatch(/\b(?:bg|text|border|ring|from|via|to)-(?:blue|red|green|yellow|amber|emerald|rose|teal|cyan|sky|violet|purple|pink|indigo|orange|lime|slate|gray|zinc|neutral|stone)-\d{2,3}(?:\/\d{1,3})?\b/);
     expect(s).not.toMatch(/\btext-(?:xs|sm|base|lg|xl|[2-9]xl)\b/);

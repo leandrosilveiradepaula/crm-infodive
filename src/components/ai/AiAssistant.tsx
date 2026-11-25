@@ -199,7 +199,7 @@ export const AiAssistant = ({ isOpen, onClose, initialQuery }: AiAssistantProps)
                                     {insight.score && (
                                         <span className={cn(
                                             "text-metadata-ui font-bold px-1.5 py-0.5 rounded-[var(--radius-control)]",
-                                            insight.score > 70 ? 'bg-success-subtle text-success-readable' : 'bg-destructive/10 text-destructive'
+                                            insight.score > 70 ? 'bg-success-subtle text-success-readable' : 'bg-destructive-subtle text-destructive-readable'
                                         )}>
                                             {insight.score}
                                         </span>
