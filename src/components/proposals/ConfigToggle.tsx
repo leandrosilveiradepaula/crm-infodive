@@ -9,25 +9,25 @@ interface ConfigToggleProps {
     color: string;
 }
 
-export function ConfigToggle({ label, description, icon: Icon, checked, onChange, color }: ConfigToggleProps) {
+export function ConfigToggle({ label, description, icon: Icon, checked, onChange }: ConfigToggleProps) {
     return (
         <label className={`
-            flex items-center justify-between p-5 rounded-2xl border cursor-pointer transition-all duration-300 group
+            flex items-center justify-between gap-3 p-5 rounded-[var(--radius-panel)] border cursor-pointer transition-all duration-300 group focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background
             ${checked
-                ? 'bg-primary/5 border-primary/50 shadow-sm'
-                : 'bg-card border-border/50 hover:border-blue-500/30 hover:bg-muted/50'}
+                ? 'bg-primary/5 border-primary/50 shadow-control-ui'
+                : 'bg-card border-border/50 hover:border-primary/30 hover:bg-muted/50'}
         `}>
             <div className="flex items-center gap-4">
-                <div className={`p-2.5 rounded-xl transition-colors duration-300 ${checked ? 'bg-primary/10 ' + color : 'bg-muted text-muted-foreground group-hover:bg-blue-500/10'}`}>
+                <div className={`p-2.5 rounded-[var(--radius-control)] transition-colors duration-300 ${checked ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-primary/10'}`}>
                     <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                    <p className={`font-bold text-sm transition-colors ${checked ? 'text-primary' : 'text-foreground'}`}>{label}</p>
-                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{description}</p>
+                    <p className={`font-bold text-label-ui transition-colors ${checked ? 'text-primary' : 'text-foreground'}`}>{label}</p>
+                    <p className="text-metadata-ui text-muted-foreground font-medium">{description}</p>
                 </div>
             </div>
-            <div className={`
-                w-10 h-6 rounded-full p-1 transition-colors duration-300
+            <div aria-hidden="true" className={`
+                w-10 h-6 shrink-0 rounded-full p-1 transition-colors duration-300
                 ${checked ? 'bg-primary' : 'bg-muted'}
             `}>
                 <div className={`
@@ -39,7 +39,7 @@ export function ConfigToggle({ label, description, icon: Icon, checked, onChange
                 type="checkbox"
                 checked={checked}
                 onChange={(e) => onChange(e.target.checked)}
-                className="hidden"
+                className="sr-only"
             />
         </label>
     );

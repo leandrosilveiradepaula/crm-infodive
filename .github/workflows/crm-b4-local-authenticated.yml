@@ -13,13 +13,14 @@ concurrency:
 
 jobs:
   nextjs-local-e2e:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ux-ui/crm214-b4-integrated-qa'
+    if: github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'ux-ui/crm214-b4-integrated-qa' || (startsWith(github.head_ref, 'codex/issue-214-ux-recovery-') || startsWith(github.head_ref, 'design-system/central-semantic-core-')))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
@@ -73,8 +74,8 @@ jobs:
         run: node test/e2e/local-qa/provision-local-auth.mjs
       - name: Compile real Next.js application against local-only backend
         run: npm run build
-      - name: Install pinned browser toolchain for full authenticated matrix
-        run: npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund playwright-core@1.64.1 axe-core@4.14.0
+      - name: Install pinned browser QA tools with runtime integrity verification
+        run: node scripts/install-isolated-browser-qa.mjs
       - name: Audit real Next.js pages (four roles, 22-route matrix, mobile/desktop, both themes)
         shell: bash
         run: |
@@ -96,7 +97,22 @@ jobs:
           export CHROME_PATH
           CHROME_PATH="$(command -v google-chrome || command -v chromium)"
           test -n "$CHROME_PATH"
-          node test/e2e/run-authenticated-smoke.mjs
+          export CRM_E2E_CAPTURE_SANITIZED=true
+          export CRM_E2E_ARTIFACT_DIR="$RUNNER_TEMP/crm-b4-local-visual-evidence"
+          if ! node test/e2e/run-authenticated-smoke.mjs; then
+            # Safe diagnostic only: the Server Action emits a bounded PostgREST
+            # error code, never profile IDs, SQL text, tokens or customer data.
+            sed -n -E 's/.*CRM_THEME_WRITE_DIAGNOSTIC=([A-Za-z0-9_]{2,32}).*/CRM_THEME_WRITE_DIAGNOSTIC=\1/p' "$RUNNER_TEMP/crm-b4-next.log" | head -2 || true
+            exit 1
+          fi
+      - name: Upload sanitized local visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crm-b4-local-visual-evidence-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/crm-b4-local-visual-evidence
+          if-no-files-found: warn
+          retention-days: 7
       - name: Stop and destroy only the disposable local Supabase stack
         if: always()
         shell: bash

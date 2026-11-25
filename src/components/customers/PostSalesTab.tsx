@@ -101,11 +101,11 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
             {/* Contratos de Suporte */}
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-body-ui font-black text-foreground uppercase tracking-widest flex items-center gap-2">
                         <Shield className="h-4 w-4 text-primary" />
                         Contratos de Suporte ({contracts.length})
                     </h3>
-                    <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => { setEditingContract(null); setIsContractModalOpen(true); }}>
+                    <Button variant="outline" size="sm" className="h-8 text-metadata-ui font-bold" onClick={() => { setEditingContract(null); setIsContractModalOpen(true); }}>
                         <Plus className="h-3.5 w-3.5 mr-1" /> Novo Contrato
                     </Button>
                 </div>
@@ -115,16 +115,16 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {contracts.map(contract => (
-                            <div key={contract.id} className="bg-card border border-border rounded-2xl p-4">
+                            <div key={contract.id} className="bg-card border border-border rounded-[var(--radius-panel)] p-4">
                                 <div className="flex justify-between items-start mb-2">
-                                    <p className="font-bold text-sm truncate">{contract.title}</p>
-                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                        contract.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-muted text-muted-foreground'
+                                    <p className="font-bold text-body-ui truncate">{contract.title}</p>
+                                    <span className={`text-metadata-ui font-black uppercase px-2 py-0.5 rounded-full ${
+                                        contract.status === 'active' ? 'bg-success/10 text-success-readable' : 'bg-muted text-muted-foreground'
                                     }`}>
                                         {contract.status}
                                     </span>
                                 </div>
-                                <div className="text-xs text-muted-foreground space-y-1">
+                                <div className="text-metadata-ui text-muted-foreground space-y-1">
                                     <p>Válido até: {contract.end_date ? new Date(contract.end_date).toLocaleDateString() : '—'}</p>
                                     <p className="font-mono mt-2 truncate">{(contract as any).deal?.title || 'Contrato Manual'}</p>
                                 </div>
@@ -132,7 +132,7 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingContract(contract); setIsContractModalOpen(true); }}>
                                         <Edit2 className="h-3.5 w-3.5" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => handleDeleteContract(contract.id, contract.title)}>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive-readable hover:text-destructive-readable hover:bg-destructive-subtle dark:hover:bg-destructive" onClick={() => handleDeleteContract(contract.id, contract.title)}>
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                 </div>
@@ -145,11 +145,11 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
             {/* Equipamentos & Licenças */}
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-foreground uppercase tracking-widest flex items-center gap-2">
-                        <Laptop className="h-4 w-4 text-blue-500" />
+                    <h3 className="text-body-ui font-black text-foreground uppercase tracking-widest flex items-center gap-2">
+                        <Laptop className="h-4 w-4 text-primary" />
                         Equipamentos e Licenças ({assets.length})
                     </h3>
-                    <Button variant="outline" size="sm" className="h-8 text-xs font-bold" onClick={() => { setEditingAsset(null); setIsAssetModalOpen(true); }}>
+                    <Button variant="outline" size="sm" className="h-8 text-metadata-ui font-bold" onClick={() => { setEditingAsset(null); setIsAssetModalOpen(true); }}>
                         <Plus className="h-3.5 w-3.5 mr-1" /> Cadastrar Ativo
                     </Button>
                 </div>
@@ -159,23 +159,23 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {assets.map(asset => (
-                            <div key={asset.id} className="bg-card border border-border rounded-2xl p-4">
+                            <div key={asset.id} className="bg-card border border-border rounded-[var(--radius-panel)] p-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <p className="font-bold text-sm truncate">{asset.name_model}</p>
-                                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">{asset.manufacturer} • {asset.type}</p>
+                                        <p className="font-bold text-body-ui truncate">{asset.name_model}</p>
+                                        <p className="text-metadata-ui text-muted-foreground font-black uppercase tracking-wider">{asset.manufacturer} • {asset.type}</p>
                                     </div>
-                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                                        asset.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                    <span className={`text-metadata-ui font-black uppercase px-2 py-0.5 rounded-full ${
+                                        asset.status === 'active' ? 'bg-success/10 text-success-readable' : 'bg-warning/10 text-warning-readable'
                                     }`}>
                                         {asset.status}
                                     </span>
                                 </div>
-                                <div className="text-xs text-muted-foreground space-y-1 mt-3">
+                                <div className="text-metadata-ui text-muted-foreground space-y-1 mt-3">
                                     {asset.serial_number_or_key && <p className="font-mono truncate">SN/Key: {asset.serial_number_or_key}</p>}
                                     <p>Garantia Expira: {asset.warranty_expires_at ? new Date(asset.warranty_expires_at).toLocaleDateString() : '—'}</p>
                                     {(asset as any).service_contract && (
-                                        <p className="text-blue-500 truncate text-[10px] uppercase font-bold mt-1">
+                                        <p className="text-primary truncate text-metadata-ui uppercase font-bold mt-1">
                                             Coberto por: {(asset as any).service_contract.title}
                                         </p>
                                     )}
@@ -184,7 +184,7 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
                                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditingAsset(asset); setIsAssetModalOpen(true); }}>
                                         <Edit2 className="h-3.5 w-3.5" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950" onClick={() => handleDeleteAsset(asset.id, asset.name_model)}>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive-readable hover:text-destructive-readable hover:bg-destructive-subtle dark:hover:bg-destructive" onClick={() => handleDeleteAsset(asset.id, asset.name_model)}>
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </Button>
                                 </div>
@@ -217,9 +217,9 @@ export function PostSalesTab({ accountId, getAssets, getContracts }: PostSalesTa
 
 function EmptyState({ text }: { text: string }) {
     return (
-        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border rounded-2xl">
-            <p className="text-sm font-bold text-muted-foreground">{text}</p>
-            <p className="text-[10px] text-muted-foreground/60 uppercase mt-1">Use os botões acima para cadastrar</p>
+        <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 border border-dashed border-border rounded-[var(--radius-panel)]">
+            <p className="text-body-ui font-bold text-muted-foreground">{text}</p>
+            <p className="text-metadata-ui text-muted-foreground/60 uppercase mt-1">Use os botões acima para cadastrar</p>
         </div>
     );
 }

@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 
 // Using inline styles for jsPDF/modern-screenshot compatibility
@@ -27,8 +28,8 @@ export function ProposalCoverPage({
     hideValues?: boolean;
     sellerName?: string;
 }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -40,7 +41,7 @@ export function ProposalCoverPage({
             style={{
                 width: width,
                 height: height,
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 display: 'flex',
                 position: 'relative',
                 overflow: 'hidden',
@@ -54,7 +55,7 @@ export function ProposalCoverPage({
                 right: 0,
                 width: '100%',
                 height: '6px',
-                background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)`,
+                background: proposalDocumentBand(accentColor, primaryColor),
                 zIndex: 10
             }} />
             {/* Left Side - Information */}
@@ -76,7 +77,7 @@ export function ProposalCoverPage({
                     />
                     {clientLogo && (
                         <>
-                            <div style={{ width: '1px', height: '40px', backgroundColor: '#e2e8f0' }}></div>
+                            <div style={{ width: '1px', height: '40px', backgroundColor: proposalDocumentPrimitives.slate200 }}></div>
                             <img
                                 src={clientLogo}
                                 alt="Client Logo"
@@ -95,7 +96,7 @@ export function ProposalCoverPage({
                 <h1 style={{
                     fontSize: isLandscape ? '30px' : '36px',
                     fontWeight: '700',
-                    color: '#000000',
+                    color: proposalDocumentPrimitives.trueBlack,
                     opacity: hideValues ? 0 : 1,
                     marginBottom: isLandscape ? '16px' : '24px',
                     lineHeight: '1.3',
@@ -129,12 +130,12 @@ export function ProposalCoverPage({
                         display: 'grid',
                         gridTemplateColumns: '140px 1fr',
                         padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
+                        borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                     }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate800, fontWeight: '600' }}>
                             Projeto
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate500, opacity: hideValues ? 0 : 1 }}>
                             {dealTitle}
                         </div>
                     </div>
@@ -143,12 +144,12 @@ export function ProposalCoverPage({
                         display: 'grid',
                         gridTemplateColumns: '140px 1fr',
                         padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
+                        borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                     }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate800, fontWeight: '600' }}>
                             Cliente
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate500, opacity: hideValues ? 0 : 1 }}>
                             {companyName}
                         </div>
                     </div>
@@ -157,12 +158,12 @@ export function ProposalCoverPage({
                         display: 'grid',
                         gridTemplateColumns: '140px 1fr',
                         padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
+                        borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                     }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate800, fontWeight: '600' }}>
                             Responsável
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b' }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate500 }}>
                             {sellerName ? `${sellerName} (Infodive IT)` : 'Infodive IT'}
                         </div>
                     </div>
@@ -171,12 +172,12 @@ export function ProposalCoverPage({
                         display: 'grid',
                         gridTemplateColumns: '140px 1fr',
                         padding: '12px 0',
-                        borderBottom: '1px solid #e5e7eb'
+                        borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                     }}>
-                        <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate800, fontWeight: '600' }}>
                             Data
                         </div>
-                        <div style={{ fontSize: '14px', color: '#64748b', opacity: hideValues ? 0 : 1 }}>
+                        <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate500, opacity: hideValues ? 0 : 1 }}>
                             {date}
                         </div>
                     </div>
@@ -186,9 +187,9 @@ export function ProposalCoverPage({
                             display: 'grid',
                             gridTemplateColumns: '140px 1fr',
                             padding: '12px 0',
-                            borderBottom: '1px solid #e5e7eb'
+                            borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                         }}>
-                            <div style={{ fontSize: '14px', color: '#1e293b', fontWeight: '600' }}>
+                            <div style={{ fontSize: '14px', color: proposalDocumentPrimitives.slate800, fontWeight: '600' }}>
                                 Nº Proposta
                             </div>
                             <div style={{ fontSize: '14px', color: accentColor, fontWeight: '700', opacity: hideValues ? 0 : 1 }}>

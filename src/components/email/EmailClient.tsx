@@ -62,12 +62,12 @@ export function EmailClient() {
 
     if (error === 'needs_auth') {
         return (
-            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] bg-card border border-border rounded-xl p-8 text-center space-y-6">
-                <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto">
-                    <AlertCircle className="h-10 w-10 text-primary dark:text-blue-400" />
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)] bg-card border border-border rounded-[var(--radius-panel)] p-8 text-center space-y-6">
+                <div className="w-20 h-20 bg-surface-highlight dark:bg-primary/30 rounded-full flex items-center justify-center mx-auto">
+                    <AlertCircle className="h-10 w-10 text-primary dark:text-primary" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold mb-2">Conecte sua conta Office 365</h2>
+                    <h2 className="text-page-title font-bold mb-2">Conecte sua conta Office 365</h2>
                     <p className="text-muted-foreground max-w-md mx-auto">
                         Para visualizar e enviar emails diretamente do CRM, você precisa conectar sua conta Microsoft.
                     </p>
@@ -78,7 +78,7 @@ export function EmailClient() {
     }
 
     return (
-        <div className="flex bg-card rounded-xl border border-border overflow-hidden h-[calc(100vh-8rem)] shadow-sm">
+        <div className="flex bg-card rounded-[var(--radius-panel)] border border-border overflow-hidden h-[calc(100vh-8rem)] shadow-control-ui">
             {/* Sidebar */}
             <div className="hidden md:block">
                 <EmailSidebar

@@ -18,12 +18,12 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
     }));
 
     return (
-        <div className="bg-card rounded-2xl p-4 h-full flex flex-col border border-border">
+        <div className="bg-card rounded-[var(--radius-panel)] p-4 h-full flex flex-col border border-border">
             <div className="flex items-center justify-between mb-4 shrink-0">
                 <div>
-                    <h2 className="text-base font-bold text-foreground">Performance de Vendas</h2>
-                    <div className="flex items-center space-x-4 mt-1 text-sm">
-                        <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-primary mr-2 shadow-lg shadow-primary/40"></div>Vendas</span>
+                    <h2 className="text-body-ui font-bold text-foreground">Performance de Vendas</h2>
+                    <div className="flex items-center space-x-4 mt-1 text-body-ui">
+                        <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-primary mr-2 shadow-card-ui shadow-primary/40"></div>Vendas</span>
                         <span className="flex items-center text-muted-foreground font-medium"><div className="w-2.5 h-2.5 rounded-full bg-surface-subtle border border-border mr-2"></div>Projeção</span>
                     </div>
                 </div>
@@ -53,18 +53,18 @@ export const SalesChartWidget = ({ data }: SalesChartWidgetProps) => {
                             content={({ active, payload, label }) => {
                                 if (active && payload && payload.length) {
                                     return (
-                                        <div className="glass-card p-4 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{label}</p>
+                                        <div className="glass-card p-4 shadow-card-ui rounded-[var(--radius-panel)] animate-in fade-in zoom-in-95 duration-200">
+                                            <p className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground mb-2">{label}</p>
                                             <div className="space-y-1">
                                                 <div className="flex justify-between gap-8 items-center">
-                                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Volume (R$):</span>
-                                                    <span className="text-sm font-black text-foreground">
+                                                    <span className="text-metadata-ui font-bold text-muted-foreground uppercase">Volume (R$):</span>
+                                                    <span className="text-body-ui font-black text-foreground">
                                                         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(payload[0].value as number)}
                                                     </span>
                                                 </div>
                                                 <div className="flex justify-between gap-8 items-center">
-                                                    <span className="text-[10px] font-bold text-primary uppercase">Oportunidades:</span>
-                                                    <span className="text-sm font-black text-primary">{payload[0].payload.deals}</span>
+                                                    <span className="text-metadata-ui font-bold text-primary uppercase">Oportunidades:</span>
+                                                    <span className="text-body-ui font-black text-primary">{payload[0].payload.deals}</span>
                                                 </div>
                                             </div>
                                         </div>

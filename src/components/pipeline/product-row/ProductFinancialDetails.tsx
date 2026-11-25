@@ -113,7 +113,7 @@ export function ProductFinancialDetails({
 
                 <div className="space-y-8">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide">Detalhes Financeiros</p>
+                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide">Detalhes Financeiros</p>
                         {isEditing && (
                             <Button
                                 variant="outline"
@@ -122,7 +122,7 @@ export function ProductFinancialDetails({
                                     setTargetImportProductId(product.id);
                                     setShowImportModal(true);
                                 }}
-                                className="gap-1.5 h-8 text-[10px] uppercase font-bold text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
+                                className="gap-1.5 h-8 text-metadata-ui uppercase font-bold text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground"
                             >
                                 <FileSpreadsheet className="h-3 w-3" />
                                 Importar Planilha
@@ -131,45 +131,45 @@ export function ProductFinancialDetails({
                     </div>
 
                     {/* Financial Summary Row */}
-                    <div className="flex items-center gap-4 bg-muted/60 border border-border rounded-2xl p-4 mb-6">
+                    <div className="flex items-center gap-4 bg-muted/60 border border-border rounded-[var(--radius-panel)] p-4 mb-6">
                         <div className="flex-1">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Custo Total</p>
-                            <p className="text-sm font-bold text-foreground">
+                            <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1">Custo Total</p>
+                            <p className="text-body-ui font-bold text-foreground">
                                 {formatCurrency(totalCost)}
                             </p>
                         </div>
                         <div className="flex-1 border-l border-border pl-4">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Margem Bruta</p>
+                            <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1">Margem Bruta</p>
                             <div className="flex items-center gap-2">
-                                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                <p className="text-body-ui font-bold text-success-readable dark:text-success-readable">
                                     {formatCurrency(grossMargin)}
                                 </p>
-                                <Badge variant="outline" className="text-[9px] font-mono text-muted-foreground bg-background">
+                                <Badge variant="outline" className="text-metadata-ui font-mono text-muted-foreground bg-background">
                                     {product.margin?.toFixed(2)}%
                                 </Badge>
                             </div>
                         </div>
                         <div className="flex-1 border-l border-border pl-4">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Total Venda</p>
-                            <p className="text-lg font-bold text-primary">
+                            <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1">Total Venda</p>
+                            <p className="text-section-title font-bold text-primary">
                                 {formatCurrency(totalSales)}
                             </p>
                         </div>
                     </div>
 
                     {/* Commission & Deduction Block */}
-                    <div className="bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-2xl p-4 mb-6 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[50px] rounded-full pointer-events-none"></div>
+                    <div className="ds-gradient-context from-success-subtle to-transparent border border-success/20 rounded-[var(--radius-panel)] p-4 mb-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-success-subtle blur-[50px] rounded-full pointer-events-none"></div>
 
                         <div className="flex items-center gap-6 relative z-10">
                             {/* Deduction Input */}
                             <div className="w-32">
-                                <label className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-wide mb-1 block">Dedução (%)</label>
+                                <label className="text-metadata-ui font-bold text-success-readable uppercase tracking-wide mb-1 block">Dedução (%)</label>
                                 {isEditing ? (
                                     <div className="relative">
                                         <Input
                                             type="number"
-                                            className="w-full bg-background border-emerald-500/30 rounded-xl px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 focus:ring-emerald-500 outline-none text-right pr-6"
+                                            className="w-full bg-background border-success/30 rounded-[var(--radius-panel)] px-3 py-2 text-metadata-ui font-bold text-success-readable dark:text-success-readable focus:ring-success outline-none text-right pr-6"
                                             value={localDeduction}
                                             onChange={e => setLocalDeduction(Number(e.target.value))}
                                             onBlur={async e => {
@@ -185,30 +185,30 @@ export function ProductFinancialDetails({
                                                 }
                                             }}
                                         />
-                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-emerald-600 font-bold">%</span>
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-metadata-ui text-success-readable font-bold">%</span>
                                     </div>
                                 ) : (
-                                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{localDeduction.toFixed(1)}%</p>
+                                    <p className="text-body-ui font-bold text-success-readable dark:text-success-readable">{localDeduction.toFixed(1)}%</p>
                                 )}
                             </div>
 
                             {/* Commission Display */}
-                            <div className="flex-1 border-l border-emerald-500/20 pl-6">
-                                <label className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-wide mb-1 flex items-center gap-2">
+                            <div className="flex-1 border-l border-success/20 pl-6">
+                                <label className="text-metadata-ui font-bold text-success-readable uppercase tracking-wide mb-1 flex items-center gap-2">
                                     Comissão Estimada ({ownerName})
                                     {commissionData.appliedRate !== undefined && (
-                                        <Badge variant="outline" className="text-[9px] font-black text-emerald-600 bg-emerald-500/10 border-emerald-500/20 h-4 px-1.5">
+                                        <Badge variant="outline" className="text-metadata-ui font-black text-success-readable bg-success-subtle border-success/20 h-4 px-1.5">
                                             {commissionData.appliedRate}%
                                         </Badge>
                                     )}
                                 </label>
                                 <div className="flex items-end gap-3">
-                                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 drop-shadow-sm">
+                                    <p className="text-metric-ui font-bold text-success-readable dark:text-success-readable drop-shadow-control-ui">
                                         {formatCurrency(commissionData.commission)}
                                     </p>
-                                    <p className="text-[10px] text-emerald-600/70 mb-1.5 font-bold flex items-center gap-1">
+                                    <p className="text-metadata-ui text-success-readable mb-1.5 font-bold flex items-center gap-1">
                                         Base Líquida:
-                                        <span className="text-emerald-600 dark:text-emerald-400 border-b border-emerald-500/30">
+                                        <span className="text-success-readable dark:text-success-readable border-b border-success/30">
                                             {formatCurrency(commissionData.netMargin)}
                                         </span>
                                     </p>
@@ -222,19 +222,19 @@ export function ProductFinancialDetails({
                         {/* Column 1: Sourcing & Classification */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between h-6 mb-2">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                                     <span className="w-1 h-1 bg-primary rounded-full"></span>
                                     Origem e Classificação
                                 </p>
                             </div>
 
-                            <div className="space-y-4 bg-muted/30 p-4 rounded-2xl border border-border">
+                            <div className="space-y-4 bg-muted/30 p-4 rounded-[var(--radius-panel)] border border-border">
                                 {/* Category Badge */}
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Categoria</p>
+                                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Categoria</p>
                                     {isEditing ? (
                                         <select
-                                            className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-8"
+                                            className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-8"
                                             value={product.category || ''}
                                             onChange={e => handleUpdateProduct(product.id, 'category', e.target.value)}
                                         >
@@ -247,9 +247,9 @@ export function ProductFinancialDetails({
                                             }
                                         </select>
                                     ) : (
-                                        <span className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border block w-full truncate h-8 flex items-center ${product.category
+                                        <span className={`px-2 py-1.5 rounded-[var(--radius-panel)] text-metadata-ui font-bold border block w-full truncate h-8 flex items-center ${product.category
                                             ? 'bg-background text-foreground border-input'
-                                            : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                                            : 'bg-warning-subtle text-warning-readable border-warning/20'
                                             }`}>
                                             {product.category || 'Indefinida'}
                                         </span>
@@ -257,18 +257,18 @@ export function ProductFinancialDetails({
                                 </div>
                                 {/* Custom Label Input */}
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Etiqueta Personalizada</p>
+                                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Etiqueta Personalizada</p>
                                     {isEditing ? (
                                         <Input
                                             type="text"
-                                            className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
+                                            className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui text-foreground h-8"
                                             placeholder="Ex: Licença Anual"
                                             value={product.custom_label || ''}
                                             onChange={e => handleUpdateProduct(product.id, 'custom_label', e.target.value)}
                                             onKeyDown={handleInputKeyDown}
                                         />
                                     ) : (
-                                        <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                        <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                             {product.custom_label || '---'}
                                         </div>
                                     )}
@@ -276,10 +276,10 @@ export function ProductFinancialDetails({
 
                                 {/* Distributor Selector */}
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Distribuidor</p>
+                                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Distribuidor</p>
                                     {isEditing ? (
                                         <select
-                                            className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none truncate h-8"
+                                            className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none truncate h-8"
                                             value={product.distributor_id || ''}
                                             onChange={e => handleUpdateProduct(product.id, 'distributor_id', e.target.value)}
                                         >
@@ -289,7 +289,7 @@ export function ProductFinancialDetails({
                                             ))}
                                         </select>
                                     ) : (
-                                        <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-muted-foreground truncate h-8 flex items-center">
+                                        <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-muted-foreground truncate h-8 flex items-center">
                                             {distributors.find((d: any) => d.id === product.distributor_id)?.name || '---'}
                                         </div>
                                     )}
@@ -298,10 +298,10 @@ export function ProductFinancialDetails({
                                 {/* Distributor CNPJ Selector */}
                                 {product.distributor_id && (
                                     <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">CNPJ de Faturamento</p>
+                                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1.5">CNPJ de Faturamento</p>
                                         {isEditing ? (
                                             <select
-                                                className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none truncate h-8"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none truncate h-8"
                                                 value={product.distributor_cnpj || ''}
                                                 onChange={e => handleUpdateProduct(product.id, 'distributor_cnpj', e.target.value)}
                                             >
@@ -323,7 +323,7 @@ export function ProductFinancialDetails({
                                                 })()}
                                             </select>
                                         ) : (
-                                            <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-muted-foreground truncate h-8 flex items-center">
+                                            <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-muted-foreground truncate h-8 flex items-center">
                                                 {product.distributor_cnpj || '---'}
                                             </div>
                                         )}
@@ -332,10 +332,10 @@ export function ProductFinancialDetails({
 
                                 {/* Billing Type Selector */}
                                 <div>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Tipo de Faturamento</p>
+                                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-1.5">Tipo de Faturamento</p>
                                     {isEditing ? (
                                         <select
-                                            className="w-full bg-background border border-input rounded-xl px-3 py-2 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px]"
+                                            className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-3 py-2 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-[34px]"
                                             value={product.billing_type || 'indirect'}
                                             onChange={e => handleUpdateProduct(product.id, 'billing_type', e.target.value)}
                                         >
@@ -343,7 +343,7 @@ export function ProductFinancialDetails({
                                             <option value="indirect">Direto (Distribuidor)</option>
                                         </select>
                                     ) : (
-                                        <div className="w-full bg-background border border-input rounded-xl px-3 py-2 text-xs font-bold text-muted-foreground h-[34px] flex items-center">
+                                        <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-3 py-2 text-metadata-ui font-bold text-muted-foreground h-[34px] flex items-center">
                                             {product.billing_type === 'indirect' ? 'Direto (Distribuidor)' : 'Revenda (Infodive)'}
                                         </div>
                                     )}
@@ -354,8 +354,8 @@ export function ProductFinancialDetails({
                         {/* Column 2: Pricing & Costs */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between h-6 mb-2">
-                                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wide flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-emerald-500 rounded-full"></span>
+                                <p className="text-metadata-ui font-bold text-success-readable uppercase tracking-wide flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-success rounded-full"></span>
                                     Precificação e Custos
                                 </p>
                                 {!isEditing && (
@@ -363,7 +363,7 @@ export function ProductFinancialDetails({
                                         variant="ghost"
                                         size="sm"
                                         onClick={onEnableEdit}
-                                        className="h-6 px-2 text-[9px] font-bold uppercase tracking-wide text-primary hover:text-primary-foreground hover:bg-primary"
+                                        className="h-6 px-2 text-metadata-ui font-bold uppercase tracking-wide text-primary hover:text-primary-foreground hover:bg-primary"
                                     >
                                         <Edit2 className="h-3 w-3 mr-1" />
                                         Editar
@@ -371,7 +371,7 @@ export function ProductFinancialDetails({
                                 )}
                             </div>
 
-                            <div className="space-y-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10 relative overflow-hidden">
+                            <div className="space-y-4 bg-success-subtle p-4 rounded-[var(--radius-panel)] border border-success/10 relative overflow-hidden">
                                 {/* USD Toggle */}
                                 <div className="flex items-center gap-2 mb-2">
                                     <input
@@ -380,9 +380,9 @@ export function ProductFinancialDetails({
                                         checked={product.is_usd || false}
                                         disabled={!isEditing}
                                         onChange={e => handleUpdateProduct(product.id, 'is_usd', e.target.checked)}
-                                        className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0"
+                                        className="h-3.5 w-3.5 rounded text-success-readable border-success/30 bg-transparent focus:ring-offset-0 focus:ring-0"
                                     />
-                                    <label htmlFor={`usd-mode-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
+                                    <label htmlFor={`usd-mode-${product.id}`} className="text-metadata-ui font-bold text-success-readable uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
                                         Custo em Dólar (USD)
                                         <DollarSign className="h-3 w-3" />
                                     </label>
@@ -393,34 +393,34 @@ export function ProductFinancialDetails({
                                     <div className="space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">Custo USD</label>
+                                                <label className="text-metadata-ui font-bold text-success-readable uppercase block mb-1">Custo USD</label>
                                                 {isEditing ? (
                                                     <Input
                                                         type="number"
-                                                        className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
+                                                        className="w-full bg-background border border-success/30 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-success outline-none h-8"
                                                         value={product.usd_cost ?? ''}
                                                         onChange={e => handleUpdateProduct(product.id, 'usd_cost', Number(e.target.value))}
                                                         onFocus={(e: any) => e.target.select()}
                                                     />
                                                 ) : (
-                                                    <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
+                                                    <div className="w-full bg-background/50 border border-success/10 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-success-readable h-8 flex items-center">
                                                         US$ {product.usd_cost?.toLocaleString('en-US')}
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">PTAX</label>
+                                                <label className="text-metadata-ui font-bold text-success-readable uppercase block mb-1">PTAX</label>
                                                 {isEditing ? (
                                                     <Input
                                                         type="number"
                                                         step="0.0001"
-                                                        className="w-full bg-background border border-emerald-500/30 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-emerald-500 outline-none h-8"
+                                                        className="w-full bg-background border border-success/30 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-success outline-none h-8"
                                                         value={product.exchange_rate ?? ''}
                                                         onChange={e => handleUpdateProduct(product.id, 'exchange_rate', Number(e.target.value))}
                                                         onFocus={(e: any) => e.target.select()}
                                                     />
                                                 ) : (
-                                                    <div className="w-full bg-background/50 border border-emerald-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-emerald-600 h-8 flex items-center">
+                                                    <div className="w-full bg-background/50 border border-success/10 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-success-readable h-8 flex items-center">
                                                         {product.exchange_rate?.toFixed(4)}
                                                     </div>
                                                 )}
@@ -435,17 +435,17 @@ export function ProductFinancialDetails({
                                                     checked={canPresentInUsd && product.present_in_usd === true}
                                                     disabled={!isEditing || !canPresentInUsd}
                                                     onChange={e => handleUpdateProduct(product.id, 'present_in_usd', e.target.checked)}
-                                                    className="h-3.5 w-3.5 rounded text-emerald-500 border-emerald-500/30 bg-transparent focus:ring-offset-0 focus:ring-0 disabled:opacity-50"
+                                                    className="h-3.5 w-3.5 rounded text-success-readable border-success/30 bg-transparent focus:ring-offset-0 focus:ring-0 disabled:opacity-50"
                                                 />
-                                                <label htmlFor={`present-usd-${product.id}`} className="text-[10px] font-bold text-emerald-600/80 uppercase tracking-wide cursor-pointer select-none">
+                                                <label htmlFor={`present-usd-${product.id}`} className="text-metadata-ui font-bold text-success-readable uppercase tracking-wide cursor-pointer select-none">
                                                     Apresentar em USD
                                                 </label>
                                             </div>
-                                            <p className="text-[9px] text-emerald-600/70 font-medium">
+                                            <p className="text-metadata-ui text-success-readable font-medium">
                                                 Exibe este produto em dólar na proposta.
                                             </p>
                                             {!canPresentInUsd && (
-                                                <p className="text-[9px] text-amber-600 font-bold">
+                                                <p className="text-metadata-ui text-warning-readable font-bold">
                                                     Informe uma taxa de câmbio válida para apresentar em USD.
                                                 </p>
                                             )}
@@ -453,17 +453,17 @@ export function ProductFinancialDetails({
                                     </div>
                                 )}
 
-                                <Separator className="bg-emerald-500/10 my-2" />
+                                <Separator className="bg-success-subtle my-2" />
 
                                 {/* Cost & Margin Grid */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">
+                                        <label className="text-metadata-ui font-bold text-success-readable uppercase block mb-1">
                                             {product.is_usd ? 'Custo (R$)' : (product.is_bid ? 'Preço Venda (R$)' : 'Custo (R$)')}
                                         </label>
                                         {isEditing ? (
                                             <ThemeCurrencyInput
-                                                className={`w-full bg-background border ${product.is_usd ? 'border-emerald-500/30 text-emerald-600' : 'border-input text-foreground'} rounded-xl px-2 py-1.5 text-xs font-bold focus:ring-1 focus:ring-primary outline-none disabled:opacity-70 disabled:cursor-not-allowed h-8 pl-8 text-left`}
+                                                className={`w-full bg-background border ${product.is_usd ? 'border-success/30 text-success-readable' : 'border-input text-foreground'} rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold focus:ring-1 focus:ring-primary outline-none disabled:opacity-70 disabled:cursor-not-allowed h-8 pl-8 text-left`}
                                                 value={(product.is_bid ? product.unit_price : product.cost) || 0}
                                                 onChange={(e: any) => {
                                                     // Update local state immediately for reactive display
@@ -473,61 +473,61 @@ export function ProductFinancialDetails({
                                                 disabled={product.is_usd || false}
                                             />
                                         ) : (
-                                            <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                            <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                 R$ {product.is_bid ? product.unit_price?.toLocaleString('pt-BR') : product.cost?.toLocaleString('pt-BR')}
                                             </div>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="text-[9px] font-bold text-emerald-600 uppercase block mb-1">Margem (%)</label>
+                                        <label className="text-metadata-ui font-bold text-success-readable uppercase block mb-1">Margem (%)</label>
                                         {isEditing ? (
                                             <Input
                                                 type="number"
-                                                className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-8"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-primary outline-none h-8"
                                                 value={product.margin ?? ''}
                                                 onChange={(e: any) => handleUpdateProduct(product.id, 'margin', e.target.value === '' ? undefined : Number(e.target.value))}
                                                 onKeyDown={handleInputKeyDown}
                                                 onFocus={(e: any) => e.target.select()}
                                             />
                                         ) : (
-                                            <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-black text-primary h-8 flex items-center">
+                                            <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-black text-primary h-8 flex items-center">
                                                 {product.margin || 0}%
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                <Separator className="bg-emerald-500/10 my-2" />
+                                <Separator className="bg-success-subtle my-2" />
 
                                 {/* Duração e Contrato - Enhanced Visibility */}
-                                <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3 space-y-3">
+                                <div className="bg-warning-subtle border border-warning/10 rounded-[var(--radius-panel)] p-3 space-y-3">
                                     <div className="flex items-center gap-2 mb-1">
-                                        <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
-                                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Duração do Contrato</p>
+                                        <div className="w-1.5 h-1.5 bg-warning rounded-full animate-pulse"></div>
+                                        <p className="text-metadata-ui font-bold text-warning-readable uppercase tracking-wide">Duração do Contrato</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="text-[9px] font-bold text-amber-600/70 uppercase block mb-1">Duração (Qtd)</label>
+                                            <label className="text-metadata-ui font-bold text-warning-readable uppercase block mb-1">Duração (Qtd)</label>
                                             {isEditing ? (
                                                 <Input
                                                     type="number"
-                                                    className="w-full bg-background border-amber-500/20 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground focus:ring-1 focus:ring-amber-500 outline-none h-8"
+                                                    className="w-full bg-background border-warning/20 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-warning outline-none h-8"
                                                     value={product.duration ?? ''}
                                                     onChange={(e: any) => handleUpdateProduct(product.id, 'duration', e.target.value === '' ? null : Number(e.target.value))}
                                                     onKeyDown={handleInputKeyDown}
                                                     placeholder="Ex: 3"
                                                 />
                                             ) : (
-                                                <div className="w-full bg-background border-amber-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                                <div className="w-full bg-background border-warning/10 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                     {product.duration || '---'}
                                                 </div>
                                             )}
                                         </div>
                                         <div>
-                                            <label className="text-[9px] font-bold text-amber-600/70 uppercase block mb-1">Período</label>
+                                            <label className="text-metadata-ui font-bold text-warning-readable uppercase block mb-1">Período</label>
                                             {isEditing ? (
                                                 <select
-                                                    className="w-full bg-background border-amber-500/20 rounded-xl px-2 py-0 text-xs font-bold text-foreground focus:ring-1 focus:ring-amber-500 outline-none h-8"
+                                                    className="w-full bg-background border-warning/20 rounded-[var(--radius-panel)] px-2 py-0 text-metadata-ui font-bold text-foreground focus:ring-1 focus:ring-warning outline-none h-8"
                                                     value={product.duration_unit || ''}
                                                     onChange={(e: any) => handleUpdateProduct(product.id, 'duration_unit', e.target.value || null)}
                                                 >
@@ -536,14 +536,14 @@ export function ProductFinancialDetails({
                                                     <option value="anos">Anos</option>
                                                 </select>
                                             ) : (
-                                                <div className="w-full bg-background border-amber-500/10 rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center capitalize">
+                                                <div className="w-full bg-background border-warning/10 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center capitalize">
                                                     {product.duration_unit || '---'}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     {isEditing && !product.duration && (
-                                        <p className="text-[9px] text-amber-600/60 italic font-medium">Preencha aqui para exibir a validade na proposta.</p>
+                                        <p className="text-metadata-ui text-warning-readable italic font-medium">Preencha aqui para exibir a validade na proposta.</p>
                                     )}
                                 </div>
                             </div>
@@ -553,44 +553,44 @@ export function ProductFinancialDetails({
                         {/* Column 3: Registration & BID */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between h-6 mb-2">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                                    <span className="w-1 h-1 bg-teal-500 rounded-full"></span>
+                                <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-info rounded-full"></span>
                                     Registros e Controle
                                 </p>
                             </div>
 
-                            <div className="space-y-4 bg-muted/30 p-4 rounded-2xl border border-border">
+                            <div className="space-y-4 bg-muted/30 p-4 rounded-[var(--radius-panel)] border border-border">
                                 {/* Manufacturer Reg */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="text-[9px] font-bold text-muted-foreground uppercase block mb-1">ID Oportunidade</label>
+                                        <label className="text-metadata-ui font-bold text-muted-foreground uppercase block mb-1">ID Oportunidade</label>
                                         {isEditing ? (
                                             <Input
                                                 type="text"
-                                                className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui text-foreground h-8"
                                                 placeholder="Ex: 12345678"
                                                 value={product.external_id || ''}
                                                 onChange={e => handleUpdateProduct(product.id, 'external_id', e.target.value)}
                                                 onKeyDown={handleInputKeyDown}
                                             />
                                         ) : (
-                                            <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                            <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                 {product.external_id || '---'}
                                             </div>
                                         )}
                                     </div>
                                     <div>
-                                        <label className="text-[9px] font-bold text-muted-foreground uppercase block mb-1">Validade Reg.</label>
+                                        <label className="text-metadata-ui font-bold text-muted-foreground uppercase block mb-1">Validade Reg.</label>
                                         {isEditing ? (
                                             <Input
                                                 type="date"
-                                                className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui text-foreground h-8"
                                                 value={product.expiration_date || ''}
                                                 onChange={e => handleUpdateProduct(product.id, 'expiration_date', e.target.value)}
                                                 onKeyDown={handleInputKeyDown}
                                             />
                                         ) : (
-                                            <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                            <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                 {product.expiration_date ? new Date(product.expiration_date).toLocaleDateString('pt-BR') : '---'}
                                             </div>
                                         )}
@@ -609,9 +609,9 @@ export function ProductFinancialDetails({
                                             checked={product.is_optional || false}
                                             disabled={!isEditing}
                                             onChange={e => handleUpdateProduct(product.id, 'is_optional', e.target.checked)}
-                                            className="h-3.5 w-3.5 rounded text-amber-500 border-input bg-transparent focus:ring-offset-0 focus:ring-0"
+                                            className="h-3.5 w-3.5 rounded text-warning-readable border-input bg-transparent focus:ring-offset-0 focus:ring-0"
                                         />
-                                        <label htmlFor={`optional-mode-${product.id}`} className="text-[10px] font-bold text-amber-600 uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
+                                        <label htmlFor={`optional-mode-${product.id}`} className="text-metadata-ui font-bold text-warning-readable uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
                                             Item Opcional (Alternativa)
                                         </label>
                                     </div>
@@ -627,7 +627,7 @@ export function ProductFinancialDetails({
                                             onChange={e => handleUpdateProduct(product.id, 'is_bid', e.target.checked)}
                                             className="h-3.5 w-3.5 rounded text-primary border-input bg-transparent focus:ring-offset-0 focus:ring-0"
                                         />
-                                        <label htmlFor={`bid-mode-${product.id}`} className="text-[10px] font-bold text-primary uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
+                                        <label htmlFor={`bid-mode-${product.id}`} className="text-metadata-ui font-bold text-primary uppercase tracking-wide cursor-pointer flex items-center gap-2 select-none">
                                             Modo BID (Preço Fixo)
                                         </label>
                                     </div>
@@ -635,34 +635,34 @@ export function ProductFinancialDetails({
                                     {product.is_bid && (
                                         <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                             <div>
-                                                <label className="text-[9px] font-bold text-blue-500/70 uppercase block mb-1">Número BID</label>
+                                                <label className="text-metadata-ui font-bold text-primary uppercase block mb-1">Número BID</label>
                                                 {isEditing ? (
                                                     <Input
                                                         type="text"
-                                                        className="w-full bg-background border border-blue-500/20 rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
+                                                        className="w-full bg-background border border-primary/20 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui text-foreground h-8"
                                                         placeholder="BID-001"
                                                         value={product.bid_number || ''}
                                                         onChange={e => handleUpdateProduct(product.id, 'bid_number', e.target.value)}
                                                         onKeyDown={handleInputKeyDown}
                                                     />
                                                 ) : (
-                                                    <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                                    <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                         {product.bid_number || '---'}
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <label className="text-[9px] font-bold text-blue-500/70 uppercase block mb-1">Validade</label>
+                                                <label className="text-metadata-ui font-bold text-primary uppercase block mb-1">Validade</label>
                                                 {isEditing ? (
                                                     <Input
                                                         type="date"
-                                                        className="w-full bg-background border border-blue-500/20 rounded-xl px-2 py-1.5 text-xs text-foreground h-8"
+                                                        className="w-full bg-background border border-primary/20 rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui text-foreground h-8"
                                                         value={product.bid_validity || ''}
                                                         onChange={e => handleUpdateProduct(product.id, 'bid_validity', e.target.value)}
                                                         onKeyDown={handleInputKeyDown}
                                                     />
                                                 ) : (
-                                                    <div className="w-full bg-background border border-input rounded-xl px-2 py-1.5 text-xs font-bold text-foreground h-8 flex items-center">
+                                                    <div className="w-full bg-background border border-input rounded-[var(--radius-panel)] px-2 py-1.5 text-metadata-ui font-bold text-foreground h-8 flex items-center">
                                                         {product.bid_validity ? new Date(product.bid_validity).toLocaleDateString('pt-BR') : '---'}
                                                     </div>
                                                 )}
@@ -670,7 +670,7 @@ export function ProductFinancialDetails({
                                         </div>
                                     )}
                                     {!product.is_bid && (
-                                        <p className="text-[10px] text-muted-foreground italic px-1">
+                                        <p className="text-metadata-ui text-muted-foreground italic px-1">
                                             Preço de Venda calculado via Margem.
                                         </p>
                                     )}
@@ -690,17 +690,17 @@ export function ProductFinancialDetails({
                         />
                     ) : (
                         <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Composição Técnica Definida</p>
-                            <div className="bg-card border border-border rounded-xl p-4">
+                            <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wide mb-2">Composição Técnica Definida</p>
+                            <div className="bg-card border border-border rounded-[var(--radius-panel)] p-4">
                                 {details.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">Nenhum detalhe técnico.</p>
+                                    <p className="text-body-ui text-muted-foreground">Nenhum detalhe técnico.</p>
                                 ) : (
                                     <ul className="space-y-1">
                                         {details.filter((d: any) => d.is_visible_on_proposal !== false).map((d: any, i: number) => (
-                                            <li key={i} className="text-sm text-foreground flex items-center justify-between">
+                                            <li key={i} className="text-body-ui text-foreground flex items-center justify-between">
                                                 <span><span className="text-muted-foreground mr-2">{d.quantity}x</span> {d.description}</span>
                                                 {d.is_highlighted_on_grid && (
-                                                    <Badge variant="outline" className="text-[9px] bg-primary/10 text-primary border-primary/20 uppercase">
+                                                    <Badge variant="outline" className="text-metadata-ui bg-primary/10 text-primary border-primary/20 uppercase">
                                                         Destacado: {d.grid_label || 'Sim'}
                                                     </Badge>
                                                 )}

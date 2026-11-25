@@ -45,37 +45,37 @@ export const IntegrationKeys = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border shadow-sm">
+            <div className="flex justify-between items-center bg-card p-6 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
                 <div>
-                    <h3 className="font-bold text-foreground text-lg">Chaves de API</h3>
-                    <p className="text-sm text-muted-foreground">Gerencie tokens de acesso para seus scripts e integrações.</p>
+                    <h3 className="font-bold text-foreground text-section-title">Chaves de API</h3>
+                    <p className="text-body-ui text-muted-foreground">Gerencie tokens de acesso para seus scripts e integrações.</p>
                 </div>
                 <button
                     onClick={handleCreate}
                     disabled={isCreating}
-                    className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all shadow-lg shadow-blue-900/10 flex items-center gap-2 disabled:opacity-50"
+                    className="bg-primary text-white px-5 py-2.5 rounded-[var(--radius-panel)] font-bold text-body-ui hover:bg-primary/90 transition-all shadow-card-ui shadow-blue-900/10 flex items-center gap-2 disabled:opacity-50"
                 >
                     <Plus className="h-4 w-4" /> {isCreating ? 'Criando...' : 'Nova Chave'}
                 </button>
             </div>
 
             {error && (
-                <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-600">
+                <div className="bg-destructive-subtle border border-destructive p-4 rounded-[var(--radius-panel)] flex items-center gap-3 text-destructive-readable">
                     <AlertCircle className="h-5 w-5" />
-                    <span className="text-sm font-medium">{error}</span>
+                    <span className="text-body-ui font-medium">{error}</span>
                 </div>
             )}
 
-            <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="bg-card rounded-[var(--radius-panel)] shadow-control-ui border border-border overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-muted/50/50 border-b border-border/50">
                             <tr>
-                                <th className="text-left py-4 px-6 text-xs font-bold text-muted-foreground uppercase tracking-widest">Nome</th>
-                                <th className="text-left py-4 px-6 text-xs font-bold text-muted-foreground uppercase tracking-widest">Token (Prefixo)</th>
-                                <th className="text-left py-4 px-6 text-xs font-bold text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="text-left py-4 px-6 text-xs font-bold text-muted-foreground uppercase tracking-widest">Criado em</th>
-                                <th className="text-right py-4 px-6 text-xs font-bold text-muted-foreground uppercase tracking-widest">Ações</th>
+                                <th className="text-left py-4 px-6 text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Nome</th>
+                                <th className="text-left py-4 px-6 text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Token (Prefixo)</th>
+                                <th className="text-left py-4 px-6 text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="text-left py-4 px-6 text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Criado em</th>
+                                <th className="text-right py-4 px-6 text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-5">
@@ -83,36 +83,36 @@ export const IntegrationKeys = () => {
                                 <tr key={key.id} className="hover:bg-muted/50/50 transition-colors group">
                                     <td className="py-5 px-6">
                                         <div className="flex items-center gap-3">
-                                            <div className={`p-2 rounded-lg ${key.status === 'active' ? 'bg-blue-50 text-primary' : 'bg-muted/50 text-muted-foreground'}`}>
+                                            <div className={`p-2 rounded-[var(--radius-control)] ${key.status === 'active' ? 'bg-surface-highlight text-primary' : 'bg-muted/50 text-muted-foreground'}`}>
                                                 <Key className="h-4 w-4" />
                                             </div>
-                                            <span className={`font-bold text-sm ${key.status === 'active' ? 'text-foreground' : 'text-muted-foreground line-through'}`}>{key.name}</span>
+                                            <span className={`font-bold text-body-ui ${key.status === 'active' ? 'text-foreground' : 'text-muted-foreground line-through'}`}>{key.name}</span>
                                         </div>
                                     </td>
-                                    <td className="py-5 px-6 font-mono text-xs text-muted-foreground">
+                                    <td className="py-5 px-6 font-mono text-metadata-ui text-muted-foreground">
                                         {key.token_prefix}••••••••
                                     </td>
                                     <td className="py-5 px-6">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${key.status === 'active' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${key.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-metadata-ui font-bold uppercase border ${key.status === 'active' ? 'bg-success-subtle text-success-readable border-success' : 'bg-destructive-subtle text-destructive-readable border-destructive'}`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${key.status === 'active' ? 'bg-success animate-pulse' : 'bg-destructive'}`}></span>
                                             {key.status === 'active' ? 'Ativo' : 'Revogado'}
                                         </span>
                                     </td>
-                                    <td className="py-5 px-6 text-sm text-muted-foreground">{formatDate(key.created_at)}</td>
+                                    <td className="py-5 px-6 text-body-ui text-muted-foreground">{formatDate(key.created_at)}</td>
                                     <td className="py-5 px-6 text-right">
                                         <div className="flex justify-end gap-1">
                                             {key.status === 'active' && (
                                                 <button
                                                     onClick={() => handleCopy(key.token_prefix, key.id)}
-                                                    className="p-2 text-muted-foreground hover:text-primary hover:bg-blue-50 rounded-lg transition-all"
+                                                    className="p-2 text-muted-foreground hover:text-primary hover:bg-surface-highlight rounded-[var(--radius-control)] transition-all"
                                                     title="Copiar Prefixo"
                                                 >
-                                                    {copiedId === key.id ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                                                    {copiedId === key.id ? <Check className="h-4 w-4 text-success-readable" /> : <Copy className="h-4 w-4" />}
                                                 </button>
                                             )}
                                             <button
                                                 onClick={() => handleDelete(key.id, key.status)}
-                                                className={`p-2 text-muted-foreground hover:bg-red-50 transition-all rounded-lg ${key.status === 'active' ? 'hover:text-amber-600' : 'hover:text-red-600'}`}
+                                                className={`p-2 text-muted-foreground hover:bg-destructive-subtle transition-all rounded-[var(--radius-control)] ${key.status === 'active' ? 'hover:text-warning-readable' : 'hover:text-destructive-readable'}`}
                                                 title={key.status === 'active' ? 'Revogar Chave' : 'Excluir Permanentemente'}
                                             >
                                                 {key.status === 'active' ? <ShieldAlert className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
@@ -127,8 +127,8 @@ export const IntegrationKeys = () => {
                 {keys.length === 0 && (
                     <div className="p-12 text-center text-muted-foreground">
                         <Key className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                        <p className="font-medium text-sm">Nenhuma chave de API encontrada.</p>
-                        <p className="text-xs mt-1">Crie sua primeira chave para começar a integrar.</p>
+                        <p className="font-medium text-body-ui">Nenhuma chave de API encontrada.</p>
+                        <p className="text-metadata-ui mt-1">Crie sua primeira chave para começar a integrar.</p>
                     </div>
                 )}
             </div>

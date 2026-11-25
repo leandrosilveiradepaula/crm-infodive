@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -46,7 +47,7 @@ export function PdfCoverPage({
                         <Image src={LOGO_BASE64} style={{ height: 50, width: 'auto' }} />
                         {clientLogo && (
                             <>
-                                <View style={{ width: 1, height: 40, backgroundColor: '#e2e8f0' }} />
+                                <View style={{ width: 1, height: 40, backgroundColor: proposalDocumentPrimitives.slate200 }} />
                                 <Image src={clientLogo} style={{ height: 45, width: 'auto', maxWidth: 120 }} />
                             </>
                         )}

@@ -6,20 +6,52 @@ import { revalidatePath } from 'next/cache';
 import { SettingsService } from '@/services/SettingsService';
 
 export async function updateUserTheme(theme: 'light' | 'dark') {
-    const { userId } = await requireSessionContext();
-    const supabase = createAdminClient();
-
-    const { error } = await supabase
-        .from('profiles')
-        .update({ theme_preference: theme })
-        .eq('id', userId);
-
-    if (error) {
-        console.error('Error updating user theme:', error);
-        throw new Error('Failed to update theme preference');
+    // A theme is an individual preference. Preserve trusted session identity;
+    // service-role writes must still target the authenticated profile only.
+    let userId: string;
+    try {
+        ({ userId } = await requireSessionContext());
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=AUTH');
+        throw new Error('Failed to authorize theme preference');
     }
 
-    revalidatePath('/');
+    let supabase: ReturnType<typeof createAdminClient>;
+    try {
+        supabase = createAdminClient();
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=CLIENT');
+        throw new Error('Failed to initialize theme preference storage');
+    }
+
+    let data: { id: string; theme_preference: string | null } | null = null;
+    let error: { code?: string } | null = null;
+    try {
+        const result = await supabase
+            .from('profiles')
+            .update({ theme_preference: theme })
+            .eq('id', userId)
+            .select('id,theme_preference')
+            .maybeSingle();
+        data = result.data;
+        error = result.error;
+    } catch {
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=TRANSPORT');
+        throw new Error('Failed to contact theme preference storage');
+    }
+
+    // Update without a returned row is NOT proof of persistence; fail closed.
+    if (error || !data || data.theme_preference !== theme) {
+        // Safe bounded code only, never user IDs, SQL, content or credentials.
+        const storageCode = error?.code && /^[A-Z0-9_]{2,32}$/i.test(error.code)
+            ? error.code : !data ? 'NO_ROW' : 'WRITE_MISMATCH';
+        console.error('CRM_THEME_WRITE_DIAGNOSTIC=' + storageCode);
+        throw new Error('Failed to persist theme preference');
+    }
+
+    // A root-layout revalidation can race the already-applied client theme and
+    // reset it from an older Server Component payload. The next navigation
+    // or page reload reads the persisted profile preference as usual.
     return { success: true };
 }
 

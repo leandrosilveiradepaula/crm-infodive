@@ -42,13 +42,13 @@ export const SalesOrderList: React.FC = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'nf_emitida': return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-            case 'entregue': return 'bg-teal-500/20 text-teal-400 border-teal-500/50';
-            case 'cliente_pagou': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
-            case 'distribuidor_pagou': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50';
-            case 'comissao_paga': return 'bg-gray-500/20 text-muted-foreground border-gray-500/50';
-            case 'pedido_gerado': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-            default: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
+            case 'nf_emitida': return 'bg-primary/20 text-primary border-primary/50';
+            case 'entregue': return 'bg-info/20 text-info border-info/50';
+            case 'cliente_pagou': return 'bg-success/20 text-success-readable border-success/50';
+            case 'distribuidor_pagou': return 'bg-success/20 text-success-readable border-success/50';
+            case 'comissao_paga': return 'bg-muted/20 text-muted-foreground border-border/50';
+            case 'pedido_gerado': return 'bg-warning/20 text-warning-readable border-warning/50';
+            default: return 'bg-warning/20 text-warning-readable border-warning/50';
         }
     };
 
@@ -86,41 +86,41 @@ export const SalesOrderList: React.FC = () => {
         <div className="h-full flex flex-col bg-background text-foreground p-5 overflow-hidden">
             <div className="flex justify-between items-center mb-5">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">
+                    <h1 className="text-page-title font-bold text-foreground">
                         Pedidos de Venda
                     </h1>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Gestão de entregas e faturamento</p>
+                    <p className="text-metadata-ui text-muted-foreground mt-0.5 font-medium uppercase tracking-wider">Gestão de entregas e faturamento</p>
                 </div>
                 <div className="flex gap-2">
-                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
-                        <div className="p-1.5 bg-primary/10 rounded-lg">
+                    <div className="bg-card border border-border rounded-[var(--radius-panel)] p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-primary/10 rounded-[var(--radius-control)]">
                             <Clock className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
-                            <p className="text-base font-black leading-tight">
+                            <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight">Pendentes</p>
+                            <p className="text-body-ui font-black leading-tight">
                                 {orders.filter(o => o.status === 'pedido_gerado').length}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
-                        <div className="p-1.5 bg-emerald-500/20 rounded-lg">
-                            <DollarSign className="h-4 w-4 text-emerald-500" />
+                    <div className="bg-card border border-border rounded-[var(--radius-panel)] p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-success/20 rounded-[var(--radius-control)]">
+                            <DollarSign className="h-4 w-4 text-success-readable" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
-                            <p className="text-base font-black leading-tight">
+                            <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight">Faturados</p>
+                            <p className="text-body-ui font-black leading-tight">
                                 {orders.filter(o => o.status === 'nf_emitida').length}
                             </p>
                         </div>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-2.5 flex items-center gap-2.5">
-                        <div className="p-1.5 bg-teal-500/20 rounded-lg">
-                            <Truck className="h-4 w-4 text-teal-500" />
+                    <div className="bg-card border border-border rounded-[var(--radius-panel)] p-2.5 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-info/20 rounded-[var(--radius-control)]">
+                            <Truck className="h-4 w-4 text-info" />
                         </div>
                         <div>
-                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
-                            <p className="text-base font-black leading-tight">
+                            <p className="text-metadata-ui text-muted-foreground uppercase font-bold tracking-tight">Entregues</p>
+                            <p className="text-body-ui font-black leading-tight">
                                 {orders.filter(o => o.status === 'entregue').length}
                             </p>
                         </div>
@@ -136,7 +136,7 @@ export const SalesOrderList: React.FC = () => {
                         placeholder="Buscar por cliente, deal ou ID..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium placeholder:text-muted-foreground shadow-sm"
+                        className="w-full bg-card border border-border rounded-[var(--radius-panel)] pl-9 pr-3 py-2 text-body-ui text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-medium placeholder:text-muted-foreground shadow-control-ui"
                     />
                 </div>
                 <div className="relative min-w-[180px]">
@@ -144,7 +144,7 @@ export const SalesOrderList: React.FC = () => {
                     <select
                         value={statusFilter}
                         onChange={e => setStatusFilter(e.target.value)}
-                        className="w-full bg-card border border-border rounded-xl pl-9 pr-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none font-medium text-muted-foreground"
+                        className="w-full bg-card border border-border rounded-[var(--radius-panel)] pl-9 pr-3 py-2 text-body-ui text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all appearance-none font-medium text-muted-foreground"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="pedido_gerado">Pedido Gerado</option>
@@ -162,7 +162,7 @@ export const SalesOrderList: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-auto bg-card border border-border rounded-2xl shadow-xl">
+            <div className="flex-1 overflow-auto bg-card border border-border rounded-[var(--radius-panel)] shadow-card-ui">
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -170,18 +170,18 @@ export const SalesOrderList: React.FC = () => {
                 ) : filteredOrders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                         <Package className="h-16 w-16 mb-4 opacity-20" />
-                        <p className="text-lg">Nenhum pedido encontrado</p>
+                        <p className="text-section-title">Nenhum pedido encontrado</p>
                     </div>
                 ) : (
                     <table className="w-full">
                         <thead className="bg-muted sticky top-0 z-10">
                             <tr>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">ID / Data</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Cliente / Deal</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Valor Total</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-black text-muted-foreground uppercase tracking-widest">NF-e</th>
-                                <th className="px-4 py-3 text-right text-[10px] font-black text-muted-foreground uppercase tracking-widest">Ações</th>
+                                <th className="px-4 py-3 text-left text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">ID / Data</th>
+                                <th className="px-4 py-3 text-left text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Cliente / Deal</th>
+                                <th className="px-4 py-3 text-left text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Valor Total</th>
+                                <th className="px-4 py-3 text-left text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Status</th>
+                                <th className="px-4 py-3 text-left text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">NF-e</th>
+                                <th className="px-4 py-3 text-right text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -192,27 +192,27 @@ export const SalesOrderList: React.FC = () => {
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <td className="px-4 py-3 whitespace-nowrap border-r border-border/10">
-                                        <div className="text-[13px] font-black text-foreground leading-none">#{order.id.slice(0, 8)}</div>
-                                        <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 font-bold">
+                                        <div className="text-body-ui font-black text-foreground leading-none">#{order.id.slice(0, 8)}</div>
+                                        <div className="text-metadata-ui text-muted-foreground mt-1 flex items-center gap-1 font-bold">
                                             <Calendar className="h-3 w-3" />
                                             {new Date(order.created_at).toLocaleDateString('pt-BR')}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        <div className="text-[13px] font-bold text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors leading-none">
+                                        <div className="text-body-ui font-bold text-primary border-b border-transparent group-hover:border-primary/50 inline-block transition-colors leading-none">
                                             {order.deal?.customer?.name || 'Cliente N/A'}
                                         </div>
-                                        <div className="text-[11px] text-muted-foreground mt-1 truncate max-w-[250px] font-medium opacity-80">
+                                        <div className="text-metadata-ui text-muted-foreground mt-1 truncate max-w-[250px] font-medium opacity-80">
                                             {order.deal?.title}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="text-[14px] font-black text-emerald-500 tracking-tighter">
+                                        <div className="text-body-ui font-black text-success-readable tracking-tighter">
                                             {formatCurrency(Number(order.total_value))}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-control)] text-metadata-ui font-black uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                                             {getStatusLabel(order.status)}
                                         </span>
                                     </td>
@@ -231,13 +231,13 @@ export const SalesOrderList: React.FC = () => {
                                                         toast.error(err.message || 'Erro ao abrir arquivo');
                                                     }
                                                 }}
-                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider transition-colors focus:outline-none"
+                                                className="text-primary hover:text-primary/80 flex items-center gap-1 text-metadata-ui font-bold uppercase tracking-wider transition-colors focus:outline-none"
                                             >
                                                 <FileText className="h-3.5 w-3.5" />
                                                 Visualizar
                                             </button>
                                         ) : (
-                                            <span className="text-[11px] text-muted-foreground italic font-medium">Pendente</span>
+                                            <span className="text-metadata-ui text-muted-foreground italic font-medium">Pendente</span>
                                         )}
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-right">

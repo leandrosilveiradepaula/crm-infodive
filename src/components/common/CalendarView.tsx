@@ -74,24 +74,24 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
     return (
-        <div className="glass-card p-6 rounded-3xl bg-card border border-border shadow-2xl">
+        <div className="glass-card p-6 rounded-[var(--radius-panel)] bg-card border border-border shadow-card-ui">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-black text-foreground tracking-tight">
+                <h2 className="text-metric-ui font-black text-foreground tracking-tight">
                     {monthNames[currentMonth]} <span className="text-muted-foreground">{currentYear}</span>
                 </h2>
                 <div className="flex gap-2">
                     <button 
-                        className="p-3 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        className="p-3 hover:bg-muted/50 rounded-[var(--radius-panel)] transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
                         aria-label="Mês anterior"
                     >
                         <ChevronLeft className="h-5 w-5" />
                     </button>
-                    <button className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-xl text-xs font-black uppercase tracking-widest transition-colors text-foreground border border-border min-h-[44px]">
+                    <button className="px-6 py-2 bg-muted hover:bg-muted/80 rounded-[var(--radius-panel)] text-metadata-ui font-black uppercase tracking-widest transition-colors text-foreground border border-border min-h-[44px]">
                         Hoje
                     </button>
                     <button 
-                        className="p-3 hover:bg-muted/50 rounded-xl transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        className="p-3 hover:bg-muted/50 rounded-[var(--radius-panel)] transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border min-w-[44px] min-h-[44px] flex items-center justify-center"
                         aria-label="Próximo mês"
                     >
                         <ChevronRight className="h-5 w-5" />
@@ -102,7 +102,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
             {/* Dias da semana */}
             <div className="grid grid-cols-7 gap-2 mb-4 border-b border-border pb-4">
                 {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
-                    <div key={day} className="text-center text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                    <div key={day} className="text-center text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">
                         {day}
                     </div>
                 ))}
@@ -123,12 +123,12 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                             tabIndex={0}
                             aria-label={`Dia ${date.getDate()} de ${monthNames[date.getMonth()]}, ${dayActivities.length} atividades`}
                             className={`
-                                min-h-24 p-2 rounded-lg border transition-all cursor-pointer
+                                min-h-24 p-2 rounded-[var(--radius-control)] border transition-all cursor-pointer
                                 ${isCurrentDay ? 'bg-primary/10 border-primary ring-1 ring-primary/50' : 'border-border hover:border-primary/20 hover:bg-muted/50'}
                                 ${isOtherMonth ? 'opacity-30' : ''}
                             `}
                         >
-                            <div className={`text-sm font-bold mb-1 ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`}>
+                            <div className={`text-body-ui font-bold mb-1 ${isCurrentDay ? 'text-primary' : 'text-muted-foreground'}`}>
                                 {date.getDate()}
                             </div>
 
@@ -150,12 +150,12 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                             }
                                         }}
                                         className={`
-                                            text-[10px] px-1.5 py-1 rounded-md truncate font-medium cursor-pointer border
-                                            ${activity.type === 'meeting' ? 'bg-teal-500/10 text-teal-500 border-teal-500/20 hover:bg-teal-500/20' : ''}
-                                            ${activity.type === 'call' ? 'bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20' : ''}
-                                            ${activity.type === 'task' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/20' : ''}
-                                            ${activity.type === 'email' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20' : ''}
-                                            ${activity.type === 'note' ? 'bg-gray-500/10 text-muted-foreground border-gray-500/20 hover:bg-gray-500/20' : ''}
+                                            text-metadata-ui px-1.5 py-1 rounded-[var(--radius-control)] truncate font-medium cursor-pointer border
+                                            ${activity.type === 'meeting' ? 'bg-info/10 text-info border-info/20 hover:bg-info/20' : ''}
+                                            ${activity.type === 'call' ? 'bg-success/10 text-success-readable border-success/20 hover:bg-success/20' : ''}
+                                            ${activity.type === 'task' ? 'bg-warning/10 text-warning-readable border-warning/20 hover:bg-warning/20' : ''}
+                                            ${activity.type === 'email' ? 'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20' : ''}
+                                            ${activity.type === 'note' ? 'bg-muted/10 text-muted-foreground border-border/20 hover:bg-muted/20' : ''}
                                         `}
                                         title={activity.title}
                                     >
@@ -164,7 +164,7 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
                                     </div>
                                 ))}
                                 {dayActivities.length > 3 && (
-                                    <div className="text-[10px] text-muted-foreground font-medium px-1.5">
+                                    <div className="text-metadata-ui text-muted-foreground font-medium px-1.5">
                                         +{dayActivities.length - 3} mais
                                     </div>
                                 )}
@@ -176,24 +176,24 @@ export const CalendarView = ({ activities, onActivityClick }: CalendarViewProps)
 
             {/* Legenda */}
             <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-border">
-                <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-teal-500/20 border border-teal-500/30"></div>
+                <div className="flex items-center gap-2 text-metadata-ui">
+                    <div className="w-3 h-3 rounded bg-info/20 border border-info/30"></div>
                     <span className="text-muted-foreground">Reunião</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-green-500/20 border border-green-500/30"></div>
+                <div className="flex items-center gap-2 text-metadata-ui">
+                    <div className="w-3 h-3 rounded bg-success/20 border border-success/30"></div>
                     <span className="text-muted-foreground">Ligação</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-orange-500/20 border border-orange-500/30"></div>
+                <div className="flex items-center gap-2 text-metadata-ui">
+                    <div className="w-3 h-3 rounded bg-warning/20 border border-warning/30"></div>
                     <span className="text-muted-foreground">Tarefa</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/30"></div>
+                <div className="flex items-center gap-2 text-metadata-ui">
+                    <div className="w-3 h-3 rounded bg-primary/20 border border-primary/30"></div>
                     <span className="text-muted-foreground">Email</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                    <div className="w-3 h-3 rounded bg-gray-500/20 border border-gray-500/30"></div>
+                <div className="flex items-center gap-2 text-metadata-ui">
+                    <div className="w-3 h-3 rounded bg-muted/20 border border-border/30"></div>
                     <span className="text-muted-foreground">Nota</span>
                 </div>
             </div>

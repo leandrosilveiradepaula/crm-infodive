@@ -83,11 +83,11 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
     const filtered = useMemo(() => {
         return allCommissions.filter(c => {
             const matchesFilter = filter === 'all' || c.status === filter;
-            const matchesSearch = !searchTerm || 
+            const matchesSearch = !searchTerm ||
                 c.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 c.dealTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 c.userName.toLowerCase().includes(searchTerm.toLowerCase());
-            
+
             return matchesFilter && matchesSearch;
         }).sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
     }, [allCommissions, filter, searchTerm]);
@@ -100,26 +100,26 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
         <div className="space-y-6">
             {/* KPI Section */}
             <div className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-primary/30 transition-all">
+                <div className="rounded-[var(--radius-panel)] border border-border bg-card/50 p-5 group hover:border-primary/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 rounded-xl bg-primary/10 group-hover:scale-110 transition-transform"><TrendingUp className="w-4 h-4 text-primary" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Margem (Empresa)</span>
+                        <div className="p-2 rounded-[var(--radius-panel)] bg-primary/10 group-hover:scale-110 transition-transform"><TrendingUp className="w-4 h-4 text-primary" /></div>
+                        <span className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Margem (Empresa)</span>
                     </div>
-                    <div className="text-2xl font-black text-foreground">{formatCurrency(totalInvoiced)}</div>
+                    <div className="text-page-title font-black text-foreground">{formatCurrency(totalInvoiced)}</div>
                 </div>
-                <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-amber-500/30 transition-all">
+                <div className="rounded-[var(--radius-panel)] border border-border bg-card/50 p-5 group hover:border-warning/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 rounded-xl bg-amber-500/10 group-hover:scale-110 transition-transform"><Clock className="w-4 h-4 text-amber-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aguardando (Distribuidor)</span>
+                        <div className="p-2 rounded-[var(--radius-panel)] bg-warning/10 group-hover:scale-110 transition-transform"><Clock className="w-4 h-4 text-warning-readable" /></div>
+                        <span className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Aguardando (Distribuidor)</span>
                     </div>
-                    <div className="text-2xl font-black text-foreground">{formatCurrency(totalPending)}</div>
+                    <div className="text-page-title font-black text-foreground">{formatCurrency(totalPending)}</div>
                 </div>
-                <div className="rounded-xl border border-border bg-card/50 p-5 group hover:border-emerald-500/30 transition-all">
+                <div className="rounded-[var(--radius-panel)] border border-border bg-card/50 p-5 group hover:border-success/30 transition-all">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="p-2 rounded-xl bg-emerald-500/10 group-hover:scale-110 transition-transform"><CheckCircle2 className="w-4 h-4 text-emerald-500" /></div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Recebido (Empresa)</span>
+                        <div className="p-2 rounded-[var(--radius-panel)] bg-success/10 group-hover:scale-110 transition-transform"><CheckCircle2 className="w-4 h-4 text-success-readable" /></div>
+                        <span className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Recebido (Empresa)</span>
                     </div>
-                    <div className="text-2xl font-black text-emerald-500">{formatCurrency(totalPaid)}</div>
+                    <div className="text-page-title font-black text-success-readable">{formatCurrency(totalPaid)}</div>
                 </div>
             </div>
 
@@ -134,14 +134,14 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                
-                <div className="flex bg-muted/50 p-1 rounded-xl border border-border overflow-hidden">
+
+                <div className="flex bg-muted/50 p-1 rounded-[var(--radius-panel)] border border-border overflow-hidden">
                     {(['all', 'pending', 'paid'] as const).map((f) => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === f
-                                ? 'bg-background text-primary shadow-sm border border-border'
+                            className={`px-4 py-1.5 rounded-[var(--radius-control)] text-metadata-ui font-black uppercase tracking-widest transition-all ${filter === f
+                                ? 'bg-background text-primary shadow-control-ui border border-border'
                                 : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                                 }`}
                         >
@@ -152,10 +152,10 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
             </FilterBar>
 
             {/* Table */}
-            <div className="border border-border rounded-2xl bg-card/30 overflow-hidden shadow-sm">
+            <div className="border border-border rounded-[var(--radius-panel)] bg-card/30 overflow-hidden shadow-control-ui">
                 <Table>
                     <TableHeader className="bg-muted/50">
-                        <TableRow className="border-border hover:bg-transparent text-[10px] font-black uppercase tracking-widest">
+                        <TableRow className="border-border hover:bg-transparent text-metadata-ui font-black uppercase tracking-widest">
                             <TableHead className="py-5">Status</TableHead>
                             <TableHead className="py-5">Vendedor</TableHead>
                             <TableHead className="py-5">Cliente / Negócio</TableHead>
@@ -172,8 +172,8 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                                     <PremiumEmptyState
                                         icon={DollarSign}
                                         title="Nenhuma comissão encontrada"
-                                        description={searchTerm || filter !== 'all' 
-                                            ? "Não encontramos comissões com os filtros aplicados." 
+                                        description={searchTerm || filter !== 'all'
+                                            ? "Não encontramos comissões com os filtros aplicados."
                                             : "Ainda não há comissões geradas para este período."
                                         }
                                         variant="compact"
@@ -184,11 +184,11 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                             filtered.map((c) => (
                                 <TableRow key={c.id} className="border-border/50 hover:bg-primary/[0.02] transition-colors group">
                                     <TableCell className="py-5">
-                                        <Badge 
-                                            variant="outline" 
-                                            className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
-                                                c.status === 'paid' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' : 
-                                                'bg-amber-500/5 text-amber-500 border-amber-500/20'
+                                        <Badge
+                                            variant="outline"
+                                            className={`text-metadata-ui font-black px-3 py-1 rounded-full uppercase tracking-tighter ${
+                                                c.status === 'paid' ? 'bg-success/5 text-success-readable border-success/20' :
+                                                'bg-warning/5 text-warning-readable border-warning/20'
                                             }`}
                                         >
                                             {c.status === 'paid' ? 'Liquidado' : 'Pendente'}
@@ -196,31 +196,31 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                                     </TableCell>
                                     <TableCell className="py-5">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary border border-primary/20">
+                                            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-metadata-ui font-black text-primary border border-primary/20">
                                                 {c.userName.substring(0, 2).toUpperCase()}
                                             </div>
-                                            <span className="text-sm font-black text-foreground tracking-tight">{c.userName}</span>
+                                            <span className="text-body-ui font-black text-foreground tracking-tight">{c.userName}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5">
                                         <div className="flex flex-col">
-                                            <span className="text-[11px] font-black text-foreground tracking-tight group-hover:text-primary transition-colors">{c.customerName}</span>
-                                            <span className="text-[9px] text-muted-foreground font-black uppercase mt-0.5">{c.dealTitle}</span>
+                                            <span className="text-metadata-ui font-black text-foreground tracking-tight group-hover:text-primary transition-colors">{c.customerName}</span>
+                                            <span className="text-metadata-ui text-muted-foreground font-black uppercase mt-0.5">{c.dealTitle}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5 text-right">
                                         <div className="flex flex-col items-end">
-                                            <span className="text-sm font-black text-foreground tracking-tighter">{formatCurrency(c.amount)}</span>
+                                            <span className="text-body-ui font-black text-foreground tracking-tighter">{formatCurrency(c.amount)}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5 text-right">
                                         <div className="flex flex-col items-end">
-                                            <span className="text-sm font-black text-emerald-600 tracking-tighter">{formatCurrency(c.seller_commission)}</span>
-                                            {c.seller_rate > 0 && <span className="text-[9px] text-muted-foreground font-black opacity-80 mt-0.5 uppercase">Aprox {c.seller_rate.toFixed(1)}%</span>}
+                                            <span className="text-body-ui font-black text-success-readable tracking-tighter">{formatCurrency(c.seller_commission)}</span>
+                                            {c.seller_rate > 0 && <span className="text-metadata-ui text-muted-foreground font-black opacity-80 mt-0.5 uppercase">Aprox {c.seller_rate.toFixed(1)}%</span>}
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5">
-                                        <div className="flex items-center gap-2 text-[10px] font-black tracking-tighter uppercase text-muted-foreground">
+                                        <div className="flex items-center gap-2 text-metadata-ui font-black tracking-tighter uppercase text-muted-foreground">
                                             <Calendar className="w-4 h-4 opacity-50" />
                                             {new Date(c.due_date).toLocaleDateString()}
                                         </div>
@@ -231,21 +231,21 @@ export function CommissionsTab({ orders, onUpdateStatus }: CommissionsTabProps) 
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 gap-1.5 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-xl px-3"
+                                                    className="h-8 gap-1.5 text-success-readable hover:text-success-readable hover:bg-success/10 rounded-[var(--radius-panel)] px-3"
                                                     onClick={() => onUpdateStatus(c.id, 'paid')}
                                                 >
                                                     <CheckCircle2 className="w-3.5 h-3.5" />
-                                                    <span className="text-[10px] font-black uppercase">Liquidar</span>
+                                                    <span className="text-metadata-ui font-black uppercase">Liquidar</span>
                                                 </Button>
                                             ) : (
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    className="h-8 gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl px-3"
+                                                    className="h-8 gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-[var(--radius-panel)] px-3"
                                                     onClick={() => onUpdateStatus(c.id, 'pending')}
                                                 >
                                                     <Undo2 className="w-3.5 h-3.5" />
-                                                    <span className="text-[10px] font-black uppercase">Reverter</span>
+                                                    <span className="text-metadata-ui font-black uppercase">Reverter</span>
                                                 </Button>
                                             )}
                                         </div>

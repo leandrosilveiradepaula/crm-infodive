@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 
 import { ProjectObjective, defaultObjectives } from './ProposalOverviewConstants';
@@ -15,8 +16,8 @@ export function ProposalOverviewPage({
     themeAccent,
     layout = 'portrait'
 }: ProposalOverviewPageProps & { aiSummary?: string; themePrimary?: string; themeAccent?: string; layout?: 'portrait' | 'landscape' }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -28,7 +29,7 @@ export function ProposalOverviewPage({
             style={{
                 width: width,
                 height: height,
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
@@ -45,7 +46,7 @@ export function ProposalOverviewPage({
                 right: 0,
                 width: '100%',
                 height: '6px',
-                background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)`
+                background: proposalDocumentBand(accentColor, primaryColor)
             }} />
 
             {/* Standardized Header */}
@@ -71,7 +72,7 @@ export function ProposalOverviewPage({
                     <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                     <p style={{
                         fontSize: '16px',
-                        color: '#64748b',
+                        color: proposalDocumentPrimitives.slate500,
                         fontWeight: '600',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px'
@@ -86,14 +87,14 @@ export function ProposalOverviewPage({
                 {/* AI Summary Section */}
                 {aiSummary && (
                     <div style={{
-                        backgroundColor: '#f8f9fa',
+                        backgroundColor: proposalDocumentPrimitives.printNearWhite,
                         padding: '20px 25px',
                         borderRadius: '12px',
-                        border: '1px solid #e5e7eb',
+                        border: `1px solid ${proposalDocumentPrimitives.gray200}`,
                         flex: objectives.length > 0 ? '0 1 auto' : '1'
                     }}>
                         <div style={{
-                            color: '#1e3a5f',
+                            color: proposalDocumentPrimitives.defaultPrimary,
                             fontSize: '13.5px', // Reduced for better density
                             lineHeight: '1.45',
                             whiteSpace: 'pre-wrap',
@@ -117,10 +118,10 @@ export function ProposalOverviewPage({
                             <div
                                 key={index}
                                 style={{
-                                    backgroundColor: '#ffffff',
+                                    backgroundColor: proposalDocumentPrimitives.paperWhite,
                                     padding: '16px 20px',
                                     borderRadius: '10px',
-                                    border: '1px solid #e5e7eb',
+                                    border: `1px solid ${proposalDocumentPrimitives.gray200}`,
                                     position: 'relative'
                                 }}
                             >
@@ -135,7 +136,7 @@ export function ProposalOverviewPage({
                                     justifyContent: 'center',
                                     fontSize: '11px',
                                     fontWeight: '800',
-                                    color: '#ffffff',
+                                    color: proposalDocumentPrimitives.paperWhite,
                                     marginBottom: '8px'
                                 }}>
                                     {objective.number}
@@ -153,7 +154,7 @@ export function ProposalOverviewPage({
 
                                 <p style={{
                                     fontSize: '11.5px',
-                                    color: '#64748b',
+                                    color: proposalDocumentPrimitives.slate500,
                                     lineHeight: '1.4'
                                 }}>
                                     {objective.description}
@@ -170,8 +171,8 @@ export function ProposalOverviewPage({
                 paddingTop: '20px',
                 display: 'flex',
                 justifyContent: 'center',
-                borderTop: '1px solid #f1f5f9',
-                color: '#9ca3af',
+                borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`,
+                color: proposalDocumentPrimitives.gray400,
                 fontSize: '11px'
             }}>
                 Infodive IT Solutions - Confidencial

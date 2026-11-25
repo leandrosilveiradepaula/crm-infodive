@@ -28,8 +28,9 @@ describe('CRM #214 B2 commercial workspaces', () => {
 
     it('uses static, semantic stage styles so Tailwind can render every Kanban state', () => {
         const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain("accent: 'bg-info'");
-        expect(pipeline).toContain("surface: 'bg-success/5 border-success/20'");
+        expect(pipeline).toContain("accent: 'bg-stage-qualification'");
+        expect(pipeline).toContain("surface: 'bg-stage-won/5 border-stage-won/20'");
+        expect(pipeline).toContain('data-qa-stage={stage.id}');
         expect(pipeline).not.toContain('border-${stage.');
         expect(pipeline).not.toContain('bg-${stage.');
     });
@@ -66,7 +67,7 @@ describe('CRM #214 B2 commercial workspaces', () => {
         const stats = source('src/components/layout/StatsGrid.tsx');
         expect(stats).not.toContain('disabled={!isClickable}');
         expect(stats).toContain('return isClickable ? (');
-        expect(stats).toContain('<div key={index} className={tileClasses}>');
+        expect(stats).toContain('<div key={index} data-slot="stats-tile" className={tileClasses}>');
     });
 
 });

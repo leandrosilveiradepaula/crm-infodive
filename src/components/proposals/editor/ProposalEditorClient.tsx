@@ -334,8 +334,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     </Button>
                     <div className="h-5 w-px bg-border" />
                     <div>
-                        <h1 className="text-sm font-bold text-foreground leading-tight">{deal.title}</h1>
-                        <p className="text-[10px] text-muted-foreground">{deal.company} • Editor de Proposta</p>
+                        <h1 className="text-body-ui font-bold text-foreground leading-tight">{deal.title}</h1>
+                        <p className="text-metadata-ui text-muted-foreground">{deal.company} • Editor de Proposta</p>
                     </div>
                 </div>
 
@@ -345,7 +345,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         variant="ghost" size="sm"
                         onClick={handleSave}
                         disabled={isSaving || isExporting}
-                        className="text-muted-foreground hover:text-foreground gap-1.5 text-xs h-8"
+                        className="text-muted-foreground hover:text-foreground gap-1.5 text-metadata-ui h-8"
                     >
                         {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                         Salvar
@@ -358,7 +358,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         variant="outline" size="sm"
                         onClick={generateAISummary}
                         disabled={isGeneratingAI || isExporting}
-                        className="gap-1.5 text-xs h-8 text-teal-600 border-teal-200 hover:bg-teal-50 hover:text-teal-700"
+                        className="gap-1.5 text-metadata-ui h-8 text-info border-info hover:bg-info-subtle hover:text-info"
                     >
                         {isGeneratingAI
                             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -373,7 +373,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             <Button
                                 variant="outline" size="sm"
                                 disabled={isExporting || activeSections.length === 0}
-                                className="gap-1.5 text-xs h-8"
+                                className="gap-1.5 text-metadata-ui h-8"
                             >
                                 <Download className="w-3.5 h-3.5" />
                                 Exportar
@@ -396,7 +396,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         size="sm"
                         onClick={handleGenerate}
                         disabled={isExporting || activeSections.length === 0}
-                        className="bg-primary hover:bg-primary/90 text-white gap-1.5 text-xs h-8 px-4 font-bold"
+                        className="bg-primary hover:bg-primary/90 text-white gap-1.5 text-metadata-ui h-8 px-4 font-bold"
                     >
                         {state.isGenerating
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
@@ -412,7 +412,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 {/* ── LEFT: Section List (240px) ──────────────────────── */}
                 <aside className="w-60 border-r border-border bg-card shrink-0 flex flex-col">
                     <div className="p-3 border-b border-border">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
+                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2">
                         {isMounted ? (
@@ -433,10 +433,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             state.sections.map(section => {
                                 const Icon = sectionIcons[section.id];
                                 return (
-                                    <div key={section.id} className="flex items-center gap-2 px-2.5 py-2 rounded-lg mb-1 border-l-2 border-transparent">
+                                    <div key={section.id} className="flex items-center gap-2 px-2.5 py-2 rounded-[var(--radius-control)] mb-1 border-l-2 border-transparent">
                                         <div className="w-3" />
                                         <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                                        <span className="text-[11px] flex-1 truncate text-foreground/80">{section.label}</span>
+                                        <span className="text-metadata-ui flex-1 truncate text-foreground/80">{section.label}</span>
                                         <Switch checked={section.enabled} className="scale-[0.55]" />
                                     </div>
                                 );
@@ -446,14 +446,14 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
 
                     {/* Config toggles */}
                     <div className="border-t border-border p-3 space-y-2">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Configurações</p>
+                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider mb-2">Configurações</p>
                         {[
                             { key: 'showBillingInfo', label: 'Faturamento' },
                             { key: 'isPriceStudy', label: 'Estudo de Preços' },
                             { key: 'allowSignature', label: 'Assinatura Digital' },
                         ].map(item => (
                             <div key={item.key} className="flex items-center justify-between">
-                                <span className="text-[11px] text-foreground">{item.label}</span>
+                                <span className="text-metadata-ui text-foreground">{item.label}</span>
                                 <Switch
                                     checked={(state.config as any)[item.key]}
                                     onCheckedChange={v => updateConfig({ [item.key]: v })}
@@ -477,7 +477,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             >
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <span className="text-xs font-bold text-foreground min-w-[80px] text-center">
+                            <span className="text-metadata-ui font-bold text-foreground min-w-[80px] text-center">
                                 {currentSection ? `${selectedIndex + 1} / ${activeSections.length}` : '—'}
                             </span>
                             <Button
@@ -492,10 +492,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         {currentSection && (
                             <div className="flex items-center gap-2">
                                 {React.createElement(sectionIcons[currentSection.id], { className: 'w-3.5 h-3.5 text-primary' })}
-                                <span className="text-xs font-bold text-foreground">{currentSection.label}</span>
+                                <span className="text-metadata-ui font-bold text-foreground">{currentSection.label}</span>
                             </div>
                         )}
-                        <div className="flex items-center gap-4 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-4 text-metadata-ui text-muted-foreground">
                             <span>{activeSections.length} páginas</span>
                             <span>{deal.deal_products?.length || 0} produtos</span>
                             <span className="font-bold text-primary">{formatCurrency(totalValue)}</span>
@@ -512,7 +512,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ duration: 0.2 }}
-                                    className="bg-white rounded-lg shadow-xl border border-border overflow-hidden"
+                                    className="bg-white rounded-[var(--radius-control)] shadow-card-ui border border-border overflow-hidden"
                                     style={{ width: '210mm', transformOrigin: 'top center' }}
                                 >
                                     <div className="transform scale-[0.55] origin-top-left w-[210mm]" style={{ minHeight: 'calc(297mm * 0.55)' }}>
@@ -531,8 +531,8 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
                                     <EyeOff className="w-10 h-10 mb-3 opacity-30" />
-                                    <p className="text-sm font-bold">Nenhuma seção ativa</p>
-                                    <p className="text-xs mt-1">Ative pelo menos uma seção na barra lateral</p>
+                                    <p className="text-body-ui font-bold">Nenhuma seção ativa</p>
+                                    <p className="text-metadata-ui mt-1">Ative pelo menos uma seção na barra lateral</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -542,7 +542,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 {/* ── RIGHT: Inspector ─────────────────────────────────── */}
                 <aside className="w-80 border-l border-border bg-card shrink-0 overflow-y-auto flex flex-col">
                     <div className="p-3 border-b border-border">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">
                             {currentSection ? `Editar: ${currentSection.label}` : 'Propriedades'}
                         </p>
                     </div>
@@ -561,7 +561,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         ) : (
                             <div className="text-center py-10 text-muted-foreground">
                                 <Settings2 className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                                <p className="text-xs">Selecione uma seção para editar</p>
+                                <p className="text-metadata-ui">Selecione uma seção para editar</p>
                             </div>
                         )}
                     </div>
@@ -642,13 +642,13 @@ function SortableSectionItem({
             ref={setNodeRef}
             style={style}
             onClick={() => section.enabled && onSelect()}
-            className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg mb-1 transition-all cursor-pointer
+            className={`group flex items-center gap-2 px-2.5 py-2 rounded-[var(--radius-control)] mb-1 transition-all cursor-pointer
                 ${isSelected
                     ? 'bg-primary/8 border-l-2 border-primary'
                     : 'hover:bg-muted/50 border-l-2 border-transparent'
                 }
                 ${!section.enabled ? 'opacity-40' : ''}
-                ${isDragging ? 'shadow-lg ring-1 ring-primary/20' : ''}
+                ${isDragging ? 'shadow-card-ui ring-1 ring-primary/20' : ''}
             `}
         >
             <div
@@ -659,7 +659,7 @@ function SortableSectionItem({
                 <GripVertical className="w-3 h-3" />
             </div>
             <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-[11px] flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
+            <span className={`text-metadata-ui flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
                 {section.label}
             </span>
             <Switch
@@ -696,7 +696,7 @@ function InspectorPanel({
                         <Input
                             value={state.editableTexts.proposalTitle}
                             onChange={e => updateText('proposalTitle', e.target.value)}
-                            className="text-xs h-9"
+                            className="text-metadata-ui h-9"
                         />
                     </FieldGroup>
                     <FieldGroup label="Logo do Cliente">
@@ -715,7 +715,7 @@ function InspectorPanel({
                         value={state.editableTexts.confidentialityText}
                         onChange={e => updateText('confidentialityText', e.target.value)}
                         rows={8}
-                        className="w-full text-xs p-3 rounded-lg bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full text-metadata-ui p-3 rounded-[var(--radius-control)] bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                 </FieldGroup>
             );
@@ -725,14 +725,14 @@ function InspectorPanel({
                 <div className="space-y-4">
                     {state.aiSummary ? (
                         <FieldGroup label="Resumo do Projeto (IA)">
-                            <p className="text-xs text-muted-foreground leading-relaxed bg-muted/30 rounded-lg p-3 border border-border">
+                            <p className="text-metadata-ui text-muted-foreground leading-relaxed bg-muted/30 rounded-[var(--radius-control)] p-3 border border-border">
                                 {state.aiSummary.substring(0, 300)}...
                             </p>
                         </FieldGroup>
                     ) : (
-                        <div className="text-center py-6 bg-muted/20 rounded-lg border border-dashed border-border">
+                        <div className="text-center py-6 bg-muted/20 rounded-[var(--radius-control)] border border-dashed border-border">
                             <Wand2 className="w-6 h-6 mx-auto mb-2 text-muted-foreground/50" />
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-metadata-ui text-muted-foreground">
                                 Clique em "Gerar com IA" no header para criar o resumo
                             </p>
                         </div>
@@ -741,9 +741,9 @@ function InspectorPanel({
                         <FieldGroup label={`Objetivos (${state.objectives.length})`}>
                             <div className="space-y-2">
                                 {state.objectives.map((obj: any, i: number) => (
-                                    <div key={i} className="text-xs p-2 bg-muted/20 rounded-lg border border-border">
+                                    <div key={i} className="text-metadata-ui p-2 bg-muted/20 rounded-[var(--radius-control)] border border-border">
                                         <p className="font-bold text-foreground">{obj.title}</p>
-                                        <p className="text-muted-foreground mt-0.5 text-[10px]">{obj.description?.substring(0, 100)}</p>
+                                        <p className="text-muted-foreground mt-0.5 text-metadata-ui">{obj.description?.substring(0, 100)}</p>
                                     </div>
                                 ))}
                             </div>
@@ -755,20 +755,20 @@ function InspectorPanel({
         case 'differentials':
             return (
                 <div className="space-y-3">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Diferenciais</p>
+                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">Diferenciais</p>
                     {state.editableTexts.differentials.map((diff: any, i: number) => (
-                        <div key={i} className="p-3 bg-muted/20 rounded-lg border border-border space-y-2">
+                        <div key={i} className="p-3 bg-muted/20 rounded-[var(--radius-control)] border border-border space-y-2">
                             <Input
                                 value={diff.title}
                                 onChange={e => updateDifferential(i, 'title', e.target.value)}
-                                className="text-xs h-8 font-bold"
+                                className="text-metadata-ui h-8 font-bold"
                                 placeholder="Título"
                             />
                             <textarea
                                 value={diff.description}
                                 onChange={e => updateDifferential(i, 'description', e.target.value)}
                                 rows={2}
-                                className="w-full text-[11px] p-2 rounded-md bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
+                                className="w-full text-metadata-ui p-2 rounded-[var(--radius-control)] bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
                                 placeholder="Descrição"
                             />
                         </div>
@@ -783,7 +783,7 @@ function InspectorPanel({
                         <Input
                             value={state.editableTexts.customNotesTitle}
                             onChange={e => updateText('customNotesTitle', e.target.value)}
-                            className="text-xs h-9"
+                            className="text-metadata-ui h-9"
                             placeholder="Ex: Notas Complementares"
                         />
                     </FieldGroup>
@@ -792,7 +792,7 @@ function InspectorPanel({
                             value={state.editableTexts.customNotesContent}
                             onChange={e => updateText('customNotesContent', e.target.value)}
                             rows={15}
-                            className="w-full text-xs p-3 rounded-lg bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed"
+                            className="w-full text-metadata-ui p-3 rounded-[var(--radius-control)] bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 leading-relaxed"
                             placeholder="Use este espaço para incluir detalhes do escopo, termos adicionais, ou referências não convencionais..."
                         />
                     </FieldGroup>
@@ -806,7 +806,7 @@ function InspectorPanel({
                         <Input
                             value={state.editableTexts.priceStudyValidity}
                             onChange={e => updateText('priceStudyValidity', e.target.value)}
-                            className="text-xs h-9"
+                            className="text-metadata-ui h-9"
                             placeholder="DD/MM/AAAA"
                         />
                     </FieldGroup>
@@ -815,7 +815,7 @@ function InspectorPanel({
                             value={state.editableTexts.generalNotes}
                             onChange={e => updateText('generalNotes', e.target.value)}
                             rows={3}
-                            className="w-full text-xs p-2.5 rounded-lg bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full text-metadata-ui p-2.5 rounded-[var(--radius-control)] bg-muted/30 border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                             placeholder="Notas adicionais..."
                         />
                     </FieldGroup>
@@ -837,10 +837,10 @@ function InspectorPanel({
                                 })),
                             ];
                             return (
-                                <div key={dist.id} className="p-3 rounded-lg bg-muted/20 border border-border space-y-2">
+                                <div key={dist.id} className="p-3 rounded-[var(--radius-control)] bg-muted/20 border border-border space-y-2">
                                     <div className="flex items-center gap-2">
                                         <div className="w-1 h-5 bg-primary rounded-full" />
-                                        <p className="text-xs font-bold text-foreground truncate">{dist.name}</p>
+                                        <p className="text-metadata-ui font-bold text-foreground truncate">{dist.name}</p>
                                     </div>
                                     <select
                                         value={override.selectedCnpj}
@@ -856,7 +856,7 @@ function InspectorPanel({
                                                 paymentTerms: override.paymentTerms || defaultTerms,
                                             });
                                         }}
-                                        className="w-full text-xs p-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="w-full text-metadata-ui p-2 rounded-[var(--radius-control)] bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                                     >
                                         {cnpjOptions.map((opt, i) => (
                                             <option key={i} value={opt.cnpj}>{opt.label} — {opt.cnpj}</option>
@@ -866,7 +866,7 @@ function InspectorPanel({
                                         rows={3}
                                         value={override.paymentTerms}
                                         onChange={e => updateBillingOverride(dist.id, { paymentTerms: e.target.value })}
-                                        className="w-full text-xs p-2 rounded-lg bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="w-full text-metadata-ui p-2 rounded-[var(--radius-control)] bg-background border border-border text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
                                         placeholder="Condições de pagamento (separe com ; para bullets)"
                                     />
                                 </div>
@@ -879,7 +879,7 @@ function InspectorPanel({
         default:
             return (
                 <div className="text-center py-10 text-muted-foreground">
-                    <p className="text-xs">Esta seção não possui propriedades editáveis</p>
+                    <p className="text-metadata-ui">Esta seção não possui propriedades editáveis</p>
                 </div>
             );
     }
@@ -891,7 +891,7 @@ function InspectorPanel({
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
     return (
         <div>
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+            <label className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                 {label}
             </label>
             {children}

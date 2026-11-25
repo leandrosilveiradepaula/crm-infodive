@@ -47,13 +47,13 @@ export function KnowledgeClient({initialArticles}:{initialArticles:Article[]}) {
  }
  return <main className="space-y-6 pb-10">
   <PageHeader title="Base de conhecimento" description="Artigos vinculados à organização e à autenticação existentes no CRM." />
-  {message&&<p role="status" className="rounded-[var(--radius-control)] border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{message}</p>}
+  {message&&<p role="status" className="rounded-[var(--radius-control)] border border-border bg-muted px-3 py-2 text-body-ui text-muted-foreground">{message}</p>}
   <Card><CardHeader><CardTitle>{editing?'Editar revisão':'Novo rascunho'}</CardTitle></CardHeader><CardContent><form onSubmit={create} className="grid gap-4">
-    <label className="text-sm font-medium">Título<Input className="mt-1" required minLength={3}
+    <label className="text-body-ui font-medium">Título<Input className="mt-1" required minLength={3}
       maxLength={240} value={title} onChange={e=>setTitle(e.target.value)}/></label>
-    <label className="text-sm font-medium">Conteúdo<Textarea className="mt-1" required
+    <label className="text-body-ui font-medium">Conteúdo<Textarea className="mt-1" required
       maxLength={100000} rows={5} value={content} onChange={e=>setContent(e.target.value)}/></label>
-    <label className="text-sm font-medium">Visibilidade
+    <label className="text-body-ui font-medium">Visibilidade
       <ThemeSelect className="mt-1" value={visibility}
         onChange={e=>setVisibility(e.target.value as KnowledgeVisibility)}>
         <option value="tenant">Organização</option>
@@ -68,7 +68,7 @@ export function KnowledgeClient({initialArticles}:{initialArticles:Article[]}) {
    {initialArticles.length===0?<PremiumEmptyState icon={BookOpen} title="Nenhum artigo" description="Crie um rascunho para iniciar a base de conhecimento."/>:
    initialArticles.map(a=><article key={a.id} className="rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
     <h2 className="font-semibold">{a.title}</h2>
-    <p className="text-sm">Estado: {a.status} · Revisão: {a.revision} · {a.visibility}</p>
+    <p className="text-body-ui">Estado: {a.status} · Revisão: {a.revision} · {a.visibility}</p>
     <p className="whitespace-pre-wrap">{a.content}</p>
     <div className="mt-3 flex flex-wrap gap-2">
       {['draft','in_review'].includes(a.status)&&<Button type="button" size="sm" variant="outline"

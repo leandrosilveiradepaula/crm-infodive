@@ -9,21 +9,22 @@ interface ViewToggleProps {
     view: ViewMode;
     onViewChange: (view: ViewMode) => void;
     className?: string;
+    gridLabel?: string;
 }
 
-export function ViewToggle({ view, onViewChange, className }: ViewToggleProps) {
+export function ViewToggle({ view, onViewChange, className, gridLabel = 'Visualização em cards' }: ViewToggleProps) {
     return (
-        <div role="group" aria-label="Modo de visualização" className={cn('flex items-center rounded-[var(--radius-control)] border border-border bg-muted p-1 gap-0.5', className)}>
+        <div role="group" aria-label="Modo de visualização" className={cn('flex items-center rounded-[var(--radius-control)] border border-border bg-muted p-[var(--ds-toggle-container-padding)] gap-0.5', className)}>
             <button
                 type="button"
                 onClick={() => onViewChange('cards')}
-                title="Visualização em cards"
-                aria-label="Visualização em cards"
+                title={gridLabel}
+                aria-label={gridLabel}
                 aria-pressed={view === 'cards'}
                 className={cn(
-                    'focus-ring rounded-md p-1.5 transition-colors',
+                    'focus-ring rounded-[var(--radius-control)] p-[var(--ds-toggle-icon-padding)] transition-colors',
                     view === 'cards'
-                        ? 'bg-background shadow-sm text-foreground'
+                        ? 'bg-background shadow-control-ui text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
                 )}
             >
@@ -36,9 +37,9 @@ export function ViewToggle({ view, onViewChange, className }: ViewToggleProps) {
                 aria-label="Visualização em lista"
                 aria-pressed={view === 'list'}
                 className={cn(
-                    'focus-ring rounded-md p-1.5 transition-colors',
+                    'focus-ring rounded-[var(--radius-control)] p-[var(--ds-toggle-icon-padding)] transition-colors',
                     view === 'list'
-                        ? 'bg-background shadow-sm text-foreground'
+                        ? 'bg-background shadow-control-ui text-foreground'
                         : 'text-muted-foreground hover:text-foreground'
                 )}
             >

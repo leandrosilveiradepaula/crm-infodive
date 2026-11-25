@@ -20,36 +20,36 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
     const avgMonthly = totalForecast / forecast.length;
 
     return (
-        <div className="glass-card p-6 rounded-2xl">
+        <div className="glass-card p-6 rounded-[var(--radius-panel)]">
             <div className="mb-6">
-                <h3 className="text-xl font-bold text-foreground mb-2">Previsão de Receita</h3>
-                <p className="text-sm text-muted-foreground">Projeção para os próximos 3 meses</p>
+                <h3 className="text-section-title font-bold text-foreground mb-2">Previsão de Receita</h3>
+                <p className="text-body-ui text-muted-foreground">Projeção para os próximos 3 meses</p>
             </div>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <div className="p-4 bg-success-subtle rounded-[var(--radius-panel)] border border-success">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <p className="text-xs text-muted-foreground font-bold uppercase">Total Previsto</p>
+                        <TrendingUp className="h-4 w-4 text-success-readable" />
+                        <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Total Previsto</p>
                     </div>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(totalForecast, { compact: true })}</p>
+                    <p className="text-page-title font-bold text-success-readable">{formatCurrency(totalForecast, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-50 rounded-xl border border-blue-200">
+                <div className="p-4 bg-surface-highlight rounded-[var(--radius-panel)] border border-primary">
                     <div className="flex items-center gap-2 mb-2">
                         <Calendar className="h-4 w-4 text-primary" />
-                        <p className="text-xs text-muted-foreground font-bold uppercase">Média Mensal</p>
+                        <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Média Mensal</p>
                     </div>
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(avgMonthly, { compact: true })}</p>
+                    <p className="text-page-title font-bold text-primary">{formatCurrency(avgMonthly, { compact: true })}</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-teal-50 to-pink-50 rounded-xl border border-teal-200">
+                <div className="p-4 bg-info-subtle rounded-[var(--radius-panel)] border border-info">
                     <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-4 w-4 text-teal-600" />
-                        <p className="text-xs text-muted-foreground font-bold uppercase">Crescimento</p>
+                        <TrendingUp className="h-4 w-4 text-info" />
+                        <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Crescimento</p>
                     </div>
-                    <p className="text-2xl font-bold text-teal-600">+10%</p>
+                    <p className="text-page-title font-bold text-info">+10%</p>
                 </div>
             </div>
 
@@ -70,11 +70,11 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                             if (active && payload && payload.length) {
                                 const data = payload[0].payload;
                                 return (
-                                    <div className="bg-card p-4 rounded-lg shadow-xl border border-border">
+                                    <div className="bg-card p-4 rounded-[var(--radius-control)] shadow-card-ui border border-border">
                                         <p className="font-bold text-foreground mb-2">{data.month}</p>
-                                        <p className="text-sm text-green-600">Otimista: <span className="font-bold">{formatCurrency(data.optimistic, { compact: true })}</span></p>
-                                        <p className="text-sm text-primary">Realista: <span className="font-bold">{formatCurrency(data.value, { compact: true })}</span></p>
-                                        <p className="text-sm text-orange-600">Pessimista: <span className="font-bold">{formatCurrency(data.pessimistic, { compact: true })}</span></p>
+                                        <p className="text-body-ui text-success-readable">Otimista: <span className="font-bold">{formatCurrency(data.optimistic, { compact: true })}</span></p>
+                                        <p className="text-body-ui text-primary">Realista: <span className="font-bold">{formatCurrency(data.value, { compact: true })}</span></p>
+                                        <p className="text-body-ui text-warning-readable">Pessimista: <span className="font-bold">{formatCurrency(data.pessimistic, { compact: true })}</span></p>
                                     </div>
                                 );
                             }
@@ -109,9 +109,9 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
             </ResponsiveContainer>
 
             {/* Legend */}
-            <div className="mt-4 flex justify-center gap-6 text-xs">
+            <div className="mt-4 flex justify-center gap-6 text-metadata-ui">
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-success"></div>
                     <span className="text-muted-foreground">Cenário Otimista (+20%)</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -119,7 +119,7 @@ export const RevenueForecast = ({ forecast }: RevenueForecastProps) => {
                     <span className="text-muted-foreground">Cenário Realista</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <div className="w-3 h-3 rounded-full bg-warning"></div>
                     <span className="text-muted-foreground">Cenário Pessimista (-20%)</span>
                 </div>
             </div>

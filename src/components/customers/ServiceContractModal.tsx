@@ -93,7 +93,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                             Título / Nome do Contrato *
                         </label>
                         <ThemeInput
@@ -106,7 +106,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                                 Tipo
                             </label>
                             <ThemeSelect
@@ -119,7 +119,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
                             </ThemeSelect>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                                 Status
                             </label>
                             <ThemeSelect
@@ -136,7 +136,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                                 Data de Início
                             </label>
                             <ThemeInput
@@ -146,7 +146,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                                 Data de Fim (Expiração)
                             </label>
                             <ThemeInput
@@ -158,7 +158,7 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                             Valor Mensal Recorrente (Opcional)
                         </label>
                         <ThemeInput
@@ -172,11 +172,11 @@ export function ServiceContractModal({ open, onOpenChange, contract, accountId, 
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        <label className="text-metadata-ui font-bold uppercase tracking-wider text-muted-foreground">
                             Escopo / Observações do SLA
                         </label>
                         <textarea
-                            className="w-full h-24 p-3 bg-muted/30 border border-border rounded-xl text-sm"
+                            className="w-full h-24 p-3 bg-muted/30 border border-border rounded-[var(--radius-panel)] text-body-ui"
                             placeholder="Descreva o tempo de atendimento, restrições e o que está coberto..."
                             value={coverageDetails}
                             onChange={(e) => setCoverageDetails(e.target.value)}

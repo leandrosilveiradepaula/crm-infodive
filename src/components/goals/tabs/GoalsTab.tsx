@@ -9,7 +9,7 @@ import { StatsCard } from '../StatsCard';
 import { EnhancedProgressBar } from '../EnhancedProgressBar';
 import { PerformanceBadge } from '../PerformanceBadge';
 import { Target, TrendingUp, Award, Calendar, DollarSign, Filter, ChevronRight, Calculator, FileText, CalendarDays } from 'lucide-react';
-import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
+import { StatsGrid } from '@/components/layout/StatsGrid';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { AccessibleChart } from '@/components/charts/AccessibleChart';
 
@@ -121,12 +121,12 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
             {/* Header / Standardized Navigation Filter */}
             <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
-                    <h2 className="text-lg font-black text-foreground uppercase tracking-tight">Visão Geral de Metas</h2>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
+                    <h2 className="ds-type-section-title font-[var(--ds-type-metric-weight)] text-foreground uppercase tracking-tight">Visão Geral de Metas</h2>
+                    <p className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground uppercase tracking-widest leading-none mt-1">Acompanhe o desempenho do time ({getPeriodLabel()})</p>
                 </div>
                 
                 {/* Advanced Multi-Year Pill Selector */}
-                <div className="flex flex-col sm:flex-row gap-2 bg-surface-subtle p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
+                <div className="flex flex-col sm:flex-row gap-2 bg-surface-subtle p-1 rounded-[var(--radius-panel)] border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center">
                     {/* View Year Selector */}
                     <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                         <CalendarDays className="h-4 w-4 text-primary opacity-50" />
@@ -134,7 +134,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(Number(e.target.value))}
                             aria-label="Selecionar ano"
-                            className="bg-transparent text-[10px] font-black uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
+                            className="bg-transparent ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest text-foreground outline-none cursor-pointer appearance-none py-1 pl-1 pr-4 min-h-[36px]"
                         >
                             {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                 <option key={year} value={year}>{year}</option>
@@ -145,8 +145,9 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
 
                     <div className="flex flex-wrap gap-1 items-center px-1">
                         <button
+                            aria-pressed={selectedPeriod === 'all'}
                             onClick={() => setSelectedPeriod('all')}
-                            className={`px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                            className={`px-4 py-1 rounded-[var(--radius-panel)] ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest transition-all whitespace-nowrap h-full ${selectedPeriod === 'all' ? 'bg-primary text-primary-foreground shadow-card-ui' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Tempo Todo
                         </button>
@@ -161,9 +162,10 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                 <button
                                     key={tab.id}
                                     aria-label={`Filtrar por ${tab.label}`}
+                                    aria-pressed={isSelected}
                                     onClick={() => setSelectedPeriod(tab.id as any)}
-                                    className={`relative px-4 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
-                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                    className={`relative px-4 py-1 rounded-[var(--radius-panel)] ds-type-metadata font-[var(--ds-type-metric-weight)] uppercase tracking-widest transition-all whitespace-nowrap h-full ${isSelected
+                                        ? 'bg-primary text-primary-foreground shadow-card-ui'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                         }`}
                                 >
@@ -182,60 +184,52 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                     value: formatCurrency(stats.totalGoal),
                     description: `${users.length} vendedores`,
                     icon: Target,
-                    color: "text-blue-600 dark:text-blue-400",
-                    gradient: "from-blue-50 to-white dark:from-blue-950/20",
-                    border: "border-blue-100 dark:border-blue-900/50"
+                    tone: 'primary'
                 },
                 {
                     label: "Realizado Total",
                     value: formatCurrency(stats.totalSoldAll),
                     description: `${stats.avgProgress.toFixed(1)}% da meta`,
                     icon: TrendingUp,
-                    color: "text-emerald-600 dark:text-emerald-400",
-                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-                    border: "border-emerald-100 dark:border-emerald-900/50"
+                    tone: 'success'
                 },
                 {
                     label: "Top Performer",
                     value: (stats.topPerformer?.name || 'N/A').split(' ')[0],
                     description: `${formatCurrency(stats.topPerformer?.totalSold || 0)} vendido`,
                     icon: Award,
-                    color: "text-violet-600 dark:text-violet-400",
-                    gradient: "from-violet-50 to-white dark:from-violet-950/20",
-                    border: "border-violet-100 dark:border-violet-900/50"
+                    tone: 'info'
                 },
                 {
                     label: "Faturamento vs Meta",
                     value: `${stats.avgProgress.toFixed(1)}%`,
                     description: "Progresso global do time",
                     icon: Calculator,
-                    color: "text-amber-600 dark:text-amber-400",
-                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
-                    border: "border-amber-100 dark:border-amber-900/50"
+                    tone: 'warning'
                 }
             ]} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Enhanced Table */}
-                <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-border bg-card shadow-sm h-fit">
+                <div className="lg:col-span-2 overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-control-ui h-fit">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-surface-raised border-b border-border">
                                 <tr>
-                                    <th className="text-left py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Usuário</th>
-                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[140px]">
+                                    <th className="text-left py-3 px-4 ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest">Usuário</th>
+                                    <th className="text-center py-3 px-3 ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest min-w-[140px]">
                                         {selectedPeriod === 'all' ? 'Meta Anual' : `Meta ${selectedPeriod.toUpperCase()}`}
                                     </th>
-                                    <th className="text-center py-3 px-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest text-emerald-800 dark:text-emerald-300 min-w-[140px]">
+                                    <th className="text-center py-3 px-3 ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest text-success-readable min-w-[140px]">
                                         Realizado
                                     </th>
-                                    <th className="text-right py-3 px-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
+                                    <th className="text-right py-3 px-4 ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest min-w-[160px]">Progresso</th>
                                     {selectedPeriod === 'all' && (
                                         <>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q1</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q2</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q3</th>
-                                            <th className="text-center py-3 px-2 text-[9px] font-bold text-muted-foreground">Q4</th>
+                                            <th className="text-center py-3 px-2 ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground">Q1</th>
+                                            <th className="text-center py-3 px-2 ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground">Q2</th>
+                                            <th className="text-center py-3 px-2 ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground">Q3</th>
+                                            <th className="text-center py-3 px-2 ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground">Q4</th>
                                         </>
                                     )}
                                 </tr>
@@ -249,12 +243,12 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                     <tr key={user.user_id} className="group hover:bg-muted/30 transition-all duration-200">
                                         <td className="py-2.5 px-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-xs font-black shadow-md">
+                                                <div className="h-10 w-10 rounded-[var(--radius-panel)] bg-primary text-primary-foreground flex items-center justify-center ds-type-metadata font-[var(--ds-type-metric-weight)] shadow-card-ui">
                                                     {(user as any).avatar || (user as any).name?.charAt(0) || 'U'}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-foreground text-sm">{(user as any).name || 'Usuário'}</p>
-                                                    <p className="text-[10px] text-muted-foreground font-medium uppercase">{user.dealCount} Vendas</p>
+                                                    <p className="font-[var(--ds-type-control-weight)] text-foreground ds-type-body">{(user as any).name || 'Usuário'}</p>
+                                                    <p className="ds-type-metadata text-muted-foreground font-[var(--ds-type-label-weight)] uppercase">{user.dealCount} Vendas</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -270,7 +264,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                                 hasError={hasError}
                                             />
                                             {hasError && (
-                                                <span className="text-[9px] text-destructive-readable font-bold whitespace-nowrap">
+                                                <span className="ds-type-metadata text-destructive-readable font-[var(--ds-type-control-weight)] whitespace-nowrap">
                                                     {((user.yearly_goal || 0) - quarterlyTotal) > 0 
                                                         ? `Faltam ${formatCurrency((user.yearly_goal || 0) - quarterlyTotal)}`
                                                         : `Sobram ${formatCurrency(Math.abs((user.yearly_goal || 0) - quarterlyTotal))}`
@@ -290,7 +284,7 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         </td>
 
                                         <td className="py-2.5 px-3 text-center">
-                                            <span className="font-black text-emerald-800 dark:text-emerald-300 text-sm">
+                                            <span className="font-[var(--ds-type-metric-weight)] text-success-readable ds-type-body">
                                                 {formatCurrency(user.totalSold)}
                                             </span>
                                         </td>
@@ -302,16 +296,16 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
                                         {selectedPeriod === 'all' && (
                                             <>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput label={`Meta Q1 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
+                                                    <GoalInput label={`Meta Q1 de ${(user as any).name || 'Usuário'}`} className="w-16 ds-type-metadata" value={user.quarterly_goals?.q1 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q1: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput label={`Meta Q2 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
+                                                    <GoalInput label={`Meta Q2 de ${(user as any).name || 'Usuário'}`} className="w-16 ds-type-metadata" value={user.quarterly_goals?.q2 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q2: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput label={`Meta Q3 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
+                                                    <GoalInput label={`Meta Q3 de ${(user as any).name || 'Usuário'}`} className="w-16 ds-type-metadata" value={user.quarterly_goals?.q3 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q3: val } })} />
                                                 </td>
                                                 <td className="px-2 text-center">
-                                                    <GoalInput label={`Meta Q4 de ${(user as any).name || 'Usuário'}`} className="w-16 text-[10px]" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
+                                                    <GoalInput label={`Meta Q4 de ${(user as any).name || 'Usuário'}`} className="w-16 ds-type-metadata" value={user.quarterly_goals?.q4 ?? 0} onSave={(val) => handleUpdate(user.user_id, { quarterly_goals: { ...user.quarterly_goals, q4: val } })} />
                                                 </td>
                                             </>
                                         )}
@@ -324,8 +318,8 @@ export function GoalsTab({ users: initialUsers, deals = [] }: GoalsTabProps) {
             </div>
 
                 {/* Main Comparison Chart */}
-                <div className="lg:col-span-1 bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col">
-                    <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">Performance {getPeriodLabel()}</h3>
+                <div className="lg:col-span-1 bg-card border border-border rounded-[var(--radius-panel)] p-4 shadow-control-ui flex flex-col">
+                    <h3 className="ds-type-body font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-4">Performance {getPeriodLabel()}</h3>
                     <div className="flex-1 min-h-[300px]">
                         <AccessibleChart label="Desempenho por vendedor" entries={chartData.map((point) => `${point.name}: meta ${formatCurrency(point.Meta)}, realizado ${formatCurrency(point.Realizado)}`)}>
                         <ResponsiveContainer width="100%" height="100%">

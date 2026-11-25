@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { Deal, DealProduct } from '@/types/deal';
 import type { Account } from '@/types/account';
@@ -17,8 +18,8 @@ interface ProposalInvestmentPageProps {
 }
 
 export function ProposalInvestmentPage({ deal, distributors = [], config, simplifiedProductNames = {}, billingOverrides = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalInvestmentPageProps & { layout?: 'portrait' | 'landscape' }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -112,7 +113,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                 style={{
                     width: width,
                     minHeight: height,
-                    backgroundColor: '#ffffff',
+                    backgroundColor: proposalDocumentPrimitives.paperWhite,
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
@@ -122,7 +123,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     paddingBottom: isLandscape ? '20px' : '40px'
                 }}
             >
-                <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
 
                 <div style={{ padding: isLandscape ? '25px 80px 15px 80px' : '40px 80px 20px 80px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
@@ -150,7 +151,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         <div style={{
                             fontSize: '11px',
                             fontWeight: '800',
-                            color: '#64748b',
+                            color: proposalDocumentPrimitives.slate500,
                             textTransform: 'uppercase',
                             letterSpacing: '1px',
                             marginBottom: '12px',
@@ -197,7 +198,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     </div>
                 )}
 
-                <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: '1px solid #f1f5f9', color: '#9ca3af', fontSize: '11px', paddingBottom: '20px' }}>
+                <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`, color: proposalDocumentPrimitives.gray400, fontSize: '11px', paddingBottom: '20px' }}>
                     Infodive IT Solutions - Resumo de Investimento
                 </div>
             </div>
@@ -211,7 +212,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     style={{
                         width: width,
                         height: height,
-                        backgroundColor: '#ffffff',
+                        backgroundColor: proposalDocumentPrimitives.paperWhite,
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
@@ -221,14 +222,14 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         marginBottom: '40px'
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ padding: isLandscape ? '25px 80px 10px 80px' : '40px 80px 10px 80px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '20px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                         </div>
                         <h2 style={{ fontSize: '24px', fontWeight: '800', color: primaryColor, marginBottom: '8px' }}>
                             Condições de <span style={{ color: accentColor }}>Pagamento</span>
-                            {totalOptionalPages > 1 && <span style={{ fontSize: '16px', color: '#64748b', marginLeft: '12px', fontWeight: '400' }}>({index + 1}/{totalOptionalPages})</span>}
+                            {totalOptionalPages > 1 && <span style={{ fontSize: '16px', color: proposalDocumentPrimitives.slate500, marginLeft: '12px', fontWeight: '400' }}>({index + 1}/{totalOptionalPages})</span>}
                         </h2>
                         <div style={{ width: '30px', height: '3px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '12px' }} />
                     </div>
@@ -274,7 +275,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         </>
                     )}
 
-                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: '1px solid #f1f5f9', color: '#9ca3af', fontSize: '11px', paddingBottom: '40px' }}>
+                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`, color: proposalDocumentPrimitives.gray400, fontSize: '11px', paddingBottom: '40px' }}>
                         Infodive IT Solutions - Condições Comerciais {totalOptionalPages > 1 ? `(${index + 1})` : ''}
                     </div>
                 </div>
@@ -288,7 +289,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                     style={{
                         width: width,
                         height: height,
-                        backgroundColor: '#ffffff',
+                        backgroundColor: proposalDocumentPrimitives.paperWhite,
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
@@ -298,7 +299,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         marginBottom: '40px'
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ padding: isLandscape ? '30px 80px 20px 80px' : '60px 80px 20px 80px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '15px' : '30px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
@@ -329,7 +330,7 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
                         </div>
                     )}
 
-                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: '1px solid #f1f5f9', color: '#9ca3af', fontSize: '11px', paddingBottom: '40px' }}>
+                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`, color: proposalDocumentPrimitives.gray400, fontSize: '11px', paddingBottom: '40px' }}>
                         Infodive IT Solutions - Condições Comerciais
                     </div>
                 </div>
@@ -340,8 +341,8 @@ export function ProposalInvestmentPage({ deal, distributors = [], config, simpli
 
 // New helper component for Group Billing Info
 function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], billingOverrides = {}, themePrimary, themeAccent, displayCnpjOverride }: { type: 'reseller' | 'direct', distributor?: Account, formatCNPJ: (v: string) => string, productNames?: string[], billingOverrides?: Record<string, BillingOverride>, themePrimary?: string, themeAccent?: string, displayCnpjOverride?: string }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
 
     // Ultimate deduplication logic inside the component to be 100% sure
     const deduplicatedNames = React.useMemo(() => {
@@ -357,8 +358,8 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
     }, [productNames]);
 
     const productList = deduplicatedNames.length > 0 ? (
-        <div style={{ marginTop: '10px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '8px' }}>
-            <div style={{ fontSize: '9px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+        <div style={{ marginTop: '10px', padding: '8px 12px', backgroundColor: proposalDocumentPrimitives.slate100, borderRadius: '8px' }}>
+            <div style={{ fontSize: '9px', fontWeight: '700', color: proposalDocumentPrimitives.slate500, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
                 Produtos neste faturamento:
             </div>
             <div style={{ fontSize: '11px', color: primaryColor, fontWeight: '600', lineHeight: '1.6' }}>
@@ -370,19 +371,19 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
     if (type === 'reseller') {
         return (
             <div style={{
-                border: '1px solid #e2e8f0',
+                border: `1px solid ${proposalDocumentPrimitives.slate200}`,
                 borderRadius: '12px',
                 padding: '20px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: proposalDocumentPrimitives.slate50,
                 position: 'relative',
                 overflow: 'hidden',
                 width: '100%',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
             }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '4px', backgroundColor: '#64748b' }} />
-                <div style={{ fontSize: '10px', fontWeight: '800', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Faturamento Direto</div>
+                <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '4px', backgroundColor: proposalDocumentPrimitives.slate500 }} />
+                <div style={{ fontSize: '10px', fontWeight: '800', color: proposalDocumentPrimitives.slate500, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Faturamento Direto</div>
                 <div style={{ fontSize: '14px', color: primaryColor, fontWeight: '800' }}>Infodive Representações e Serviços Ltda</div>
-                <div style={{ display: 'flex', gap: '20px', marginTop: '10px', fontSize: '11px', color: '#475569' }}>
+                <div style={{ display: 'flex', gap: '20px', marginTop: '10px', fontSize: '11px', color: proposalDocumentPrimitives.slate600 }}>
                     <div><span style={{ fontWeight: '700', color: primaryColor }}>CNPJ:</span> {formatCNPJ(displayCnpjOverride || '05.613.186/0001-78')}</div>
                     <div><span style={{ fontWeight: '700', color: primaryColor }}>IE:</span> Isento</div>
                 </div>
@@ -405,10 +406,10 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
         const displayTerms = override?.paymentTerms ?? branch?.payment_terms ?? distributor.payment_terms;
         return (
             <div style={{
-                border: '1px solid #fecdd3',
+                border: `1px solid ${proposalDocumentPrimitives.rose200}`,
                 borderRadius: '16px',
                 padding: '24px',
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 10px 15px -3px rgba(227, 24, 55, 0.05)',
@@ -417,7 +418,7 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
                 <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '6px', backgroundColor: accentColor }} />
                 <div style={{ fontSize: '10px', fontWeight: '900', color: accentColor, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' }}>Faturamento Direto</div>
                 <div style={{ fontSize: '18px', color: primaryColor, fontWeight: '800', marginBottom: '4px' }}>{displayName}</div>
-                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
+                <div style={{ fontSize: '12px', color: proposalDocumentPrimitives.slate500, marginBottom: '12px' }}>
                     <span style={{ fontWeight: '600' }}>CNPJ:</span> {formatCNPJ(displayCnpj)}
                 </div>
 
@@ -426,9 +427,9 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
                 {displayTerms && (
                     <div style={{
                         padding: '20px',
-                        backgroundColor: '#fff1f2',
+                        backgroundColor: proposalDocumentPrimitives.rose50,
                         borderRadius: '12px',
-                        border: '1px solid #fecdd3',
+                        border: `1px solid ${proposalDocumentPrimitives.rose200}`,
                         marginTop: '12px',
                     }}>
                         <span style={{
@@ -450,7 +451,7 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
                                         display: 'flex',
                                         gap: '10px',
                                         fontSize: '11px',
-                                        color: '#9f1239',
+                                        color: proposalDocumentPrimitives.rose800,
                                         lineHeight: '1.6',
                                         fontWeight: '600'
                                     }}>
@@ -471,19 +472,19 @@ function GroupBillingInfo({ type, distributor, formatCNPJ, productNames = [], bi
 
 // Helper component for Price Study Section
 function PriceStudySection({ themePrimary }: { themePrimary?: string }) {
-    const primaryColor = themePrimary || '#1e3a5f';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
     return (
         <div style={{ marginTop: '20px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: '700', color: primaryColor, marginBottom: '10px', textTransform: 'uppercase' }}>
                 Estudo de Preços
             </h3>
             <div style={{
-                backgroundColor: '#fffbeb',
-                border: '1px solid #fef3c7',
+                backgroundColor: proposalDocumentPrimitives.amber50,
+                border: `1px solid ${proposalDocumentPrimitives.amber100}`,
                 borderRadius: '8px',
                 padding: '16px',
                 fontSize: '12px',
-                color: '#92400e',
+                color: proposalDocumentPrimitives.amber800,
                 lineHeight: '1.5'
             }}>
                 <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Validade da Estimativa</div>

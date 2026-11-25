@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives, proposalDocumentBand } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { Deal, DealProduct } from '@/types/deal';
 import { ProposalSoftwareMainHighlight, ProposalSoftwareAdditional } from './ProposalSoftwareComponents';
@@ -13,8 +14,8 @@ interface ProposalSoftwarePageProps {
 }
 
 export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, simplifiedProductNames = {}, themePrimary, themeAccent, layout = 'portrait' }: ProposalSoftwarePageProps & { layout?: 'portrait' | 'landscape' }) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     
     const isLandscape = layout === 'landscape';
     const width = isLandscape ? '297mm' : '210mm';
@@ -79,7 +80,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                 style={{
                     width: width,
                     height: height,
-                    backgroundColor: '#ffffff',
+                    backgroundColor: proposalDocumentPrimitives.paperWhite,
                     display: 'flex',
                     flexDirection: 'column',
                     position: 'relative',
@@ -96,7 +97,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     right: 0,
                     width: '100%',
                     height: '6px',
-                    background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)`
+                    background: proposalDocumentBand(accentColor, primaryColor)
                 }} />
 
                 {/* Header */}
@@ -106,7 +107,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     </div>
                     <h1 style={{ fontSize: '32px', fontWeight: '800', color: primaryColor, marginBottom: '8px', letterSpacing: '-1px' }}>
                         {sectionTitle} & <span style={{ color: accentColor }}>{sectionAccent}</span>
-                        {totalPages > 1 && <span style={{ fontSize: '16px', color: '#64748b', marginLeft: '12px', fontWeight: '400' }}>({1}/{totalPages})</span>}
+                        {totalPages > 1 && <span style={{ fontSize: '16px', color: proposalDocumentPrimitives.slate500, marginLeft: '12px', fontWeight: '400' }}>({1}/{totalPages})</span>}
                     </h1>
                     <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                 </div>
@@ -125,20 +126,20 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     {tiles.map((tile, idx) => (
                         <div key={idx} style={{
                             padding: isLandscape ? '15px' : '25px',
-                            backgroundColor: idx === 0 ? '#f0f9ff' : idx === 1 ? '#fef2f2' : '#f0fdf4',
+                            backgroundColor: idx === 0 ? proposalDocumentPrimitives.sky50 : idx === 1 ? proposalDocumentPrimitives.red50 : proposalDocumentPrimitives.green50,
                             borderRadius: '8px',
                             textAlign: 'center',
-                            border: `1px solid ${idx === 0 ? '#bfdbfe' : idx === 1 ? '#fecaca' : '#bbf7d0'}`
+                            border: `1px solid ${idx === 0 ? proposalDocumentPrimitives.blue200 : idx === 1 ? proposalDocumentPrimitives.red200 : proposalDocumentPrimitives.green200}`
                         }}>
                             <div style={{
                                 fontSize: '32px',
                                 fontWeight: '700',
-                                color: idx === 0 ? primaryColor : idx === 1 ? accentColor : '#16a34a',
+                                color: idx === 0 ? primaryColor : idx === 1 ? accentColor : proposalDocumentPrimitives.green600,
                                 marginBottom: '8px'
                             }}>
                                 {tile.value}
                             </div>
-                            <div style={{ fontSize: '11px', color: '#4b5563', fontWeight: '600', textTransform: 'uppercase' }}>
+                            <div style={{ fontSize: '11px', color: proposalDocumentPrimitives.gray600, fontWeight: '600', textTransform: 'uppercase' }}>
                                 {tile.label}
                             </div>
                         </div>
@@ -152,7 +153,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     themeAccent={accentColor}
                 />
 
-                <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: '1px solid #f1f5f9', color: '#9ca3af', fontSize: '11px' }}>
+                <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`, color: proposalDocumentPrimitives.gray400, fontSize: '11px' }}>
                     Infodive IT Solutions - Pag 1 de {totalPages}
                 </div>
             </div>
@@ -166,7 +167,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                     style={{
                         width: width,
                         height: height,
-                        backgroundColor: '#ffffff',
+                        backgroundColor: proposalDocumentPrimitives.paperWhite,
                         display: 'flex',
                         flexDirection: 'column',
                         position: 'relative',
@@ -177,14 +178,14 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                         marginBottom: index < extraChunks.length - 1 ? '40px' : 0
                     }}
                 >
-                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: `linear-gradient(90deg, ${accentColor} 0%, ${primaryColor} 100%)` }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '6px', background: proposalDocumentBand(accentColor, primaryColor) }} />
                     <div style={{ marginBottom: isLandscape ? '25px' : '50px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isLandscape ? '20px' : '40px' }}>
                             <img src="/assets/logo-infodive.png" alt="Infodive" style={{ height: '42px' }} />
                         </div>
                         <h1 style={{ fontSize: '32px', fontWeight: '800', color: primaryColor, marginBottom: '8px', letterSpacing: '-1px' }}>
                             {sectionTitle} & <span style={{ color: accentColor }}>{sectionAccent}</span>
-                            <span style={{ fontSize: '16px', color: '#64748b', marginLeft: '12px', fontWeight: '400' }}>({index + 2}/{totalPages})</span>
+                            <span style={{ fontSize: '16px', color: proposalDocumentPrimitives.slate500, marginLeft: '12px', fontWeight: '400' }}>({index + 2}/{totalPages})</span>
                         </h1>
                         <div style={{ width: '40px', height: '4px', backgroundColor: accentColor, borderRadius: '2px', marginBottom: '16px' }} />
                     </div>
@@ -198,7 +199,7 @@ export function ProposalSoftwarePage({ deal, softwareHighlights, benefitTiles, s
                         />
                     </div>
 
-                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: '1px solid #f1f5f9', color: '#9ca3af', fontSize: '11px' }}>
+                    <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', justifyContent: 'center', borderTop: `1px solid ${proposalDocumentPrimitives.slate100}`, color: proposalDocumentPrimitives.gray400, fontSize: '11px' }}>
                         Infodive IT Solutions - Pag {index + 2} de {totalPages}
                     </div>
                 </div>

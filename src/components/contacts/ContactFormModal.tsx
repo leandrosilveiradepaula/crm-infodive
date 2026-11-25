@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeInput, ThemeLabel, ThemeSectionHeader } from '@/components/ui/theme/ThemeComponents';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
 import { SignatureParserModal } from './SignatureParserModal';
 import { Sparkles, Loader2, CheckCircle2, User, Mail, Linkedin, Phone } from 'lucide-react';
 import { getAccounts } from '@/app/(dashboard)/customers/actions';
@@ -25,6 +26,8 @@ interface ContactFormModalProps {
 
 export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: ContactFormModalProps) {
     const [loading, setLoading] = useState(false);
+    const formId = useId();
+    useDialogBackgroundInert(isOpen);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [isParserOpen, setIsParserOpen] = useState(false);
 
@@ -131,17 +134,16 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-2xl animate-in zoom-in-95 duration-300">
-                <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border flex flex-row items-center justify-between relative">
-                    <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
+            <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 max-h-[var(--ds-form-dialog-max-height)] overflow-y-auto rounded-[var(--radius-panel)] shadow-card-ui">
+                <DialogHeader className="bg-surface-subtle p-[var(--ds-form-dialog-gutter)] border-b border-border flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between relative">
                     <div className="relative z-10">
-                        <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-3">
-                            <div className="p-2.5 bg-primary/20 rounded-xl">
+                        <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3">
+                            <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">
                                 <User className="w-5 h-5 text-primary" />
                             </div>
                             {contact ? 'Editar Contato' : 'Novo Contato'}
                         </DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2">
+                        <DialogDescription className="ds-type-body text-muted-foreground mt-2 leading-relaxed">
                             Gerencie as informações do seu contato
                         </DialogDescription>
                     </div>
@@ -150,7 +152,7 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                             variant="outline"
                             size="sm"
                             onClick={() => setIsParserOpen(true)}
-                            className="relative z-10 bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 hover:text-teal-700 border-teal-200 dark:border-teal-500/30 rounded-xl font-bold px-4 h-10 shadow-sm"
+                            className="relative z-10 gap-2 w-full shrink-0 sm:w-auto"
                         >
                             <Sparkles className="mr-2 h-4 w-4" />
                             Importar de Assinatura
@@ -164,15 +166,15 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     onDataParsed={handleSignatureData}
                 />
 
-                <form onSubmit={handleSubmit} className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="p-[var(--ds-form-dialog-gutter)] grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-2 space-y-1">
-                        <ThemeLabel>Empresa *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-account`}>Empresa *</ThemeLabel>
                         <Select
                             value={formData.account_id}
                             onValueChange={(val) => setFormData(prev => ({ ...prev, account_id: val }))}
                             required
                         >
-                            <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-primary border">
+                            <SelectTrigger id={`${formId}-account`} aria-label="Empresa" className="bg-background border-border text-foreground h-[var(--ds-control-height-default)] rounded-[var(--radius-panel)] ds-type-control focus:ring-1 focus:ring-primary border">
                                 <SelectValue placeholder="Selecione uma empresa..." />
                             </SelectTrigger>
                             <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -184,9 +186,9 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Nome Completo *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-name`}>Nome Completo *</ThemeLabel>
                         <div className="relative">
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-name`}
                                 required
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -197,17 +199,17 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Cargo</ThemeLabel>
-                        <ThemeInput
+                        <ThemeLabel htmlFor={`${formId}-role`}>Cargo</ThemeLabel>
+                        <ThemeInput id={`${formId}-role`}
                             value={formData.role}
                             onChange={e => setFormData({ ...formData, role: e.target.value })}
                         />
                     </div>
 
                     <div className="col-span-2 space-y-1">
-                        <ThemeLabel>Email *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-email`}>Email *</ThemeLabel>
                         <div className="relative">
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-email`}
                                 required
                                 type="email"
                                 value={formData.email}
@@ -219,9 +221,9 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>LinkedIn</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-linkedin`}>LinkedIn</ThemeLabel>
                         <div className="relative">
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-linkedin`}
                                 value={formData.linkedin}
                                 onChange={e => setFormData({ ...formData, linkedin: e.target.value })}
                                 placeholder="https://linkedin.com/in/perfil"
@@ -232,9 +234,9 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Celular</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-mobile`}>Celular</ThemeLabel>
                         <div className="relative">
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-mobile`}
                                 value={formData.mobile_phone}
                                 onChange={e => setFormData({ ...formData, mobile_phone: e.target.value })}
                                 className="pl-10 h-[34px]"
@@ -244,8 +246,8 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Telefone Fixo</ThemeLabel>
-                        <ThemeInput
+                        <ThemeLabel htmlFor={`${formId}-landline`}>Telefone Fixo</ThemeLabel>
+                        <ThemeInput id={`${formId}-landline`}
                             value={formData.landline_phone}
                             onChange={e => setFormData({ ...formData, landline_phone: e.target.value })}
                         />
@@ -260,23 +262,21 @@ export function ContactFormModal({ isOpen, onClose, contact, onSuccess }: Contac
                         />
                         <label
                             htmlFor="is_primary"
-                            className="text-xs font-bold uppercase tracking-widest leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+                            className="text-metadata-ui font-bold uppercase tracking-widest leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
                         >
                             Contato Principal
                         </label>
                     </div>
 
-                    <DialogFooter className="col-span-2 border-t border-border pt-10 mt-4 flex items-center justify-end gap-3">
-                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
+                    <DialogFooter className="col-span-2 border-t border-border pt-4 mt-2 flex items-center justify-end gap-3">
+                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-[var(--radius-panel)] transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} size="lg" className="w-full sm:w-auto">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                                <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                                    <User className="h-3 w-3" />
-                                </div>
+                                <User className="h-4 w-4" aria-hidden="true" />
                             )}
                             {contact ? 'Salvar Alterações' : 'Cadastrar Contato'}
                         </Button>

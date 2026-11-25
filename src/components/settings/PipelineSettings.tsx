@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { pipelineStageDefaultColor } from '@/design-system/domain-visual-defaults';
 import { getPipelineStages, savePipelineStages } from '@/app/(dashboard)/settings/actions';
 import type { PipelineStage } from '@/services/SettingsService';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,7 @@ export function PipelineSettings() {
     const addStage = () => setStages([...stages, {
         id: crypto.randomUUID(),
         name: 'Nova Etapa',
-        color: '#888888',
+        color: pipelineStageDefaultColor,
         order_index: stages.length
     }]);
 
@@ -62,15 +63,15 @@ export function PipelineSettings() {
         <div className="space-y-6">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                    <div className="p-2.5 bg-primary/10 rounded-[var(--radius-panel)]">
                         <Kanban className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-black text-foreground tracking-tight">Estágios do Pipeline</h3>
-                        <p className="text-xs text-muted-foreground font-medium">Personalize as etapas do seu processo de vendas.</p>
+                        <h3 className="text-section-title font-black text-foreground tracking-tight">Estágios do Pipeline</h3>
+                        <p className="text-metadata-ui text-muted-foreground font-medium">Personalize as etapas do seu processo de vendas.</p>
                     </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={fetchStages} disabled={loading} className="text-muted-foreground hover:bg-muted h-9 w-9 rounded-xl">
+                <Button variant="ghost" size="icon" onClick={fetchStages} disabled={loading} className="text-muted-foreground hover:bg-muted h-9 w-9 rounded-[var(--radius-panel)]">
                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
             </div>
@@ -81,13 +82,13 @@ export function PipelineSettings() {
                 ) : (
                     <div className="space-y-3">
                         {stages.map((stage, index) => (
-                            <div key={stage.id} className="flex items-center gap-4 bg-muted/20 p-4 rounded-xl border border-border group hover:border-primary/30 transition-colors">
+                            <div key={stage.id} className="flex items-center gap-4 bg-muted/20 p-4 rounded-[var(--radius-panel)] border border-border group hover:border-primary/30 transition-colors">
                                 <GripVertical className="h-5 w-5 text-muted-foreground/30 cursor-move flex-shrink-0" />
 
                                 {/* Color swatch + picker */}
                                 <div className="relative flex-shrink-0">
                                     <div
-                                        className="h-8 w-8 rounded-lg border border-border shadow-sm cursor-pointer"
+                                        className="h-8 w-8 rounded-[var(--radius-control)] border border-border shadow-control-ui cursor-pointer"
                                         style={{ backgroundColor: stage.color }}
                                         title="Clique para mudar a cor"
                                     />
@@ -106,14 +107,14 @@ export function PipelineSettings() {
                                     placeholder="Nome da etapa"
                                 />
 
-                                <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
+                                <span className="text-metadata-ui font-mono text-muted-foreground bg-muted px-2 py-1 rounded hidden group-hover:inline">
                                     #{index + 1}
                                 </span>
 
                                 <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+                                    className="text-muted-foreground hover:text-destructive-readable hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all rounded-[var(--radius-control)]"
                                     onClick={() => removeStage(stage.id)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -124,12 +125,12 @@ export function PipelineSettings() {
                 )}
 
                 <div className="flex flex-col gap-4">
-                    <Button onClick={addStage} variant="outline" className="w-full border-dashed border-border hover:bg-muted text-muted-foreground hover:text-foreground h-12 rounded-xl">
+                    <Button onClick={addStage} variant="outline" className="w-full border-dashed border-border hover:bg-muted text-muted-foreground hover:text-foreground h-12 rounded-[var(--radius-panel)]">
                         <Plus className="h-4 w-4 mr-2" /> Adicionar Etapa
                     </Button>
 
                     <div className="flex justify-end pt-4 border-t border-border">
-                        <Button onClick={handleSave} disabled={saving || loading} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-xl shadow-lg shadow-primary/10">
+                        <Button onClick={handleSave} disabled={saving || loading} className="bg-primary hover:bg-primary/90 font-bold text-white px-8 h-11 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/10">
                             {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Check className="h-4 w-4 mr-2" />}
                             Salvar Etapas
                         </Button>

@@ -28,35 +28,35 @@ function formatFileSize(bytes: number): string {
 }
 
 function getFileIcon(mimeType: string) {
-    if (mimeType === 'application/pdf') return <FileText className="w-5 h-5 text-red-500" />;
+    if (mimeType === 'application/pdf') return <FileText className="w-5 h-5 text-destructive-readable" />;
     if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType === 'text/csv')
-        return <FileSpreadsheet className="w-5 h-5 text-emerald-500" />;
+        return <FileSpreadsheet className="w-5 h-5 text-success-readable" />;
     if (mimeType.includes('presentation') || mimeType.includes('powerpoint'))
-        return <Presentation className="w-5 h-5 text-orange-500" />;
-    if (mimeType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-teal-500" />;
-    if (mimeType.includes('word')) return <FileText className="w-5 h-5 text-blue-500" />;
+        return <Presentation className="w-5 h-5 text-warning-readable" />;
+    if (mimeType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-muted-foreground" />;
+    if (mimeType.includes('word')) return <FileText className="w-5 h-5 text-primary" />;
     if (mimeType.includes('zip') || mimeType.includes('rar'))
-        return <FileArchive className="w-5 h-5 text-yellow-600" />;
+        return <FileArchive className="w-5 h-5 text-warning-readable" />;
     return <FileIcon className="w-5 h-5 text-muted-foreground" />;
 }
 
 function getCategoryBadge(category: DocumentCategory, entityType: EntityType) {
     const map: Record<string, { bg: string; text: string }> = {
-        contrato: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
-        contrato_social: { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-300' },
-        financeiro: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300' },
-        fiscal: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300' },
-        certificado: { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-700 dark:text-cyan-300' },
-        ata: { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-300' },
-        nf: { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-300' },
-        tecnico: { bg: 'bg-cyan-100 dark:bg-cyan-900/40', text: 'text-cyan-700 dark:text-cyan-300' },
+        contrato: { bg: 'bg-primary/10 dark:bg-primary/10', text: 'text-primary dark:text-primary' },
+        contrato_social: { bg: 'bg-primary/10 dark:bg-primary/10', text: 'text-primary dark:text-primary' },
+        financeiro: { bg: 'bg-destructive-subtle dark:bg-destructive-subtle', text: 'text-destructive-readable dark:text-destructive-readable' },
+        fiscal: { bg: 'bg-info-subtle dark:bg-info-subtle', text: 'text-muted-foreground dark:text-muted-foreground' },
+        certificado: { bg: 'bg-info-subtle dark:bg-info-subtle', text: 'text-muted-foreground dark:text-muted-foreground' },
+        ata: { bg: 'bg-warning-subtle dark:bg-warning-subtle', text: 'text-warning-readable dark:text-warning-readable' },
+        nf: { bg: 'bg-success-subtle dark:bg-success-subtle', text: 'text-success-readable dark:text-success-readable' },
+        tecnico: { bg: 'bg-info-subtle dark:bg-info-subtle', text: 'text-muted-foreground dark:text-muted-foreground' },
         outro: { bg: 'bg-muted', text: 'text-muted-foreground' },
     };
     const categories = getDocumentCategories(entityType);
     const label = categories.find((c) => c.value === category)?.label ?? category;
     const colors = map[category] ?? map.outro;
     return (
-        <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${colors.bg} ${colors.text}`}>
+        <span className={`px-1.5 py-0.5 rounded-[var(--radius-control)] text-metadata-ui font-bold uppercase tracking-wider ${colors.bg} ${colors.text}`}>
             {label}
         </span>
     );
@@ -178,11 +178,11 @@ export const DocumentsTab = ({
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h3 className="text-lg font-bold text-foreground tracking-tight">Documentos</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="text-section-title font-bold text-foreground tracking-tight">Documentos</h3>
+                    <p className="text-body-ui text-muted-foreground">
                         {entityType === 'account' ? 'Documentos da empresa' : 'Arquivos anexados à oportunidade'}
                         {documents.length > 0 && (
-                            <span className="ml-1 text-xs font-bold text-muted-foreground/60">
+                            <span className="ml-1 text-metadata-ui font-bold text-muted-foreground/60">
                                 ({documents.length})
                             </span>
                         )}
@@ -192,7 +192,7 @@ export const DocumentsTab = ({
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value as DocumentCategory)}
-                        className="h-9 rounded-lg border border-border bg-card text-xs font-bold px-2 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        className="h-9 rounded-[var(--radius-panel)] border border-border bg-card text-metadata-ui font-bold px-2 text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     >
                         {categories.map((cat) => (
                             <option key={cat.value} value={cat.value}>
@@ -204,7 +204,7 @@ export const DocumentsTab = ({
                     <Button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="bg-primary hover:bg-primary/90 text-white font-bold text-xs tracking-wide shadow-sm"
+                        className="bg-primary hover:bg-primary/90 text-white font-bold text-metadata-ui tracking-wide shadow-control-ui"
                     >
                         {uploading ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -234,10 +234,10 @@ export const DocumentsTab = ({
                 onDrop={handleDrop}
                 onClick={() => !uploading && fileInputRef.current?.click()}
                 className={`
-                    border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center cursor-pointer
+                    border-2 border-dashed rounded-[var(--radius-panel)] p-8 flex flex-col items-center justify-center text-center cursor-pointer
                     transition-all duration-300 group
                     ${isDragging
-                        ? 'border-primary bg-primary/10 scale-[1.01] shadow-lg'
+                        ? 'border-primary bg-primary/10 scale-[1.01] shadow-overlay-ui'
                         : 'border-border hover:border-primary/60 hover:bg-primary/5 dark:hover:bg-primary/10'
                     }
                 `}
@@ -255,10 +255,10 @@ export const DocumentsTab = ({
                         <HardDrive className={`w-6 h-6 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'}`} />
                     )}
                 </div>
-                <p className="text-sm font-bold text-foreground">
+                <p className="text-body-ui font-bold text-foreground">
                     {isDragging ? 'Solte os arquivos aqui' : 'Clique ou arraste arquivos'}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-metadata-ui text-muted-foreground mt-1">
                     PDF, Word, Excel, PowerPoint, Imagens (Máx. 25 MB)
                 </p>
             </div>
@@ -268,8 +268,8 @@ export const DocumentsTab = ({
                 <div className="flex items-center gap-2 flex-wrap">
                     <button
                         onClick={() => setFilter('all')}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filter === 'all'
-                                ? 'bg-primary text-white shadow-sm'
+                        className={`px-3 py-1.5 rounded-[var(--radius-panel)] text-metadata-ui font-bold uppercase tracking-wider transition-all ${filter === 'all'
+                                ? 'bg-primary text-white shadow-control-ui'
                                 : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                             }`}
                     >
@@ -282,8 +282,8 @@ export const DocumentsTab = ({
                             <button
                                 key={cat.value}
                                 onClick={() => setFilter(cat.value)}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filter === cat.value
-                                        ? 'bg-primary text-white shadow-sm'
+                                className={`px-3 py-1.5 rounded-[var(--radius-panel)] text-metadata-ui font-bold uppercase tracking-wider transition-all ${filter === cat.value
+                                        ? 'bg-primary text-white shadow-control-ui'
                                         : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
                                     }`}
                             >
@@ -301,11 +301,11 @@ export const DocumentsTab = ({
                 </div>
             ) : filteredDocs.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-                    <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+                    <div className="h-16 w-16 rounded-[var(--radius-panel)] bg-muted/50 flex items-center justify-center mb-4">
                         <FolderOpen className="w-8 h-8 text-muted-foreground/40" />
                     </div>
-                    <p className="text-sm font-bold text-foreground">Nenhum documento encontrado</p>
-                    <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                    <p className="text-body-ui font-bold text-foreground">Nenhum documento encontrado</p>
+                    <p className="text-metadata-ui text-muted-foreground mt-1 max-w-xs">
                         {filter !== 'all'
                             ? 'Não há documentos nessa categoria. Tente "Todos".'
                             : 'Arraste arquivos para a área acima ou clique em "Upload" para começar.'}
@@ -316,25 +316,25 @@ export const DocumentsTab = ({
                     {filteredDocs.map((doc) => (
                         <div
                             key={doc.id}
-                            className="bg-card border border-border rounded-xl p-3 flex items-center justify-between hover:bg-muted/30 dark:hover:bg-muted/10 transition-all group"
+                            className="bg-card border border-border rounded-[var(--radius-panel)] p-3 flex items-center justify-between hover:bg-muted/30 dark:hover:bg-muted/10 transition-all group"
                         >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="h-10 w-10 bg-muted/50 dark:bg-muted/20 rounded-lg flex items-center justify-center shrink-0">
+                                <div className="h-10 w-10 bg-muted/50 dark:bg-muted/20 rounded-[var(--radius-panel)] flex items-center justify-center shrink-0">
                                     {getFileIcon(doc.file_type)}
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                                        <p className="text-body-ui font-bold text-foreground truncate group-hover:text-primary transition-colors">
                                             {doc.name}
                                         </p>
                                         {doc.source_name && (
-                                            <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 shrink-0">
+                                            <span className="px-1.5 py-0.5 rounded-[var(--radius-control)] text-metadata-ui font-bold uppercase tracking-wider bg-info-subtle dark:bg-info-subtle text-muted-foreground dark:text-muted-foreground shrink-0">
                                                 {doc.source_name}
                                             </span>
                                         )}
                                         {getCategoryBadge(doc.category, entityType)}
                                     </div>
-                                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono mt-0.5">
+                                    <div className="flex items-center gap-2 text-metadata-ui text-muted-foreground font-mono mt-0.5">
                                         <span>{formatFileSize(doc.file_size)}</span>
                                         <span className="opacity-40">•</span>
                                         <span>
@@ -361,7 +361,7 @@ export const DocumentsTab = ({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500"
+                                    className="h-8 w-8 hover:bg-destructive-subtle dark:hover:bg-destructive-subtle hover:text-destructive-readable"
                                     onClick={() => handleDelete(doc)}
                                     disabled={deletingId === doc.id}
                                     title="Excluir"

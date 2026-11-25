@@ -51,9 +51,9 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-2xl bg-card border-border text-foreground p-0 overflow-hidden max-h-[90vh] flex flex-col">
-                <DialogHeader className="bg-gradient-to-r from-emerald-500/10 to-transparent p-6 border-b border-border shrink-0">
-                    <DialogTitle className="text-xl font-black tracking-tight text-foreground flex gap-2 items-center">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <DialogHeader className="bg-success-subtle p-6 border-b border-border shrink-0">
+                    <DialogTitle className="text-section-title font-black tracking-tight text-foreground flex gap-2 items-center">
+                        <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
                         Converter Lead
                     </DialogTitle>
                 </DialogHeader>
@@ -62,7 +62,7 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
                     <form id="conversion-form" onSubmit={handleSubmit} className="space-y-6">
                         {/* Company Data */}
                         <div className="space-y-4">
-                            <h4 className="text-xs font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest border-b border-border pb-2">
+                            <h4 className="text-metadata-ui font-black text-success-readable dark:text-success-readable uppercase tracking-widest border-b border-border pb-2">
                                 Dados Corporativos
                             </h4>
                             <div className="grid grid-cols-2 gap-4">
@@ -76,7 +76,7 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
                                         required
                                         value={formData.cnpj}
                                         onChange={e => setFormData({ ...formData, cnpj: e.target.value })}
-                                        className="border-emerald-500/20 focus:border-emerald-500"
+                                        className="border-success/20 focus:border-success"
                                         placeholder="00.000.000/0000-00"
                                     />
                                 </div>
@@ -93,7 +93,7 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
 
                         {/* Address Data */}
                         <div className="space-y-4">
-                            <h4 className="text-xs font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest border-b border-border pb-2">
+                            <h4 className="text-metadata-ui font-black text-success-readable dark:text-success-readable uppercase tracking-widest border-b border-border pb-2">
                                 Endereço
                             </h4>
                             <div className="grid grid-cols-6 gap-4">
@@ -156,7 +156,7 @@ export function LeadConversionModal({ isOpen, onClose, lead }: LeadConversionMod
                     <Button variant="ghost" type="button" onClick={onClose} className="mr-2 text-muted-foreground hover:text-foreground hover:bg-muted">
                         Cancelar
                     </Button>
-                    <Button type="submit" form="conversion-form" disabled={loading} className="bg-emerald-600 hover:bg-emerald-500 font-bold text-white">
+                    <Button type="submit" form="conversion-form" disabled={loading} className="bg-success hover:bg-success font-bold text-white">
                         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                         Concluir Conversão
                     </Button>

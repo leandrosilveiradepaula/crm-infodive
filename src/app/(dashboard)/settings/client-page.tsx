@@ -1,5 +1,7 @@
 'use client';
 
+
+import { organizationBrandDefaults } from '@/design-system/domain-visual-defaults';
 import { useState, useEffect } from 'react';
 import { PipelineSettings } from '@/components/settings/PipelineSettings';
 import { OrganizationThemeSettings } from '@/components/settings/OrganizationThemeSettings';
@@ -41,21 +43,21 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
+                <div className="p-2.5 bg-primary/10 rounded-[var(--radius-panel)]">
                     <Palette className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-foreground tracking-tight">Identidade Visual</h3>
-                    <p className="text-xs text-muted-foreground font-medium">Customize como sua empresa aparece no CRM e nas Propostas.</p>
+                    <h3 className="text-section-title font-black text-foreground tracking-tight">Identidade Visual</h3>
+                    <p className="text-metadata-ui text-muted-foreground font-medium">Customize como sua empresa aparece no CRM e nas Propostas.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Logo Upload */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Logo da Empresa</Label>
-                    <div className="flex items-center gap-6 p-5 bg-muted/20 border-2 border-dashed border-border rounded-2xl group hover:border-primary/50 transition-all">
-                        <div className="h-20 w-20 bg-card rounded-xl border border-border flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform">
+                    <Label className="uppercase tracking-[0.2em] text-metadata-ui font-black text-muted-foreground">Logo da Empresa</Label>
+                    <div className="flex items-center gap-6 p-5 bg-muted/20 border-2 border-dashed border-border rounded-[var(--radius-panel)] group hover:border-primary/50 transition-all">
+                        <div className="h-20 w-20 bg-card rounded-[var(--radius-panel)] border border-border flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-105 transition-transform">
                             {form.logo_url ? (
                                 <img src={form.logo_url} alt="Logo" className="w-full h-full object-contain" />
                             ) : (
@@ -63,42 +65,42 @@ function BrandingSettings({ initial }: { initial: OrgSettings }) {
                             )}
                         </div>
                         <div className="space-y-2">
-                            <Button variant="outline" size="sm" className="font-bold uppercase text-[10px] tracking-widest border-border hover:bg-muted">
+                            <Button variant="outline" size="sm" className="font-bold uppercase text-metadata-ui tracking-widest border-border hover:bg-muted">
                                 Alterar Logo
                             </Button>
-                            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">PNG ou SVG. Máx 2MB.</p>
+                            <p className="text-metadata-ui text-muted-foreground font-medium uppercase tracking-wide">PNG ou SVG. Máx 2MB.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Brand Colors */}
                 <div className="space-y-3">
-                    <Label className="uppercase tracking-[0.2em] text-[10px] font-black text-muted-foreground">Cores da Marca</Label>
+                    <Label className="uppercase tracking-[0.2em] text-metadata-ui font-black text-muted-foreground">Cores da Marca</Label>
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
+                        <div className="p-4 bg-muted/20 rounded-[var(--radius-panel)] border border-border">
+                            <Label className="text-metadata-ui font-bold text-muted-foreground uppercase mb-2 block">Cor Primária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor primária da marca"
-                                    value={form.primary_color || '#3b82f6'} 
+                                    value={form.primary_color || organizationBrandDefaults.primary}
                                     onChange={e => setForm({ ...form, primary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
-                                <span className="font-mono text-xs font-bold">{form.primary_color || '#3b82f6'}</span>
+                                <span className="font-mono text-metadata-ui font-bold">{form.primary_color || organizationBrandDefaults.primary}</span>
                             </div>
                         </div>
-                        <div className="p-4 bg-muted/20 rounded-xl border border-border">
-                            <Label className="text-[9px] font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
+                        <div className="p-4 bg-muted/20 rounded-[var(--radius-panel)] border border-border">
+                            <Label className="text-metadata-ui font-bold text-muted-foreground uppercase mb-2 block">Cor Secundária</Label>
                             <div className="flex items-center gap-3">
                                 <input 
                                     type="color"
                                     aria-label="Selecionar cor secundária da marca"
-                                    value={form.secondary_color || '#1e293b'} 
+                                    value={form.secondary_color || organizationBrandDefaults.secondary}
                                     onChange={e => setForm({ ...form, secondary_color: e.target.value })}
                                     className="h-8 w-8 rounded cursor-pointer border-none bg-transparent"
                                 />
-                                <span className="font-mono text-xs font-bold">{form.secondary_color || '#1e293b'}</span>
+                                <span className="font-mono text-metadata-ui font-bold">{form.secondary_color || organizationBrandDefaults.secondary}</span>
                             </div>
                         </div>
                     </div>
@@ -138,38 +140,38 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 bg-primary/10 rounded-xl">
+                <div className="p-2.5 bg-primary/10 rounded-[var(--radius-panel)]">
                     <Building2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-foreground tracking-tight">Dados da Instituição</h3>
-                    <p className="text-xs text-muted-foreground font-medium">Informações cadastrais e fiscais da organização.</p>
+                    <h3 className="text-section-title font-black text-foreground tracking-tight">Dados da Instituição</h3>
+                    <p className="text-metadata-ui text-muted-foreground font-medium">Informações cadastrais e fiscais da organização.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Razão Social / Nome Fantasia</Label>
+                    <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Razão Social / Nome Fantasia</Label>
                     <div className="relative group">
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
                             aria-label="Razão social ou nome fantasia"
                             value={form.name}
                             onChange={e => setForm({ ...form, name: e.target.value })}
-                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                             placeholder="Nome da sua empresa"
                         />
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Email Institucional</Label>
+                    <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Email Institucional</Label>
                     <div className="relative group">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         <Input
                             aria-label="Email institucional"
                             value={form.support_email}
                             onChange={e => setForm({ ...form, support_email: e.target.value })}
-                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="pl-10 h-[38px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                             placeholder="suporte@empresa.com"
                         />
                     </div>
@@ -178,22 +180,22 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CNPJ</Label>
+                    <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">CNPJ</Label>
                     <Input
                         aria-label="CNPJ da empresa"
                             value={form.cnpj || ''}
                         onChange={e => setForm({ ...form, cnpj: e.target.value })}
-                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
+                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-mono text-body-ui font-bold"
                         placeholder="00.000.000/0000-00"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
+                    <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Inscrição Estadual (IE)</Label>
                     <Input
                         aria-label="Inscrição estadual"
                             value={form.ie || ''}
                         onChange={e => setForm({ ...form, ie: e.target.value })}
-                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-xl font-mono text-sm font-bold"
+                        className="h-[38px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-mono text-body-ui font-bold"
                         placeholder="IE da empresa"
                     />
                 </div>
@@ -202,7 +204,7 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             <Separator className="bg-border/50" />
 
             <div className="space-y-4">
-                <h4 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                <h4 className="text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
                     <span className="w-6 h-[1px] bg-border" />
                     Endereço Sede
                     <span className="flex-1 h-[1px] bg-border" />
@@ -210,61 +212,61 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                     <div className="md:col-span-2 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">CEP</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">CEP</Label>
                         <Input
                             aria-label="CEP"
                             value={form.zip || ''}
                             onChange={e => setForm({ ...form, zip: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                             placeholder="00000-000"
                         />
                     </div>
                     <div className="md:col-span-3 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Logradouro</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Logradouro</Label>
                         <Input
                             aria-label="Logradouro"
                             value={form.street || ''}
                             onChange={e => setForm({ ...form, street: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                         />
                     </div>
                     <div className="md:col-span-1 space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Nº</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Nº</Label>
                         <Input
                             aria-label="Número do endereço"
                             value={form.number || ''}
                             onChange={e => setForm({ ...form, number: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                         />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Bairro</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Bairro</Label>
                         <Input
                             aria-label="Bairro"
                             value={form.neighborhood || ''}
                             onChange={e => setForm({ ...form, neighborhood: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">Cidade</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">Cidade</Label>
                         <Input
                             aria-label="Cidade"
                             value={form.city || ''}
                             onChange={e => setForm({ ...form, city: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui"
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em]">UF</Label>
+                        <Label className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em]">UF</Label>
                         <Input
                             aria-label="Estado (UF)"
                             value={form.state || ''}
                             onChange={e => setForm({ ...form, state: e.target.value })}
-                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-xl font-bold text-sm uppercase"
+                            className="h-[34px] bg-surface-raised border-border focus:bg-background rounded-[var(--radius-panel)] font-bold text-body-ui uppercase"
                             maxLength={2}
                         />
                     </div>
@@ -283,15 +285,15 @@ function GeneralSettings({ initial }: { initial: OrgSettings }) {
             {/* Application Preferences */}
             <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-muted rounded-lg border border-border">
+                    <div className="p-2 bg-muted rounded-[var(--radius-control)] border border-border">
                         <Palette className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <h3 className="text-sm font-black text-foreground">Preferências da Aplicação</h3>
+                    <h3 className="text-body-ui font-black text-foreground">Preferências da Aplicação</h3>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-muted/10 rounded-xl border border-border">
+                <div className="flex items-center justify-between p-4 bg-muted/10 rounded-[var(--radius-panel)] border border-border">
                     <div className="space-y-0.5">
-                        <Label className="text-sm text-foreground font-bold">Modo Escuro / Claro</Label>
-                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
+                        <Label className="text-body-ui text-foreground font-bold">Modo Escuro / Claro</Label>
+                        <p className="text-metadata-ui text-muted-foreground font-medium uppercase tracking-wide">Alternar tema da interface pessoal</p>
                     </div>
                     <Switch
                         aria-label="Alternar modo escuro"

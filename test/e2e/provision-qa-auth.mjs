@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { randomBytes } from 'node:crypto';
 import { appendFile, mkdtemp, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 
 /**
  * CRM #214 B4 — protected, QA-only user provisioning. Never run against
@@ -180,7 +180,7 @@ export async function provisionQaAuth(env, clientFactory = createClient) {
     return { createdOrRotated: credentials.length, tenantCount: 2 };
 }
 
-if (process.argv[1]?.endsWith('/provision-qa-auth.mjs')) {
+if (basename(process.argv[1] || '') === 'provision-qa-auth.mjs') {
     provisionQaAuth(process.env).then(({ createdOrRotated, tenantCount }) => {
         process.stdout.write('CRM_QA_AUTH_PROVISION=READY; profiles=' + createdOrRotated +
             '; tenants=' + tenantCount + '; passwords=redacted\n');

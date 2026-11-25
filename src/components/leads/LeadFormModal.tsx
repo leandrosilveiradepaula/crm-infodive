@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { User, Mail, Phone, Building, Loader2 } from 'lucide-react';
 import { Lead } from '@/types/lead';
 import { ThemeInput, ThemeLabel, ThemeSelect } from '@/components/ui/theme/ThemeComponents';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
 import { createLead, updateLead } from '@/app/(dashboard)/leads/actions';
 
 interface LeadFormModalProps {
@@ -16,6 +17,8 @@ interface LeadFormModalProps {
 
 export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
     const [loading, setLoading] = useState(false);
+    const formId = useId();
+    useDialogBackgroundInert(isOpen);
 
     const [formData, setFormData] = useState<Partial<Lead>>({
         company: '',
@@ -70,26 +73,25 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-2xl animate-in zoom-in-95 duration-300">
-                <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border relative">
-                    <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
-                    <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-3">
-                        <div className="p-2.5 bg-primary/20 rounded-xl">
+            <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 max-h-[var(--ds-form-dialog-max-height)] overflow-y-auto rounded-[var(--radius-panel)] shadow-card-ui">
+                <DialogHeader className="bg-surface-subtle p-[var(--ds-form-dialog-gutter)] border-b border-border relative">
+                    <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3">
+                        <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">
                             <User className="w-5 h-5 text-primary" />
                         </div>
                         {lead ? 'Editar Lead' : 'Novo Lead'}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2">
+                    <DialogDescription className="ds-type-body text-muted-foreground mt-2 leading-relaxed">
                         Gerencie as informações do seu potencial cliente
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="p-10 grid grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="p-[var(--ds-form-dialog-gutter)] grid grid-cols-2 gap-4">
                     <div className="col-span-2 space-y-1">
-                        <ThemeLabel>Empresa *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-company`}>Empresa *</ThemeLabel>
                         <div className="relative">
                             <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-company`}
                                 required
                                 value={formData.company}
                                 onChange={e => setFormData({ ...formData, company: e.target.value })}
@@ -100,10 +102,10 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                     </div>
 
                     <div className="col-span-2 space-y-1">
-                        <ThemeLabel>Nome do Contato *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-contact`}>Nome do Contato *</ThemeLabel>
                         <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-contact`}
                                 required
                                 value={formData.contact_name}
                                 onChange={e => setFormData({ ...formData, contact_name: e.target.value })}
@@ -114,10 +116,10 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Email *</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-email`}>Email *</ThemeLabel>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-email`}
                                 required
                                 type="email"
                                 value={formData.email}
@@ -129,10 +131,10 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                     </div>
 
                     <div className="col-span-2 md:col-span-1 space-y-1">
-                        <ThemeLabel>Telefone</ThemeLabel>
+                        <ThemeLabel htmlFor={`${formId}-phone`}>Telefone</ThemeLabel>
                         <div className="relative">
                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                            <ThemeInput
+                            <ThemeInput id={`${formId}-phone`}
                                 value={formData.phone}
                                 onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                 className="pl-10"
@@ -142,8 +144,8 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                     </div>
 
                     <div className="col-span-2 space-y-1">
-                        <ThemeLabel>Interesse Principal</ThemeLabel>
-                        <ThemeSelect
+                        <ThemeLabel htmlFor={`${formId}-interest`}>Interesse Principal</ThemeLabel>
+                        <ThemeSelect id={`${formId}-interest`}
                             value={formData.interest}
                             onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
                         >
@@ -156,17 +158,15 @@ export function LeadFormModal({ isOpen, onClose, lead }: LeadFormModalProps) {
                         </ThemeSelect>
                     </div>
 
-                    <DialogFooter className="col-span-2 border-t border-border pt-10 mt-4 flex items-center justify-end gap-3">
-                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
+                    <DialogFooter className="col-span-2 border-t border-border pt-4 mt-2 flex items-center justify-end gap-3">
+                        <Button variant="ghost" type="button" onClick={onClose} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-[var(--radius-panel)] transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} size="lg" className="w-full sm:w-auto">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                                <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
-                                    <User className="h-3 w-3" />
-                                </div>
+                                <User className="h-4 w-4" aria-hidden="true" />
                             )}
                             {lead ? 'Salvar Alterações' : 'Cadastrar Lead'}
                         </Button>

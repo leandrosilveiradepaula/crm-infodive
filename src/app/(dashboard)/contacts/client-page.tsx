@@ -81,27 +81,21 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     value: contacts.length,
                     description: "Contatos na base",
                     icon: Users,
-                    color: "text-primary",
-                    gradient: "from-primary/5 to-white dark:from-primary/10",
-                    border: "border-primary/10"
+                    tone: 'primary',
                 },
                 {
                     label: "Contatos Principais",
                     value: contacts.filter(c => c.is_primary).length,
                     description: "Interlocutores chave",
                     icon: UserCheck,
-                    color: "text-teal-600 dark:text-teal-400",
-                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
-                    border: "border-teal-100 dark:border-teal-900/50"
+                    tone: 'info',
                 },
                 {
                     label: "Com Empresa",
                     value: contacts.filter(c => c.account_id).length,
                     description: "Contatos vinculados",
                     icon: Building2,
-                    color: "text-emerald-600 dark:text-emerald-400",
-                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-                    border: "border-emerald-100 dark:border-emerald-900/50"
+                    tone: 'success',
                 },
                 {
                     label: "Novos (Mês)",
@@ -112,9 +106,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     }).length,
                     description: "Adicionados recentemente",
                     icon: Sparkles,
-                    color: "text-amber-600 dark:text-amber-400",
-                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
-                    border: "border-amber-100 dark:border-amber-900/50"
+                    tone: 'warning',
                 }
             ]} />
 
