@@ -1305,7 +1305,7 @@ try {
                             status: assistantIssues ? 'failed' : 'passed',
                         });
                     }
-                    // Read-only authenticated directory journey. No AI request or writes.
+                    // Read-only authenticated directory UX. No AI request, export or writes.
                     if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers'].includes(route)) {
                         const spec = {
                             '/leads': { search: 'Buscar leads', term: 'Prospecto', reset: 'Limpar filtros de leads', table: 'Leads' },
@@ -1360,16 +1360,8 @@ try {
                             path: resolve(artifactDir, account.label + '-' + route.slice(1) + '-filtered-list-' + viewport.name + '-' + theme + '.png'),
                             fullPage: true,
                         });
-                        if (route === '/customers') {
-                            const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
-                            await page.getByRole('button', { name: 'Exportar CSV', exact: true }).click();
-                            const download = await downloadPromise;
-                            const { readFile } = await import('node:fs/promises');
-                            const csv = await readFile(await download.path(), 'utf8');
-                            if (download.suggestedFilename() !== 'empresas-filtradas.csv' ||
-                                !csv.includes('Empresa Exemplo Aurora') || csv.includes('Empresa Exemplo Horizonte') ||
-                                csv.includes('@example.invalid')) throw new Error('CRM_DIRECTORY_CSV_SCOPE_FAILED');
-                            await download.delete();
+                        if (route === '/customers' && !(await page.getByRole('button', { name: 'Exportação CSV indisponível' }).isDisabled())) {
+                            throw new Error('CRM_DIRECTORY_UNAVAILABLE_CSV_MISREPRESENTED');
                         }
                         if (route === '/leads') {
                             const opener = table.getByRole('button', { name: /^Pesquisar empresa do lead / }).first();
@@ -1409,7 +1401,7 @@ try {
                         await page.getByRole('button', { name: spec.reset, exact: true }).click();
                         await waitCount('2 de 2 registros');
                         await page.getByRole('button', { name: 'Visualização em cards', exact: true }).click();
-                        profileResult.checks.push({ route, state: 'directory-filter-view-csv', viewport: viewport.name, theme,
+                        profileResult.checks.push({ route, state: 'directory-filter-view', viewport: viewport.name, theme,
                             status: listIssues ? 'failed' : 'passed' });
                     }
                     // Exercise real migrated lead/contact/customer creation dialogs

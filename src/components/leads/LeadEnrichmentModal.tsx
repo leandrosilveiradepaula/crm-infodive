@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
@@ -16,42 +17,55 @@ interface ResearchResult {
 interface LeadEnrichmentModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onEnrich: (data: any) => void;
     initialCompany?: string;
     initialWebsite?: string;
 }
 
-export const LeadEnrichmentModal = ({ isOpen, onClose, initialCompany = '', initialWebsite = '' }: LeadEnrichmentModalProps) => {
+export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany = '', initialWebsite = '' }: LeadEnrichmentModalProps) => {
     const [company, setCompany] = useState(initialCompany);
     const [website, setWebsite] = useState(initialWebsite);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ResearchResult | null>(null);
-    const [failed, setFailed] = useState(false);
     const opener = useRef<HTMLElement | null>(null);
     useDialogBackgroundInert(isOpen);
 
     const handleResearch = async () => {
-        if (!company.trim() || loading) return;
+        if (!company) {
+            toast.error('Informe o nome da empresa');
+            return;
+        }
+
         setLoading(true);
-        setFailed(false);
         setResult(null);
+
         try {
             const response = await fetch('/api/gemini/enrich', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ company: company.trim(), website: website.trim() })
+                body: JSON.stringify({ company, website })
             });
-            if (!response.ok) throw new Error('Research unavailable');
+
             const data = await response.json();
-            if (typeof data.summary !== 'string' ||
-                !Array.isArray(data.tags) || !data.tags.every((tag: unknown) => typeof tag === 'string') ||
-                !Array.isArray(data.talking_points) || !data.talking_points.every((point: unknown) => typeof point === 'string')) {
-                throw new Error('Invalid research response');
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Falha ao enriquecer lead');
             }
+
             setResult(data);
-        } catch {
-            setFailed(true);
+            toast.success('Sugestões geradas.');
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleApply = () => {
+        if (result) {
+            onEnrich(result);
+            onClose();
         }
     };
 
@@ -89,7 +103,6 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, initialCompany = '', init
                                 <label htmlFor="lead-research-website" className="text-label-ui font-medium">Website (opcional)</label>
                                 <Input id="lead-research-website" value={website} onChange={event => setWebsite(event.target.value)} placeholder="exemplo.com.br" disabled={loading} />
                             </div>
-                            {failed && <p role="alert" className="text-body-ui text-destructive-readable">Não foi possível gerar as sugestões. Verifique a disponibilidade da integração ou tente novamente.</p>}
                         </>
                     ) : (
                         <>
@@ -99,11 +112,11 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, initialCompany = '', init
                             </section>
                             <section className="space-y-2">
                                 <h3 className="text-section-title font-semibold">Setores e tecnologias sugeridos</h3>
-                                <div className="flex flex-wrap gap-2">{result.tags.map((tag, i) => <span key={i} className="break-all rounded-[var(--radius-control)] border border-border bg-surface-subtle px-2 py-1 text-body-ui text-foreground">{tag}</span>)}</div>
+                                <div className="flex flex-wrap gap-2">{result.tags?.map((tag, i) => <span key={i} className="break-all rounded-[var(--radius-control)] border border-border bg-surface-subtle px-2 py-1 text-body-ui text-foreground">{tag}</span>)}</div>
                             </section>
                             <section className="space-y-2">
                                 <h3 className="text-section-title font-semibold">Pontos de conversa</h3>
-                                <ul className="list-disc space-y-2 pl-5 text-body-ui text-foreground">{result.talking_points.map((point, i) => <li className="break-words" key={i}>{point}</li>)}</ul>
+                                <ul className="list-disc space-y-2 pl-5 text-body-ui text-foreground">{result.talking_points?.map((point, i) => <li className="break-words" key={i}>{point}</li>)}</ul>
                             </section>
                         </>
                     )}
@@ -111,7 +124,10 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, initialCompany = '', init
                 <footer className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border p-4 sm:p-6">
                     <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Fechar</Button>
                     {result ? (
-                        <Button type="button" onClick={() => setResult(null)}>Nova consulta</Button>
+                        <>
+                            <Button type="button" variant="outline" onClick={() => setResult(null)}>Nova consulta</Button>
+                            <Button type="button" onClick={handleApply}>Concluir consulta</Button>
+                        </>
                     ) : (
                         <Button type="button" onClick={handleResearch} disabled={loading || !company.trim()}>
                             <Sparkles aria-hidden="true" /> {loading ? 'Gerando sugestões...' : 'Gerar sugestões'}

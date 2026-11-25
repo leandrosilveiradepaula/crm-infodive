@@ -20,6 +20,10 @@ describe('Actual customer overview uses the shared semantic StatsGrid contract',
     expect(page).toContain('handleCreate');
     expect(page).toContain('handleDelete');
     expect(page).toContain('clearFilters');
-    expect(page).toContain('text-destructive-readable hover:bg-destructive-subtle');
+    expect(page).toContain('onReset={clearFilters} resetLabel="Limpar filtros de empresas"');
+    const reset = read('src/components/layout/DirectoryResults.tsx');
+    expect(reset).toContain('aria-label={resetLabel} onClick={onReset}');
+    expect(reset).toContain('variant="outline"');
+    expect(reset).not.toContain('text-destructive');
   });
 });

@@ -1,3 +1,15 @@
+### 2026-11-25 — Owner clarification: UI/UX ONLY (PR #223)
+
+The owner explicitly narrowed the current program to appearance and experience, not feature implementation. Preserve existing business behavior, API requests, persistence, permissions and financial logic. The first candidate `367cc396` remains in immutable branch history; its CSV implementation, stale-record and CRUD changes are deferred and excluded from the final diff. Do not create or certify new business functions in this workstream.
+
+This same PR retains the three directory screens' shared responsive summary (central compact density tokens), filter layout, result count, single empty state, card/list switching, accessible scrollable table and separately labeled row actions. The existing unavailable CSV capability is labeled unavailable instead of advertising a fake export. Existing research API payload and completion callback are preserved; the dialog is visually unified, keyboard-accessible and says clearly that the returned suggestions are not verified internet research or saved data. No request is sent in QA. Do not describe the existing research or export capability as operationally certified.
+
+Prior candidate [CI 45619683961](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45619683961) passed TypeScript but failed one stale source assertion that required destructive hover colors for a reset-filter button. Reset is non-destructive: verify the actual shared neutral control and callback, retaining the other checks. [QA 45619684151](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45619684151) was skipped because its branch whitelist did not include this branch. Authorize only the exact `ux/commercial-directory-journeys-20261125` same-repository branch in the isolated QA workflow; no broadening to forks, hosted environments or secrets.
+
+Re-reviewed existing desktop/mobile commercial screenshots from artifact 15000584964 and the private reference montage. Keep four KPI values but compact them into two columns on phones; retain semantic labels, predictable filter order, view switches and table affordances. No changes to functional scope. Require CI and the real browser QA to succeed on the same new SHA, inspect new screenshots and document remaining UX differences before human merge. Continue with the pipeline/opportunity/proposal presentation family after this block.
+
+---
+
 ### 2026-11-25 — Commercial directories: responsive workflow and honest actions (issue #214)
 
 #220 was merged; main `4e4e92cfdd712ae7d8bffe0c4b68088869f98029` has exactly the tree of the certified `a194f058`. [CI 45568190685](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45568190685) 483 tests, 0 categorized style debt; [isolated QA 45568190461](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45568190461) 236 checks, four profiles, no unresolved axe findings. The prior automation scope is certified as interface only; actual execution/persistence remains a separately disclosed functional blocker.

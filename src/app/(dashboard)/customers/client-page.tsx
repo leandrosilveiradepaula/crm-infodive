@@ -19,8 +19,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DirectoryResults } from '@/components/layout/DirectoryResults';
-import { toast } from 'sonner';
-import { buildCustomerCsv } from '@/components/customers/customer-csv';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
 
 interface CustomersClientPageProps {
@@ -65,13 +63,8 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja remover este cliente?')) {
-            try {
-                const result = await deleteAccount(id);
-                if (!result.success) throw new Error('Exclusão não confirmada');
-                router.refresh();
-            } catch {
-                toast.error('Não foi possível excluir a empresa.');
-            }
+            await deleteAccount(id);
+            router.refresh();
         }
     };
 
@@ -88,21 +81,6 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     const handleCreate = () => {
         setEditingAccount(null);
         setIsModalOpen(true);
-    };
-
-    const handleExportCSV = () => {
-        if (!filteredAccounts.length) return;
-        const url = URL.createObjectURL(new Blob([buildCustomerCsv(filteredAccounts)], { type: 'text/csv;charset=utf-8' }));
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'empresas-filtradas.csv';
-        document.body.appendChild(link);
-        try {
-            link.click();
-        } finally {
-            link.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }
     };
 
     const clearFilters = () => {
@@ -144,9 +122,9 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                         <FileSpreadsheet />
                         Importar Planilha
                     </Button>
-                    <Button variant="outline" onClick={handleExportCSV} disabled={!filteredAccounts.length} title="Exportar somente as empresas dos filtros atuais">
+                    <Button variant="outline" disabled aria-label="Exportação CSV indisponível">
                         <Download />
-                        Exportar CSV
+                        CSV indisponível
                     </Button>
                     <Button size="lg" onClick={handleCreate}>
                         <Plus />

@@ -16,8 +16,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DirectoryResults } from '@/components/layout/DirectoryResults';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface LeadsClientPageProps {
@@ -25,8 +23,7 @@ interface LeadsClientPageProps {
 }
 
 export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
-    const router = useRouter();
-    const leads = initialLeads;
+    const [leads] = useState<Lead[]>(initialLeads);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [filterInterest, setFilterInterest] = useState('all');
@@ -82,14 +79,15 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
         setIsEnrichOpen(true);
     };
 
+    const onEnrichSubmit = (data: any) => {
+        // Here you would typically update the lead in the backend using the enriched data
+        console.log('Enriched Data:', data);
+        // For visual feedback, we could assume we updated it locally
+    };
+
     const handleDelete = async (lead: Lead) => {
         if (confirm(`Tem certeza que deseja apagar o lead "${lead.contact_name}"?`)) {
-            try {
-                await deleteLead(lead.id);
-                router.refresh();
-            } catch {
-                toast.error('Não foi possível excluir o lead.');
-            }
+            await deleteLead(lead.id);
         }
     };
 
@@ -255,6 +253,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     key={selectedLead.id}
                     isOpen={isEnrichOpen}
                     onClose={handleCloseEnrich}
+                    onEnrich={onEnrichSubmit}
                     initialCompany={selectedLead.company}
                     initialWebsite={''} // Add website if avail on lead
                 />

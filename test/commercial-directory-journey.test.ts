@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { buildCustomerCsv, csvCell } from '../src/components/customers/customer-csv';
 
 const source = (path: string) => readFileSync(path, 'utf8');
 describe('Commercial directory usability and honest actions', () => {
@@ -12,12 +11,17 @@ describe('Commercial directory usability and honest actions', () => {
         expect(page).toContain("length > 0 && (view === 'cards'");
         expect(page).toContain('ViewToggle view={view}');
     });
-    it('keeps fresh server-provided leads and contacts, including missing contact email', () => {
+    it('retains the existing data and mutation contracts without adding business features', () => {
         const leads = source('src/app/(dashboard)/leads/client-page.tsx');
         const contacts = source('src/app/(dashboard)/contacts/client-page.tsx');
-        expect(leads).toContain('const leads = initialLeads;');
-        expect(contacts).toContain('const contacts = initialContacts;');
-        expect(contacts).toContain("(contact.email || '').toLowerCase()");
+        const companies = source('src/app/(dashboard)/customers/client-page.tsx');
+        expect(leads).toContain('const [leads] = useState<Lead[]>(initialLeads)');
+        expect(leads).toContain('await deleteLead(lead.id)');
+        expect(contacts).toContain('setContacts(initialContacts)');
+        expect(contacts).toContain('await deleteContact(id)');
+        expect(companies).toContain('await deleteAccount(id)');
+        expect(companies).toContain('disabled aria-label="Exportação CSV indisponível"');
+        expect(companies).not.toContain('buildCustomerCsv');
     });
     it('keeps table actions independently accessible and table scrolling local', () => {
         for (const file of ['leads/LeadsTable', 'contacts/ContactsTable', 'customers/CustomersTable']) {
@@ -31,30 +35,17 @@ describe('Commercial directory usability and honest actions', () => {
         expect(companies).not.toContain('onClick={() => onView?.(account)}');
         expect(companies).toContain('Abrir empresa');
     });
-    it('escapes delimiters, quotes, newlines and spreadsheet formula prefixes', () => {
-        expect(csvCell('Empresa "A"; Sul')).toBe('"Empresa ""A""; Sul"');
-        expect(csvCell('linha\nseguinte')).toBe('"linha\nseguinte"');
-        for (const value of ['=1+1', '  +1', '-10', '@SUM(A1)', '\tfoo', '\rfoo', '\nfoo', '＝1']) {
-            expect(csvCell(value).startsWith('"\'')).toBe(true);
-        }
-        expect(csvCell(null)).toBe('""');
-    });
-    it('exports only selected company fields and no nested contact or internal tenant ID', () => {
-        const account = { name: 'Empresa Aurora', cnpj: '00123', segment: 'Serviços', city: 'Cidade', state: 'SC', status: 'Ativo' as const, relationship_type: 'Cliente', contacts: [{ email: 'hidden@example.invalid' }], organization_id: 'tenant-secret' };
-        const csv = buildCustomerCsv([account]);
-        expect(csv.charCodeAt(0)).toBe(0xFEFF);
-        expect(csv).toContain('"Empresa Aurora";"00123";"Serviços";"Cidade";"SC";"Ativo";"Cliente"');
-        expect(csv).not.toContain('hidden@example.invalid');
-        expect(csv).not.toContain('tenant-secret');
-    });
     it('does not simulate research persistence or call it verified internet research', () => {
         const lead = source('src/app/(dashboard)/leads/client-page.tsx');
         const modal = source('src/components/leads/LeadEnrichmentModal.tsx');
-        expect(lead).not.toContain('onEnrichSubmit');
+        expect(lead).toContain('onEnrich={onEnrichSubmit}');
         expect(modal).not.toContain('Aplicar Dados');
         expect(modal).toContain('Nenhum dado é gravado no lead');
         expect(modal).toContain('não uma pesquisa verificada na internet');
         expect(modal).toContain("fetch('/api/gemini/enrich'");
         expect(modal).toContain('useDialogBackgroundInert(isOpen)');
+        expect(modal).toContain('onEnrich(result)');
+        expect(modal).toContain('JSON.stringify({ company, website })');
+        expect(modal).toContain('Concluir consulta');
     });
 });

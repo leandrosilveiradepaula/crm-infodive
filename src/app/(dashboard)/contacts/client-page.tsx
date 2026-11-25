@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Contact } from '@/types/contact';
 import { ContactCard } from '@/components/contacts/ContactCard';
@@ -15,7 +15,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
 import { DirectoryResults } from '@/components/layout/DirectoryResults';
-import { toast } from 'sonner';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface ContactsClientPageProps {
@@ -24,9 +23,12 @@ interface ContactsClientPageProps {
 
 export function ContactsClientPage({ initialContacts }: ContactsClientPageProps) {
     const router = useRouter();
-    const contacts = initialContacts;
+    const [contacts, setContacts] = useState<Contact[]>(initialContacts);
     const [view, setView] = useState<ViewMode>('cards');
 
+    useEffect(() => {
+        setContacts(initialContacts);
+    }, [initialContacts]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterAccount, setFilterAccount] = useState('all');
     const [filterRole, setFilterRole] = useState('all');
@@ -38,7 +40,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
 
     const filteredContacts = contacts.filter(contact => {
         const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (contact.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (contact.account?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesAccount = filterAccount === 'all' || contact.account?.name === filterAccount;
         const matchesRole = filterRole === 'all' || contact.role === filterRole;
@@ -54,13 +56,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja remover este contato?')) {
-            try {
-                const result = await deleteContact(id);
-                if (!result.success) throw new Error('Exclusão não confirmada');
-                router.refresh();
-            } catch {
-                toast.error('Não foi possível excluir o contato.');
-            }
+            await deleteContact(id);
         }
     };
 
