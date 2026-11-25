@@ -14,8 +14,8 @@ describe('Live CommandBar uses centrally configurable Design System styling', ()
     expect(command).toContain('className="command-item"');
   });
   it('uses light/dark semantic surfaces, selection contrast, radii and shadows', () => {
-    for (const token of ['var(--popover)', 'var(--popover-foreground)', 'var(--primary)',
-      'var(--primary-foreground)', 'var(--border)', 'var(--ds-shadow-overlay)',
+    for (const token of ['var(--popover)', 'var(--popover-foreground)', 'var(--accent)',
+      'var(--accent-foreground)', 'var(--border)', 'var(--ds-shadow-overlay)',
       'var(--radius-panel)', 'var(--radius-control)', 'var(--ring)']) {
       expect(css).toContain(token);
     }
