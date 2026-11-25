@@ -1,3 +1,11 @@
+## 25 November 2026 — certified browser matrix, final visual finding
+
+Candidate `3393b4007a5a4fef9518569641747feeca756f5c`: [CI 45700508500](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508500) SUCCESS (502/502, four synthetic axe combinations, 16 PDF pages, zero tracked hardcode regression). [Authenticated QA 45700508503](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508503) SUCCESS. Directly inspected [artifact 15064051854](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508503/artifacts/15064051854): exact SHA, failures=[], 454 checks (371/37/29/17), 324 PNGs, 44 tablet route cases, 1,128 additional computed-style probes and 132 original probes. Four profiles, 22 static dashboard routes, synthetic isolated backend cleaned. Local shallow checkout [15062792045](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508500/artifacts/15062792045) verified tree `e88c0de499a5f8140a88c8fd9e9569f9546c5d54`, 1002 tracked files, clean status, fsck, runner syntax and 3/3 standalone guard tests; inventory zero.
+
+Compared new base-route montages and navigation states with the 19 private reference images. Tablet Pipeline now stacks stages without clipping; desktop keeps five columns. The mobile navigation screenshots in both themes (profile-1-navigation-mobile-light.png and dark.png) reveal a visual stacking defect despite the green matrix: Dashboard drag handles with z-50 paint above the open sidebar with z-50, even though the underlying workspace is inert. Fix the common workspace stacking context only while the mobile menu is open; assert the actual computed layer relationship and restoration in the existing mobile/tablet menu check. No new features, layout behavior outside the open drawer, business logic, hosted database or deployment changes. Keep PR #224 draft until both exact-SHA gates and direct inspection of the replacement menu captures pass. Do not claim global UX acceptance or operation of unavailable integrations/public/dynamic routes.
+
+---
+
 ### 2026-11-25 — Final audit QA recovery (PR #224)
 
 ## 25 November 2026 — expanded QA findings and repair

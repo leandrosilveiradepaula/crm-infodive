@@ -380,6 +380,20 @@ async function assertMobileMenuKeyboard(page, source, capture, artifactDir, scre
     await page.getByRole('dialog', { name: 'Menu de navegação' }).waitFor({ state: 'visible' });
     await page.waitForFunction(() => document.getElementById('crm-sidebar')?.contains(document.activeElement));
     if (!(await page.locator('main').evaluate(node => node.inert))) throw new Error('CRM_FINAL_MENU_BACKGROUND_NOT_INERT');
+    // Inert alone does not stop the Dashboard's z-50 drag handles painting
+    // over the equally ranked drawer. Assert the real workspace stacking
+    // context as well as keyboard isolation, on mobile and tablet.
+    const stacking = await page.evaluate(() => {
+        const workspace = document.querySelector('main');
+        const drawer = document.getElementById('crm-sidebar');
+        if (!workspace || !drawer || workspace.parentElement !== drawer.parentElement) return false;
+        const workspaceStyle = getComputedStyle(workspace);
+        const drawerStyle = getComputedStyle(drawer);
+        const workspaceZ = workspaceStyle.zIndex === 'auto' ? 0 : Number(workspaceStyle.zIndex);
+        return workspaceStyle.isolation === 'isolate' &&
+            drawerStyle.position === 'fixed' && Number(drawerStyle.zIndex) > workspaceZ;
+    });
+    if (!stacking) throw new Error('CRM_FINAL_MENU_VISUAL_STACKING_LEAK');
     await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Tab');
     if (!(await sidebar.evaluate(node => node.contains(document.activeElement)))) throw new Error('CRM_FINAL_MENU_FOCUS_ESCAPE');
@@ -390,6 +404,9 @@ async function assertMobileMenuKeyboard(page, source, capture, artifactDir, scre
     await sidebar.waitFor({ state: 'hidden' });
     await page.waitForFunction(() => document.activeElement?.getAttribute('data-slot') === 'crm-mobile-menu-trigger');
     if (await page.locator('main').evaluate(node => node.inert)) throw new Error('CRM_FINAL_MENU_BACKGROUND_STILL_INERT');
+    if (await page.locator('main').evaluate(node => getComputedStyle(node).isolation === 'isolate')) {
+        throw new Error('CRM_FINAL_MENU_STACKING_NOT_RESTORED');
+    }
     if (audit.violationsCount + audit.incompleteCount) throw new Error('CRM_FINAL_MENU_AXE_FINDINGS');
 }
 

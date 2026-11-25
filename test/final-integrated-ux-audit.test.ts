@@ -50,6 +50,10 @@ describe('integrated UX audit contract', () => {
         expect(read('src/components/layout/Sidebar.tsx')).toContain('invisible -translate-x-full lg:visible');
         const shell = read('src/components/layout/DashboardShell.tsx');
         expect(shell).toContain('inert={isMobileMenuOpen}');
+        expect(shell).toContain("isMobileMenuOpen ? 'isolate' : ''");
+        const runner = read('test/e2e/run-authenticated-smoke.mjs');
+        expect(runner).toContain('CRM_FINAL_MENU_VISUAL_STACKING_LEAK');
+        expect(runner).toContain('CRM_FINAL_MENU_STACKING_NOT_RESTORED');
         expect(shell).toContain("event.key === 'Escape'");
         expect(shell).toContain('opener?.focus()');
         const header = read('src/components/layout/Header.tsx');

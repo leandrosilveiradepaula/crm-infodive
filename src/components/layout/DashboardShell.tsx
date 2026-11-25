@@ -72,7 +72,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
-            <main inert={isMobileMenuOpen} className="flex-1 flex min-w-0 flex-col overflow-hidden w-full relative">
+            {/* Inert prevents interaction, not painting. While the mobile drawer
+                is open, confine all workspace z-index layers below it. */}
+            <main inert={isMobileMenuOpen} className={`flex-1 flex min-w-0 flex-col overflow-hidden w-full relative ${isMobileMenuOpen ? 'isolate' : ''}`}>
                 <Header 
                     isMobileMenuOpen={isMobileMenuOpen}
                     onMenuClick={() => setIsMobileMenuOpen(true)} 
