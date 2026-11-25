@@ -1,3 +1,313 @@
+### 2026-11-25 — Post-merge UX reconciliation: automation workspace (PR #220)
+
+The owner merged #221. main `cdf7a5ba05289c0fab81f85a8794e6c0fb24f07d` has exactly the tree of the certified `7305fdd` candidate. Evidence: [CI 45524688734](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45524688734), [authenticated QA 45524688814](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45524688814), 474 tests, 216 browser checks, zero in the seven original inventory categories, 171 locked modules, 132 token propagation checks and 16 PDF page renders. These are baseline results, not certification of the next revision.
+
+Reconcile existing draft #220 with main through a two-parent non-destructive commit, using the newer certified main tree rather than copying older local Tailwind declarations. Most older #220 changes (two-level navigation, view toggle, report empty states, filters, opportunity inspector) are already present on main. Restore its missing B3 analytics/automation regression tests. The remaining carousel was directly observed in the authenticated admin light desktop/mobile screenshots from artifact 14980919488: clipped recipe options, fixed unsupported 42h savings, misleading 0% without runs, and workflow filtering coupled to the rule-based draft input. The 19 private reference images were inspected in the previous review and their montage again for this task; use their restrained hierarchy without copying visual assets or inventing a workflow engine. Local checkout is unavailable (DNS); the project UI/UX Pro Max script is wired into the isolated CI job, not claimed as completed before its output.
+
+Candidate UX: saved workflows and actual execution counts first, a separate draft helper and independent filter/search, one full responsive library with all six existing recipes and direct entry from the page header. Remove duplicate library overlay; describe existing heuristic draft behavior accurately, not as LLM generation. Translate persisted IDs in display only. Use shared Dialog, Button, Input and Textarea in the three-step editor; label controls, retain focus, avoid mutating initial action objects before save, and preserve paused status on edit instead of silently enabling the flow. Creation still follows the original explicit activation path; no server actions, pricing, permissions, storage, or engine changed. Human merge only; no hosted database, credentials, production, or real automation execution.
+
+Required gate: exact new SHA CI + isolated real browser (all four profiles and existing matrix; new read-only checks for independent inputs, filters, all six cards, editor prefill, all three steps, add/remove, Escape, focus and clipping), new screenshots, unchanged global zero-debt guard and independent PDF proof. Record visual differences and any failures; keep draft until verified. Do not treat this scoped reconciliation as closure of all product UX or issue #214.
+
+---
+
+### 2026-11-25 — DS12 full-inventory graduation candidate
+
+The exact predecessor `60df4bbc` passed [CI 45521798757](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45521798757) (471/471 tests, TypeScript, build, synthetic WCAG, 112 locked modules, 189 changed UI files and no hardcode regressions), and [real isolated authenticated QA 45521799142](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45521799142) (4 profiles, 216 visual route checks, artifact 14981431026). Its measured inventory was 59 files / 180 categorized local decisions (179 web, 1 PDF), against the original 196 files / 5,536 decisions.
+
+The final migration candidate reconciles all 59 identified residual source files, including shared primitives, dashboard/opportunity, public/portal/debug, operational modals and charts, settings, and proposal HTML/PDF. Each of the staged replacement sources was checked against the unchanged historical seven regex categories; the global inventory still must prove zero on the **published exact SHA**. New shared inventory traversal powers both the CI guard and the report. The global gate fails on any nonzero categorized local decision in src/app or src/components, with no exclusions; 59 additional files are locked. Central document band helper preserves its original angle and organization primary/accent arguments. Domain-specific user-editable brand, portal, and pipeline-stage default values move to named typed constants without changing persisted values. The print palette retains signature ink and PDF notes colors. Nonessential local gradients are replaced with semantic solid surfaces to avoid contrast ambiguity. This is a scoped source migration, not proof that every possible style syntax is inventoried, nor proof of visual acceptance.
+
+**Required exact-candidate gates:** zero categorized decisions globally; TypeScript/tests/build; synthetic and isolated authenticated browser in four profiles, 22 routes and expanded interactive states across both themes/viewports; inspect real screenshots and token propagation, and independently render proposal outputs before claiming print parity. Preserve all existing functional actions, tenant permissions, calculations and signature workflows. Do not merge, deploy production, alter hosted Supabase, run migrations, change secrets or copy private reference assets. One DRAFT PR #221, human merge only. Prior PASS does not certify this new revision.
+
+---
+
+### 2026-11-24 — DS10 authenticated command palette focus and mobile contrast repair
+
+At exact SHA `d3dbe45b`, [CRM CI 45514919170](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45514919170) PASS while [full authenticated QA 45514919030](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45514919030) FAILED **four /dashboard?global-search combinations**: `aria-hidden-focus` incomplete on background shell for desktop/mobile and selected cmdk command row `color-contrast` on mobile/light and mobile/dark. Scope-limited correction on the original command surface: invoke the existing inert-and-restore dashboard hook while portal is open; remove the palette's additional slide-down animation to prevent in-between compositing; use central `accent/accent-foreground` paired palette tokens on hover/selected and explicit foreground for keyboard legends, with descendant foreground roles aligned; wait for the real Radix open transition to complete before axe audit (zero violations AND incomplete still required, not bypassed). Preserve `searchGlobal`, real links, command keyboard and opportunity move server action. No fake search, credentials, hosted DB, migrations or production. Re-certify exact SHA full browser and screenshots; keep PR #221 DRAFT until verified and human merge.
+
+---
+
+### 2026-11-24 — DS10 full authenticated matrix diagnostic 87904137; fix real causes
+
+[Authenticated local QA 45513154036](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45513154036) completed 4-profile × 22-route matrix on `87904137`, **FAILED 10 combinations in 4 route/states**. Unlike the earlier hidden-dialog failure, `Command.Dialog` is now visible; however its own cmdk/Radix portal lacks a real `DialogTitle`, leaving `aria-labelledby` unresolved, and generates hidden focus-guard spans plus inaccessible background landmarks (`aria-hidden-focus`/ `bypass`, all incomplete) in desktop/mobile light/dark. Root fix replaces cmdk's embedded Radix modal with the CRM's proven `Dialog/DialogContent/DialogTitle/DialogDescription` wrapper (already used successfully by Customer/Contact/Lead dialogs and reconciles hidden focus-guards), while retaining the cmdk keyboard/search list and real searchGlobal/router actions. No axe suppressions or rules disabled.
+
+The same SHA revealed **one real low-contrast Watson risk score badge** in desktop/mobile light (`bg-destructive/10 text-destructive`), corrected to semantic `bg-destructive-subtle text-destructive-readable`. It also flagged **mobile/light and mobile/dark opportunity ID metadata** (`ID: #...` span at x=232 y=32) overlapped by neighboring header content, causing `color-contrast` incomplete and secondary-section navigation failures; ID remains screen-reader readable but is not visually squeezed beside the company label on narrow mobile screens. These are targeted original product UX fixes, not CI hacks.
+
+Require fresh exact-SHA TypeScript/build/unit/strict policy plus real 4-role×22-route authenticated desktop/mobile light/dark with **ZERO axe violation AND incomplete**, keyboard and modal-bound screenshots. Keep PR #221 DRAFT, preserve financial/tenant/business logic, no hosted Supabase, production, migrations, secrets or merge. Explicitly preserve the previous green CI 465/465 at SHA `87904137` but never mark that SHA's browser gate passed.
+
+---
+
+### 2026-11-24 — DS9 real screenshot inspection: company modal footer and close overlap (detached candidate)
+
+Individually opened actual [same-SHA 45510765794](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45510765794) desktop screenshot `profile-1-customers-create-desktop-light.png`: at 1440×960 the full-height company form ends with its blue `Cadastrar Empresa` button partially clipped at the modal's bottom edge and a close (×) icon overlaps the CNPJ import button. These problems were **not caught by axe**, which checks DOM semantics and contrast, so all 208 route checks PASSED despite the visual defect. The detached next candidate uses a sticky opaque semantic DialogFooter inside the 90dvh scroll container, top header right padding and responsive stacking; extends read-only authenticated QA to assert **visible submit-button bounds** for Companies, Contacts and Leads in both modes and viewports, beyond existing text contrast checks. No changes to submit handlers, CNPJ parsing, integration, server data, tenant policy or persistence. Maintain PR Draft and require fresh screenshots at final exact SHA. The original private reference was used for visual hierarchy only, no copying.
+
+---
+
+## 2026-11-24 — DS9 actual header Search activation and CommandBar end-to-end gate (DETACHED)
+
+Static reconnaissance found the original CRM Dashboard Header's top Search input was **inert**: no `onChange`, onClick or navigation handler, and separate CommandBar component was not mounted through `Header.tsx`. Source-only CommandPalette.css cleanup would therefore NOT constitute a real UX fix. This candidate replaces fake Search input with an accessible, visible responsive command opener; mounts the **existing** CommandBar component, adds mobile search access and Ctrl/Cmd+K shortcut, translates existing labels/empty/search states to Portuguese, and corrects inherited text foregrounds in selected results. It does not invent new backend actions: the existing `searchGlobal`, router navigation and `updateDealStage` handlers are preserved. E2E on `/dashboard` now explicitly opens command UI, runs full axe (zero violation AND incomplete), takes screenshots at desktop/mobile light/dark, checks Escape and Ctrl+K, and then audits the separately mounted Watson AI drawer without submitting AI prompts. **It is only staged, not yet published,** and must pass same-SHA CI and authenticated QA before any acceptance. No hosted DB, production, migration, secret or merge.
+
+---
+
+## 2026-11-24 — DS9 real Watson AI drawer accessible semantic family (detached)
+
+Header.tsx mounts AiAssistant in the live CRM, not a fabricated mock route. Its original UI contains local Tailwind color/type/radius/shadow utilities, icon-only send button with no accessible name, and insight cards styled as clickable despite having no handler. This candidate removes 23 categorized local-style matches (all 23 → 0), using central status/contrast/overlay/type roles; gives icon-only controls readable ARIA names, real input name and an explicitly named dialog; removes misleading pointer style while retaining existing chat calls and CRM deal context. Adds strict anti-hardcode lock and source test, plus real authenticated `/dashboard` UI drawer open/close and axe snapshot across desktop/mobile and light/dark; no AI prompt submitted or external LLM called during QA. This block is **not declared accessible** until actual browser PASS and verified focus behavior; print colors / command palette changes remain staged in same substantial candidate. No server action, data, credentials, production, hosted DB or merge.
+
+---
+
+## 2026-11-24 — DS9 actual Customer overview migrated to StatsGrid tone API (detached)
+
+Audited real `/customers` source against shared `StatsGrid.tsx`: the page supplied legacy `color`/`gradient`/`border` properties, but the current shared component intentionally **ignores** them and resolves only `tone` (neutral default). Thus all four customer KPI icons were silently neutral despite local hardcoded teal/emerald/amber strings. Replaced those ignored local definitions with explicit semantic `tone: primary/info/success/warning` and centrally configured filter typography/radii/destructive reset styles. The real page's measured categorized local-style occurrences go **27 → 0**, and the strict policy now locks its source. All actual values, contacts averages, filters, CRUD and navigation remain unchanged. Browser QA must verify computed icon colors and screenshots on the exact published SHA; current work remains detached behind the ongoing earlier QA. No production, DB, secrets, migrations or merge.
+
+---
+
+## 2026-11-24 — DS9 real CommandBar theme/keyboard module prepared (detached)
+
+Code inspection confirmed `src/components/layout/CommandBar.tsx` imports the actual `CommandPalette.css`, which independently defined a white panel, fixed blue #0530ad selected background, gray text, arbitrary radii/shadows and invalid CSS `font-weight: 600px`. This is a real design-system centralization defect, not an unused demo stylesheet. Prepared a cohesive shared semantic CSS migration for overlay, popover, selected/hover/focus foreground, keyboard chips, typography and geometry, backed by four `--ds-command-*` variables and a CI contract. The command actions/search/keyboard handlers are unchanged. **Must inspect real CommandBar UI in authenticated light/dark/mobile once the code is published; no claim of acceptance from source assertions.** This candidate is detached behind ongoing exact-SHA QA of `aa7bafd6`, not yet published. No hosted DB, production, merge or migrations.
+
+---
+
+## 2026-11-24 — DS9 proposal document family completion (DETACHED, not yet published)
+
+The print-safe single palette extracted in the previous candidate now also covers 11 remaining HTML proposal and React PDF pages: confidentiality, custom notes, differentiators, overview, software groups, cover and hardware PDF fragments. Replaces an additional 101 literal hex colors without changing RGB values, renderer APIs, prices, classification, billing logic or brand override props. Added document primitives for slate700/red50/red200 and expanded source regression coverage. **Total 322 duplicate print colors in 18 components centralized**, independent of CSS dark/light, with PDF output parity NOT accepted until actual exports are compared. This detached commit is staged behind ongoing exact-SHA QA of `aa7bafd6`; do not change live PR head until the previous run completes and its outcome is incorporated. No migrations, hosted DB, production or auto-merge.
+
+---
+
+## 2026-11-24 — DS8 QA closure for two description overlap risks
+
+Run 45508860943 (SHA 4acaa857) audited full 4-role/22-route matrix and failed ONLY 4 desktop light/dark description-text contrast *incompletes* in Lead/Contact creation dialogs, with zero contrast violations. Inspected real mobile Contact screenshot: cramped forced-row header causes title/subtitle to wrap unnaturally. Remediation: shared readable description typography and breakpoint-aware stacked header/action. Preserve all form data/actions and WCAG strict failure gate; require exact new SHA CI+isolated auth QA and image comparison before completion. Single Draft PR #221; no merge, hosted changes or production.
+
+---
+
+## 2026-11-24 — DS9 pending proposal document palette certification
+
+Owner wants one centralized CRM visual configuration. Seven source files supplying HTML proposal pages and React-PDF exports used 221 duplicate raw colors despite existing PDF roles. New dependency-free document primitive palette unifies those fixed values, preserves organization themes and business math, and adds source contracts. Keep this as a cohesive block **in the same PR #221** only after the preceding exact-SHA accessibility QA is read; this detached candidate is not yet pushed to the PR. Run final SHA build, tests, production-safe isolated 4-role QA, PDF output checks and genuine reference visual review. Never mark the CRM/UX completed from source-color counts.
+
+---
+
+### 2026-11-24 — DS8 real create modal failures localized, coherent accessibility remediation
+
+On [exact-SHA isolated authenticated QA 45506940586](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45506940586), commit `6e30acc8` audited four real synthetic profiles across all 22 authorized routes. It FAILED 16 viewport/theme combinations **only in four newly exercised states**: /login (one color-contrast incomplete per combo due blurred decoration under the footer), /leads?create (unlabeled native select, incomplete aria-hidden-focus and contrast during transition), /contacts?create (unbound form labels, company selector/button name, background-focus and contrast during animation), /customers?create (unbound inputs, unnamed select/tag controls, dangling dialog description and background-focus). The route-level default QA and previous Pipeline/Goals tests did not report other regressions. This block fixes genuine semantics, not suppressions: shared open-gated hook for background inert/cleanup; explicit unique useId label associations for each field; named select/button controls; mounted Radix DialogDescription; solid design-token surfaces, shared primary Button, common modal max-height/padding; and real QA runs axe after the real 200ms animation settles. Removes overlapping blur decoration from login and gives footer an opaque background. Maintains true server actions, entity tenancy, product prices and OAuth. No DB, user accounts, migrations, Vercel production or merge. **Retest the entire real browser matrix on the next exact SHA before marking resolved.**
+
+---
+
+## 2026-11-24 — DS8 integrated dashboard, shared command and catalog styling
+
+The single centralized CRM Design System Draft PR #221 now includes 16 additional original Dashboard/Products/Email/CommandBar/Notifications/Handover components with private Tailwind palette, type-scale and geometry substitutions to existing central `tokens.css` roles. Measured category reduction in these files: 71 + 142 = 213 local occurrences, not 213 independent user-facing defects. Adds 14 newly clean modules to strict anti-hardcode policy; source tests verify all 16 family members. Colors and font weights remain centrally configurable and light/dark semantic; no product, backend, Auth, financial rules, live data or migrations changed. This batch is NOT globally visually certified until exact new SHA browser proofs and the approved private screenshots are compared. Preserve PR Draft and human main merge.
+
+---
+
+## 2026-11-24 — DS8 follow-up: genuine login, charts, calendar and opportunity diagnosis
+
+Continues the original CRM Design System branch and single PR #221. Eight additional existing components (login page, opportunity AI header, shared calendar and five charts) are switched to the same semantic palette/type/geometry primitives; 230 additional local-style matches were eliminated by the inventory categories in this batch. Three newly clean modules are strict-guarded, with source contracts for all eight. Unchanged login/auth semantics, sales chart data and AI callbacks; no personal data, hosted infrastructure, migrations or production. A source contract is NOT a browser screenshot or functional acceptance. Login/analytics visual contrast in both themes still needs actual final-SHA browser proof and separate owner visual assessment. Previously inspected private screen references remain private.
+
+---
+
+## 2026-11-24 — DS8: customer lifecycle, activity/integration, inbox-related and leaderboard migration
+
+Continue the SAME Draft PR #221: after DS7's substantial Operation/Admin + Commercial migration, this next pre-reviewed block centralizes 32 original React UI modules spanning Customers, Contacts, Leads, Email, Omnichannel, Integrations, Activities, Gamification and a proposal selector card. Removes 746 categorized local-style occurrences in this batch (measured by the current matching categories, not distinct UX bugs). Adds 21 newly zero-debt modules to the strict anti-hardcode guard, plus family-level source contracts. Existing typed state, Server Actions, permission checks, calculation functions and response data are unchanged. Existing specialized email/marketing decorations and user-facing output still require separate visual evidence; never claim global completion based only on regex counts. The live browser must retest all existing full route/profile/viewport/theme conditions on the EXACT final SHA, including keyboard, WCAG zero violation/incomplete, token propagation, auth, and snapshots. Human main merge gate; no hosted DB, migrations or production.
+
+---
+
+## 2026-11-24 — DS7 commercial family integrated with Operation/Admin bulk migration
+
+Owner requested to finish the existing centrally configurable Design System in ONE cohesive PR #221, not additional micro-PRs. After the 26 Operations/Admin source files, this candidate migrates 24 more original CRM TSX modules across Sales, Sales Order, Product catalog, Pipeline product workflows, proposal editor/versions, public proposal and customer portal. Private Tailwind palette/font/geometry declarations now reference the existing centralized light/dark roles in `src/design-system/tokens.css`. Existing data/API/payment/financial/tenant/role behavior remains untouched; branded output defaults and existing decorative gradients remain under explicit residual review rather than silently altered. Added 17 new strictly locked clean modules and a source contract covering all 24 commercial modules, in addition to the prior Operations/Admin family contract. This is structural source centralization, not universal UX acceptance.
+
+Original reference screenshots were inspected in private. The previous exact-SHA QA (run 45502306283, SHA 2c82a0e4) proved the orphan tabpanel ARIA issue fixed (no incompletes) but found a real low-contrast `StakeholdersTab` empty-state paragraph; this candidate removes its whole-panel opacity and adds regression coverage. **New exact-SHA TypeScript, unit, build, design policy, WCAG preflight, real four-profile 22-route isolated authenticated QA and visual review are required.** Keep Draft PR, no human merge, hosted Supabase, Vercel production or migrations.
+
+---
+
+## 2026-11-24 — DS7: cohesive Operations/Admin family migration, keep Draft pending real QA
+
+Owner explicitly requested the Design System completion, not repeated micro-PRs. Prepared a substantial **single-PR** migration on 26 original CRM operational and administration TSX modules: Settings/Users/Security, Activities, Automations, Contracts and Service Desk. Existing Tailwind palette names, sub-12px font sizes, locally chosen type scales, radius and shadow classes are replaced by the shared light/dark semantic palette, typography, control/panel radius and elevation roles. No new identity; all default values remain in `src/design-system/tokens.css`. Strict no-hardcode policy now locks 16 newly clean modules. Original read-only visual source screenshots were examined privately; no third-party assets published.
+
+This is code centralization, **not** a declaration of full product UX acceptance. Preserved real Server Actions, user/account permissions, tenants, contract/signature logic, calculations and persistence; no hosted DB, migrations, or production operations. Source-level regression contract covers all 26 modules. Some existing business default hex values and local decorative gradients remain outside this partial cleanup and must be reviewed explicitly before declaring global completion. **Required next gate:** exact SHA TypeScript, unit, build, strict token policy plus isolated authenticated four-profile/22-route light/dark desktop/mobile browser with zero axe violations AND incomplete, propagation and screenshots compared to reference. Keep PR #221 DRAFT, human merge only.
+
+---
+
+## 2026-11-24 — DS6 ROOT CAUSE: OVERFLOW SELECTOR MUST NOT RENDER ORPHAN TABPANELS
+
+At exact SHA 82377adb, CI run 45495842854 PASS but four-profile isolated authenticated QA run 45495842864 FAIL in all four Partners viewport/theme combinations, one axe-core 4.14 `aria-valid-attr-value` incomplete (`noIdShadow`), zero violations. Full target resolution established the failing element is a DIV INSIDE the dialog bearing `aria-labelledby` with one reference that is NOT in the document; the dialog itself has a valid direct `aria-label`. The actual component renders five `TabsContent` instances for destinations selected by a Radix Select/combobox, with NO matching Radix `TabsTrigger`; Radix generates `role=tabpanel` and `aria-labelledby` for missing trigger IDs. Fix the semantic mismatch for all five secondary destinations by rendering conditionally named `role=region` sections; keep primary three genuine Radix tabs, selector labels, all commercial state/actions and central visual tokens untouched. Extend the real browser QA to exercise all five named regions and check for unresolved IDREFs; preserve full WCAG rule set, zero incomplete threshold, keyboard and functional gates. Same PR #221 DRAFT; rerun CI plus isolated authenticated 4-role/22-route/mobile/desktop/light/dark QA on NEW exact SHA before claiming resolved. No production, hosted DB, migration, secrets or merge.
+
+---
+
+## 2026-11-24 — DS6 AXE VIRTUAL TARGET FORENSICS, FAIL CLOSED
+
+At exact SHA b4e5bd7a, CI 45491164463 PASS, isolated authenticated QA 45491164346 FAIL. Per source axe-core 4.14 aria-valid-attr-value-evaluate.js (lines 80-90), `noIdShadow` is assigned when `aria-labelledby` has an unresolved IDREF and the axe virtual tree contains shadow DOM. Reloading axe once/resetting its virtual tree did NOT cure the failure; this disproves stale-injection-only hypothesis. Current diagnostics erroneously infer failing node from `node.target[0]`, but axe targets can be nested selector paths for shadows/frames; the dialog may be an ancestor or wrong target. New QA-only read-only probe resolves every target segment including shadowRoot/contentDocument and reports only boolean structure, safe tag names, ARIA attribute NAMES, and reference existence/counts (never IDs, selectors, raw values, HTML or customer data). The rule remains enabled, zero incomplete/violation gate unchanged. Next same-SHA CI+auth QA identifies TRUE offending descendant before any application UI change. Existing Draft PR #221; no prod, hosted Supabase, migrations, or business behavior touched.
+
+---
+
+## 2026-11-24 — DS6 STALE AXE VIRTUAL TREE HYPOTHESIS, NOT YET CERTIFIED
+
+At HEAD a208b6b0, CI run 45487106786 PASS, real auth QA 45487106841 FAIL all 4 Partners states on a *single* `aria-valid-attr-value` incomplete with `noIdShadow`, `attributeName=aria-labelledby`, although DOM root explicitly has aria-label only; `aria-labelledby`/describedby absent, visible title and sr-only description mounted, neutral accessible label read-only probe fails too. Earlier CSS-safe IDREF and direct aria-label approaches both failed. The current QA called `page.addScriptTag({content:axeSource})` on every nested audit, repeatedly injecting axe 4.14 into the same React/Radix dialog while tabs and DOM state change. Candidate adjusts harness to initialize axe once per page, call axe.reset() before every full WCAG audit, and capture only safe boolean/number IDREF/AOM reference diagnostics on failure. DO NOT suppress or waive axe incompletes; same-SHA CI+real local authenticated 4-role QA, accessibility and screenshots must pass for release. Maintain Draft PR #221, no merge, production, hosted Supabase, migrations or business operations.
+
+---
+
+## 2026-11-24 — DS6 READ-ONLY AXE ARIA CHECK ISOLATION
+
+Same SHA aa599f1b CI 45485021450 SUCCESS (298 tests, 32 strict modules, zero regressions). Real local auth QA 45485021426 FAILED ONLY on `aria-valid-attr-value` *incomplete* on the root opportunity dialog in desktop/mobile, light/dark. No violations. Safe diagnostic shows the dialog has ONLY `aria-label` with a non-empty value; there are NO aria-labelledby/describedby IDREF attributes, and title/description elements exist. Therefore previous IDREF fix and direct aria-label naming do not remove this axe inconclusive result; stop blindly changing UI. axe-core 4.14's own aria-valid-attr-value evaluate sets structured `data.messageKey` of `noId/noIdShadow/ariaCurrent/idrefs/empty/controlsWithinPopup` when incomplete. Instrument that key and sanitized ARIA ATTRIBUTE NAME only, never raw values/customer data. Run a separate read-only targeted axe rule comparison on the live dialog with original versus neutral literal aria-label, always restore the original DOM and retain original audit failure. Inspect exact new SHA results before any UI change. Keep draft PR #221, no production, hosted DB, migrations or merge.
+
+---
+
+## 2026-11-24 — DS6 USE A DIRECT ACCESSIBLE NAME FOR COMPLEX DEAL DIALOG
+
+Evidence: SHA 4eea8f5a CI 45483291071 SUCCESS (298 tests, all 4 synthetic axe checks), real authenticated QA 45483291054 FAILED only `aria-valid-attr-value` incomplete on root deal dialog in all 4 light/dark desktop/mobile combinations. Both IDREF references existed and title/description were mounted. Previous mobile Partners scroll `scrollable-region-focusable` defect is FIXED (zero violations). CSS-safe explicit IDREF did not eliminate the incomplete; reject that previous root-cause hypothesis. Per official WAI-ARIA spec, role dialog may have an accessible name via aria-label OR aria-labelledby. WAI-ARIA APG advises omitting aria-describedby for complex multi-section dialogs where content should be navigated structurally. Candidate: use meaningful dynamic direct aria-label on DialogContent, explicitly omit both IDREF props while retaining visible DialogTitle and sr-only DialogDescription for in-content navigation, and keep edit-mode title mounted. Add safe browser diagnostic of attribute *names only* and direct-name boolean. Do not disable axe or relax zero-incomplete gate. Re-run exact new SHA CI+4-profile authenticated QA, inspect reference screenshots and leave PR #221 DRAFT. No hosted DB/prod/merge.
+
+---
+
+## 2026-11-24 — DS6 COMMERCIAL DIALOG IDREF AND MOBILE KEYBOARD SCROLL
+
+At exact SHA d7e10385, CI 45481474035 SUCCESS, authenticated local QA 45481473896 FAILED 4 combinations. The earlier unnamed decorative button was fixed: zero `button-name` violations. Remaining real defect on mobile: `scrollable-region-focusable` in Partners tab at [12,160,368,436]. Add proper named focusable scroll region and visible focus ring. All viewport/theme combinations also reported axe `aria-valid-attr-value` **incomplete** on the root dialog even though `aria-labelledby` and `aria-describedby` each pointed to one existing node and title/description were mounted (safe diagnostics). External axe-core issue #4576 describes unresolved React useId CSS-special-character references in certain integrations; exact cause here is not proven. Candidate assigns deterministic CSS-safe IDs from sanitized React.useId to DialogContent/Title/Description, keeps dialog's name/description mounted during edit mode, and labels editable deal title. No axe rule suppression, no business actions changes. Need new exact-SHA CI plus local authenticated four-role 22-route, desktop/mobile light/dark E2E and screenshot review. If ARIA remains incomplete, obtain deeper safe evidence rather than accepting. Same Draft PR #221, no hosted DB, prod or merge.
+
+---
+
+## 2026-11-24 — DS6 AUTHENTICATED PARTNERS A11Y BLOCKER
+
+SHA 2a1a36d7 CI run 45478409187 SUCCESS (296 tests, 32 strict modules). Authenticated QA 45478409438 FAILED four theme/viewport combinations on the nested Partners tab with one `button-name` violation: icon-only `ExternalLink` rendered in an inert `<button>`, no aria label or click handler, exact visual coords [884,328] desktop and [324,528] mobile. This is decorative rather than an actionable link: replace with aria-hidden icon span, do NOT add misleading accessible button. Axe also reports one `aria-valid-attr-value` incomplete on the dialog itself (source cause uncertain): instrument only safe booleans of ARIA reference existence + title/description presence, never actual ids/HTML/customer data; retain zero violation AND zero incomplete gate. Next run same-SHA real four-role 22-route QA and screenshots; finish Partners/Clientes navigation. PR #221 DRAFT, no prod/hosted Supabase/merge.
+
+---
+
+## 2026-11-24 — DS6 SYNCHRONIZE HISTORICAL B2/B4 SOURCE TEST CONTRACTS
+
+Exact SHA 81953310 real /pipeline route correctly changed five stage accents to centrally configured `bg-stage-*` classes and column geometry to `sm:w-[var(--ds-kanban-column-width)]`. CI run 45478015290 FAILED with exactly two existing source-contract assertions, which still expected old `bg-info`/`bg-success` stage classes and hardcoded `sm:w-80`. Update the old tests to assert NEW semantic-stage literals, DOM QA hook and central column variable. Do NOT revert the actual route to satisfy historical test literals. Preserve all business logic and compare same-SHA CI and real authenticated four-profile QA before considering DS6 certified. Same DRAFT PR #221, no merge, hosted DB or production.
+
+---
+
+## 2026-11-24 — DS6 REAL PIPELINE BOARD ROUTING CORRECTION
+
+Owner's original centralized Design System priority remains active, same DRAFT PR #221. Exact CI SHA 560836ba passed 295 tests and strict policy (31 locked modules; 153 affected files/3,214 occurrences), but local authenticated QA 45477099853 FAILED at `COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED` before opportunity modal checks. Root cause verified in the REAL source: `src/app/(dashboard)/pipeline/client-page.tsx` renders its own `DragDropContext` and `DEFAULT_STAGES`; `src/components/pipeline/KanbanBoard.tsx` migrated in DS6 is NOT imported by that live page. Update the actual route's existing five static stage accents/surfaces to `bg-stage-*`/semantic borders, add QA hooks to real rendered stages, and centralize column dimensions in tokens.css; preserve drag-and-drop and business logic. Lock the actual route under strict guard (confirmed zero pre-existing palette/font/radius/shadow-local occurrences). Require new exact-SHA full CI, authenticated local QA, screenshot review and zero WCAG violations/incompletes before asserting Commercial complete. No prod, Supabase hosted or merge.
+
+---
+
+## 2026-11-24 — DS6 COMMERCIAL FAMILY AFTER DS5 MOBILE CERTIFICATION
+
+Owner repeatedly authorized continuing the original Infodive CRM centralized Design System and preserving same Draft PR #221. **Conditional gate:** publish this prepared Commercial candidate only after DS5 Goals exact-SHA CI and real four-profile isolated QA PASS; do not mask remaining mobile a11y findings. Scope: six components of original Pipeline/Opportunity (KanbanBoard, DealFormModal, PartnersTab, StakeholdersTab, LostDealModal, CommissionWidget) migrated to semantic tokens. Kanban's dynamically constructed Tailwind classes become static typed five-stage classes. Existing stage transitions, RBAC, commissions, calculations, tenancy and server actions stay unchanged. Add fail-closed real browser computed-stage-token checks, read-only Partners/Clientes modal navigation and WCAG/screenshot checks on desktop/mobile, light/dark. Extend strict token guard to six files. Run exact-SHA CI and authenticated QA; visual acceptance and human merge gate remain separate. No Supabase hosted changes, migrations, secrets or production.
+
+---
+
+## 2026-11-24 — DS5 MOBILE ACCESSIBILITY CERTIFICATION BLOCK
+
+Owner authorized continue after CI success on 93bc4b95. First real QA attempt 45472526797 failed in the local-only Supabase Docker setup due an occupied inbucket host port 54324; rerunning just the failed job (attempt 2) reached the authenticated browser and exposed new mobile-only issues: Commissions had one color-contrast `incomplete` on clipped user name in a horizontally scrolling button list (numeric box [316,448,124,16]); Statement had one `scrollable-region-focusable` violation on the horizontally scrolling table (box [24,556,340,124]); Seasonality had an axe overlap `incomplete` in the sticky page-header subtitle (box [12,96,368,36]) after scrolling to the graph. Fix all three coherently: mobile users grid with fully visible buttons; focusable named table scroll region; non-sticky mobile PageHeader, retaining md+ sticky. Preserve all DB/actions/RBAC/commissions; run new exact-SHA CI and isolated four-profile 22-route light/dark desktop/mobile QA before Commercial candidate. PR #221 stays DRAFT.
+
+---
+
+## 2026-11-24 — DS5 SINGLE REMAINING DRE CONTRAST VIOLATION
+
+Real QA SHA 9d8956ae (run 45471381437) has exactly one failing Goals state, Planning, with one `color-contrast` node. Direct evidence coordinates [836,452,156,16] on actual screenshot identify the `Ineficiência Ramp-up` label inside FinancialSummaryCard. The row had `opacity-80` on the whole text container, making it less readable. Remove this unnecessary opacity only, preserving all values and business logic, plus permanent source contract. Re-run exact-SHA CI, authenticated four-role 22-route QA, both themes/mobile/desktop and inspect screenshot. PR #221 stays DRAFT. Do not publish subsequent Commercial candidate until this gate passes; no hosted DB/production/main merge.
+
+---
+
+## 2026-11-24 — DS5 GOALS REAL VISUAL AND AXE DEFECTS FOUND
+
+Owner directed autonomous completion. Exact SHA bf69f1dd CI 45468723328 SUCCESS, isolated authenticated QA 45468723316 **FAIL**. Sanitized logs identify five nested Goals states: Commissions 2 contrast violations; Campaigns 3 contrast + 2 unlabeled fields; Planning 40 contrast + 7 unlabeled fields + 5 axe incomplete; Seasonality 7 labels + 20 incomplete SVG; Statement 2 contrast. Real desktop screenshot additionally proves P1 planning layout: FilterBar occupies one column of a 12-grid, displacing right results below left, and a duplicated inner grid wrapper crushes goal mode options. Do NOT claim UX accepted. Fix actual grid composition, labels, chart SVG accessibility and tab animation sampling, using central tokens. No change to math, Server Actions, access control or hosted DB. Same-SHA CI/real QA must prove zero violations and zero incompletes in all nested states across both viewports/themes.
+
+---
+
+## 2026-11-24 — DS5 AUTHENTICATED GOALS STATE QA BLOCKER
+
+Owner said "prossiga" after full CI success at d68b9e82 (run 45466924408), but real isolated authenticated QA 45466924462 **FAIL** at commissions nested tab: one WCAG violation, unknown rule. This is a genuine blocker, not UX approval. Continue SAME DRAFT PR #221 with a narrow responsive/accessibility correction for CommissionsTab and safe, redacted axe diagnostics for ALL nested Goals tab states, rather than masking or bypassing the violation. Strict zero-hardcode lock and commercial calculations/actions must remain unchanged. Re-run TypeScript, unit, build, policy and same-SHA isolated 4-role 22-route QA; inspect the actual failing rule before asserting fix. No hosted Supabase, migration, production or merge.
+
+---
+
+## 2026-11-24 — DS5 GOALS FAMILY COMPLETION CANDIDATE
+
+Owner explicitly authorized "prossiga" after same-SHA CI and local authenticated QA PASS on PR #221 commit 5f879207 (runs 45463359093 / 45463359105). Continue SAME DRAFT PR #221 only. Verified debt 168 files / 3,593 occurrences (from run 45463359093), not UX acceptance. Authorized cohesive UI-only Goals family: CommissionSimulator, EnhancedProgressBar, GoalInput, PerformanceBadge, ProfitabilityChart, SeasonalityChart, StatsCard, CampaignsTab and StatementTab. Replace visual literals with semantic token roles, correct Recharts HSL/OKLCH mismatch, improve keyboard/ARIA and small-screen scrolling without changing commission math, goals, server actions, RBAC, tenants, database or production. Add all fully migrated files to strict guard and source contracts. Require exact final SHA CI and four-profile authenticated isolated browser QA desktop/mobile light/dark; visually compare private references before release. Do not merge automatically; #221 remains DRAFT.
+
+---
+
+## 2026-11-24 — DS5 GOALS FAMILY CENTRALIZATION (same DRAFT PR #221)
+
+Owner said "continue" after SHA 8395895d achieved both CI and isolated authenticated QA PASS. Authorized scope: migrate presentation only in four existing Goals components (financial DRE, Goals dashboard, Commissions, Distribution) to shared semantic tokens with strict hardcode lock and regression tests. Preserve amounts, calculations, handlers, persistence, permissions and tenant isolation. Required: exact final SHA TypeScript/tests/build/axe/diff/policy CI plus isolated four-role, 22-route desktop/mobile/light/dark browser QA and visual comparison. No Supabase hosted database, migrations, API changes, production or main merge. This PR stays DRAFT pending owner review.
+
+---
+
+## 2026-11-24 — DS4 QA isolation implementation clarification
+
+Source lockfile confirms an existing app axe-core 4.11.1 versus pinned QA axe-core 4.14.0. The shared installer must **NOT** symlink or replace anything inside the app's node_modules after Next build. Export only isolated absolute module file paths via GITHUB_ENV and make the two QA test runners read those paths. Keep runtime package integrity proof and all previous CI+authenticated QA gates. No production or hosted DB operations.
+
+---
+
+# CURRENT_TASK — 2026-11-24: DS4 PERSONAL THEME PERSISTENCE CERTIFICATION
+
+**Explicit goal:** user requested the Design System working perfectly, including the currently existing individual light/dark preference. Continue SAME DRAFT PR #221, no main merge.
+
+**Observed:** Candidates `9b9ba175` and `6b342382` failed real local authenticated QA while switching light/dark. Candidate `34fb0b39` passed full CI (run 45428977985) but failed local authenticated QA (45428977868) with `CRM_THEME_PERSISTENCE_BLOCKED: wantedDark=false, renderedDark=true, saveState=failed`. The preference Server Action truly rejected the write; earlier purely optimistic toggle masked this. The current priority is a narrow root-cause correction and receipt, not additional cosmetic changes.
+
+**Narrow exception to prior task:** allowed to correct **only** `updateUserTheme` in `src/app/actions/theme-actions.ts` as part of the requested individual Design System theme feature. Keep `requireSessionContext` and per-user `profiles.id` scope, ensure an actual updated record is returned and matches the requested theme, omit unnecessary root `revalidatePath('/')`, fail closed and log only bounded non-sensitive backend code for isolated QA. No other Server Action, API, tenant permission/schema, commercial logic or hosted DB operation is authorized.
+
+**Required gates:** real same-SHA isolated browser QA verifies click, server save confirmation, and that the theme survives a full authenticated page reload, on desktop/light/dark with 4 profiles/22 routes; the existing 9-token propagation and all WCAG checks must still pass. CI TypeScript/unit/build/diff/design policy/axe; compare screenshots against private reference. Keep the PR DRAFT.
+
+---
+
+# CURRENT_TASK — 2026-11-24: DS4 CENTRAL PROPAGATION + MULTI-FAMILY MIGRATION
+
+**Owner authorization:** “Ok, prossiga, quero o design system em perfeito funcionamento.” Continue in the SAME DRAFT PR #221 from exact head `2891b5ecc82cc54dcc242338a0f946d89a25138c`. No main merge or production deployment.
+
+**Confirmed baseline:** Last CI 45418898557 SUCCESS on prior head. Its read-only design debt report measured 188 UI files and 5,168 local-style occurrences, down from the original 196/5,536 baseline. These are counted occurrences, not independent bugs. Shared StatItem still accepted per-page color/gradient/border strings, legacy Tailwind font/shadow utilities were not all tied to the new configurable primitives, ThemeInput/ThemeSelect forced `value=""` when callers omitted value, and OrganizationThemeSettings claimed organizational default theme saved even though its server action ignores the theme argument.
+
+**Authorized cohesive block:** Upgrade central `tokens.css` compatibility bridge for Tailwind font/radius/shadow utilities, implement typed semantic stat tones, migrate StatGrid consumers (Leads, Contacts, Reports, Sales, Pipeline) and twelve high-debt existing UI components across commercial, pipeline, operation, analytics, proposals and procurement. Lock migrated modules with strict zero-local-hardcode policy. Make uncontrolled shared fields editable, revert failed personal-theme saves, and stop claiming the unsupported organization theme is persistent. Add a local authenticated browser **computed-style propagation test**: modify and restore one token at a time, verifying shared header, stats, button, font and gradient in light/dark across multiple routes; do not persist any temporary value. Update tests and docs.
+
+**Denied:** schema/migrations, Supabase hosted DB, API/Server Actions, auth/RLS/RBAC, financial calculations, tenant theme storage, dependencies, credentials, Vercel or production, auto merge, copying private visual references to GitHub. Org default-theme persistence requires separately scoped schema+authorization gate; do not fake its success.
+
+**Required QA:** CI TypeScript/unit tests/build/axe/design policy/diff, exact SHA local isolated authenticated QA, 4 roles, 22 authorized routes, desktop+mobile and light+dark, zero WCAG violations/incompletes, keyboard/navigation and token propagation probe PASS. Inspect source screenshots and document actual remaining debt on final SHA; do not claim full 188-file migration or universal UX acceptance without evidence. Keep PR #221 DRAFT.
+
+---
+
+# CURRENT_TASK — 2026-11-24: DS3.1 OPPORTUNITY INFORMATION HIERARCHY AND SECTION NAVIGATION
+
+**Owner authorization:** "prossiga" after G2/DS3 local isolated authenticated QA PASS, 176 checks, CI PASS on `37dfb820`. Extend **only** DRAFT PR #221 on existing branch, no merge to main.
+
+**Direct evidence:** inspected all four real authenticated synthetic QA detail captures for `37dfb820` (desktop/mobile, light/dark), plus the owner's private `Captura de tela 2026-11-17 093410(1).png`. The CRM modal's 8 equal-weight tabs require two rows desktop and four rows mobile. Four broad KPI cards and duplicated status summaries dominate the central panel, obscuring the core company/contact/context/details found in the reference. Prior technical PASS does not equal visual acceptance.
+
+**Allowed block:** Keep all eight real section destinations and server actions, but expose 3 high-frequency direct tabs plus 5 secondary destinations through an accessible selector, and move the overview to a dense readable definition-list composition using recorded deal fields only. All spacing, layout columns, widths and surface roles live in `src/design-system/tokens.css`. Update contract tests, actual authenticated browser navigation and screenshots, and the visual evidence ledger. Do not fake contact roles, AI recommendations, activity dates, prices or engagement events.
+
+**Prohibited:** business/service/API behavior changes, financial calculation or persisted-value synchronization changes, RLS/RBAC/tenancy, migrations, hosted Supabase, external integrations, production, automated merge, screenshot publication to this public repo.
+
+**Required proof:** exact final SHA CI (TypeScript, unit tests, Next build, token guard, WCAG preflight), real isolated synthetic authenticated QA (four profiles, 22 routes, both themes and viewport sizes), modal tab destinations via keyboard and pointer, overflow absence, screenshots of overview AND secondary History at desktop/mobile × light/dark, evidence-based comparison with the private visual source. Keep UX and main merge gate open until human visual review and remote protected QA if required. The complete 196-file migration is NOT finished.
+
+---
+
+# CURRENT_TASK — 2026-11-24: DS3 OPPORTUNITY INSPECTOR + FINANCIAL PRESENTATION
+
+**Owner authorization:** "prossiga" after #221 local CI and authenticated QA passed at `141c128a`. Extend the same DRAFT PR #221, never merge main or deploy.
+
+**Confirmed defect:** The Opportunity dialog showed the stored deal estimate (R$15,000.00 in synthetic QA) alongside a second "Forecast" computed from product `unit_price` (R$0.00). The two values have different sources, but labels did not explain that. Worse, opening the dialog invoked `handleProductsUpdate`, which could silently execute `updateDeal({value: calculated})` during a read-only view. Explicit mutations in `DealProductsTab` already persist recalculated totals.
+
+**Allowed cohesive block:** Presentation-only refactor of `ViewDealModal`, `OverviewTab`, `DealActivityTimeline` and centralized `src/design-system/tokens.css`; no business calculation changes. Distinguish estimated vs product-derived amounts and display an explicit reconciliation warning; make opening a deal read-only; keep existing stage transitions, product edit, proposal, contract, AI and portal functionality accessible. Reduce header/tab crowding and align main details/right-side context to the owner-provided opportunity drawer reference. Update isolated local authenticated QA to capture detail desktop/mobile, light/dark, tests and UX evidence ledger.
+
+**Denied:** SQL/migrations, hosted Supabase, APIs/services, tenant/RBAC policy, financial calculation formula, production deploy, integrations, credential changes, automatic merge. The 196-file global design-system migration remains unfinished. This task is NOT visual UX acceptance of the entire CRM.
+
+**Required gates:** Exact SHA TypeScript, unit tests, Next build, design-token guard and real synthetic authenticated QA; 4 dialog screenshots (desktop/mobile x light/dark), WCAG/incomplete fail closed, keyboard focus, no document overflow and no automatic write from read paths. Review source-vs-QA screenshots and ledger. Keep #221 DRAFT until genuine human merge and remote QA gate.
+
+---
+
+# CURRENT_TASK — 2026-11-23: INTEGRATE G1 SHELL AND PIPELINE ON CENTRAL DESIGN SYSTEM
+
+**Owner authorization:** “prossiga com a próxima tarefa” after Design System PR #221. Extend the existing DRAFT PR #221; use the implementation from DRAFT PR #220 only where consistent with global semantic tokens. Do not merge any branch into main.
+
+**Exact source candidates:** #221 head at task start 1a68e9de93e49bc0d4a201aa62ccffbccfa1d317; #220 head 6f722876e91ec9cc761888a0f9cb48245eded3cb. #220 regular CI PASS, latest local authenticated QA FAIL on Pipeline opportunity detail. This task MUST not relabel it PASS. Real screenshot references are the 19 privately held Clinia PNGs; no copying them to public GitHub.
+
+**Implementation block:** integrate Sidebar contextual icon rail, Header and ViewToggle, Pipeline board/list, DealCard, shared StatsGrid/FilterBar and detail accessibility into the centralized token contract in src/design-system/tokens.css. No new hardcoded colors, fonts, control radius, shadows or gradients; CSS semantics own all design values. Preserve route hierarchy, features and all financial logic. Reuse sanitized SHA-bound E2E local QA workflow, do not connect hosted Supabase.
+
+**Allowed:** original UI presentation components listed above; one coherent isolated local-QA workflow and test helpers from #220; relevant tests, docs/ux/**, MEMORY.md, docs/codex/CURRENT_TASK.md and token style additions. **Denied:** database migrations, API/server actions, tenant/RBAC changes, production deployments, hosted credentials, other repos and any automatic merge.
+
+**Completion criteria:** CI unit+build+synthetic axe+nonregression guard PASS on the exact candidate; isolated authenticated local QA with sanitized screenshots and 4 test profiles PASS or explicit failure ledger; keyboard/ARIA and dark-mode contrast. Compare actual screenshots against the original reference before claiming visual acceptance. The current PR stays DRAFT until all gates verified. The global 196-file design migration is not complete.
+
+---
+
+# CURRENT_TASK — 2026-11-23: CENTRAL CONFIGURABLE DESIGN SYSTEM CORE (DS0–DS1 + Pipeline drawer pilot)
+
+**Explicit owner authorization:** 2026-11-23 direction to prioritize a single globally configurable Design System (colors, fonts, title sizes, radii, shadows, gradient roles and geometry), followed by “prossiga”. This task supersedes local module-by-module visual retouching as the immediate priority. It does NOT authorize Supabase migrations, production deployment or human merge.
+
+**Repository baseline:** main at a9097aac7c53548f6f0983265c24a90c513b8746. Existing PR #220 is an independent G1 UX DRAFT; do not change its branch or merge it. Open one substantial separate PR for this central core against main, then reconcile #220 later.
+
+**Allowed in this scope:** src/design-system/**; src/app/globals.css; src/app/layout.tsx ONLY to resolve the centrally loaded font; src/components/ui/** for shared UI primitives; src/components/layout/PageHeader.tsx; src/components/pipeline/ViewDealModal.tsx as an end-to-end reference migration; relevant tests under test/**, scripts/**, package.json, .github/workflows/crm-validation.yml to enforce hardcode policy; docs/ux/** and root AGENTS.md/MEMORY.md/docs/codex/CURRENT_TASK.md. Keep untouched all business/server/API actions, RBAC, RLS, migrations, integration and production environment.
+
+**Deliverables:** one authoritative CSS token source with light/dark, semantic aliases and Tailwind 4 mapping; shared typography and base components; no locally defined gradients in the Pipeline drawer; versioned migration plan and per-file debt inventory; a CI guard preventing growth in local hardcoded colors/type/radius/shadows/gradients. Existing nonmigrated visual debt remains explicitly PENDING: run 45239400879 measured 196 affected UI files and 5,536 matching style occurrences. Do not claim global UX acceptance.
+
+**Required validation:** TypeScript, unit tests, build, design-token guard and real synthetic accessibility/browser QA on the same candidate SHA through existing workflows. No false PASS for runtime admin configurator, WCAG across unconverted modules, or production deployment. The PR remains DRAFT while checks and visual gates are pending. A human approves merge into main.
+
+---
+
 # CURRENT_TASK — 2026-11-19: RESTORE UX SOURCE OF TRUTH (documentation and skills ONLY)
 
 **Authorization:** the owner explicitly requested permanent preservation of every UI/UX obligation, AGENTS.md and MEMORY.md instructions, the Clinia visual references, and the UI/UX skill, BEFORE restarting the redesign. This source-of-truth stage is not an authorization to change application screens, database, environments, or production.

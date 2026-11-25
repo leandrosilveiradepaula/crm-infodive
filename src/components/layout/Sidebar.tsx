@@ -73,18 +73,18 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
     return (
         <aside className={cn(
             'fixed inset-y-0 left-0 z-50 flex h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width,transform] duration-200 lg:static lg:translate-x-0',
-            isMobileMenuOpen ? 'w-[19.5rem] translate-x-0' : '-translate-x-full lg:translate-x-0',
-            isCollapsed ? 'lg:w-[4.5rem]' : 'lg:w-[19.5rem]',
+            isMobileMenuOpen ? 'w-[var(--ds-nav-expanded-width)] translate-x-0' : '-translate-x-full lg:translate-x-0',
+            isCollapsed ? 'lg:w-[var(--ds-nav-rail-width)]' : 'lg:w-[var(--ds-nav-expanded-width)]',
         )}>
-            <div className="flex w-[4.5rem] shrink-0 flex-col items-center border-r border-sidebar-border py-3">
-                <Link href="/dashboard" aria-label="Infodive CRM — Início" className="focus-ring mb-5 flex size-10 items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground shadow-sm">
-                    <BarChart3 className="size-5" aria-hidden="true" />
+            <div className="flex w-[var(--ds-nav-rail-width)] shrink-0 flex-col items-center border-r border-sidebar-border py-3">
+                <Link href="/dashboard" aria-label="Infodive CRM — Início" className="focus-ring mb-5 flex size-[var(--ds-nav-target-size)] items-center justify-center rounded-[var(--radius-control)] bg-primary text-primary-foreground shadow-control-ui">
+                    <BarChart3 className="size-[var(--ds-nav-icon-size)]" aria-hidden="true" />
                 </Link>
                 <nav aria-label="Áreas principais" className="flex w-full flex-1 flex-col items-center gap-1 px-2">
                     {navigationAreas.map((area) => {
                         const Icon = area.icon;
                         const isActive = area === activeArea;
-                        return <Link key={area.label} href={area.href} aria-label={area.label} aria-current={isActive ? 'page' : undefined} title={area.label} onClick={() => setIsMobileMenuOpen(false)} className={cn('focus-ring flex size-10 items-center justify-center rounded-[var(--radius-control)] transition-colors', isActive ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-foreground')}><Icon className="size-5" aria-hidden="true" /></Link>;
+                        return <Link key={area.label} href={area.href} aria-label={area.label} aria-current={isActive ? 'page' : undefined} title={area.label} onClick={() => setIsMobileMenuOpen(false)} className={cn('focus-ring flex size-[var(--ds-nav-target-size)] items-center justify-center rounded-[var(--radius-control)] transition-colors', isActive ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-control-ui' : 'text-sidebar-foreground/65 hover:bg-sidebar-accent hover:text-sidebar-foreground')}><Icon className="size-[var(--ds-nav-icon-size)]" aria-hidden="true" /></Link>;
                     })}
                 </nav>
                 <div className="mt-3 flex flex-col items-center gap-2">
@@ -94,17 +94,17 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
 
             <div className={cn('flex min-w-0 flex-1 flex-col overflow-hidden', isCollapsed && 'lg:hidden')}>
                 <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-                    <div className="min-w-0"><p className="text-xs font-medium text-muted-foreground">Infodive CRM</p><h2 className="truncate text-base font-semibold tracking-tight">{activeArea.label}</h2></div>
+                    <div className="min-w-0"><p className="ds-type-label font-medium text-muted-foreground">Infodive CRM</p><h2 className="truncate ds-type-body font-semibold tracking-tight">{activeArea.label}</h2></div>
                     <button type="button" aria-label="Fechar menu" onClick={() => setIsMobileMenuOpen(false)} className="focus-ring rounded-[var(--radius-control)] p-2 text-sidebar-foreground/70 hover:bg-sidebar-accent lg:hidden"><X className="size-5" /></button>
                 </div>
                 <nav aria-label={`Navegação de ${activeArea.label}`} className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
                     {activeArea.items.map((item) => {
                         const Icon = item.icon;
                         const isActive = isEntryActive(item, pathname);
-                        return <Link key={item.href} href={item.href} aria-current={isActive ? 'page' : undefined} onClick={() => setIsMobileMenuOpen(false)} className={cn('focus-ring flex min-h-10 items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm transition-colors', isActive ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-sm' : 'text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground')}><Icon className="size-4 shrink-0" aria-hidden="true" /><span className="font-medium">{item.label}</span></Link>;
+                        return <Link key={item.href} href={item.href} aria-current={isActive ? 'page' : undefined} onClick={() => setIsMobileMenuOpen(false)} className={cn('focus-ring flex min-h-[var(--ds-nav-target-size)] items-center gap-3 rounded-[var(--radius-control)] px-3 ds-type-body transition-colors', isActive ? 'bg-sidebar-primary text-sidebar-primary-foreground shadow-control-ui' : 'text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground')}><Icon className="size-4 shrink-0" aria-hidden="true" /><span className="font-medium">{item.label}</span></Link>;
                     })}
                 </nav>
-                <div className="border-t border-sidebar-border p-3"><div className="flex items-center gap-3 rounded-[var(--radius-control)] px-2 py-2"><Avatar className="size-8"><AvatarImage src={userProfile.avatar_url || ''} /><AvatarFallback>{userProfile.full_name?.charAt(0) || 'U'}</AvatarFallback></Avatar><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{userProfile.full_name}</p><p className="truncate text-xs text-muted-foreground capitalize">{userProfile.role}</p></div><button type="button" onClick={handleLogout} className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-sidebar-accent hover:text-destructive" title="Sair do sistema" aria-label="Sair do sistema"><LogOut className="size-4" /></button></div></div>
+                <div className="border-t border-sidebar-border p-3"><div className="flex items-center gap-3 rounded-[var(--radius-control)] px-2 py-2"><Avatar className="size-8"><AvatarImage src={userProfile.avatar_url || ''} /><AvatarFallback>{userProfile.full_name?.charAt(0) || 'U'}</AvatarFallback></Avatar><div className="min-w-0 flex-1"><p className="truncate ds-type-body font-medium">{userProfile.full_name}</p><p className="truncate ds-type-label text-muted-foreground capitalize">{userProfile.role}</p></div><button type="button" onClick={handleLogout} className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-sidebar-accent hover:text-destructive" title="Sair do sistema" aria-label="Sair do sistema"><LogOut className="size-4" /></button></div></div>
             </div>
         </aside>
     );

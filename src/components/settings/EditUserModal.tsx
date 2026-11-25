@@ -47,9 +47,9 @@ export const EditUserModal = ({ isOpen, onClose, user, onSave }: EditUserModalPr
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200">
+            <div className="relative bg-card border border-border rounded-[var(--radius-panel)] shadow-card-ui w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in duration-200">
                 <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-foreground">Editar Usuário</h3>
+                    <h3 className="text-section-title font-bold text-foreground">Editar Usuário</h3>
                     <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
                         <X className="h-5 w-5" />
                     </button>
@@ -57,47 +57,47 @@ export const EditUserModal = ({ isOpen, onClose, user, onSave }: EditUserModalPr
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg flex items-center gap-2">
+                        <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive-readable text-body-ui rounded-[var(--radius-control)] flex items-center gap-2">
                             <AlertCircle className="h-4 w-4" />
                             {error}
                         </div>
                     )}
 
                     <div>
-                        <label className="block text-sm font-bold text-muted-foreground mb-1">Nome Completo</label>
+                        <label className="block text-body-ui font-bold text-muted-foreground mb-1">Nome Completo</label>
                         <input
                             type="text"
                             required
-                            className="w-full px-4 py-2 bg-background border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full px-4 py-2 bg-background border border-border rounded-[var(--radius-panel)] text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                             value={formData.name || ''}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-muted-foreground mb-1">Email</label>
+                        <label className="block text-body-ui font-bold text-muted-foreground mb-1">Email</label>
                         <input
                             type="email"
                             required
-                            className="w-full px-4 py-2 bg-background border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full px-4 py-2 bg-background border border-border rounded-[var(--radius-panel)] text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                             value={formData.email || ''}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-muted-foreground mb-1">Telefone (WhatsApp)</label>
+                        <label className="block text-body-ui font-bold text-muted-foreground mb-1">Telefone (WhatsApp)</label>
                         <input
                             type="tel"
                             placeholder="ex: 5511999999999"
-                            className="w-full px-4 py-2 bg-background border border-border rounded-xl text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full px-4 py-2 bg-background border border-border rounded-[var(--radius-panel)] text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                             value={formData.phone || ''}
                             onChange={e => setFormData({ ...formData, phone: e.target.value })}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-muted-foreground mb-2">Funções de Acesso (Roles)</label>
+                        <label className="block text-body-ui font-bold text-muted-foreground mb-2">Funções de Acesso (Roles)</label>
                         <RoleSelect
                             value={formData.roles || []}
                             onChange={(roles) => setFormData({ ...formData, roles: roles as any })}
@@ -110,14 +110,14 @@ export const EditUserModal = ({ isOpen, onClose, user, onSave }: EditUserModalPr
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-muted-foreground font-medium hover:bg-muted rounded-lg transition-colors"
+                            className="px-4 py-2 text-muted-foreground font-medium hover:bg-muted rounded-[var(--radius-control)] transition-colors"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-primary text-white font-bold rounded-[var(--radius-control)] hover:bg-primary transition-all shadow-card-ui shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Salvando...' : (
                                 <>

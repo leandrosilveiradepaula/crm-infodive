@@ -29,17 +29,18 @@ import { type Automation } from '@/types/automation';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ThemeInput } from '@/components/ui/theme/ThemeComponents';
-import { 
-    DropdownMenu, 
-    DropdownMenuContent, 
-    DropdownMenuItem, 
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuSeparator 
+    DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 import { Button } from '@/components/ui/button';
+import { automationSummary, automationTriggerLabel, automationActionLabel } from '@/components/automations/automation-presentation';
 
 interface AutomationsClientPageProps {
     initialAutomations: Automation[];
@@ -48,27 +49,27 @@ interface AutomationsClientPageProps {
 export default function AutomationsClientPage({ initialAutomations }: AutomationsClientPageProps) {
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
+    const [builderPrompt, setBuilderPrompt] = useState('');
     const [showNewModal, setShowNewModal] = useState(false);
     const [initialModalData, setInitialModalData] = useState<Partial<Automation> | undefined>(undefined);
     const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
     const [showHistory, setShowHistory] = useState(false);
     const [filterType, setFilterType] = useState<string | null>(null);
-    const [showGallery, setShowGallery] = useState(false);
 
 
     const recipes = [
-        { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-orange-400', bg: 'bg-orange-400/10' },
-        { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-teal-400', bg: 'bg-teal-400/10' },
-        { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+        { title: 'Follow-up 7 Dias', triggerType: 'deal_stagnant', actionType: 'send_email', category: 'followup', icon: RefreshCw, color: 'text-primary', bg: 'bg-primary/10' },
+        { title: 'Alerta Ticket Alto', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Bell, color: 'text-warning-readable', bg: 'bg-warning-subtle' },
+        { title: 'Boas-vindas Cliente', triggerType: 'deal_moved', actionType: 'send_email', category: 'welcome', icon: UserPlus, color: 'text-success-readable', bg: 'bg-success-subtle' },
+        { title: 'Mover Negociação', triggerType: 'proposal_sent', actionType: 'move_deal', category: 'custom', icon: ArrowUpRight, color: 'text-muted-foreground', bg: 'bg-info-subtle' },
+        { title: 'Tarefa de Retorno', triggerType: 'deal_stagnant', actionType: 'create_task', category: 'followup', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
+        { title: 'Notificar VIP', triggerType: 'deal_created', actionType: 'send_notification', category: 'alert', icon: Zap, color: 'text-warning-readable', bg: 'bg-warning-subtle' },
     ];
 
-    const parseAIIntent = (prompt: string): Partial<Automation> => {
+    const parseDraftIntent = (prompt: string): Partial<Automation> => {
         const p = prompt.toLowerCase();
         let trigger: any = { type: 'deal_created', config: {} };
-        let actions: any[] = [{ type: 'send_notification', config: { title: 'AI Automation', description: prompt } }];
+        let actions: any[] = [{ type: 'send_notification', config: { title: 'Novo fluxo', description: prompt } }];
         const name = prompt.charAt(0).toUpperCase() + prompt.slice(1);
         let category: any = 'custom';
 
@@ -95,11 +96,11 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         return { name, trigger, actions, category };
     };
 
-    const handleAIBuilder = () => {
-        if (!searchTerm) {
+    const prepareDraft = (prompt = builderPrompt) => {
+        if (!prompt.trim()) {
             setInitialModalData(undefined);
         } else {
-            const data = parseAIIntent(searchTerm);
+            const data = parseDraftIntent(prompt.trim());
             setInitialModalData(data);
         }
         setShowNewModal(true);
@@ -116,53 +117,41 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
         setShowNewModal(true);
     };
 
-    const totalExecutions = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.executionCount || 0), 0);
-    const totalSuccessCount = initialAutomations.reduce((acc: number, curr: Automation) => acc + (curr.successCount || 0), 0);
-    const successRate = totalExecutions > 0 
-        ? ((totalSuccessCount / totalExecutions) * 100).toFixed(1)
-        : "0";
-
+    const summary = automationSummary(initialAutomations);
     const stats: StatItem[] = [
         {
-            label: "Total de Execuções",
-            value: totalExecutions.toString(),
-            description: "Ações processadas",
+            label: "Fluxos ativos",
+            value: summary.active,
+            description: `${summary.inactive} pausado(s)`,
+            icon: Activity,
+            tone: "primary",
+            onClick: () => setFilterType(filterType === 'active' ? null : 'active'),
+        },
+        {
+            label: "Execuções",
+            value: summary.executions,
+            description: "Execuções registradas",
             icon: Zap,
-            color: "text-blue-500",
-            gradient: "from-blue-50 to-white dark:from-blue-950/20",
-            border: "border-blue-100 dark:border-blue-900/50",
-            onClick: () => setFilterType(filterType === 'active' ? null : 'active')
+            tone: "info",
         },
         {
-            label: "Tempo Economizado",
-            value: "42h",
-            description: "Estimativa mensal",
-            icon: Clock,
-            color: "text-emerald-500",
-            gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-            border: "border-emerald-100 dark:border-emerald-900/50"
-        },
-        {
-            label: "Taxa de Sucesso",
-            value: `${successRate}%`,
-            description: "Execuções sem erro",
+            label: "Taxa de sucesso",
+            value: summary.successRate === null ? '—' : `${summary.successRate.toFixed(1)}%`,
+            description: summary.successRate === null ? "Sem execuções registradas" : "Execuções sem erro",
             icon: CheckCircle2,
-            color: "text-orange-500",
-            gradient: "from-orange-50 to-white dark:from-orange-950/20",
-            border: "border-orange-100 dark:border-orange-900/50",
-            onClick: () => setFilterType(filterType === 'failed' ? null : 'failed')
-        }
+            tone: "neutral",
+        },
     ];
 
     // Filtered automations
     const filteredAutomations = initialAutomations.filter((a: Automation) => {
         const matchesSearch = a.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             a.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        
+
         if (filterType === 'failed') return matchesSearch && (a.failureCount || 0) > 0;
         if (filterType === 'active') return matchesSearch && a.enabled;
         if (filterType === 'inactive') return matchesSearch && !a.enabled;
-        
+
         return matchesSearch;
     });
 
@@ -207,9 +196,9 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
 
     const getCategoryIcon = (category?: string) => {
         switch (category) {
-            case 'followup': return <RefreshCw className="h-5 w-5 text-blue-400" />;
-            case 'alert': return <Bell className="h-5 w-5 text-orange-400" />;
-            case 'welcome': return <UserPlus className="h-5 w-5 text-emerald-400" />;
+            case 'followup': return <RefreshCw className="h-5 w-5 text-primary" />;
+            case 'alert': return <Bell className="h-5 w-5 text-warning-readable" />;
+            case 'welcome': return <UserPlus className="h-5 w-5 text-success-readable" />;
             default: return <Settings className="h-5 w-5 text-muted-foreground" />;
         }
     };
@@ -219,9 +208,12 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
             {/* Top Bar / Header */}
             <PageHeader
                 title="Automações"
-                description="Otimize sua rotina com gatilhos e ações automáticas inteligentes."
+                description="Crie, configure e acompanhe fluxos de trabalho automáticos."
             >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Button asChild variant="outline">
+                        <a href="#automation-modelos">Ver modelos</a>
+                    </Button>
                     <Button
                         onClick={() => {
                             setInitialModalData(undefined);
@@ -234,89 +226,77 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 </div>
             </PageHeader>
 
-            {/* AI Builder Quick Input */}
-            <div className="bg-card border border-border rounded-2xl shadow-sm mb-6">
-                <div className="p-4 flex flex-col md:flex-row items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                        <Zap className="h-5 w-5 text-white animate-pulse" />
+            <section aria-label="Preparar fluxo" className="rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-control-ui">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                    <div className="flex min-w-0 flex-1 items-start gap-3">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-[var(--radius-control)] bg-primary text-primary-foreground">
+                            <Zap className="size-5" aria-hidden="true" />
+                        </span>
+                        <div>
+                            <h2 className="text-section-title font-semibold text-foreground">Prepare um novo fluxo</h2>
+                            <p className="mt-1 text-body-ui text-muted-foreground">Descreva uma tarefa para preencher um modelo inicial. Revise antes de ativar.</p>
+                        </div>
                     </div>
-                    <div className="flex-1 space-y-0.5 text-center md:text-left">
-                        <h3 className="text-sm font-black text-foreground tracking-tight">O que você deseja automatizar hoje?</h3>
-                        <p className="text-xs text-foreground font-medium italic">"Me avise por e-mail quando um negócio for ganho"</p>
-                    </div>
-                    <div className="w-full md:w-[450px] relative group">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <div className="flex min-w-0 flex-col gap-2 sm:flex-row lg:w-[min(100%,32rem)]">
                         <ThemeInput
-                            placeholder="Descreva sua automação e a IA fará o resto..."
-                            aria-label="Descrever automação por IA"
-                            className="pl-10 pr-28 w-full h-10 bg-background border-border focus:bg-background transition-all rounded-xl font-medium text-sm"
-                            value={searchTerm}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                            placeholder="Ex.: enviar e-mail após 7 dias sem movimentação"
+                            aria-label="Descrever automação"
+                            className="min-w-0 flex-1"
+                            value={builderPrompt}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBuilderPrompt(e.target.value)}
                         />
-                        <button
-                            onClick={handleAIBuilder}
-                            className="focus-ring absolute right-1 top-1/2 flex h-8 -translate-y-1/2 items-center gap-1.5 rounded-[var(--radius-control)] bg-primary px-3 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                        >
-                            <Zap className="h-3 w-3 fill-current" />
-                            Gerar com IA
-                        </button>
+                        <Button type="button" onClick={() => prepareDraft()} className="w-full sm:w-auto">
+                            Preparar fluxo
+                        </Button>
                     </div>
                 </div>
-            </div>
+            </section>
 
             {/* Premium Stats Grid */}
             <StatsGrid items={stats} />
 
-            {/* Featured Templates (Receitas) */}
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-foreground">Receitas recomendadas</h2>
-                    <button 
-                        onClick={() => setShowGallery(true)}
-                        className="text-xs font-bold text-primary hover:underline transition-all"
-                    >
-                        Ver todas
-                    </button>
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {recipes.map((recipe, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => handleUseRecipe(recipe)}
-                            className="min-h-32 bg-card border border-border p-4 rounded-2xl hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all text-left flex flex-col justify-between group"
-                        >
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className={`p-3 rounded-xl ${recipe.bg}`}>
-                                    <recipe.icon className={`h-6 w-6 ${recipe.color}`} />
-                                </div>
-                                <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="rounded-[var(--radius-control)] border border-border/50 bg-surface-subtle px-3 py-1.5 text-xs font-medium text-foreground">
-                                    Usar Modelo
-                                </span>
-                                <Plus className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-all group-hover:rotate-90" />
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
-
             {/* Automation Grid Section */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold flex items-center gap-3 text-foreground">
-                        Fluxos de Trabalho 
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h2 className="text-section-title font-semibold flex flex-wrap items-center gap-3 text-foreground">
+                        Fluxos de trabalho
                         {filterType && (
-                            <span className="text-xs font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
-                                <AlertCircle className="h-3 w-3" /> Filtrado: {filterType}
-                                <button type="button" aria-label="Limpar filtro de tipo" onClick={() => setFilterType(null)} className="hover:text-foreground">×</button>
+                            <span className="text-metadata-ui font-black bg-primary/20 text-primary px-3 py-1 rounded-full flex items-center gap-2">
+                                <AlertCircle className="h-3 w-3" /> Filtrado: {filterType === 'active' ? 'Ativos' : filterType === 'inactive' ? 'Pausados' : 'Com falhas'}
+                                <button type="button" aria-label="Limpar filtro de tipo" onClick={() => setFilterType(null)} className="focus-ring rounded-full px-1 hover:text-foreground">×</button>
                             </span>
                         )}
-                        <span className="bg-surface-raised text-xs px-3 py-1 rounded-full text-foreground">
+                        <span className="bg-surface-raised text-metadata-ui px-3 py-1 rounded-full text-foreground">
                             {filteredAutomations.length}
                         </span>
                     </h2>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                    <div className="relative w-full sm:max-w-[24rem]">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                        <ThemeInput
+                            aria-label="Buscar fluxos de trabalho"
+                            placeholder="Buscar fluxos"
+                            className="pl-9"
+                            value={searchTerm}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(event.target.value)}
+                        />
+                    </div>
+                    <div role="group" aria-label="Filtrar fluxos por status" className="flex flex-wrap gap-2">
+                        {([{ id: null, label: 'Todos' }, { id: 'active', label: 'Ativos' }, { id: 'inactive', label: 'Pausados' }, { id: 'failed', label: 'Com falhas' }] as const).map(filter => (
+                            <Button
+                                key={filter.label}
+                                type="button"
+                                variant={filterType === filter.id ? 'default' : 'outline'}
+                                aria-pressed={filterType === filter.id}
+                                onClick={() => setFilterType(filter.id)}
+                                size="sm"
+                            >
+                                {filter.label}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
 
                 {filteredAutomations.length === 0 ? (
@@ -324,44 +304,51 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                         <PremiumEmptyState
                             icon={Zap}
                             title="Nenhuma automação encontrada"
-                            description={searchTerm || filterType 
-                                ? "Não encontramos fluxos com os filtros aplicados." 
-                                : "Você ainda não criou nenhuma automação. Use a IA acima para começar agora!"
-                            }
-                            actionLabel="Criar Automação"
-                            onAction={() => setShowNewModal(true)}
+                            description={searchTerm || filterType
+                                ? "Não encontramos fluxos com os filtros aplicados."
+                                : "Escolha um modelo ou crie um fluxo para começar."}
+                            actionLabel={searchTerm || filterType ? "Limpar filtros" : "Criar automação"}
+                            onAction={() => {
+                                if (searchTerm || filterType) {
+                                    setSearchTerm('');
+                                    setFilterType(null);
+                                } else {
+                                    setInitialModalData(undefined);
+                                    setShowNewModal(true);
+                                }
+                            }}
                         />
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                         {filteredAutomations.map(automation => (
                             <div
                                 key={automation.id}
-                                className={`group relative bg-card p-5 rounded-2xl border transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 ${automation.enabled
+                                className={`group relative min-w-0 bg-card p-4 rounded-[var(--radius-panel)] border shadow-card-ui transition-colors ${automation.enabled
                                     ? 'border-border hover:border-primary/30'
                                     : 'border-border border-dashed'
                                     }`}
                             >
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`p-3 rounded-xl transition-all duration-500 ${automation.enabled
+                                <div className="flex flex-wrap justify-between items-start gap-3 mb-4">
+                                    <div className="flex min-w-0 items-start gap-3">
+                                        <div className={`shrink-0 p-3 rounded-[var(--radius-panel)] transition-all duration-500 ${automation.enabled
                                             ? 'bg-primary/10 group-hover:bg-primary/20'
-                                            : 'bg-gray-800'
+                                            : 'bg-muted'
                                             }`}>
                                             {getCategoryIcon(automation.category)}
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="font-black text-xl text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="break-words font-semibold text-section-title text-foreground group-hover:text-primary transition-colors">{automation.name}</h3>
                                                 {!automation.enabled && (
-                                                    <span className="rounded-[var(--radius-control)] bg-muted px-2.5 py-1 text-xs font-medium text-foreground">Pausado</span>
+                                                    <span className="text-metadata-ui font-medium text-foreground bg-muted px-2.5 py-1 rounded-[var(--radius-panel)]">Pausado</span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-foreground mt-1 line-clamp-1">{automation.description}</p>
+                                            <p className="text-body-ui text-foreground mt-1 line-clamp-1">{automation.description}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
-                                        <label className="relative inline-flex items-center cursor-pointer scale-110">
+                                        <label className="relative inline-flex items-center cursor-pointer rounded-full focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
                                             <input
                                                 type="checkbox"
                                                 aria-label="Habilitar automação"
@@ -371,37 +358,37 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                             />
                                             <div className="w-12 h-6.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-card after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary border border-border"></div>
                                         </label>
-                                        
+
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <button type="button" aria-label="Opções da automação" className="p-2 text-muted-foreground hover:text-foreground transition-colors">
+                                                <button type="button" aria-label="Opções da automação" className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:text-foreground transition-colors">
                                                     <MoreHorizontal className="h-5 w-5" />
                                                 </button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-white/10 p-2 rounded-2xl shadow-2xl">
-                                                <DropdownMenuItem 
+                                            <DropdownMenuContent align="end" className="w-48 bg-card border-border p-2 rounded-[var(--radius-panel)] shadow-overlay-ui">
+                                                <DropdownMenuItem
                                                     onClick={() => {
                                                         setInitialModalData(automation);
                                                         setShowNewModal(true);
                                                     }}
-                                                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all font-bold group"
+                                                    className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-muted transition-all font-bold group"
                                                 >
-                                                    <Edit className="h-4 w-4 text-blue-400 group-hover:scale-110 transition-transform" /> 
+                                                    <Edit className="h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
                                                     Editar Fluxo
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem 
+                                                <DropdownMenuItem
                                                     onClick={() => handleDuplicate(automation)}
-                                                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all font-bold group"
+                                                    className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-muted transition-all font-bold group"
                                                 >
-                                                    <Copy className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" /> 
+                                                    <Copy className="h-4 w-4 text-success-readable group-hover:scale-110 transition-transform" />
                                                     Duplicar
                                                 </DropdownMenuItem>
-                                                <DropdownMenuSeparator className="bg-white/5 my-1" />
-                                                <DropdownMenuItem 
+                                                <DropdownMenuSeparator className="bg-border my-1" />
+                                                <DropdownMenuItem
                                                     onClick={() => handleDelete(automation.id)}
-                                                    className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-red-500/10 text-red-400 transition-all font-bold group"
+                                                    className="flex items-center gap-3 p-3 rounded-[var(--radius-panel)] cursor-pointer hover:bg-destructive-subtle text-destructive-readable transition-all font-bold group"
                                                 >
-                                                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform text-red-400" /> 
+                                                    <Trash2 className="h-4 w-4 group-hover:scale-110 transition-transform text-destructive-readable" />
                                                     Excluir
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
@@ -409,50 +396,50 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="mb-2 text-xs font-semibold text-foreground">Gatilho</p>
-                                        <p className="text-sm font-bold text-foreground flex items-center gap-2">
-                                            <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(45,108,223,0.6)]" />
-                                            {automation.trigger?.type || 'N/A'}
+                                <div className="grid grid-cols-1 gap-3 mb-4 sm:grid-cols-2">
+                                    <div className="bg-surface-subtle p-4 rounded-[var(--radius-panel)] border border-border group-hover:border-border transition-colors">
+                                        <p className="text-metadata-ui font-medium text-foreground mb-2">Gatilho</p>
+                                        <p className="text-body-ui font-bold text-foreground flex items-center gap-2">
+                                            <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
+                                            {automation.trigger ? automationTriggerLabel(automation.trigger.type) : 'Não configurado'}
                                         </p>
                                     </div>
-                                    <div className="bg-surface-subtle p-4 rounded-xl border border-border group-hover:border-border transition-colors">
-                                        <p className="mb-2 text-xs font-semibold text-foreground">Ações</p>
+                                    <div className="bg-surface-subtle p-4 rounded-[var(--radius-panel)] border border-border group-hover:border-border transition-colors">
+                                        <p className="text-metadata-ui font-medium text-foreground mb-2">Ações</p>
                                         <div className="flex gap-2 flex-wrap">
                                             {automation.actions?.map((action: any, idx: number) => (
                                                 <span
                                                     key={`${action.type}-${idx}`}
-                                                    className="rounded-[var(--radius-control)] border border-border bg-background px-3 py-1.5 text-xs font-medium text-primary transition-colors group-hover:border-primary/20"
+                                                    className="text-metadata-ui font-medium bg-background border border-border px-3 py-1.5 rounded-[var(--radius-panel)] text-primary group-hover:border-primary/20 transition-all"
                                                 >
-                                                    {action.type.replace('_', ' ').toUpperCase()}
+                                                    {automationActionLabel(action.type)}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-4 border-t border-border">
+                                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border">
                                     <div className="flex items-center gap-6">
                                         <div className="flex flex-col">
-                                            <span className="text-xs font-medium text-foreground">Execuções</span>
-                                            <span className="text-sm font-black text-foreground">{automation.executionCount || 0}</span>
+                                            <span className="text-metadata-ui font-bold text-foreground uppercase tracking-tighter">Execuções</span>
+                                            <span className="text-body-ui font-black text-foreground">{automation.executionCount || 0}</span>
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-xs font-medium text-foreground">Taxa de sucesso</span>
-                                            <span className={`text-sm font-black ${automation.executionCount > 0 ? 'text-success-readable' : 'text-muted-foreground'}`}>
+                                            <span className="text-metadata-ui font-bold text-foreground uppercase tracking-tighter">Taxa de sucesso</span>
+                                            <span className={`text-body-ui font-black ${automation.executionCount > 0 ? 'text-success-readable' : 'text-muted-foreground'}`}>
                                                 {automation.executionCount > 0
-                                                    ? ((automation.successCount / automation.executionCount) * 100).toFixed(0)
-                                                    : 0}%
+                                                    ? `${((automation.successCount / automation.executionCount) * 100).toFixed(0)}%`
+                                                    : '—'}
                                             </span>
                                         </div>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setSelectedAutomation(automation);
                                             setShowHistory(true);
                                         }}
-                                        className="flex items-center gap-2 text-foreground font-black text-xs underline underline-offset-4 hover:text-primary transition-colors group/btn"
+                                        className="flex items-center gap-2 text-foreground font-black text-metadata-ui underline underline-offset-4 hover:text-primary transition-colors group/btn"
                                     >
                                         <History className="h-4 w-4" />
                                         Ver Histórico
@@ -464,6 +451,40 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                     </div>
                 )}
             </div>
+
+            <section id="automation-modelos" tabIndex={-1} aria-label="Biblioteca de receitas" data-qa-region="automation-recipes" className="space-y-3">
+                <div>
+                    <h2 className="text-section-title font-semibold text-foreground">Biblioteca de modelos</h2>
+                    <p className="mt-1 text-body-ui text-muted-foreground">Escolha um dos {recipes.length} modelos e revise o gatilho e as ações antes de salvar.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {recipes.map(recipe => (
+                        <button
+                            key={recipe.title}
+                            type="button"
+                            aria-label={`Usar modelo ${recipe.title}`}
+                            onClick={() => handleUseRecipe(recipe)}
+                            className="flex min-w-0 flex-col justify-between gap-3 rounded-[var(--radius-panel)] border border-border bg-card p-4 text-left shadow-control-ui transition-colors hover:border-primary/40 focus-ring"
+                        >
+                            <div className="flex items-start gap-3">
+                                <span className={`grid size-10 shrink-0 place-items-center rounded-[var(--radius-control)] ${recipe.bg}`}>
+                                    <recipe.icon className={`size-5 ${recipe.color}`} aria-hidden="true" />
+                                </span>
+                                <div className="min-w-0">
+                                    <h3 className="break-words text-body-ui font-semibold text-foreground">{recipe.title}</h3>
+                                    <p className="mt-1 text-metadata-ui text-muted-foreground">{automationTriggerLabel(recipe.triggerType)}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="text-metadata-ui text-muted-foreground">{automationActionLabel(recipe.actionType)}</span>
+                                <span className="inline-flex items-center gap-1 text-label-ui font-semibold text-foreground">
+                                    Usar modelo <Plus className="size-4" aria-hidden="true" />
+                                </span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </section>
 
             {/* Modais e Sheets */}
             {showNewModal && (
@@ -485,65 +506,6 @@ export default function AutomationsClientPage({ initialAutomations }: Automation
                 />
             )}
 
-            {showGallery && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-background/90 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-card w-full max-w-4xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden flex flex-col max-h-[85vh]">
-                        <div className="p-10 border-b border-border flex items-center justify-between bg-card">
-                            <div>
-                                <h2 className="text-3xl font-black text-foreground tracking-tighter">Biblioteca de Receitas</h2>
-                                <p className="text-muted-foreground font-medium mt-1">Escolha um modelo e comece em segundos</p>
-                            </div>
-                            <button type="button" aria-label="Fechar biblioteca de receitas" onClick={() => setShowGallery(false)} className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center hover:bg-muted/80 transition-all">
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 custom-scrollbar">
-                            {recipes.map((recipe, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => {
-                                        handleUseRecipe(recipe);
-                                        setShowGallery(false);
-                                    }}
-                                    className="bg-muted/30 border border-border p-6 rounded-[2rem] hover:border-primary/40 hover:bg-primary/5 transition-all text-left flex flex-col justify-between group"
-                                >
-                                    <div className="flex items-center gap-4 mb-6">
-                                        <div className={`p-4 rounded-2xl ${recipe.bg}`}>
-                                            <recipe.icon className={`h-6 w-6 ${recipe.color}`} />
-                                        </div>
-                                        <h4 className="font-black text-lg text-foreground tracking-tight group-hover:text-primary transition-colors">{recipe.title}</h4>
-                                    </div>
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-card px-3 py-2 rounded-xl border border-border/50 text-center group-hover:bg-primary group-hover:text-white transition-all">
-                                        Explorar Modelo
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Footer / AI Tip */}
-            <div className="bg-card p-6 rounded-3xl border border-primary/10 flex items-center gap-6">
-                <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center animate-pulse">
-                    <Zap className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                    <h4 className="font-black text-foreground text-sm uppercase tracking-widest">Dica da Antigravity AI</h4>
-                    <p className="text-muted-foreground text-sm mt-1">
-                        Você pode criar uma automação para enviar um e-mail personalizado toda vez que um deal atingir os 7 dias de estagnação. 
-                        <button 
-                            onClick={() => {
-                                setSearchTerm("Mandar e-mail ao estagnar por 7 dias");
-                                handleAIBuilder();
-                            }}
-                            className="text-primary font-bold hover:underline ml-1"
-                        >
-                            Configurar agora
-                        </button>
-                    </p>
-                </div>
-            </div>
         </div>
     );
 }

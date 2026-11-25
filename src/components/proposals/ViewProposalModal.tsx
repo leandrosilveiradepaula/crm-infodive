@@ -176,28 +176,28 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden shadow-2xl">
+            <DialogContent className="max-w-5xl w-[95vw] h-[85vh] max-h-[92vh] flex flex-col p-0 gap-0 overflow-hidden shadow-overlay-ui">
                 {/* Header */}
-                <div className="p-6 md:p-8 border-b border-border flex justify-between items-center relative overflow-hidden bg-gradient-to-r from-primary/5 to-transparent flex-shrink-0">
+                <div className="p-6 md:p-8 border-b border-border flex justify-between items-center relative overflow-hidden ds-gradient-context from-primary/5 to-transparent flex-shrink-0">
                     <div className="flex items-center gap-6 relative z-10 w-full">
-                        <div className="h-12 w-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
+                        <div className="h-12 w-12 rounded-[var(--radius-panel)] bg-primary text-white flex items-center justify-center shadow-overlay-ui shadow-primary/20 flex-shrink-0">
                             <FileText className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 flex-wrap">
-                                <DialogTitle className="text-2xl font-black text-foreground uppercase tracking-tight leading-none truncate">
+                                <DialogTitle className="text-metric-ui font-black text-foreground uppercase tracking-tight leading-none truncate">
                                     {proposal.title}
                                 </DialogTitle>
-                                <span className={`flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase border tracking-widest ${statusInfo.color}`}>
+                                <span className={`flex items-center gap-2 px-2.5 py-0.5 rounded-full text-metadata-ui font-black uppercase border tracking-widest ${statusInfo.color}`}>
                                     <StatusIcon className="h-2.5 w-2.5" /> {statusInfo.label}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-4 mt-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
+                            <div className="flex items-center gap-4 mt-2 text-metadata-ui font-bold uppercase tracking-wide text-muted-foreground">
+                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-[var(--radius-control)] border border-border/50">
                                     <User className="h-3 w-3 text-primary" />
                                     <span className="truncate max-w-[200px]">{pseudoDeal.company}</span>
                                 </span>
-                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
+                                <span className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-[var(--radius-control)] border border-border/50">
                                     <Calendar className="h-3 w-3 text-success" />
                                     Expira: {expirationDate}
                                 </span>
@@ -226,25 +226,25 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             <TabsContent value="resume" className="mt-0 h-full">
                                 <div className="space-y-6 max-w-4xl mx-auto">
                                     {aiSummary ? (
-                                        <div className="bg-gradient-to-br from-stage-proposal/5 to-primary/5 p-8 rounded-3xl border border-stage-proposal/10 shadow-sm relative overflow-hidden">
+                                        <div className="ds-gradient-context from-stage-proposal/5 to-primary/5 p-8 rounded-[var(--radius-panel)] border border-stage-proposal/10 shadow-control-ui relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-stage-proposal/10 rounded-full blur-3xl -mr-10 -mt-10" />
                                             <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -ml-10 -mb-10" />
                                             <div className="relative">
                                                 <div className="flex items-center gap-3 mb-4">
-                                                    <div className="h-8 w-8 rounded-lg bg-stage-proposal text-white flex items-center justify-center shadow-lg shadow-stage-proposal/20">
+                                                    <div className="h-8 w-8 rounded-[var(--radius-panel)] bg-stage-proposal text-white flex items-center justify-center shadow-overlay-ui shadow-stage-proposal/20">
                                                         <TrendingUp className="h-4 w-4" />
                                                     </div>
-                                                    <h4 className="text-sm font-black uppercase tracking-widest text-stage-proposal">Resumo Executivo IA</h4>
+                                                    <h4 className="text-body-ui font-black uppercase tracking-widest text-stage-proposal">Resumo Executivo IA</h4>
                                                 </div>
-                                                <p className="text-sm text-foreground leading-relaxed whitespace-pre-line relative z-10">{aiSummary}</p>
+                                                <p className="text-body-ui text-foreground leading-relaxed whitespace-pre-line relative z-10">{aiSummary}</p>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center p-12 bg-card rounded-3xl border border-border text-center">
+                                        <div className="flex flex-col items-center justify-center p-12 bg-card rounded-[var(--radius-panel)] border border-border text-center">
                                             <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
                                                 <FileText className="h-6 w-6" />
                                             </div>
-                                            <h3 className="text-lg font-bold text-foreground">Proposta Gerada</h3>
+                                            <h3 className="text-section-title font-bold text-foreground">Proposta Gerada</h3>
                                             <p className="text-muted-foreground mt-2 max-w-sm">Esta proposta não possui um resumo automático gerado pela IA, mas todos os detalhes estão nas abas seguintes.</p>
                                         </div>
                                     )}
@@ -252,11 +252,11 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     {/* Preview simplificado */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                                         {['Capa', 'Confidencialidade', 'Premissas'].map((label, i) => (
-                                            <div key={i} className="aspect-[1/1.414] bg-card border border-border border-dashed rounded-xl shadow-sm flex items-center justify-center relative overflow-hidden group hover:border-primary transition-colors cursor-default">
+                                            <div key={i} className="aspect-[1/1.414] bg-card border border-border border-dashed rounded-[var(--radius-panel)] shadow-control-ui flex items-center justify-center relative overflow-hidden group hover:border-primary transition-colors cursor-default">
                                                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 <FileText className="h-8 w-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
                                                 <div className="absolute bottom-3 left-0 w-full text-center">
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">{label}</span>
+                                                    <span className="text-metadata-ui font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">{label}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -266,7 +266,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
 
                             {/* TAB: PRODUTOS */}
                             <TabsContent value="products" className="mt-0">
-                                <div className="bg-white rounded-3xl border border-border shadow-sm p-6 overflow-hidden min-h-[500px]">
+                                <div className="bg-white rounded-[var(--radius-panel)] border border-border shadow-control-ui p-6 overflow-hidden min-h-[500px]">
                                     <ProposalProductsTable productsList={productsList || []} />
                                 </div>
                             </TabsContent>
@@ -274,40 +274,40 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             {/* TAB: FINANCEIRO */}
                             <TabsContent value="financial" className="mt-0">
                                 <div className="max-w-xl mx-auto space-y-6">
-                                    <div className="bg-gradient-to-br from-primary to-stage-proposal p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+                                    <div className="ds-gradient-context from-primary to-stage-proposal p-8 rounded-[var(--radius-panel)] text-white shadow-overlay-ui relative overflow-hidden">
                                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
                                         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-black/10 rounded-full blur-2xl" />
 
-                                        <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-6 flex items-center gap-2">
+                                        <p className="text-metadata-ui font-black uppercase tracking-widest opacity-80 mb-6 flex items-center gap-2">
                                             <ShieldCheck className="w-3.5 h-3.5" />
                                             Resumo Financeiro
                                         </p>
 
                                         <div className="space-y-4 relative z-10">
                                             <div className="flex justify-between items-center pb-4 border-b border-white/20">
-                                                <span className="text-sm font-bold uppercase tracking-wide opacity-90">Subtotal Produtos</span>
-                                                <span className="text-xl font-bold">{formatCurrency(proposal.subtotal)}</span>
+                                                <span className="text-body-ui font-bold uppercase tracking-wide opacity-90">Subtotal Produtos</span>
+                                                <span className="text-section-title font-bold">{formatCurrency(proposal.subtotal)}</span>
                                             </div>
                                             <div className="pt-2">
-                                                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Total Oportunidade</p>
+                                                <p className="text-metadata-ui font-black uppercase tracking-widest opacity-80 mb-2">Total Oportunidade</p>
                                                 <div className="flex justify-between items-baseline">
-                                                    <span className="text-4xl font-black tracking-tight">{formatCurrency(proposal.total)}</span>
-                                                    <span className="text-sm font-bold opacity-80 uppercase tracking-widest">BRL</span>
+                                                    <span className="text-page-title font-black tracking-tight">{formatCurrency(proposal.total)}</span>
+                                                    <span className="text-body-ui font-bold opacity-80 uppercase tracking-widest">BRL</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Breakdown por Distribuidor (Placeholder para futura expansão) */}
-                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
-                                        <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-4">Quebra por Faturamento</h3>
+                                    <div className="bg-white p-6 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
+                                        <h3 className="text-body-ui font-bold text-foreground uppercase tracking-widest mb-4">Quebra por Faturamento</h3>
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-2 h-2 rounded-full bg-primary" />
-                                                    <span className="text-sm font-medium">Faturamento Direto</span>
+                                                    <span className="text-body-ui font-medium">Faturamento Direto</span>
                                                 </div>
-                                                <span className="text-sm font-bold text-foreground">100%</span>
+                                                <span className="text-body-ui font-bold text-foreground">100%</span>
                                             </div>
                                         </div>
                                     </div>
@@ -318,40 +318,40 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                             <TabsContent value="actions" className="mt-0">
                                 <div className="max-w-2xl mx-auto space-y-6">
                                     {/* Link de Apresentação */}
-                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
+                                    <div className="bg-white p-6 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
                                         <div className="flex items-start gap-4 mb-4">
-                                            <div className="h-10 w-10 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                                            <div className="h-10 w-10 shrink-0 rounded-[var(--radius-panel)] bg-primary/10 text-primary flex items-center justify-center">
                                                 <ExternalLink className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Apresentação Pública</h3>
-                                                <p className="text-sm text-muted-foreground mt-1">Gerencie o acesso do cliente à proposta digital.</p>
+                                                <h3 className="text-body-ui font-bold text-foreground uppercase tracking-widest">Apresentação Pública</h3>
+                                                <p className="text-body-ui text-muted-foreground mt-1">Gerencie o acesso do cliente à proposta digital.</p>
                                             </div>
                                         </div>
 
                                         {proposal.public_token ? (
-                                            <div className="bg-muted inline-flex items-center h-10 px-3 rounded-lg w-full mb-4 focus-within:ring-2 focus-within:ring-primary/20 border border-border">
-                                                <span className="text-muted-foreground truncate flex-1 text-sm font-mono mr-3">
+                                            <div className="bg-muted inline-flex items-center h-10 px-3 rounded-[var(--radius-panel)] w-full mb-4 focus-within:ring-2 focus-within:ring-primary/20 border border-border">
+                                                <span className="text-muted-foreground truncate flex-1 text-body-ui font-mono mr-3">
                                                     {window.location.origin}/proposals/public/{proposal.public_token}
                                                 </span>
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
                                                     onClick={handleCopyLink}
-                                                    className="shrink-0 h-7 text-xs font-bold uppercase tracking-wider text-primary hover:bg-primary/10 hover:text-primary"
+                                                    className="shrink-0 h-7 text-metadata-ui font-bold uppercase tracking-wider text-primary hover:bg-primary/10 hover:text-primary"
                                                 >
                                                     Copiar Link
                                                 </Button>
                                             </div>
                                         ) : (
-                                            <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl mb-4 text-sm text-primary font-medium">
+                                            <div className="bg-primary/10 border border-primary/20 p-4 rounded-[var(--radius-panel)] mb-4 text-body-ui text-primary font-medium">
                                                 A proposta não possui um link de apresentação pública ativo. Ela deve ser marcada como enviada para gerar o link.
                                             </div>
                                         )}
 
                                         <Button
                                             onClick={handleSend}
-                                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold tracking-wide h-12 shadow-lg shadow-primary/20"
+                                            className="w-full bg-primary hover:bg-primary/90 text-white font-bold tracking-wide h-12 shadow-overlay-ui shadow-primary/20"
                                             disabled={proposal.status === PROPOSAL_STATUS.SENT || proposal.status === PROPOSAL_STATUS.SIGNED}
                                         >
                                             <Send className="w-4 h-4 mr-2" />
@@ -360,14 +360,14 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     </div>
 
                                     {/* Download Actions */}
-                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
+                                    <div className="bg-white p-6 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
                                         <div className="flex items-center gap-4 mb-6">
-                                            <div className="h-10 w-10 shrink-0 rounded-xl bg-stage-proposal/10 text-stage-proposal flex items-center justify-center">
+                                            <div className="h-10 w-10 shrink-0 rounded-[var(--radius-panel)] bg-stage-proposal/10 text-stage-proposal flex items-center justify-center">
                                                 <Download className="h-5 w-5" />
                                             </div>
                                             <div>
-                                                <h3 className="text-sm font-bold text-foreground font-black uppercase tracking-widest">Documentos Estáticos</h3>
-                                                <p className="text-xs text-muted-foreground uppercase font-bold">Exportar versão para apresentação ou impressão.</p>
+                                                <h3 className="text-body-ui font-bold text-foreground font-black uppercase tracking-widest">Documentos Estáticos</h3>
+                                                <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Exportar versão para apresentação ou impressão.</p>
                                             </div>
                                         </div>
                                         
@@ -376,7 +376,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 onClick={onDownloadClick}
                                                 disabled={generatingPdf || generatingPpt || generatingDocx}
                                                 variant="outline"
-                                                className="flex-1 border-primary/20 text-primary hover:bg-primary/5 font-bold tracking-wide h-10 rounded-xl text-xs"
+                                                className="flex-1 border-primary/20 text-primary hover:bg-primary/5 font-bold tracking-wide h-10 rounded-[var(--radius-panel)] text-metadata-ui"
                                             >
                                                 {generatingPdf ? (
                                                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> PDF...</>
@@ -389,7 +389,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 onClick={onDownloadDocxClick}
                                                 disabled={generatingPdf || generatingPpt || generatingDocx}
                                                 variant="outline"
-                                                className="flex-1 border-blue-500/20 text-blue-500 hover:bg-blue-500/5 font-bold tracking-wide h-10 rounded-xl text-xs"
+                                                className="flex-1 border-primary/20 text-primary hover:bg-primary/10 font-bold tracking-wide h-10 rounded-[var(--radius-panel)] text-metadata-ui"
                                             >
                                                 {generatingDocx ? (
                                                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> DOCX...</>
@@ -402,7 +402,7 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 onClick={onDownloadPptClick}
                                                 disabled={generatingPdf || generatingPpt || generatingDocx}
                                                 variant="outline"
-                                                className="flex-1 border-stage-proposal/20 text-stage-proposal hover:bg-stage-proposal/5 font-bold tracking-wide h-10 rounded-xl text-xs"
+                                                className="flex-1 border-stage-proposal/20 text-stage-proposal hover:bg-stage-proposal/5 font-bold tracking-wide h-10 rounded-[var(--radius-panel)] text-metadata-ui"
                                             >
                                                 {generatingPpt ? (
                                                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> PPT...</>
@@ -414,10 +414,10 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                     </div>
 
                                     {/* Status Control */}
-                                    <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
+                                    <div className="bg-white p-6 rounded-[var(--radius-panel)] border border-border shadow-control-ui">
                                         <div className="space-y-3">
-                                            <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-1 flex items-center gap-2">
-                                                <div className="h-1 w-1 bg-gray-400 rounded-full" />
+                                            <label className="text-metadata-ui uppercase font-bold text-muted-foreground tracking-wider px-1 flex items-center gap-2">
+                                                <div className="h-1 w-1 bg-muted rounded-full" />
                                                 Controle de Status
                                             </label>
                                             <Select
@@ -438,27 +438,27 @@ export const ViewProposalModal: React.FC<ViewProposalModalProps> = ({
                                                 }}
                                             >
                                                 <SelectTrigger
-                                                    className={`w-full h-12 rounded-xl transition-all duration-300 border shadow-sm hover:shadow-md ${proposal.status === PROPOSAL_STATUS.SIGNED ? 'bg-success/5 border-success/20 text-success font-bold' :
+                                                    className={`w-full h-12 rounded-[var(--radius-panel)] transition-all duration-300 border shadow-control-ui hover:shadow-card-ui ${proposal.status === PROPOSAL_STATUS.SIGNED ? 'bg-success/5 border-success/20 text-success font-bold' :
                                                         proposal.status === PROPOSAL_STATUS.REJECTED ? 'bg-destructive/5 border-destructive/20 text-destructive font-bold' :
                                                             proposal.status === PROPOSAL_STATUS.SENT ? 'bg-primary/5 border-primary/20 text-primary font-bold' :
                                                                 'bg-card border-border text-foreground hover:bg-muted font-bold'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`h-2.5 w-2.5 rounded-full ring-2 ring-white shadow-sm ${proposal.status === PROPOSAL_STATUS.SIGNED ? 'bg-success' :
+                                                        <div className={`h-2.5 w-2.5 rounded-full ring-2 ring-white shadow-control-ui ${proposal.status === PROPOSAL_STATUS.SIGNED ? 'bg-success' :
                                                             proposal.status === PROPOSAL_STATUS.REJECTED ? 'bg-destructive' :
                                                                 proposal.status === PROPOSAL_STATUS.SENT ? 'bg-primary' :
-                                                                    'bg-gray-400'
+                                                                    'bg-muted'
                                                         }`} />
                                                         <SelectValue placeholder="Selecione o Status" />
                                                     </div>
                                                 </SelectTrigger>
                                                 <SelectContent className="font-bold">
-                                                    <SelectItem value={PROPOSAL_STATUS.DRAFT} className="text-muted-foreground uppercase text-[10px]">Draft (Rascunho)</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.SENT} className="text-primary uppercase text-[10px]">Enviada</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.VIEWED} className="text-stage-proposal uppercase text-[10px]">Visualizada</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.SIGNED} className="text-success uppercase text-[10px]">Assinada (Aceite Manual)</SelectItem>
-                                                    <SelectItem value={PROPOSAL_STATUS.REJECTED} className="text-destructive uppercase text-[10px]">Rejeitada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.DRAFT} className="text-muted-foreground uppercase text-metadata-ui">Draft (Rascunho)</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.SENT} className="text-primary uppercase text-metadata-ui">Enviada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.VIEWED} className="text-stage-proposal uppercase text-metadata-ui">Visualizada</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.SIGNED} className="text-success uppercase text-metadata-ui">Assinada (Aceite Manual)</SelectItem>
+                                                    <SelectItem value={PROPOSAL_STATUS.REJECTED} className="text-destructive uppercase text-metadata-ui">Rejeitada</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>

@@ -6,7 +6,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { getUserTheme } from "@/app/actions/theme-actions";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--ds-font-inter" });
 
 export const metadata: Metadata = {
   title: "CRM IBM/Lenovo",
@@ -21,8 +21,8 @@ export default async function RootLayout({
   const theme = await getUserTheme();
 
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
+      <body>
         <ThemeProvider initialTheme={theme}>
           <AuthProvider>
             {children}

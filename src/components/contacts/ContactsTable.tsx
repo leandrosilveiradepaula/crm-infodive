@@ -13,15 +13,15 @@ interface ContactsTableProps {
 
 export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps) {
     return (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-            <table className="w-full text-sm">
+        <div className="bg-card border border-border rounded-[var(--radius-panel)] overflow-hidden">
+            <table className="w-full text-body-ui">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nome</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">E-mail</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Telefone</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Empresa</th>
-                        <th className="text-left px-4 py-3 text-[10px] font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cargo</th>
+                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Nome</th>
+                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">E-mail</th>
+                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Telefone</th>
+                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Empresa</th>
+                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cargo</th>
                         <th className="px-4 py-3" />
                     </tr>
                 </thead>
@@ -44,32 +44,32 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                             >
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-[10px] font-black text-white shadow-sm">
+                                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center shrink-0 text-metadata-ui font-black text-white shadow-control-ui">
                                             {initials}
                                         </div>
-                                        <p className="font-bold text-foreground text-sm truncate max-w-[150px]">{contact.name}</p>
+                                        <p className="font-bold text-foreground text-body-ui truncate max-w-[150px]">{contact.name}</p>
                                     </div>
                                 </td>
                                 <td className="px-4 py-3 hidden md:table-cell">
                                     {contact.email ? (
-                                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+                                        <a href={`mailto:${contact.email}`} className="flex items-center gap-1.5 text-metadata-ui text-muted-foreground hover:text-primary transition-colors">
                                             <Mail className="h-3 w-3 shrink-0" />
                                             <span className="truncate max-w-[180px]">{contact.email}</span>
                                         </a>
-                                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                                    ) : <span className="text-metadata-ui text-muted-foreground">—</span>}
                                 </td>
                                 <td className="px-4 py-3 hidden lg:table-cell">
                                     {contact.mobile_phone ? (
-                                        <a href={`tel:${contact.mobile_phone}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                                        <a href={`tel:${contact.mobile_phone}`} className="flex items-center gap-1.5 text-metadata-ui text-muted-foreground hover:text-foreground transition-colors">
                                             <Phone className="h-3 w-3 shrink-0" />
                                             {contact.mobile_phone}
                                         </a>
-                                    ) : <span className="text-xs text-muted-foreground">—</span>}
+                                    ) : <span className="text-metadata-ui text-muted-foreground">—</span>}
                                 </td>
-                                <td className="px-4 py-3 text-xs text-muted-foreground font-medium hidden sm:table-cell truncate max-w-[160px]">
+                                <td className="px-4 py-3 text-metadata-ui text-muted-foreground font-medium hidden sm:table-cell truncate max-w-[160px]">
                                     {contact.account?.name || '—'}
                                 </td>
-                                <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell">
+                                <td className="px-4 py-3 text-metadata-ui text-muted-foreground hidden lg:table-cell">
                                     {contact.role || '—'}
                                 </td>
                                 <td className="px-4 py-3">
@@ -77,7 +77,7 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                                         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => onEdit(contact)}>
                                             <Pencil className="h-3.5 w-3.5" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-500" onClick={() => onDelete(contact.id)}>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive-readable" onClick={() => onDelete(contact.id)}>
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </Button>
                                     </div>
@@ -88,7 +88,7 @@ export function ContactsTable({ contacts, onEdit, onDelete }: ContactsTableProps
                 </tbody>
             </table>
             {contacts.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground text-sm">Nenhum contato encontrado.</div>
+                <div className="text-center py-12 text-muted-foreground text-body-ui">Nenhum contato encontrado.</div>
             )}
         </div>
     );

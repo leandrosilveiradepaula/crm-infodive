@@ -198,9 +198,9 @@ export function ActivitiesClientPage() {
     return (
         <div className="space-y-6 pb-10">
             {error && (
-                <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl flex items-center gap-3 text-red-400 animate-slide-up">
+                <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-[var(--radius-panel)] flex items-center gap-3 text-destructive-readable animate-slide-up">
                     <AlertCircle className="h-5 w-5" />
-                    <span className="text-sm font-medium">Erro ao sincronizar dados: {error}</span>
+                    <span className="text-body-ui font-medium">Erro ao sincronizar dados: {error}</span>
                 </div>
             )}
 
@@ -239,27 +239,27 @@ export function ActivitiesClientPage() {
                     value: stats.pending,
                     description: "Aguardando execução",
                     icon: Clock3,
-                    color: "text-amber-600 dark:text-amber-400",
-                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
-                    border: "border-amber-100 dark:border-amber-900/50"
+                    color: "text-warning-readable dark:text-warning-readable",
+                    gradient: "from-warning-subtle to-white dark:from-warning/20",
+                    border: "border-warning dark:border-warning/50"
                 },
                 {
                     label: "Atrasadas",
                     value: stats.overdue,
                     description: "Atenção requerida",
                     icon: AlertTriangle,
-                    color: "text-red-600 dark:text-red-400",
-                    gradient: "from-red-50 to-white dark:from-red-950/20",
-                    border: "border-red-100 dark:border-red-900/50"
+                    color: "text-destructive-readable dark:text-destructive-readable",
+                    gradient: "from-destructive-subtle to-white dark:from-destructive/20",
+                    border: "border-destructive dark:border-destructive/50"
                 },
                 {
                     label: "Hoje",
                     value: stats.today,
                     description: "Programadas p/ agora",
                     icon: CalendarCheck,
-                    color: "text-primary dark:text-blue-400",
-                    gradient: "from-blue-50 to-white dark:from-blue-950/20",
-                    border: "border-blue-100 dark:border-blue-900/50"
+                    color: "text-primary dark:text-primary",
+                    gradient: "from-surface-highlight to-white dark:from-primary/20",
+                    border: "border-primary dark:border-primary/50"
                 }
             ]} />
 
@@ -310,8 +310,8 @@ export function ActivitiesClientPage() {
                             onClick={() => setViewMode('list')}
                             aria-label="Visualização em lista"
                             aria-pressed={viewMode === 'list'}
-                            className={`focus-ring rounded-md p-2 transition-colors ${viewMode === 'list'
-                                ? 'bg-background text-foreground shadow-sm'
+                            className={`focus-ring rounded-[var(--radius-control)] p-2 transition-colors ${viewMode === 'list'
+                                ? 'bg-background text-foreground shadow-control-ui'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
@@ -322,8 +322,8 @@ export function ActivitiesClientPage() {
                             onClick={() => setViewMode('calendar')}
                             aria-label="Visualização em calendário"
                             aria-pressed={viewMode === 'calendar'}
-                            className={`focus-ring rounded-md p-2 transition-colors ${viewMode === 'calendar'
-                                ? 'bg-background text-foreground shadow-sm'
+                            className={`focus-ring rounded-[var(--radius-control)] p-2 transition-colors ${viewMode === 'calendar'
+                                ? 'bg-background text-foreground shadow-control-ui'
                                 : 'text-muted-foreground hover:text-foreground'
                                 }`}
                         >
@@ -349,17 +349,17 @@ export function ActivitiesClientPage() {
                         };
 
                         const groupColors: Record<string, string> = {
-                            overdue: 'text-red-500',
+                            overdue: 'text-destructive-readable',
                             today: 'text-primary',
                             tomorrow: 'text-muted-foreground',
                             thisWeek: 'text-muted-foreground',
                             later: 'text-muted-foreground',
-                            completed: 'text-emerald-500'
+                            completed: 'text-success-readable'
                         };
 
                         return (
                             <div key={group} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h3 className={`mb-4 flex items-center gap-2 text-sm font-semibold ${groupColors[group]}`}>
+                                <h3 className={`text-metadata-ui font-black uppercase tracking-widest mb-4 flex items-center gap-2 ${groupColors[group]}`}>
                                     <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     {groupTitles[group]}
                                     <span className="ml-1 text-foreground">({items.length})</span>
@@ -389,7 +389,7 @@ export function ActivitiesClientPage() {
                                         return (
                                             <div
                                                 key={activity.id}
-                                                className={`glass-card p-5 rounded-3xl bg-card border border-border hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 cursor-pointer group transition-all duration-300 relative overflow-hidden ${activity.status === 'completed' ? 'opacity-40 hover:opacity-60' : ''
+                                                className={`glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border hover:border-primary/50 hover:shadow-card-ui hover:shadow-primary/10 cursor-pointer group transition-all duration-300 relative overflow-hidden ${activity.status === 'completed' ? 'opacity-40 hover:opacity-60' : ''
                                                     } ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
                                                 onClick={() => {
                                                     setEditingActivity(activity);
@@ -421,16 +421,16 @@ export function ActivitiesClientPage() {
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                                                             <div className="flex-1">
-                                                                <h4 className={`text-lg font-bold text-foreground mb-2 ${activity.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                                                <h4 className={`text-section-title font-bold text-foreground mb-2 ${activity.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
                                                                     {activity.title}
                                                                 </h4>
                                                                 {activity.description && (
-                                                                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2 font-medium">{activity.description}</p>
+                                                                    <p className="text-body-ui text-muted-foreground mb-3 line-clamp-2 font-medium">{activity.description}</p>
                                                                 )}
 
                                                                 <div className="flex flex-wrap items-center gap-3">
                                                                     {/* Type Badge */}
-                                                                    <span className={`flex items-center gap-1.5 rounded-[var(--radius-control)] border px-2.5 py-1 text-xs font-semibold ${typeColors[activity.type]}`}>
+                                                                    <span className={`px-2.5 py-1 rounded-[var(--radius-control)] border text-metadata-ui font-black uppercase tracking-wider flex items-center gap-1.5 ${typeColors[activity.type]}`}>
                                                                         <TypeIcon className="h-3 w-3" />
                                                                         {activity.type === 'meeting' && 'Reunião'}
                                                                         {activity.type === 'call' && 'Ligação'}
@@ -440,7 +440,7 @@ export function ActivitiesClientPage() {
                                                                     </span>
 
                                                                     {/* Priority */}
-                                                                    <span className={`rounded-[var(--radius-control)] px-2.5 py-1 text-xs font-semibold ${priorityColors[activity.priority]}`}>
+                                                                    <span className={`px-2.5 py-1 rounded-[var(--radius-control)] text-metadata-ui font-black uppercase tracking-wider ${priorityColors[activity.priority]}`}>
                                                                         {activity.priority === 'urgent' && '🔥 Urgente'}
                                                                         {activity.priority === 'high' && 'Alta'}
                                                                         {activity.priority === 'medium' && 'Média'}
@@ -449,12 +449,12 @@ export function ActivitiesClientPage() {
 
                                                                     {/* Date & Time */}
                                                                     {activity.dueDate && (
-                                                                        <span className="flex items-center gap-1.5 text-muted-foreground bg-card/5 px-2.5 py-1 rounded-lg border border-white/5 text-xs font-bold">
+                                                                        <span className="flex items-center gap-1.5 text-muted-foreground bg-card/5 px-2.5 py-1 rounded-[var(--radius-control)] border border-white/5 text-metadata-ui font-bold">
                                                                             <CalendarIcon className="h-3.5 w-3.5" />
                                                                             {formatDate(activity.dueDate)}
                                                                             {activity.dueTime && (
                                                                                 <>
-                                                                                    <span className="w-1 h-1 rounded-full bg-gray-500" />
+                                                                                    <span className="w-1 h-1 rounded-full bg-muted" />
                                                                                     {activity.dueTime}
                                                                                 </>
                                                                             )}
@@ -462,14 +462,14 @@ export function ActivitiesClientPage() {
                                                                     )}
 
                                                                     {/* Assignee */}
-                                                                    <span className="bg-card/5 px-2.5 py-1 rounded-lg border border-white/5 text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                                                                    <span className="bg-card/5 px-2.5 py-1 rounded-[var(--radius-control)] border border-white/5 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1">
                                                                         <Users className="h-3 w-3" />
                                                                         {activity.assignedTo || 'Unassigned'}
                                                                     </span>
 
                                                                     {/* Linked Deal */}
                                                                     {activity.dealTitle && (
-                                                                        <span className="bg-surface-subtle px-2.5 py-1 rounded-lg border border-border text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-surface-subtle px-2.5 py-1 rounded-[var(--radius-control)] border border-border text-metadata-ui font-black text-foreground uppercase tracking-widest flex items-center gap-1">
                                                                             <List className="h-3 w-3" />
                                                                             {activity.dealTitle}
                                                                         </span>
@@ -477,7 +477,7 @@ export function ActivitiesClientPage() {
 
                                                                     {/* Linked Account */}
                                                                     {activity.customerName && (
-                                                                        <span className="bg-success-subtle px-2.5 py-1 rounded-lg border border-border text-[10px] font-black text-foreground uppercase tracking-widest flex items-center gap-1">
+                                                                        <span className="bg-success-subtle px-2.5 py-1 rounded-[var(--radius-control)] border border-border text-metadata-ui font-black text-foreground uppercase tracking-widest flex items-center gap-1">
                                                                             <Users className="h-3 w-3" />
                                                                             {activity.customerName}
                                                                         </span>
@@ -495,7 +495,7 @@ export function ActivitiesClientPage() {
                                                                         setEditingActivity(activity);
                                                                         setShowNewModal(true);
                                                                     }}
-                                                                    className="p-2 bg-muted/50 hover:bg-primary/10 rounded-xl text-muted-foreground hover:text-primary transition-colors border border-border"
+                                                                    className="p-2 bg-muted/50 hover:bg-primary/10 rounded-[var(--radius-panel)] text-muted-foreground hover:text-primary transition-colors border border-border"
                                                                 >
                                                                     <Edit className="h-4 w-4" />
                                                                 </button>
@@ -506,7 +506,7 @@ export function ActivitiesClientPage() {
                                                                         e.stopPropagation();
                                                                         handleDelete(activity.id);
                                                                     }}
-                                                                    className="p-2 bg-card/5 hover:bg-red-500/10 rounded-xl text-muted-foreground hover:text-red-400 transition-colors border border-white/5"
+                                                                    className="p-2 bg-card/5 hover:bg-destructive/10 rounded-[var(--radius-panel)] text-muted-foreground hover:text-destructive-readable transition-colors border border-white/5"
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </button>
@@ -523,11 +523,11 @@ export function ActivitiesClientPage() {
                     })}
 
                     {filteredActivities.length === 0 && (
-                        <div className="text-center py-20 bg-card rounded-3xl border border-border border-dashed">
+                        <div className="text-center py-20 bg-card rounded-[var(--radius-panel)] border border-border border-dashed">
                             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6 border border-border animate-pulse">
                                 <List className="h-10 w-10 text-muted-foreground" />
                             </div>
-                            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">Nenhuma atividade encontrada</h3>
+                            <h3 className="text-section-title font-black text-foreground mb-2 tracking-tight">Nenhuma atividade encontrada</h3>
                             <p className="text-muted-foreground font-medium">Tente ajustar os filtros ou criar uma nova atividade para começar.</p>
                         </div>
                     )}

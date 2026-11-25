@@ -18,15 +18,15 @@ export default function Error({
 
     return (
         <div className="flex h-[80vh] w-full flex-col items-center justify-center gap-4 text-center">
-            <div className="bg-red-500/10 p-4 rounded-full">
-                <AlertCircle className="h-10 w-10 text-red-500" />
+            <div className="bg-destructive-subtle p-4 rounded-full">
+                <AlertCircle className="h-10 w-10 text-destructive-readable" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Algo deu errado no sistema</h2>
+            <h2 className="text-page-title font-bold text-foreground">Algo deu errado no sistema</h2>
             <p className="text-muted-foreground max-w-md">
                 Encontramos um erro ao carregar esta página. Isso pode ser devido a uma falha de conexão ou configuração pendente (ex: Banco de Dados).
             </p>
-            <div className="p-4 bg-black/20 rounded-lg border border-white/5 text-left w-full max-w-lg overflow-auto max-h-40">
-                <code className="text-xs text-red-300 font-mono">
+            <div className="p-4 bg-card rounded-[var(--radius-panel)] border border-border text-left w-full max-w-lg overflow-auto max-h-40">
+                <code className="text-metadata-ui text-destructive-readable font-mono">
                     {error.message || "Erro desconhecido"}
                 </code>
             </div>
@@ -34,7 +34,7 @@ export default function Error({
                 <Button
                     onClick={() => reset()}
                     variant="default"
-                    className="bg-primary hover:bg-primary font-bold min-h-[44px]"
+                    className="min-h-[var(--ds-control-height-large)]"
                     aria-label="Tentar novamente"
                 >
                     Tentar Novamente
@@ -42,7 +42,7 @@ export default function Error({
                 <Button
                     onClick={() => window.location.reload()}
                     variant="outline"
-                    className="border-white/10 hover:bg-card/5 min-h-[44px]"
+                    className="min-h-[var(--ds-control-height-large)]"
                     aria-label="Recarregar página"
                 >
                     Recarregar Página

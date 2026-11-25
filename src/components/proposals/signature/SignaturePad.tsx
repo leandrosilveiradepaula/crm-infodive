@@ -78,7 +78,7 @@ export function SignaturePad({ onSave, onCancel }: SignaturePadProps) {
     return (
         <div className="space-y-4">
             {/* Mode Selector */}
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+            <div className="flex gap-2 p-1 bg-muted rounded-[var(--radius-panel)]">
                 <Button
                     variant={mode === 'draw' ? 'default' : 'ghost'}
                     size="sm"
@@ -109,7 +109,7 @@ export function SignaturePad({ onSave, onCancel }: SignaturePadProps) {
             </div>
 
             {/* Signature Area */}
-            <div className="border-2 border-dashed border-border rounded-lg bg-card min-h-[200px] flex items-center justify-center">
+            <div className="border-2 border-dashed border-border rounded-[var(--radius-panel)] bg-card min-h-[200px] flex items-center justify-center">
                 {mode === 'draw' && (
                     <SignatureCanvas
                         ref={signatureRef}
@@ -126,7 +126,7 @@ export function SignaturePad({ onSave, onCancel }: SignaturePadProps) {
                             value={typedName}
                             onChange={(e) => setTypedName(e.target.value)}
                             placeholder="Digite seu nome completo"
-                            className="text-center text-3xl"
+                            className="text-center text-page-title"
                             style={{ fontFamily: '"Brush Script MT", cursive' }}
                         />
                     </div>
@@ -137,17 +137,18 @@ export function SignaturePad({ onSave, onCancel }: SignaturePadProps) {
                         {uploadedImage ? (
                             <img src={uploadedImage} alt="Uploaded signature" className="max-h-[160px] mx-auto" />
                         ) : (
-                            <label className="cursor-pointer block">
+                            <label className="cursor-pointer block rounded-[var(--radius-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    aria-label="Selecionar imagem da assinatura"
                                     onChange={handleFileUpload}
-                                    className="hidden"
+                                    className="sr-only"
                                 />
                                 <div className="text-muted-foreground">
                                     <Upload className="h-12 w-12 mx-auto mb-2" />
                                     <p>Clique para fazer upload da assinatura</p>
-                                    <p className="text-sm mt-1">PNG, JPG ou SVG</p>
+                                    <p className="text-body-ui mt-1">PNG, JPG ou SVG</p>
                                 </div>
                             </label>
                         )}
@@ -165,7 +166,7 @@ export function SignaturePad({ onSave, onCancel }: SignaturePadProps) {
                     <Button variant="outline" onClick={onCancel}>
                         Cancelar
                     </Button>
-                    <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+                    <Button onClick={handleSave}>
                         Confirmar Assinatura
                     </Button>
                 </div>

@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image, Svg, Path, Circle, Polygon } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -16,9 +17,9 @@ interface PdfDifferentialsPageProps {
 }
 
 const getCardColors = (pdfColors: PdfColors) => [
-    { bg: '#f0f9ff', border: pdfColors.primary, text: pdfColors.primary },
-    { bg: '#fef2f2', border: pdfColors.accent, text: pdfColors.accent },
-    { bg: '#f0fdf4', border: pdfColors.emerald, text: pdfColors.emerald },
+    { bg: proposalDocumentPrimitives.sky50, border: pdfColors.primary, text: pdfColors.primary },
+    { bg: proposalDocumentPrimitives.red50, border: pdfColors.accent, text: pdfColors.accent },
+    { bg: proposalDocumentPrimitives.green50, border: pdfColors.emerald, text: pdfColors.emerald },
 ];
 
 const renderIcon = (iconText: string, color: string) => {
@@ -112,7 +113,7 @@ export function PdfDifferentialsPage({ differentials, pdfColors, pdfStyles }: Pd
                                     }}>
                                         {diff.title}
                                     </Text>
-                                    <Text style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>
+                                    <Text style={{ fontSize: 13, color: proposalDocumentPrimitives.gray600, lineHeight: 1.6 }}>
                                         {diff.description}
                                     </Text>
                                 </View>
@@ -139,7 +140,7 @@ export function PdfDifferentialsPage({ differentials, pdfColors, pdfStyles }: Pd
                 position: 'absolute', bottom: 20, left: 60, right: 60,
                 paddingTop: 8,
                 borderTopWidth: 1,
-                borderTopColor: '#f1f5f9',
+                borderTopColor: proposalDocumentPrimitives.slate100,
                 alignItems: 'center',
             }}>
                 <Text style={pdfStyles.footerText}>Infodive IT Solutions - Confidencial</Text>

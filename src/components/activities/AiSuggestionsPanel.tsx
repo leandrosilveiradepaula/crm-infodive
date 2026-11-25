@@ -148,14 +148,14 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
     if (loading) {
         return (
-            <div className={`bg-card border border-border ${compact ? 'rounded-2xl p-3' : 'rounded-3xl p-4'} animate-pulse`}>
+            <div className={`bg-card border border-border ${compact ? 'rounded-[var(--radius-panel)] p-3' : 'rounded-[var(--radius-panel)] p-4'} animate-pulse`}>
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10" />
-                    <div className="h-5 w-48 bg-muted rounded-lg" />
+                    <div className="w-10 h-10 rounded-[var(--radius-panel)] bg-primary/10" />
+                    <div className="h-5 w-48 bg-muted rounded-[var(--radius-control)]" />
                 </div>
                 <div className="space-y-3">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-20 bg-muted/50 rounded-2xl" />
+                        <div key={i} className="h-20 bg-muted/50 rounded-[var(--radius-panel)]" />
                     ))}
                 </div>
             </div>
@@ -163,27 +163,27 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
     }
 
     return (
-        <div className={`bg-card border border-border shadow-sm ${compact ? 'rounded-2xl' : 'rounded-3xl'} overflow-hidden`}>
+        <div className={`bg-card border border-border shadow-control-ui ${compact ? 'rounded-[var(--radius-panel)]' : 'rounded-[var(--radius-panel)]'} overflow-hidden`}>
             {/* Header */}
             <div
                 className={`flex items-center justify-between ${compact ? 'px-3 py-2.5' : 'px-4 py-3'} cursor-pointer hover:bg-primary/5 transition-colors`}
             >
                 <div className="flex items-center gap-3">
-                    <div className={`${compact ? 'p-1.5' : 'p-2'} bg-primary rounded-lg shadow-lg shadow-primary/20`}>
+                    <div className={`${compact ? 'p-1.5' : 'p-2'} bg-primary rounded-[var(--radius-control)] shadow-card-ui shadow-primary/20`}>
                         <Sparkles className={`${compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} text-primary-foreground`} />
                     </div>
                     <div>
-                        <h3 className={`font-black text-foreground tracking-tight ${compact ? 'text-xs' : 'text-sm'}`}>
+                        <h3 className={`font-black text-foreground tracking-tight ${compact ? 'text-metadata-ui' : 'text-body-ui'}`}>
                             Ações Sugeridas pela IA
                         </h3>
                         {!compact && (
-                            <p className="text-xs text-muted-foreground font-medium">
+                            <p className="text-metadata-ui text-muted-foreground font-medium">
                                 Recomendações inteligentes baseadas no seu pipeline
                             </p>
                         )}
                     </div>
                     {suggestions.length > 0 && (
-                        <span className="px-2.5 py-0.5 text-[10px] font-black bg-primary text-primary-foreground rounded-full uppercase tracking-widest">
+                        <span className="px-2.5 py-0.5 text-metadata-ui font-black bg-primary text-primary-foreground rounded-full uppercase tracking-widest">
                             {suggestions.length}
                         </span>
                     )}
@@ -195,7 +195,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                             handleGenerate();
                         }}
                         disabled={generating}
-                        className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest bg-surface-subtle text-foreground rounded-xl hover:bg-muted transition-all flex items-center gap-1.5 disabled:cursor-progress"
+                        className="px-3 py-1.5 text-metadata-ui font-black uppercase tracking-widest bg-surface-subtle text-foreground rounded-[var(--radius-panel)] hover:bg-muted transition-all flex items-center gap-1.5 disabled:cursor-progress"
                         title="Gerar novas sugestões"
                     >
                         {generating ? (
@@ -209,7 +209,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                         aria-label={collapsed ? 'Expandir sugestões de IA' : 'Recolher sugestões de IA'}
                         aria-expanded={!collapsed}
                         onClick={() => setCollapsed(!collapsed)}
-                        className="rounded-md p-1 text-muted-foreground hover:bg-muted focus-ring"
+                        className="rounded-[var(--radius-control)] p-1 text-muted-foreground hover:bg-muted focus-ring"
                     >
                         {collapsed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
                     </button>
@@ -224,8 +224,8 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-muted/50 mb-3">
                                 <Zap className="h-7 w-7 text-muted-foreground" />
                             </div>
-                            <p className="text-sm font-bold text-foreground mb-1">Nenhuma sugestão ativa</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-body-ui font-bold text-foreground mb-1">Nenhuma sugestão ativa</p>
+                            <p className="text-metadata-ui text-muted-foreground">
                                 Clique em "Gerar" para que a IA analise seus deals.
                             </p>
                         </div>
@@ -238,11 +238,11 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                 return (
                                     <div
                                         key={suggestion.id}
-                                        className={`group bg-card border border-border rounded-xl ${compact ? 'p-2.5' : 'p-3'} hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all ${isProcessing ? 'cursor-progress' : ''}`}
+                                        className={`group bg-card border border-border rounded-[var(--radius-panel)] ${compact ? 'p-2.5' : 'p-3'} hover:border-primary/30 hover:shadow-card-ui hover:shadow-primary/5 transition-all ${isProcessing ? 'cursor-progress' : ''}`}
                                     >
                                         <div className="flex items-start gap-3">
                                             {/* Type Icon */}
-                                            <div className={`p-2 rounded-xl border ${getTypeColor(suggestion.type)} shrink-0`}>
+                                            <div className={`p-2 rounded-[var(--radius-panel)] border ${getTypeColor(suggestion.type)} shrink-0`}>
                                                 <TypeIcon className="h-4 w-4" />
                                             </div>
 
@@ -250,11 +250,11 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className="flex-1">
-                                                        <h4 className={`font-bold text-foreground ${compact ? 'text-xs' : 'text-sm'} leading-tight`}>
+                                                        <h4 className={`font-bold text-foreground ${compact ? 'text-metadata-ui' : 'text-body-ui'} leading-tight`}>
                                                             {suggestion.title}
                                                         </h4>
                                                         {suggestion.dealTitle && (
-                                                            <p className="text-[10px] font-bold text-primary mt-0.5 flex items-center gap-1">
+                                                            <p className="text-metadata-ui font-bold text-primary mt-0.5 flex items-center gap-1">
                                                                 <ArrowRight className="h-2.5 w-2.5" />
                                                                 {suggestion.dealTitle}
                                                                 {suggestion.companyName && (
@@ -268,7 +268,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                     <div className="flex items-center gap-1 shrink-0">
                                                         <button
                                                             onClick={() => handleAccept(suggestion.id)}
-                                                            className="p-1.5 rounded-lg bg-success-subtle text-foreground hover:bg-muted transition-colors"
+                                                            className="p-1.5 rounded-[var(--radius-control)] bg-success-subtle text-foreground hover:bg-muted transition-colors"
                                                             title="Aceitar e criar atividade" aria-label="Aceitar e criar atividade"
                                                         >
                                                             {isProcessing ? (
@@ -279,7 +279,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
                                                         </button>
                                                         <button
                                                             onClick={() => handleDismiss(suggestion.id)}
-                                                            className="p-1.5 rounded-lg bg-surface-subtle text-foreground hover:bg-muted transition-colors"
+                                                            className="p-1.5 rounded-[var(--radius-control)] bg-surface-subtle text-foreground hover:bg-muted transition-colors"
                                                             title="Dispensar" aria-label="Dispensar sugestão"
                                                         >
                                                             <X className="h-3.5 w-3.5" />
@@ -289,14 +289,14 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
                                                 {/* Badges */}
                                                 <div className={`flex flex-wrap items-center gap-1.5 ${compact ? 'mt-1.5' : 'mt-2'}`}>
-                                                    <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-wider ${getTypeColor(suggestion.type)}`}>
+                                                    <span className={`px-2 py-0.5 rounded-[var(--radius-control)] border text-metadata-ui font-black uppercase tracking-wider ${getTypeColor(suggestion.type)}`}>
                                                         {getTypeLabel(suggestion.type)}
                                                     </span>
-                                                    <span className={`px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-wider ${getPriorityColor(suggestion.priority)}`}>
+                                                    <span className={`px-2 py-0.5 rounded-[var(--radius-control)] border text-metadata-ui font-black uppercase tracking-wider ${getPriorityColor(suggestion.priority)}`}>
                                                         {getPriorityLabel(suggestion.priority)}
                                                     </span>
                                                     {suggestion.suggestedDueDate && (
-                                                        <span className="px-2 py-0.5 rounded-md border border-border bg-surface-subtle text-[9px] font-bold text-foreground">
+                                                        <span className="px-2 py-0.5 rounded-[var(--radius-control)] border border-border bg-surface-subtle text-metadata-ui font-bold text-foreground">
                                                             📅 {new Date(suggestion.suggestedDueDate + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
                                                         </span>
                                                     )}
@@ -304,7 +304,7 @@ export function AiSuggestionsPanel({ onAccepted, compact = false, dealId, maxIte
 
                                                 {/* Reasoning (expandable on hover) */}
                                                 {suggestion.reasoning && !compact && (
-                                                    <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
+                                                    <p className="mt-2 text-metadata-ui text-muted-foreground leading-relaxed line-clamp-2 group-hover:line-clamp-none transition-all">
                                                         💡 {suggestion.reasoning}
                                                     </p>
                                                 )}

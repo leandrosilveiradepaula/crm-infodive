@@ -16,26 +16,26 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
     const topProduct = data[0];
 
     return (
-        <div className="glass-card p-6 rounded-2xl">
+        <div className="glass-card p-6 rounded-[var(--radius-panel)]">
             <div className="mb-6">
-                <h3 className="text-xl font-bold text-foreground mb-2">Top 5 Produtos</h3>
-                <p className="text-sm text-muted-foreground">Produtos mais vendidos por receita</p>
+                <h3 className="text-section-title font-bold text-foreground mb-2">Top 5 Produtos</h3>
+                <p className="text-body-ui text-muted-foreground">Produtos mais vendidos por receita</p>
             </div>
 
             {/* Top Product */}
             {topProduct && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl border border-blue-200">
+                <div className="mb-6 p-4 bg-surface-highlight rounded-[var(--radius-panel)] border border-primary">
                     <div className="flex items-center gap-3">
                         <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
                             <Package className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
-                            <p className="text-xs text-muted-foreground font-bold uppercase">Mais Vendido</p>
-                            <p className="text-lg font-bold text-foreground">{topProduct.productName}</p>
+                            <p className="text-metadata-ui text-muted-foreground font-bold uppercase">Mais Vendido</p>
+                            <p className="text-section-title font-bold text-foreground">{topProduct.productName}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-2xl font-bold text-primary">{formatCurrency(topProduct.revenue)}</p>
-                            <p className="text-xs text-muted-foreground">{topProduct.quantitySold} unidades</p>
+                            <p className="text-page-title font-bold text-primary">{formatCurrency(topProduct.revenue)}</p>
+                            <p className="text-metadata-ui text-muted-foreground">{topProduct.quantitySold} unidades</p>
                         </div>
                     </div>
                 </div>
@@ -52,11 +52,11 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
                             if (active && payload && payload.length) {
                                 const data = payload[0].payload;
                                 return (
-                                    <div className="bg-card p-4 rounded-lg shadow-xl border border-border">
+                                    <div className="bg-card p-4 rounded-[var(--radius-control)] shadow-card-ui border border-border">
                                         <p className="font-bold text-foreground mb-2">{data.productName}</p>
-                                        <p className="text-sm text-muted-foreground">Receita: <span className="font-bold text-primary">{formatCurrency(data.revenue, { compact: true })}</span></p>
-                                        <p className="text-sm text-muted-foreground">Quantidade: <span className="font-bold">{data.quantitySold}</span></p>
-                                        <p className="text-sm text-muted-foreground">Preço Médio: <span className="font-bold">{formatCurrency(data.avgPrice, { compact: true })}</span></p>
+                                        <p className="text-body-ui text-muted-foreground">Receita: <span className="font-bold text-primary">{formatCurrency(data.revenue, { compact: true })}</span></p>
+                                        <p className="text-body-ui text-muted-foreground">Quantidade: <span className="font-bold">{data.quantitySold}</span></p>
+                                        <p className="text-body-ui text-muted-foreground">Preço Médio: <span className="font-bold">{formatCurrency(data.avgPrice, { compact: true })}</span></p>
                                     </div>
                                 );
                             }
@@ -70,19 +70,19 @@ export const ProductAnalysis = ({ data }: ProductAnalysisProps) => {
             {/* Product List */}
             <div className="mt-6 space-y-3">
                 {data.map((product, index) => (
-                    <div key={product.productName} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={product.productName} className="flex items-center justify-between p-3 bg-muted/50 rounded-[var(--radius-control)] hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-3">
-                            <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                            <span className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-metadata-ui font-bold">
                                 {index + 1}
                             </span>
                             <div>
-                                <p className="font-bold text-foreground text-sm">{product.productName}</p>
-                                <p className="text-xs text-muted-foreground">{product.quantitySold} unidades vendidas</p>
+                                <p className="font-bold text-foreground text-body-ui">{product.productName}</p>
+                                <p className="text-metadata-ui text-muted-foreground">{product.quantitySold} unidades vendidas</p>
                             </div>
                         </div>
                         <div className="text-right">
                             <p className="font-bold text-primary">{formatCurrency(product.revenue)}</p>
-                            <p className="text-xs text-muted-foreground">{formatCurrency(product.avgPrice)}/un</p>
+                            <p className="text-metadata-ui text-muted-foreground">{formatCurrency(product.avgPrice)}/un</p>
                         </div>
                     </div>
                 ))}

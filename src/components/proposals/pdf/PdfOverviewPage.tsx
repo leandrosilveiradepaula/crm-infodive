@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Page, View, Text, Image } from '@react-pdf/renderer';
 import { PdfColors } from './pdfStyles';
@@ -71,7 +72,7 @@ export function PdfOverviewPage({
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                             {objectives.map((obj, i) => (
                                 <View key={i} style={{
-                                    width: '48.5%', backgroundColor: '#ffffff',
+                                    width: '48.5%', backgroundColor: proposalDocumentPrimitives.paperWhite,
                                     padding: 12, borderRadius: 10, borderWidth: 1,
                                     borderColor: pdfColors.border, minHeight: 80,
                                 }}>
@@ -92,7 +93,7 @@ export function PdfOverviewPage({
                                     }}>
                                         {obj.title}
                                     </Text>
-                                    <Text style={{ fontSize: 10, color: '#64748b', lineHeight: 1.35 }}>
+                                    <Text style={{ fontSize: 10, color: proposalDocumentPrimitives.slate500, lineHeight: 1.35 }}>
                                         {obj.description}
                                     </Text>
                                 </View>
@@ -107,7 +108,7 @@ export function PdfOverviewPage({
                 position: 'absolute', bottom: 20, left: 60, right: 60,
                 paddingTop: 8,
                 borderTopWidth: 1,
-                borderTopColor: '#f1f5f9',
+                borderTopColor: proposalDocumentPrimitives.slate100,
                 alignItems: 'center',
             }}>
                 <Text style={pdfStyles.footerText}>Infodive IT Solutions - Confidencial</Text>

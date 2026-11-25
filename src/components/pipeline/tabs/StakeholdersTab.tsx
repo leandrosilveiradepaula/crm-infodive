@@ -184,27 +184,27 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
         <div className="flex flex-col space-y-8 min-h-full">
             {/* Header */}
             <div>
-                <h3 className="text-xl font-bold tracking-tight text-foreground">Clientes &amp; Stakeholders</h3>
-                <p className="text-sm text-muted-foreground mt-1">
+                <h3 className="text-[var(--ds-type-legacy-prominent-size)] font-[var(--ds-type-control-weight)] tracking-tight text-foreground">Clientes &amp; Stakeholders</h3>
+                <p className="ds-type-body text-muted-foreground mt-1">
                     Gerencie os tomadores de decisão e influenciadores envolvidos nesta oportunidade.
                 </p>
                 {error && (
-                    <div className="mt-4 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3 text-rose-500 text-sm">
+                    <div className="mt-4 p-4 bg-destructive-subtle border border-destructive/20 rounded-[var(--radius-panel)] flex items-center gap-3 text-destructive-readable ds-type-body">
                         <AlertCircle className="w-5 h-5 shrink-0" />
                         <span>Erro ao carregar contatos do banco de dados: {error}</span>
                     </div>
                 )}
                 {!loading && allContacts.length > 0 && availableContacts.length === 0 && deal?.account_id && !showAllContacts && (
-                    <div className="flex flex-col gap-3 text-xs text-amber-500 mt-4 bg-amber-500/10 p-4 rounded-xl border border-amber-500/20">
+                    <div className="flex flex-col gap-3 ds-type-metadata text-warning-readable mt-4 bg-warning-subtle p-4 rounded-[var(--radius-panel)] border border-warning/20">
                         <div className="flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 shrink-0" />
-                            <p className="font-bold uppercase tracking-wider">Nenhum contato encontrado para esta empresa</p>
+                            <p className="font-[var(--ds-type-control-weight)] uppercase tracking-wider">Nenhum contato encontrado para esta empresa</p>
                         </div>
                         <p>Você pode buscar contatos de outras empresas ou contatos sem empresa vinculada clicando no botão abaixo.</p>
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-fit h-8 text-[10px] uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
+                            className="w-fit h-8 ds-type-metadata uppercase font-[var(--ds-type-control-weight)] border-warning/30 hover:bg-warning-subtle text-warning-readable"
                             onClick={() => setShowAllContacts(true)}
                         >
                             <Search className="w-3 h-3 mr-1.5" /> Buscar em todos os contatos
@@ -212,16 +212,16 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                     </div>
                 )}
                 {!deal?.account_id && !showAllContacts && (
-                    <div className="flex flex-col gap-3 text-xs text-amber-500 mt-4 bg-amber-500/10 p-4 rounded-xl border border-amber-500/20">
+                    <div className="flex flex-col gap-3 ds-type-metadata text-warning-readable mt-4 bg-warning-subtle p-4 rounded-[var(--radius-panel)] border border-warning/20">
                         <div className="flex items-center gap-2">
                             <AlertCircle className="w-4 h-4 shrink-0" />
-                            <p className="font-bold uppercase tracking-wider">Oportunidade sem empresa vinculada</p>
+                            <p className="font-[var(--ds-type-control-weight)] uppercase tracking-wider">Oportunidade sem empresa vinculada</p>
                         </div>
                         <p>Sem uma empresa vinculada no cabeçalho, não podemos sugerir contatos específicos. Você pode vincular uma empresa ou buscar por qualquer contato existente no sistema.</p>
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-fit h-8 text-[10px] uppercase font-bold border-amber-500/30 hover:bg-amber-500/10 text-amber-600"
+                            className="w-fit h-8 ds-type-metadata uppercase font-[var(--ds-type-control-weight)] border-warning/30 hover:bg-warning-subtle text-warning-readable"
                             onClick={() => setShowAllContacts(true)}
                         >
                             <Search className="w-3 h-3 mr-1.5" /> Buscar em todos os contatos
@@ -235,14 +235,14 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
                 {/* Unified Add Form — only visible when editing */}
                 {isEditing && (
-                    <div className="bg-card border border-primary/30 bg-primary/5 shadow-sm rounded-2xl p-5 flex flex-col md:flex-row gap-4 mb-6 relative">
+                    <div className="bg-card border border-primary/30 bg-primary/5 shadow-control-ui rounded-[var(--radius-panel)] p-5 flex flex-col md:flex-row gap-4 mb-6 relative">
                         <div className="flex-1 space-y-2.5">
                             <div className="flex justify-between items-center">
-                                <Label className="text-[10px] uppercase tracking-wider font-bold text-primary">Selecionar Contato</Label>
+                                <Label className="ds-type-metadata uppercase tracking-wider font-[var(--ds-type-control-weight)] text-primary">Selecionar Contato</Label>
                                 {deal?.account_id && (
                                     <button
                                         onClick={() => setShowAllContacts(!showAllContacts)}
-                                        className="text-[9px] uppercase font-black text-primary/60 hover:text-primary transition-colors underline decoration-dotted"
+                                        className="ds-type-metadata uppercase font-[var(--ds-type-metric-weight)] text-primary/60 hover:text-primary transition-colors underline decoration-dotted"
                                     >
                                         {showAllContacts ? 'Filtrar por empresa' : 'Ver todos'}
                                     </button>
@@ -253,10 +253,10 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                 value={newStakeholderId || 'none'}
                                 onValueChange={(val) => setNewStakeholderId(val === 'none' ? '' : val)}
                             >
-                                <SelectTrigger className="w-full h-11 rounded-lg border-border/60 bg-background">
+                                <SelectTrigger aria-label="Selecionar contato na oportunidade" className="w-full h-11 rounded-[var(--radius-panel)] border-border/60 bg-background">
                                     <SelectValue placeholder="Selecione um contato…" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl border-border/60 shadow-lg max-h-[300px]">
+                                <SelectContent className="rounded-[var(--radius-panel)] border-border/60 shadow-card-ui max-h-[300px]">
                                     <SelectItem value="none" className="text-muted-foreground italic">Selecionar contato...</SelectItem>
                                     {selectableContacts.map(c => (
                                         <SelectItem key={c.id} value={c.id}>
@@ -270,10 +270,10 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                         </div>
 
                         <div className="flex-1 space-y-2.5">
-                            <Label className="text-[10px] uppercase tracking-wider font-bold text-primary">Papel no Negócio</Label>
+                            <Label className="ds-type-metadata uppercase tracking-wider font-[var(--ds-type-control-weight)] text-primary">Papel no Negócio</Label>
                             <Input
                                 type="text"
-                                className="w-full h-11 bg-background border-border/60 rounded-lg placeholder:text-muted-foreground/40"
+                                aria-label="Papel do contato no negócio" className="w-full h-11 bg-background border-border/60 rounded-[var(--radius-panel)] placeholder:text-muted-foreground/40"
                                 placeholder="Ex: Diretor, Jurídico, Técnico…"
                                 value={newStakeholderRole}
                                 onChange={e => setNewStakeholderRole(e.target.value)}
@@ -282,9 +282,9 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
                         <div className="flex items-end md:pb-0">
                             <Button
-                                className={`h-11 px-6 rounded-lg shadow-sm transition-all whitespace-nowrap ${!newStakeholderId
+                                className={`h-11 px-6 rounded-[var(--radius-panel)] shadow-control-ui transition-all whitespace-nowrap ${!newStakeholderId
                                     ? 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                    : 'bg-primary hover:bg-primary/90 text-white'
+                                    : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                                     }`}
                                 onClick={addStakeholder}
                             >
@@ -296,12 +296,12 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
 
                 {/* Empty State */}
                 {allStakeholders.length === 0 && (
-                    <div className="bg-card border-2 border-dashed border-border/50 rounded-2xl p-10 flex flex-col items-center text-center opacity-70 hover:opacity-100 transition-opacity">
+                    <div className="bg-card border-2 border-dashed border-border/50 rounded-[var(--radius-panel)] p-10 flex flex-col items-center text-center">
                         <div className="bg-muted w-16 h-16 rounded-full flex items-center justify-center mb-4">
                             <Users className="h-8 w-8 text-muted-foreground opacity-60" />
                         </div>
-                        <p className="font-bold text-foreground text-base">Nenhum stakeholder associado</p>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+                        <p className="font-[var(--ds-type-control-weight)] text-foreground text-[var(--ds-type-legacy-base-size)]">Nenhum stakeholder associado</p>
+                        <p className="ds-type-body text-muted-foreground mt-2 max-w-sm">
                             Adicione o cliente principal e outros influenciadores (compras, jurídico, área técnica) que participam do negócio.
                         </p>
                     </div>
@@ -314,27 +314,27 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                         if (!contact) return null;
 
                         return (
-                            <div key={stakeholder.contact_id} className={`bg-card border shadow-sm rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-all relative overflow-hidden group ${stakeholder.isPrimary ? 'border-amber-500/30 shadow-md' : 'border-border/50 hover:shadow-md hover:border-border'}`}>
+                            <div key={stakeholder.contact_id} className={`bg-card border shadow-control-ui rounded-[var(--radius-panel)] p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-all relative overflow-hidden group ${stakeholder.isPrimary ? 'border-warning/30 shadow-card-ui' : 'border-border/50 hover:shadow-card-ui hover:border-border'}`}>
                                 {stakeholder.isPrimary && (
-                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
+                                    <div className="absolute top-0 left-0 w-1.5 h-full bg-warning shadow-control-ui"></div>
                                 )}
 
-                                <Avatar className={`h-12 w-12 border-2 shrink-0 ${stakeholder.isPrimary ? 'border-amber-500/20 sm:ml-2' : 'border-border/50'}`}>
-                                    <AvatarFallback className="bg-muted text-foreground font-bold">
+                                <Avatar className={`h-12 w-12 border-2 shrink-0 ${stakeholder.isPrimary ? 'border-warning/20 sm:ml-2' : 'border-border/50'}`}>
+                                    <AvatarFallback className="bg-muted text-foreground font-[var(--ds-type-control-weight)]">
                                         {contact.name.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
 
                                 <div className={`space-y-1.5 flex-1 w-full ${stakeholder.isPrimary ? 'sm:pl-2' : ''}`}>
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                        <h4 className="font-bold text-foreground text-sm truncate">{contact.name}</h4>
+                                        <h4 className="font-[var(--ds-type-control-weight)] text-foreground ds-type-body truncate">{contact.name}</h4>
                                         {stakeholder.role && (
-                                            <span className={`inline-flex text-[10px] px-2.5 py-1 rounded-md font-semibold tracking-wide border w-fit ${stakeholder.isPrimary ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-muted text-foreground border-border/50'}`}>
+                                            <span className={`inline-flex ds-type-metadata px-2.5 py-1 rounded-[var(--radius-control)] font-semibold tracking-wide border w-fit ${stakeholder.isPrimary ? 'bg-warning-subtle text-warning-readable border-warning/20' : 'bg-muted text-foreground border-border/50'}`}>
                                                 {stakeholder.role}
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1.5 ds-type-metadata text-muted-foreground">
                                         <div className="flex items-center gap-1.5">
                                             <Mail className="w-3.5 h-3.5 opacity-70" />
                                             <span className="truncate">{contact.email || 'Email não informado'}</span>
@@ -355,7 +355,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-10 w-10 text-amber-500 hover:text-amber-600 hover:bg-amber-500/10 rounded-lg transition-all"
+                                                className="h-10 w-10 text-warning-readable hover:text-warning-readable hover:bg-warning-subtle rounded-[var(--radius-panel)] transition-all"
                                                 onClick={() => setPrimaryContact(stakeholder.contact_id)}
                                                 title="Definir como Cliente Principal"
                                             >
@@ -363,7 +363,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                             </Button>
                                         ) : (
                                             <div
-                                                className="h-10 w-10 flex items-center justify-center text-amber-500 bg-amber-500/10 rounded-lg"
+                                                className="h-10 w-10 flex items-center justify-center text-warning-readable bg-warning-subtle rounded-[var(--radius-panel)]"
                                                 title="Cliente Principal Atual"
                                             >
                                                 <Star className="w-5 h-5 fill-current" />
@@ -372,7 +372,7 @@ export const StakeholdersTab = ({ deal, setDeal, isEditing, allContacts }: Stake
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-10 w-10 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition-all"
+                                            className="h-10 w-10 text-destructive-readable hover:text-destructive-readable hover:bg-destructive-subtle rounded-[var(--radius-panel)] transition-all"
                                             onClick={() => removeStakeholder(stakeholder.contact_id, stakeholder.isPrimary)}
                                             title="Remover Stakeholder"
                                         >

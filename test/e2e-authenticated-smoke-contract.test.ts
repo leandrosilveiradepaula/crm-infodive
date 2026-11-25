@@ -5,6 +5,33 @@ import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
 
+describe('Actual CRM customer/contact/lead create dialog QA', () => {
+    it('opens each existing creation dialog read-only with real axe and layout checks', () => {
+        const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
+        for (const route of ["'/customers'", "'/contacts'", "'/leads'"]) {
+            expect(source).toContain(route);
+        }
+        expect(source).toContain('CRM_B4_CREATE_DIALOG_DIAGNOSTIC=');
+        expect(source).toContain('const modalAudit = await runAxe(page, source)');
+        expect(source).toContain("await formDialog.waitFor({ state: 'visible'");
+        expect(source).toContain("await page.keyboard.press('Escape')");
+    });
+});
+
+describe('Real login accessibility before synthetic credential entry', () => {
+    it('audits both light/dark and desktop/mobile with axe and no credentials in screenshots', () => {
+        const source = readFileSync(resolve(process.cwd(), 'test/e2e/run-authenticated-smoke.mjs'), 'utf8');
+        expect(source).toContain('inspectLogin: local && profileIndex === 0');
+        expect(source).toContain("CRM_B4_LOGIN_A11Y_DIAGNOSTIC=");
+        expect(source).toContain("const audit = await runAxe(page, options.source)");
+        expect(source).toContain("['light', 'dark']");
+        expect(source).toContain("a11yFailedRoutes.add('/login')");
+        expect(source).toContain('layoutOverflow: overflow');
+        expect(source).toContain("if (overflow || audit.violationsCount || audit.incompleteCount)");
+        expect(source).toContain('login-');
+    });
+});
+
 describe('authenticated E2E smoke contract', () => {
     it('requires a legitimate isolated target and never manufactures an authenticated session', () => {
         expect(source).toContain("CRM_E2E_TEST_TARGET must be exactly \"isolated\"");
@@ -40,7 +67,17 @@ describe('authenticated E2E smoke contract', () => {
         expect(source).toContain("execFileSync('git', ['rev-parse', 'HEAD']");
         expect(source).toContain('candidateSha, target:');
         expect(source).toContain("state: 'deal-detail'");
-        expect(source).toContain('pipeline-deal-detail-desktop-light.png');
+        expect(source).toContain('pipeline-deal-detail-${viewport.name}-${theme}.png');
+        expect(source).toContain("if (capture && local && profileIndex === 0 && route === '/pipeline')");
+        expect(source).toContain('Opportunity detail extends outside the device viewport.');
+        expect(source).toContain('assertOpportunitySections(page, dialog, capture, artifactDir,');
+        expect(source).toContain('CRM_B4_SECTION_NAV_DIAGNOSTIC=');
+        expect(source).toContain('Opportunity navigation incorrectly highlights a primary tab in a secondary section.');
+        expect(source).toContain("a11yFailedRoutes.add('/pipeline?detail:sections')");
+        expect(source).toContain("for (const label of ['Parceiros', 'Clientes', 'Documentos', 'Comunicações', 'Histórico'])");
+        expect(source).toContain("getByRole('tab', { name: 'Resumo', exact: true })");
+        expect(source).toContain("'-history.png'");
+
     });
     it('only enumerates existing concrete dashboard routes, never an absent module', () => {
         const section = source.match(/const defaultRoutes = \[([\s\S]*?)\];/)?.[1];

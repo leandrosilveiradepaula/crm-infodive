@@ -52,14 +52,14 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="relative bg-card border border-border rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="relative bg-card border border-border rounded-[var(--radius-panel)] shadow-card-ui w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-muted/20">
                     <div className="flex items-center gap-3">
                         <UserPlus className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-bold text-foreground">Novo Membro</h3>
+                        <h3 className="text-section-title font-bold text-foreground">Novo Membro</h3>
                     </div>
-                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted">
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-[var(--radius-control)] hover:bg-muted">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
@@ -68,7 +68,7 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
                 <div className="p-6 space-y-6">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-muted-foreground">Email do Colaborador</label>
+                            <label className="text-body-ui font-bold text-muted-foreground">Email do Colaborador</label>
                             <div className="flex relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                 <input
@@ -79,13 +79,13 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
                                         setInviteLink(''); // reset link if email changes
                                     }}
                                     placeholder="colaborador@empresa.com"
-                                    className="w-full pl-10 pr-4 h-11 bg-background border border-border rounded-xl text-foreground placeholder-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all"
+                                    className="w-full pl-10 pr-4 h-11 bg-background border border-border rounded-[var(--radius-panel)] text-foreground placeholder-muted-foreground/60 focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-muted-foreground">Função / Permissões</label>
+                            <label className="text-body-ui font-bold text-muted-foreground">Função / Permissões</label>
                             <RoleSelect
                                 value={roles}
                                 onChange={(newRoles) => {
@@ -99,7 +99,7 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
                             <button
                                 onClick={handleGenerateLink}
                                 disabled={loading || !email}
-                                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-xl flex items-center justify-center hover:bg-primary/90 transition-all disabled:opacity-50"
+                                className="w-full h-11 bg-primary text-primary-foreground font-bold rounded-[var(--radius-panel)] flex items-center justify-center hover:bg-primary/90 transition-all disabled:opacity-50"
                             >
                                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Gerar Convite Seguro'}
                             </button>
@@ -108,21 +108,21 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
 
                     {/* Invite Link Section */}
                     {inviteLink && (
-                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 animate-in slide-in-from-top-4 duration-300">
-                            <label className="block text-xs font-bold text-primary mb-2">Link Único de Convite</label>
+                        <div className="bg-primary/5 p-4 rounded-[var(--radius-panel)] border border-primary/20 animate-in slide-in-from-top-4 duration-300">
+                            <label className="block text-metadata-ui font-bold text-primary mb-2">Link Único de Convite</label>
                             <div className="flex gap-2">
-                                <div className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-primary font-mono truncate flex items-center">
+                                <div className="flex-1 bg-background border border-border rounded-[var(--radius-control)] px-3 py-2 text-metadata-ui text-primary font-mono truncate flex items-center">
                                     {inviteLink}
                                 </div>
                                 <button
                                     onClick={handleCopy}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${copied ? 'bg-emerald-500 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
+                                    className={`px-4 py-2 rounded-[var(--radius-control)] text-metadata-ui font-bold transition-all flex items-center gap-2 ${copied ? 'bg-success text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
                                 >
                                     {copied ? <Check size={14} /> : <Copy size={14} />}
                                     {copied ? 'Copiado' : 'Copiar'}
                                 </button>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                            <p className="text-metadata-ui text-muted-foreground mt-3 leading-relaxed">
                                 Compartilhe este link com o colaborador. Ele expirará em 7 dias automaticamente.
                             </p>
                         </div>
@@ -133,7 +133,7 @@ export const InviteUserModal = ({ isOpen, onClose }: InviteUserModalProps) => {
                 <div className="px-6 py-4 border-t border-border flex justify-end bg-background">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                        className="px-6 py-2 text-body-ui font-medium hover:bg-muted rounded-[var(--radius-control)] transition-colors"
                     >
                         Concluir
                     </button>

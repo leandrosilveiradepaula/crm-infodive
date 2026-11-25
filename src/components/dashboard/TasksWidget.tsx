@@ -32,19 +32,19 @@ export const TasksWidget = () => {
     };
 
     return (
-        <div className="glass-card rounded-2xl p-4 flex flex-col h-full border border-border">
+        <div className="glass-card rounded-[var(--radius-panel)] p-4 flex flex-col h-full border border-border">
             <div className="flex items-center justify-between mb-4 shrink-0">
                 <div className="flex items-center gap-2">
-                    <h2 className="text-base font-bold text-foreground">Minhas Tarefas</h2>
+                    <h2 className="text-body-ui font-bold text-foreground">Minhas Tarefas</h2>
                     {overdueCount > 0 && (
-                        <span className="bg-destructive-subtle text-foreground text-[9px] font-black px-1.5 py-0.5 rounded border border-destructive/20 uppercase tracking-widest">
+                        <span className="bg-destructive-subtle text-foreground text-metadata-ui font-black px-1.5 py-0.5 rounded border border-destructive/20 uppercase tracking-widest">
                             {overdueCount} atrasadas
                         </span>
                     )}
                 </div>
                 <button
                     onClick={() => router.push('/activities')}
-                    className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary/80"
+                    className="text-metadata-ui font-black uppercase tracking-widest text-primary hover:text-primary/80"
                 >
                     Ver Todas
                 </button>
@@ -56,7 +56,7 @@ export const TasksWidget = () => {
                         <div className="w-10 h-10 rounded-full bg-success-subtle flex items-center justify-center mb-2.5">
                             <CheckCircle2 className="h-5 w-5 text-success" />
                         </div>
-                        <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Tudo em dia!</p>
+                        <p className="text-muted-foreground text-metadata-ui font-bold uppercase tracking-wider">Tudo em dia!</p>
                     </div>
                 ) : (
                     relevantTasks.slice(0, 5).map((task) => {
@@ -65,7 +65,7 @@ export const TasksWidget = () => {
                         return (
                             <div
                                 key={task.id}
-                                className={`group p-2.5 rounded-xl transition-all border border-transparent hover:bg-muted/50 cursor-pointer active:scale-[0.98] ${isOverdue ? 'border-l-2 border-l-destructive bg-destructive-subtle' : ''}`}
+                                className={`group p-2.5 rounded-[var(--radius-panel)] transition-all border border-transparent hover:bg-muted/50 cursor-pointer active:scale-[0.98] ${isOverdue ? 'border-l-2 border-l-destructive bg-destructive-subtle' : ''}`}
                                 onClick={() => router.push('/activities')}
                             >
                                 <div className="flex items-start gap-2.5">
@@ -73,18 +73,18 @@ export const TasksWidget = () => {
                                         {isOverdue ? <AlertCircle className="h-3.5 w-3.5" /> : <Circle className="h-3.5 w-3.5" />}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-[13px] font-bold truncate leading-none mb-1.5 ${isOverdue ? 'text-destructive' : 'text-foreground hover:text-primary'}`}>
+                                        <p className={`text-body-ui font-bold truncate leading-none mb-1.5 ${isOverdue ? 'text-destructive' : 'text-foreground hover:text-primary'}`}>
                                             {task.title}
                                         </p>
                                         <div className="flex items-center gap-2 mt-1">
-                                            <span className={`text-[8px] uppercase font-black tracking-widest px-1 py-0 rounded ${task.priority === 'urgent' ? 'bg-destructive-subtle text-foreground' :
+                                            <span className={`text-metadata-ui uppercase font-black tracking-widest px-1 py-0 rounded ${task.priority === 'urgent' ? 'bg-destructive-subtle text-foreground' :
                                                 task.priority === 'high' ? 'bg-warning-subtle text-foreground' :
                                                     'bg-surface-subtle text-muted-foreground'
                                                 }`}>
                                                 {task.priority === 'urgent' ? 'Urgente' : task.priority === 'high' ? 'Alta' : task.priority}
                                             </span>
                                             {task.dueDate && (
-                                                <span className={`text-[10px] flex items-center gap-1 font-bold uppercase tracking-tight ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
+                                                <span className={`text-metadata-ui flex items-center gap-1 font-bold uppercase tracking-tight ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
                                                     <Calendar className="h-3 w-3" />
                                                     {formatDate(task.dueDate)}
                                                 </span>
@@ -100,7 +100,7 @@ export const TasksWidget = () => {
 
             <button
                 onClick={() => router.push('/activities')}
-                className="w-full mt-4 py-2 rounded-xl border border-dashed border-border text-muted-foreground font-black text-[10px] uppercase tracking-widest hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center gap-2 group shrink-0"
+                className="w-full mt-4 py-2 rounded-[var(--radius-panel)] border border-dashed border-border text-muted-foreground font-black text-metadata-ui uppercase tracking-widest hover:bg-muted/50 hover:text-foreground transition-all flex items-center justify-center gap-2 group shrink-0"
             >
                 <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 Gerenciar Atividades

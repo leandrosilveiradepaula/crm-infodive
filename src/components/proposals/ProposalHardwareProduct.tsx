@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import { Cpu, HardDrive, Database, MemoryStick, Network, Zap, Settings } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -129,41 +130,41 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                 alignItems: 'center',
                 marginBottom: '6px',
                 padding: '8px 15px',
-                backgroundColor: '#f8fafc',
+                backgroundColor: proposalDocumentPrimitives.slate50,
                 borderRadius: '10px',
-                borderLeft: `4px solid ${isStorage ? '#0369a1' : '#dc2626'}`,
-                borderTop: '1px solid #e2e8f0',
-                borderRight: '1px solid #e2e8f0',
-                borderBottom: '1px solid #e2e8f0'
+                borderLeft: `4px solid ${isStorage ? proposalDocumentPrimitives.sky700 : proposalDocumentPrimitives.red600}`,
+                borderTop: `1px solid ${proposalDocumentPrimitives.slate200}`,
+                borderRight: `1px solid ${proposalDocumentPrimitives.slate200}`,
+                borderBottom: `1px solid ${proposalDocumentPrimitives.slate200}`
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{
                         width: '32px',
                         height: '32px',
-                        backgroundColor: isStorage ? '#e0f2fe' : '#fee2e2',
+                        backgroundColor: isStorage ? proposalDocumentPrimitives.sky100 : proposalDocumentPrimitives.red100,
                         borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: isStorage ? '#0369a1' : '#dc2626'
+                        color: isStorage ? proposalDocumentPrimitives.sky700 : proposalDocumentPrimitives.red600
                     }}>
                         {isStorage ? <HardDrive size={18} /> : <Cpu size={18} />}
                     </div>
                     <div>
-                        <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#0f172a', margin: 0, letterSpacing: '-0.3px', lineHeight: '1.2' }}>
+                        <h2 style={{ fontSize: '15px', fontWeight: '800', color: proposalDocumentPrimitives.slate900, margin: 0, letterSpacing: '-0.3px', lineHeight: '1.2' }}>
                             {simplifiedName || product.name}
                         </h2>
                         <div style={{ display: 'flex', gap: '8px', marginTop: '2px', alignItems: 'center' }}>
                             {isStorage && (
-                                <span style={{ fontSize: '10px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                <span style={{ fontSize: '10px', fontWeight: '800', color: proposalDocumentPrimitives.slate500, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     Storage
                                 </span>
                             )}
                             {isOptional && (
                                 <Badge style={{
-                                    backgroundColor: '#f5f3ff',
-                                    color: '#7c3aed',
-                                    border: '1px solid #ddd6fe',
+                                    backgroundColor: proposalDocumentPrimitives.violet50,
+                                    color: proposalDocumentPrimitives.violet600,
+                                    border: `1px solid ${proposalDocumentPrimitives.violet200}`,
                                     fontSize: '9px',
                                     padding: '0 8px',
                                     height: '18px',
@@ -180,25 +181,25 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                     <div style={{
                         fontSize: '10px',
                         fontWeight: '800',
-                        color: '#94a3b8',
+                        color: proposalDocumentPrimitives.slate400,
                         textTransform: 'uppercase',
                         marginBottom: '2px'
                     }}>
                         &nbsp;
                     </div>
                     <div style={{
-                        backgroundColor: '#ffffff',
+                        backgroundColor: proposalDocumentPrimitives.paperWhite,
                         padding: '6px 14px',
                         borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
+                        border: `1px solid ${proposalDocumentPrimitives.slate200}`,
                         display: 'flex',
                         alignItems: 'baseline',
                         gap: '6px',
                         boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
                     }}>
-                        <span style={{ fontSize: '10px', fontWeight: '900', color: '#E31837', letterSpacing: '0.5px' }}>QTY:</span>
-                        <span style={{ fontSize: '15px', fontWeight: '900', color: '#0f172a' }}>{serverQty}</span>
-                        <span style={{ fontSize: '10px', fontWeight: '800', color: '#64748b' }}>{serverQty > 1 ? 'UNIDADES' : 'UNIDADE'}</span>
+                        <span style={{ fontSize: '10px', fontWeight: '900', color: proposalDocumentPrimitives.defaultAccent, letterSpacing: '0.5px' }}>QTY:</span>
+                        <span style={{ fontSize: '15px', fontWeight: '900', color: proposalDocumentPrimitives.slate900 }}>{serverQty}</span>
+                        <span style={{ fontSize: '10px', fontWeight: '800', color: proposalDocumentPrimitives.slate500 }}>{serverQty > 1 ? 'UNIDADES' : 'UNIDADE'}</span>
                     </div>
                 </div>
             </div>
@@ -218,12 +219,12 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                 }}>
                     {gridItems.map((item, idx) => {
                         const colors: Record<string, any> = {
-                            gray: { bg: '#f1f5f9', text: '#64748b', val: '#1e293b' },
-                            blue: { bg: '#eff6ff', text: '#3b82f6', val: '#1e3a8a' },
-                            green: { bg: '#f0fdf4', text: '#22c55e', val: '#14532d' },
-                            amber: { bg: '#fffbeb', text: '#f59e0b', val: '#78350f' },
-                            indigo: { bg: '#eef2ff', text: '#6366f1', val: '#312e81' },
-                            teal: { bg: '#f0fdfa', text: '#14b8a6', val: '#134e4a' },
+                            gray: { bg: proposalDocumentPrimitives.slate100, text: proposalDocumentPrimitives.slate500, val: proposalDocumentPrimitives.slate800 },
+                            blue: { bg: proposalDocumentPrimitives.blue50, text: proposalDocumentPrimitives.blue500, val: proposalDocumentPrimitives.blue900 },
+                            green: { bg: proposalDocumentPrimitives.green50, text: proposalDocumentPrimitives.green500, val: proposalDocumentPrimitives.green900 },
+                            amber: { bg: proposalDocumentPrimitives.amber50, text: proposalDocumentPrimitives.amber500, val: proposalDocumentPrimitives.amber900 },
+                            indigo: { bg: proposalDocumentPrimitives.indigo50, text: proposalDocumentPrimitives.indigo500, val: proposalDocumentPrimitives.indigo900 },
+                            teal: { bg: proposalDocumentPrimitives.teal50, text: proposalDocumentPrimitives.teal500, val: proposalDocumentPrimitives.teal900 },
                         };
                         const itemColors = colors[item.color] || colors.gray;
 
@@ -263,9 +264,9 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
 
             <div style={{
                 marginLeft: '5px',
-                backgroundColor: '#ffffff',
+                backgroundColor: proposalDocumentPrimitives.paperWhite,
                 borderRadius: '12px',
-                border: '1px solid #f1f5f9',
+                border: `1px solid ${proposalDocumentPrimitives.slate100}`,
                 overflow: 'hidden'
             }}>
                 {finalSpecs.filter(spec => {
@@ -282,16 +283,16 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                         display: 'flex',
                         alignItems: 'center',
                         padding: '2px 8px',
-                        borderBottom: i === finalSpecs.length - 1 ? 'none' : '1px solid #f1f5f9',
-                        backgroundColor: i % 2 === 0 ? '#ffffff' : '#fcfcfc',
+                        borderBottom: i === finalSpecs.length - 1 ? 'none' : `1px solid ${proposalDocumentPrimitives.slate100}`,
+                        backgroundColor: i % 2 === 0 ? proposalDocumentPrimitives.paperWhite : proposalDocumentPrimitives.paperWarmWhite,
                         height: '100%'
                     }}>
                         <div style={{
                             width: '18px',
                             height: '18px',
                             borderRadius: '3px',
-                            backgroundColor: '#f8fafc',
-                            color: '#64748b',
+                            backgroundColor: proposalDocumentPrimitives.slate50,
+                            color: proposalDocumentPrimitives.slate500,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -306,7 +307,7 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                             minWidth: '28px',
                             fontSize: '11px',
                             fontWeight: '950',
-                            color: '#E31837',
+                            color: proposalDocumentPrimitives.defaultAccent,
                             marginRight: '8px',
                             flexShrink: 0,
                             letterSpacing: '-0.3px'
@@ -316,7 +317,7 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
 
                         <div style={{
                             fontSize: '10.5px',
-                            color: '#475569',
+                            color: proposalDocumentPrimitives.slate600,
                             lineHeight: '1.05',
                             fontWeight: '500',
                             flex: 1,
@@ -330,8 +331,8 @@ export function ProposalHardwareProduct({ product, simplifiedName }: ProposalHar
                     else rows[rows.length - 1].push(key);
                     return rows;
                 }, []).map((row, rowIndex) => (
-                    <div key={rowIndex} style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
-                        <div style={{ flex: 1, borderRight: '1px solid #f1f5f9' }}>{row[0]}</div>
+                    <div key={rowIndex} style={{ display: 'flex', borderBottom: `1px solid ${proposalDocumentPrimitives.slate100}` }}>
+                        <div style={{ flex: 1, borderRight: `1px solid ${proposalDocumentPrimitives.slate100}` }}>{row[0]}</div>
                         <div style={{ flex: 1 }}>{row[1] || <div style={{ height: '32px' }} />}</div>
                     </div>
                 ))}

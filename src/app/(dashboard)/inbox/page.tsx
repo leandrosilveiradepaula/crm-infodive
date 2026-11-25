@@ -11,7 +11,7 @@ export default function InboxPage() {
                 description="Gerencie suas mensagens e notificações." 
             />
 
-            <Suspense fallback={<Card><CardContent className="p-6 text-sm text-muted-foreground">Carregando emails...</CardContent></Card>}>
+            <Suspense fallback={<Card><CardContent className="p-6 text-body-ui text-muted-foreground">Carregando emails...</CardContent></Card>}>
                 <EmailClient />
             </Suspense>
         </div>

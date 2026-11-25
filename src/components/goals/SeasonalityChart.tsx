@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { AccessibleChart } from '@/components/charts/AccessibleChart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Target } from 'lucide-react';
 
@@ -31,51 +32,57 @@ export const SeasonalityChart = ({ yearlyRevenueGoal, qPct }: SeasonalityChartPr
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: "compact" }).format(value);
 
     return (
-        <div className="w-full h-[300px] bg-card rounded-2xl border border-border p-5 shadow-sm">
-            <h3 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
+        <div className="w-full min-w-0 bg-card rounded-[var(--radius-panel)] border border-border p-5 shadow-control-ui">
+            <h3 className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-muted-foreground uppercase tracking-widest mb-4 ml-2 flex items-center gap-2">
                 <Target className="h-4 w-4" /> Distribuição Sazonal (Ano)
             </h3>
-            <ResponsiveContainer width="100%" height="80%">
+            <div className="h-[250px]">
+                <AccessibleChart label="Metas mensais de sazonalidade" entries={data.map(point =>
+                    `${point.month}: ${formatCurrency(point.target)} (proporção mensal ${point.pct}%)`
+                )}>
+                <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                     <XAxis
                         dataKey="month"
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={10}
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        tick={false}
+                        stroke="var(--muted-foreground)"
+                        fontSize="var(--ds-type-metadata-size)"
                         axisLine={false}
                         tickLine={false}
                     />
                     <YAxis
+                        tick={false}
                         tickFormatter={formatCurrency}
-                        stroke="hsl(var(--muted-foreground))"
-                        fontSize={10}
-                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        stroke="var(--muted-foreground)"
+                        fontSize="var(--ds-type-metadata-size)"
                         axisLine={false}
                         tickLine={false}
                     />
                     <Tooltip
-                        cursor={{ fill: 'hsl(var(--muted)/0.5)' }}
+                        cursor={{ fill: 'color-mix(in oklab, var(--muted) 50%, transparent)' }}
                         contentStyle={{
-                            backgroundColor: 'hsl(var(--popover))',
-                            borderColor: 'hsl(var(--border))',
-                            color: 'hsl(var(--popover-foreground))',
-                            borderRadius: '0.75rem',
-                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                            backgroundColor: 'var(--popover)',
+                            borderColor: 'var(--border)',
+                            color: 'var(--popover-foreground)',
+                            borderRadius: 'var(--radius-panel)',
+                            boxShadow: 'var(--ds-shadow-overlay)'
                         }}
                         formatter={(value: number | undefined) => [
                             new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0),
                             'Meta do Mês'
                         ]}
-                        labelStyle={{ color: 'hsl(var(--muted-foreground))', fontWeight: 'bold', marginBottom: '4px' }}
+                        labelStyle={{ color: 'var(--muted-foreground)', fontWeight: 'var(--ds-type-label-weight)', marginBottom: '4px' }}
                     />
                     <Bar dataKey="target" radius={[4, 4, 0, 0]}>
                         {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill="hsl(var(--primary))" fillOpacity={0.8} />
+                            <Cell key={`cell-${index}`} fill="var(--primary)" fillOpacity={0.8} />
                         ))}
                     </Bar>
                 </BarChart>
-            </ResponsiveContainer>
+                </ResponsiveContainer>
+                </AccessibleChart>
+            </div>
         </div>
     );
 };

@@ -51,11 +51,11 @@ const SubItemEditor = ({
 
     return (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-card border border-border rounded-xl w-full max-w-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="bg-card border border-border rounded-[var(--radius-panel)] w-full max-w-2xl shadow-overlay-ui overflow-hidden flex flex-col max-h-[80vh]">
                 <div className="p-5 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Settings className="h-4 w-4 text-primary" />
-                        <h3 className="text-sm font-semibold text-foreground tracking-tight">Editor de Sub-itens / Bundle</h3>
+                        <h3 className="text-body-ui font-semibold text-foreground tracking-tight">Editor de Sub-itens / Bundle</h3>
                     </div>
                     <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
                         <X className="h-4 w-4" />
@@ -64,43 +64,43 @@ const SubItemEditor = ({
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-muted/30">
                     {localItems.map((item, idx) => (
-                        <div key={idx} className="bg-card border border-border rounded-lg p-4 flex gap-3 items-start group hover:border-primary/50 transition-colors shadow-sm">
+                        <div key={idx} className="bg-card border border-border rounded-[var(--radius-panel)] p-4 flex gap-3 items-start group hover:border-primary/50 transition-colors shadow-control-ui">
                             <div className="grid grid-cols-12 gap-3 flex-1">
                                 <div className="col-span-3">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">SKU</label>
+                                    <label className="text-metadata-ui font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">SKU</label>
                                     <input
                                         type="text"
                                         value={item.sku}
                                         onChange={(e) => handleUpdateItem(idx, 'sku', e.target.value)}
-                                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary font-mono"
+                                        className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-2 text-metadata-ui text-foreground outline-none focus:ring-1 focus:ring-primary font-mono"
                                         placeholder="SKU"
                                     />
                                 </div>
                                 <div className="col-span-12 md:col-span-5">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Descrição</label>
+                                    <label className="text-metadata-ui font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Descrição</label>
                                     <input
                                         type="text"
                                         value={item.description}
                                         onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                                        className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-2 text-metadata-ui text-foreground outline-none focus:ring-1 focus:ring-primary"
                                         placeholder="Nome do componente"
                                     />
                                 </div>
                                 <div className="col-span-6 md:col-span-2">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Qtd</label>
+                                    <label className="text-metadata-ui font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Qtd</label>
                                     <input
                                         type="number"
                                         value={item.quantity}
                                         onChange={(e) => handleUpdateItem(idx, 'quantity', Number(e.target.value))}
-                                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary text-center"
+                                        className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-2 text-metadata-ui text-foreground outline-none focus:ring-1 focus:ring-primary text-center"
                                     />
                                 </div>
                                 <div className="col-span-6 md:col-span-2">
-                                    <label className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Custo Unit</label>
+                                    <label className="text-metadata-ui font-medium text-muted-foreground uppercase tracking-wider block mb-1.5">Custo Unit</label>
                                     <ThemeCurrencyInput
                                         value={item.unit_price}
                                         onChange={(e) => handleUpdateItem(idx, 'unit_price', Number(e.target.value))}
-                                        className="w-full bg-background border border-input rounded-md px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary text-right"
+                                        className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-2 text-metadata-ui text-foreground outline-none focus:ring-1 focus:ring-primary text-right"
                                     />
                                 </div>
                             </div>
@@ -121,14 +121,14 @@ const SubItemEditor = ({
                         className="w-full py-6 border-dashed border-2 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all group h-auto"
                     >
                         <Plus className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-bold uppercase tracking-wide">Adicionar Item ao Bundle</span>
+                        <span className="text-metadata-ui font-bold uppercase tracking-wide">Adicionar Item ao Bundle</span>
                     </Button>
                 </div>
 
                 <div className="p-5 border-t border-border bg-muted/10 flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wide">Custo Total Consolidado</p>
-                        <p className="text-xl font-bold text-primary">
+                        <p className="text-metadata-ui text-muted-foreground font-bold uppercase tracking-wide">Custo Total Consolidado</p>
+                        <p className="text-section-title font-bold text-primary">
                             {formatCurrency(totalCost)}
                         </p>
                     </div>
@@ -150,14 +150,14 @@ const BundleRenderer = ({ jsonString, isEditingEnabled, onUpdate }: { jsonString
 
     try {
         const items = JSON.parse(jsonString);
-        if (!Array.isArray(items)) return <span className="text-xs text-muted-foreground font-medium">{jsonString}</span>;
+        if (!Array.isArray(items)) return <span className="text-metadata-ui text-muted-foreground font-medium">{jsonString}</span>;
 
         return (
             <div className="space-y-2">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setExpanded(!expanded)}
-                        className="flex items-center gap-2 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                        className="flex items-center gap-2 text-metadata-ui font-bold text-primary hover:text-primary/80 transition-colors"
                     >
                         <Package className="h-3.5 w-3.5" />
                         <span>Bundle com {items.length} itens</span>
@@ -167,7 +167,7 @@ const BundleRenderer = ({ jsonString, isEditingEnabled, onUpdate }: { jsonString
                     {isEditingEnabled && (
                         <button
                             onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
-                            className="p-1 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-md transition-colors"
+                            className="p-1 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-[var(--radius-control)] transition-colors"
                             title="Editar composição do bundle"
                         >
                             <Edit2 className="h-3 w-3" />
@@ -178,7 +178,7 @@ const BundleRenderer = ({ jsonString, isEditingEnabled, onUpdate }: { jsonString
                 {expanded && (
                     <div className="pl-2 border-l-2 border-border space-y-1">
                         {items.map((item: any, idx: number) => (
-                            <div key={idx} className="text-[10px] text-muted-foreground flex justify-between gap-4">
+                            <div key={idx} className="text-metadata-ui text-muted-foreground flex justify-between gap-4">
                                 <span className="flex-1 truncate">{item.quantity}x {item.description}</span>
                                 <span className="font-mono text-muted-foreground/70">{item.sku}</span>
                             </div>
@@ -199,7 +199,7 @@ const BundleRenderer = ({ jsonString, isEditingEnabled, onUpdate }: { jsonString
             </div>
         );
     } catch {
-        return <p className="text-xs text-muted-foreground font-medium">{jsonString}</p>;
+        return <p className="text-metadata-ui text-muted-foreground font-medium">{jsonString}</p>;
     }
 };
 
@@ -231,9 +231,9 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
 
     if (details.length === 0 && !isDealEditing) {
         return (
-            <div className="bg-muted/20 border border-border rounded-xl px-4 py-12 text-center flex flex-col items-center gap-3">
+            <div className="bg-muted/20 border border-border rounded-[var(--radius-panel)] px-4 py-12 text-center flex flex-col items-center gap-3">
                 <Package className="h-10 w-10 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">Nenhum item adicionado a esta oportunidade.</p>
+                <p className="text-body-ui text-muted-foreground">Nenhum item adicionado a esta oportunidade.</p>
             </div>
         );
     }
@@ -290,13 +290,13 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
     };
 
     return (
-        <div className="bg-card rounded-xl overflow-hidden shadow-sm border border-border">
+        <div className="bg-card rounded-[var(--radius-panel)] overflow-hidden shadow-control-ui border border-border">
             {/* Bulk Delete Button */}
             {isDealEditing && selectedRows.size > 0 && (
                 <div className="px-4 py-3 bg-destructive/10 border-b border-destructive/20 flex justify-end">
                     <button
                         onClick={handleBulkDelete}
-                        className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-md font-medium text-xs hover:bg-destructive/90 transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-[var(--radius-control)] font-medium text-metadata-ui hover:bg-destructive/90 transition-all"
                     >
                         <Trash2 className="h-4 w-4" />
                         Remover {selectedRows.size} Selecionado(s)
@@ -318,29 +318,29 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                     />
                                 </div>
                             </th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-40">SKU/PartNumber</th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider w-40">SKU/PartNumber</th>
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider">
                                 Descrição
-                                <span className="ml-1 text-primary/60 normal-case font-normal text-[10px]">(+ nome na proposta)</span>
+                                <span className="ml-1 text-primary/60 normal-case font-normal text-metadata-ui">(+ nome na proposta)</span>
                             </th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Qtd</th>
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Qtd</th>
 
                             {/* Dynamic Columns based on Mode */}
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">
                                 {isBidMode ? 'Preço Venda' : 'Custo'}
                             </th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Margem (%)</th>
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Margem (%)</th>
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">
                                 {isBidMode ? 'Custo (Calc)' : 'Preço Venda'}
                             </th>
 
-                            <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">Total</th>
+                            <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-right w-32">Total</th>
                             {onProposalSpecsChange && (
-                                <th className="px-4 py-3 text-xs font-semibold text-amber-600 uppercase tracking-wider text-center w-20" title="Marcar para aparecer nas Specs Técnicas da proposta">
+                                <th className="px-4 py-3 text-metadata-ui font-semibold text-warning-readable uppercase tracking-wider text-center w-20" title="Marcar para aparecer nas Specs Técnicas da proposta">
                                     📄 Proposta
                                 </th>
                             )}
-                            {isDealEditing && <th className="px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Ações</th>}
+                            {isDealEditing && <th className="px-4 py-3 text-metadata-ui font-semibold text-muted-foreground uppercase tracking-wider text-center w-24">Ações</th>}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -383,7 +383,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                         {isRowEditing ? (
                                             <input
                                                 type="text"
-                                                className="w-full bg-background border border-input rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-1.5 text-body-ui text-foreground focus:ring-1 focus:ring-primary outline-none"
                                                 placeholder="SKU"
                                                 value={detail.sku || ''}
                                                 onChange={e => {
@@ -393,7 +393,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 }}
                                             />
                                         ) : (
-                                            <p className="text-sm font-medium text-foreground">{detail.sku || '---'}</p>
+                                            <p className="text-body-ui font-medium text-foreground">{detail.sku || '---'}</p>
                                         )}
                                     </td>
                                     <td className="px-4 py-3">
@@ -401,10 +401,10 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                             <div className="space-y-2">
                                                 {/* IBM/Catalog name - read-only reference */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Nome Técnico (IBM)</label>
+                                                    <label className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider block mb-1">Nome Técnico (IBM)</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-muted/30 border border-input rounded-md px-3 py-1.5 text-xs text-muted-foreground outline-none font-mono cursor-not-allowed"
+                                                        className="w-full bg-muted/30 border border-input rounded-[var(--radius-control)] px-3 py-1.5 text-metadata-ui text-muted-foreground outline-none font-mono cursor-not-allowed"
                                                         value={detail.name || ''}
                                                         readOnly
                                                         title="Nome original do catálogo — não editável aqui"
@@ -412,10 +412,10 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 </div>
                                                 {/* Friendly display name for proposal */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-primary uppercase tracking-wider block mb-1">📄 Nome na Proposta</label>
+                                                    <label className="text-metadata-ui font-bold text-primary uppercase tracking-wider block mb-1">📄 Nome na Proposta</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-background border border-primary/30 rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/50"
+                                                        className="w-full bg-background border border-primary/30 rounded-[var(--radius-control)] px-3 py-1.5 text-body-ui text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/50"
                                                         placeholder={`${detail.name || 'Nome para o cliente...'}`}
                                                         value={detail.display_name || ''}
                                                         onChange={e => {
@@ -427,10 +427,10 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 </div>
                                                 {/* Original description field */}
                                                 <div>
-                                                    <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Descrição Interna</label>
+                                                    <label className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider block mb-1">Descrição Interna</label>
                                                     <input
                                                         type="text"
-                                                        className="w-full bg-background border border-input rounded-md px-3 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none"
+                                                        className="w-full bg-background border border-input rounded-[var(--radius-control)] px-3 py-1.5 text-body-ui text-foreground focus:ring-1 focus:ring-primary outline-none"
                                                         placeholder="Descrição"
                                                         value={detail.description || ''}
                                                         onChange={e => {
@@ -467,11 +467,11 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                     <div className="space-y-0.5">
                                                         {detail.display_name ? (
                                                             <>
-                                                                <p className="text-sm font-semibold text-foreground">{detail.display_name}</p>
-                                                                <p className="text-[10px] text-muted-foreground/60 font-mono truncate" title={detail.name}>{detail.name}</p>
+                                                                <p className="text-body-ui font-semibold text-foreground">{detail.display_name}</p>
+                                                                <p className="text-metadata-ui text-muted-foreground/60 font-mono truncate" title={detail.name}>{detail.name}</p>
                                                             </>
                                                         ) : (
-                                                            <p className="text-sm text-muted-foreground">{detail.description || detail.name || '---'}</p>
+                                                            <p className="text-body-ui text-muted-foreground">{detail.description || detail.name || '---'}</p>
                                                         )}
                                                     </div>
                                                 )}
@@ -482,7 +482,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                         {isRowEditing ? (
                                             <input
                                                 type="number"
-                                                className="w-full bg-background border border-input rounded-md px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none text-center"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-control)] px-2 py-1.5 text-body-ui text-foreground focus:ring-1 focus:ring-primary outline-none text-center"
                                                 value={detail.quantity ?? ''}
                                                 onFocus={(e) => e.target.select()}
                                                 onChange={e => {
@@ -502,7 +502,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                     <td className="px-4 py-3 text-right">
                                         {isRowEditing ? (
                                             <ThemeCurrencyInput
-                                                className="w-full bg-background border border-input rounded-md px-2 py-1.5 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none text-right"
+                                                className="w-full bg-background border border-input rounded-[var(--radius-control)] px-2 py-1.5 text-body-ui text-foreground focus:ring-1 focus:ring-primary outline-none text-right"
                                                 value={detail.unit_price ?? 0}
                                                 onChange={e => {
                                                     const updated = [...details];
@@ -511,7 +511,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                 }}
                                             />
                                         ) : (
-                                            <p className="text-sm font-medium text-foreground">
+                                            <p className="text-body-ui font-medium text-foreground">
                                                 {formatCurrency(isBidMode ? displayPrice : displayCost)}
                                             </p>
                                         )}
@@ -519,14 +519,14 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
 
                                     {/* Margin (Read Only) */}
                                     <td className="px-4 py-3 text-center">
-                                        <Badge variant="secondary" className="font-mono text-xs">
+                                        <Badge variant="secondary" className="font-mono text-metadata-ui">
                                             {productMargin}%
                                         </Badge>
                                     </td>
 
                                     {/* Derived Value Column (Read Only) */}
                                     <td className="px-4 py-3 text-right">
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-body-ui text-muted-foreground">
                                             {formatCurrency(isBidMode ? displayCost : displayPrice)}
                                         </p>
                                     </td>
@@ -534,10 +534,10 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                     {/* Line Total (Based on Driver) */}
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex flex-col items-end">
-                                            <p className={`text-sm font-bold ${isBidMode ? 'text-primary' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                                            <p className={`text-body-ui font-bold ${isBidMode ? 'text-primary' : 'text-success-readable dark:text-success-readable'}`}>
                                                 {formatCurrency(lineTotal)}
                                             </p>
-                                            <span className="text-[10px] text-muted-foreground uppercase">Total Venda</span>
+                                            <span className="text-metadata-ui text-muted-foreground uppercase">Total Venda</span>
                                         </div>
                                     </td>
 
@@ -555,7 +555,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                         : [...current, idx].sort((a, b) => a - b);
                                                     onProposalSpecsChange(next);
                                                 }}
-                                                className="h-4 w-4 rounded border-amber-400 accent-amber-500"
+                                                className="h-4 w-4 rounded border-warning accent-amber-500"
                                             />
                                         </td>
                                     )}
@@ -568,7 +568,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                                                             variant="ghost"
                                                             size="icon"
                                                             onClick={() => toggleEdit(idx)}
-                                                            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                                            className="h-8 w-8 text-success-readable hover:text-success-readable hover:bg-success-subtle dark:hover:bg-success-subtle"
                                                         >
                                                             <Check className="h-4 w-4" />
                                                         </Button>
@@ -604,9 +604,9 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                         })}
                     </tbody>
                     {/* Table Footer with Totals */}
-                    <tfoot className="bg-muted/50 border-t border-border font-medium text-sm text-foreground">
+                    <tfoot className="bg-muted/50 border-t border-border font-medium text-body-ui text-foreground">
                         <tr>
-                            <td colSpan={3} className="px-4 py-4 text-right uppercase text-xs tracking-wider text-muted-foreground">Totais:</td>
+                            <td colSpan={3} className="px-4 py-4 text-right uppercase text-metadata-ui tracking-wider text-muted-foreground">Totais:</td>
                             <td className="px-4 py-4 text-center font-bold">
                                 {details.reduce((acc, d) => acc + (Number(d.quantity) || 0), 0)}
                             </td>
@@ -619,7 +619,7 @@ export const ProductDetailsTable = ({ details, isDealEditing, onUpdate, isBidMod
                             <td className="px-4 py-4 text-right">
                                 -
                             </td>
-                            <td className="px-4 py-4 text-right text-base font-bold text-primary">
+                            <td className="px-4 py-4 text-right text-body-ui font-bold text-primary">
                                 {formatCurrency(
                                     details.reduce((acc, d) => {
                                         const qty = Number(d.quantity) || 0;

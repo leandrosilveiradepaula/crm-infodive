@@ -1,297 +1,217 @@
-
 'use client';
 
 import React from 'react';
-import {
-    TrendingUp, Calendar, Activity as ActivityIcon, Users,
-    ArrowRight, MessageSquare, Package, AlertCircle,
-    CheckCircle2, Clock, Zap, Target, Bot, Sparkles,
-    User, ArrowUpRight, ArrowDownRight, Minus
-} from 'lucide-react';
+import { ArrowRight, Building2, ClipboardList, Mail, Package, Phone, UserRound, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { type Deal } from '@/types/deal';
+import type { Deal } from '@/types/deal';
 import { formatCurrency } from '@/utils/format';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface OverviewTabProps {
     deal: Deal;
     onViewStakeholders: () => void;
     onViewProducts: () => void;
+    onViewCommunications: () => void;
 }
 
-export function OverviewTab({ deal, onViewStakeholders, onViewProducts }: OverviewTabProps) {
-    // Helper for health trend icon
-    const getTrendIcon = (trend?: string) => {
-        switch (trend) {
-            case 'improving': return <ArrowUpRight className="h-4 w-4 text-emerald-500" />;
-            case 'declining': return <ArrowDownRight className="h-4 w-4 text-red-500" />;
-            default: return <Minus className="h-4 w-4 text-blue-500" />;
-        }
-    };
+const stageLabels: Record<string, string> = {
+    qualification: 'Qualificação',
+    discovery: 'Descoberta',
+    proposal: 'Proposta',
+    negotiation: 'Negociação',
+    won: 'Ganho',
+    lost: 'Perdido',
+};
 
-    // Mock Next Best Action based on deal state
-    const getNextAction = () => {
-        if (!deal.deal_products || deal.deal_products.length === 0) {
-            return {
-                title: "Oportunidade sem Itens",
-                description: "Adicione produtos ou serviços para gerar o forecast de venda.",
-                action: "Adicionar Produtos",
-                onClick: onViewProducts,
-                icon: Package,
-                color: "text-amber-500",
-                bg: "bg-amber-500/10"
-            };
+function recorded(value?: string | null) {
+    return value?.trim() ? value : 'Não informado';
+}
+
+export function OverviewTab({ deal, onViewStakeholders, onViewProducts, onViewCommunications }: OverviewTabProps) {
+    const products = Array.isArray(deal.deal_products) ? deal.deal_products : [];
+    const healthScore = typeof deal.health_score === 'number' && Number.isFinite(deal.health_score)
+        ? Math.max(0, Math.min(100, deal.health_score)) : null;
+    const stakeholderCount = Array.isArray(deal.custom_fields?.stakeholders)
+        ? deal.custom_fields.stakeholders.length : null;
+    const ownerName = deal.owner_profile?.full_name || deal.owner;
+    const estimatedValue = typeof deal.value === 'number' && Number.isFinite(deal.value)
+        ? formatCurrency(deal.value) : 'Não informado';
+    const recordedProbability = typeof deal.probability === 'number' && Number.isFinite(deal.probability)
+        ? `${deal.probability}%` : 'Não informado';
+    const expectedClose = deal.expected_close_date
+        ? deal.expected_close_date.split('T')[0].split('-').reverse().join('/')
+        : 'Não definida';
+    const nextAction = products.length === 0
+        ? {
+            title: 'Incluir produtos ou serviços',
+            description: 'A oportunidade ainda não possui itens vinculados.',
+            label: 'Gerenciar produtos',
+            onClick: onViewProducts,
         }
-        if (deal.stage === 'qualification' || deal.stage === 'discovery') {
-            return {
-                title: "Mapeamento de Stakeholders",
-                description: "Identifique o tomador de decisão e o influenciador técnico.",
-                action: "Gerenciar Clientes",
+        : deal.stage === 'qualification' || deal.stage === 'discovery'
+            ? {
+                title: 'Conferir os contatos',
+                description: 'Verifique quem está vinculado à negociação antes de avançar de etapa.',
+                label: 'Ver contatos',
                 onClick: onViewStakeholders,
-                icon: Users,
-                color: "text-blue-500",
-                bg: "bg-blue-500/10"
+            }
+            : {
+                title: 'Revisar as comunicações',
+                description: 'Consulte o histórico disponível antes do próximo contato.',
+                label: 'Ver comunicações',
+                onClick: onViewCommunications,
             };
-        }
-        return {
-            title: "Follow-up Sugerido",
-            description: "A última comunicação foi há 3 dias. Verifique se o cliente tem dúvidas.",
-            action: "Enviar Mensagem",
-            onClick: () => { }, // Would open omnichannel
-            icon: MessageSquare,
-            color: "text-teal-500",
-            bg: "bg-teal-500/10"
-        };
-    };
-
-    const nextAction = getNextAction();
 
     return (
-        <div className="space-y-8">
-
-            {/* 1. Metrics Row */}
-            <div className="grid grid-cols-4 gap-4">
-                {/* Metric: Value & Forecast */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-blue-500/30 transition-all shadow-sm min-h-[90px]">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-blue-500/10 rounded-md">
-                            <Target className="h-3.5 w-3.5 text-blue-500" />
-                        </div>
-                        <Badge variant="outline" className="text-[8px] uppercase font-black text-blue-500 border-blue-500/20 px-1.5 py-0">Forecast</Badge>
+        <div data-qa-region="deal-overview" className="ds-deal-overview">
+            <section className="ds-deal-overview-section" aria-labelledby="deal-overview-details">
+                <div className="ds-deal-section-heading">
+                    <Building2 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <h3 id="deal-overview-details" className="ds-type-section-title text-foreground">Detalhes da oportunidade</h3>
+                </div>
+                <dl className="ds-deal-primary-facts">
+                    <div>
+                        <dt className="ds-type-label text-muted-foreground">Valor estimado</dt>
+                        <dd className="ds-type-section-title font-semibold text-foreground">{estimatedValue}</dd>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Valor Estimado</p>
-                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{formatCurrency(deal.value)}</h4>
-                        <p className="text-[9px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                            <Calendar className="h-3 w-3" />
-                            {deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString('pt-BR') : 'Não definido'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Metric: Health Score */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-emerald-500/30 transition-all shadow-sm min-h-[90px]">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-emerald-500/10 rounded-md">
-                            <Zap className="h-3.5 w-3.5 text-emerald-500" />
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{deal.health_score || 0}%</span>
-                            {getTrendIcon(deal.health_trend)}
-                        </div>
+                        <dt className="ds-type-label text-muted-foreground">Probabilidade de fechamento</dt>
+                        <dd className="ds-type-body font-semibold text-foreground">{recordedProbability}</dd>
                     </div>
                     <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1">Saúde do Negócio</p>
-                        <Progress value={deal.health_score || 0} className="h-1 bg-muted" />
-                        <p className="text-[9px] text-muted-foreground mt-1">Baseado em atividade</p>
+                        <dt className="ds-type-label text-muted-foreground">Previsão de fechamento</dt>
+                        <dd className="ds-type-body font-semibold text-foreground">{expectedClose}</dd>
+                    </div>
+                </dl>
+                <dl className="ds-deal-facts">
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Empresa</dt>
+                        <dd className="ds-type-body font-medium text-foreground">{recorded(deal.company)}</dd>
+                    </div>
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Responsável</dt>
+                        <dd className="ds-type-body font-medium text-foreground">{recorded(ownerName)}</dd>
+                    </div>
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Etapa atual</dt>
+                        <dd className="ds-type-body font-medium text-foreground">{stageLabels[deal.stage] || recorded(deal.stage)}</dd>
+                    </div>
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Origem</dt>
+                        <dd className="ds-type-body font-medium text-foreground">{recorded(deal.lead_source)}</dd>
+                    </div>
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Tempo na etapa</dt>
+                        <dd className="ds-type-body font-medium text-foreground">
+                            {typeof deal.days_in_stage === 'number' && Number.isFinite(deal.days_in_stage)
+                                ? `${deal.days_in_stage} dias` : 'Não informado'}
+                        </dd>
+                    </div>
+                    <div className="ds-deal-fact">
+                        <dt className="ds-type-label text-muted-foreground">Saúde registrada</dt>
+                        <dd className={`ds-type-body font-medium ${healthScore !== null && healthScore >= 80 ? 'text-success-readable' : 'text-foreground'}`}>
+                            {healthScore === null ? 'Sem avaliação' : `${healthScore}/100`}
+                        </dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section className="ds-panel-highlight ds-deal-next-action" aria-labelledby="deal-next-action-title">
+                <div className="flex min-w-0 items-start gap-3">
+                    <ClipboardList className="mt-1 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                    <div className="min-w-0">
+                        <p className="ds-type-metadata text-muted-foreground">Ação sugerida conforme os dados da oportunidade</p>
+                        <h3 id="deal-next-action-title" className="ds-type-body font-semibold text-foreground">{nextAction.title}</h3>
+                        <p className="ds-type-label text-muted-foreground">{nextAction.description}</p>
                     </div>
                 </div>
+                <Button type="button" variant="outline" size="sm" className="ds-type-control shrink-0"
+                    onClick={nextAction.onClick}>
+                    {nextAction.label}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Button>
+            </section>
 
-                {/* Metric: Momentum */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-teal-500/30 transition-all shadow-sm min-h-[90px]">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-teal-500/10 rounded-md">
-                            <Clock className="h-3.5 w-3.5 text-teal-500" />
+            <div className="ds-deal-overview-grid">
+                <section className="ds-deal-overview-section" aria-labelledby="deal-linked-products">
+                    <div className="ds-deal-section-heading">
+                        <Package className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <h3 id="deal-linked-products" className="ds-type-section-title text-foreground">Produtos vinculados</h3>
+                    </div>
+                    {products.length ? (
+                        <ul className="divide-y divide-border">
+                            {products.slice(0, 4).map(product => (
+                                <li key={product.id} className="ds-deal-detail-row">
+                                    <span className="ds-type-label min-w-0 break-words font-medium text-foreground">
+                                        {product.display_name || product.name || 'Item sem nome'}
+                                    </span>
+                                    <span className="ds-type-label shrink-0 text-muted-foreground">
+                                        Qtd. {product.quantity}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="ds-type-label text-muted-foreground">Nenhum produto ou serviço vinculado.</p>
+                    )}
+                    {products.length > 4 && (
+                        <p className="ds-type-metadata text-muted-foreground">Mostrando 4 de {products.length} itens.</p>
+                    )}
+                    <Button type="button" variant="outline" size="sm" onClick={onViewProducts}
+                        className="ds-type-control mt-3">Ver produtos</Button>
+                </section>
+
+                <section className="ds-deal-overview-section" aria-labelledby="deal-linked-contact">
+                    <div className="ds-deal-section-heading">
+                        <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <h3 id="deal-linked-contact" className="ds-type-section-title text-foreground">Contato</h3>
+                    </div>
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-2">
+                            <UserRound className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                            <div>
+                                <p className="ds-type-metadata text-muted-foreground">Nome</p>
+                                <p className="ds-type-label font-medium text-foreground">{recorded(deal.contact_name)}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <Mail className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                            <div className="min-w-0">
+                                <p className="ds-type-metadata text-muted-foreground">E-mail</p>
+                                <p className="ds-type-label break-all text-foreground">{recorded(deal.contact_email)}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-2">
+                            <Phone className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                            <div>
+                                <p className="ds-type-metadata text-muted-foreground">Telefone</p>
+                                <p className="ds-type-label text-foreground">{recorded(deal.contact_phone)}</p>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Momentum</p>
-                        <h4 className="text-lg font-black text-foreground tracking-tight leading-tight">{deal.days_in_stage || 0} Dias</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">no estágio de {deal.stage}</p>
-                    </div>
-                </div>
-
-                {/* Metric: Stakeholders */}
-                <div className="bg-card border border-border p-3 rounded-xl flex flex-col justify-between group hover:border-amber-500/30 transition-all shadow-sm min-h-[90px]">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="p-1 bg-amber-500/10 rounded-md">
-                            <Users className="h-3.5 w-3.5 text-amber-500" />
-                        </div>
-                        <Badge variant="outline" className="text-[8px] uppercase font-black text-amber-500 border-amber-500/20 px-1.5 py-0">
-                            {deal.custom_fields?.stakeholders?.length || 1} Total
-                        </Badge>
-                    </div>
-                    <div>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.1em] mb-0.5">Contato Principal</p>
-                        <h4 className="text-[13px] font-bold text-foreground truncate leading-tight">{deal.contact_name || 'Não definido'}</h4>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{deal.contact_email || 'Sem email'}</p>
-                    </div>
-                </div>
+                    {stakeholderCount !== null && (
+                        <p className="ds-type-metadata mt-3 text-muted-foreground">{stakeholderCount} contatos complementares registrados.</p>
+                    )}
+                    <Button type="button" variant="outline" size="sm" onClick={onViewStakeholders}
+                        className="ds-type-control mt-3">Ver contatos</Button>
+                </section>
             </div>
 
-            {/* 2. AI Next Best Action spotlight */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/5 to-teal-600/5 border border-blue-500/20 rounded-xl p-4 backdrop-blur-sm group">
-                <div className="absolute top-0 right-0 p-20 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/10 transition-colors pointer-events-none" />
-                <div className="relative z-10 flex items-center justify-between gap-6">
-                    <div className="flex gap-4 items-center max-w-2xl">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-teal-600 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-                            <Bot className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <Sparkles className="h-3 w-3 text-blue-500" />
-                                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">IA : Próxima Melhor Ação</span>
-                            </div>
-                            <h3 className="text-base font-black text-foreground mb-0.5">{nextAction.title}</h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{nextAction.description}</p>
-                        </div>
-                    </div>
-                    <Button
-                        onClick={nextAction.onClick}
-                        className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-5 text-sm rounded-lg shadow-lg shadow-primary/20 gap-2 shrink-0 transition-all hover:scale-105"
-                    >
-                        <nextAction.icon className="h-3.5 w-3.5" />
-                        {nextAction.action}
-                    </Button>
+            <section className="ds-deal-overview-section" aria-labelledby="deal-description-heading">
+                <div className="ds-deal-section-heading">
+                    <ClipboardList className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    <h3 id="deal-description-heading" className="ds-type-section-title text-foreground">Descrição e próximos passos</h3>
                 </div>
-            </div>
-
-            {/* 3. Bottom Grid: Activity & Quick Details */}
-            <div className="grid grid-cols-3 gap-8">
-
-                {/* Left: Activity Timeline */}
-                <div className="col-span-2 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <ActivityIcon className="h-4 w-4 text-blue-500" />
-                            Timeline de Atividade
-                        </h3>
-                        <Button variant="ghost" size="sm" className="text-[10px] font-bold uppercase text-muted-foreground hover:text-blue-500">
-                            Ver Histórico Completo
-                        </Button>
+                <dl className="ds-deal-note-list">
+                    <div>
+                        <dt className="ds-type-label font-medium text-muted-foreground">Descrição registrada</dt>
+                        <dd className="ds-type-label whitespace-pre-wrap break-words text-foreground">{recorded(deal.description)}</dd>
                     </div>
-
-                    <div className="relative space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-border">
-                        {[
-                            { title: 'Proposta enviada para o cliente', user: 'Leandro', date: new Date(), type: 'proposal' },
-                            { title: 'Mix de produtos atualizado', user: 'Sistema', date: new Date(Date.now() - 86400000), type: 'products' },
-                            { title: 'Negócio criado no pipeline', user: 'Leandro', date: new Date(Date.now() - 172800000), type: 'creation' }
-                        ].map((item, i) => (
-                            <div key={i} className="relative pl-10 group">
-                                <div className={`
-                                    absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-background flex items-center justify-center transition-all group-hover:scale-110 shadow-sm
-                                    ${item.type === 'proposal' ? 'bg-teal-500' : item.type === 'products' ? 'bg-blue-500' : 'bg-emerald-500'}
-                                `}>
-                                    {item.type === 'proposal' ? <FileText className="h-2.5 w-2.5 text-white" /> : <ActivityIcon className="h-2.5 w-2.5 text-white" />}
-                                </div>
-                                <div className="bg-card border border-border p-3.5 rounded-xl hover:border-blue-500/20 transition-all shadow-sm">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h4 className="text-sm font-bold text-foreground">{item.title}</h4>
-                                        <span className="text-[10px] text-muted-foreground font-medium uppercase">
-                                            {formatDistanceToNow(item.date, { addSuffix: true, locale: ptBR })}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-4 w-4 rounded-full bg-muted flex items-center justify-center">
-                                            <User className="h-2.5 w-2.5 text-muted-foreground" />
-                                        </div>
-                                        <span className="text-[10px] text-muted-foreground font-bold">{item.user}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                    <div>
+                        <dt className="ds-type-label font-medium text-muted-foreground">Próximo passo registrado</dt>
+                        <dd className="ds-type-label whitespace-pre-wrap break-words text-foreground">{recorded(deal.next_step)}</dd>
                     </div>
-                </div>
-
-                {/* Right: Quick Details */}
-                <div className="space-y-8">
-                    {/* Mix de Produtos Summary */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Package className="h-4 w-4 text-blue-500" />
-                            Mix de Produtos
-                        </h3>
-                        <div className="bg-card border border-border rounded-xl p-5 space-y-4 shadow-sm">
-                            {(deal.deal_products || []).length > 0 ? (
-                                <>
-                                    <div className="space-y-3">
-                                        {(deal.deal_products || []).slice(0, 3).map((p, i) => (
-                                            <div key={i} className="flex justify-between items-center text-xs">
-                                                <span className="text-foreground font-medium truncate max-w-[120px]">{p.name}</span>
-                                                <span className="text-muted-foreground font-bold">x{p.quantity}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="pt-3 border-t border-border flex justify-between items-center">
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Itens</span>
-                                        <span className="text-sm font-black text-primary">{(deal.deal_products || []).length}</span>
-                                    </div>
-                                </>
-                            ) : (
-                                <p className="text-xs text-muted-foreground italic text-center py-4">Nenhum produto adicionado</p>
-                            )}
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewProducts}>
-                                Gerenciar Mix
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Stakeholders Summary */}
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                            <Users className="h-4 w-4 text-blue-500" />
-                            Stakeholders
-                        </h3>
-                        <div className="bg-card border border-border rounded-xl p-5 space-y-5 shadow-sm">
-                            <div className="flex flex-col gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                                        <User className="h-4 w-4 text-blue-500" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[11px] font-bold text-foreground leading-tight">{deal.contact_name || 'Decisor não definido'}</p>
-                                        <p className="text-[9px] text-blue-500 font-black uppercase tracking-widest mt-0.5">Tomador de Decisão</p>
-                                    </div>
-                                </div>
-                                {deal.custom_fields?.technical_influencer && (
-                                    <div className="flex items-center gap-3 opacity-60">
-                                        <div className="h-8 w-8 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-500/20">
-                                            <User className="h-4 w-4 text-teal-500" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[11px] font-bold text-foreground leading-tight">{deal.custom_fields.technical_influencer}</p>
-                                            <p className="text-[9px] text-teal-500 font-black uppercase tracking-widest mt-0.5">Influenciador Técnico</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <Button variant="outline" size="sm" className="w-full text-[10px] font-black uppercase rounded-lg tracking-widest h-9" onClick={onViewStakeholders}>
-                                Ver Todos
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </dl>
+            </section>
         </div>
     );
 }
-
-// Helper component for repeated Icon + Text pattern in activity
-const FileText = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-);

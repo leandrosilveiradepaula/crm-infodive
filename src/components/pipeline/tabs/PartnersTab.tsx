@@ -118,22 +118,22 @@ export const PartnersTab = ({
         if (!c) return null;
         return (
             <div className="mt-3 pt-3 border-t border-border/30 space-y-1.5">
-                <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-2 ds-type-metadata">
                     <User className="h-3 w-3 shrink-0 text-muted-foreground" />
                     <span className="font-semibold text-foreground">{c.name}</span>
                     {c.role && <span className="text-muted-foreground">· {c.role}</span>}
                 </div>
-                {c.email && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{c.email}</span></div>}
-                {(c.mobile_phone || c.landline_phone) && <div className="flex items-center gap-2 text-xs text-muted-foreground"><Phone className="h-3 w-3 shrink-0" />{c.mobile_phone || c.landline_phone}</div>}
+                {c.email && <div className="flex items-center gap-2 ds-type-metadata text-muted-foreground"><Mail className="h-3 w-3 shrink-0" /><span className="truncate">{c.email}</span></div>}
+                {(c.mobile_phone || c.landline_phone) && <div className="flex items-center gap-2 ds-type-metadata text-muted-foreground"><Phone className="h-3 w-3 shrink-0" />{c.mobile_phone || c.landline_phone}</div>}
             </div>
         );
     };
 
-    const ContactSelect = ({ value, onChange, contacts, disabled, ringColor = 'focus:ring-emerald-500/20' }: any) => (
+    const ContactSelect = ({ value, onChange, contacts, disabled, ringColor = 'focus:ring-primary/20' }: any) => (
         contacts.length > 0 ? (
             <div className="relative">
                 <select
-                    className={`w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm text-foreground outline-none appearance-none cursor-pointer hover:bg-muted disabled:opacity-50 pr-8 focus:ring-2 ${ringColor}`}
+                    aria-label="Selecionar contato do parceiro" className={`w-full bg-muted/50 border border-border rounded-[var(--radius-panel)] px-4 py-3 ds-type-body text-foreground outline-none appearance-none cursor-pointer hover:bg-muted disabled:opacity-50 pr-8 focus:ring-2 ${ringColor}`}
                     value={value}
                     onChange={e => onChange(e.target.value)}
                     disabled={disabled}
@@ -146,19 +146,24 @@ export const PartnersTab = ({
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
         ) : (
-            <p className="text-xs text-amber-600 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
-                Nenhum contato cadastrado. <a href="/accounts" className="underline font-bold">Cadastrar</a>
+            <p className="ds-type-metadata text-warning-readable bg-warning-subtle border border-warning/20 rounded-[var(--radius-panel)] px-4 py-3">
+                Nenhum contato cadastrado. <a href="/accounts" className="underline font-[var(--ds-type-control-weight)]">Cadastrar</a>
             </p>
         )
     );
 
     return (
-        <div className="h-full flex flex-col p-8 space-y-8 overflow-y-auto">
+        <div
+            role="region"
+            aria-label="Parceiros e distribuidores da oportunidade"
+            tabIndex={0}
+            className="flex h-full min-w-0 flex-col space-y-6 overflow-y-auto p-4 sm:p-6 lg:p-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
             <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-500/10 rounded-lg"><Globe className="h-6 w-6 text-blue-400" /></div>
+                <div className="p-2 bg-info-subtle rounded-[var(--radius-panel)]"><Globe className="h-6 w-6 text-primary" /></div>
                 <div>
-                    <h3 className="text-lg font-bold text-foreground">Ecosistema de Parceiros</h3>
-                    <p className="text-sm text-muted-foreground">Gerencie os fabricantes e distribuidores envolvidos.</p>
+                    <h3 className="ds-type-section-title font-[var(--ds-type-control-weight)] text-foreground">Ecosistema de Parceiros</h3>
+                    <p className="ds-type-body text-muted-foreground">Gerencie os fabricantes e distribuidores envolvidos.</p>
                 </div>
             </div>
 
@@ -166,16 +171,16 @@ export const PartnersTab = ({
                 {/* ── DISTRIBUIÇÃO ─────────────────────────── */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 pb-4 border-b border-border">
-                        <Building2 className="h-5 w-5 text-emerald-400" />
-                        <h4 className="font-bold text-emerald-400 uppercase tracking-widest text-xs">Distribuição</h4>
+                        <Building2 className="h-5 w-5 text-success-readable" />
+                        <h4 className="font-[var(--ds-type-control-weight)] text-success-readable uppercase tracking-widest ds-type-metadata">Distribuição</h4>
                     </div>
 
-                    <div className="bg-card border border-border rounded-2xl p-6 space-y-5">
+                    <div className="bg-card border border-border rounded-[var(--radius-panel)] p-6 space-y-5">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Distribuidor Selecionado</label>
+                            <label className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground uppercase tracking-wide">Distribuidor Selecionado</label>
                             <div className="relative">
                                 <select
-                                    className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 text-sm text-foreground outline-none appearance-none cursor-pointer hover:bg-muted disabled:opacity-60 disabled:cursor-default pr-8 focus:ring-2 focus:ring-emerald-500/20"
+                                    aria-label="Selecionar distribuidor" className="w-full bg-muted/50 border border-border rounded-[var(--radius-panel)] px-4 py-3 ds-type-body text-foreground outline-none appearance-none cursor-pointer hover:bg-muted disabled:opacity-60 disabled:cursor-default pr-8 focus:ring-2 focus:ring-success/20"
                                     value={selectedDistributor}
                                     onChange={e => handleDistributorChange(e.target.value)}
                                     disabled={!isEditing}
@@ -191,7 +196,7 @@ export const PartnersTab = ({
 
                         {selectedDistributor && (
                             <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Contato Comercial</label>
+                                <label className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground uppercase tracking-wide">Contato Comercial</label>
                                 <ContactSelect
                                     value={selectedDistributorContact}
                                     onChange={handleDistributorContactChange}
@@ -202,16 +207,16 @@ export const PartnersTab = ({
                         )}
 
                         {selectedDistributorObj && (
-                            <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                            <div className="p-4 rounded-[var(--radius-panel)] bg-success-subtle border border-success/10">
                                 <div className="flex items-start gap-4">
-                                    <div className="h-10 w-10 border border-emerald-500/20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold overflow-hidden shrink-0">
+                                    <div className="h-10 w-10 border border-success/20 rounded-full bg-success-subtle flex items-center justify-center text-success-readable font-[var(--ds-type-control-weight)] overflow-hidden shrink-0">
                                         {selectedDistributorObj.logo_url
                                             ? <img src={selectedDistributorObj.logo_url} alt="" className="w-full h-full object-contain p-1" />
                                             : selectedDistributorObj.name?.substring(0, 2).toUpperCase()}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h5 className="font-bold text-foreground truncate">{selectedDistributorObj.name}</h5>
-                                        <p className="text-xs text-emerald-400 font-mono mt-0.5">Parceiro Estratégico</p>
+                                        <h5 className="font-[var(--ds-type-control-weight)] text-foreground truncate">{selectedDistributorObj.name}</h5>
+                                        <p className="ds-type-metadata text-success-readable font-mono mt-0.5">Parceiro Estratégico</p>
                                         {selectedDistributorContact && <ContactCard contactId={selectedDistributorContact} contacts={distributorContacts} />}
                                     </div>
                                 </div>
@@ -219,7 +224,7 @@ export const PartnersTab = ({
                         )}
 
                         {!selectedDistributorObj && !isEditing && (
-                            <p className="text-center py-4 text-xs text-muted-foreground italic">Nenhum distribuidor vinculado.</p>
+                            <p className="text-center py-4 ds-type-metadata text-muted-foreground italic">Nenhum distribuidor vinculado.</p>
                         )}
                     </div>
                 </div>
@@ -228,7 +233,7 @@ export const PartnersTab = ({
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 pb-4 border-b border-border">
                         <Building2 className="h-5 w-5 text-primary" />
-                        <h4 className="font-bold text-primary uppercase tracking-widest text-xs">Fabricantes Identificados</h4>
+                        <h4 className="font-[var(--ds-type-control-weight)] text-primary uppercase tracking-widest ds-type-metadata">Fabricantes Identificados</h4>
                     </div>
 
                     <div className="space-y-4">
@@ -238,27 +243,27 @@ export const PartnersTab = ({
                             const isFirst = firstRealManufacturer?.id === m.id;
 
                             return (
-                                <div key={m.id} className="bg-card border border-border rounded-2xl p-4 space-y-4 hover:border-primary/30 transition-all">
+                                <div key={m.id} className="bg-card border border-border rounded-[var(--radius-panel)] p-4 space-y-4 hover:border-primary/30 transition-all">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center">
+                                            <div className="h-12 w-12 rounded-[var(--radius-panel)] bg-muted/50 flex items-center justify-center">
                                                 {m.logo_url
                                                     ? <img src={m.logo_url} alt={m.name} className="w-full h-full object-contain p-1" />
-                                                    : <span className="font-black text-muted-foreground text-xs">{m.name.substring(0, 3).toUpperCase()}</span>}
+                                                    : <span className="font-[var(--ds-type-metric-weight)] text-muted-foreground ds-type-metadata">{m.name.substring(0, 3).toUpperCase()}</span>}
                                             </div>
                                             <div>
-                                                <h5 className="font-bold text-foreground text-sm">{m.name}</h5>
+                                                <h5 className="font-[var(--ds-type-control-weight)] text-foreground ds-type-body">{m.name}</h5>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Vendor</span>
+                                                    <span className="ds-type-metadata bg-primary/10 text-primary px-2 py-0.5 rounded font-[var(--ds-type-control-weight)] uppercase">Vendor</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <button className="p-2 text-muted-foreground hover:text-foreground"><ExternalLink className="h-4 w-4" /></button>
+                                        <span aria-hidden="true" className="p-2 text-muted-foreground"><ExternalLink className="h-4 w-4" /></span>
                                     </div>
 
                                     {!isVirtual && isFirst && (
                                         <div className="space-y-2 border-t border-border/50 pt-4">
-                                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Contato no Fabricante</label>
+                                            <label className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground uppercase tracking-wide">Contato no Fabricante</label>
                                             <ContactSelect
                                                 value={selectedManufacturerContact}
                                                 onChange={handleManufacturerContactChange}
@@ -267,7 +272,7 @@ export const PartnersTab = ({
                                                 ringColor="focus:ring-primary/20"
                                             />
                                             {selectedManufacturerContact && mfContacts.length > 0 && (
-                                                <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+                                                <div className="p-3 rounded-[var(--radius-panel)] bg-primary/5 border border-primary/10">
                                                     <ContactCard contactId={selectedManufacturerContact} contacts={mfContacts} />
                                                 </div>
                                             )}
@@ -275,21 +280,21 @@ export const PartnersTab = ({
                                     )}
 
                                     {isVirtual && (
-                                        <p className="text-[10px] text-muted-foreground border-t border-border/50 pt-3">
+                                        <p className="ds-type-metadata text-muted-foreground border-t border-border/50 pt-3">
                                             Detectado automaticamente. Cadastre como Conta para vincular contatos.
                                         </p>
                                     )}
                                 </div>
                             );
                         }) : (
-                            <div className="text-center p-8 bg-muted/30 rounded-2xl border-2 border-dashed border-border">
-                                <p className="text-sm text-muted-foreground font-medium">Nenhum fabricante identificado.</p>
-                                <p className="text-xs text-muted-foreground mt-2">Adicione produtos com fabricantes conhecidos (IBM, Lenovo, etc).</p>
+                            <div className="text-center p-8 bg-muted/30 rounded-[var(--radius-panel)] border-2 border-dashed border-border">
+                                <p className="ds-type-body text-muted-foreground font-[var(--ds-type-label-weight)]">Nenhum fabricante identificado.</p>
+                                <p className="ds-type-metadata text-muted-foreground mt-2">Adicione produtos com fabricantes conhecidos (IBM, Lenovo, etc).</p>
                             </div>
                         )}
 
                         {isEditing && (
-                            <button className="w-full py-3 border border-dashed border-border rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground transition-all">
+                            <button className="w-full py-3 border border-dashed border-border rounded-[var(--radius-panel)] ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground hover:text-foreground transition-all">
                                 + Adicionar Fabricante Manualmente
                             </button>
                         )}

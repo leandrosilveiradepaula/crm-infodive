@@ -67,7 +67,7 @@ export default function SalesList() {
                     <Package className="w-4 h-4" />
                     Pedidos
                     {orders.length > 0 && (
-                        <span className="ml-1 px-1.5 py-0.5 rounded-md bg-surface-raised border border-border text-foreground text-[9px] font-black">{orders.length}</span>
+                        <span className="ml-1 px-1.5 py-0.5 rounded-[var(--radius-control)] bg-surface-raised border border-border text-foreground text-metadata-ui font-black">{orders.length}</span>
                     )}
                 </TabsTrigger>
                 <TabsTrigger value="installments" className="gap-2">

@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { DealProduct } from '@/types/deal';
 import { isSoftware, isService, isSupport, getClassificationLabel } from '@/utils/productClassification';
@@ -18,8 +19,8 @@ interface ProposalInvestmentTableProps {
 }
 
 export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentTableProps) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     return (
         <div style={{ padding: '0 80px', marginTop: '10px' }}>
             {group.title && (
@@ -41,14 +42,14 @@ export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNa
             <div style={{
                 borderTop: `3px solid ${primaryColor}`,
                 borderBottom: `3px solid ${primaryColor}`,
-                backgroundColor: '#ffffff'
+                backgroundColor: proposalDocumentPrimitives.paperWhite
             }}>
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: '90px 1fr 90px 45px 95px 110px',
                     padding: '12px 15px',
-                    backgroundColor: '#f3f4f6',
-                    borderBottom: '1px solid #e5e7eb'
+                    backgroundColor: proposalDocumentPrimitives.gray100,
+                    borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`
                 }}>
                     <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase' }}>Categoria</div>
                     <div style={{ color: accentColor, fontWeight: 'bold', fontSize: '9px', textTransform: 'uppercase' }}>Descrição</div>
@@ -71,30 +72,30 @@ export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNa
                             display: 'grid',
                             gridTemplateColumns: '90px 1fr 90px 45px 95px 110px',
                             padding: '10px 15px',
-                            borderBottom: '1px solid #e5e7eb',
+                            borderBottom: `1px solid ${proposalDocumentPrimitives.gray200}`,
                             alignItems: 'center'
                         }}>
                             <div style={{ color: primaryColor, fontWeight: '700', fontSize: '11px' }}>
                                 {categoryLabel}
                             </div>
-                            <div style={{ color: '#374151', fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ color: proposalDocumentPrimitives.gray700, fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                                 <span>{simplifiedProductNames[product.name] || product.display_name || product.name}</span>
                                 {product.duration && product.duration_unit && (
-                                    <span style={{ fontSize: '9px', color: '#059669', fontStyle: 'italic', fontWeight: 'bold' }}>
+                                    <span style={{ fontSize: '9px', color: proposalDocumentPrimitives.emerald600, fontStyle: 'italic', fontWeight: 'bold' }}>
                                         (Válido por {product.duration} {product.duration_unit})
                                     </span>
                                 )}
                             </div>
-                            <div style={{ color: '#64748b', fontSize: '10px', fontWeight: '500', fontFamily: 'var(--font-mono, monospace)', letterSpacing: '-0.2px' }}>
+                            <div style={{ color: proposalDocumentPrimitives.slate500, fontSize: '10px', fontWeight: '500', fontFamily: 'var(--font-mono, monospace)', letterSpacing: '-0.2px' }}>
                                 {(product.show_sku_on_proposal !== false) ? (product.sku || '-') : '-'}
                             </div>
-                            <div style={{ color: '#374151', fontSize: '11px', textAlign: 'center', fontWeight: '600' }}>
+                            <div style={{ color: proposalDocumentPrimitives.gray700, fontSize: '11px', textAlign: 'center', fontWeight: '600' }}>
                                 {item.quantity}
                             </div>
-                            <div style={{ color: '#64748b', fontWeight: '600', fontSize: '11px', textAlign: 'right' }}>
+                            <div style={{ color: proposalDocumentPrimitives.slate500, fontWeight: '600', fontSize: '11px', textAlign: 'right' }}>
                                 {formatProposalDisplayCurrency(item.unitPrice, item.currency)}
                             </div>
-                            <div style={{ color: '#111827', fontWeight: '700', fontSize: '12px', textAlign: 'right' }}>
+                            <div style={{ color: proposalDocumentPrimitives.gray900, fontWeight: '700', fontSize: '12px', textAlign: 'right' }}>
                                 {formatProposalDisplayCurrency(item.subtotal, item.currency)}
                             </div>
                         </div>
@@ -102,7 +103,7 @@ export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNa
                 })}
 
                 {group.items.length === 0 && (
-                    <div style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
+                    <div style={{ padding: '24px', textAlign: 'center', color: proposalDocumentPrimitives.gray500 }}>
                         Consulte as opções alternativas abaixo.
                     </div>
                 )}
@@ -119,7 +120,7 @@ export function ProposalInvestmentTable({ group, isSubtotal, simplifiedProductNa
                     <div style={{
                         fontSize: isSubtotal ? '12px' : '14px',
                         fontWeight: '800',
-                        color: '#4b5563',
+                        color: proposalDocumentPrimitives.gray600,
                         textTransform: 'uppercase',
                         textAlign: 'right',
                         paddingRight: '20px',
@@ -150,8 +151,8 @@ interface ProposalInvestmentOptionalsProps {
 }
 
 export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalInvestmentOptionalsProps) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     const visibleOptionalProducts = optionalProducts.filter(p => p.is_visible_on_proposal !== false);
     if (visibleOptionalProducts.length === 0) return null;
 
@@ -166,14 +167,14 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
             <h3 style={{
                 fontSize: '14px',
                 fontWeight: '700',
-                color: '#b45309',
+                color: proposalDocumentPrimitives.amber700,
                 marginBottom: '10px',
                 textTransform: 'uppercase',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
             }}>
-                <span style={{ width: '8px', height: '8px', backgroundColor: '#f59e0b', borderRadius: '50%' }}></span>
+                <span style={{ width: '8px', height: '8px', backgroundColor: proposalDocumentPrimitives.amber500, borderRadius: '50%' }}></span>
                 Opções Adicionais / Alternativas
             </h3>
 
@@ -192,8 +193,8 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                                         display: 'grid',
                                         gridTemplateColumns: '1fr 140px',
                                         padding: `8px 20px 8px ${48 + (depth * 20)}px`,
-                                        borderTop: '1px solid #fef3c7',
-                                        backgroundColor: '#fffbf0',
+                                        borderTop: `1px solid ${proposalDocumentPrimitives.amber100}`,
+                                        backgroundColor: proposalDocumentPrimitives.amberPaper,
                                         alignItems: 'center',
                                         position: 'relative'
                                     }}>
@@ -203,7 +204,7 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                                             top: '0',
                                             bottom: cIdx === children.length - 1 && !optionalProducts.some(gc => gc.parent_id === child.id) ? '50%' : '100%',
                                             width: '1px',
-                                            backgroundColor: '#f59e0b'
+                                            backgroundColor: proposalDocumentPrimitives.amber500
                                         }} />
                                         <div style={{
                                             position: 'absolute',
@@ -211,25 +212,25 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                                             top: '50%',
                                             width: '12px',
                                             height: '1px',
-                                            backgroundColor: '#f59e0b'
+                                            backgroundColor: proposalDocumentPrimitives.amber500
                                         }} />
 
                                         <div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <div style={{ fontWeight: '700', color: primaryColor, fontSize: '12px' }}>{simplifiedProductNames[child.name] || child.name}</div>
-                                                <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
+                                                <span style={{ fontSize: '9px', fontWeight: '700', color: proposalDocumentPrimitives.amber700, textTransform: 'uppercase' }}>
                                                     {getProposalPricingLabels(child.pricing_model).title}
                                                 </span>
                                                 {isSoftware(child) && (
                                                     <span style={{
                                                         fontSize: '9px',
                                                         fontWeight: '800',
-                                                        backgroundColor: '#dcfce7',
-                                                        color: '#166534',
+                                                        backgroundColor: proposalDocumentPrimitives.green100,
+                                                        color: proposalDocumentPrimitives.green800,
                                                         padding: '2px 8px',
                                                         borderRadius: '12px',
                                                         textTransform: 'uppercase',
-                                                        border: '1px solid #bbf7d0'
+                                                        border: `1px solid ${proposalDocumentPrimitives.green200}`
                                                     }}>
                                                         Software
                                                     </span>
@@ -238,22 +239,22 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                                                     <span style={{
                                                         fontSize: '9px',
                                                         fontWeight: '700',
-                                                        backgroundColor: '#fef3c7',
-                                                        color: '#92400e',
+                                                        backgroundColor: proposalDocumentPrimitives.amber100,
+                                                        color: proposalDocumentPrimitives.amber800,
                                                         padding: '1px 6px',
                                                         borderRadius: '10px',
                                                         textTransform: 'uppercase',
-                                                        border: '1px solid #fde68a'
+                                                        border: `1px solid ${proposalDocumentPrimitives.amber200}`
                                                     }}>
                                                         {child.custom_label}
                                                     </span>
                                                 )}
                                             </div>
-                                            <div style={{ fontSize: '10px', color: '#64748b', marginTop: '1px', fontWeight: '500' }}>
+                                            <div style={{ fontSize: '10px', color: proposalDocumentPrimitives.slate500, marginTop: '1px', fontWeight: '500' }}>
                                                 {child.category || getClassificationLabel(child)} - Qtd: {displayItem.quantity} - Unit.: {formatProposalDisplayCurrency(displayItem.unitPrice, displayItem.currency)}
                                             </div>
                                         </div>
-                                        <div style={{ textAlign: 'right', fontWeight: '600', color: '#374151', fontSize: '13px' }}>
+                                        <div style={{ textAlign: 'right', fontWeight: '600', color: proposalDocumentPrimitives.gray700, fontSize: '13px' }}>
                                             {formatProposalDisplayCurrency(displayItem.subtotal, displayItem.currency)}
                                         </div>
                                     </div>
@@ -279,7 +280,7 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
 
                     return (
                         <div key={pIdx} style={{
-                            border: '1px solid #fde68a',
+                            border: `1px solid ${proposalDocumentPrimitives.amber200}`,
                             borderRadius: '12px',
                             backgroundColor: '#fff',
                             overflow: 'hidden',
@@ -295,29 +296,29 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <div style={{ fontWeight: '700', color: primaryColor, fontSize: '13px' }}>{simplifiedProductNames[parent.name] || parent.name}</div>
-                                        <span style={{ fontSize: '9px', fontWeight: '700', color: '#b45309', textTransform: 'uppercase' }}>
+                                        <span style={{ fontSize: '9px', fontWeight: '700', color: proposalDocumentPrimitives.amber700, textTransform: 'uppercase' }}>
                                             {getProposalPricingLabels(parent.pricing_model).title}
                                         </span>
                                         {parent.custom_label && (
                                             <span style={{
                                                 fontSize: '10px',
                                                 fontWeight: '800',
-                                                backgroundColor: '#eff6ff',
-                                                color: '#1e40af',
+                                                backgroundColor: proposalDocumentPrimitives.blue50,
+                                                color: proposalDocumentPrimitives.blue800,
                                                 padding: '2px 8px',
                                                 borderRadius: '12px',
                                                 textTransform: 'uppercase',
-                                                border: '1px solid #dbeafe'
+                                                border: `1px solid ${proposalDocumentPrimitives.blue100}`
                                             }}>
                                                 {parent.custom_label}
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
+                                    <div style={{ fontSize: '11px', color: proposalDocumentPrimitives.gray500, marginTop: '2px' }}>
                                         {parent.category || 'Hardware'} - Qtd: {parentDisplayItem.quantity} - Unit.: {formatProposalDisplayCurrency(parentDisplayItem.unitPrice, parentDisplayItem.currency)}
                                     </div>
                                 </div>
-                                <div style={{ textAlign: 'right', fontWeight: '700', color: '#111827', fontSize: '13px' }}>
+                                <div style={{ textAlign: 'right', fontWeight: '700', color: proposalDocumentPrimitives.gray900, fontSize: '13px' }}>
                                     {formatProposalDisplayCurrency(parentDisplayItem.subtotal, parentDisplayItem.currency)}
                                 </div>
                             </div>
@@ -327,18 +328,18 @@ export function ProposalInvestmentOptionals({ optionalProducts, rootProducts, si
                             {directChildren.length > 0 && (
                                 <div style={{
                                     padding: '10px 20px',
-                                    backgroundColor: '#fffbeb',
-                                    borderTop: '2px solid #fde68a',
+                                    backgroundColor: proposalDocumentPrimitives.amber50,
+                                    borderTop: `2px solid ${proposalDocumentPrimitives.amber200}`,
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '4px'
                                 }}>
                                     {optionTotals.map(total => (
                                         <div key={total.currency} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '11px', fontWeight: '800', color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                            <span style={{ fontSize: '11px', fontWeight: '800', color: proposalDocumentPrimitives.amber700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                                 {total.totalLabel}
                                             </span>
-                                            <span style={{ fontSize: '16px', fontWeight: '800', color: '#111827' }}>
+                                            <span style={{ fontSize: '16px', fontWeight: '800', color: proposalDocumentPrimitives.gray900 }}>
                                                 {formatProposalDisplayCurrency(total.subtotal, total.currency)}
                                             </span>
                                         </div>

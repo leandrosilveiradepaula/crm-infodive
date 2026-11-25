@@ -31,7 +31,7 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         // Premium pill/segment style (new default)
-        default: "bg-muted p-1 rounded-2xl border border-border h-auto gap-0.5",
+        default: "bg-muted p-1 rounded-[var(--radius-panel)] border border-border h-auto gap-0.5",
         // Line underline style (kept for backward compat)
         line: "gap-1 bg-transparent rounded-none border-b border-border pb-0",
       },
@@ -68,14 +68,14 @@ function TabsTrigger({
       className={cn(
         // Base
         "relative inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
-        "text-xs font-bold uppercase tracking-wider transition-all",
-        "px-4 py-2 rounded-xl",
+        "text-control-ui font-medium transition-colors",
+        "px-4 py-2 rounded-[var(--radius-control)]",
         "disabled:pointer-events-none disabled:opacity-50",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         // Inactive
         "text-muted-foreground hover:text-foreground hover:bg-surface-raised",
         // Active (pill style)
-        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
+        "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-control-ui",
         // Vertical orientation
         "group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start",
         // SVG inside

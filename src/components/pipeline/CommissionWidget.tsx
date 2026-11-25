@@ -18,44 +18,44 @@ export const CommissionWidget = ({ projectedCommission, guaranteedCommission, co
 
     return (
         <div className="flex items-center gap-2">
-            <div className="flex items-center gap-3 bg-card p-1.5 rounded-2xl border border-border shadow-sm overflow-hidden group">
+            <div className="flex items-center gap-3 bg-card p-1.5 rounded-[var(--radius-panel)] border border-border shadow-control-ui overflow-hidden group">
                 {/* Projected */}
-                <div className="flex items-center gap-3 bg-info/10 px-4 py-2 rounded-xl border border-info/20 hover:border-info/40 transition-all cursor-default">
-                    <div className="h-8 w-8 rounded-lg bg-info/20 flex items-center justify-center">
-                        <TrendingUp className="h-4 w-4 text-info" />
+                <div className="flex items-center gap-3 bg-info/10 px-4 py-2 rounded-[var(--radius-panel)] border border-info/20 hover:border-info/40 transition-all cursor-default">
+                    <div className="h-8 w-8 rounded-[var(--radius-panel)] bg-info/20 flex items-center justify-center">
+                        <TrendingUp className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black text-info uppercase tracking-widest leading-none mb-1">Minha Meta</p>
+                        <p className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-primary uppercase tracking-widest leading-none mb-1">Minha Meta</p>
                         <div className={`transition-all duration-500 ${isVisible ? 'blur-0' : 'blur-md select-none'}`}>
-                            <p className="text-sm font-black text-foreground">{formatValue(projectedCommission)}</p>
+                            <p className="ds-type-body font-[var(--ds-type-metric-weight)] text-foreground">{formatValue(projectedCommission)}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Guaranteed */}
-                <div className="flex items-center gap-3 bg-success/10 px-4 py-2 rounded-xl border border-success/20 hover:border-success/40 transition-all cursor-default relative">
-                    <div className="h-8 w-8 rounded-lg bg-success/20 flex items-center justify-center">
-                        <ShieldCheck className="h-4 w-4 text-success" />
+                <div className="flex items-center gap-3 bg-success/10 px-4 py-2 rounded-[var(--radius-panel)] border border-success/20 hover:border-success/40 transition-all cursor-default relative">
+                    <div className="h-8 w-8 rounded-[var(--radius-panel)] bg-success/20 flex items-center justify-center">
+                        <ShieldCheck className="h-4 w-4 text-success-readable" />
                     </div>
                     <div>
-                        <p className="text-[9px] font-black text-success uppercase tracking-widest leading-none mb-1">Garantido</p>
+                        <p className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-success-readable uppercase tracking-widest leading-none mb-1">Garantido</p>
                         <div className={`transition-all duration-500 ${isVisible ? 'blur-0' : 'blur-md select-none'}`}>
-                            <p className="text-sm font-black text-foreground">{formatValue(guaranteedCommission)}</p>
+                            <p className="ds-type-body font-[var(--ds-type-metric-weight)] text-foreground">{formatValue(guaranteedCommission)}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Rate Badge */}
-                <div className="px-4 py-2 bg-muted rounded-xl border border-border hidden 2xl:block">
-                    <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none mb-1">Margem Média</p>
-                    <p className="text-xs text-foreground font-black">{commissionRate.toFixed(1)}%</p>
+                <div className="px-4 py-2 bg-muted rounded-[var(--radius-panel)] border border-border hidden 2xl:block">
+                    <p className="ds-type-metadata text-muted-foreground font-[var(--ds-type-control-weight)] uppercase tracking-widest leading-none mb-1">Margem Média</p>
+                    <p className="ds-type-metadata text-foreground font-[var(--ds-type-metric-weight)]">{commissionRate.toFixed(1)}%</p>
                 </div>
 
                 {/* Global Toggle Button */}
                 <button
-                    onClick={() => setIsVisible(!isVisible)}
+                    type="button" aria-pressed={isVisible} aria-label={isVisible ? 'Ocultar valores' : 'Mostrar valores'} onClick={() => setIsVisible(!isVisible)}
                     className={`
-                        flex items-center justify-center h-10 w-10 rounded-xl transition-all border
+                        flex items-center justify-center h-10 w-10 rounded-[var(--radius-panel)] transition-all border
                         ${isVisible
                             ? 'bg-primary/10 border-primary/30 text-primary'
                             : 'bg-muted border-border text-muted-foreground hover:text-foreground hover:bg-accent'

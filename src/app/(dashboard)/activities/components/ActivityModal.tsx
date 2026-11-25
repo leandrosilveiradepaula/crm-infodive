@@ -62,20 +62,20 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-card rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border">
-                {/* Header with Gradient */}
-                <div className="bg-gradient-to-r from-primary to-stage-proposal px-8 py-6 flex items-center justify-between border-b border-border/10">
+            <div className="bg-card rounded-[var(--radius-panel)] w-full max-w-2xl overflow-hidden shadow-card-ui animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-border">
+                {/* Header */}
+                <div className="bg-primary text-primary-foreground px-8 py-6 flex items-center justify-between border-b border-border/10">
                     <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">
+                        <h2 className="text-page-title font-black text-primary-foreground tracking-tight">
                             {activity ? 'Editar Atividade' : 'Nova Atividade'}
                         </h2>
-                        <p className="text-white/80 text-[10px] mt-1 font-black uppercase tracking-[0.2em]">
+                        <p className="text-primary-foreground text-body-ui mt-1 font-medium">
                             {activity ? 'Visualizar e editar detalhes' : 'Agendar nova tarefa ou reunião'}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 bg-card/10 hover:bg-card/20 rounded-xl transition-all text-white border border-white/10"
+                        className="p-2 bg-card/10 hover:bg-card/20 rounded-[var(--radius-panel)] transition-all text-primary-foreground border border-primary-foreground/20"
                     >
                         <X className="h-6 w-6" />
                     </button>
@@ -90,7 +90,7 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                             placeholder="Ex: Reunião de Alinhamento, Follow-up..."
                             value={formData.title}
                             onChange={e => setFormData({ ...formData, title: e.target.value })}
-                            className="text-lg font-bold"
+                            className="text-section-title font-bold"
                         />
                     </div>
 
@@ -148,8 +148,8 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                     </div>
 
                     {/* Linking Section */}
-                    <div className="bg-accent/30 p-6 rounded-3xl space-y-4 border border-border/50">
-                        <h4 className="text-xs font-bold text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                    <div className="bg-accent/30 p-6 rounded-[var(--radius-panel)] space-y-4 border border-border/50">
+                        <h4 className="text-metadata-ui font-bold text-primary uppercase tracking-[0.2em] flex items-center gap-2">
                             <Users className="h-4 w-4" /> Vincular Registro
                         </h4>
 
@@ -189,7 +189,7 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                         <ThemeLabel>Descrição / Notas</ThemeLabel>
                         <textarea
                             rows={3}
-                            className="w-full px-5 py-3.5 bg-muted/30 border border-border/50 rounded-2xl focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground resize-none text-[13px] font-bold"
+                            className="w-full px-5 py-3.5 bg-muted/30 border border-border/50 rounded-[var(--radius-panel)] focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground resize-none text-body-ui font-bold"
                             placeholder="Adicione detalhes, observações ou próximos passos..."
                             value={formData.description}
                             onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -228,7 +228,7 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                                         onClose();
                                     }
                                 }}
-                                className="px-6 py-3 text-red-400 font-bold hover:bg-red-500/10 rounded-2xl border border-red-500/20 transition-all flex items-center"
+                                className="px-6 py-3 text-destructive-readable font-bold hover:bg-destructive/10 rounded-[var(--radius-panel)] border border-destructive/20 transition-all flex items-center"
                             >
                                 <Trash2 className="h-5 w-5 mr-2" />
                                 Excluir
@@ -237,7 +237,7 @@ export const ActivityModal = ({ isOpen, onClose, onSave, onDelete, activity }: A
                         <button
                             onClick={handleSubmit}
                             disabled={isSaving || !formData.title}
-                            className="px-8 py-3 bg-primary text-white font-bold rounded-2xl hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-primary/20"
+                            className="px-8 py-3 bg-primary text-white font-bold rounded-[var(--radius-panel)] hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-card-ui shadow-primary/20"
                         >
                             {isSaving ? 'Salvando...' : activity ? 'Salvar Tudo' : 'Criar Atividade'}
                         </button>

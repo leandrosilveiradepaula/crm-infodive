@@ -119,16 +119,16 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-2xl animate-in zoom-in-95 duration-300">
-                <DialogHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-10 border-b border-border relative">
+            <DialogContent className="sm:max-w-3xl bg-card border-border text-foreground p-0 overflow-hidden rounded-[2rem] shadow-card-ui animate-in zoom-in-95 duration-300">
+                <DialogHeader className="bg-surface-subtle p-10 border-b border-border relative">
                     <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
-                    <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-3 relative z-10">
-                        <div className="p-2.5 bg-primary/20 rounded-xl">
+                    <DialogTitle className="text-page-title font-black tracking-tight text-foreground flex items-center gap-3 relative z-10">
+                        <div className="p-2.5 bg-primary/20 rounded-[var(--radius-panel)]">
                             <Package className="h-5 w-5 text-primary" />
                         </div>
                         {product ? 'Editar Produto' : 'Novo Produto'}
                     </DialogTitle>
-                    <DialogDescription className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.2em] mt-2 relative z-10">
+                    <DialogDescription className="text-muted-foreground text-metadata-ui font-black uppercase tracking-[0.2em] mt-2 relative z-10">
                         Gerencie as especificações técnicas do seu catálogo
                     </DialogDescription>
                 </DialogHeader>
@@ -157,10 +157,10 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-xl border border-border/50">
+                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-[var(--radius-panel)] border border-border/50">
                             <div className="space-y-0.5">
                                 <ThemeLabel className="mb-0">Exibir SKU na Proposta</ThemeLabel>
-                                <p className="text-[10px] text-muted-foreground">O SKU/Partnumber será visível na tabela de investimentos da proposta PDF e no portal.</p>
+                                <p className="text-metadata-ui text-muted-foreground">O SKU/Partnumber será visível na tabela de investimentos da proposta PDF e no portal.</p>
                             </div>
                             <Switch
                                 checked={formData.show_sku_on_proposal !== false}
@@ -196,7 +196,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                             }
                                         }}
                                     >
-                                        <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-primary border">
+                                        <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -234,7 +234,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                             }
                                         }}
                                     >
-                                        <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-primary border">
+                                        <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                             <SelectValue placeholder="Selecione..." />
                                         </SelectTrigger>
                                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -270,7 +270,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                         }
                                     }}
                                 >
-                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-xl text-xs font-bold focus:ring-1 focus:ring-primary border">
+                                    <SelectTrigger className="bg-background border-border text-foreground h-[34px] rounded-[var(--radius-panel)] text-metadata-ui font-bold focus:ring-1 focus:ring-primary border">
                                         <SelectValue placeholder="Selecione..." />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -291,7 +291,7 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                                     <div
                                         key={opt.value}
                                         onClick={() => setFormData({ ...formData, icon: opt.value })}
-                                        className={`p-2.5 rounded-xl border cursor-pointer transition-all ${formData.icon === opt.value ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-card border-border hover:border-muted-foreground/30 text-muted-foreground hover:text-foreground'}`}
+                                        className={`p-2.5 rounded-[var(--radius-panel)] border cursor-pointer transition-all ${formData.icon === opt.value ? 'bg-primary border-primary text-white shadow-card-ui shadow-primary/20' : 'bg-card border-border hover:border-muted-foreground/30 text-muted-foreground hover:text-foreground'}`}
                                     >
                                         <opt.icon className="h-4 w-4" />
                                     </div>
@@ -304,21 +304,21 @@ export function ProductFormModal({ open, onOpenChange, product, existingBrands, 
                             <Textarea
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="bg-background border-border text-foreground h-24 rounded-xl text-xs shadow-none resize-none"
+                                className="bg-background border-border text-foreground h-24 rounded-[var(--radius-panel)] text-metadata-ui shadow-none resize-none"
                                 placeholder="Descreva as principais características do produto..."
                             />
                         </div>
                     </div>
 
                     <DialogFooter className="border-t border-border p-10 bg-muted/20 flex items-center justify-end gap-3">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-xl transition-all">
+                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="h-12 px-6 text-muted-foreground hover:text-foreground hover:bg-muted font-bold rounded-[var(--radius-panel)] transition-all">
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-2xl shadow-xl shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-[11px] tracking-widest flex items-center gap-2">
+                        <Button type="submit" disabled={loading} className="h-12 px-10 bg-primary hover:bg-primary/90 text-white font-black rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 min-w-[180px] transition-all active:scale-95 uppercase text-metadata-ui tracking-widest flex items-center gap-2">
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                                <div className="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                                <div className="p-1 bg-white/20 rounded-[var(--radius-control)] group-hover:scale-110 transition-transform">
                                     <Package className="h-3 w-3" />
                                 </div>
                             )}

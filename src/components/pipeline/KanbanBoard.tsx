@@ -16,12 +16,22 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS = [
-    { id: 'qualification', title: 'Qualificação', color: 'stage-qualification' },
-    { id: 'proposal', title: 'Proposta', color: 'stage-proposal' },
-    { id: 'negotiation', title: 'Negociação', color: 'stage-negotiation' },
-    { id: 'won', title: 'Ganho', color: 'stage-won' },
-    { id: 'lost', title: 'Perdido', color: 'stage-lost' }
-];
+    { id: 'qualification', title: 'Qualificação' },
+    { id: 'proposal', title: 'Proposta' },
+    { id: 'negotiation', title: 'Negociação' },
+    { id: 'won', title: 'Ganho' },
+    { id: 'lost', title: 'Perdido' }
+] as const;
+
+// Static Tailwind classes are required for reliable compiled styles.
+// The meanings and actual colors all resolve through the shared stage tokens.
+const STAGE_TONE_CLASSES = {
+    qualification: { dot: 'bg-stage-qualification', border: 'border-stage-qualification/20', surface: 'bg-stage-qualification/5', hover: 'hover:border-stage-qualification/10', drag: 'bg-stage-qualification/10' },
+    proposal: { dot: 'bg-stage-proposal', border: 'border-stage-proposal/20', surface: 'bg-stage-proposal/5', hover: 'hover:border-stage-proposal/10', drag: 'bg-stage-proposal/10' },
+    negotiation: { dot: 'bg-stage-negotiation', border: 'border-stage-negotiation/20', surface: 'bg-stage-negotiation/5', hover: 'hover:border-stage-negotiation/10', drag: 'bg-stage-negotiation/10' },
+    won: { dot: 'bg-stage-won', border: 'border-stage-won/20', surface: 'bg-stage-won/5', hover: 'hover:border-stage-won/10', drag: 'bg-stage-won/10' },
+    lost: { dot: 'bg-stage-lost', border: 'border-stage-lost/20', surface: 'bg-stage-lost/5', hover: 'hover:border-stage-lost/10', drag: 'bg-stage-lost/10' },
+} as const;
 
 export function KanbanBoard({ initialDeals, onDealClick }: KanbanBoardProps) {
     const [deals, setDeals] = useState<Deal[]>(initialDeals);
@@ -83,29 +93,27 @@ export function KanbanBoard({ initialDeals, onDealClick }: KanbanBoardProps) {
                 {COLUMNS.map(column => {
                     const columnDeals = deals.filter(d => (d.stage || 'qualification') === column.id);
                     const totalValue = columnDeals.reduce((sum, d) => sum + Number(d.value), 0);
+                    const stageStyle = STAGE_TONE_CLASSES[column.id];
 
                     return (
-                        <div key={column.id} className="w-80 flex flex-col shrink-0 group/column">
+                        <div key={column.id} data-qa-stage={column.id} className="w-80 flex flex-col shrink-0 group/column">
                             {/* Modern Column Header */}
                             <div className="mb-3 px-1">
                                 <div className={`
-                                    p-4 rounded-2xl border border-${column.color}/20 
-                                    bg-gradient-to-br from-white/5 to-white/0 dark:from-white/5 dark:to-transparent
-                                    backdrop-blur-sm shadow-sm flex justify-between items-center
+                                    flex items-center justify-between gap-3 rounded-[var(--radius-panel)] border bg-card p-4 shadow-control-ui ${stageStyle.border}
                                 `}>
                                     <div className="flex flex-col">
                                         <div className="flex items-center gap-2">
-                                            <div className={`h-2 w-2 rounded-full bg-${column.color}`} />
-                                            <h3 className="font-black text-sm text-foreground uppercase tracking-wider">{column.title}</h3>
+                                            <div data-qa-stage-dot="" className={`h-2 w-2 rounded-full ${stageStyle.dot}`} />
+                                            <h3 className="font-[var(--ds-type-metric-weight)] ds-type-body text-foreground uppercase tracking-wider">{column.title}</h3>
                                         </div>
-                                        <span className="text-[10px] font-bold text-muted-foreground mt-1 ml-4 uppercase tracking-widest">{columnDeals.length} Oportunidades</span>
+                                        <span className="ds-type-metadata font-[var(--ds-type-control-weight)] text-muted-foreground mt-1 ml-4 uppercase tracking-widest">{columnDeals.length} Oportunidades</span>
                                     </div>
 
                                     <div className={`
-                                        px-3 py-1.5 rounded-lg border border-${column.color}/20
-                                        bg-card/50 backdrop-blur-md shadow-sm
+                                        rounded-[var(--radius-control)] border border-border bg-surface-subtle px-3 py-1.5 shadow-control-ui
                                     `}>
-                                        <span className="text-xs font-black text-foreground">
+                                        <span className="ds-type-metadata font-[var(--ds-type-metric-weight)] text-foreground">
                                             {formatCurrency(totalValue, { compact: true })}
                                         </span>
                                     </div>
@@ -113,15 +121,15 @@ export function KanbanBoard({ initialDeals, onDealClick }: KanbanBoardProps) {
                             </div>
 
                             {/* Droppable Area */}
-                            <div className={`flex-1 rounded-2xl bg-${column.color}/5 p-2 min-h-[150px] border border-transparent transition-colors duration-300 hover:border-${column.color}/10`}>
+                            <div className={`min-h-[150px] flex-1 rounded-[var(--radius-panel)] border border-transparent p-2 transition-colors duration-300 ${stageStyle.surface} ${stageStyle.hover}`}>
                                 <Droppable droppableId={column.id}>
                                     {(provided, snapshot) => (
                                         <div
                                             {...provided.droppableProps}
                                             ref={provided.innerRef}
                                             className={`
-                                                flex-1 flex flex-col gap-3 min-h-[100px] transition-all duration-300 rounded-xl p-1
-                                                ${snapshot.isDraggingOver ? `bg-${column.color}/10 shadow-inner` : ''}
+                                                flex-1 flex flex-col gap-3 min-h-[100px] transition-all duration-300 rounded-[var(--radius-panel)] p-1
+                                                ${snapshot.isDraggingOver ? `${stageStyle.drag} shadow-control-ui` : ''}
                                             `}
                                         >
                                             {columnDeals.map((deal, index) => (

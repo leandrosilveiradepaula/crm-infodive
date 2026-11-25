@@ -129,26 +129,26 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
   }
   return <main className="space-y-6 pb-10">
     <PageHeader title="Service Desk" description="Chamados vinculados aos clientes e contratos já autorizados no CRM." />
-    {message && <p role="status" className="rounded-[var(--radius-control)] border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">{message}</p>}
+    {message && <p role="status" className="rounded-[var(--radius-control)] border border-border bg-muted px-3 py-2 text-body-ui text-muted-foreground">{message}</p>}
     <Card><CardHeader><CardTitle>Novo chamado</CardTitle></CardHeader><CardContent><form onSubmit={onCreate} className="grid gap-4" aria-label="Novo chamado">
-      <label className="text-sm font-medium">Cliente do CRM <ThemeSelect required value={accountId}
+      <label className="text-body-ui font-medium">Cliente do CRM <ThemeSelect required value={accountId}
         onChange={e=>void onAccount(e.target.value)} className={fieldClass}>
         <option value="">Selecione</option>
         {accounts.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
       </ThemeSelect></label>
-      <label className="text-sm font-medium">Contrato de serviço <ThemeSelect value={contractId} onChange={e=>setContractId(e.target.value)} className={fieldClass}>
+      <label className="text-body-ui font-medium">Contrato de serviço <ThemeSelect value={contractId} onChange={e=>setContractId(e.target.value)} className={fieldClass}>
         <option value="">Sem contrato</option>
         {contracts.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
       </ThemeSelect></label>
-      <label className="text-sm font-medium">Assunto <Input required minLength={3} maxLength={240} value={subject} onChange={e=>setSubject(e.target.value)} className={fieldClass}/></label>
-      <label className="text-sm font-medium">Descrição <Textarea maxLength={5000} value={description} onChange={e=>setDescription(e.target.value)} className={fieldClass}/></label>
-      <label className="text-sm font-medium">Prioridade <ThemeSelect value={priority} onChange={e=>setPriority(e.target.value as typeof priority)} className={fieldClass}>
+      <label className="text-body-ui font-medium">Assunto <Input required minLength={3} maxLength={240} value={subject} onChange={e=>setSubject(e.target.value)} className={fieldClass}/></label>
+      <label className="text-body-ui font-medium">Descrição <Textarea maxLength={5000} value={description} onChange={e=>setDescription(e.target.value)} className={fieldClass}/></label>
+      <label className="text-body-ui font-medium">Prioridade <ThemeSelect value={priority} onChange={e=>setPriority(e.target.value as typeof priority)} className={fieldClass}>
         <option value="low">Baixa</option><option value="normal">Normal</option>
         <option value="high">Alta</option><option value="urgent">Urgente</option>
       </ThemeSelect></label>
       <Button type="submit" disabled={busy} className="w-fit">Criar chamado</Button>
     </form></CardContent></Card>
-    <section className="space-y-3"><h2 className="text-lg font-semibold">Chamados</h2>
+    <section className="space-y-3"><h2 className="text-section-title font-semibold">Chamados</h2>
       {tickets.length===0?<PremiumEmptyState icon={Inbox} title="Nenhum chamado" description="Não há chamados nesta organização."/>:
       <ul className="space-y-3">{tickets.map(t=><li key={t.id} className="rounded-[var(--radius-panel)] border border-border bg-card p-4 shadow-[var(--shadow-card)]">
         <strong>#{t.ticket_number} — {t.subject}</strong>
@@ -156,12 +156,12 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
         <p>Status: {t.status} · Prioridade: {t.priority}</p>
         <div className="mt-2 flex flex-wrap gap-2">{(transitions[t.status]||[]).map(next=>
           <button key={next} type="button" disabled={busy}
-            onClick={()=>void advance(t.id,t.status,next)} className="focus-ring rounded-[var(--radius-control)] border border-border px-3 py-1 text-xs hover:bg-muted">
+            onClick={()=>void advance(t.id,t.status,next)} className="focus-ring rounded-[var(--radius-control)] border border-border px-3 py-1 text-metadata-ui hover:bg-muted">
             Mover para {next}</button>)}</div>
         <div className="mt-3 grid gap-2 border-t pt-3">
-          <label className="text-sm">Anexo privado (PDF, PNG, JPEG ou TXT, até 5 MB)
+          <label className="text-body-ui">Anexo privado (PDF, PNG, JPEG ou TXT, até 5 MB)
             <input type="file" accept=".pdf,.png,.jpg,.jpeg,.txt"
-              className="mt-1 w-full rounded-[var(--radius-control)] border border-input bg-surface-raised p-2 text-sm"
+              className="mt-1 w-full rounded-[var(--radius-control)] border border-input bg-surface-raised p-2 text-body-ui"
               onChange={e=>setAttachmentFiles(p=>({...p,[t.id]:e.target.files?.[0]}))}/>
           </label>
           <Button type="button" size="sm" disabled={busy||!attachmentFiles[t.id]}
@@ -174,17 +174,17 @@ export function ServiceDeskClient({tickets,accounts}:{tickets:Ticket[];accounts:
             onClick={()=>void openAttachment(a.id)}
             className="w-fit text-left underline">{a.filename}</button>)}
 
-          <label className="text-sm">Comentário interno
+          <label className="text-body-ui">Comentário interno
             <Textarea maxLength={5000} value={commentText[t.id]||''}
               onChange={e=>setCommentText(p=>({...p,[t.id]:e.target.value}))}
               className={fieldClass}/></label>
           <Button type="button" size="sm" variant="outline" disabled={busy||!(commentText[t.id]||'').trim()}
             onClick={()=>void addComment(t.id)} className="w-fit">Registrar comentário</Button>
-          <label className="text-sm">Minutos trabalhados
+          <label className="text-body-ui">Minutos trabalhados
             <Input type="number" min="1" max="1440" step="1"
               value={minutes[t.id]||''} onChange={e=>setMinutes(p=>({...p,[t.id]:e.target.value}))}
               className={fieldClass}/></label>
-          <label className="text-sm">Descrição do trabalho
+          <label className="text-body-ui">Descrição do trabalho
             <Textarea maxLength={5000} value={workNotes[t.id]||''}
               onChange={e=>setWorkNotes(p=>({...p,[t.id]:e.target.value}))}
               className={fieldClass}/></label>

@@ -9,7 +9,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     return (
-        <div className="flex h-dvh overflow-hidden bg-surface-subtle transition-colors">
+        <div data-slot="crm-dashboard-shell" className="flex h-dvh overflow-hidden bg-surface-subtle transition-colors">
             <Sidebar
                 isMobileMenuOpen={isMobileMenuOpen}
                 setIsMobileMenuOpen={setIsMobileMenuOpen}

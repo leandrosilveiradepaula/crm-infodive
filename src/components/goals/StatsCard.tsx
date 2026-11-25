@@ -16,45 +16,47 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, icon: Icon, trend, subtitle, color = 'blue' }: StatsCardProps) {
+    // Retain the existing color prop for caller compatibility, but resolve its
+    // meaning to shared semantic roles rather than screen-local palette values.
     const colorClasses = {
-        blue: 'from-blue-500/10 to-blue-600/5 border-blue-500/20 text-primary',
-        emerald: 'from-emerald-500/10 to-emerald-600/5 border-emerald-500/20 text-emerald-600',
-        amber: 'from-amber-500/10 to-amber-600/5 border-amber-500/20 text-amber-600',
-        violet: 'from-cyan-500/10 to-cyan-600/5 border-cyan-500/20 text-cyan-600',
+        blue: 'border-primary/20 bg-primary/5',
+        emerald: 'border-success/20 bg-success-subtle',
+        amber: 'border-warning/20 bg-warning-subtle',
+        violet: 'border-info/20 bg-info-subtle',
     };
 
     const iconBgClasses = {
-        blue: 'bg-blue-500/10 text-primary',
-        emerald: 'bg-emerald-500/10 text-emerald-600',
-        amber: 'bg-amber-500/10 text-amber-600',
-        violet: 'bg-cyan-500/10 text-cyan-600',
+        blue: 'bg-primary/10 text-primary',
+        emerald: 'bg-success-subtle text-success-readable',
+        amber: 'bg-warning-subtle text-warning-readable',
+        violet: 'bg-info-subtle text-foreground',
     };
 
     return (
-        <div className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br ${colorClasses[color]} p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}>
+        <div className={`relative overflow-hidden rounded-[var(--radius-panel)] border ${colorClasses[color]} p-4 transition-all duration-300 hover:shadow-card-ui hover:scale-[1.02]`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                    <p className="ds-type-metadata font-[var(--ds-type-control-weight)] uppercase tracking-wider text-muted-foreground mb-1">
                         {title}
                     </p>
-                    <p className="text-2xl font-black text-foreground">
+                    <p className="ds-type-metric font-[var(--ds-type-metric-weight)] text-foreground">
                         {value}
                     </p>
                     {subtitle && (
-                        <p className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                        <p className="ds-type-metadata text-muted-foreground font-[var(--ds-type-label-weight)] mt-0.5">
                             {subtitle}
                         </p>
                     )}
                     {trend && (
                         <div className="mt-2 flex items-center gap-1">
-                            <span className={`text-[10px] font-bold ${trend.isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
+                            <span className={`ds-type-metadata font-[var(--ds-type-control-weight)] ${trend.isPositive ? 'text-success-readable' : 'text-destructive-readable'}`}>
                                 {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                             </span>
-                            <span className="text-[10px] text-muted-foreground">vs último mês</span>
+                            <span className="ds-type-metadata text-muted-foreground">vs último mês</span>
                         </div>
                     )}
                 </div>
-                <div className={`rounded-xl p-2 ${iconBgClasses[color]}`}>
+                <div className={`rounded-[var(--radius-panel)] p-2 ${iconBgClasses[color]}`}>
                     <Icon className="h-5 w-5" />
                 </div>
             </div>

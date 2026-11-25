@@ -26,28 +26,28 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
     return (
         <div
             onClick={() => onView(proposal)}
-            className="group bg-card border border-border hover:border-primary/50 hover:shadow-2xl rounded-2xl p-4 transition-all cursor-pointer relative overflow-hidden"
+            className="group bg-card border border-border hover:border-primary/50 hover:shadow-card-ui rounded-[var(--radius-panel)] p-4 transition-all cursor-pointer relative overflow-hidden"
         >
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
             <div className="flex items-start justify-between gap-4">
                 {/* Left: Icon + Info */}
                 <div className="flex items-start gap-3 flex-1 relative z-10">
-                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-all shadow-inner">
+                    <div className="h-9 w-9 rounded-[var(--radius-control)] bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-all shadow-inner">
                         <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-1.5">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none">
+                            <span className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground bg-muted px-1.5 py-0.5 rounded leading-none">
                                 #{proposal.number}
                             </span>
-                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border flex items-center gap-1 leading-none ${status.color}`}>
+                            <span className={`text-metadata-ui font-black uppercase tracking-widest px-2 py-0.5 rounded-[var(--radius-control)] border flex items-center gap-1 leading-none ${status.color}`}>
                                 <StatusIcon className="h-2.5 w-2.5" /> {status.label}
                             </span>
                         </div>
-                        <h4 className="text-sm font-bold text-foreground mb-1 group-hover:text-primary transition-colors truncate tracking-tight">
+                        <h4 className="text-body-ui font-bold text-foreground mb-1 group-hover:text-primary transition-colors truncate tracking-tight">
                             {proposal.title}
                         </h4>
-                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
+                        <div className="flex items-center gap-3 text-metadata-ui text-muted-foreground font-black uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 {new Date(proposal.createdAt).toLocaleDateString('pt-BR')}
@@ -64,14 +64,14 @@ export function ProposalRow({ proposal, onView }: ProposalRowProps) {
 
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="text-right">
-                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground font-black mb-0.5 opacity-60">
+                        <p className="text-metadata-ui uppercase tracking-widest text-muted-foreground font-black mb-0.5 opacity-60">
                             Valor Total
                         </p>
-                        <p className="text-xl font-black text-foreground group-hover:text-primary transition-colors tracking-tighter">
+                        <p className="text-section-title font-black text-foreground group-hover:text-primary transition-colors tracking-tighter">
                             {formatCurrency(proposal.total)}
                         </p>
                     </div>
-                    <div className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground group-hover:text-white group-hover:bg-primary group-hover:border-primary transition-all shadow-sm group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:scale-110">
+                    <div className="h-8 w-8 rounded-[var(--radius-control)] border border-border flex items-center justify-center text-muted-foreground group-hover:text-white group-hover:bg-primary group-hover:border-primary transition-all shadow-control-ui group-hover:shadow-card-ui group-hover:shadow-primary/20 group-hover:scale-110">
                         <Eye className="h-4 w-4" />
                     </div>
                 </div>

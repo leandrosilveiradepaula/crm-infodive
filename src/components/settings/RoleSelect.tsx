@@ -13,44 +13,44 @@ export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
             label: 'Administrador',
             description: 'Acesso total a todas as configurações e dados.',
             icon: Shield,
-            color: 'text-teal-400',
-            bg: 'bg-teal-500/10',
-            border: 'border-teal-500/20',
-            activeBorder: 'border-teal-500',
-            ring: 'ring-teal-500'
+            color: 'text-info',
+            bg: 'bg-info/10',
+            border: 'border-info/20',
+            activeBorder: 'border-info',
+            ring: 'ring-info'
         },
         {
             id: 'manager',
             label: 'Gerente',
             description: 'Visão geral da equipe e relatórios completos.',
             icon: Briefcase,
-            color: 'text-blue-400',
-            bg: 'bg-blue-500/10',
-            border: 'border-blue-500/20',
-            activeBorder: 'border-blue-500',
-            ring: 'ring-blue-500'
+            color: 'text-primary',
+            bg: 'bg-primary/10',
+            border: 'border-primary/20',
+            activeBorder: 'border-primary',
+            ring: 'ring-primary'
         },
         {
             id: 'sales',
             label: 'Vendedor',
             description: 'Acesso focado em seus próprios leads e deals.',
             icon: User,
-            color: 'text-emerald-400',
-            bg: 'bg-emerald-500/10',
-            border: 'border-emerald-500/20',
-            activeBorder: 'border-emerald-500',
-            ring: 'ring-emerald-500'
+            color: 'text-success-readable',
+            bg: 'bg-success/10',
+            border: 'border-success/20',
+            activeBorder: 'border-success',
+            ring: 'ring-success'
         },
         {
             id: 'support',
             label: 'Suporte',
             description: 'Acesso para visualização de clientes e contratos.',
             icon: Headphones,
-            color: 'text-orange-400',
-            bg: 'bg-orange-500/10',
-            border: 'border-orange-500/20',
-            activeBorder: 'border-orange-500',
-            ring: 'ring-orange-500'
+            color: 'text-warning-readable',
+            bg: 'bg-warning/10',
+            border: 'border-warning/20',
+            activeBorder: 'border-warning',
+            ring: 'ring-warning'
         }
     ];
 
@@ -70,7 +70,7 @@ export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
                             }
                         }}
                         className={`
-                            relative p-4 rounded-xl border text-left transition-all duration-200 group
+                            relative p-4 rounded-[var(--radius-panel)] border text-left transition-all duration-200 group
                             ${isSelected
                                 ? `${role.activeBorder} ${role.bg} ring-1 ${role.ring}`
                                 : 'border-border bg-card hover:border-foreground/20 hover:bg-muted/50'
@@ -78,14 +78,14 @@ export const RoleSelect: React.FC<RoleSelectProps> = ({ value, onChange }) => {
                         `}
                     >
                         <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-lg ${isSelected ? 'bg-black/20 dark:bg-black/20' : 'bg-muted/50 group-hover:bg-muted'} transition-colors`}>
+                            <div className={`p-2 rounded-[var(--radius-control)] ${isSelected ? 'bg-black/20 dark:bg-black/20' : 'bg-muted/50 group-hover:bg-muted'} transition-colors`}>
                                 <role.icon className={`h-5 w-5 ${isSelected ? role.color : 'text-muted-foreground group-hover:text-foreground'}`} />
                             </div>
                             <div>
-                                <div className={`font-bold text-sm ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                <div className={`font-bold text-body-ui ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                                     {role.label}
                                 </div>
-                                <div className={`text-xs mt-1 leading-relaxed ${isSelected ? 'text-foreground/80' : 'text-muted-foreground/80'}`}>
+                                <div className={`text-metadata-ui mt-1 leading-relaxed ${isSelected ? 'text-foreground/80' : 'text-muted-foreground/80'}`}>
                                     {role.description}
                                 </div>
                             </div>

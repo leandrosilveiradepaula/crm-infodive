@@ -218,15 +218,15 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl p-0 gap-0 bg-background border-border overflow-hidden">
-                <div className="bg-emerald-600 p-8 text-white relative">
+                <div className="bg-success p-8 text-white relative">
                     <div className="absolute top-0 right-0 p-8 opacity-10">
                         <DollarSign className="w-32 h-32" />
                     </div>
                     <div className="relative z-10">
-                        <div className="bg-white/20 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
+                        <div className="bg-white/20 w-12 h-12 rounded-[var(--radius-panel)] flex items-center justify-center mb-4">
                             <CheckCircle2 className="w-6 h-6" />
                         </div>
-                        <DialogTitle className="text-2xl font-bold">Consolidar Venda</DialogTitle>
+                        <DialogTitle className="text-metric-ui font-bold">Consolidar Venda</DialogTitle>
                         <DialogDescription className="text-white/80 mt-1">
                             {deal.title} • {deal.company}
                         </DialogDescription>
@@ -237,22 +237,22 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                     {step === 1 ? (
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Valor Total</p>
-                                    <p className="text-xl font-black text-foreground">{formatCurrency(totalValue)}</p>
+                                <div className="p-4 bg-muted/50 rounded-[var(--radius-panel)] border border-border">
+                                    <p className="text-metadata-ui uppercase font-bold text-muted-foreground tracking-wider mb-1">Valor Total</p>
+                                    <p className="text-section-title font-black text-foreground">{formatCurrency(totalValue)}</p>
                                 </div>
-                                <div className="p-4 bg-muted/50 rounded-xl border border-border">
-                                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">Distribuidores</p>
-                                    <p className="text-xl font-black text-foreground">{distributors.length || 'Venda Direta'}</p>
+                                <div className="p-4 bg-muted/50 rounded-[var(--radius-panel)] border border-border">
+                                    <p className="text-metadata-ui uppercase font-bold text-muted-foreground tracking-wider mb-1">Distribuidores</p>
+                                    <p className="text-section-title font-black text-foreground">{distributors.length || 'Venda Direta'}</p>
                                 </div>
                             </div>
 
                             <section className="space-y-3">
-                                <h4 className="text-xs font-bold text-foreground flex items-center gap-2">
-                                    <Truck className="w-4 h-4 text-emerald-500" />
+                                <h4 className="text-metadata-ui font-bold text-foreground flex items-center gap-2">
+                                    <Truck className="w-4 h-4 text-success-readable" />
                                     Fluxo de Pedidos
                                 </h4>
-                                <div className="text-sm text-muted-foreground leading-relaxed">
+                                <div className="text-body-ui text-muted-foreground leading-relaxed">
                                     {distributors.length > 0 ? (
                                         <p>
                                             O sistema irá gerar <strong>{distributors.length} pedido(s) de venda</strong> automaticamente,
@@ -264,10 +264,10 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                 </div>
                             </section>
 
-                            <section className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/50 rounded-xl">
+                            <section className="p-4 bg-warning-subtle dark:bg-warning-subtle border border-warning dark:border-warning/50 rounded-[var(--radius-panel)]">
                                 <div className="flex gap-3">
-                                    <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                                    <div className="text-xs text-amber-800 dark:text-amber-200">
+                                    <AlertTriangle className="w-5 h-5 text-warning-readable shrink-0" />
+                                    <div className="text-metadata-ui text-warning-readable dark:text-warning-readable">
                                         <p className="font-bold mb-1">Verificação Final</p>
                                         <p>Certifique-se de que todos os produtos e margens estão corretos. Uma vez consolidada, a oportunidade não poderá ser reaberta sem permissão administrativa.</p>
                                     </div>
@@ -277,19 +277,19 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                     ) : step === 2 ? (
                         <div className="space-y-6">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="p-1.5 bg-blue-100 rounded-lg">
+                                <div className="p-1.5 bg-primary/10 rounded-[var(--radius-panel)]">
                                     <FileText className="w-4 h-4 text-primary" />
                                 </div>
-                                <h4 className="text-sm font-bold text-foreground">Comprovação de Fechamento</h4>
+                                <h4 className="text-body-ui font-bold text-foreground">Comprovação de Fechamento</h4>
                             </div>
 
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-metadata-ui text-muted-foreground">
                                 Para prosseguir, é obrigatório anexar um documento que comprove o aceite do cliente.
                             </p>
 
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Tipo de Evidência</p>
+                                    <p className="text-metadata-ui font-bold text-muted-foreground uppercase">Tipo de Evidência</p>
                                     <Select
                                         value={evidenceCategory}
                                         onValueChange={(v: any) => setEvidenceCategory(v)}
@@ -307,13 +307,13 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
 
                                 {!uploadedDoc ? (
                                     <div className="space-y-4">
-                                        <div className="relative border-2 border-dashed border-border rounded-xl p-8 text-center bg-muted/20 hover:border-blue-500/50 transition-colors">
-                                            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <div className="relative border-2 border-dashed border-border rounded-[var(--radius-panel)] p-8 text-center bg-muted/20 hover:border-primary/50 transition-colors">
+                                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                                                 <Paperclip className="w-6 h-6 text-primary" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-foreground">Clique para selecionar o arquivo</p>
-                                                <p className="text-[10px] text-muted-foreground mt-1">PDF, PNG, JPG ou DOCX até 25MB</p>
+                                                <p className="text-body-ui font-medium text-foreground">Clique para selecionar o arquivo</p>
+                                                <p className="text-metadata-ui text-muted-foreground mt-1">PDF, PNG, JPG ou DOCX até 25MB</p>
                                             </div>
                                             <input
                                                 type="file"
@@ -334,7 +334,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                         {evidenceFile && (
                                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                                                 {evidenceFile.type.startsWith('image/') && (
-                                                    <div className="relative aspect-video rounded-xl overflow-hidden border border-border">
+                                                    <div className="relative aspect-video rounded-[var(--radius-panel)] overflow-hidden border border-border">
                                                         <img
                                                             src={previewUrl || ''}
                                                             alt="Preview"
@@ -343,14 +343,14 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                     </div>
                                                 )}
 
-                                                <div className="p-3 bg-muted rounded-xl flex items-center justify-between border border-border">
+                                                <div className="p-3 bg-muted rounded-[var(--radius-panel)] flex items-center justify-between border border-border">
                                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                                         <FileText className="w-4 h-4 text-primary shrink-0" />
-                                                        <span className="text-xs font-semibold truncate text-foreground">{evidenceFile.name}</span>
+                                                        <span className="text-metadata-ui font-semibold truncate text-foreground">{evidenceFile.name}</span>
                                                     </div>
                                                     <Button
                                                         size="sm"
-                                                        className="bg-primary hover:bg-primary/90 text-white h-8 text-xs font-bold"
+                                                        className="bg-primary hover:bg-primary/90 text-white h-8 text-metadata-ui font-bold"
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
@@ -372,13 +372,13 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                         )}
                                     </div>
                                 ) : (
-                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl p-4 flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-800 rounded-full flex items-center justify-center shrink-0">
-                                            <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                                    <div className="bg-success-subtle dark:bg-success-subtle border border-success dark:border-success/50 rounded-[var(--radius-panel)] p-4 flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-success-subtle dark:bg-success rounded-full flex items-center justify-center shrink-0">
+                                            <CheckCircle2 className="w-6 h-6 text-success-readable dark:text-success-readable" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-bold text-emerald-800 dark:text-emerald-200 truncate">{uploadedDoc.name}</p>
-                                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-black">{evidenceCategory.replace('_', ' ')}</p>
+                                            <p className="text-metadata-ui font-bold text-success-readable dark:text-success-readable truncate">{uploadedDoc.name}</p>
+                                            <p className="text-metadata-ui text-success-readable dark:text-success-readable uppercase font-black">{evidenceCategory.replace('_', ' ')}</p>
                                         </div>
                                         <Button
                                             variant="ghost"
@@ -402,9 +402,9 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                                         <FileText className="w-4 h-4 text-primary" />
                                     </div>
-                                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest">Revisão Completa do Pedido</h3>
+                                    <h3 className="text-body-ui font-bold text-foreground uppercase tracking-widest">Revisão Completa do Pedido</h3>
                                 </div>
-                                <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-full font-bold">ESTILO PRESERVADO</span>
+                                <span className="text-metadata-ui bg-primary/10 text-primary px-2 py-1 rounded-full font-bold">ESTILO PRESERVADO</span>
                             </div>
 
                             <ScrollArea className="h-[400px] pr-4">
@@ -413,23 +413,23 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 text-primary">
                                             <Building2 className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Dados da Revenda (Sua Empresa)</h4>
+                                            <h4 className="text-metadata-ui font-black uppercase tracking-widest">Dados da Revenda (Sua Empresa)</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Razão Social</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Razão Social</Label>
                                                 <Input
                                                     value={formData.dealerName}
                                                     onChange={e => setFormData({ ...formData, dealerName: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CNPJ</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">CNPJ</Label>
                                                 <Input
                                                     value={formData.dealerCnpj}
                                                     onChange={e => setFormData({ ...formData, dealerCnpj: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                         </div>
@@ -439,100 +439,100 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
 
                                     {/* SEÇÃO 2: USUÁRIO FINAL */}
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-2 text-emerald-600">
+                                        <div className="flex items-center gap-2 text-success-readable">
                                             <User className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Dados do Usuário Final (Cliente)</h4>
+                                            <h4 className="text-metadata-ui font-black uppercase tracking-widest">Dados do Usuário Final (Cliente)</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Razão Social / Nome</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Razão Social / Nome</Label>
                                                 <Input
                                                     value={formData.userName}
                                                     onChange={e => setFormData({ ...formData, userName: e.target.value })}
-                                                    className="h-9 text-xs font-bold"
+                                                    className="h-9 text-metadata-ui font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CNPJ / CPF</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">CNPJ / CPF</Label>
                                                 <Input
                                                     value={formData.userCnpj}
                                                     onChange={e => setFormData({ ...formData, userCnpj: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Inscrição Estadual</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Inscrição Estadual</Label>
                                                 <Input
                                                     value={formData.userIe}
                                                     onChange={e => setFormData({ ...formData, userIe: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Endereço Completo</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Endereço Completo</Label>
                                                 <Input
                                                     value={formData.userAddress}
                                                     onChange={e => setFormData({ ...formData, userAddress: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Bairro</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Bairro</Label>
                                                 <Input
                                                     value={formData.userNeighborhood}
                                                     onChange={e => setFormData({ ...formData, userNeighborhood: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">CEP</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">CEP</Label>
                                                 <Input
                                                     value={formData.userZip}
                                                     onChange={e => setFormData({ ...formData, userZip: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Cidade</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Cidade</Label>
                                                 <Input
                                                     value={formData.userCity}
                                                     onChange={e => setFormData({ ...formData, userCity: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Estado (UF)</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Estado (UF)</Label>
                                                 <Input
                                                     value={formData.userState}
                                                     onChange={e => setFormData({ ...formData, userState: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/30 grid grid-cols-2 gap-4">
+                                        <div className="p-3 bg-success-subtle dark:bg-success-subtle rounded-[var(--radius-panel)] border border-success dark:border-success/30 grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Contato</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Contato</Label>
                                                 <Input
                                                     value={formData.userContact}
                                                     onChange={e => setFormData({ ...formData, userContact: e.target.value })}
-                                                    className="h-8 text-xs bg-background"
+                                                    className="h-8 text-metadata-ui bg-background"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Telefone</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Telefone</Label>
                                                 <Input
                                                     value={formData.userPhone}
                                                     onChange={e => setFormData({ ...formData, userPhone: e.target.value })}
-                                                    className="h-8 text-xs bg-background"
+                                                    className="h-8 text-metadata-ui bg-background"
                                                 />
                                             </div>
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">E-mail para Licenças/Faturamento</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">E-mail para Licenças/Faturamento</Label>
                                                 <Input
                                                     value={formData.userEmail}
                                                     onChange={e => setFormData({ ...formData, userEmail: e.target.value })}
-                                                    className="h-8 text-xs bg-background font-mono"
+                                                    className="h-8 text-metadata-ui bg-background font-mono"
                                                 />
                                             </div>
                                         </div>
@@ -542,13 +542,13 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
 
                                     {/* SEÇÃO 3: DETALHES DO PEDIDO */}
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-2 text-amber-600">
+                                        <div className="flex items-center gap-2 text-warning-readable">
                                             <Package className="w-4 h-4" />
-                                            <h4 className="text-[11px] font-black uppercase tracking-widest">Informações do Pedido Ingram</h4>
+                                            <h4 className="text-metadata-ui font-black uppercase tracking-widest">Informações do Pedido Ingram</h4>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5 col-span-2">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Faturamento por conta de:</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Faturamento por conta de:</Label>
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <Button
                                                         variant={formData.billingType === 'reseller' ? 'default' : 'outline'}
@@ -569,21 +569,21 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                 </div>
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">BID / Proposta Ingram</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">BID / Proposta Ingram</Label>
                                                 <Input
                                                     placeholder="Ex: 3182875/1"
                                                     value={formData.bidNumber}
                                                     onChange={e => setFormData({ ...formData, bidNumber: e.target.value })}
-                                                    className="h-9 text-xs font-mono bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50"
+                                                    className="h-9 text-metadata-ui font-mono bg-warning-subtle dark:bg-warning-subtle border-warning dark:border-warning/50"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <Label className="text-[10px] text-muted-foreground uppercase font-bold">Condição de Pagamento</Label>
+                                                <Label className="text-metadata-ui text-muted-foreground uppercase font-bold">Condição de Pagamento</Label>
                                                 <Input
                                                     placeholder="Ex: 30 DDF"
                                                     value={formData.paymentTerms}
                                                     onChange={e => setFormData({ ...formData, paymentTerms: e.target.value })}
-                                                    className="h-9 text-xs"
+                                                    className="h-9 text-metadata-ui"
                                                 />
                                             </div>
                                         </div>
@@ -594,17 +594,17 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     {/* SEÇÃO 4: GRADE DE PRODUTOS */}
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-blue-600">
+                                            <div className="flex items-center gap-2 text-primary">
                                                 <Truck className="w-4 h-4" />
-                                                <h4 className="text-[11px] font-black uppercase tracking-widest">Grade de Produtos</h4>
+                                                <h4 className="text-metadata-ui font-black uppercase tracking-widest">Grade de Produtos</h4>
                                             </div>
                                         </div>
 
                                         <div className="space-y-2">
                                             {formData.products.map((product, idx) => (
-                                                <div key={idx} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-lg bg-muted/30">
+                                                <div key={idx} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-[var(--radius-panel)] bg-muted/30">
                                                     <div className="col-span-6 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Part Number / Nome</Label>
+                                                        <Label className="text-metadata-ui uppercase font-bold">Part Number / Nome</Label>
                                                         <Input
                                                             value={product.sku}
                                                             onChange={e => {
@@ -612,11 +612,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].sku = e.target.value;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-metadata-ui"
                                                         />
                                                     </div>
                                                     <div className="col-span-2 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Qtd</Label>
+                                                        <Label className="text-metadata-ui uppercase font-bold">Qtd</Label>
                                                         <Input
                                                             type="number"
                                                             value={product.quantity}
@@ -625,11 +625,11 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].quantity = parseInt(e.target.value) || 0;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-metadata-ui"
                                                         />
                                                     </div>
                                                     <div className="col-span-3 space-y-1">
-                                                        <Label className="text-[9px] uppercase font-bold">Preço Unit.</Label>
+                                                        <Label className="text-metadata-ui uppercase font-bold">Preço Unit.</Label>
                                                         <Input
                                                             type="number"
                                                             value={product.unitPrice}
@@ -638,7 +638,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                                                 newProducts[idx].unitPrice = parseFloat(e.target.value) || 0;
                                                                 setFormData({ ...formData, products: newProducts });
                                                             }}
-                                                            className="h-7 text-[10px]"
+                                                            className="h-7 text-metadata-ui"
                                                         />
                                                     </div>
                                                     <div className="col-span-1 flex justify-center pb-1">
@@ -660,7 +660,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="w-full h-8 border-dashed text-[10px] font-bold"
+                                                className="w-full h-8 border-dashed text-metadata-ui font-bold"
                                                 onClick={() => {
                                                     setFormData({
                                                         ...formData,
@@ -676,20 +676,20 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                 </div>
                             </ScrollArea>
 
-                            <div className="bg-primary p-3 rounded-lg text-white">
-                                <p className="text-[10px] leading-relaxed opacity-90">
+                            <div className="bg-primary p-3 rounded-[var(--radius-panel)] text-white">
+                                <p className="text-metadata-ui leading-relaxed opacity-90">
                                     <span className="font-bold uppercase">Aviso:</span> Ao clicar em "Confirmar & Efetivar", o sistema usará exatamente os dados acima para preencher o formulário oficial da Ingram. Verifique se os impostos estão embutidos conforme a regra do distribuidor.
                                 </p>
                             </div>
                         </div>
                     ) : (
                         <div className="space-y-6 py-4 text-center animate-in zoom-in-95 duration-300">
-                            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                                <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+                            <div className="w-20 h-20 bg-success-subtle dark:bg-success-subtle rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                                <CheckCircle2 className="w-10 h-10 text-success-readable dark:text-success-readable" />
                             </div>
                             <div>
-                                <h3 className="text-xl font-black text-foreground">Venda Sincronizada!</h3>
-                                <p className="text-sm text-muted-foreground mt-2 px-6">
+                                <h3 className="text-section-title font-black text-foreground">Venda Sincronizada!</h3>
+                                <p className="text-body-ui text-muted-foreground mt-2 px-6">
                                     A oportunidade foi consolidada com sucesso. Os pedidos para os distribuidores já estão disponíveis no módulo de Vendas.
                                 </p>
                             </div>
@@ -697,9 +697,9 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                             <Separator className="my-6" />
 
                             <div className="space-y-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Automação de Pedidos</p>
+                                <p className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Automação de Pedidos</p>
                                 <Button
-                                    className="w-full bg-primary font-bold text-white h-12 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    className="w-full bg-primary font-bold text-white h-12 shadow-overlay-ui shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     onClick={handleDownloadOrder}
                                     disabled={isDownloading}
                                 >
@@ -710,7 +710,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     )}
                                     Baixar Formulário Ingram (Excel)
                                 </Button>
-                                <p className="text-[10px] text-muted-foreground italic">
+                                <p className="text-metadata-ui text-muted-foreground italic">
                                     *Arquivo pré-preenchido com dados da Revenda, Cliente e Produtos.
                                 </p>
                             </div>
@@ -721,7 +721,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                 <DialogFooter className="p-6 bg-muted/30 border-t border-border mt-0">
                     {step === 4 ? (
                         <Button
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11"
+                            className="w-full bg-success hover:bg-success text-white font-bold h-11"
                             onClick={() => {
                                 onSuccess({
                                     ...deal,
@@ -747,7 +747,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                 )}
                                 {step < 3 ? (
                                     <Button
-                                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                                        className="bg-success hover:bg-success text-white font-bold"
                                         onClick={() => setStep(step + 1)}
                                         disabled={step === 2 && !uploadedDoc}
                                     >
@@ -756,7 +756,7 @@ export function WonDealWizard({ deal, isOpen, onClose, onSuccess }: WonDealWizar
                                     </Button>
                                 ) : (
                                     <Button
-                                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold min-w-[140px]"
+                                        className="bg-success hover:bg-success text-white font-bold min-w-[140px]"
                                         onClick={handleConfirm}
                                         disabled={isLoading || !uploadedDoc}
                                     >

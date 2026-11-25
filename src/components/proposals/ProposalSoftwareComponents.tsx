@@ -1,3 +1,4 @@
+import { proposalDocumentPrimitives } from '@/design-system/proposal-document-colors';
 import React from 'react';
 import type { DealProduct } from '@/types/deal';
 import { formatProductDescription } from '@/utils/formatProductDescription';
@@ -12,8 +13,8 @@ interface ProposalSoftwareMainHighlightProps {
 }
 
 export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights, mainProduct, themePrimary, themeAccent }: ProposalSoftwareMainHighlightProps) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     // Default highlights if AI fails or hasn't run yet
     const highlights = softwareHighlights && softwareHighlights.length > 0
         ? softwareHighlights
@@ -31,13 +32,13 @@ export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights
             padding: '40px',
             borderRadius: '12px',
             marginBottom: '30px',
-            color: '#ffffff'
+            color: proposalDocumentPrimitives.paperWhite
         }}>
             <h2 style={{
                 fontSize: '24px',
                 fontWeight: '700',
                 marginBottom: '20px',
-                color: '#ffffff'
+                color: proposalDocumentPrimitives.paperWhite
             }}>
                 {softwareName}
             </h2>
@@ -60,7 +61,7 @@ export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights
                         <p style={{
                             fontSize: '13px',
                             lineHeight: '1.6',
-                            color: '#e5e7eb'
+                            color: proposalDocumentPrimitives.gray200
                         }}>
                             {item.value}
                         </p>
@@ -78,7 +79,7 @@ export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights
                 <h4 style={{
                     fontSize: '12px',
                     fontWeight: '800',
-                    color: '#ffffff',
+                    color: proposalDocumentPrimitives.paperWhite,
                     marginBottom: '12px',
                     textTransform: 'uppercase',
                     letterSpacing: '1px',
@@ -93,7 +94,7 @@ export function ProposalSoftwareMainHighlight({ softwareName, softwareHighlights
                     {techDetails.map((det, idx) => (
                         <li key={idx} style={{
                             fontSize: '13.5px',
-                            color: '#f3f4f6',
+                            color: proposalDocumentPrimitives.gray100,
                             paddingLeft: '20px',
                             position: 'relative',
                             lineHeight: '1.4'
@@ -130,16 +131,16 @@ interface ProposalSoftwareAdditionalProps {
 }
 
 export function ProposalSoftwareAdditional({ softwareProducts, simplifiedProductNames = {}, themePrimary, themeAccent }: ProposalSoftwareAdditionalProps) {
-    const primaryColor = themePrimary || '#1e3a5f';
-    const accentColor = themeAccent || '#E31837';
+    const primaryColor = themePrimary || proposalDocumentPrimitives.defaultPrimary;
+    const accentColor = themeAccent || proposalDocumentPrimitives.defaultAccent;
     if (softwareProducts.length <= 1) return null;
 
     return (
         <div style={{
-            backgroundColor: '#f8f9fa',
+            backgroundColor: proposalDocumentPrimitives.printNearWhite,
             padding: '25px',
             borderRadius: '8px',
-            border: '1px solid #e5e7eb'
+            border: `1px solid ${proposalDocumentPrimitives.gray200}`
         }}>
             <h3 style={{
                 fontSize: '16px',
@@ -161,12 +162,12 @@ export function ProposalSoftwareAdditional({ softwareProducts, simplifiedProduct
                     return (
                         <li key={index} style={{
                             fontSize: '14px',
-                            color: '#4b5563',
+                            color: proposalDocumentPrimitives.gray600,
                             marginBottom: '16px',
                             paddingLeft: '24px',
                             position: 'relative',
                             backgroundColor: '#fff',
-                            border: '1px solid #e5e7eb',
+                            border: `1px solid ${proposalDocumentPrimitives.gray200}`,
                             borderRadius: '6px',
                             padding: '12px 12px 12px 34px'
                         }}>
@@ -188,13 +189,13 @@ export function ProposalSoftwareAdditional({ softwareProducts, simplifiedProduct
                                     {techDetails.map((det, idx) => (
                                         <li key={idx} style={{
                                             fontSize: '12px',
-                                            color: '#6b7280',
+                                            color: proposalDocumentPrimitives.gray500,
                                             paddingLeft: '12px',
                                             position: 'relative',
                                             marginBottom: '4px'
                                         }}>
-                                            <span style={{ position: 'absolute', left: 0, color: '#9ca3af' }}>-</span>
-                                            <span style={{ fontWeight: '600', color: '#4b5563' }}>{det.quantity > 1 ? `${det.quantity}x ` : ''}</span>
+                                            <span style={{ position: 'absolute', left: 0, color: proposalDocumentPrimitives.gray400 }}>-</span>
+                                            <span style={{ fontWeight: '600', color: proposalDocumentPrimitives.gray600 }}>{det.quantity > 1 ? `${det.quantity}x ` : ''}</span>
                                             {det.description}
                                         </li>
                                     ))}
@@ -202,7 +203,7 @@ export function ProposalSoftwareAdditional({ softwareProducts, simplifiedProduct
                             )}
 
                             {techDetails.length === 0 && product?.description && !product.description.trim().startsWith('[') && (
-                                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                                <div style={{ fontSize: '12px', color: proposalDocumentPrimitives.gray500, marginTop: '4px' }}>
                                     {product.description}
                                 </div>
                             )}

@@ -8,7 +8,7 @@ interface FilterBarProps {
 
 export function FilterBar({ children }: FilterBarProps) {
     return (
-        <section aria-label="Filtros" className="flex flex-col gap-3 rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)] md:flex-row md:items-center">
+        <section aria-label="Filtros" className="flex flex-col gap-[var(--ds-filter-gap)] rounded-[var(--radius-panel)] border border-border bg-card p-[var(--ds-filter-padding)] shadow-[var(--shadow-card)] md:flex-row md:items-center">
             {children}
         </section>
     );

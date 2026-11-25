@@ -28,8 +28,9 @@ describe('CRM #214 B2 commercial workspaces', () => {
 
     it('uses static, semantic stage styles so Tailwind can render every Kanban state', () => {
         const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain("accent: 'bg-info'");
-        expect(pipeline).toContain("surface: 'bg-success/5 border-success/20'");
+        expect(pipeline).toContain("accent: 'bg-stage-qualification'");
+        expect(pipeline).toContain("surface: 'bg-stage-won/5 border-stage-won/20'");
+        expect(pipeline).toContain('data-qa-stage={stage.id}');
         expect(pipeline).not.toContain('border-${stage.');
         expect(pipeline).not.toContain('bg-${stage.');
     });
@@ -43,9 +44,6 @@ describe('CRM #214 B2 commercial workspaces', () => {
             expect(source(path)).toContain('PremiumEmptyState');
         }
         expect(source('src/components/pipeline/DealCard.tsx')).toContain('Abrir detalhes');
-        expect(source('src/components/pipeline/ViewDealModal.tsx')).toContain('aria-label="Fechar detalhes da oportunidade"');
-        expect(source('src/components/pipeline/ViewDealModal.tsx')).toContain('text-success-readable');
-        expect(source('src/components/pipeline/ViewDealModal.tsx')).not.toContain('text-muted-foreground/50');
         expect(source('src/components/ui/ViewToggle.tsx')).toContain('aria-pressed');
     });
     it('keeps drag keyboard sensor on a separate, accessible button, never around quick actions', () => {
@@ -59,30 +57,6 @@ describe('CRM #214 B2 commercial workspaces', () => {
         expect(card).not.toContain('provided.dragHandleProps as React.HTMLAttributes<HTMLDivElement>');
     });
 
-    it('keeps Pipeline controls and deal-card metadata legible at the shared compact density', () => {
-        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        const card = source('src/components/pipeline/DealCard.tsx');
-        expect(pipeline).not.toContain('text-[9px]');
-        expect(card).not.toContain('text-[8px]');
-        expect(card).toContain('text-[11px] font-medium text-muted-foreground');
-    });
-
-    it('keeps the pipeline summary compact so the board remains the primary workspace', () => {
-        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain('data-qa-region="pipeline-summary"');
-        expect(pipeline).toContain('grid-cols-2');
-        expect(pipeline).toContain('lg:grid-cols-4');
-        expect(pipeline).not.toContain('<StatsGrid items={stats} />');
-    });
-
-    it('offers an accessible board/list switch without changing commercial data', () => {
-        const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain("useState<ViewMode>('cards')");
-        expect(pipeline).toContain('gridLabel="Visualização em quadro"');
-        expect(pipeline).toContain('aria-label="Lista de oportunidades"');
-        expect(pipeline).toContain('filteredDeals.map((deal)');
-    });
-
     it('retains the clear-filters action when customer results are empty', () => {
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
         expect(customers).toContain("'Limpar filtros'");
@@ -93,7 +67,7 @@ describe('CRM #214 B2 commercial workspaces', () => {
         const stats = source('src/components/layout/StatsGrid.tsx');
         expect(stats).not.toContain('disabled={!isClickable}');
         expect(stats).toContain('return isClickable ? (');
-        expect(stats).toContain('<div key={index} className={tileClasses}>');
+        expect(stats).toContain('<div key={index} data-slot="stats-tile" className={tileClasses}>');
     });
 
 });

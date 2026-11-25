@@ -142,36 +142,28 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     value: initialAccounts.filter(c => c.status === 'Ativo').length,
                     description: `de ${initialAccounts.length} total`,
                     icon: Building,
-                    color: "text-primary",
-                    gradient: "from-primary/5 to-white dark:from-primary/10",
-                    border: "border-primary/10"
+                    tone: 'primary'
                 },
                 {
                     label: "Segmento Principal",
                     value: topSegment || 'N/A',
                     description: `${uniqueSegments.length} segmentos`,
                     icon: Briefcase,
-                    color: "text-teal-600 dark:text-teal-400",
-                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
-                    border: "border-teal-100 dark:border-teal-900/50"
+                    tone: 'info'
                 },
                 {
                     label: "Cidade Principal",
                     value: topCity || 'N/A',
                     description: `${Array.from(new Set(initialAccounts.map(c => c.city).filter(Boolean))).length} cidades`,
                     icon: MapPin,
-                    color: "text-emerald-600 dark:text-emerald-400",
-                    gradient: "from-emerald-50 to-white dark:from-emerald-950/20",
-                    border: "border-emerald-100 dark:border-emerald-900/50"
+                    tone: 'success'
                 },
                 {
                     label: "Total de Contatos",
                     value: initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0),
                     description: `Média ${(initialAccounts.length > 0 ? (initialAccounts.reduce((sum, c) => sum + (c.contacts?.length || 0), 0) / initialAccounts.length).toFixed(1) : 0)} por empresa`,
                     icon: User,
-                    color: "text-amber-600 dark:text-amber-400",
-                    gradient: "from-amber-50 to-white dark:from-amber-950/20",
-                    border: "border-amber-100 dark:border-amber-900/50"
+                    tone: 'warning'
                 }
             ]} />
 
@@ -188,7 +180,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 </div>
                 <div className="grid w-full grid-cols-1 gap-3 px-2 sm:grid-cols-2 lg:w-auto xl:flex xl:items-center">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por status" className="w-full xl:w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por status" className="w-full xl:w-[140px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-[var(--radius-control)] text-body-ui bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -199,7 +191,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por segmento" className="w-full xl:w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por segmento" className="w-full xl:w-[160px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-[var(--radius-control)] text-body-ui bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Segmento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -211,7 +203,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     <Select value={relationshipFilter} onValueChange={setRelationshipFilter}>
-                        <SelectTrigger aria-label="Filtrar empresas por relacionamento" className="w-full xl:w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-2xl text-xs bg-surface-raised border-border hover:bg-muted transition-colors">
+                        <SelectTrigger aria-label="Filtrar empresas por relacionamento" className="w-full xl:w-[180px] text-muted-foreground hover:text-foreground font-bold h-11 rounded-[var(--radius-control)] text-body-ui bg-surface-raised border-border hover:bg-muted transition-colors">
                             <SelectValue placeholder="Relacionamento" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover border-border text-popover-foreground">
@@ -225,7 +217,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     </Select>
 
                     {(searchTerm || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos') && (
-                        <Button aria-label="Limpar filtros de empresas" variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-red-500 hover:bg-red-500/10 h-10 w-10 rounded-xl transition-colors">
+                        <Button aria-label="Limpar filtros de empresas" variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-destructive-readable hover:bg-destructive-subtle h-10 w-10 rounded-[var(--radius-control)] transition-colors">
                             <X className="h-5 w-5" />
                         </Button>
                     )}

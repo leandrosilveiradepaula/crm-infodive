@@ -96,10 +96,11 @@ export function ReportsClientPage() {
             {/* Nova Barra de Filtros (Padrão Pipeline) */}
             <FilterBar>
                 <div className="relative w-full min-w-0 md:min-w-[18rem] md:flex-[1_1_18rem] group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                    <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar nos relatórios"
                         placeholder="Buscar por oportunidade, empresa, produto, vendedor ou status..."
-                        className="h-10 w-full pl-11"
+                        className="h-[var(--ds-control-height-large)] w-full bg-surface-raised pl-11 text-foreground placeholder:text-muted-foreground"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
@@ -107,14 +108,14 @@ export function ReportsClientPage() {
 
                 <div className="flex w-full min-w-0 flex-wrap items-center gap-3 md:flex-[1_1_34rem]">
                     {/* Advanced Multi-Year Pill Selector */}
-                    <div className="flex flex-col sm:flex-row gap-2 bg-muted/30 p-1 rounded-xl border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
+                    <div className="flex flex-col sm:flex-row gap-2 bg-surface-subtle p-1 rounded-[var(--radius-control)] border border-border w-full sm:w-auto h-auto sm:h-[38px] items-center overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-1 px-3 border-r border-border shrink-0 h-full">
                             <Calendar className="h-3.5 w-3.5 text-primary opacity-50" />
                             <select
                                 aria-label="Selecionar ano do relatório"
                         value={selectedYear}
                                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                            className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 text-xs font-medium text-foreground outline-none"
+                            className="min-h-8 cursor-pointer appearance-none bg-transparent py-1 pl-1 pr-4 ds-type-label font-medium text-foreground outline-none"
                             >
                                 {[selectedYear - 1, selectedYear, selectedYear + 1].map(year => (
                                     <option key={year} value={year}>{year}</option>
@@ -126,7 +127,7 @@ export function ReportsClientPage() {
                         <div className="flex gap-1 items-center px-1">
                             <button
                                 onClick={() => setSelectedQuarters([])}
-                                className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                className={`focus-ring h-8 whitespace-nowrap rounded-[var(--radius-control)] px-3 ds-type-label font-medium transition-colors ${selectedQuarters.length === 0 ? 'bg-primary text-primary-foreground shadow-control-ui' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                             >
                                 Tempo Todo
                             </button>
@@ -141,7 +142,7 @@ export function ReportsClientPage() {
                                                 prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val].sort()
                                             );
                                         }}
-                                        className={`focus-ring h-8 whitespace-nowrap rounded-md px-3 text-xs font-medium transition-colors ${isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                        className={`focus-ring h-8 whitespace-nowrap rounded-[var(--radius-control)] px-3 ds-type-label font-medium transition-colors ${isSelected ? 'bg-primary text-primary-foreground shadow-control-ui' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                                     >
                                         {q}
                                     </button>
@@ -151,13 +152,13 @@ export function ReportsClientPage() {
                     </div>
 
                     {/* Status Pill */}
-                    <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="shrink-0 text-xs font-medium text-muted-foreground">Status:</span>
+                    <div className="flex items-center gap-2 bg-surface-subtle px-3 py-1.5 rounded-[var(--radius-control)] border border-border h-11">
+                        <span className="shrink-0 ds-type-label font-medium text-muted-foreground">Status:</span>
                         <select
                             aria-label="Filtrar relatórios por status"
                         value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent text-xs font-semibold text-foreground outline-none"
+                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent ds-type-label font-semibold text-foreground outline-none"
                         >
                             <option value="all">Todos</option>
                             <option value="qualification">Qualificação</option>
@@ -169,13 +170,13 @@ export function ReportsClientPage() {
                     </div>
 
                     {/* Faturamento Pill */}
-                    <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border h-11">
-                        <span className="shrink-0 text-xs font-medium text-muted-foreground">Faturamento:</span>
+                    <div className="flex items-center gap-2 bg-surface-subtle px-3 py-1.5 rounded-[var(--radius-control)] border border-border h-11">
+                        <span className="shrink-0 ds-type-label font-medium text-muted-foreground">Faturamento:</span>
                         <select
                             aria-label="Filtrar relatórios por faturamento"
                         value={billingFilter}
                             onChange={(e) => setBillingFilter(e.target.value)}
-                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent text-xs font-semibold text-foreground outline-none"
+                            className="min-w-[80px] cursor-pointer appearance-none bg-transparent ds-type-label font-semibold text-foreground outline-none"
                         >
                             <option value="all">Todos</option>
                             {allBillingTypes.map(type => (
@@ -193,7 +194,7 @@ export function ReportsClientPage() {
                             aria-label="Filtrar relatórios por vendedor"
                         value={sellerFilter}
                             onChange={(e) => setSellerFilter(e.target.value)}
-                            className="h-11 rounded-[var(--radius-control)] border-border bg-muted/30 text-xs font-semibold"
+                            className="h-11 rounded-[var(--radius-control)] border-border bg-surface-subtle ds-type-label font-semibold"
                         >
                             <option value="all">Vendedor: Todos</option>
                             {allSellers.map(seller => (
@@ -204,10 +205,10 @@ export function ReportsClientPage() {
 
                     <button
                         onClick={handleExportReport}
-                        className="h-11 px-4 bg-success-subtle hover:bg-muted text-foreground border border-border rounded-full flex items-center gap-2 transition-all group shrink-0"
+                        className="h-11 px-4 bg-success-subtle hover:bg-muted text-foreground border border-border rounded-[var(--radius-control)] flex items-center gap-2 transition-all group shrink-0"
                     >
                         <Download className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                        <span className="text-xs font-semibold">CSV</span>
+                        <span className="ds-type-label font-semibold">CSV</span>
                     </button>
                 </div>
             </FilterBar>
@@ -219,44 +220,36 @@ export function ReportsClientPage() {
                     value: formatCompact(stats.dealMetrics.totalValue),
                     description: "Receita de negócios ganhos",
                     icon: DollarSign,
-                    color: "text-primary",
-                    gradient: "from-primary/5 to-white dark:from-primary/10",
-                    border: "border-primary/10"
+                    tone: 'primary',
                 },
                 {
                     label: "Taxa de Conversão",
                     value: formatPercentage(stats.dealMetrics.conversionRate),
                     description: "Negócios ganhos sobre fechados",
                     icon: Target,
-                    color: "text-teal-600 dark:text-teal-400",
-                    gradient: "from-teal-50 to-white dark:from-teal-950/20",
-                    border: "border-teal-100 dark:border-teal-900/50"
+                    tone: 'neutral',
                 },
                 {
                     label: "Ciclo Médio",
                     value: `${Math.round(stats.dealMetrics.avgCycleTime)}d`,
                     description: "Tempo médio até o fechamento",
                     icon: Calendar,
-                    color: "text-orange-600 dark:text-orange-400",
-                    gradient: "from-orange-50 to-white dark:from-orange-950/20",
-                    border: "border-orange-100 dark:border-orange-900/50"
+                    tone: 'warning',
                 },
                 {
                     label: "Pipeline Ativo",
                     value: formatCompact(stats.dealMetrics.pipelineValue),
                     description: `Ponderado: ${formatCompact(stats.dealMetrics.weightedValue)}`,
                     icon: TrendingUp,
-                    color: "text-cyan-600 dark:text-cyan-400",
-                    gradient: "from-cyan-50 to-white dark:from-cyan-950/20",
-                    border: "border-cyan-100 dark:border-cyan-900/50"
+                    tone: 'neutral',
                 }
             ]} />
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Funnel */}
-                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-primary/20 transition-all">
-                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui hover:border-primary/20 transition-all">
+                    <h3 className="mb-6 flex items-center gap-2 ds-type-body font-semibold text-muted-foreground">
                         <Filter className="h-4 w-4 text-primary" />
                         Funil de Conversão
                     </h3>
@@ -269,9 +262,9 @@ export function ReportsClientPage() {
                 </div>
 
                 {/* Sales Performance */}
-                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-emerald-500/20 transition-all">
-                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                        <Users className="h-4 w-4 text-emerald-400" />
+                <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui hover:border-success/20 transition-all">
+                    <h3 className="mb-6 flex items-center gap-2 ds-type-body font-semibold text-muted-foreground">
+                        <Users className="h-4 w-4 text-success-readable" />
                         Performance por Vendedor
                     </h3>
                     <SalesPerformance 
@@ -283,18 +276,18 @@ export function ReportsClientPage() {
                 </div>
 
                 {/* Revenue Forecast */}
-                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-teal-500/20 transition-all">
-                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                        <TrendingUp className="h-4 w-4 text-teal-400" />
+                <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui hover:border-info/20 transition-all">
+                    <h3 className="mb-6 flex items-center gap-2 ds-type-body font-semibold text-muted-foreground">
+                        <TrendingUp className="h-4 w-4 text-foreground" />
                         Previsão de Receita (3 Meses)
                     </h3>
                     <RevenueForecast forecast={stats.revenueForecast} />
                 </div>
 
                 {/* Loss Reasons */}
-                <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm hover:border-red-500/20 transition-all">
-                    <h3 className="mb-6 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                        <Target className="h-4 w-4 text-red-400" />
+                <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui hover:border-destructive/20 transition-all">
+                    <h3 className="mb-6 flex items-center gap-2 ds-type-body font-semibold text-muted-foreground">
+                        <Target className="h-4 w-4 text-destructive-readable" />
                         Motivos de Perda
                     </h3>
                     <LossReasonChart 
@@ -305,19 +298,19 @@ export function ReportsClientPage() {
             </div>
 
             {/* Product Analysis (Full Width) */}
-            <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm">
+            <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui">
                 <ProductAnalysis data={stats.productMetrics} />
             </div>
 
             {/* Drill-down Table: Oportunidades Relacionadas */}
-            <div className="glass-card p-5 rounded-2xl bg-card border border-border shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-700">
+            <div className="glass-card p-5 rounded-[var(--radius-panel)] bg-card border border-border shadow-control-ui animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <h3 className="mb-1 flex items-center gap-2 ds-type-body font-semibold text-foreground">
                             <Target className="h-4 w-4 text-primary" />
                             Detalhamento das Oportunidades
                         </h3>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="ds-type-label text-muted-foreground">
                             {mappedDeals.length} resultados encontrados para os filtros atuais
                         </p>
                     </div>
@@ -327,35 +320,35 @@ export function ReportsClientPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-border">
-                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Oportunidade</th>
-                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Empresa</th>
-                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Vendedor</th>
-                                <th className="pb-4 text-xs font-semibold text-muted-foreground">Status</th>
-                                <th className="pb-4 text-right text-xs font-semibold text-muted-foreground">Valor</th>
+                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Oportunidade</th>
+                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Empresa</th>
+                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Vendedor</th>
+                                <th className="pb-4 ds-type-label font-semibold text-muted-foreground">Status</th>
+                                <th className="pb-4 text-right ds-type-label font-semibold text-muted-foreground">Valor</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {mappedDeals.map((deal: any) => (
-                                <tr key={deal.id} className="group hover:bg-muted/30 transition-colors">
+                                <tr key={deal.id} className="group hover:bg-surface-subtle transition-colors">
                                     <td className="py-2.5">
-                                        <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="font-bold ds-type-body text-foreground group-hover:text-primary transition-colors">{deal.title}</p>
+                                        <p className="ds-type-label text-muted-foreground">
                                             {new Date(deal.created_at).toLocaleDateString()}
                                         </p>
                                     </td>
                                     <td className="py-4">
-                                        <span className="text-sm text-foreground">{deal.company}</span>
+                                        <span className="ds-type-body text-foreground">{deal.company}</span>
                                     </td>
                                     <td className="py-4">
                                         <div className="flex items-center gap-2">
-                                            <div className="h-6 w-6 rounded-full bg-surface-subtle flex items-center justify-center text-[10px] font-bold text-foreground">
+                                            <div className="h-6 w-6 rounded-[var(--radius-control)] bg-surface-subtle flex items-center justify-center text-metadata-ui font-bold text-foreground">
                                                 {deal.owner?.charAt(0)}
                                             </div>
-                                            <span className="text-sm text-foreground">{deal.owner}</span>
+                                            <span className="ds-type-body text-foreground">{deal.owner}</span>
                                         </div>
                                     </td>
                                     <td className="py-4">
-                                        <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${
+                                        <span className={`rounded-[var(--radius-control)] border px-2 py-1 ds-type-label font-semibold ${
                                             deal.stage === 'won' ? 'bg-success-subtle text-foreground border-border' :
                                             deal.stage === 'lost' ? 'bg-destructive-subtle text-foreground border-border' :
                                             'bg-surface-subtle text-foreground border-border'
@@ -368,14 +361,14 @@ export function ReportsClientPage() {
                                     </td>
                                     <td className="py-4 text-right">
                                         <p className="font-bold text-foreground">{formatCurrency(deal.value)}</p>
-                                        <p className="text-xs text-muted-foreground">{deal.probability}% de probabilidade</p>
+                                        <p className="ds-type-label text-muted-foreground">{deal.probability}% de probabilidade</p>
                                     </td>
                                 </tr>
                             ))}
                             {mappedDeals.length === 0 && (
                                 <tr>
                                     <td colSpan={5} className="py-20 text-center">
-                                        <p className="text-sm text-muted-foreground">Nenhuma oportunidade encontrada para estes filtros.</p>
+                                        <p className="ds-type-body text-muted-foreground">Nenhuma oportunidade encontrada para estes filtros.</p>
                                     </td>
                                 </tr>
                             )}

@@ -14,8 +14,8 @@ export const FunnelWidget = ({ data }: FunnelWidgetProps) => {
     const isDark = theme === 'dark';
 
     return (
-        <div className="bg-card rounded-2xl p-4 border border-border flex flex-col h-full">
-            <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-2 shrink-0">
+        <div className="bg-card rounded-[var(--radius-panel)] p-4 border border-border flex flex-col h-full">
+            <h2 className="text-body-ui font-bold text-foreground mb-4 flex items-center gap-2 shrink-0">
                 <Activity className="h-4 w-4 text-primary" />
                 Funil de Vendas
             </h2>
@@ -26,11 +26,11 @@ export const FunnelWidget = ({ data }: FunnelWidgetProps) => {
                             content={({ active, payload }) => {
                                 if (active && payload && payload.length) {
                                     return (
-                                        <div className="glass-card p-4 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">{payload[0].name}</p>
+                                        <div className="glass-card p-4 shadow-card-ui rounded-[var(--radius-panel)] animate-in fade-in zoom-in-95 duration-200">
+                                            <p className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground mb-2">{payload[0].name}</p>
                                             <div className="flex justify-between gap-8 items-center">
-                                                <span className="text-[10px] font-bold text-muted-foreground uppercase">Valor Total:</span>
-                                                <span className="text-sm font-black text-foreground">{formatCurrency(payload[0].value as number)}</span>
+                                                <span className="text-metadata-ui font-bold text-muted-foreground uppercase">Valor Total:</span>
+                                                <span className="text-body-ui font-black text-foreground">{formatCurrency(payload[0].value as number)}</span>
                                             </div>
                                         </div>
                                     );
@@ -64,7 +64,7 @@ export const FunnelWidget = ({ data }: FunnelWidgetProps) => {
             {/* Labels are HTML outside the chart so text never overlays SVG paint. */}
             <div role="list" aria-label="Etapas do funil" className="mt-3 flex flex-wrap gap-2">
                 {data.map((stage, index) => (
-                    <span key={stage.stage + '-' + index} role="listitem" className="rounded-md bg-surface-subtle px-2 py-1 text-xs font-semibold text-foreground">
+                    <span key={stage.stage + '-' + index} role="listitem" className="rounded-[var(--radius-control)] bg-surface-subtle px-2 py-1 text-metadata-ui font-semibold text-foreground">
                         {stage.stage === 'qualification' ? 'Qualificação' :
                          stage.stage === 'proposal' ? 'Proposta' :
                          stage.stage === 'negotiation' ? 'Negociação' : stage.stage}

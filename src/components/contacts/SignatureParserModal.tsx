@@ -110,9 +110,9 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-xl bg-card border-border text-foreground p-0 overflow-hidden">
-                <DialogHeader className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-stage-proposal/10">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                        <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <DialogHeader className="p-6 border-b border-border bg-surface-subtle">
+                    <DialogTitle className="flex items-center gap-2 text-section-title font-bold">
+                        <div className="p-2 bg-primary/10 rounded-[var(--radius-control)] border border-primary/20">
                             <Sparkles className="h-5 w-5 text-primary" />
                         </div>
                         Extrair Contato de Assinatura
@@ -122,7 +122,7 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                 <div className="p-6 space-y-6">
                     {!parsedData ? (
                         <div className="space-y-4">
-                            <label className="text-sm font-medium text-muted-foreground">
+                            <label className="text-body-ui font-medium text-muted-foreground">
                                 Cole a assinatura (texto ou imagem/print) abaixo:
                             </label>
 
@@ -136,14 +136,14 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                                 />
 
                                 {imagePreview && (
-                                    <div className="absolute inset-0 bg-background/95 z-10 flex flex-col items-center justify-center p-4 border rounded-md">
+                                    <div className="absolute inset-0 bg-background/95 z-10 flex flex-col items-center justify-center p-4 border rounded-[var(--radius-control)]">
                                         <div className="relative w-full h-full max-h-[180px] flex items-center justify-center">
                                             <Image
                                                 src={imagePreview}
                                                 alt="Preview"
                                                 width={400}
                                                 height={200}
-                                                className="object-contain max-h-full rounded-md shadow-sm"
+                                                className="object-contain max-h-full rounded-[var(--radius-control)] shadow-control-ui"
                                             />
                                             <Button
                                                 variant="destructive"
@@ -154,7 +154,7 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                                                 <X className="h-3 w-3" />
                                             </Button>
                                         </div>
-                                        <p className="text-xs text-muted-foreground mt-2 font-medium">
+                                        <p className="text-metadata-ui text-muted-foreground mt-2 font-medium">
                                             Imagem anexada para análise
                                         </p>
                                     </div>
@@ -172,7 +172,7 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 text-xs text-muted-foreground hover:text-primary"
+                                            className="h-8 text-metadata-ui text-muted-foreground hover:text-primary"
                                             onClick={() => document.getElementById('signature-upload')?.click()}
                                         >
                                             <ImageIcon className="h-4 w-4 mr-1" />
@@ -185,7 +185,7 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                                 <Button
                                     onClick={handleParse}
                                     disabled={(!signature.trim() && !imagePreview) || loading}
-                                    className="bg-primary hover:bg-primary/90 text-white font-bold shadow-lg shadow-primary/20"
+                                    className="bg-primary hover:bg-primary/90 text-white font-bold shadow-card-ui shadow-primary/20"
                                 >
                                     {loading ? (
                                         <>
@@ -203,55 +203,55 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                         </div>
                     ) : (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                            <div className="bg-muted/30 rounded-xl p-4 border border-border space-y-3">
-                                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <div className="bg-muted/30 rounded-[var(--radius-panel)] p-4 border border-border space-y-3">
+                                <h3 className="text-body-ui font-bold text-foreground flex items-center gap-2">
+                                    <CheckCircle2 className="h-4 w-4 text-success-readable" />
                                     Dados Identificados
                                 </h3>
 
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="grid grid-cols-2 gap-4 text-body-ui">
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Nome</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Nome</p>
                                         <p className="font-medium">{parsedData.name || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Empresa</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Empresa</p>
                                         <p className="font-medium">{parsedData.company || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Email</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Email</p>
                                         <p className="font-medium">{parsedData.email || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Cargo</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Cargo</p>
                                         <p className="font-medium">{parsedData.role || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Celular</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Celular</p>
                                         <p className="font-medium">{parsedData.mobile_phone || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">LinkedIn</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">LinkedIn</p>
                                         <p className="font-medium truncate">{parsedData.linkedin || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">WhatsApp</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">WhatsApp</p>
                                         <p className="font-medium">{parsedData.whatsapp || '-'}</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Telefone Fixo</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Telefone Fixo</p>
                                         <p className="font-medium">{parsedData.landline_phone || '-'}</p>
                                     </div>
                                     <div className="col-span-2 space-y-1">
-                                        <p className="text-xs text-muted-foreground uppercase font-bold">Endereço</p>
+                                        <p className="text-metadata-ui text-muted-foreground uppercase font-bold">Endereço</p>
                                         <p className="font-medium">{parsedData.address || '-'}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 bg-info/10 p-3 rounded-lg border border-info/20">
+                            <div className="flex items-center gap-3 bg-info/10 p-3 rounded-[var(--radius-control)] border border-info/20">
                                 <AlertCircle className="h-4 w-4 text-info flex-shrink-0" />
-                                <p className="text-xs text-info">
+                                <p className="text-metadata-ui text-info">
                                     Verifique os dados antes de confirmar. A IA pode cometer erros.
                                 </p>
                             </div>
@@ -266,7 +266,7 @@ export function SignatureParserModal({ isOpen, onClose, onDataParsed }: Signatur
                                 </Button>
                                 <Button
                                     onClick={handleApply}
-                                    className="flex-1 bg-success hover:bg-success/90 text-white font-bold shadow-lg shadow-success/20"
+                                    className="flex-1 bg-success hover:bg-success/90 text-white font-bold shadow-card-ui shadow-success/20"
                                 >
                                     Usar Estes Dados
                                     <ArrowRight className="ml-2 h-4 w-4" />

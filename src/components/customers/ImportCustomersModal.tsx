@@ -106,9 +106,9 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-4xl bg-card border-border text-foreground p-0 overflow-hidden">
-                <DialogHeader className="p-6 border-b border-border bg-gradient-to-r from-primary/10 to-info/10">
-                    <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                        <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <DialogHeader className="p-6 border-b border-border bg-surface-subtle">
+                    <DialogTitle className="flex items-center gap-2 text-section-title font-bold">
+                        <div className="p-2 bg-primary/10 rounded-[var(--radius-control)] border border-primary/20">
                             <FileSpreadsheet className="h-5 w-5 text-primary" />
                         </div>
                         Importador Inteligente de Clientes
@@ -119,7 +119,7 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                     {!parsedData.length ? (
                         <div className="space-y-6">
                             <div 
-                                className="border-2 border-dashed border-border rounded-2xl p-12 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
+                                className="border-2 border-dashed border-border rounded-[var(--radius-panel)] p-12 text-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <input 
@@ -134,17 +134,17 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                         <Upload className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-bold text-foreground">
+                                        <p className="text-body-ui font-bold text-foreground">
                                             {file ? file.name : 'Selecione ou arraste sua planilha'}
                                         </p>
-                                        <p className="text-xs text-muted-foreground mt-1">
+                                        <p className="text-metadata-ui text-muted-foreground mt-1">
                                             Suporta .CSV, .XLSX e .XLS
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex gap-3 italic text-xs text-amber-600 dark:text-amber-400">
+                            <div className="bg-warning/5 border border-warning/20 rounded-[var(--radius-panel)] p-4 flex gap-3 italic text-metadata-ui text-warning-readable dark:text-warning-readable">
                                 <Sparkles className="h-4 w-4 shrink-0" />
                                 <p>
                                     Nossa IA detectará automaticamente as colunas de Nome, CNPJ, Endereço e Contatos, 
@@ -174,24 +174,24 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                    <h3 className="text-sm font-bold">Mapeamento Concluído</h3>
-                                    <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 text-[10px] font-black rounded-full uppercase">
+                                    <CheckCircle2 className="h-5 w-5 text-success-readable" />
+                                    <h3 className="text-body-ui font-bold">Mapeamento Concluído</h3>
+                                    <span className="px-2 py-0.5 bg-success-subtle dark:bg-success/30 text-success-readable text-metadata-ui font-black rounded-full uppercase">
                                         {parsedData.length} Registros Detectados
                                     </span>
                                 </div>
-                                <Button variant="ghost" size="sm" onClick={() => setParsedData([])} className="h-8 text-[10px] font-black uppercase">
+                                <Button variant="ghost" size="sm" onClick={() => setParsedData([])} className="h-8 text-metadata-ui font-black uppercase">
                                     <X className="h-3 w-3 mr-1" /> Trocar Arquivo
                                 </Button>
                             </div>
 
-                            <div className="max-h-[400px] overflow-y-auto border border-border rounded-xl">
-                                <table className="w-full text-xs">
+                            <div className="max-h-[400px] overflow-y-auto border border-border rounded-[var(--radius-panel)]">
+                                <table className="w-full text-metadata-ui">
                                     <thead className="bg-muted/50 sticky top-0 z-10">
                                         <tr className="border-b border-border">
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Empresa / CNPJ</th>
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Localização</th>
-                                            <th className="text-left p-3 font-black uppercase tracking-widest text-[10px] text-muted-foreground">Contatos Primários</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-metadata-ui text-muted-foreground">Empresa / CNPJ</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-metadata-ui text-muted-foreground">Localização</th>
+                                            <th className="text-left p-3 font-black uppercase tracking-widest text-metadata-ui text-muted-foreground">Contatos Primários</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-border/50">
@@ -199,17 +199,17 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                             <tr key={idx} className="hover:bg-muted/20 transition-colors">
                                                 <td className="p-3">
                                                     <p className="font-bold text-foreground">{item.name}</p>
-                                                    <p className="text-[10px] text-muted-foreground font-mono">{item.cnpj}</p>
+                                                    <p className="text-metadata-ui text-muted-foreground font-mono">{item.cnpj}</p>
                                                 </td>
                                                 <td className="p-3">
                                                     <p className="text-muted-foreground">{item.city} - {item.state}</p>
-                                                    <p className="text-[10px] text-muted-foreground truncate max-w-[200px]">{item.street}, {item.number}</p>
+                                                    <p className="text-metadata-ui text-muted-foreground truncate max-w-[200px]">{item.street}, {item.number}</p>
                                                 </td>
                                                 <td className="p-3">
                                                     {item.contacts?.map((c: any, cIdx: number) => (
                                                         <div key={cIdx} className="mb-1 last:mb-0">
                                                             <p className="font-medium text-foreground">{c.name}</p>
-                                                            <p className="text-[9px] text-muted-foreground">{c.email || c.mobile_phone}</p>
+                                                            <p className="text-metadata-ui text-muted-foreground">{c.email || c.mobile_phone}</p>
                                                         </div>
                                                     ))}
                                                     {!item.contacts?.length && <span className="text-muted-foreground italic opacity-50">Nenhum</span>}
@@ -220,8 +220,8 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                 </table>
                             </div>
 
-                            <div className="bg-info/5 border border-info/20 rounded-xl p-4 flex gap-3 text-xs text-info">
-                                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />
+                            <div className="bg-info/5 border border-info/20 rounded-[var(--radius-panel)] p-4 flex gap-3 text-metadata-ui text-info">
+                                <AlertTriangle className="h-4 w-4 shrink-0 text-warning-readable" />
                                 <p>
                                     Os dados acima foram mapeados via IA. Clientes com o mesmo CNPJ já existentes no CRM serão 
                                     <strong> atualizados</strong>. Novos CNPJs serão cadastrados.
@@ -233,7 +233,7 @@ export function ImportCustomersModal({ isOpen, onClose }: ImportCustomersModalPr
                                 <Button 
                                     onClick={confirmImport}
                                     disabled={importing}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-10 shadow-lg shadow-emerald-600/20"
+                                    className="bg-success hover:bg-success text-white font-bold px-10 shadow-card-ui shadow-emerald-600/20"
                                 >
                                     {importing ? (
                                         <>
