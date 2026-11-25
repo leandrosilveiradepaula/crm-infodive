@@ -268,6 +268,7 @@ export function ActivitiesClientPage() {
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar atividades"
                         placeholder="Buscar atividade por título ou descrição..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
@@ -275,12 +276,12 @@ export function ActivitiesClientPage() {
                     />
                 </div>
 
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
                     <ThemeSelect
                         aria-label="Filtrar atividades por status"
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as ActivityStatus | 'all')}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Todos Status</option>
                         <option value="pending">Pendente</option>
@@ -293,7 +294,7 @@ export function ActivitiesClientPage() {
                         aria-label="Filtrar atividades por tipo"
                         value={filterType}
                         onChange={e => setFilterType(e.target.value as ActivityType | 'all')}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Todos Tipos</option>
                         <option value="task">Tarefa</option>

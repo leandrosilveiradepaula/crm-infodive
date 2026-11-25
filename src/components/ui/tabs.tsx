@@ -45,14 +45,16 @@ const tabsListVariants = cva(
 function TabsList({
   className,
   variant = "default",
+  layout = "default",
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+  VariantProps<typeof tabsListVariants> & { layout?: "default" | "workspace" }) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-layout={layout}
+      className={cn(tabsListVariants({ variant }), layout === "workspace" && "grid w-full grid-cols-2 gap-1 sm:flex sm:flex-wrap sm:justify-start", className)}
       {...props}
     />
   )
@@ -70,6 +72,7 @@ function TabsTrigger({
         "relative inline-flex items-center justify-center gap-1.5 whitespace-nowrap",
         "text-control-ui font-medium transition-colors",
         "px-4 py-2 rounded-[var(--radius-control)]",
+        "group-data-[layout=workspace]/tabs-list:min-w-0 group-data-[layout=workspace]/tabs-list:whitespace-normal group-data-[layout=workspace]/tabs-list:px-2 sm:group-data-[layout=workspace]/tabs-list:px-4",
         "disabled:pointer-events-none disabled:opacity-50",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
         // Inactive

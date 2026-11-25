@@ -11,7 +11,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
       role="region"
       aria-label="Tabela com rolagem horizontal"
       tabIndex={0}
-      className="relative w-full overflow-x-auto"
+      className="relative min-w-0 w-full max-w-full overflow-x-auto rounded-[var(--radius-control)] focus-ring"
     >
       <table
         data-slot="table"
@@ -72,6 +72,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       data-slot="table-head"
+      scope="col"
       className={cn(
         "text-muted-foreground h-[var(--ds-table-header-height)] px-[var(--ds-table-cell-inline)] text-left align-middle ds-type-table-heading whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className

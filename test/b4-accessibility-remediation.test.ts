@@ -27,7 +27,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         const cases: Record<string, string[]> = {
             'src/components/leads/LeadCard.tsx': ['Opções do lead'],
             'src/components/customers/CustomerCard.tsx': ['Opções da empresa'],
-            'src/app/(dashboard)/customers/client-page.tsx': ['Limpar filtros de empresas'],
+            'src/app/(dashboard)/customers/client-page.tsx': ['Buscar empresas'],
             'src/app/(dashboard)/dashboard/client-page.tsx': [
                 'Selecionar ano do Dashboard', 'Configurar layout do Dashboard', 'Fechar configuração de layout',
             ],
@@ -160,7 +160,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(goals).toContain('<thead className="bg-surface-raised');
         const goalsPage = source('src/app/(dashboard)/goals/client-page.tsx');
         expect(goalsPage).not.toContain('pb-10 animate-in fade-in');
-        expect(goalsPage).toContain('grid-cols-1 gap-1 sm:grid-cols-2');
+        expect(goalsPage).toContain('<TabsList layout="workspace"');
         const automation = source('src/app/(dashboard)/automations/client-page.tsx');
         expect(automation).not.toContain('pb-10 animate-in fade-in');
         expect(automation).not.toContain('border-border backdrop-blur-sm');
@@ -174,14 +174,16 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(select).not.toContain('dark:bg-input/30');
         expect(select).toContain('bg-surface-raised');
         const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain('flex-col gap-4 sm:flex-row');
+        expect(pipeline).toContain('flex-col gap-[var(--ds-stat-gap)] sm:flex-row');
         expect(source('src/design-system/tokens.css')).toContain('--ds-kanban-column-width:');
-        expect(pipeline).toContain('w-full shrink-0 flex-col sm:w-[var(--ds-kanban-column-width)]');
+        expect(pipeline).toContain('sm:basis-[var(--ds-kanban-column-width)] sm:min-w-[var(--ds-kanban-column-min-width)]');
+        expect(source('src/design-system/tokens.css')).toContain('--ds-kanban-column-min-width:');
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
         expect(customers).toContain('grid-cols-1 gap-3 px-2 sm:grid-cols-2');
         expect(customers).not.toContain('md:w-auto overflow-x-auto no-scrollbar');
         const sales = source('src/app/(dashboard)/sales/SalesList.tsx');
-        expect(sales).toContain('grid-cols-2 gap-1 p-1 sm:inline-flex');
+        expect(sales).toContain('<TabsList layout="workspace"');
+        expect(source('src/components/ui/tabs.tsx')).toContain('grid w-full grid-cols-2 gap-1 sm:flex sm:flex-wrap sm:justify-start');
         const design = source('src/app/(dashboard)/design-preview/page.tsx');
         expect(design).toContain('<Table className="table-fixed">');
         expect(design).toContain('whitespace-normal break-words');
@@ -270,7 +272,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(dashboard).not.toContain('opacity-0 group-hover:opacity-100 transition-all');
         const runner = source('test/e2e/run-authenticated-smoke.mjs');
         expect(runner).toContain('async function assertDashboardDragHandles(page, viewportName)');
-        expect(runner).toContain("if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name)");
+        expect(runner).toMatch(/if \(route === '\/dashboard'\)\s*\{\s*await assertDashboardDragHandles\(page, viewport\.name\);/);
+        expect(runner).toContain('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
         expect(runner).toContain("document.getElementById(id)");
         expect(runner).toContain('notKeyboardReachable');
         expect(runner).toContain('invisibleMobile');

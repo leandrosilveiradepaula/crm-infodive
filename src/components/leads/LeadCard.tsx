@@ -41,8 +41,8 @@ export function LeadCard({ lead, onEdit, onDelete, onConvert, onEnrich }: LeadCa
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground">
-                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-info/10 hover:text-info cursor-pointer text-metadata-ui font-bold uppercase tracking-wide py-1.5 text-info">
-                                <Sparkles className="h-3 w-3 mr-2" /> Enriquecer (AI)
+                            <DropdownMenuItem onClick={() => onEnrich(lead)} className="hover:bg-muted hover:text-foreground cursor-pointer text-metadata-ui font-medium py-1.5 text-foreground">
+                                <Sparkles className="h-3 w-3 mr-2" /> Pesquisa comercial
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onEdit(lead)} className="hover:bg-muted hover:text-foreground cursor-pointer text-metadata-ui font-bold uppercase tracking-wide py-1.5">
                                 <Edit className="h-3 w-3 mr-2" /> Editar

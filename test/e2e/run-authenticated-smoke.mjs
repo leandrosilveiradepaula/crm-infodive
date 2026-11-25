@@ -376,7 +376,7 @@ async function runAxe(page, source) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
+            const regions = new Set(['stats', 'dashboard-stats-widget', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
             const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
             // Persist only structural and numeric data. Never store HTML,
@@ -439,7 +439,7 @@ async function runAxe(page, source) {
             const style = getComputedStyle(element);
             const tag = element.tagName?.toLowerCase() || '';
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
+            const regions = new Set(['stats', 'dashboard-stats-widget', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             return {
                 resolved: true,
                 tag: staticTags.has(tag) ? tag : 'other',
@@ -929,6 +929,7 @@ async function login(page, baseUrl, account, options = {}) {
 const results = { version: 2, profiles: [], failures: [] };
 const MAX_A11Y_DIAGNOSTICS = 32;
 let a11yFailureCount = 0;
+let routeCaseFailureCount = 0;
 const a11yFailedRoutes = new Set();
 let browser;
 try {
@@ -1004,11 +1005,20 @@ try {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
+                    // Keep the isolated authenticated matrix running after a failing
+                    // interaction or layout assertion. A failed case remains a hard
+                    // gate; the next case starts from a fresh document via goto.
+                    let phase = 'navigation';
+                    let authenticatedDocument = false;
+                    try {
                     const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
+                    authenticatedDocument = true;
+                    phase = 'theme';
                     await setTheme(page, theme,
                         local && profileIndex === 0 && route === '/leads' && viewport.name === 'desktop');
+                    phase = 'token-propagation';
                     if (local && profileIndex === 0 &&
                         ['/leads', '/contacts', '/activities'].includes(route)) {
                         const propagated = await assertDesignTokenPropagation(page);
@@ -1021,6 +1031,7 @@ try {
                             primitiveCount: propagated.length, status: 'passed',
                         });
                     }
+                    phase = 'synthetic-fixture';
                     // The original pre-QA could report green even if a route
                     // rendered an empty product catalog. Local QA must prove
                     // that the actual seeded tenant data reached the Next.js page.
@@ -1042,8 +1053,20 @@ try {
                             throw new Error('LOCAL_QA_FIXTURE_NOT_RENDERED: automations');
                         }
                     }
+                    phase = 'base-layout';
                     await assertLayout(page);
-                    if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name);
+                    if (local && profileIndex === 0 && ['/service-desk', '/service-desk/knowledge'].includes(route)) {
+                        // The isolated schema does not provide Service Desk data.
+                        // Its genuine unavailable screen must render successfully.
+                        const unavailable = page.getByRole('alert').filter({ hasText: 'Acesso indisponível' });
+                        await unavailable.getByRole('heading', { name: 'Acesso indisponível' }).waitFor({ state: 'visible', timeout: 8000 });
+                    }
+                    if (route === '/dashboard') {
+                        await assertDashboardDragHandles(page, viewport.name);
+                        if (local && profileIndex === 0 && await page.locator('[data-qa-region="stats"]').count() !== 1) {
+                            throw new Error('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
+                        }
+                    }
                     await assertKeyboardFocus(page);
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;
@@ -1078,6 +1101,46 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    phase = 'workspace-layout';
+                    // Shared family contract: visible KPI values and reachable workspace tabs.
+                    if (local && profileIndex === 0) {
+                        const presentation = await page.evaluate(mobile => {
+                            const visible = node => node.getClientRects().length > 0;
+                            const stats = [...document.querySelectorAll('[data-qa-region="stats"]')].filter(visible);
+                            const tabs = [...document.querySelectorAll('[data-slot="tabs-list"][data-layout="workspace"]')].filter(visible);
+                            const statsFit = stats.every(grid => {
+                                const tiles = [...grid.querySelectorAll('[data-slot="stats-tile"]')].filter(visible);
+                                const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+                                return (!mobile || tiles.length < 2 || columns === 2) && tiles.every(tile =>
+                                    tile.scrollWidth <= tile.clientWidth + 1 &&
+                                    [...tile.querySelectorAll('p')].every(p => p.scrollWidth <= p.clientWidth + 1));
+                            });
+                            const tabsFit = tabs.every(list => {
+                                const bounds = list.getBoundingClientRect();
+                                return [...list.querySelectorAll('[role="tab"]')].filter(visible).every(tab => {
+                                    const b = tab.getBoundingClientRect();
+                                    return b.left >= bounds.left - 1 && b.right <= bounds.right + 1 &&
+                                        b.top >= bounds.top - 1 && b.bottom <= bounds.bottom + 1 &&
+                                        tab.scrollWidth <= tab.clientWidth + 1;
+                                });
+                            });
+                            return { stats: stats.length, tabs: tabs.length, statsFit, tabsFit };
+                        }, viewport.name === 'mobile');
+                        if (presentation.stats || presentation.tabs) {
+                            const ok = presentation.statsFit && presentation.tabsFit;
+                            if (!ok) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?presentation');
+                                const finding = { profileIndex, route, state: 'workspace-presentation',
+                                    viewport: viewport.name, theme, ...presentation };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                                process.stderr.write('CRM_WORKSPACE_LAYOUT_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                            profileResult.checks.push({ route, state: 'workspace-presentation', viewport: viewport.name,
+                                theme, status: ok ? 'passed' : 'failed', ...presentation });
+                        }
+                    }
+                    phase = 'automation-interaction';
                     // Real read-only interaction proof for the automation workspace.
                     // Do not submit, toggle, delete, duplicate or execute any workflow.
                     if (local && profileIndex === 0 && route === '/automations') {
@@ -1214,6 +1277,7 @@ try {
                         profileResult.checks.push({ route, state: 'automation-history', viewport: viewport.name, theme,
                             status: historyIssues ? 'failed' : 'passed' });
                     }
+                    phase = 'global-search';
                     // Verify that the actual global search control is an action,
                     // not a fake input. No search is submitted or data changed here.
                     if (local && profileIndex === 0 && route === '/dashboard') {
@@ -1305,6 +1369,108 @@ try {
                             status: assistantIssues ? 'failed' : 'passed',
                         });
                     }
+                    phase = 'directory-interaction';
+                    // Read-only authenticated directory UX. No AI request, export or writes.
+                    if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers', '/products'].includes(route)) {
+                        const spec = {
+                            '/leads': { search: 'Buscar leads', term: 'Prospecto', reset: 'Limpar filtros de leads', table: 'Leads' },
+                            '/contacts': { search: 'Buscar contatos', term: 'aurora@example.invalid', reset: 'Limpar filtros de contatos', table: 'Contatos' },
+                            '/customers': { search: 'Buscar empresas', term: 'Aurora', reset: 'Limpar filtros de empresas', table: 'Empresas' },
+                            '/products': { search: 'Buscar produtos', term: 'QA-SRV-001', reset: 'Limpar filtros de produtos', table: 'Produtos' },
+                        }[route];
+                        const search = page.getByRole('textbox', { name: spec.search, exact: true });
+                        const waitCount = expected => page.waitForFunction(value =>
+                            document.querySelector('[data-qa-region="directory-results"] [role="status"]')?.textContent?.trim() === value, expected);
+                        const summary = page.locator('[data-qa-region="stats"]').first();
+                        if (await summary.locator('[data-slot="stats-tile"]').count() !== 4) throw new Error('CRM_DIRECTORY_SUMMARY_MISSING: ' + route);
+                        const summaryLayout = await summary.evaluate(node => {
+                            const tiles = [...node.querySelectorAll('[data-slot="stats-tile"]')];
+                            return { columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
+                                noOverflow: tiles.every(tile => tile.scrollWidth <= tile.clientWidth + 1) };
+                        });
+                        if (!summaryLayout.noOverflow || (viewport.name === 'mobile' && summaryLayout.columns !== 2)) {
+                            throw new Error('CRM_DIRECTORY_SUMMARY_CLIPPING: ' + route);
+                        }
+                        await waitCount('2 de 2 registros');
+                        await search.fill(spec.term);
+                        await waitCount('1 de 2 registros');
+                        const toggle = page.getByRole('button', { name: 'Visualização em lista', exact: true });
+                        await toggle.click();
+                        const table = page.getByRole('table', { name: spec.table, exact: true });
+                        await table.waitFor({ state: 'visible' });
+                        if (await table.getByRole('row').count() !== 2 || await toggle.getAttribute('aria-pressed') !== 'true') {
+                            throw new Error('CRM_DIRECTORY_VIEW_LOST_FILTER: ' + route);
+                        }
+                        const frame = page.locator('[data-qa-region="directory-table"]');
+                        const frameFits = await frame.evaluate(node => {
+                            const b = node.getBoundingClientRect();
+                            return b.left >= -1 && b.right <= innerWidth + 1 &&
+                                getComputedStyle(node).overflowX === 'auto' &&
+                                node.querySelectorAll('th[scope="col"]').length >= 5;
+                        });
+                        if (!frameFits) throw new Error('CRM_DIRECTORY_TABLE_CLIPPING: ' + route);
+                        await page.waitForTimeout(250);
+                        const listAxe = await runAxe(page, source);
+                        const listIssues = listAxe.violationsCount + listAxe.incompleteCount;
+                        if (listIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add(route + '?list');
+                            const finding = { profileIndex, route, state: 'directory-list', viewport: viewport.name, theme,
+                                violations: listAxe.violations, incomplete: listAxe.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_DIRECTORY_LIST_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-' + route.slice(1) + '-filtered-list-' + viewport.name + '-' + theme + '.png'),
+                            fullPage: true,
+                        });
+                        if (route === '/customers' && !(await page.getByRole('button', { name: 'Exportação CSV indisponível' }).isDisabled())) {
+                            throw new Error('CRM_DIRECTORY_UNAVAILABLE_CSV_MISREPRESENTED');
+                        }
+                        if (route === '/leads') {
+                            const opener = table.getByRole('button', { name: /^Pesquisar empresa do lead / }).first();
+                            const openerLabel = await opener.getAttribute('aria-label');
+                            await opener.click();
+                            const research = page.getByRole('dialog', { name: 'Pesquisa comercial' });
+                            await research.waitFor({ state: 'visible', timeout: 8000 });
+                            await research.getByText(/Nenhum dado é gravado no lead/).waitFor({ state: 'visible' });
+                            await page.waitForTimeout(350);
+                            await assertAutomationDialogIsolation(page, research);
+                            const researchAxe = await runAxe(page, source);
+                            const issues = researchAxe.violationsCount + researchAxe.incompleteCount;
+                            if (issues) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?research');
+                                const finding = { profileIndex, route, state: 'lead-research', viewport: viewport.name, theme,
+                                    violations: researchAxe.violations, incomplete: researchAxe.incomplete };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                    results.failures.push(finding);
+                                    process.stderr.write('CRM_DIRECTORY_RESEARCH_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                                }
+                            }
+                            if (capture) await page.screenshot({
+                                path: resolve(artifactDir, account.label + '-leads-research-' + viewport.name + '-' + theme + '.png'),
+                                fullPage: true,
+                            });
+                            await page.keyboard.press('Escape');
+                            await research.waitFor({ state: 'hidden', timeout: 8000 });
+                            await page.waitForFunction(label => document.activeElement?.getAttribute('aria-label') === label &&
+                                !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert, openerLabel);
+                            profileResult.checks.push({ route, state: 'lead-research', viewport: viewport.name, theme,
+                                status: issues ? 'failed' : 'passed' });
+                        }
+                        await search.fill('qa-no-matching-directory-record-728');
+                        await waitCount('0 de 2 registros');
+                        await table.waitFor({ state: 'hidden' });
+                        await page.getByRole('button', { name: spec.reset, exact: true }).click();
+                        await waitCount('2 de 2 registros');
+                        await page.getByRole('button', { name: 'Visualização em cards', exact: true }).click();
+                        profileResult.checks.push({ route, state: 'directory-filter-view', viewport: viewport.name, theme,
+                            status: listIssues ? 'failed' : 'passed' });
+                    }
+                    phase = 'directory-dialog';
                     // Exercise real migrated lead/contact/customer creation dialogs
                     // without submitting or changing the synthetic QA database.
                     // A static source test cannot see focus, scrollbar clipping
@@ -1377,6 +1543,7 @@ try {
                     // Source-level component tests cannot certify the four Goals
                     // tabs or the Recharts theme colors. Exercise actual UI
                     // transitions with local synthetic data on the SAME SHA.
+                    phase = 'goals-interaction';
                     if (local && profileIndex === 0 && route === '/goals') {
                         const states = await assertGoalsFamilyStates(
                             page, source, capture, artifactDir,
@@ -1388,6 +1555,49 @@ try {
                         });
                     }
 
+                    phase = 'pipeline-list-proposals';
+                    // Read-only Pipeline list and proposal section, with actual seeded deal.
+                    if (local && profileIndex === 0 && route === '/pipeline') {
+                        const search = page.getByRole('textbox', { name: 'Buscar oportunidades', exact: true });
+                        await search.fill('Servidores');
+                        await page.getByRole('button', { name: 'Visualização em lista', exact: true }).click();
+                        const table = page.getByRole('table', { name: 'Oportunidades', exact: true });
+                        const opener = table.getByRole('button', { name: 'Abrir oportunidade Oportunidade Fictícia Servidores', exact: true });
+                        await opener.waitFor({ state: 'visible', timeout: 10000 });
+                        if (await table.getByRole('row').count() !== 2) throw new Error('CRM_PIPELINE_LIST_FILTER_FAILED');
+                        const listAudit = await runAxe(page, source);
+                        const listIssues = listAudit.incompleteCount + listAudit.violationsCount;
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-pipeline-list-' + viewport.name + '-' + theme + '.png'), fullPage: true,
+                        });
+                        await opener.click();
+                        const dialog = page.getByRole('dialog');
+                        await dialog.waitFor({ state: 'visible', timeout: 10000 });
+                        await dialog.getByRole('tab', { name: 'Propostas', exact: true }).click();
+                        await dialog.getByRole('button', { name: 'Abrir proposta Proposta Fictícia Aurora', exact: true }).waitFor({ state: 'visible', timeout: 12000 });
+                        await dialog.getByRole('button', { name: /^Rascunhos/ }).click();
+                        await dialog.getByRole('button', { name: 'Abrir proposta Proposta Fictícia Aurora', exact: true }).waitFor({ state: 'visible' });
+                        await page.waitForTimeout(350);
+                        const proposalsAudit = await runAxe(page, source);
+                        const proposalsIssues = proposalsAudit.incompleteCount + proposalsAudit.violationsCount;
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-pipeline-proposals-' + viewport.name + '-' + theme + '.png'), fullPage: true,
+                        });
+                        for (const [state, audit, issues] of [['pipeline-list', listAudit, listIssues], ['pipeline-proposals', proposalsAudit, proposalsIssues]]) {
+                            if (issues) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?' + state);
+                                const finding = { profileIndex, route, state, viewport: viewport.name, theme, violations: audit.violations, incomplete: audit.incomplete };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                                process.stderr.write('CRM_WORKSPACE_INTERACTION_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                            profileResult.checks.push({ route, state, viewport: viewport.name, theme, status: issues ? 'failed' : 'passed' });
+                        }
+                        await assertOpportunityDialogKeyboard(page, opener);
+                        await page.getByRole('button', { name: 'Limpar filtros de oportunidades', exact: true }).click();
+                        await page.getByRole('button', { name: 'Visualização em quadro', exact: true }).click();
+                    }
+                    phase = 'opportunity-detail';
                     // The board screenshot alone cannot prove the focused opportunity
                     // inspector. Capture one read-only drawer state from the synthetic
                     // admin fixture without changing stage, products, or any deal data.
@@ -1411,6 +1621,17 @@ try {
                             });
                         });
                         if (!stageTokensRendered) throw new Error('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
+                        if (viewport.name === 'desktop') {
+                            const allStageHeadersVisible = await page.getByRole('region', { name: 'Quadro de oportunidades' }).evaluate(board => {
+                                const bounds = board.getBoundingClientRect();
+                                const headers = [...board.querySelectorAll('[data-qa-stage] > header')];
+                                return headers.length === 5 && headers.every(header => {
+                                    const b = header.getBoundingClientRect();
+                                    return b.left >= bounds.left - 1 && b.right <= bounds.right + 1;
+                                });
+                            });
+                            if (!allStageHeadersVisible) throw new Error('CRM_KANBAN_STAGE_HEADERS_CLIPPED');
+                        }
                         const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
                         await openDetails.click();
                         const dialog = page.getByRole('dialog');
@@ -1495,6 +1716,28 @@ try {
                         }
                         profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed', keyboardIsolation: keyboardStatus });
                     }
+                    } catch (error) {
+                        if (!local) throw error;
+                        routeCaseFailureCount += 1;
+                        // Record only allowlisted assertion codes or the exception
+                        // category. Never include raw selector text, URLs, or data.
+                        const message = error instanceof Error ? error.message : '';
+                        const code = message.match(/^(CRM_[A-Z0-9_]+|AUTOMATION_[A-Z0-9_]+|COMMERCIAL_[A-Z0-9_]+|LOCAL_QA_FIXTURE_NOT_RENDERED)\b/)?.[0] ??
+                            (error instanceof Error && error.name === 'TimeoutError' ? 'TIMEOUT' : 'ASSERTION_OR_RUNTIME_ERROR');
+                        const finding = { profileIndex, route, viewport: viewport.name, theme,
+                            state: 'route-case-failure', phase, code, status: 'failed' };
+                        if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                        profileResult.checks.push(finding);
+                        process.stderr.write('CRM_ROUTE_CASE_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                        if (capture && authenticatedDocument && !page.isClosed()) {
+                            try {
+                                await page.screenshot({
+                                    path: resolve(artifactDir, account.label + '-' + route.slice(1).replaceAll('/', '-') +
+                                        '-failed-' + viewport.name + '-' + theme + '.png'), fullPage: true, timeout: 5000,
+                                });
+                            } catch { /* Evidence capture must not suppress the failed case. */ }
+                        }
+                    }
                 }
             }
         }
@@ -1502,7 +1745,10 @@ try {
         await context.close();
     }
     if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, candidateSha, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
-    if (a11yFailureCount) {
+    if (routeCaseFailureCount) {
+        fail(routeCaseFailureCount + ' route/viewport/theme case(s) failed or stopped before completing their assertions; ' +
+            a11yFailureCount + ' additional accessibility/layout findings. Remaining isolated cases attempted; matrix NOT certified.');
+    } else if (a11yFailureCount) {
         fail('WCAG remains unresolved in ' + a11yFailureCount +
             ' audited combination(s) across ' + a11yFailedRoutes.size +
             ' route(s). Full matrix was audited but not certified.');

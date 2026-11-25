@@ -178,13 +178,14 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar contratos"
                         placeholder="Buscar contratos por título ou empresa..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
                     <ThemeSelect
                         aria-label="Filtrar contratos por status"
                         value={filterStatus}
@@ -202,16 +203,16 @@ export function ContractsClientPage({ initialContracts }: ContractsClientPagePro
 
             {/* Contracts List */}
             <div className="overflow-hidden rounded-[var(--radius-panel)] border border-border bg-card shadow-[var(--shadow-card)]">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
+                <div role="region" aria-label="Tabela de contratos" tabIndex={0} className="min-w-0 max-w-full overflow-x-auto focus-ring">
+                    <table aria-label="Contratos" className="w-full min-w-[var(--ds-directory-table-min-width)]">
                         <thead className="bg-muted/50 border-b border-border">
                             <tr>
-                                <th className="text-left py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Documento</th>
-                                <th className="text-left py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Cliente</th>
-                                <th className="text-left py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Valor</th>
-                                <th className="text-left py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Status</th>
-                                <th className="text-left py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Data</th>
-                                <th className="text-right py-3 px-4 text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">Ações</th>
+                                <th scope="col" className="text-left py-3 px-4 text-label-ui font-semibold text-foreground">Documento</th>
+                                <th scope="col" className="text-left py-3 px-4 text-label-ui font-semibold text-foreground">Cliente</th>
+                                <th scope="col" className="text-left py-3 px-4 text-label-ui font-semibold text-foreground">Valor</th>
+                                <th scope="col" className="text-left py-3 px-4 text-label-ui font-semibold text-foreground">Status</th>
+                                <th scope="col" className="text-left py-3 px-4 text-label-ui font-semibold text-foreground">Data</th>
+                                <th scope="col" className="text-right py-3 px-4 text-label-ui font-semibold text-foreground">Ações</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">

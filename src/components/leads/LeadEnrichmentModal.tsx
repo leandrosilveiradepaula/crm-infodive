@@ -1,7 +1,18 @@
 'use client';
-import { useState } from 'react';
-import { Sparkles, Loader2, Check, X, Building2, Globe, FileText, Hash, MessageSquare } from 'lucide-react';
+
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { Sparkles } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+interface ResearchResult {
+    summary: string;
+    tags: string[];
+    talking_points: string[];
+}
 
 interface LeadEnrichmentModalProps {
     isOpen: boolean;
@@ -15,9 +26,11 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
     const [company, setCompany] = useState(initialCompany);
     const [website, setWebsite] = useState(initialWebsite);
     const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<ResearchResult | null>(null);
+    const opener = useRef<HTMLElement | null>(null);
+    useDialogBackgroundInert(isOpen);
 
-    const handleEnrich = async () => {
+    const handleResearch = async () => {
         if (!company) {
             toast.error('Informe o nome da empresa');
             return;
@@ -40,7 +53,7 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
             }
 
             setResult(data);
-            toast.success('Lead enriquecido com sucesso!');
+            toast.success('Sugestões geradas.');
         } catch (error: any) {
             console.error(error);
             toast.error(error.message);
@@ -56,146 +69,74 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
         }
     };
 
-    if (!isOpen) return null;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-card border border-border w-full max-w-lg rounded-[var(--radius-panel)] shadow-card-ui overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-8 border-b border-border bg-surface-subtle relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-full bg-primary/5 blur-3xl rounded-full -mr-16 pointer-events-none" />
-                    <div className="flex items-center justify-between relative z-10">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary/10 rounded-[var(--radius-panel)] border border-primary/20 shadow-inner">
-                                <Sparkles className="h-6 w-6 text-primary" />
-                            </div>
-                            <div>
-                                <h2 className="text-section-title font-black text-foreground tracking-tight">Prospecting Agent</h2>
-                                <p className="text-metadata-ui text-primary font-black uppercase tracking-[0.2em] mt-0.5">Powered by Gemini 2.1</p>
-                            </div>
-                        </div>
-                        <button onClick={onClose} className="p-2 hover:bg-info-subtle dark:hover:bg-card/5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
-                            <X className="h-5 w-5" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Body */}
-                <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+        <Dialog open={isOpen} onOpenChange={open => { if (!open && !loading) onClose(); }}>
+            <DialogContent
+                showCloseButton={false}
+                className="flex w-[calc(100%_-_2rem)] max-w-lg max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0"
+                onInteractOutside={event => event.preventDefault()}
+                onEscapeKeyDown={event => { if (loading) event.preventDefault(); }}
+                onOpenAutoFocus={() => {
+                    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                }}
+                onCloseAutoFocus={event => {
+                    event.preventDefault();
+                    const target = opener.current;
+                    if (target?.isConnected) requestAnimationFrame(() => target.focus());
+                }}
+            >
+                <header className="shrink-0 space-y-2 border-b border-border bg-card p-4 sm:p-6">
+                    <DialogTitle className="leading-snug">Pesquisa comercial</DialogTitle>
+                    <DialogDescription className="space-y-1 text-foreground">
+                        <span className="block bg-card">Sugestões de IA para abordagem comercial.</span>
+                        <span className="block bg-card">Nenhum dado é gravado no lead.</span>
+                        <span className="block bg-card">Não é uma pesquisa verificada na internet.</span>
+                        <span className="block bg-card">Confira as informações antes de usá-las.</span>
+                    </DialogDescription>
+                </header>
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-card p-4 sm:p-6">
                     {!result ? (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest mb-2">Empresa</label>
-                                <div className="relative">
-                                    <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    <input
-                                        type="text"
-                                        value={company}
-                                        onChange={(e) => setCompany(e.target.value)}
-                                        placeholder="Ex: Lenovo"
-                                        className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
-                                    />
-                                </div>
+                        <>
+                            <div className="space-y-1">
+                                <label htmlFor="lead-research-company" className="text-label-ui font-medium">Empresa</label>
+                                <Input id="lead-research-company" value={company} onChange={event => setCompany(event.target.value)} disabled={loading} />
                             </div>
-                            <div>
-                                <label className="block text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest mb-2">Website (Opcional)</label>
-                                <div className="relative">
-                                    <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    <input
-                                        type="text"
-                                        value={website}
-                                        onChange={(e) => setWebsite(e.target.value)}
-                                        placeholder="Ex: lenovo.com"
-                                        className="w-full bg-muted/30 border border-border rounded-[var(--radius-panel)] py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all font-bold"
-                                    />
-                                </div>
+                            <div className="space-y-1">
+                                <label htmlFor="lead-research-website" className="text-label-ui font-medium">Website (opcional)</label>
+                                <Input id="lead-research-website" value={website} onChange={event => setWebsite(event.target.value)} placeholder="exemplo.com.br" disabled={loading} />
                             </div>
-
-                            <button
-                                onClick={handleEnrich}
-                                disabled={loading || !company}
-                                className="w-full py-4 bg-primary text-white font-black rounded-[var(--radius-panel)] hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-card-ui shadow-primary/20 uppercase text-metadata-ui tracking-widest active:scale-95"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                        Pesquisando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="h-4 w-4 fill-white/20" />
-                                        Enriquecer Dados
-                                    </>
-                                )}
-                            </button>
-                        </div>
+                        </>
                     ) : (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {/* Summary Section */}
-                            <div className="bg-muted/30 p-4 rounded-[var(--radius-panel)] border border-border">
-                                <h3 className="flex items-center gap-2 text-metadata-ui font-black text-foreground mb-2 uppercase tracking-widest">
-                                    <FileText className="h-4 w-4 text-primary" />
-                                    Resumo Executivo
-                                </h3>
-                                <p className="text-body-ui text-muted-foreground leading-relaxed bg-background p-3 rounded-[var(--radius-control)] border border-border">
-                                    {result.summary}
-                                </p>
-                            </div>
-
-                            {/* Tags Section */}
-                            <div>
-                                <h3 className="flex items-center gap-2 text-metadata-ui font-black text-foreground mb-3 uppercase tracking-widest">
-                                    <Hash className="h-4 w-4 text-stage-proposal" />
-                                    Principais Tecnologias / Setores
-                                </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {result.tags?.map((tag: string, i: number) => (
-                                        <span key={i} className="px-3 py-1.5 bg-stage-proposal/10 text-stage-proposal text-metadata-ui font-black uppercase tracking-wider rounded-[var(--radius-control)] border border-stage-proposal/20">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Talking Points Section */}
-                            <div>
-                                <h3 className="flex items-center gap-2 text-metadata-ui font-black text-foreground mb-3 uppercase tracking-widest">
-                                    <MessageSquare className="h-4 w-4 text-success" />
-                                    Pontos de Conversa (Ice Breakers)
-                                </h3>
-                                <ul className="space-y-2">
-                                    {result.talking_points?.map((point: string, i: number) => (
-                                        <li key={i} className="flex gap-3 text-body-ui text-muted-foreground bg-muted/30 p-4 rounded-[var(--radius-panel)] border border-border font-medium">
-                                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-success/10 text-success flex items-center justify-center text-metadata-ui font-black border border-success/20">
-                                                {i + 1}
-                                            </span>
-                                            {point}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+                        <>
+                            <section className="space-y-2">
+                                <h3 className="text-section-title font-semibold">Resumo sugerido</h3>
+                                <p className="break-words text-body-ui text-muted-foreground">{result.summary}</p>
+                            </section>
+                            <section className="space-y-2">
+                                <h3 className="text-section-title font-semibold">Setores e tecnologias sugeridos</h3>
+                                <div className="flex flex-wrap gap-2">{result.tags?.map((tag, i) => <span key={i} className="break-all rounded-[var(--radius-control)] border border-border bg-surface-subtle px-2 py-1 text-body-ui text-foreground">{tag}</span>)}</div>
+                            </section>
+                            <section className="space-y-2">
+                                <h3 className="text-section-title font-semibold">Pontos de conversa</h3>
+                                <ul className="list-disc space-y-2 pl-5 text-body-ui text-foreground">{result.talking_points?.map((point, i) => <li className="break-words" key={i}>{point}</li>)}</ul>
+                            </section>
+                        </>
                     )}
                 </div>
-
-                {/* Footer */}
-                {result && (
-                    <div className="p-4 border-t border-border bg-muted/30 flex gap-3">
-                        <button
-                            onClick={() => setResult(null)}
-                            className="flex-1 py-3 text-muted-foreground font-bold hover:text-foreground hover:bg-muted rounded-[var(--radius-panel)] transition-all uppercase text-metadata-ui tracking-wider"
-                        >
-                            Voltar
-                        </button>
-                        <button
-                                                            onClick={handleApply}
-                                                            className="flex-1 py-4 bg-primary text-white font-black rounded-[var(--radius-panel)] hover:bg-primary/90 transition-all shadow-card-ui shadow-primary/20 flex items-center justify-center gap-2 uppercase text-metadata-ui tracking-[0.2em] active:scale-95"
-                                                        >
-                                                            <Check className="h-4 w-4" />
-                                                            Aplicar Dados
-                                                        </button>
-                    </div>
-                )}
-            </div>
-        </div>
+                <footer className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-border p-4 sm:p-6">
+                    <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Fechar</Button>
+                    {result ? (
+                        <>
+                            <Button type="button" variant="outline" onClick={() => setResult(null)}>Nova consulta</Button>
+                            <Button type="button" onClick={handleApply}>Concluir consulta</Button>
+                        </>
+                    ) : (
+                        <Button type="button" onClick={handleResearch} disabled={loading || !company.trim()}>
+                            <Sparkles aria-hidden="true" /> {loading ? 'Gerando sugestões...' : 'Gerar sugestões'}
+                        </Button>
+                    )}
+                </footer>
+            </DialogContent>
+        </Dialog>
     );
 };

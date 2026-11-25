@@ -38,7 +38,7 @@ export function GoalsClientPage({
 
             {/* Navigation Tabs */}
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                <TabsList className="mb-6 grid w-full grid-cols-1 gap-1 sm:grid-cols-2 xl:flex xl:flex-wrap xl:justify-start">
+                <TabsList layout="workspace" aria-label="Seções de metas e comissões" className="mb-3">
                     <TabsTrigger value="goals">
                         <Target className="h-4 w-4" /> Metas de Vendas
                     </TabsTrigger>

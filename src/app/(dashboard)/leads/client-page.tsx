@@ -15,6 +15,7 @@ import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
+import { DirectoryResults } from '@/components/layout/DirectoryResults';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface LeadsClientPageProps {
@@ -60,6 +61,8 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
         const matchesInterest = filterInterest === 'all' || lead.interest === filterInterest;
         return matchesSearch && matchesStatus && matchesInterest;
     });
+
+    const clearFilters = () => { setSearchTerm(''); setFilterStatus('all'); setFilterInterest('all'); };
 
     const handleEdit = (lead: Lead) => {
         setSelectedLead(lead);
@@ -138,10 +141,12 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
         }
     ];
 
+    const hasFilters = searchTerm !== '' || filterStatus !== 'all' || filterInterest !== 'all';
+
     return (
         <div className="flex-1 space-y-6 pb-10">
-            <PageHeader 
-                title="Gestão de Leads" 
+            <PageHeader
+                title="Gestão de Leads"
                 description="Capture, qualifique e converta interessados em clientes."
             >
                 <Button onClick={() => setIsFormOpen(true)} size="lg">
@@ -149,25 +154,26 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                     Novo Lead
                 </Button>
             </PageHeader>
-            
-            <StatsGrid items={stats} />
+
+            <StatsGrid density="directory" items={stats} />
 
             <FilterBar>
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar leads"
                         placeholder="Buscar leads por nome, empresa ou email..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
                     <ThemeSelect
                         aria-label="Filtrar leads por status"
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Status: Todos</option>
                         <option value="Novo">Novo</option>
@@ -181,7 +187,7 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                         aria-label="Filtrar leads por interesse"
                         value={filterInterest}
                         onChange={e => setFilterInterest(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Interesse: Todos</option>
                         {uniqueInterests.map(interest => (
@@ -193,7 +199,9 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                 </div>
             </FilterBar>
 
-            {view === 'cards' ? (
+            <DirectoryResults shown={filteredLeads.length} total={leads.length} hasFilters={hasFilters} onReset={clearFilters} resetLabel="Limpar filtros de leads" />
+
+            {filteredLeads.length > 0 && (view === 'cards' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     {filteredLeads.map(lead => (
                         <LeadCard
@@ -208,12 +216,13 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                 </div>
             ) : (
                 <LeadsTable
+                    onEnrich={handleEnrich}
                     leads={filteredLeads}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onConvert={handleConvert}
                 />
-            )}
+            ))}
 
             {filteredLeads.length === 0 && (
                 <PremiumEmptyState
@@ -239,8 +248,9 @@ export function LeadsClientPage({ initialLeads }: LeadsClientPageProps) {
                 />
             )}
 
-            {selectedLead && (
+            {selectedLead && isEnrichOpen && (
                 <LeadEnrichmentModal
+                    key={selectedLead.id}
                     isOpen={isEnrichOpen}
                     onClose={handleCloseEnrich}
                     onEnrich={onEnrichSubmit}

@@ -73,7 +73,7 @@ export default function IntegrationsClientPage({
             />
 
             <Tabs value={view} onValueChange={(v) => setView(v as 'apps' | 'dev')} className="w-full">
-                <TabsList className="mb-6 w-full justify-start overflow-x-auto no-scrollbar">
+                <TabsList layout="workspace" aria-label="Seções de integrações" className="mb-3">
                     <TabsTrigger value="apps">
                         <Zap className="h-4 w-4" /> App Marketplace
                     </TabsTrigger>

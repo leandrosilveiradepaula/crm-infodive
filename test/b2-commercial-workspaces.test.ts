@@ -59,8 +59,8 @@ describe('CRM #214 B2 commercial workspaces', () => {
 
     it('retains the clear-filters action when customer results are empty', () => {
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
-        expect(customers).toContain("'Limpar filtros'");
-        expect(customers).toContain('onAction={initialAccounts.length === 0 ? handleCreate : clearFilters}');
+        expect(customers).toContain('onReset={clearFilters} resetLabel="Limpar filtros de empresas"');
+        expect(source('src/components/layout/DirectoryResults.tsx')).toContain('Limpar filtros');
     });
 
     it('renders read-only KPIs as information rather than disabled controls', () => {
