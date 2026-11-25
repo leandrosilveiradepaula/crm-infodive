@@ -14,6 +14,7 @@ describe('Cross-workspace presentation contract', () => {
         expect(dashboard).toContain("router.push('/pipeline')");
         expect(dashboard).toContain("router.push('/reports')");
         expect(dashboard).not.toContain('+12.5%');
+        expect(read('src/app/(dashboard)/dashboard/client-page.tsx')).toContain("widget.id === 'stats' ? 'dashboard-stats-widget' : widget.id");
     });
     it.each(['goals/client-page.tsx','settings/client-page.tsx','integrations/client-page.tsx','sales/SalesList.tsx'])('%s uses the shared responsive workspace navigation', route => {
         expect(read('src/app/(dashboard)/' + route)).toContain('<TabsList layout="workspace"');
@@ -50,5 +51,13 @@ describe('Cross-workspace presentation contract', () => {
         expect(read('src/app/(dashboard)/service-desk/page.tsx')).toContain('Nenhum banco alternativo será utilizado.');
         expect(read('src/app/(dashboard)/service-desk/knowledge/page.tsx')).toContain('Não autorizado ou conhecimento indisponível.');
         expect(read('src/components/email/EmailClient.tsx')).toContain('<ConnectEmailButton />');
+        for (const route of ['service-desk/page.tsx', 'service-desk/knowledge/page.tsx']) {
+            const page = read('src/app/(dashboard)/' + route);
+            expect(page).toContain('<UnavailableWorkspaceState description=');
+            expect(page).not.toContain('icon={AlertCircle}');
+        }
+        const state = read('src/components/layout/UnavailableWorkspaceState.tsx');
+        expect(state).toContain("'use client'");
+        expect(state).toContain('<PremiumEmptyState icon={AlertCircle}');
     });
 });

@@ -41,7 +41,7 @@ describe('Commercial directory usability and honest actions', () => {
         expect(lead).toContain('onEnrich={onEnrichSubmit}');
         expect(modal).not.toContain('Aplicar Dados');
         expect(modal).toContain('Nenhum dado é gravado no lead');
-        expect(modal).toContain('não uma pesquisa verificada na internet');
+        expect(modal).toContain('Não é uma pesquisa verificada na internet.');
         expect(modal).toContain("fetch('/api/gemini/enrich'");
         expect(modal).toContain('useDialogBackgroundInert(isOpen)');
         expect(modal).toContain('onEnrich(result)');

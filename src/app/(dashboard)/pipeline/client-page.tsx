@@ -401,14 +401,14 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <section key={stage.id} data-qa-stage={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-[var(--ds-kanban-column-width)]">
-                                    <header className="mb-2 flex items-center justify-between rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
-                                        <div>
+                                <section key={stage.id} data-qa-stage={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-auto sm:grow sm:shrink sm:basis-[var(--ds-kanban-column-width)] sm:min-w-[var(--ds-kanban-column-min-width)]">
+                                    <header className="mb-2 flex min-w-0 flex-wrap items-start justify-between gap-2 rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
+                                        <div className="min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <span aria-hidden="true" data-qa-stage-dot="" className={`size-2 rounded-full ${stage.accent}`} />
                                                 <h3 className="ds-type-body font-semibold text-foreground">{stage.title}</h3>
                                             </div>
-                                            <p className="mt-1 ds-type-label text-muted-foreground">{stageDeals.length} oportunidades</p>
+                                            <p className="mt-1 ds-type-label text-muted-foreground [overflow-wrap:anywhere]">{stageDeals.length} oportunidades</p>
                                         </div>
                                         <span className="ds-type-body font-semibold text-foreground">{formatCompact(totalStageValue)}</span>
                                     </header>

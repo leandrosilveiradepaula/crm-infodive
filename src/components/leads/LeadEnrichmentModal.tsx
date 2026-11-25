@@ -85,14 +85,16 @@ export const LeadEnrichmentModal = ({ isOpen, onClose, onEnrich, initialCompany 
                     if (target?.isConnected) requestAnimationFrame(() => target.focus());
                 }}
             >
-                <header className="shrink-0 space-y-2 border-b border-border p-4 sm:p-6">
+                <header className="shrink-0 space-y-2 border-b border-border bg-card p-4 sm:p-6">
                     <DialogTitle className="leading-snug">Pesquisa comercial</DialogTitle>
-                    <DialogDescription>Gere sugestões de abordagem com IA a partir do nome da empresa. Nenhum dado é gravado no lead.</DialogDescription>
+                    <DialogDescription className="space-y-1 text-foreground">
+                        <span className="block bg-card">Sugestões de IA para abordagem comercial.</span>
+                        <span className="block bg-card">Nenhum dado é gravado no lead.</span>
+                        <span className="block bg-card">Não é uma pesquisa verificada na internet.</span>
+                        <span className="block bg-card">Confira as informações antes de usá-las.</span>
+                    </DialogDescription>
                 </header>
-                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-                    <p className="text-body-ui leading-relaxed text-foreground">
-                        As sugestões usam o conhecimento do modelo, não uma pesquisa verificada na internet. Confira as informações antes de usá-las.
-                    </p>
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto bg-card p-4 sm:p-6">
                     {!result ? (
                         <>
                             <div className="space-y-1">

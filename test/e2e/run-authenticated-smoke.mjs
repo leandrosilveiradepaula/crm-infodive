@@ -376,7 +376,7 @@ async function runAxe(page, source) {
                 // Complex shadow DOM targets are intentionally not serialized.
             }
             if (!element) return { resolved: false };
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
+            const regions = new Set(['stats', 'dashboard-stats-widget', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
             const region = regions.has(candidateRegion) ? candidateRegion : 'outside-widgets';
             // Persist only structural and numeric data. Never store HTML,
@@ -439,7 +439,7 @@ async function runAxe(page, source) {
             const style = getComputedStyle(element);
             const tag = element.tagName?.toLowerCase() || '';
             const candidateRegion = element.closest('[data-qa-region]')?.getAttribute('data-qa-region');
-            const regions = new Set(['stats', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
+            const regions = new Set(['stats', 'dashboard-stats-widget', 'chart', 'funnel', 'recent_deals', 'tasks', 'health', 'performers', 'ai_suggestions', 'ai_actions', 'deal-doctor', 'deal-risk', 'deal-actions', 'deal-dialog', 'deal-header', 'deal-tabs', 'deal-sidebar', 'deal-financial', 'goals-commissions']);
             return {
                 resolved: true,
                 tag: staticTags.has(tag) ? tag : 'other',
@@ -1055,7 +1055,18 @@ try {
                     }
                     phase = 'base-layout';
                     await assertLayout(page);
-                    if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name);
+                    if (local && profileIndex === 0 && ['/service-desk', '/service-desk/knowledge'].includes(route)) {
+                        // The isolated schema does not provide Service Desk data.
+                        // Its genuine unavailable screen must render successfully.
+                        const unavailable = page.getByRole('alert').filter({ hasText: 'Acesso indisponível' });
+                        await unavailable.getByRole('heading', { name: 'Acesso indisponível' }).waitFor({ state: 'visible', timeout: 8000 });
+                    }
+                    if (route === '/dashboard') {
+                        await assertDashboardDragHandles(page, viewport.name);
+                        if (local && profileIndex === 0 && await page.locator('[data-qa-region="stats"]').count() !== 1) {
+                            throw new Error('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
+                        }
+                    }
                     await assertKeyboardFocus(page);
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;
@@ -1610,6 +1621,17 @@ try {
                             });
                         });
                         if (!stageTokensRendered) throw new Error('COMMERCIAL_STAGE_TOKEN_RENDERING_FAILED');
+                        if (viewport.name === 'desktop') {
+                            const allStageHeadersVisible = await page.getByRole('region', { name: 'Quadro de oportunidades' }).evaluate(board => {
+                                const bounds = board.getBoundingClientRect();
+                                const headers = [...board.querySelectorAll('[data-qa-stage] > header')];
+                                return headers.length === 5 && headers.every(header => {
+                                    const b = header.getBoundingClientRect();
+                                    return b.left >= bounds.left - 1 && b.right <= bounds.right + 1;
+                                });
+                            });
+                            if (!allStageHeadersVisible) throw new Error('CRM_KANBAN_STAGE_HEADERS_CLIPPED');
+                        }
                         const openDetails = page.getByRole('button', { name: /Abrir detalhes da oportunidade/i }).first();
                         await openDetails.click();
                         const dialog = page.getByRole('dialog');

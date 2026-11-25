@@ -323,7 +323,7 @@ export const DashboardClientPage = ({ initialMetrics, initialRecentDeals, initia
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
-                                                data-qa-region={widget.id}
+                                                data-qa-region={widget.id === 'stats' ? 'dashboard-stats-widget' : widget.id}
                                                 className={`${widget.colSpan} relative group transition-transform ${snapshot.isDragging ? 'z-50 scale-[1.02] shadow-overlay-ui' : ''}`}
                                             >
                                                 <>

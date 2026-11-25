@@ -1,6 +1,5 @@
 import { PageHeader } from '@/components/layout/PageHeader';
-import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
-import { AlertCircle } from 'lucide-react';
+import { UnavailableWorkspaceState } from '@/components/layout/UnavailableWorkspaceState';
 import { listServiceDeskAccounts, listServiceDeskTickets } from './actions';
 import { ServiceDeskClient } from './service-desk-client';
 
@@ -15,7 +14,7 @@ export default async function ServiceDeskPage() {
   } catch {
     return <div className="space-y-6 pb-10">
       <PageHeader title="Service Desk" />
-      <div role="alert"><PremiumEmptyState icon={AlertCircle} title="Acesso indisponível" description="Módulo indisponível ou acesso não autorizado. Nenhum banco alternativo será utilizado." /></div>
+      <UnavailableWorkspaceState description="Módulo indisponível ou acesso não autorizado. Nenhum banco alternativo será utilizado." />
     </div>;
   }
 }

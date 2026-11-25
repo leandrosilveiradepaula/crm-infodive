@@ -296,6 +296,7 @@
   --ds-deal-stage-select-width: 10.5rem;
   /* Shared opportunity board geometry, configured here for every rendered stage. */
   --ds-kanban-column-width: 18rem;
+  --ds-kanban-column-min-width: 12.5rem;
   --ds-kanban-board-min-height: 34rem;
   --ds-kanban-column-min-height: 12.5rem;
   --ds-deal-inspector-width: 21rem;

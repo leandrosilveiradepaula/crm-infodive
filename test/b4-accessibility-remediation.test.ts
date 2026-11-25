@@ -174,9 +174,10 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(select).not.toContain('dark:bg-input/30');
         expect(select).toContain('bg-surface-raised');
         const pipeline = source('src/app/(dashboard)/pipeline/client-page.tsx');
-        expect(pipeline).toContain('flex-col gap-4 sm:flex-row');
+        expect(pipeline).toContain('flex-col gap-[var(--ds-stat-gap)] sm:flex-row');
         expect(source('src/design-system/tokens.css')).toContain('--ds-kanban-column-width:');
-        expect(pipeline).toContain('w-full shrink-0 flex-col sm:w-[var(--ds-kanban-column-width)]');
+        expect(pipeline).toContain('sm:basis-[var(--ds-kanban-column-width)] sm:min-w-[var(--ds-kanban-column-min-width)]');
+        expect(source('src/design-system/tokens.css')).toContain('--ds-kanban-column-min-width:');
         const customers = source('src/app/(dashboard)/customers/client-page.tsx');
         expect(customers).toContain('grid-cols-1 gap-3 px-2 sm:grid-cols-2');
         expect(customers).not.toContain('md:w-auto overflow-x-auto no-scrollbar');
