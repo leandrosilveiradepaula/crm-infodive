@@ -144,6 +144,8 @@
 
 :root {
   /* Infodive interface foundation: semantic values, never product-specific hex values. */
+  --ds-spacing-unit: 0.25rem;
+  --spacing: var(--ds-spacing-unit);
   --ds-base-radius: 0.75rem;
   --radius: var(--ds-base-radius);
   --ds-base-radius-control: 0.625rem;
@@ -341,6 +343,18 @@
   --ds-command-max-width: 40rem;
   --ds-command-list-max-height: 25rem;
   --ds-command-input-size: 1rem;
+  --ds-command-input-padding: 20px 24px;
+  --ds-command-list-padding: 8px;
+  --ds-command-empty-padding: 64px 24px;
+  --ds-command-group-gap: 8px;
+  --ds-command-group-heading-padding: 8px 12px 4px;
+  --ds-command-item-gap: 12px;
+  --ds-command-item-padding: 12px 16px;
+  --ds-command-icon-size: 16px;
+  --ds-command-kbd-padding: 2px 6px;
+  --ds-command-kbd-small-padding: 2px 4px;
+  --ds-command-footer-padding: 12px 16px;
+  --ds-command-scrollbar-width: 6px;
   --ds-form-dialog-max-height: 90dvh;
   --ds-form-dialog-gutter: 1.5rem;
   --ds-control-height-small: 2rem;

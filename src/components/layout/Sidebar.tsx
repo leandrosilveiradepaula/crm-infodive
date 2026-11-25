@@ -71,9 +71,12 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
     };
 
     return (
-        <aside className={cn(
+        <aside id="crm-sidebar" role={isMobileMenuOpen ? "dialog" : undefined}
+            aria-modal={isMobileMenuOpen ? true : undefined}
+            aria-label={isMobileMenuOpen ? "Menu de navegação" : undefined}
+            className={cn(
             'fixed inset-y-0 left-0 z-50 flex h-full border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width,transform] duration-200 lg:static lg:translate-x-0',
-            isMobileMenuOpen ? 'w-[var(--ds-nav-expanded-width)] translate-x-0' : '-translate-x-full lg:translate-x-0',
+            isMobileMenuOpen ? 'visible w-[var(--ds-nav-expanded-width)] max-w-full translate-x-0' : 'invisible -translate-x-full lg:visible lg:translate-x-0',
             isCollapsed ? 'lg:w-[var(--ds-nav-rail-width)]' : 'lg:w-[var(--ds-nav-expanded-width)]',
         )}>
             <div className="flex w-[var(--ds-nav-rail-width)] shrink-0 flex-col items-center border-r border-sidebar-border py-3">
@@ -95,7 +98,7 @@ export function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen, isCollapsed }: 
             <div className={cn('flex min-w-0 flex-1 flex-col overflow-hidden', isCollapsed && 'lg:hidden')}>
                 <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
                     <div className="min-w-0"><p className="ds-type-label font-medium text-muted-foreground">Infodive CRM</p><h2 className="truncate ds-type-body font-semibold tracking-tight">{activeArea.label}</h2></div>
-                    <button type="button" aria-label="Fechar menu" onClick={() => setIsMobileMenuOpen(false)} className="focus-ring rounded-[var(--radius-control)] p-2 text-sidebar-foreground/70 hover:bg-sidebar-accent lg:hidden"><X className="size-5" /></button>
+                    <button type="button" data-slot="crm-mobile-menu-close" aria-label="Fechar menu" onClick={() => setIsMobileMenuOpen(false)} className="focus-ring rounded-[var(--radius-control)] p-2 text-sidebar-foreground/70 hover:bg-sidebar-accent lg:hidden"><X className="size-5" /></button>
                 </div>
                 <nav aria-label={`Navegação de ${activeArea.label}`} className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
                     {activeArea.items.map((item) => {

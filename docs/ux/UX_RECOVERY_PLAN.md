@@ -1,3 +1,9 @@
+### 2026-11-25 — Owner-authorized final integrated Design System / UI / UX audit
+
+Owner requested a full post-merge review and consolidated correction block. Base main `63f02d5fb1aa910cb7bf3c0fa28829be049d4fca`, branch `codex/issue-214-ux-recovery-final-audit-20261125`. Scope: shared visual tokens/consumers, shell navigation/accessibility, and expanded real isolated QA, as documented in `docs/ux/FINAL_INTEGRATED_UX_AUDIT.md`. No features, server actions, persistence, pricing, RBAC, hosted database, secrets, deployment or automatic merge. Authorizes one cohesive candidate commit and draft PR. Preserve existing CI and authenticated tests; no weakening or suppressing axe. Require exact-head CI and QA, review final captures, record actual uncovered routes/states; no claim of complete product acceptance while unresolved. Prior evidence is baseline, not a new pass.
+
+---
+
 ### 2026-11-25 — Final certification alignment (PR #223)
 
 Exact candidate `dc506ab3a98b21c635f05ca38fa1f1d408ce2356`: [authenticated QA 45637913252](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45637913252) SUCCESS, 4 profiles, 320 recorded checks, 276 PNGs, results.json failures=[] on local-isolated. [Artifact 15034623338](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45637913252/artifacts/15034623338) has exact SHA provenance, 237/37/29/17 checks by profile, including the shared workspace layouts, directory views, research, Pipeline list and seeded proposal tab, opportunity inspector, goals, automation states and keyboard interactions. The 22 previous findings are resolved, including the unavailable Service Desk states. No claim of operational Service Desk, Office 365, CSV, or automation engine functionality.

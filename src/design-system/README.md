@@ -1,3 +1,9 @@
+## Final integrated audit candidate (25 November 2026)
+
+The shared spacing scale is explicitly configurable through `--ds-spacing-unit`; command palette spacing/icon geometry and keyboard font use centrally named tokens. The existing historical seven-category inventory remains unchanged. Cross-route computed-style propagation and tablet coverage are added to the isolated authenticated proof. See [final audit](../../docs/ux/FINAL_INTEGRATED_UX_AUDIT.md); do not claim certification until the exact candidate passes.
+
+---
+
 ## DS12 graduation and verification
 
 The global design-system guard now requires zero categorized local decisions across every inventoried file in `src/app` and `src/components`, with no exclusions. See `npm run design-system:inventory` for the full matrix and `npm run lint:design-system` for the enforced gate. The historical seven categories are unchanged, not a comprehensive parser for every possible styling syntax. Keep all web theme values in `tokens.css`, and use `proposal-document-colors.ts` for stable, printable proposal defaults and organization brand overrides. Editable business-domain fallback colors are separately named in `domain-visual-defaults.ts`; they are not a runtime web-theme editor.
