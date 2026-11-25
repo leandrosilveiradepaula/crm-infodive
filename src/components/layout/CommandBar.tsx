@@ -294,7 +294,7 @@ export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => 
                             </span>
                         )}
                         <span className="flex items-center gap-1">
-                            <kbd className="command-kbd-small">↑↓</kbd> Navegar
+                            <span className="font-medium text-foreground">Setas:</span> Navegar
                         </span>
                         <span className="flex items-center gap-1">
                             <kbd className="command-kbd-small">Enter</kbd> Selecionar

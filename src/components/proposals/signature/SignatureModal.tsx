@@ -120,16 +120,16 @@ export function SignatureModal({ isOpen, onClose, proposalToken, proposalTitle, 
                 {step === 'details' && (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Preview da assinatura */}
-                        <div className="border rounded-lg p-4 bg-muted">
-                            <Label className="text-sm text-muted-foreground mb-2 block">Preview da Assinatura</Label>
+                        <div className="border rounded-[var(--radius-panel)] p-4 bg-muted">
+                            <Label className="text-body-ui text-muted-foreground mb-2 block">Preview da Assinatura</Label>
                             <div className="bg-card border rounded p-4 flex justify-center">
-                                <img src={signatureData} alt="Signature" className="max-h-24" />
+                                <img src={signatureData} alt="Prévia da assinatura" className="max-h-24" />
                             </div>
                             <Button
                                 type="button"
                                 variant="link"
                                 onClick={() => setStep('signature')}
-                                className="mt-2 p-0 h-auto text-sm"
+                                className="mt-2 p-0 h-auto text-body-ui"
                             >
                                 Refazer assinatura
                             </Button>
@@ -179,7 +179,7 @@ export function SignatureModal({ isOpen, onClose, proposalToken, proposalTitle, 
                         </div>
 
                         {/* Terms */}
-                        <div className="flex items-start space-x-2 border rounded-lg p-4 bg-muted/50">
+                        <div className="flex items-start space-x-2 border rounded-[var(--radius-panel)] p-4 bg-muted/50">
                             <Checkbox
                                 id="terms"
                                 checked={agreedToTerms}
@@ -188,10 +188,10 @@ export function SignatureModal({ isOpen, onClose, proposalToken, proposalTitle, 
                             <div className="space-y-1 leading-none">
                                 <Label
                                     htmlFor="terms"
-                                    className="text-sm font-normal cursor-pointer"
+                                    className="text-body-ui font-normal cursor-pointer"
                                 >
                                     Ao assinar, concordo com todos os termos e condições apresentados nesta proposta
-                                    <strong className="block mt-1 text-xs text-muted-foreground">
+                                    <strong className="block mt-1 text-metadata-ui text-muted-foreground">
                                         Proposta: {proposalTitle}
                                     </strong>
                                 </Label>
@@ -203,7 +203,7 @@ export function SignatureModal({ isOpen, onClose, proposalToken, proposalTitle, 
                             <Button type="button" variant="outline" onClick={() => setStep('signature')} disabled={loading}>
                                 Voltar
                             </Button>
-                            <Button type="submit" disabled={loading || !agreedToTerms} className="bg-green-600 hover:bg-green-700">
+                            <Button type="submit" disabled={loading || !agreedToTerms}>
                                 {loading ? (
                                     <>
                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -219,12 +219,12 @@ export function SignatureModal({ isOpen, onClose, proposalToken, proposalTitle, 
 
                 {step === 'success' && (
                     <div className="text-center py-8">
-                        <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">Assinatura Confirmada!</h3>
+                        <CheckCircle2 className="h-16 w-16 text-success-readable mx-auto mb-4" />
+                        <h3 className="text-section-title font-semibold mb-2">Assinatura Confirmada!</h3>
                         <p className="text-muted-foreground mb-4">
                             Sua assinatura foi registrada com sucesso.
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-body-ui text-muted-foreground">
                             Um certificado digital foi gerado e pode ser validado a qualquer momento.
                         </p>
                     </div>

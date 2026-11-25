@@ -25,6 +25,13 @@ export const policies = {
  */
 export const fullyMigratedModules = Object.freeze([
   'src/components/ai/AiAssistant.tsx',
+  'src/components/ui/dropdown-menu.tsx',
+  'src/components/ui/select.tsx',
+  'src/components/proposals/ConfigToggle.tsx',
+  'src/components/proposals/ProposalProductsTable.tsx',
+  'src/components/proposals/signature/SignatureModal.tsx',
+  'src/components/proposals/signature/SignaturePad.tsx',
+  'src/app/(dashboard)/error.tsx',
   'src/app/(dashboard)/customers/client-page.tsx',
   'src/components/dashboard/AiActionsWidget.tsx',
   'src/components/dashboard/FunnelWidget.tsx',

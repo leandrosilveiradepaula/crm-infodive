@@ -8,22 +8,22 @@ interface ProposalProductsTableProps {
 
 export function ProposalProductsTable({ productsList }: ProposalProductsTableProps) {
     return (
-        <div className="bg-card p-4 rounded-2xl border border-border shadow-sm">
+        <div className="bg-card p-4 rounded-[var(--radius-panel)] border border-border shadow-card-ui">
             <div className="flex items-center gap-3 mb-6">
                 <Layout className="h-5 w-5 text-primary" />
-                <h4 className="text-sm font-black uppercase tracking-widest text-foreground">Escopo do Investimento</h4>
+                <h4 className="text-body-ui font-semibold text-foreground">Escopo do Investimento</h4>
             </div>
 
             {productsList && productsList.length > 0 ? (
                 <div className="space-y-3">
                     {productsList.map((product: any, idx: number) => (
-                        <div key={idx} className="flex justify-between items-center p-4 bg-muted/50 rounded-xl border border-border/50 hover:border-blue-200 transition-colors">
+                        <div key={idx} className="flex justify-between items-center p-4 bg-muted/50 rounded-[var(--radius-control)] border border-border/50 hover:border-primary/30 transition-colors">
                             <div className="flex-1">
-                                <p className="text-sm font-bold text-foreground">{product.name || 'Produto'}</p>
-                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-1">Qty: {product.quantity || 1}</p>
+                                <p className="text-body-ui font-bold text-foreground">{product.name || 'Produto'}</p>
+                                <p className="text-metadata-ui text-muted-foreground uppercase tracking-wide mt-1">Qty: {product.quantity || 1}</p>
                             </div>
                             <div className="text-right">
-                                <p className="text-base font-black text-primary">
+                                <p className="text-body-ui font-black text-primary">
                                     {formatCurrency(
                                         (typeof product.unit_price === 'number' ? product.unit_price : 0) *
                                         (typeof product.quantity === 'number' ? product.quantity : 1)
@@ -34,7 +34,7 @@ export function ProposalProductsTable({ productsList }: ProposalProductsTablePro
                     ))}
                 </div>
             ) : (
-                <p className="text-sm text-muted-foreground">Nenhum produto detalhado nesta proposta.</p>
+                <p className="text-body-ui text-muted-foreground">Nenhum produto detalhado nesta proposta.</p>
             )}
         </div>
     );
