@@ -15,7 +15,8 @@
     border-radius: var(--radius-panel);
     box-shadow: var(--ds-shadow-overlay);
     overflow: hidden;
-    animation: slideDown 0.2s ease-out;
+    /* Keep text and backgrounds stable when measured by WCAG during modal entry. */
+    animation: none;
 }
 
 .command-input {
@@ -74,20 +75,26 @@
 .command-item:hover,
 .command-item:focus-visible,
 .command-item[aria-selected="true"] {
-    background: var(--primary);
-    color: var(--primary-foreground) !important;
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.command-item[aria-selected="true"] :is(span, div, kbd),
+.command-item:hover :is(span, div, kbd),
+.command-item:focus-visible :is(span, div, kbd) {
+    color: var(--accent-foreground) !important;
 }
 
 .command-item[aria-selected="true"] .command-icon,
 .command-item:hover .command-icon {
-    color: var(--primary-foreground) !important;
+    color: var(--accent-foreground) !important;
 }
 
 .command-item[aria-selected="true"] .command-kbd,
 .command-item:hover .command-kbd {
-    background: color-mix(in srgb, var(--primary-foreground) 18%, transparent);
-    color: var(--primary-foreground);
-    border-color: color-mix(in srgb, var(--primary-foreground) 30%, transparent);
+    background: var(--background);
+    color: var(--foreground) !important;
+    border-color: var(--border);
 }
 
 .command-icon {
@@ -172,5 +179,5 @@
 .command-item[aria-selected="true"] .text-muted-foreground,
 .command-item:hover .text-muted-foreground,
 .command-item:focus-visible .text-muted-foreground {
-    color: var(--primary-foreground);
+    color: var(--accent-foreground) !important;
 }

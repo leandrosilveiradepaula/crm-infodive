@@ -60,6 +60,19 @@ describe('Live CommandBar uses centrally configurable Design System styling', ()
     expect(css).not.toContain('command-dialog-content');
   });
 
+  it('prevents hidden background focus and resolves selected item contrast in both themes', () => {
+    const command = read('src/components/layout/CommandBar.tsx');
+    const css = read('src/components/layout/CommandPalette.css');
+    const qa = read('test/e2e/run-authenticated-smoke.mjs');
+    expect(command).toContain('useDialogBackgroundInert(open)');
+    expect(css).toContain('background: var(--accent);');
+    expect(css).toContain('color: var(--accent-foreground) !important;');
+    expect(css).toContain('background: var(--background);');
+    expect(css).not.toContain('animation: slideDown 0.2s ease-out;');
+    expect(qa).toContain('await page.waitForTimeout(450);');
+    expect(qa).toContain('const commandAxe = await runAxe(page, source)');
+  });
+
   it('centralizes overlay and command dimensions without adding a second palette', () => {
     for(const token of ['--ds-command-overlay:', '--ds-command-max-width:',
       '--ds-command-list-max-height:', '--ds-command-input-size:'])expect(tokens).toContain(token);

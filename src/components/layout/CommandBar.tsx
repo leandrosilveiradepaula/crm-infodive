@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
 import { useRouter } from 'next/navigation'; // Next.js adaptation
 import {
     LayoutDashboard, Briefcase, Users, Plus, Sparkles, ArrowRight, Loader2
@@ -17,6 +18,7 @@ interface CommandBarProps {
 
 export const CommandBar = ({ open, onOpenChange, onAskAI }: CommandBarProps) => {
     const [search, setSearch] = useState('');
+    useDialogBackgroundInert(open);
     const [pages, setPages] = useState<string[]>([]);
     const activePage = pages[pages.length - 1];
 

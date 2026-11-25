@@ -1059,6 +1059,9 @@ try {
                         await page.getByRole('button', { name: 'Buscar no CRM' }).first().click();
                         const commandDialog = page.getByRole('dialog', { name: 'Pesquisa e comandos do CRM' });
                         await commandDialog.waitFor({ state: 'visible', timeout: 8_000 });
+                        // Radix takes 200ms to enter. Test the settled visual,
+                        // with the real background focus trap active.
+                        await page.waitForTimeout(450);
                         const commandAxe = await runAxe(page, source);
                         const commandIssues = commandAxe.violationsCount + commandAxe.incompleteCount;
                         if (commandIssues) {
