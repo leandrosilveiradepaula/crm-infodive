@@ -78,7 +78,12 @@ describe('Infodive design-system foundation', () => {
         expect(stats).not.toContain('bg-success/10 text-success');
         expect(deals).not.toContain('bg-primary/20 text-primary');
         expect(tasks).not.toContain('bg-destructive/20 text-destructive');
-        expect(dashboard).toContain('data-qa-region={widget.id}');
+        expect(dashboard).toContain("data-qa-region={widget.id === 'stats' ? 'dashboard-stats-widget' : widget.id}");
+        expect(stats).toContain('<StatsGrid items={stats}');
+        const sharedStats = source('src/components/layout/StatsGrid.tsx');
+        expect(sharedStats).toContain('data-qa-region="stats"');
+        expect(sharedStats).not.toContain('bg-opacity-10');
+        expect(sharedStats).not.toContain('bg-success/10 text-success');
     });
 
     it('makes horizontally scrollable tables reachable by keyboard', () => {

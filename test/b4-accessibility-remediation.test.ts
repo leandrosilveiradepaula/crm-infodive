@@ -272,7 +272,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         expect(dashboard).not.toContain('opacity-0 group-hover:opacity-100 transition-all');
         const runner = source('test/e2e/run-authenticated-smoke.mjs');
         expect(runner).toContain('async function assertDashboardDragHandles(page, viewportName)');
-        expect(runner).toContain("if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name)");
+        expect(runner).toMatch(/if \(route === '\/dashboard'\)\s*\{\s*await assertDashboardDragHandles\(page, viewport\.name\);/);
+        expect(runner).toContain('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
         expect(runner).toContain("document.getElementById(id)");
         expect(runner).toContain('notKeyboardReachable');
         expect(runner).toContain('invisibleMobile');
