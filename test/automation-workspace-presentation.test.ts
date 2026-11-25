@@ -53,6 +53,17 @@ describe('Automation workspace after Design System integration', () => {
         expect(page).toContain('await createAutomation(automation)');
         expect(page).toContain('await updateAutomation(automation.id, automation)');
     });
+    it('isolates the dashboard shell for both automation dialogs and verifies actual focus restoration', () => {
+        const wizard = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
+        const history = readFileSync('src/components/automations/HistorySheet.tsx', 'utf8');
+        const runner = readFileSync('test/e2e/run-authenticated-smoke.mjs', 'utf8');
+        expect(wizard).toContain('useDialogBackgroundInert(true)');
+        expect(history).toContain('useDialogBackgroundInert(open && Boolean(automation))');
+        expect(runner).toContain('await assertAutomationDialogIsolation(page, editor)');
+        expect(runner).toContain('await assertAutomationDialogIsolation(page, historyDialog)');
+        expect(runner).toContain('AUTOMATION_BACKGROUND_FOCUS_ACCEPTED');
+        expect(runner).toContain('AUTOMATION_HISTORY_DIALOG_CLIPPING');
+    });
     it('uses the shared dialog and keeps edits non-mutating until explicit save', () => {
         const wizard = readFileSync('src/components/automations/NewAutomationModal.tsx', 'utf8');
         expect(wizard).toContain("from '@/components/ui/dialog'");

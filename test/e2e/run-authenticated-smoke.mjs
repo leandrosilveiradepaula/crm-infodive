@@ -483,6 +483,31 @@ async function runAxe(page, source) {
     return report;
 }
 
+// Confirm the actual browser's inert boundary for every audited automation modal.
+async function assertAutomationDialogIsolation(page, dialog) {
+    const shell = page.locator('[data-slot="crm-dashboard-shell"]');
+    if (!(await shell.evaluate(element => element.inert))) {
+        throw new Error('AUTOMATION_DIALOG_BACKGROUND_NOT_INERT');
+    }
+    await dialog.locator('button:not([disabled])').first().focus();
+    const backgroundBlocked = await dialog.evaluate(node => {
+        const shell = document.querySelector('[data-slot="crm-dashboard-shell"]');
+        const target = shell?.querySelector('button:not([disabled]), a[href]');
+        if (!(target instanceof HTMLElement)) return false;
+        target.focus();
+        return node.contains(document.activeElement) &&
+            !document.activeElement?.closest('[aria-hidden="true"], [inert]');
+    });
+    if (!backgroundBlocked) throw new Error('AUTOMATION_BACKGROUND_FOCUS_ACCEPTED');
+    for (const key of ['Tab', 'Tab', 'Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab']) {
+        await page.keyboard.press(key);
+        if (!(await dialog.evaluate(node => node.contains(document.activeElement) &&
+            !document.activeElement?.closest('[aria-hidden="true"], [inert]')))) {
+            throw new Error('AUTOMATION_DIALOG_FOCUS_LEAK');
+        }
+    }
+}
+
 async function assertOpportunityDialogKeyboard(page, opener) {
     const dialog = page.getByRole('dialog');
     const shell = page.locator('[data-slot="crm-dashboard-shell"]');
@@ -1118,6 +1143,7 @@ try {
                                     !!button && button.top >= box.top - 1 && button.bottom <= box.bottom + 1;
                             });
                             if (!fits) throw new Error('AUTOMATION_EDITOR_CLIPPING: step ' + step);
+                            await assertAutomationDialogIsolation(page, editor);
                             const editorAxe = await runAxe(page, source);
                             const editorIssues = editorAxe.violationsCount + editorAxe.incompleteCount;
                             if (editorIssues) {
@@ -1144,6 +1170,7 @@ try {
                         await page.keyboard.press('Escape');
                         await editor.waitFor({ state: 'hidden', timeout: 8000 });
                         await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Usar modelo Notificar VIP');
+                        await page.waitForFunction(() => !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert);
                         await savedFlow.waitFor({ state: 'visible' });
                         profileResult.checks.push({ route, state: 'automation-library-filter-cancel', viewport: viewport.name, theme, status: 'passed' });
                         // Confirm the recorded counters, not a fabricated event timeline.
@@ -1156,6 +1183,14 @@ try {
                             throw new Error('AUTOMATION_HISTORY_CONTAINS_SIMULATED_EVENTS');
                         }
                         await page.waitForTimeout(350);
+                        const historyFits = await historyDialog.evaluate(node => {
+                            const bounds = node.getBoundingClientRect();
+                            return bounds.left >= 8 && bounds.right <= innerWidth - 8 &&
+                                bounds.top >= -1 && bounds.bottom <= innerHeight + 1 &&
+                                node.scrollWidth <= node.clientWidth + 1;
+                        });
+                        if (!historyFits) throw new Error('AUTOMATION_HISTORY_DIALOG_CLIPPING');
+                        await assertAutomationDialogIsolation(page, historyDialog);
                         const historyAxe = await runAxe(page, source);
                         const historyIssues = historyAxe.violationsCount + historyAxe.incompleteCount;
                         if (historyIssues) {
@@ -1175,6 +1210,7 @@ try {
                         await page.keyboard.press('Escape');
                         await historyDialog.waitFor({ state: 'hidden', timeout: 8000 });
                         await page.waitForFunction(() => document.activeElement?.textContent?.includes('Ver execuções'));
+                        await page.waitForFunction(() => !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert);
                         profileResult.checks.push({ route, state: 'automation-history', viewport: viewport.name, theme,
                             status: historyIssues ? 'failed' : 'passed' });
                     }

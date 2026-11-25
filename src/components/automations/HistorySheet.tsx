@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
 import { Button } from '@/components/ui/button';
 import { type Automation } from '@/types/automation';
 import { automationSummary } from './automation-presentation';
@@ -14,6 +15,7 @@ interface AutomationHistorySheetProps {
 
 export function AutomationHistorySheet({ automation, open, onOpenChange }: AutomationHistorySheetProps) {
     const opener = useRef<HTMLElement | null>(null);
+    useDialogBackgroundInert(open && Boolean(automation));
     if (!automation) return null;
 
     const summary = automationSummary([automation]);
@@ -21,7 +23,7 @@ export function AutomationHistorySheet({ automation, open, onOpenChange }: Autom
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
                 showCloseButton={false}
-                className="flex max-w-lg max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0"
+                className="flex w-[calc(100%_-_2rem)] max-w-lg max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0"
                 onOpenAutoFocus={() => {
                     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
                 }}

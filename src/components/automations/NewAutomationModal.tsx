@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import type { TriggerType, ActionType, Automation } from '@/types/automation';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -31,6 +32,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     const [loading, setLoading] = useState(false);
     const [saveError, setSaveError] = useState(false);
     const opener = useRef<HTMLElement | null>(null);
+    useDialogBackgroundInert(true);
 
     const [formData, setFormData] = useState<Partial<Automation>>({
         name: initialData?.name || '',
