@@ -1,3 +1,11 @@
+### 2026-11-25 — Consolidated validation recovery (PR #223)
+
+Both exact-SHA runs for `a0fe3ec946220c5ebb4d69fe5d8a09597b6dff70` stopped before browser verification: [technical CI 45626825756](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45626825756) failed TypeScript with three TS2353 errors in Dashboard StatsWidget (the shared StatItem contract requires `description`, not `sublabel`); [isolated QA 45626825725](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45626825725) failed at application compilation. UI/UX Pro Max research completed, the disposable local stack was cleaned, and no new browser screenshots were produced. Correct all three field names while preserving displayed data and navigation.
+
+To prevent another early interaction exception from obscuring the rest of the comprehensive UI/UX matrix, isolate exceptions within each route/viewport/theme combination for the local synthetic target only. Record the failed case, bounded diagnostic code and phase, capture authenticated synthetic evidence if available, and proceed to the next freshly navigated document. Any such failure remains a hard gate; no axe rules, assertion or real data requirement are removed. Remote-target failures retain the existing fail-fast behavior. Keep the existing UI scope and single draft PR. Re-reviewed the private reference montage and mobile baseline; no new visual acceptance is claimed until the exact corrected SHA builds, completes the real matrix, and its screenshots are examined.
+
+---
+
 ### 2026-11-25 — Owner direction: one comprehensive UI/UX block (PR #223)
 
 Owner: focus exclusively on UI/UX, stop breaking delivery into small handoffs; execute larger coherent blocks. Current branch is `ux/commercial-directory-journeys-20261125`, previous candidate `4885389b17e069436f562298c3ebdd93b89bb4be`, main `4e4e92cfdd712ae7d8bffe0c4b68088869f98029`. Continue this single draft PR. No new business functionality, server actions, persistence, integrations, hosted database, financial calculations, production deployment or automatic merge.

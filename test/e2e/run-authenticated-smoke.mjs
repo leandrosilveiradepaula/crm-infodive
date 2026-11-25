@@ -929,6 +929,7 @@ async function login(page, baseUrl, account, options = {}) {
 const results = { version: 2, profiles: [], failures: [] };
 const MAX_A11Y_DIAGNOSTICS = 32;
 let a11yFailureCount = 0;
+let routeCaseFailureCount = 0;
 const a11yFailedRoutes = new Set();
 let browser;
 try {
@@ -1004,11 +1005,20 @@ try {
             for (const viewport of viewports) {
                 await page.setViewportSize(viewport);
                 for (const theme of ['light', 'dark']) {
+                    // Keep the isolated authenticated matrix running after a failing
+                    // interaction or layout assertion. A failed case remains a hard
+                    // gate; the next case starts from a fresh document via goto.
+                    let phase = 'navigation';
+                    let authenticatedDocument = false;
+                    try {
                     const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
                     if (!response?.ok()) throw new Error(`Authenticated route returned an unsuccessful HTTP status: ${route}.`);
                     if (page.url().includes('/login')) throw new Error(`Authenticated route redirected to login: ${route}`);
+                    authenticatedDocument = true;
+                    phase = 'theme';
                     await setTheme(page, theme,
                         local && profileIndex === 0 && route === '/leads' && viewport.name === 'desktop');
+                    phase = 'token-propagation';
                     if (local && profileIndex === 0 &&
                         ['/leads', '/contacts', '/activities'].includes(route)) {
                         const propagated = await assertDesignTokenPropagation(page);
@@ -1021,6 +1031,7 @@ try {
                             primitiveCount: propagated.length, status: 'passed',
                         });
                     }
+                    phase = 'synthetic-fixture';
                     // The original pre-QA could report green even if a route
                     // rendered an empty product catalog. Local QA must prove
                     // that the actual seeded tenant data reached the Next.js page.
@@ -1042,6 +1053,7 @@ try {
                             throw new Error('LOCAL_QA_FIXTURE_NOT_RENDERED: automations');
                         }
                     }
+                    phase = 'base-layout';
                     await assertLayout(page);
                     if (route === '/dashboard') await assertDashboardDragHandles(page, viewport.name);
                     await assertKeyboardFocus(page);
@@ -1078,6 +1090,7 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    phase = 'workspace-layout';
                     // Shared family contract: visible KPI values and reachable workspace tabs.
                     if (local && profileIndex === 0) {
                         const presentation = await page.evaluate(mobile => {
@@ -1116,6 +1129,7 @@ try {
                                 theme, status: ok ? 'passed' : 'failed', ...presentation });
                         }
                     }
+                    phase = 'automation-interaction';
                     // Real read-only interaction proof for the automation workspace.
                     // Do not submit, toggle, delete, duplicate or execute any workflow.
                     if (local && profileIndex === 0 && route === '/automations') {
@@ -1252,6 +1266,7 @@ try {
                         profileResult.checks.push({ route, state: 'automation-history', viewport: viewport.name, theme,
                             status: historyIssues ? 'failed' : 'passed' });
                     }
+                    phase = 'global-search';
                     // Verify that the actual global search control is an action,
                     // not a fake input. No search is submitted or data changed here.
                     if (local && profileIndex === 0 && route === '/dashboard') {
@@ -1343,6 +1358,7 @@ try {
                             status: assistantIssues ? 'failed' : 'passed',
                         });
                     }
+                    phase = 'directory-interaction';
                     // Read-only authenticated directory UX. No AI request, export or writes.
                     if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers', '/products'].includes(route)) {
                         const spec = {
@@ -1443,6 +1459,7 @@ try {
                         profileResult.checks.push({ route, state: 'directory-filter-view', viewport: viewport.name, theme,
                             status: listIssues ? 'failed' : 'passed' });
                     }
+                    phase = 'directory-dialog';
                     // Exercise real migrated lead/contact/customer creation dialogs
                     // without submitting or changing the synthetic QA database.
                     // A static source test cannot see focus, scrollbar clipping
@@ -1515,6 +1532,7 @@ try {
                     // Source-level component tests cannot certify the four Goals
                     // tabs or the Recharts theme colors. Exercise actual UI
                     // transitions with local synthetic data on the SAME SHA.
+                    phase = 'goals-interaction';
                     if (local && profileIndex === 0 && route === '/goals') {
                         const states = await assertGoalsFamilyStates(
                             page, source, capture, artifactDir,
@@ -1526,6 +1544,7 @@ try {
                         });
                     }
 
+                    phase = 'pipeline-list-proposals';
                     // Read-only Pipeline list and proposal section, with actual seeded deal.
                     if (local && profileIndex === 0 && route === '/pipeline') {
                         const search = page.getByRole('textbox', { name: 'Buscar oportunidades', exact: true });
@@ -1567,6 +1586,7 @@ try {
                         await page.getByRole('button', { name: 'Limpar filtros de oportunidades', exact: true }).click();
                         await page.getByRole('button', { name: 'Visualização em quadro', exact: true }).click();
                     }
+                    phase = 'opportunity-detail';
                     // The board screenshot alone cannot prove the focused opportunity
                     // inspector. Capture one read-only drawer state from the synthetic
                     // admin fixture without changing stage, products, or any deal data.
@@ -1674,6 +1694,28 @@ try {
                         }
                         profileResult.checks.push({ route: '/pipeline', state: 'deal-detail', viewport: viewport.name, theme, axeStatus: detailIssues ? 'failed' : 'passed', keyboardIsolation: keyboardStatus });
                     }
+                    } catch (error) {
+                        if (!local) throw error;
+                        routeCaseFailureCount += 1;
+                        // Record only allowlisted assertion codes or the exception
+                        // category. Never include raw selector text, URLs, or data.
+                        const message = error instanceof Error ? error.message : '';
+                        const code = message.match(/^(CRM_[A-Z0-9_]+|AUTOMATION_[A-Z0-9_]+|COMMERCIAL_[A-Z0-9_]+|LOCAL_QA_FIXTURE_NOT_RENDERED)\b/)?.[0] ??
+                            (error instanceof Error && error.name === 'TimeoutError' ? 'TIMEOUT' : 'ASSERTION_OR_RUNTIME_ERROR');
+                        const finding = { profileIndex, route, viewport: viewport.name, theme,
+                            state: 'route-case-failure', phase, code, status: 'failed' };
+                        if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                        profileResult.checks.push(finding);
+                        process.stderr.write('CRM_ROUTE_CASE_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                        if (capture && authenticatedDocument && !page.isClosed()) {
+                            try {
+                                await page.screenshot({
+                                    path: resolve(artifactDir, account.label + '-' + route.slice(1).replaceAll('/', '-') +
+                                        '-failed-' + viewport.name + '-' + theme + '.png'), fullPage: true, timeout: 5000,
+                                });
+                            } catch { /* Evidence capture must not suppress the failed case. */ }
+                        }
+                    }
                 }
             }
         }
@@ -1681,7 +1723,10 @@ try {
         await context.close();
     }
     if (artifactDir) await writeFile(resolve(artifactDir, 'results.json'), `${JSON.stringify({ ...results, candidateSha, target: local ? 'local-isolated' : 'remote-isolated', previewSha: process.env.CRM_E2E_PREVIEW_SHA ?? null, deploymentId: process.env.CRM_E2E_DEPLOYMENT_ID ?? null }, null, 2)}\n`);
-    if (a11yFailureCount) {
+    if (routeCaseFailureCount) {
+        fail(routeCaseFailureCount + ' route/viewport/theme case(s) failed or stopped before completing their assertions; ' +
+            a11yFailureCount + ' additional accessibility/layout findings. Remaining isolated cases attempted; matrix NOT certified.');
+    } else if (a11yFailureCount) {
         fail('WCAG remains unresolved in ' + a11yFailureCount +
             ' audited combination(s) across ' + a11yFailedRoutes.size +
             ' route(s). Full matrix was audited but not certified.');

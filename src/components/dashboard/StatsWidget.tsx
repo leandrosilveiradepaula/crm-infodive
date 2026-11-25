@@ -17,7 +17,7 @@ export const StatsWidget = ({ metrics }: StatsWidgetProps) => {
         {
             label: "Pipeline Total",
             value: formatCompact(metrics.totalPipeline),
-            sublabel: `${metrics.totalDeals - metrics.wonDeals - metrics.lostDeals} oportunidades ativas`,
+            description: `${metrics.totalDeals - metrics.wonDeals - metrics.lostDeals} oportunidades ativas`,
             icon: DollarSign,
             tone: "primary",
             onClick: () => router.push('/pipeline')
@@ -25,7 +25,7 @@ export const StatsWidget = ({ metrics }: StatsWidgetProps) => {
         {
             label: "Previsão Ponderada",
             value: formatCompact(metrics.weightedForecast),
-            sublabel: "Baseada em probabilidade",
+            description: "Baseada em probabilidade",
             icon: Target,
             tone: "info",
             onClick: () => router.push('/pipeline')
@@ -41,7 +41,7 @@ export const StatsWidget = ({ metrics }: StatsWidgetProps) => {
         {
             label: "Taxa de conversão",
             value: `${metrics.winRate.toFixed(1)}%`,
-            sublabel: `${metrics.wonDeals} ganhos / ${metrics.wonDeals + metrics.lostDeals} fechados`,
+            description: `${metrics.wonDeals} ganhos / ${metrics.wonDeals + metrics.lostDeals} fechados`,
             icon: Activity,
             tone: "primary",
             onClick: () => router.push('/reports')

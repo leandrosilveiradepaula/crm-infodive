@@ -38,6 +38,14 @@ describe('Cross-workspace presentation contract', () => {
         expect(row).toContain('onClick={() => onView(proposal)}');
         expect(row).toContain('formatCurrency(proposal.total)');
     });
+    it('records incomplete isolated route cases without claiming matrix certification', () => {
+        const runner = read('test/e2e/run-authenticated-smoke.mjs');
+        expect(runner).toContain('routeCaseFailureCount += 1');
+        expect(runner).toContain('CRM_ROUTE_CASE_DIAGNOSTIC=');
+        expect(runner).toContain('if (!local) throw error');
+        expect(runner).toContain('if (routeCaseFailureCount)');
+        expect(runner).toContain('matrix NOT certified');
+    });
     it('exposes unavailable service desk states and does not invent connectivity', () => {
         expect(read('src/app/(dashboard)/service-desk/page.tsx')).toContain('Nenhum banco alternativo será utilizado.');
         expect(read('src/app/(dashboard)/service-desk/knowledge/page.tsx')).toContain('Não autorizado ou conhecimento indisponível.');
