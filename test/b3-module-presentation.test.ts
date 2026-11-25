@@ -54,4 +54,25 @@ describe('CRM #214 B3 module presentation', () => {
         }
     });
 
+    it('labels analytics empty states and does not present fixed trend copy as data', () => {
+        const reports = source('src/app/(dashboard)/reports/client-page.tsx');
+        const charts = source('src/components/charts/ReportsCharts.tsx');
+
+        expect(reports).not.toContain('description: "+12.5%"');
+        expect(reports).not.toContain('description: "+2.1%"');
+        expect(reports).not.toContain('description: "+3 dias"');
+        expect(charts).toContain('function EmptyChartState');
+        expect(charts).toContain('Sem dados para os filtros selecionados.');
+    });
+
+    it('keeps report search usable beside filters and automation recipes reachable without a hidden carousel', () => {
+        const reports = source('src/app/(dashboard)/reports/client-page.tsx');
+        const automations = source('src/app/(dashboard)/automations/client-page.tsx');
+
+        expect(reports).toContain('md:min-w-[18rem]');
+        expect(reports).toContain('md:flex-[1_1_34rem]');
+        expect(automations).toContain('grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4');
+        expect(automations).not.toContain('overflow-x-auto pb-6 -mx-4 px-4 no-scrollbar');
+    });
+
 });

@@ -37,8 +37,8 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
             ],
             'src/app/(dashboard)/activities/client-page.tsx': ['Editar atividade', 'Excluir atividade'],
             'src/app/(dashboard)/automations/client-page.tsx': [
-                'Descrever automação por IA', 'Limpar filtro de tipo', 'Opções da automação',
-                'Fechar biblioteca de receitas', 'Habilitar automação',
+                'Descrever automação', 'Limpar filtro de tipo', 'Opções da automação',
+                'Biblioteca de receitas', 'Buscar fluxos de trabalho', 'Filtrar fluxos por status', 'Habilitar automação',
             ],
         };
         for (const [path, names] of Object.entries(cases)) {

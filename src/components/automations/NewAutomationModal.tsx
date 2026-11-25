@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     X,
     Zap,
@@ -15,6 +15,11 @@ import {
     Trash2
 } from 'lucide-react';
 import type { TriggerType, ActionType, Automation } from '@/types/automation';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useDialogBackgroundInert } from '@/components/ui/useDialogBackgroundInert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 interface NewAutomationModalProps {
     onClose: () => void;
@@ -25,12 +30,15 @@ interface NewAutomationModalProps {
 export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomationModalProps) => {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [saveError, setSaveError] = useState(false);
+    const opener = useRef<HTMLElement | null>(null);
+    useDialogBackgroundInert(true);
 
     const [formData, setFormData] = useState<Partial<Automation>>({
         name: initialData?.name || '',
         description: initialData?.description || '',
         category: initialData?.category || 'followup',
-        enabled: true,
+        enabled: initialData?.enabled ?? true,
         trigger: initialData?.trigger || {
             type: 'deal_created',
             config: {}
@@ -45,9 +53,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
     const categories = [
         { id: 'followup', label: 'Follow-up', icon: RefreshCw, color: 'text-primary', bg: 'bg-primary/10' },
-        { id: 'alert', label: 'Alerta', icon: Bell, color: 'text-warning-readable', bg: 'bg-warning/10' },
-        { id: 'welcome', label: 'Boas-vindas', icon: UserPlus, color: 'text-success-readable', bg: 'bg-success/10' },
-        { id: 'custom', label: 'Personalizada', icon: Settings, color: 'text-info', bg: 'bg-info/10' },
+        { id: 'alert', label: 'Alerta', icon: Bell, color: 'text-warning-readable', bg: 'bg-warning-subtle' },
+        { id: 'welcome', label: 'Boas-vindas', icon: UserPlus, color: 'text-success-readable', bg: 'bg-success-subtle' },
+        { id: 'custom', label: 'Personalizada', icon: Settings, color: 'text-foreground', bg: 'bg-info-subtle' },
     ];
 
     const triggerTypes: { id: TriggerType; label: string; desc: string }[] = [
@@ -69,7 +77,9 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
     const handleBack = () => setStep(s => s - 1);
 
     const handleSubmit = async () => {
+        if (loading) return;
         setLoading(true);
+        setSaveError(false);
         try {
             await onSave({
                 ...formData,
@@ -79,36 +89,43 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 failureCount: initialData?.failureCount || 0
             });
             onClose();
-        } catch (error) {
-            console.error(error);
+        } catch {
+            setSaveError(true);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="bg-card w-full max-w-2xl rounded-[var(--radius-panel)] border border-border shadow-card-ui overflow-hidden flex flex-col max-h-[90vh]">
-                {/* Header */}
-                <div className="p-4 px-6 border-b border-border flex items-center justify-between bg-surface-subtle">
-                    <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-[var(--radius-panel)] bg-primary flex items-center justify-center shadow-card-ui shadow-primary/20">
-                            <Zap className="h-6 w-6 text-primary-foreground" />
-                        </div>
-                        <div>
-                            <h2 className="text-section-title font-black text-foreground tracking-tight">
-                                {initialData?.id ? 'Editar Fluxo de Trabalho' : 'Novo Fluxo de Trabalho'}
-                            </h2>
-                            <p className="text-metadata-ui text-muted-foreground font-bold uppercase tracking-widest mt-0.5">Passo {step} de 3</p>
-                        </div>
+        <Dialog open onOpenChange={open => { if (!open && !loading) onClose(); }}>
+            <DialogContent
+                showCloseButton={false}
+                className="flex w-[calc(100%_-_2rem)] max-w-2xl max-h-[90dvh] flex-col gap-0 overflow-hidden bg-card p-0"
+                onInteractOutside={event => event.preventDefault()}
+                onEscapeKeyDown={event => { if (loading) event.preventDefault(); }}
+                onOpenAutoFocus={() => {
+                    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+                }}
+                onCloseAutoFocus={event => {
+                    event.preventDefault();
+                    const target = opener.current;
+                    if (target?.isConnected) requestAnimationFrame(() => target.focus());
+                }}
+            >
+                <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border bg-surface-subtle p-4 sm:px-6">
+                    <div className="min-w-0">
+                        <DialogTitle className="leading-snug">
+                            {initialData?.id ? 'Editar Fluxo de Trabalho' : 'Novo Fluxo de Trabalho'}
+                        </DialogTitle>
+                        <DialogDescription className="mt-1">Passo {step} de 3 · {step === 1 ? 'Identificação' : step === 2 ? 'Gatilho' : 'Ações'}</DialogDescription>
                     </div>
-                    <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
-                        <X className="h-6 w-6" />
-                    </button>
+                    <Button type="button" variant="ghost" size="icon" aria-label="Fechar editor de fluxo" onClick={onClose} disabled={loading}>
+                        <X aria-hidden="true" />
+                    </Button>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="h-1 bg-muted">
+                <div aria-hidden="true" className="h-1 shrink-0 bg-muted">
                     <div
                         className="h-full bg-primary transition-all duration-500"
                         style={{ width: `${(step / 3) * 100}%` }}
@@ -116,34 +133,44 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                 </div>
 
                 {/* Step Content */}
-                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
                     {step === 1 && (
-                        <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-5">
                             <div>
-                                <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Informações Básicas</label>
-                                <input
-                                    type="text"
-                                    placeholder="Nome da Automação (ex: Follow-up 3 dias)"
-                                    className="w-full bg-muted/50 border-none rounded-[var(--radius-panel)] px-4 py-3 text-foreground text-body-ui placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                />
-                                <textarea
-                                    placeholder="Descreva o que este fluxo faz..."
-                                    className="w-full bg-muted/50 border-none rounded-[var(--radius-panel)] px-4 py-3 text-foreground mt-4 h-28 resize-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/40 transition-all outline-none"
-                                    value={formData.description}
-                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                />
+                                <h3 className="mb-3 text-section-title font-semibold text-foreground">Informações básicas</h3>
+                                <div className="space-y-3">
+                                    <div className="space-y-1">
+                                        <label htmlFor="automation-name" className="text-label-ui font-medium text-foreground">Nome da automação</label>
+                                        <Input
+                                            id="automation-name"
+                                            type="text"
+                                            placeholder="Ex.: Follow-up 3 dias"
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="automation-description" className="text-label-ui font-medium text-foreground">Descrição</label>
+                                        <Textarea
+                                            id="automation-description"
+                                            placeholder="Descreva o que este fluxo faz"
+                                            value={formData.description}
+                                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
-                                <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Categoria</label>
-                                <div className="grid grid-cols-2 gap-4">
+                                <h3 className="mb-3 text-section-title font-semibold text-foreground">Categoria</h3>
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     {categories.map(cat => (
                                         <button
                                             key={cat.id}
+                                            type="button"
+                                            aria-pressed={formData.category === cat.id}
                                             onClick={() => setFormData({ ...formData, category: cat.id as any })}
-                                            className={`flex items-center gap-3 p-3.5 rounded-[var(--radius-panel)] border transition-all duration-300 ${formData.category === cat.id
+                                            className={`focus-ring flex items-center gap-3 p-3 rounded-[var(--radius-control)] border transition-colors ${formData.category === cat.id
                                                 ? 'bg-primary/10 border-primary/40 shadow-card-ui shadow-primary/5'
                                                 : 'bg-muted/50 border-transparent hover:border-border'
                                                 }`}
@@ -162,18 +189,20 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
+                        <div className="space-y-5">
                             <div>
-                                <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Quando este fluxo inicia?</label>
+                                <h3 className="mb-3 text-section-title font-semibold text-foreground">Quando este fluxo inicia?</h3>
                                 <div className="space-y-4">
                                     {triggerTypes.map(type => (
                                         <button
                                             key={type.id}
+                                            type="button"
+                                            aria-pressed={formData.trigger?.type === type.id}
                                             onClick={() => setFormData({
                                                 ...formData,
-                                                trigger: { type: type.id, config: {} }
+                                                trigger: formData.trigger?.type === type.id ? formData.trigger : { type: type.id, config: {} }
                                             })}
-                                            className={`w-full flex items-start text-left gap-4 p-4 rounded-[var(--radius-panel)] border transition-all duration-300 ${formData.trigger?.type === type.id
+                                            className={`focus-ring w-full flex items-start text-left gap-3 p-3 rounded-[var(--radius-control)] border transition-colors ${formData.trigger?.type === type.id
                                                 ? 'bg-primary/10 border-primary/40'
                                                 : 'bg-muted/50 border-transparent hover:border-border'
                                                 }`}
@@ -185,7 +214,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                                 {formData.trigger?.type === type.id && <div className="h-2 w-2 bg-primary-foreground rounded-full" />}
                                             </div>
                                             <div>
-                                                <h4 className={`font-black tracking-tight ${formData.trigger?.type === type.id ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                <h4 className={`font-semibold ${formData.trigger?.type === type.id ? 'text-foreground' : 'text-muted-foreground'}`}>
                                                     {type.label}
                                                 </h4>
                                                 <p className="text-body-ui text-muted-foreground mt-0.5">{type.desc}</p>
@@ -198,13 +227,8 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                     )}
 
                     {step === 3 && (
-                        <div className="space-y-8 animate-in slide-in-from-right-4 duration-500">
-                            <div className="flex items-center justify-between">
-                                <label className="block text-metadata-ui font-black text-muted-foreground uppercase tracking-[0.2em]">O que deve acontecer?</label>
-                                <button className="flex items-center gap-2 text-primary text-metadata-ui font-black hover:text-primary/80 transition-colors">
-                                    <Plus className="h-4 w-4" /> Adicionar Ação
-                                </button>
-                            </div>
+                        <div className="space-y-5">
+                            <h3 className="text-section-title font-semibold text-foreground">O que deve acontecer?</h3>
 
                              <div className="space-y-6">
                                 {/* Trigger Visual Badge */}
@@ -214,7 +238,7 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             <Zap className="h-4 w-4 text-primary-foreground" />
                                         </div>
                                         <div>
-                                            <p className="text-metadata-ui font-black text-primary uppercase tracking-[0.2em]">Gatilho Ativo</p>
+                                            <p className="text-metadata-ui font-medium text-foreground">Gatilho selecionado</p>
                                             <p className="text-body-ui font-bold text-foreground">
                                                 {triggerTypes.find(t => t.id === formData.trigger?.type)?.label || 'Início'}
                                             </p>
@@ -225,36 +249,40 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
 
                                 {formData.actions?.map((action, idx) => (
                                     <div key={idx} className="bg-muted/30 p-5 rounded-[var(--radius-panel)] border border-border relative group hover:border-primary/20 transition-all">
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 const newActions = [...(formData.actions || [])];
                                                 newActions.splice(idx, 1);
                                                 setFormData({ ...formData, actions: newActions });
                                             }}
-                                            className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                                            type="button"
+                                            aria-label={`Remover ação ${idx + 1}`}
+                                            className="focus-ring absolute right-3 top-3 rounded-[var(--radius-control)] p-2 text-muted-foreground hover:text-destructive-readable transition-colors"
                                         >
                                             <Trash2 className="h-5 w-5" />
                                         </button>
 
                                         <div className="grid grid-cols-1 gap-6">
                                             <div>
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Ação #{idx + 1}</p>
+                                                <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pr-9">
+                                                    <p className="text-label-ui font-semibold text-foreground">Ação {idx + 1}</p>
                                                     {initialData && (
-                                                        <span className="text-metadata-ui font-black bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Sugerido por IA</span>
+                                                        <span className="text-metadata-ui font-medium bg-surface-subtle text-foreground px-2 py-0.5 rounded-full">Configuração inicial</span>
                                                     )}
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-3">
+                                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                                     {actionTypes.map(type => (
                                                         <button
                                                             key={type.id}
+                                                            type="button"
+                                                            aria-pressed={action.type === type.id}
                                                             onClick={() => {
                                                                 const newActions = [...(formData.actions || [])];
-                                                                newActions[idx].type = type.id;
+                                                                newActions[idx] = { ...newActions[idx], type: type.id };
                                                                 setFormData({ ...formData, actions: newActions });
                                                             }}
-                                                            className={`p-3 rounded-[var(--radius-panel)] border text-metadata-ui font-black transition-all ${action.type === type.id
-                                                                ? 'bg-primary/20 border-primary text-primary'
+                                                            className={`focus-ring p-3 rounded-[var(--radius-control)] border text-body-ui font-medium transition-colors ${action.type === type.id
+                                                                ? 'bg-primary/10 border-primary text-foreground'
                                                                 : 'bg-card border-transparent text-muted-foreground hover:border-border'
                                                                 }`}
                                                         >
@@ -265,15 +293,15 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                             </div>
 
                                             <div>
-                                                <p className="text-metadata-ui font-black text-muted-foreground uppercase tracking-widest mb-3">Configuração</p>
-                                                <input
+                                                <label htmlFor={`automation-action-title-${idx}`} className="mb-2 block text-label-ui font-medium text-foreground">Assunto ou título da ação {idx + 1}</label>
+                                                <Input
+                                                    id={`automation-action-title-${idx}`}
                                                     type="text"
-                                                    placeholder="Assunto / Título da Ação"
-                                                    className="w-full bg-card border-none rounded-[var(--radius-panel)] px-5 py-3 text-foreground text-body-ui outline-none focus:ring-1 focus:ring-primary/40 focus:bg-background transition-all"
+                                                    placeholder="Assunto ou título"
                                                     value={action.config.title || ''}
                                                     onChange={e => {
                                                         const newActions = [...(formData.actions || [])];
-                                                        newActions[idx].config.title = e.target.value;
+                                                        newActions[idx] = { ...newActions[idx], config: { ...newActions[idx].config, title: e.target.value } };
                                                         setFormData({ ...formData, actions: newActions });
                                                     }}
                                                 />
@@ -282,14 +310,15 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     </div>
                                 ))}
 
-                                <button 
+                                <button
                                     onClick={() => {
                                         const newActions = [...(formData.actions || []), { type: 'send_notification', config: {} }];
                                         setFormData({ ...formData, actions: newActions as any });
                                     }}
-                                    className="w-full p-4 border-2 border-dashed border-border rounded-[var(--radius-panel)] text-metadata-ui font-black text-muted-foreground hover:text-primary hover:border-primary/40 transition-all flex items-center justify-center gap-2 group"
+                                    type="button"
+                                    className="focus-ring w-full p-3 border border-dashed border-border rounded-[var(--radius-control)] text-body-ui font-medium text-foreground hover:border-primary/40 transition-colors flex items-center justify-center gap-2 group"
                                 >
-                                    <Plus className="h-4 w-4 group-hover:rotate-90 transition-all" /> Adicionar Passo Sequencial
+                                    <Plus className="h-4 w-4 group-hover:rotate-90 transition-all" /> Adicionar ação
                                 </button>
                             </div>
 
@@ -298,38 +327,33 @@ export const NewAutomationModal = ({ onClose, onSave, initialData }: NewAutomati
                                     <CheckCircle2 className="h-5 w-5 text-primary-foreground" />
                                 </div>
                                 <p className="text-body-ui text-muted-foreground font-medium">
-                                    Este fluxo será ativado <span className="text-foreground font-bold">Imediatamente</span> após a criação.
+                                    {initialData?.id
+                                        ? `As alterações mantêm o fluxo ${formData.enabled ? "ativo" : "pausado"}.`
+                                        : "Ao salvar, o fluxo ficará habilitado na configuração. Isso não confirma a execução automática."}
                                 </p>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Footer Actions */}
-                <div className="p-4 px-6 border-t border-border bg-card flex items-center justify-between">
-                    <button
-                        onClick={step === 1 ? onClose : handleBack}
-                        className="px-8 py-3.5 rounded-[var(--radius-panel)] font-bold bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all flex items-center gap-2"
-                    >
-                        {step === 1 ? 'Cancelar' : <><ArrowLeft className="h-5 w-5" /> Voltar</>}
-                    </button>
-
-                    <button
-                        onClick={step === 3 ? handleSubmit : handleNext}
-                        disabled={step === 1 && !formData.name}
-                        className={`px-10 py-3.5 rounded-[var(--radius-panel)] font-bold flex items-center gap-2 shadow-card-ui transition-all hover:scale-[1.02] active:scale-[0.98] ${step === 1 && !formData.name
-                            ? 'bg-muted text-muted-foreground cursor-not-allowed shadow-none'
-                            : 'bg-primary text-primary-foreground shadow-primary/40'
-                            }`}
-                    >
-                        {loading ? 'Criando...' : step === 3 ? (
-                            <>Concluir e Ativar <CheckCircle2 className="h-5 w-5" /></>
+                {saveError && (
+                    <p role="alert" className="shrink-0 border-t border-border bg-destructive-subtle px-4 py-3 text-body-ui text-destructive-readable sm:px-6">
+                        Não foi possível salvar o fluxo. Suas alterações permanecem no formulário; tente novamente.
+                    </p>
+                )}
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-card p-4 sm:px-6">
+                    <Button type="button" variant="outline" onClick={step === 1 ? onClose : handleBack} disabled={loading}>
+                        {step === 1 ? 'Cancelar' : <><ArrowLeft aria-hidden="true" /> Voltar</>}
+                    </Button>
+                    <Button type="button" onClick={step === 3 ? handleSubmit : handleNext} disabled={loading || (step === 1 && !formData.name?.trim())}>
+                        {loading ? 'Salvando...' : step === 3 ? (
+                            <>{initialData?.id ? 'Salvar alterações' : 'Salvar fluxo'} <CheckCircle2 aria-hidden="true" /></>
                         ) : (
-                            <>Próximo <ArrowRight className="h-5 w-5" /></>
+                            <>Próximo <ArrowRight aria-hidden="true" /></>
                         )}
-                    </button>
+                    </Button>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };

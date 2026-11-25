@@ -483,6 +483,31 @@ async function runAxe(page, source) {
     return report;
 }
 
+// Confirm the actual browser's inert boundary for every audited automation modal.
+async function assertAutomationDialogIsolation(page, dialog) {
+    const shell = page.locator('[data-slot="crm-dashboard-shell"]');
+    if (!(await shell.evaluate(element => element.inert))) {
+        throw new Error('AUTOMATION_DIALOG_BACKGROUND_NOT_INERT');
+    }
+    await dialog.locator('button:not([disabled])').first().focus();
+    const backgroundBlocked = await dialog.evaluate(node => {
+        const shell = document.querySelector('[data-slot="crm-dashboard-shell"]');
+        const target = shell?.querySelector('button:not([disabled]), a[href]');
+        if (!(target instanceof HTMLElement)) return false;
+        target.focus();
+        return node.contains(document.activeElement) &&
+            !document.activeElement?.closest('[aria-hidden="true"], [inert]');
+    });
+    if (!backgroundBlocked) throw new Error('AUTOMATION_BACKGROUND_FOCUS_ACCEPTED');
+    for (const key of ['Tab', 'Tab', 'Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab']) {
+        await page.keyboard.press(key);
+        if (!(await dialog.evaluate(node => node.contains(document.activeElement) &&
+            !document.activeElement?.closest('[aria-hidden="true"], [inert]')))) {
+            throw new Error('AUTOMATION_DIALOG_FOCUS_LEAK');
+        }
+    }
+}
+
 async function assertOpportunityDialogKeyboard(page, opener) {
     const dialog = page.getByRole('dialog');
     const shell = page.locator('[data-slot="crm-dashboard-shell"]');
@@ -1053,6 +1078,142 @@ try {
                     }
                     if (capture) await page.screenshot({ path: resolve(artifactDir, `${account.label}-${route.slice(1).replaceAll('/', '-') || 'root'}-${viewport.name}-${theme}.png`), fullPage: true });
                     profileResult.checks.push({ route, viewport: viewport.name, theme, axeStatus: issues ? 'failed' : 'passed' });
+                    // Real read-only interaction proof for the automation workspace.
+                    // Do not submit, toggle, delete, duplicate or execute any workflow.
+                    if (local && profileIndex === 0 && route === '/automations') {
+                        const savedFlow = page.getByText('Fluxo Inativo de Demonstração', { exact: true }).first();
+                        const draft = page.getByRole('textbox', { name: 'Descrever automação' });
+                        const search = page.getByRole('textbox', { name: 'Buscar fluxos de trabalho' });
+                        const filters = page.getByRole('group', { name: 'Filtrar fluxos por status' });
+                        await draft.fill('Enviar e-mail de acompanhamento');
+                        await savedFlow.waitFor({ state: 'visible' });
+                        await draft.clear();
+                        await search.fill('qa-sem-correspondencia-987');
+                        await savedFlow.waitFor({ state: 'hidden' });
+                        await search.clear();
+                        await savedFlow.waitFor({ state: 'visible' });
+                        await filters.getByRole('button', { name: 'Ativos', exact: true }).click();
+                        await savedFlow.waitFor({ state: 'hidden' });
+                        await filters.getByRole('button', { name: 'Pausados', exact: true }).click();
+                        await savedFlow.waitFor({ state: 'visible' });
+                        await filters.getByRole('button', { name: 'Todos', exact: true }).click();
+                        const library = page.getByRole('region', { name: 'Biblioteca de receitas' });
+                        if (await library.getByRole('button', { name: /^Usar modelo / }).count() !== 6) {
+                            throw new Error('AUTOMATION_LIBRARY_INCOMPLETE');
+                        }
+                        await page.getByRole('link', { name: 'Ver modelos' }).click();
+                        const fitsHorizontally = await library.evaluate(node => {
+                            const bounds = node.getBoundingClientRect();
+                            return node.scrollWidth <= node.clientWidth + 1 &&
+                                [...node.querySelectorAll('button')].every(button => {
+                                    const rect = button.getBoundingClientRect();
+                                    return rect.width > 0 && rect.left >= bounds.left - 1 && rect.right <= bounds.right + 1;
+                                });
+                        });
+                        if (!fitsHorizontally) throw new Error('AUTOMATION_LIBRARY_HORIZONTAL_CLIPPING');
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-automations-library-' + viewport.name + '-' + theme + '.png'),
+                            fullPage: true,
+                        });
+                        const recipe = library.getByRole('button', { name: 'Usar modelo Notificar VIP', exact: true });
+                        await recipe.click();
+                        const editor = page.getByRole('dialog', { name: 'Novo Fluxo de Trabalho' });
+                        await editor.waitFor({ state: 'visible', timeout: 8000 });
+                        if (await editor.getByRole('textbox', { name: 'Nome da automação' }).inputValue() !== 'Notificar VIP') {
+                            throw new Error('AUTOMATION_RECIPE_PREFILL_FAILED');
+                        }
+                        for (let step = 1; step <= 3; step++) {
+                            if (step > 1) await editor.getByRole('button', { name: 'Próximo', exact: true }).click();
+                            if (step === 2 && await editor.getByRole('button', { name: /Oportunidade Criada/ }).getAttribute('aria-pressed') !== 'true') {
+                                throw new Error('AUTOMATION_RECIPE_TRIGGER_LOST');
+                            }
+                            if (step === 3) {
+                                if (await editor.getByRole('button', { name: 'Notificação Push', exact: true }).getAttribute('aria-pressed') !== 'true') {
+                                    throw new Error('AUTOMATION_RECIPE_ACTION_LOST');
+                                }
+                                await editor.getByRole('button', { name: 'Adicionar ação', exact: true }).click();
+                                await editor.getByRole('button', { name: 'Remover ação 2' }).click();
+                            }
+                            await page.waitForTimeout(300);
+                            const fits = await editor.evaluate(node => {
+                                const box = node.getBoundingClientRect();
+                                const button = [...node.querySelectorAll('button')].at(-1)?.getBoundingClientRect();
+                                return box.left >= -1 && box.right <= innerWidth + 1 &&
+                                    box.top >= -1 && box.bottom <= innerHeight + 1 &&
+                                    !!button && button.top >= box.top - 1 && button.bottom <= box.bottom + 1;
+                            });
+                            if (!fits) throw new Error('AUTOMATION_EDITOR_CLIPPING: step ' + step);
+                            await assertAutomationDialogIsolation(page, editor);
+                            const editorAxe = await runAxe(page, source);
+                            const editorIssues = editorAxe.violationsCount + editorAxe.incompleteCount;
+                            if (editorIssues) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add('/automations?editor-step=' + step);
+                                const finding = { profileIndex, route, state: 'automation-editor-' + step,
+                                    viewport: viewport.name, theme, violations: editorAxe.violations, incomplete: editorAxe.incomplete };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                    results.failures.push(finding);
+                                    process.stderr.write('CRM_AUTOMATION_EDITOR_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                                }
+                            }
+                            if (capture) await page.screenshot({
+                                path: resolve(artifactDir, account.label + '-automations-editor-step-' + step + '-' + viewport.name + '-' + theme + '.png'),
+                                fullPage: true,
+                            });
+                            profileResult.checks.push({ route, state: 'automation-editor-' + step, viewport: viewport.name, theme,
+                                status: editorIssues ? 'failed' : 'passed' });
+                        }
+                        await page.keyboard.press('Tab');
+                        if (!await editor.evaluate(node => node.contains(document.activeElement))) {
+                            throw new Error('AUTOMATION_EDITOR_FOCUS_LEAK');
+                        }
+                        await page.keyboard.press('Escape');
+                        await editor.waitFor({ state: 'hidden', timeout: 8000 });
+                        await page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === 'Usar modelo Notificar VIP');
+                        await page.waitForFunction(() => !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert);
+                        await savedFlow.waitFor({ state: 'visible' });
+                        profileResult.checks.push({ route, state: 'automation-library-filter-cancel', viewport: viewport.name, theme, status: 'passed' });
+                        // Confirm the recorded counters, not a fabricated event timeline.
+                        const historyButton = page.getByRole('button', { name: 'Ver execuções' }).first();
+                        await historyButton.click();
+                        const historyDialog = page.getByRole('dialog', { name: 'Execuções de automação' });
+                        await historyDialog.waitFor({ state: 'visible', timeout: 8000 });
+                        await historyDialog.getByText('Histórico detalhado indisponível', { exact: true }).waitFor({ state: 'visible' });
+                        if (await historyDialog.getByText(/cliente@email\.com|TIMEOUT|Configurar Notificações de Erro/).count()) {
+                            throw new Error('AUTOMATION_HISTORY_CONTAINS_SIMULATED_EVENTS');
+                        }
+                        await page.waitForTimeout(350);
+                        const historyFits = await historyDialog.evaluate(node => {
+                            const bounds = node.getBoundingClientRect();
+                            return bounds.left >= 8 && bounds.right <= innerWidth - 8 &&
+                                bounds.top >= -1 && bounds.bottom <= innerHeight + 1 &&
+                                node.scrollWidth <= node.clientWidth + 1;
+                        });
+                        if (!historyFits) throw new Error('AUTOMATION_HISTORY_DIALOG_CLIPPING');
+                        await assertAutomationDialogIsolation(page, historyDialog);
+                        const historyAxe = await runAxe(page, source);
+                        const historyIssues = historyAxe.violationsCount + historyAxe.incompleteCount;
+                        if (historyIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add('/automations?history');
+                            const finding = { profileIndex, route, state: 'automation-history',
+                                viewport: viewport.name, theme, violations: historyAxe.violations, incomplete: historyAxe.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_AUTOMATION_HISTORY_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-automations-history-' + viewport.name + '-' + theme + '.png'),
+                            fullPage: true,
+                        });
+                        await page.keyboard.press('Escape');
+                        await historyDialog.waitFor({ state: 'hidden', timeout: 8000 });
+                        await page.waitForFunction(() => document.activeElement?.textContent?.includes('Ver execuções'));
+                        await page.waitForFunction(() => !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert);
+                        profileResult.checks.push({ route, state: 'automation-history', viewport: viewport.name, theme,
+                            status: historyIssues ? 'failed' : 'passed' });
+                    }
                     // Verify that the actual global search control is an action,
                     // not a fake input. No search is submitted or data changed here.
                     if (local && profileIndex === 0 && route === '/dashboard') {
