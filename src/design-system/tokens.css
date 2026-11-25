@@ -325,6 +325,8 @@
   --ds-card-gap: 1rem;
   --ds-stat-gap: 0.75rem;
   --ds-stat-padding: 1rem;
+  --ds-stat-compact-padding: 0.625rem;
+  --ds-directory-table-min-width: 48rem;
   --ds-stat-min-height: 7rem;
   --ds-stat-icon-size: 2.25rem;
   --ds-card-padding-block: 1.25rem;

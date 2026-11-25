@@ -19,26 +19,25 @@ const statusColors: Record<string, string> = {
 
 export function CustomersTable({ accounts, onEdit, onDelete, onView }: CustomersTableProps) {
     return (
-        <div className="bg-card border border-border rounded-[var(--radius-panel)] overflow-hidden">
-            <table className="w-full text-body-ui">
+        <div role="region" aria-label="Tabela de empresas" tabIndex={0} data-qa-region="directory-table" className="min-w-0 max-w-full overflow-x-auto focus-ring bg-card border border-border rounded-[var(--radius-panel)]">
+            <table aria-label="Empresas" className="w-full min-w-[var(--ds-directory-table-min-width)] text-body-ui">
                 <thead>
                     <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Empresa</th>
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden md:table-cell">CNPJ</th>
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Segmento</th>
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden lg:table-cell">Cidade / UF</th>
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest">Status</th>
-                        <th className="text-left px-4 py-3 text-metadata-ui font-black text-muted-foreground uppercase tracking-widest hidden sm:table-cell">Contatos</th>
-                        <th className="px-4 py-3" />
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">Empresa</th>
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">CNPJ</th>
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">Segmento</th>
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">Cidade / UF</th>
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">Status</th>
+                        <th scope="col" className="text-left px-4 py-3 text-label-ui font-semibold text-foreground">Contatos</th>
+                        <th scope="col" className="px-4 py-3 text-right text-label-ui font-semibold text-foreground">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {accounts.map((account, i) => (
                         <tr
                             key={account.id}
-                            onClick={() => onView?.(account)}
                             className={cn(
-                                'border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer',
+                                'border-b border-border/50 hover:bg-muted/20 transition-colors',
                                 i === accounts.length - 1 && 'border-b-0'
                             )}
                         >
@@ -48,18 +47,22 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                                         <Building2 className="h-4 w-4 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="font-bold text-foreground text-body-ui leading-tight truncate max-w-[180px]">{account.name}</p>
+                                        {onView ? (
+                                            <button type="button" className="focus-ring rounded-[var(--radius-control)] text-left font-semibold text-foreground text-body-ui underline underline-offset-4" aria-label={`Abrir empresa ${account.name}`} onClick={() => onView(account)}>
+                                                {account.name}
+                                            </button>
+                                        ) : <p className="font-semibold text-foreground text-body-ui">{account.name}</p>}
                                         <p className="text-metadata-ui text-muted-foreground font-medium capitalize">{account.relationship_type || 'Cliente'}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td className="px-4 py-3 text-metadata-ui text-muted-foreground font-mono hidden md:table-cell">
+                            <td className="px-4 py-3 text-metadata-ui text-muted-foreground font-mono">
                                 {account.cnpj || '—'}
                             </td>
-                            <td className="px-4 py-3 text-metadata-ui text-muted-foreground font-medium hidden lg:table-cell">
+                            <td className="px-4 py-3 text-metadata-ui text-muted-foreground font-medium">
                                 {account.segment || '—'}
                             </td>
-                            <td className="px-4 py-3 hidden lg:table-cell">
+                            <td className="px-4 py-3">
                                 {account.city ? (
                                     <div className="flex items-center gap-1 text-metadata-ui text-muted-foreground">
                                         <MapPin className="h-3 w-3 shrink-0" />
@@ -69,13 +72,13 @@ export function CustomersTable({ accounts, onEdit, onDelete, onView }: Customers
                             </td>
                             <td className="px-4 py-3">
                                 <span className={cn(
-                                    'px-2 py-0.5 rounded-full text-metadata-ui font-black uppercase tracking-wide',
+                                    'px-2 py-0.5 rounded-full text-metadata-ui font-medium',
                                     statusColors[account.status || 'Ativo'] || 'bg-muted text-muted-foreground'
                                 )}>
                                     {account.status || 'Ativo'}
                                 </span>
                             </td>
-                            <td className="px-4 py-3 hidden sm:table-cell">
+                            <td className="px-4 py-3">
                                 <div className="flex items-center gap-1 text-metadata-ui text-muted-foreground">
                                     <Users className="h-3 w-3" />
                                     {account.contacts?.length || 0}

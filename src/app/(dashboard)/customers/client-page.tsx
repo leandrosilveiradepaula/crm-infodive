@@ -18,6 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
+import { DirectoryResults } from '@/components/layout/DirectoryResults';
+import { toast } from 'sonner';
+import { buildCustomerCsv } from '@/components/customers/customer-csv';
 import { ImportCustomersModal } from '@/components/customers/ImportCustomersModal';
 
 interface CustomersClientPageProps {
@@ -62,8 +65,13 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja remover este cliente?')) {
-            await deleteAccount(id);
-            router.refresh();
+            try {
+                const result = await deleteAccount(id);
+                if (!result.success) throw new Error('Exclusão não confirmada');
+                router.refresh();
+            } catch {
+                toast.error('Não foi possível excluir a empresa.');
+            }
         }
     };
 
@@ -83,8 +91,18 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
     };
 
     const handleExportCSV = () => {
-        // Todo implementation
-        alert("Exporting CSV...");
+        if (!filteredAccounts.length) return;
+        const url = URL.createObjectURL(new Blob([buildCustomerCsv(filteredAccounts)], { type: 'text/csv;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'empresas-filtradas.csv';
+        document.body.appendChild(link);
+        try {
+            link.click();
+        } finally {
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
     };
 
     const clearFilters = () => {
@@ -112,11 +130,13 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
         ).pop();
     }, [initialAccounts]);
 
+    const hasFilters = searchTerm !== '' || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos';
+
     return (
         <div className="space-y-6 pb-10">
             {/* Header */}
-            <PageHeader 
-                title="Minhas Empresas" 
+            <PageHeader
+                title="Minhas Empresas"
                 description="Base de empresas, parceiros e fornecedores."
             >
                 <div className="flex flex-wrap gap-2">
@@ -124,7 +144,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                         <FileSpreadsheet />
                         Importar Planilha
                     </Button>
-                    <Button variant="outline" onClick={handleExportCSV}>
+                    <Button variant="outline" onClick={handleExportCSV} disabled={!filteredAccounts.length} title="Exportar somente as empresas dos filtros atuais">
                         <Download />
                         Exportar CSV
                     </Button>
@@ -136,7 +156,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
             </PageHeader>
 
             {/* KPIs Dashboard */}
-            <StatsGrid items={[
+            <StatsGrid density="directory" items={[
                 {
                     label: "Empresas Ativas",
                     value: initialAccounts.filter(c => c.status === 'Ativo').length,
@@ -172,6 +192,7 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar empresas"
                         placeholder="Buscar por nome, cidade ou segmento..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
@@ -216,17 +237,14 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                         </SelectContent>
                     </Select>
 
-                    {(searchTerm || statusFilter !== 'Todos' || segmentFilter !== 'Todos' || relationshipFilter !== 'Todos') && (
-                        <Button aria-label="Limpar filtros de empresas" variant="ghost" size="icon" onClick={clearFilters} className="text-muted-foreground hover:text-destructive-readable hover:bg-destructive-subtle h-10 w-10 rounded-[var(--radius-control)] transition-colors">
-                            <X className="h-5 w-5" />
-                        </Button>
-                    )}
                     <ViewToggle view={view} onViewChange={setView} />
                 </div>
             </FilterBar>
 
             {/* Grid / Table */}
-            {view === 'cards' ? (
+            <DirectoryResults shown={filteredAccounts.length} total={initialAccounts.length} hasFilters={hasFilters} onReset={clearFilters} resetLabel="Limpar filtros de empresas" />
+
+            {filteredAccounts.length > 0 && (view === 'cards' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     {filteredAccounts.map(account => (
                         <CustomerCard
@@ -245,15 +263,15 @@ export default function CustomersClientPage({ initialAccounts }: CustomersClient
                     onDelete={handleDelete}
                     onView={handleView}
                 />
-            )}
+            ))}
 
             {filteredAccounts.length === 0 && (
                 <PremiumEmptyState
                     icon={Building}
                     title="Nenhuma empresa encontrada"
                     description={initialAccounts.length === 0 ? 'Cadastre a primeira empresa para iniciar a base comercial.' : 'Ajuste os filtros para localizar outras empresas.'}
-                    actionLabel={initialAccounts.length === 0 ? 'Novo cadastro' : 'Limpar filtros'}
-                    onAction={initialAccounts.length === 0 ? handleCreate : clearFilters}
+                    actionLabel={initialAccounts.length === 0 ? 'Novo cadastro' : undefined}
+                    onAction={initialAccounts.length === 0 ? handleCreate : undefined}
                 />
             )}
 

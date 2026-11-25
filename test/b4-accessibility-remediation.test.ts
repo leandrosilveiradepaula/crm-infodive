@@ -27,7 +27,7 @@ describe('CRM #214 B4 authenticated accessibility remediation regressions', () =
         const cases: Record<string, string[]> = {
             'src/components/leads/LeadCard.tsx': ['Opções do lead'],
             'src/components/customers/CustomerCard.tsx': ['Opções da empresa'],
-            'src/app/(dashboard)/customers/client-page.tsx': ['Limpar filtros de empresas'],
+            'src/app/(dashboard)/customers/client-page.tsx': ['Buscar empresas'],
             'src/app/(dashboard)/dashboard/client-page.tsx': [
                 'Selecionar ano do Dashboard', 'Configurar layout do Dashboard', 'Fechar configuração de layout',
             ],

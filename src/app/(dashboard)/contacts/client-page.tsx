@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Contact } from '@/types/contact';
 import { ContactCard } from '@/components/contacts/ContactCard';
@@ -14,6 +14,8 @@ import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { StatsGrid, type StatItem } from '@/components/layout/StatsGrid';
 import { FilterBar } from '@/components/layout/FilterBar';
+import { DirectoryResults } from '@/components/layout/DirectoryResults';
+import { toast } from 'sonner';
 import { PremiumEmptyState } from '@/components/ui/PremiumEmptyState';
 
 interface ContactsClientPageProps {
@@ -22,12 +24,9 @@ interface ContactsClientPageProps {
 
 export function ContactsClientPage({ initialContacts }: ContactsClientPageProps) {
     const router = useRouter();
-    const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+    const contacts = initialContacts;
     const [view, setView] = useState<ViewMode>('cards');
 
-    useEffect(() => {
-        setContacts(initialContacts);
-    }, [initialContacts]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterAccount, setFilterAccount] = useState('all');
     const [filterRole, setFilterRole] = useState('all');
@@ -39,12 +38,14 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
 
     const filteredContacts = contacts.filter(contact => {
         const matchesSearch = contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (contact.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             (contact.account?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesAccount = filterAccount === 'all' || contact.account?.name === filterAccount;
         const matchesRole = filterRole === 'all' || contact.role === filterRole;
         return matchesSearch && matchesAccount && matchesRole;
     });
+
+    const clearFilters = () => { setSearchTerm(''); setFilterAccount('all'); setFilterRole('all'); };
 
     const handleEdit = (contact: Contact) => {
         setSelectedContact(contact);
@@ -53,7 +54,13 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
 
     const handleDelete = async (id: string) => {
         if (confirm('Tem certeza que deseja remover este contato?')) {
-            await deleteContact(id);
+            try {
+                const result = await deleteContact(id);
+                if (!result.success) throw new Error('Exclusão não confirmada');
+                router.refresh();
+            } catch {
+                toast.error('Não foi possível excluir o contato.');
+            }
         }
     };
 
@@ -62,10 +69,12 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
         setSelectedContact(undefined);
     };
 
+    const hasFilters = searchTerm !== '' || filterAccount !== 'all' || filterRole !== 'all';
+
     return (
         <div className="flex-1 space-y-6 pb-10">
-            <PageHeader 
-                title="Contatos" 
+            <PageHeader
+                title="Contatos"
                 description="Gerencie todos os contatos da sua base."
             >
                 <Button onClick={() => setIsModalOpen(true)} size="lg">
@@ -73,9 +82,9 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     Novo Contato
                 </Button>
             </PageHeader>
-            
+
             {/* KPI Cards */}
-            <StatsGrid items={[
+            <StatsGrid density="directory" items={[
                 {
                     label: "Total de Contatos",
                     value: contacts.length,
@@ -115,18 +124,19 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 <div className="relative flex-1 w-full group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <ThemeInput
+                        aria-label="Buscar contatos"
                         placeholder="Buscar por nome, email ou empresa..."
                         className="h-10 w-full pl-11"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex items-center gap-3 w-full md:w-auto">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-2 md:w-auto">
                     <ThemeSelect
                         aria-label="Filtrar contatos por empresa"
                         value={filterAccount}
                         onChange={e => setFilterAccount(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Empresa: Todas</option>
                         {uniqueAccounts.map(acc => (
@@ -138,7 +148,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                         aria-label="Filtrar contatos por cargo"
                         value={filterRole}
                         onChange={e => setFilterRole(e.target.value)}
-                        className="h-10"
+                        className="h-10 min-w-0 flex-1 basis-[8rem] md:w-auto md:flex-none"
                     >
                         <option value="all">Cargo: Todos</option>
                         {uniqueRoles.map(role => (
@@ -150,7 +160,9 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                 </div>
             </FilterBar>
 
-            {view === 'cards' ? (
+            <DirectoryResults shown={filteredContacts.length} total={contacts.length} hasFilters={hasFilters} onReset={clearFilters} resetLabel="Limpar filtros de contatos" />
+
+            {filteredContacts.length > 0 && (view === 'cards' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
                     {filteredContacts.map(contact => (
                         <ContactCard
@@ -167,7 +179,7 @@ export function ContactsClientPage({ initialContacts }: ContactsClientPageProps)
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                 />
-            )}
+            ))}
 
             {filteredContacts.length === 0 && (
                 <PremiumEmptyState

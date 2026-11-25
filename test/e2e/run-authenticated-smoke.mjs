@@ -1305,6 +1305,113 @@ try {
                             status: assistantIssues ? 'failed' : 'passed',
                         });
                     }
+                    // Read-only authenticated directory journey. No AI request or writes.
+                    if (local && profileIndex === 0 && ['/leads', '/contacts', '/customers'].includes(route)) {
+                        const spec = {
+                            '/leads': { search: 'Buscar leads', term: 'Prospecto', reset: 'Limpar filtros de leads', table: 'Leads' },
+                            '/contacts': { search: 'Buscar contatos', term: 'aurora@example.invalid', reset: 'Limpar filtros de contatos', table: 'Contatos' },
+                            '/customers': { search: 'Buscar empresas', term: 'Aurora', reset: 'Limpar filtros de empresas', table: 'Empresas' },
+                        }[route];
+                        const search = page.getByRole('textbox', { name: spec.search, exact: true });
+                        const waitCount = expected => page.waitForFunction(value =>
+                            document.querySelector('[data-qa-region="directory-results"] [role="status"]')?.textContent?.trim() === value, expected);
+                        const summary = page.locator('[data-qa-region="stats"][data-density="directory"]');
+                        if (await summary.locator('[data-slot="stats-tile"]').count() !== 4) throw new Error('CRM_DIRECTORY_SUMMARY_MISSING: ' + route);
+                        const summaryLayout = await summary.evaluate(node => {
+                            const tiles = [...node.querySelectorAll('[data-slot="stats-tile"]')];
+                            return { columns: getComputedStyle(node).gridTemplateColumns.split(' ').length,
+                                noOverflow: tiles.every(tile => tile.scrollWidth <= tile.clientWidth + 1) };
+                        });
+                        if (!summaryLayout.noOverflow || (viewport.name === 'mobile' && summaryLayout.columns !== 2)) {
+                            throw new Error('CRM_DIRECTORY_SUMMARY_CLIPPING: ' + route);
+                        }
+                        await waitCount('2 de 2 registros');
+                        await search.fill(spec.term);
+                        await waitCount('1 de 2 registros');
+                        const toggle = page.getByRole('button', { name: 'Visualização em lista', exact: true });
+                        await toggle.click();
+                        const table = page.getByRole('table', { name: spec.table, exact: true });
+                        await table.waitFor({ state: 'visible' });
+                        if (await table.getByRole('row').count() !== 2 || await toggle.getAttribute('aria-pressed') !== 'true') {
+                            throw new Error('CRM_DIRECTORY_VIEW_LOST_FILTER: ' + route);
+                        }
+                        const frame = page.locator('[data-qa-region="directory-table"]');
+                        const frameFits = await frame.evaluate(node => {
+                            const b = node.getBoundingClientRect();
+                            return b.left >= -1 && b.right <= innerWidth + 1 &&
+                                getComputedStyle(node).overflowX === 'auto' &&
+                                node.querySelectorAll('th[scope="col"]').length >= 6;
+                        });
+                        if (!frameFits) throw new Error('CRM_DIRECTORY_TABLE_CLIPPING: ' + route);
+                        await page.waitForTimeout(250);
+                        const listAxe = await runAxe(page, source);
+                        const listIssues = listAxe.violationsCount + listAxe.incompleteCount;
+                        if (listIssues) {
+                            a11yFailureCount += 1;
+                            a11yFailedRoutes.add(route + '?list');
+                            const finding = { profileIndex, route, state: 'directory-list', viewport: viewport.name, theme,
+                                violations: listAxe.violations, incomplete: listAxe.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                results.failures.push(finding);
+                                process.stderr.write('CRM_DIRECTORY_LIST_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                            }
+                        }
+                        if (capture) await page.screenshot({
+                            path: resolve(artifactDir, account.label + '-' + route.slice(1) + '-filtered-list-' + viewport.name + '-' + theme + '.png'),
+                            fullPage: true,
+                        });
+                        if (route === '/customers') {
+                            const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
+                            await page.getByRole('button', { name: 'Exportar CSV', exact: true }).click();
+                            const download = await downloadPromise;
+                            const { readFile } = await import('node:fs/promises');
+                            const csv = await readFile(await download.path(), 'utf8');
+                            if (download.suggestedFilename() !== 'empresas-filtradas.csv' ||
+                                !csv.includes('Empresa Exemplo Aurora') || csv.includes('Empresa Exemplo Horizonte') ||
+                                csv.includes('@example.invalid')) throw new Error('CRM_DIRECTORY_CSV_SCOPE_FAILED');
+                            await download.delete();
+                        }
+                        if (route === '/leads') {
+                            const opener = table.getByRole('button', { name: /^Pesquisar empresa do lead / }).first();
+                            await opener.click();
+                            const research = page.getByRole('dialog', { name: 'Pesquisa comercial' });
+                            await research.waitFor({ state: 'visible', timeout: 8000 });
+                            await research.getByText(/Nenhum dado é gravado no lead/).waitFor({ state: 'visible' });
+                            await page.waitForTimeout(350);
+                            await assertAutomationDialogIsolation(page, research);
+                            const researchAxe = await runAxe(page, source);
+                            const issues = researchAxe.violationsCount + researchAxe.incompleteCount;
+                            if (issues) {
+                                a11yFailureCount += 1;
+                                a11yFailedRoutes.add(route + '?research');
+                                const finding = { profileIndex, route, state: 'lead-research', viewport: viewport.name, theme,
+                                    violations: researchAxe.violations, incomplete: researchAxe.incomplete };
+                                if (results.failures.length < MAX_A11Y_DIAGNOSTICS) {
+                                    results.failures.push(finding);
+                                    process.stderr.write('CRM_DIRECTORY_RESEARCH_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
+                                }
+                            }
+                            if (capture) await page.screenshot({
+                                path: resolve(artifactDir, account.label + '-leads-research-' + viewport.name + '-' + theme + '.png'),
+                                fullPage: true,
+                            });
+                            const openerLabel = await opener.getAttribute('aria-label');
+                            await page.keyboard.press('Escape');
+                            await research.waitFor({ state: 'hidden', timeout: 8000 });
+                            await page.waitForFunction(label => document.activeElement?.getAttribute('aria-label') === label &&
+                                !document.querySelector('[data-slot="crm-dashboard-shell"]')?.inert, openerLabel);
+                            profileResult.checks.push({ route, state: 'lead-research', viewport: viewport.name, theme,
+                                status: issues ? 'failed' : 'passed' });
+                        }
+                        await search.fill('qa-no-matching-directory-record-728');
+                        await waitCount('0 de 2 registros');
+                        await table.waitFor({ state: 'hidden' });
+                        await page.getByRole('button', { name: spec.reset, exact: true }).click();
+                        await waitCount('2 de 2 registros');
+                        await page.getByRole('button', { name: 'Visualização em cards', exact: true }).click();
+                        profileResult.checks.push({ route, state: 'directory-filter-view-csv', viewport: viewport.name, theme,
+                            status: listIssues ? 'failed' : 'passed' });
+                    }
                     // Exercise real migrated lead/contact/customer creation dialogs
                     // without submitting or changing the synthetic QA database.
                     // A static source test cannot see focus, scrollbar clipping
