@@ -167,20 +167,48 @@ async function setTheme(page, theme, verifyPersistence = false) {
 }
 
 async function assertKeyboardFocus(page) {
-    await page.keyboard.press('Tab');
-    const focus = await page.evaluate(() => {
-        const element = document.activeElement;
-        if (!(element instanceof HTMLElement)) return null;
-        const style = getComputedStyle(element);
-        return {
-            tag: element.tagName,
-            outline: style.outlineStyle,
-            boxShadow: style.boxShadow,
-        };
-    });
-    if (!focus || (focus.outline === 'none' && focus.boxShadow === 'none')) {
-        throw new Error('Keyboard focus is not visibly rendered.');
-    }
+    // Theme toggling may leave focus on the last enabled control. Start at a
+    // visible navigation anchor, then use actual forward and reverse Tab.
+    const desktopAnchor = page.locator('#crm-sidebar a').first();
+    const mobileAnchor = page.locator('[data-slot="crm-mobile-menu-trigger"]');
+    const anchor = await desktopAnchor.isVisible() ? desktopAnchor : mobileAnchor;
+    await anchor.focus();
+    const start = await anchor.elementHandle();
+    if (!start) throw new Error('CRM_FINAL_KEYBOARD_ANCHOR_MISSING');
+    try {
+        await page.keyboard.press('Tab');
+        const target = await page.evaluateHandle(() => document.activeElement);
+        try {
+            const focus = await target.evaluate((element, previous) => {
+                if (!(element instanceof HTMLElement) || element === previous ||
+                    element === document.body || !element.matches(':focus-visible')) return false;
+                const style = getComputedStyle(element);
+                const bounds = element.getBoundingClientRect();
+                return bounds.width > 0 && bounds.height > 0 &&
+                    bounds.right > 0 && bounds.left < innerWidth &&
+                    bounds.bottom > 0 && bounds.top < innerHeight &&
+                    style.visibility === 'visible' && !element.closest('[inert]');
+            }, start);
+            if (!focus) throw new Error('CRM_FINAL_KEYBOARD_FOCUS_TARGET');
+            // A permanent decorative shadow cannot satisfy this check: compare
+            // the same real control with and without keyboard focus.
+            await page.waitForTimeout(250);
+            const readIndicator = element => {
+                const style = getComputedStyle(element);
+                return { outline: style.outlineStyle + ' ' + style.outlineWidth + ' ' + style.outlineColor,
+                    shadow: style.boxShadow };
+            };
+            const active = await target.evaluate(readIndicator);
+            await page.keyboard.press('Shift+Tab');
+            if (!(await start.evaluate(element => document.activeElement === element &&
+                element.matches(':focus-visible')))) throw new Error('CRM_FINAL_KEYBOARD_REVERSE');
+            await page.waitForTimeout(250);
+            const inactive = await target.evaluate(readIndicator);
+            const focusChanged = active.outline !== inactive.outline || active.shadow !== inactive.shadow;
+            const visibleIndicator = !active.outline.startsWith('none') || active.shadow !== 'none';
+            if (!focusChanged || !visibleIndicator) throw new Error('CRM_FINAL_KEYBOARD_INDICATOR_MISSING');
+        } finally { await target.dispose(); }
+    } finally { await start.dispose(); }
 }
 
 /**
@@ -1155,7 +1183,9 @@ try {
                             throw new Error('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
                         }
                     }
+                    phase = 'keyboard-focus';
                     await assertKeyboardFocus(page);
+                    phase = 'base-axe';
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;
                     if (issues) {
@@ -1844,11 +1874,31 @@ try {
                         await assertLayout(page);
                         phase = 'tablet-token-coverage';
                         const tokens = await assertWorkspaceTokenCoverage(page);
+                        phase = 'tablet-keyboard-focus';
+                        await assertKeyboardFocus(page);
+                        if (route === '/pipeline') {
+                            phase = 'tablet-kanban-layout';
+                            const stagesFit = await page.evaluate(() => {
+                                const stages = [...document.querySelectorAll('[data-qa-stage]')];
+                                return stages.length === 5 && stages.every(stage => {
+                                    const bounds = stage.getBoundingClientRect();
+                                    const header = stage.querySelector('header');
+                                    return !!header && bounds.left >= -1 && bounds.right <= innerWidth + 1 &&
+                                        header.scrollWidth <= header.clientWidth + 1;
+                                });
+                            });
+                            if (!stagesFit) throw new Error('CRM_FINAL_TABLET_KANBAN_CLIPPED');
+                        }
                         phase = 'tablet-axe';
                         const audit = await runAxe(page, source);
                         if (capture) await page.screenshot({ path: resolve(artifactDir,
                             account.label + '-' + route.slice(1).replaceAll('/', '-') + '-tablet-' + theme + '.png'), fullPage: true });
                         if (audit.violationsCount + audit.incompleteCount) {
+                            const finding = { profileIndex, route, viewport: 'tablet', theme,
+                                state: 'tablet-axe-detail', violations: audit.violations,
+                                incomplete: audit.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_FINAL_TABLET_AXE_DETAIL=' + JSON.stringify(finding) + '\n');
                             throw new Error('CRM_FINAL_TABLET_AXE_FINDINGS');
                         }
                         if (route === '/dashboard') {

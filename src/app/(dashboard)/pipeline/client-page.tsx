@@ -394,14 +394,14 @@ export const PipelineClientPage = ({ initialDeals, userProfile, distributors, al
                 </section>
             ) : (
             <DragDropContext onDragEnd={onDragEnd}>
-                <div role="region" aria-label="Quadro de oportunidades" tabIndex={0} className="min-w-0 flex-1 overflow-visible pb-4 focus-ring sm:overflow-x-auto">
-                    <div className="flex min-h-[var(--ds-kanban-board-min-height)] flex-col gap-[var(--ds-stat-gap)] sm:flex-row">
+                <div role="region" aria-label="Quadro de oportunidades" tabIndex={0} className="min-w-0 flex-1 overflow-visible pb-4 focus-ring xl:overflow-x-auto">
+                    <div className="flex min-h-[var(--ds-kanban-board-min-height)] flex-col gap-[var(--ds-stat-gap)] xl:flex-row">
                         {DEFAULT_STAGES.map(stage => {
                             const stageDeals = columns[stage.id] || [];
                             const totalStageValue = stageDeals.reduce((sum, d) => sum + Number(d.value || 0), 0);
 
                             return (
-                                <section key={stage.id} data-qa-stage={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col sm:w-auto sm:grow sm:shrink sm:basis-[var(--ds-kanban-column-width)] sm:min-w-[var(--ds-kanban-column-min-width)]">
+                                <section key={stage.id} data-qa-stage={stage.id} aria-label={`${stage.title}: ${stageDeals.length} oportunidades`} className="flex w-full shrink-0 flex-col xl:w-auto xl:grow xl:shrink xl:basis-[var(--ds-kanban-column-width)] xl:min-w-[var(--ds-kanban-column-min-width)]">
                                     <header className="mb-2 flex min-w-0 flex-wrap items-start justify-between gap-2 rounded-[var(--radius-panel)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">

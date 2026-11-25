@@ -37,6 +37,15 @@ describe('integrated UX audit contract', () => {
         expect(runner).toContain("state: 'final-workspace-token-coverage'");
     });
 
+    it('audits actual keyboard navigation and prevents clipped tablet Kanban headers', () => {
+        const runner = read('test/e2e/run-authenticated-smoke.mjs');
+        expect(runner).toContain("await page.keyboard.press('Shift+Tab')");
+        expect(runner).toContain('CRM_FINAL_KEYBOARD_INDICATOR_MISSING');
+        expect(runner).toContain('CRM_FINAL_TABLET_KANBAN_CLIPPED');
+        expect(runner).toContain('CRM_FINAL_TABLET_AXE_DETAIL=');
+        expect(read('src/app/(dashboard)/pipeline/client-page.tsx')).toContain('flex-col gap-[var(--ds-stat-gap)] xl:flex-row');
+    });
+
     it('provides explicit mobile menu visibility, isolation, dismissal and honest notification state', () => {
         expect(read('src/components/layout/Sidebar.tsx')).toContain('invisible -translate-x-full lg:visible');
         const shell = read('src/components/layout/DashboardShell.tsx');

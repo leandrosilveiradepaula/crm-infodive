@@ -21,6 +21,37 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      # Source-only shallow checkout for the owner-authorized final audit.
+      # The artifact excludes runner config, credentials, working data and history.
+      - name: Package exact candidate shallow checkout for local audit
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125'
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git branch crm-audit-source-snapshot "$EXPECTED_SHA"
+          snapshot="$RUNNER_TEMP/crm-audit-source-snapshot"
+          git clone --no-local --depth 1 --single-branch --no-checkout --branch crm-audit-source-snapshot "file://$GITHUB_WORKSPACE" "$snapshot"
+          git -C "$snapshot" remote remove origin
+          test -f "$snapshot/.git/shallow"
+          test "$(git -C "$snapshot" rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git -C "$snapshot" rev-parse 'HEAD^{tree}')" = "$(git rev-parse 'HEAD^{tree}')"
+          test -z "$(git -C "$snapshot" remote)"
+          mkdir "$RUNNER_TEMP/crm-audit-checkout-evidence"
+          tar -C "$snapshot" -czf "$RUNNER_TEMP/crm-audit-checkout-evidence/checkout.tar.gz" .git
+          printf '%s\n%s\n' "$EXPECTED_SHA" "$(git rev-parse 'HEAD^{tree}')" > "$RUNNER_TEMP/crm-audit-checkout-evidence/provenance.txt"
+          git branch -D crm-audit-source-snapshot
+      - name: Upload exact candidate shallow checkout
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: crm-final-audit-source-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/crm-audit-checkout-evidence
+          if-no-files-found: error
+          retention-days: 2
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
