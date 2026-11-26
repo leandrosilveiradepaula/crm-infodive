@@ -1,14 +1,32 @@
 'use server';
 
-import { requireSessionContext } from '@/lib/auth-server';
-import { ContractService } from '@/services/ContractService';
+import { requireSessionContext } from '../../../lib/auth-server';
+import { roleAllowsPermission } from '../../../lib/permission-matrix';
+import { createAdminClient } from '../../../lib/supabase/admin';
+import { ContractService } from '../../../services/ContractService';
 import { revalidatePath } from 'next/cache';
 import { type Contract } from '@/types/contract';
 
 export async function getContracts(): Promise<Contract[]> {
     try {
-        const { organizationId } = await requireSessionContext();
-        const data = await ContractService.getContracts(organizationId);
+        const { organizationId, userId } = await requireSessionContext();
+        const admin = createAdminClient();
+        const { data: profile, error } = await admin.from('profiles')
+            .select('role,status,organization_id')
+            .eq('id', userId)
+            .eq('organization_id', organizationId)
+            .maybeSingle();
+        if (error || !profile || profile.status !== 'active' ||
+            profile.organization_id !== organizationId) {
+            throw new Error('Não foi possível validar o acesso aos contratos.');
+        }
+        const canViewAll = roleAllowsPermission(profile.role, 'deals:view_all');
+        if (!canViewAll && profile.role !== 'vendedor') {
+            throw new Error('Você não tem permissão para visualizar contratos.');
+        }
+        const data = await ContractService.getContracts(
+            organizationId, canViewAll ? null : userId, canViewAll,
+        );
         return data.map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -27,7 +45,7 @@ export async function getContracts(): Promise<Contract[]> {
         }));
     } catch {
         console.error('[ContractsActions] contracts fetch failed');
-        return [];
+        throw new Error('Não foi possível carregar os contratos.');
     }
 }
 
