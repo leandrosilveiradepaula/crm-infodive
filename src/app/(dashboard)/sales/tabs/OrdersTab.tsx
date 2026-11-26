@@ -349,11 +349,11 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                     <ChevronRight className="w-3 h-3" />
                                                 </Button>
                                             ) : (
-                                                <span className="text-metadata-ui text-muted-foreground uppercase font-black opacity-30 tracking-widest">Finalizado</span>
+                                                <span className="text-metadata-ui text-muted-foreground uppercase font-black tracking-widest">Finalizado</span>
                                             )}
                                         </td>
                                         <td className="px-5 py-3 text-right">
-                                            <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 translate-x-0 lg:translate-x-1 lg:group-hover:translate-x-0">
+                                            <div className="flex items-center justify-end gap-1 opacity-100 transition-colors">
                                                 <Button variant="ghost" size="icon" title="Ver Parcelas/Detalhes" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-[var(--radius-panel)]" onClick={(e) => { e.stopPropagation(); setExpandedOrderId(prev => prev === order.id ? null : order.id); }}>
                                                     <Eye className="w-4 h-4" />
                                                 </Button>
@@ -362,17 +362,17 @@ export function OrdersTab({ orders, onStatusUpdate, onInstallmentUpdate, onReloa
                                                 </Button>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-[var(--radius-panel)]">
+                                                        <Button variant="ghost" size="icon" aria-label="Ações do pedido" className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-[var(--radius-panel)]">
                                                             <MoreVertical className="w-4 h-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-56 glass-card p-2 rounded-[var(--radius-panel)] border-white/10 shadow-overlay-ui">
-                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground/50">Ações do Pedido</div>
+                                                    <DropdownMenuContent align="end" className="w-56 bg-popover text-popover-foreground p-2 rounded-[var(--radius-panel)] border-border shadow-overlay-ui">
+                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Ações do Pedido</div>
                                                         <DropdownMenuItem className="gap-2 cursor-pointer text-metadata-ui font-bold p-3 rounded-[var(--radius-panel)]" onClick={() => setExpandedOrderId(prev => prev === order.id ? null : order.id)}>
                                                             <FileText className="w-4 h-4" /> Ver Parcelas/Detalhes
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuSeparator className="bg-white/5 my-1" />
-                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground/50 text-warning">Forçar Status</div>
+                                                        <DropdownMenuSeparator className="bg-border my-1" />
+                                                        <div className="px-3 py-2 text-metadata-ui font-black uppercase tracking-widest text-muted-foreground">Forçar Status</div>
                                                         {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
                                                             <DropdownMenuItem key={key} onClick={() => onStatusUpdate(order.id, key as SalesOrder['status'])} className="gap-2 cursor-pointer text-metadata-ui uppercase font-bold hover:bg-primary/5 hover:text-primary p-3 rounded-[var(--radius-panel)]">
                                                                 <cfg.icon className="w-3 h-3" />

@@ -359,7 +359,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         variant="outline" size="sm"
                         onClick={generateAISummary}
                         disabled={isGeneratingAI || isExporting}
-                        className="gap-1.5 text-metadata-ui h-8 text-info border-info hover:bg-info-subtle hover:text-info"
+                        className="gap-1.5 text-metadata-ui h-8 text-foreground border-border hover:bg-info-subtle hover:text-foreground"
                     >
                         {isGeneratingAI
                             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -397,7 +397,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         size="sm"
                         onClick={handleGenerate}
                         disabled={isExporting || activeSections.length === 0}
-                        className="bg-primary hover:bg-primary/90 text-white gap-1.5 text-metadata-ui h-8 px-4 font-bold"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-metadata-ui h-8 px-4 font-bold"
                     >
                         {state.isGenerating
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
@@ -651,7 +651,7 @@ function SortableSectionItem({
                     ? 'bg-primary/8 border-l-2 border-primary'
                     : 'hover:bg-muted/50 border-l-2 border-transparent'
                 }
-                ${!section.enabled ? 'opacity-40' : ''}
+                ${!section.enabled ? 'cursor-default' : ''}
                 ${isDragging ? 'shadow-card-ui ring-1 ring-primary/20' : ''}
             `}
         >
@@ -666,7 +666,7 @@ function SortableSectionItem({
             <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
             <button type="button" aria-label={`Editar seção ${section.label}`} aria-pressed={isSelected} disabled={!section.enabled}
                 onClick={event => { event.stopPropagation(); onSelect(); }}
-                className={`text-metadata-ui flex-1 min-w-0 truncate text-left focus-ring ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
+                className={`text-metadata-ui flex-1 min-w-0 truncate text-left focus-ring ${isSelected ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
                 {section.label}
             </button>
             <Switch

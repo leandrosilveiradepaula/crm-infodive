@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { dealRoomDefaultThemeColor } from '@/design-system/domain-visual-defaults';
 import {
     Package,
@@ -43,6 +44,9 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
     const products = Array.isArray(deal.products) ? deal.products : [];
     const owner = deal.owner || { name: 'Responsável não informado', email: '', phone: '', avatar: '' };
     const themeColor = room.theme_color || dealRoomDefaultThemeColor;
+    // The legacy RPC returns initials in avatar; only use an image for an actual image URL.
+    const avatarUrl = owner.avatar && (/^https?:\/\//i.test(owner.avatar) || /^\/(?!\/)/.test(owner.avatar)) ? owner.avatar : undefined;
+    const initials = owner.name.trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('');
 
     return (
         <div data-slot="customer-portal" className="min-h-screen bg-background text-foreground font-ui selection:bg-primary/20">
@@ -65,7 +69,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                             <span className="text-body-ui font-black text-foreground">{owner.name}</span>
                         </div>
                         <div className="h-11 w-11 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-black shadow-card-ui shadow-primary/10">
-                            {owner.avatar || owner.name.substring(0, 2).toUpperCase()}
+                            {initials || "—"}
                         </div>
                     </div>
                 </div>
@@ -85,7 +89,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                     <div className="space-y-4">
                                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-success/10 text-success-readable dark:text-success-readable rounded-full border border-success/20 text-metadata-ui font-black uppercase tracking-widest">
                                             <CheckCircle2 className="w-3 h-3" />
-                                            Oportunidade Ativa
+                                            Portal ativo
                                         </div>
                                         <h2 className="text-metric-ui font-black tracking-tight text-foreground leading-[1.1]">
                                             {deal.title}
@@ -104,7 +108,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                     </div>
 
                                     <div className="bg-primary text-primary-foreground p-4 sm:p-6 rounded-[var(--radius-panel)] shadow-card-ui flex flex-col items-start xl:items-end min-w-0">
-                                        <span className="text-metadata-ui font-black uppercase tracking-[0.2em] opacity-80 mb-2">Investimento Estimado</span>
+                                        <span className="text-metadata-ui font-black uppercase tracking-[0.2em] mb-2">Investimento Estimado</span>
                                         <span className="text-metric-ui font-black tabular-nums tracking-tighter">
                                             {formatCurrency(deal.value)}
                                         </span>
@@ -146,7 +150,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                                                     {product.category || 'Solução'}
                                                                 </span>
                                                                 {product.sku && product.show_sku_on_proposal !== false && (
-                                                                    <span className="text-metadata-ui font-medium text-muted-foreground/60">{product.sku}</span>
+                                                                    <span className="text-metadata-ui font-medium text-muted-foreground">{product.sku}</span>
                                                                 )}
                                                                 {product.duration && product.duration_unit && (
                                                                     <span className="text-metadata-ui font-bold text-success-readable bg-success/10 px-1.5 py-0.5 rounded italic border border-success/20 uppercase">
@@ -187,22 +191,22 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
 
                         {/* Status Card */}
                         <div className="bg-card border border-border/60 p-8 rounded-[var(--radius-panel)] space-y-6 shadow-control-ui">
-                            <h4 className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground border-b border-border pb-4">Próximos Passos</h4>
+                            <h4 className="text-metadata-ui font-black uppercase tracking-widest text-muted-foreground border-b border-border pb-4">Acompanhamento</h4>
                             <div className="space-y-4">
                                 <div className="flex gap-4">
                                     <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
                                         <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                                     </div>
                                     <p className="text-body-ui font-medium leading-relaxed">
-                                        Aguardando revisão técnica dos requisitos para validação final do escopo.
+                                        Consulte o responsável para confirmar o escopo e os próximos passos.
                                     </p>
                                 </div>
-                                <div className="flex gap-4 opacity-50">
+                                <div className="flex gap-4">
                                     <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-1">
                                         <TrendingUp className="w-3 h-3" />
                                     </div>
                                     <p className="text-body-ui font-medium leading-relaxed">
-                                        Emissão da proposta formal para assinatura digital.
+                                        Previsão de fechamento: {deal.expected_close_date ? format(new Date(deal.expected_close_date), "dd 'de' MMMM", { locale: ptBR }) : 'A definir'}.
                                     </p>
                                 </div>
                             </div>
@@ -217,28 +221,25 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                             <h4 className="text-metadata-ui font-black uppercase tracking-widest text-primary">Seu Consultor</h4>
 
                             <div className="flex items-center gap-4 py-2">
-                                <div className="h-16 w-16 rounded-[var(--radius-panel)] bg-white border border-primary/20 flex items-center justify-center shadow-card-ui shadow-primary/10 overflow-hidden">
-                                    {owner.avatar ? (
-                                        <img src={owner.avatar} alt={owner.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <User className="w-8 h-8 text-primary" />
-                                    )}
-                                </div>
+                                <Avatar className="h-16 w-16 rounded-[var(--radius-panel)] border border-border bg-card shadow-card-ui">
+                                    {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
+                                    <AvatarFallback className="rounded-[var(--radius-panel)] text-foreground">{initials || "—"}</AvatarFallback>
+                                </Avatar>
                                 <div>
                                     <div className="text-section-title font-black tracking-tight">{owner.name}</div>
-                                    <div className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Solutions Architect</div>
+                                    {deal.owner && <div className="text-metadata-ui font-bold text-muted-foreground">Responsável pela oportunidade</div>}
                                 </div>
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-primary/10">
-                                {owner.email && <a href={`mailto:${owner.email}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
+                                {owner.email && <a href={`mailto:${owner.email}`} className="flex items-center gap-3 p-3 bg-card rounded-[var(--radius-panel)] border border-border hover:border-primary/30 hover:bg-surface-raised transition-all group">
                                     <div className="h-9 w-9 bg-primary/10 rounded-[var(--radius-panel)] flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Mail className="w-4 h-4" />
                                     </div>
                                     <span className="text-metadata-ui font-bold truncate max-w-[180px]">{owner.email}</span>
                                 </a>}
                                 {owner.phone && /\d/.test(owner.phone) && (
-                                    <a href={`tel:${owner.phone.replace(/\D/g, '')}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
+                                    <a href={`tel:${owner.phone.replace(/\D/g, '')}`} className="flex items-center gap-3 p-3 bg-card rounded-[var(--radius-panel)] border border-border hover:border-primary/30 hover:bg-surface-raised transition-all group">
                                         <div className="h-9 w-9 bg-success/10 rounded-[var(--radius-panel)] flex items-center justify-center text-success-readable group-hover:scale-110 transition-transform">
                                             <Phone className="w-4 h-4" />
                                         </div>
@@ -259,11 +260,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                         <img src="/assets/logo-infodive.png" alt="Infodive" className="h-8" />
                     </div>
 
-                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-metadata-ui font-black uppercase tracking-[0.2em] text-muted-foreground">
-                        <a href="#" className="hover:text-primary transition-colors">Termos de Uso</a>
-                        <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
-                        <a href="#" className="hover:text-primary transition-colors">Suporte</a>
-                    </div>
+                    {owner.email && <a href={`mailto:${owner.email}`} className="text-body-ui text-muted-foreground hover:text-primary focus-ring">Contatar responsável</a>}
 
                     <div className="text-metadata-ui text-muted-foreground font-medium">
                         © {new Date().getFullYear()} Infodive IT Solutions. Todos os direitos reservados.

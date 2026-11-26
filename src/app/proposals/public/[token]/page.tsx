@@ -95,7 +95,7 @@ export default function PublicProposalPage() {
         const configs = {
             draft: { label: 'Rascunho', color: 'bg-muted/50 text-foreground' },
             sent: { label: 'Enviada', color: 'bg-surface-highlight text-primary' },
-            viewed: { label: 'Visualizada', color: 'bg-info-subtle text-info' },
+            viewed: { label: 'Visualizada', color: 'bg-info-subtle text-foreground' },
             signed: { label: 'Assinada', color: 'bg-success-subtle text-success-readable' },
             rejected: { label: 'Rejeitada', color: 'bg-destructive-subtle text-destructive-readable' },
         };

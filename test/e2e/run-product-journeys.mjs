@@ -99,11 +99,27 @@ async function audit(page,name) {
     const report = await page.evaluate(async () => {
         window.axe.reset();
         const a = await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa']}});
-        return { violations:a.violations.map(x=>({rule:x.id,count:x.nodes.length})),
-            incomplete:a.incomplete.map(x=>({rule:x.id,count:x.nodes.length})) };
+        // Record only bounded, synthetic-safe diagnostics, never text, HTML,
+        // raw selectors, credentials, tokens, or user records.
+        const color = value => typeof value === 'string' &&
+            /^(?:#[0-9a-f]{3,8}|(?:rgb|rgba|hsl|hsla|lab|lch|oklab|oklch)\([0-9 .,%/+-]+\))$/i.test(value)
+            ? value : null;
+        const summarize = rule => ({rule:rule.id,count:rule.nodes.length,samples:rule.nodes.slice(0,6).map(node=>{
+            let el = null;
+            try { if(typeof node.target[0] === 'string') el=document.querySelector(node.target[0]); } catch {}
+            if(!el) return {resolved:false};
+            const style=getComputedStyle(el), bounds=el.getBoundingClientRect();
+            const region = el.closest('[data-slot="proposal-editor"],[data-slot="public-proposal"],[data-slot="customer-portal"]')?.getAttribute('data-slot') || 'other';
+            const checks=[...node.any,...node.all,...node.none].filter(c=>c.data && typeof c.data==='object');
+            return {resolved:true,region,tag:el.tagName.toLowerCase(),bounds:[bounds.x,bounds.y,bounds.width,bounds.height].map(Math.round),
+                foreground:color(style.color),background:color(style.backgroundColor),opacity:Number(style.opacity),
+                contrast:checks.slice(0,4).map(c=>({fg:color(c.data.fgColor),bg:color(c.data.bgColor),ratio:Number.isFinite(c.data.contrastRatio)?c.data.contrastRatio:null}))};
+        })});
+        return { violations:a.violations.map(summarize), incomplete:a.incomplete.map(summarize) };
     });
     if (report.violations.length || report.incomplete.length) {
         result.failures.push({name,kind:'axe',...report});
+        console.error('CRM_PRODUCT_QA_AXE_DETAIL='+JSON.stringify({name,...report}));
         throw new Error('PRODUCT_QA_AXE_FINDINGS');
     }
 }
@@ -212,9 +228,14 @@ try {
         await modal.getByPlaceholder('Ex: Renovação Datacenter').fill(dealName);
         await modal.getByRole('combobox').first().click();
         await page.getByRole('option',{name:company.name,exact:true}).click();
+        const closeDate = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+        await modal.locator('#value').fill('1500000');
+        await modal.locator('#expected_close_date').fill(closeDate);
+        check(await modal.locator('form').evaluate(form => form.checkValidity()),'DEAL_FORM_INVALID');
         await modal.getByRole('button',{name:'Criar Nova Oportunidade'}).click();
-        createdDeal=await persisted(()=>db.from('deals').select('id,title,account_id,stage').eq('organization_id',org).ilike('title',dealName),'DEAL');
+        createdDeal=await persisted(()=>db.from('deals').select('id,title,account_id,stage,value,expected_close_date').eq('organization_id',org).ilike('title',dealName),'DEAL');
         check(createdDeal.account_id===company.id,'DEAL_WRONG_COMPANY');
+        check(Number(createdDeal.value)===15000 && String(createdDeal.expected_close_date).slice(0,10)===closeDate,'DEAL_FORM_VALUES');
         await go(page,'/pipeline'); await page.getByText(createdDeal.title,{exact:true}).first().waitFor({state:'visible'});
         await capture(page,'journey-opportunity');
     });

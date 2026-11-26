@@ -1,3 +1,19 @@
+## 26/11/2026 — first real integrated QA: findings and corrections
+
+Candidate `f0ff7d870e7cd54b76a5f4b4df45647ac58293a1`: [CI 45850769110](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45850769110) PASS, 508/508 tests, 43 suites, build, synthetic axe, 16 PDF pages, zero inventory debt. [QA 45850769280](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45850769280) FAIL. Directly inspected [artifact 15134466097](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45850769280/artifacts/15134466097), product-readiness/results.json and complementary screenshots, local exact checkout. 18/33 complementary cases passed, including actual company/contact/lead creation, draft persistence/reopening and amount, real order status transition without value change, tenant segregation, anonymous invalid/draft token rejection, foreign editor denial, public view receipt and portal access receipt. The prior matrix failed six orders accessibility cases (one unlabeled icon in all viewports/themes).
+
+- Opportunity not persisted: required closing date was unfilled and currency input unset in test. Fill actual form controls, verify HTML validity, independent amount and date readback; keep activity dependency and all checks.
+- Sales orders: label real menu trigger, keep actions visible and use opaque menu surface; avoid low-contrast finalized label.
+- Editor: use semantic primary foreground and readable AI button, do not dim the active section switches along with disabled rows.
+- Public status: use readable foreground on info-subtle in both themes.
+- Portal: remove text opacity on the next-step block, use readable contact surfaces, render legacy initials correctly with shared avatar fallback (RPC returns initials, not URL); replace hardcoded workflow claims with general guidance and real expected closing date, remove dead footer links, avoid invented job title. Keep actual access and financial behavior unchanged.
+- Add bounded axe computed-color diagnostics (no raw text, selectors, credentials or tokens). First report recorded rule/count only; contrast repairs are based on screenshot/source review and must pass re-execution.
+- Portability inventory on this exact candidate: 10 exclusion/review paths, 7 environment-bound files, 25 identity-bound app files (the previous 26 was a baseline count), 37 env variable names. BLOCKED_FOR_DIRECT_CLONE. No export, no production changes.
+
+This is remediation, not a certified result. Require new same-SHA CI, all previous browser checks, 33 complementary cases, visual review and owner merge.
+
+---
+
 # Auditoria complementar de produto e prontidão de reutilização — 26/11/2026
 
 ## Escopo e baseline

@@ -36,6 +36,20 @@ describe('Complementary product readiness contract', () => {
         expect(runner).toContain('PRODUCT_QA_AXE_FINDINGS');
         expect(runner).not.toContain('route.fulfill(');
     });
+    it('preserves contrast and accessible real order actions in complementary pages', () => {
+        expect(source('src/app/(dashboard)/sales/tabs/OrdersTab.tsx')).toContain('aria-label="Ações do pedido"');
+        const editor = source('src/components/proposals/editor/ProposalEditorClient.tsx');
+        expect(editor).toContain('bg-primary hover:bg-primary/90 text-primary-foreground');
+        expect(editor).not.toContain("!section.enabled ? 'opacity-40'");
+        expect(source('src/app/proposals/public/[token]/page.tsx')).toContain("viewed: { label: 'Visualizada', color: 'bg-info-subtle text-foreground' }");
+        const portal = source('src/components/portal/DealRoomPortal.tsx');
+        expect(portal).toContain('<AvatarFallback');
+        expect(portal).not.toContain('href="#"');
+        const runner=source('test/e2e/run-product-journeys.mjs');
+        expect(runner).toContain('DEAL_FORM_INVALID');
+        expect(runner).toContain('DEAL_FORM_VALUES');
+        expect(runner).toContain('CRM_PRODUCT_QA_AXE_DETAIL=');
+    });
     it('does not certify or automatically export the environment-bound original', () => {
         const audit=source('scripts/audit-reusable-base.mjs');
         expect(audit).toContain('NOT_AUTHORIZED_AND_NOT_CREATED');
