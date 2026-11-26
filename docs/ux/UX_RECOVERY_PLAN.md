@@ -1,3 +1,31 @@
+## 25 November 2026 — certified browser matrix, final visual finding
+
+Candidate `3393b4007a5a4fef9518569641747feeca756f5c`: [CI 45700508500](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508500) SUCCESS (502/502, four synthetic axe combinations, 16 PDF pages, zero tracked hardcode regression). [Authenticated QA 45700508503](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508503) SUCCESS. Directly inspected [artifact 15064051854](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508503/artifacts/15064051854): exact SHA, failures=[], 454 checks (371/37/29/17), 324 PNGs, 44 tablet route cases, 1,128 additional computed-style probes and 132 original probes. Four profiles, 22 static dashboard routes, synthetic isolated backend cleaned. Local shallow checkout [15062792045](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45700508500/artifacts/15062792045) verified tree `e88c0de499a5f8140a88c8fd9e9569f9546c5d54`, 1002 tracked files, clean status, fsck, runner syntax and 3/3 standalone guard tests; inventory zero.
+
+Compared new base-route montages and navigation states with the 19 private reference images. Tablet Pipeline now stacks stages without clipping; desktop keeps five columns. The mobile navigation screenshots in both themes (profile-1-navigation-mobile-light.png and dark.png) reveal a visual stacking defect despite the green matrix: Dashboard drag handles with z-50 paint above the open sidebar with z-50, even though the underlying workspace is inert. Fix the common workspace stacking context only while the mobile menu is open; assert the actual computed layer relationship and restoration in the existing mobile/tablet menu check. No new features, layout behavior outside the open drawer, business logic, hosted database or deployment changes. Keep PR #224 draft until both exact-SHA gates and direct inspection of the replacement menu captures pass. Do not claim global UX acceptance or operation of unavailable integrations/public/dynamic routes.
+
+---
+
+### 2026-11-25 — Final audit QA recovery (PR #224)
+
+## 25 November 2026 — expanded QA findings and repair
+
+Candidate `7e91c86309072eae9e422113577cb6c24365feda`: CI [45685498591](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45685498591) SUCCESS. Authenticated QA [45685498757](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45685498757) FAILED: 28 route cases (26 base-layout/keyboard-stage exceptions, 2 tablet Pipeline axe findings), 451 recorded checks, 322 PNGs, [artifact 15056007774](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45685498757/artifacts/15056007774). All four profiles attempted; backend cleaned. No new acceptance.
+
+- Base-layout groups multiple assertions; exact cause of all 26 exceptions is not yet proven. Theme-button focus and the disabled bell can cause Tab to leave the document. Use a real visible navigation anchor, actual Tab/Shift+Tab, visible target and focused/unfocused indicator comparison; separate diagnostic phases, preserve layout/drag-handle checks.
+- Tablet Pipeline screenshot confirms clipped fifth-stage header. Retain stacked layout at tablet/narrow desktop, horizontal layout at xl; verify all five stage header bounds at 768px. Log sanitized tablet axe details without suppressing rules.
+- Local Git clone again failed DNS for github.com. The owner requested checkout. Same-repository exact-branch CI produces a shallow source-only Git snapshot, without runner config, credentials, previous history or working data. The transport itself passed a disposable local Git exercise (extract, reset, fsck, exact SHA, clean status, no remote). Actual candidate artifact and local checkout still require verification. No claim of local application or browser execution.
+- Scope UI/UX and QA only; no production, migrations, business logic, hosted services or automatic merge. Require both gates at the new SHA and review of new evidence.
+
+
+---
+
+### 2026-11-25 — Owner-authorized final integrated Design System / UI / UX audit
+
+Owner requested a full post-merge review and consolidated correction block. Base main `63f02d5fb1aa910cb7bf3c0fa28829be049d4fca`, branch `codex/issue-214-ux-recovery-final-audit-20261125`. Scope: shared visual tokens/consumers, shell navigation/accessibility, and expanded real isolated QA, as documented in `docs/ux/FINAL_INTEGRATED_UX_AUDIT.md`. No features, server actions, persistence, pricing, RBAC, hosted database, secrets, deployment or automatic merge. Authorizes one cohesive candidate commit and draft PR. Preserve existing CI and authenticated tests; no weakening or suppressing axe. Require exact-head CI and QA, review final captures, record actual uncovered routes/states; no claim of complete product acceptance while unresolved. Prior evidence is baseline, not a new pass.
+
+---
+
 ### 2026-11-25 — Final certification alignment (PR #223)
 
 Exact candidate `dc506ab3a98b21c635f05ca38fa1f1d408ce2356`: [authenticated QA 45637913252](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45637913252) SUCCESS, 4 profiles, 320 recorded checks, 276 PNGs, results.json failures=[] on local-isolated. [Artifact 15034623338](https://github.com/leandrosilveiradepaula/crm-infodive/actions/runs/45637913252/artifacts/15034623338) has exact SHA provenance, 237/37/29/17 checks by profile, including the shared workspace layouts, directory views, research, Pipeline list and seeded proposal tab, opportunity inspector, goals, automation states and keyboard interactions. The 22 previous findings are resolved, including the unavailable Service Desk states. No claim of operational Service Desk, Office 365, CSV, or automation engine functionality.

@@ -301,8 +301,9 @@ describe('Central design system — source propagation and strict migrated famil
     expect(board).toContain('data-qa-stage={stage.id}');
     expect(board).toContain('data-qa-stage-dot=""');
     expect(board).toContain('min-h-[var(--ds-kanban-column-min-height)]');
-    expect(board).toContain('sm:basis-[var(--ds-kanban-column-width)]');
-    expect(board).toContain('sm:min-w-[var(--ds-kanban-column-min-width)]');
+    expect(board).toContain('xl:basis-[var(--ds-kanban-column-width)]');
+    expect(board).toContain('xl:min-w-[var(--ds-kanban-column-min-width)]');
+    expect(board).toContain('flex-col gap-[var(--ds-stat-gap)] xl:flex-row');
     expect(css).toContain('--ds-kanban-column-min-width:');
     expect(css).toContain('--ds-kanban-column-width:');
     expect(css).toContain('--ds-kanban-board-min-height:');

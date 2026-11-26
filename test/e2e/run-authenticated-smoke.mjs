@@ -167,20 +167,48 @@ async function setTheme(page, theme, verifyPersistence = false) {
 }
 
 async function assertKeyboardFocus(page) {
-    await page.keyboard.press('Tab');
-    const focus = await page.evaluate(() => {
-        const element = document.activeElement;
-        if (!(element instanceof HTMLElement)) return null;
-        const style = getComputedStyle(element);
-        return {
-            tag: element.tagName,
-            outline: style.outlineStyle,
-            boxShadow: style.boxShadow,
-        };
-    });
-    if (!focus || (focus.outline === 'none' && focus.boxShadow === 'none')) {
-        throw new Error('Keyboard focus is not visibly rendered.');
-    }
+    // Theme toggling may leave focus on the last enabled control. Start at a
+    // visible navigation anchor, then use actual forward and reverse Tab.
+    const desktopAnchor = page.locator('#crm-sidebar a').first();
+    const mobileAnchor = page.locator('[data-slot="crm-mobile-menu-trigger"]');
+    const anchor = await desktopAnchor.isVisible() ? desktopAnchor : mobileAnchor;
+    await anchor.focus();
+    const start = await anchor.elementHandle();
+    if (!start) throw new Error('CRM_FINAL_KEYBOARD_ANCHOR_MISSING');
+    try {
+        await page.keyboard.press('Tab');
+        const target = await page.evaluateHandle(() => document.activeElement);
+        try {
+            const focus = await target.evaluate((element, previous) => {
+                if (!(element instanceof HTMLElement) || element === previous ||
+                    element === document.body || !element.matches(':focus-visible')) return false;
+                const style = getComputedStyle(element);
+                const bounds = element.getBoundingClientRect();
+                return bounds.width > 0 && bounds.height > 0 &&
+                    bounds.right > 0 && bounds.left < innerWidth &&
+                    bounds.bottom > 0 && bounds.top < innerHeight &&
+                    style.visibility === 'visible' && !element.closest('[inert]');
+            }, start);
+            if (!focus) throw new Error('CRM_FINAL_KEYBOARD_FOCUS_TARGET');
+            // A permanent decorative shadow cannot satisfy this check: compare
+            // the same real control with and without keyboard focus.
+            await page.waitForTimeout(250);
+            const readIndicator = element => {
+                const style = getComputedStyle(element);
+                return { outline: style.outlineStyle + ' ' + style.outlineWidth + ' ' + style.outlineColor,
+                    shadow: style.boxShadow };
+            };
+            const active = await target.evaluate(readIndicator);
+            await page.keyboard.press('Shift+Tab');
+            if (!(await start.evaluate(element => document.activeElement === element &&
+                element.matches(':focus-visible')))) throw new Error('CRM_FINAL_KEYBOARD_REVERSE');
+            await page.waitForTimeout(250);
+            const inactive = await target.evaluate(readIndicator);
+            const focusChanged = active.outline !== inactive.outline || active.shadow !== inactive.shadow;
+            const visibleIndicator = !active.outline.startsWith('none') || active.shadow !== 'none';
+            if (!focusChanged || !visibleIndicator) throw new Error('CRM_FINAL_KEYBOARD_INDICATOR_MISSING');
+        } finally { await target.dispose(); }
+    } finally { await start.dispose(); }
 }
 
 /**
@@ -287,6 +315,99 @@ async function assertDesignTokenPropagation(page) {
         }
         return completed;
     });
+}
+
+
+/** Final cross-route audit: use the actual rendered shell, headers, controls and
+ * summaries, never a fabricated page. Mutations are temporary CSS-only probes. */
+async function assertWorkspaceTokenCoverage(page) {
+    return page.evaluate(async () => {
+        const root = document.documentElement;
+        const header = document.querySelector('main > header');
+        const nav = document.querySelector('#crm-sidebar nav[aria-label="Áreas principais"] a');
+        const button = header?.querySelector('[data-slot="button"][data-size="icon"]');
+        const headerGroup = header?.firstElementChild;
+        if (!header || !nav || !button || !headerGroup) {
+            throw new Error('CRM_FINAL_TOKEN_SHELL_MISSING');
+        }
+        const specs = [
+            ['background', '--ds-base-background', 'oklch(0.71 0.08 220)', header, 'backgroundColor'],
+            ['body-font', '--ds-font-family-body', 'Georgia, serif', document.body, 'fontFamily'],
+            ['control-radius', '--ds-base-radius-control', '1.875rem', nav, 'borderTopLeftRadius'],
+            ['navigation-target', '--ds-nav-target-size', '3.25rem', nav, 'width'],
+            ['control-height', '--ds-control-height-default', '3.125rem', button, 'height'],
+            ['spacing-scale', '--ds-spacing-unit', '0.375rem', headerGroup, 'columnGap'],
+        ];
+        const title = document.querySelector('[data-slot="crm-page-header"] h1');
+        const pageHeader = document.querySelector('[data-slot="crm-page-header"]');
+        const summary = document.querySelector('[data-qa-region="stats"]');
+        if (title) specs.push(['page-title', '--ds-type-page-title-size', '2.125rem', title, 'fontSize']);
+        if (pageHeader) specs.push(['page-header-gap', '--ds-page-header-gap', '1.375rem', pageHeader, 'rowGap']);
+        if (summary) specs.push(['summary-gap', '--ds-stat-gap', '1.375rem', summary, 'rowGap']);
+        const completed = [];
+        for (const [name, token, value, element, property] of specs) {
+            const previous = root.style.getPropertyValue(token);
+            const priority = root.style.getPropertyPriority(token);
+            const transition = element.style.transition;
+            const before = getComputedStyle(element)[property];
+            element.style.transition = 'none';
+            try {
+                root.style.setProperty(token, value);
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                const after = getComputedStyle(element)[property];
+                if (!before || !after || before === after) throw new Error('CRM_FINAL_TOKEN_NOT_PROPAGATED ' + name);
+                completed.push(name);
+            } finally {
+                if (previous) root.style.setProperty(token, previous, priority);
+                else root.style.removeProperty(token);
+                element.style.transition = transition;
+            }
+        }
+        return completed;
+    });
+}
+
+async function assertMobileMenuKeyboard(page, source, capture, artifactDir, screenshotName) {
+    const opener = page.getByRole('button', { name: 'Abrir menu' });
+    const sidebar = page.locator('#crm-sidebar');
+    await opener.focus();
+    const leaked = await sidebar.locator('a').first().evaluate(node => {
+        node.focus();
+        return document.activeElement === node;
+    });
+    if (leaked) throw new Error('CRM_FINAL_MENU_CLOSED_FOCUS_LEAK');
+    await opener.click();
+    await page.getByRole('dialog', { name: 'Menu de navegação' }).waitFor({ state: 'visible' });
+    await page.waitForFunction(() => document.getElementById('crm-sidebar')?.contains(document.activeElement));
+    if (!(await page.locator('main').evaluate(node => node.inert))) throw new Error('CRM_FINAL_MENU_BACKGROUND_NOT_INERT');
+    // Inert alone does not stop the Dashboard's z-50 drag handles painting
+    // over the equally ranked drawer. Assert the real workspace stacking
+    // context as well as keyboard isolation, on mobile and tablet.
+    const stacking = await page.evaluate(() => {
+        const workspace = document.querySelector('main');
+        const drawer = document.getElementById('crm-sidebar');
+        if (!workspace || !drawer || workspace.parentElement !== drawer.parentElement) return false;
+        const workspaceStyle = getComputedStyle(workspace);
+        const drawerStyle = getComputedStyle(drawer);
+        const workspaceZ = workspaceStyle.zIndex === 'auto' ? 0 : Number(workspaceStyle.zIndex);
+        return workspaceStyle.isolation === 'isolate' &&
+            drawerStyle.position === 'fixed' && Number(drawerStyle.zIndex) > workspaceZ;
+    });
+    if (!stacking) throw new Error('CRM_FINAL_MENU_VISUAL_STACKING_LEAK');
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    if (!(await sidebar.evaluate(node => node.contains(document.activeElement)))) throw new Error('CRM_FINAL_MENU_FOCUS_ESCAPE');
+    await page.waitForTimeout(250);
+    if (capture) await page.screenshot({ path: resolve(artifactDir, screenshotName), fullPage: true });
+    const audit = await runAxe(page, source);
+    await page.keyboard.press('Escape');
+    await sidebar.waitFor({ state: 'hidden' });
+    await page.waitForFunction(() => document.activeElement?.getAttribute('data-slot') === 'crm-mobile-menu-trigger');
+    if (await page.locator('main').evaluate(node => node.inert)) throw new Error('CRM_FINAL_MENU_BACKGROUND_STILL_INERT');
+    if (await page.locator('main').evaluate(node => getComputedStyle(node).isolation === 'isolate')) {
+        throw new Error('CRM_FINAL_MENU_STACKING_NOT_RESTORED');
+    }
+    if (audit.violationsCount + audit.incompleteCount) throw new Error('CRM_FINAL_MENU_AXE_FINDINGS');
 }
 
 async function assertMobileNavigation(page, baseUrl) {
@@ -1031,6 +1152,18 @@ try {
                             primitiveCount: propagated.length, status: 'passed',
                         });
                     }
+                    if (local && profileIndex === 0) {
+                        const tokens = await assertWorkspaceTokenCoverage(page);
+                        profileResult.checks.push({ route, viewport: viewport.name, theme,
+                            state: 'final-workspace-token-coverage', tokens, status: 'passed' });
+                        if (route === '/dashboard' && viewport.name === 'mobile') {
+                            phase = 'mobile-menu-keyboard';
+                            await assertMobileMenuKeyboard(page, source, capture, artifactDir,
+                                account.label + '-navigation-mobile-' + theme + '.png');
+                            profileResult.checks.push({ route, viewport: viewport.name, theme,
+                                state: 'final-menu-keyboard', status: 'passed' });
+                        }
+                    }
                     phase = 'synthetic-fixture';
                     // The original pre-QA could report green even if a route
                     // rendered an empty product catalog. Local QA must prove
@@ -1067,7 +1200,9 @@ try {
                             throw new Error('CRM_DASHBOARD_DUPLICATE_STATS_REGION');
                         }
                     }
+                    phase = 'keyboard-focus';
                     await assertKeyboardFocus(page);
+                    phase = 'base-axe';
                     const axeReport = await runAxe(page, source);
                     const issues = axeReport.incompleteCount + axeReport.violationsCount;
                     if (issues) {
@@ -1737,6 +1872,67 @@ try {
                                 });
                             } catch { /* Evidence capture must not suppress the failed case. */ }
                         }
+                    }
+                }
+            }
+        }
+        // The previous proof covered only 390px and 1440px. Audit every
+        // administrator route at the intermediate breakpoint in both themes.
+        if (local && profileIndex === 0) {
+            await page.setViewportSize({ width: 768, height: 1024 });
+            for (const route of account.routes) {
+                for (const theme of ['light', 'dark']) {
+                    let phase = 'tablet-navigation';
+                    try {
+                        const response = await page.goto(routeUrl(baseUrl, route), { waitUntil: 'networkidle' });
+                        if (!response?.ok() || page.url().includes('/login')) throw new Error('CRM_FINAL_TABLET_ROUTE');
+                        await setTheme(page, theme, false);
+                        phase = 'tablet-layout';
+                        await assertLayout(page);
+                        phase = 'tablet-token-coverage';
+                        const tokens = await assertWorkspaceTokenCoverage(page);
+                        phase = 'tablet-keyboard-focus';
+                        await assertKeyboardFocus(page);
+                        if (route === '/pipeline') {
+                            phase = 'tablet-kanban-layout';
+                            const stagesFit = await page.evaluate(() => {
+                                const stages = [...document.querySelectorAll('[data-qa-stage]')];
+                                return stages.length === 5 && stages.every(stage => {
+                                    const bounds = stage.getBoundingClientRect();
+                                    const header = stage.querySelector('header');
+                                    return !!header && bounds.left >= -1 && bounds.right <= innerWidth + 1 &&
+                                        header.scrollWidth <= header.clientWidth + 1;
+                                });
+                            });
+                            if (!stagesFit) throw new Error('CRM_FINAL_TABLET_KANBAN_CLIPPED');
+                        }
+                        phase = 'tablet-axe';
+                        const audit = await runAxe(page, source);
+                        if (capture) await page.screenshot({ path: resolve(artifactDir,
+                            account.label + '-' + route.slice(1).replaceAll('/', '-') + '-tablet-' + theme + '.png'), fullPage: true });
+                        if (audit.violationsCount + audit.incompleteCount) {
+                            const finding = { profileIndex, route, viewport: 'tablet', theme,
+                                state: 'tablet-axe-detail', violations: audit.violations,
+                                incomplete: audit.incomplete };
+                            if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                            process.stderr.write('CRM_FINAL_TABLET_AXE_DETAIL=' + JSON.stringify(finding) + '\n');
+                            throw new Error('CRM_FINAL_TABLET_AXE_FINDINGS');
+                        }
+                        if (route === '/dashboard') {
+                            phase = 'tablet-menu-keyboard';
+                            await assertMobileMenuKeyboard(page, source, capture, artifactDir,
+                                account.label + '-navigation-tablet-' + theme + '.png');
+                        }
+                        profileResult.checks.push({ route, viewport: 'tablet', theme, tokens,
+                            state: 'final-tablet-route', axeStatus: 'passed', status: 'passed' });
+                    } catch (error) {
+                        routeCaseFailureCount += 1;
+                        const code = error instanceof Error ? error.message.match(/^CRM_[A-Z0-9_]+/)?.[0] : null;
+                        const finding = { profileIndex, route, viewport: 'tablet', theme,
+                            state: 'final-tablet-route', phase, code: code ?? 'ASSERTION_OR_RUNTIME_ERROR', status: 'failed' };
+                        if (results.failures.length < MAX_A11Y_DIAGNOSTICS) results.failures.push(finding);
+                        profileResult.checks.push(finding);
+                        process.stderr.write('CRM_FINAL_TABLET_DIAGNOSTIC=' + JSON.stringify(finding) + '\n');
                     }
                 }
             }

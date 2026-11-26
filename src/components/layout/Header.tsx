@@ -11,11 +11,12 @@ import { cn } from '@/lib/utils';
 
 interface HeaderProps {
     onMenuClick: () => void;
+    isMobileMenuOpen?: boolean;
     isSidebarCollapsed?: boolean;
     onToggleSidebar?: () => void;
 }
 
-export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
+export function Header({ onMenuClick, isMobileMenuOpen = false, isSidebarCollapsed, onToggleSidebar }: HeaderProps) {
     const { toggleTheme } = useTheme();
     const { profile } = useAuth();
     const [isAiOpen, setIsAiOpen] = useState(false);
@@ -23,14 +24,14 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
 
     useEffect(() => {
         const onGlobalKeyDown = (event: KeyboardEvent) => {
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+            if (!isMobileMenuOpen && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
                 event.preventDefault();
                 setIsCommandOpen(open => !open);
             }
         };
         window.addEventListener('keydown', onGlobalKeyDown);
         return () => window.removeEventListener('keydown', onGlobalKeyDown);
-    }, []);
+    }, [isMobileMenuOpen]);
     
     const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
 
@@ -39,7 +40,10 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
             <div className="flex min-w-0 items-center gap-2 sm:gap-4">
                 <button
                     type="button"
+                    data-slot="crm-mobile-menu-trigger"
                     aria-label="Abrir menu"
+                    aria-controls="crm-sidebar"
+                    aria-expanded={isMobileMenuOpen}
                     onClick={onMenuClick}
                     className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted lg:hidden"
                 >
@@ -47,6 +51,9 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                 </button>
                 <div className="hidden lg:flex items-center gap-2">
                     <button
+                        type="button"
+                        aria-controls="crm-sidebar"
+                        aria-expanded={!isSidebarCollapsed}
                         onClick={onToggleSidebar}
                         className="focus-ring rounded-[var(--radius-control)] p-2 text-muted-foreground hover:bg-muted transition-colors"
                         title={isSidebarCollapsed ? "Expandir Menu" : "Recolher Menu"}
@@ -95,9 +102,9 @@ export function Header({ onMenuClick, isSidebarCollapsed, onToggleSidebar }: Hea
                     <span className="sr-only">Alternar tema</span>
                 </Button>
 
-                <Button variant="ghost" size="icon" className="relative" aria-label="Notificações" title="Notificações">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+                {/* No notification feed is connected here. Do not imply unread events. */}
+                <Button variant="ghost" size="icon" disabled aria-label="Notificações indisponíveis" title="Notificações indisponíveis">
+                    <Bell className="h-5 w-5" aria-hidden="true" />
                 </Button>
             </div>
 
