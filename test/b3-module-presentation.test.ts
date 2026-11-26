@@ -46,12 +46,17 @@ describe('CRM #214 B3 module presentation', () => {
         // Component to a Client Component breaks Next.js prerendering.
         for (const path of [
             'src/app/(dashboard)/price-lists/page.tsx',
-            'src/app/(dashboard)/sales-orders/page.tsx',
         ]) {
             const page = source(path);
             expect(page.trimStart().startsWith("'use client';")).toBe(true);
             expect(page).toContain('<PremiumEmptyState icon={');
         }
+    });
+
+    it('uses the existing live sales workspace rather than an unconditional orders empty state', () => {
+        const orders = source('src/app/(dashboard)/sales-orders/page.tsx');
+        expect(orders).toContain('<SalesList initialTab="orders"');
+        expect(orders).not.toContain('Nenhum pedido recente');
     });
 
     it('labels analytics empty states and does not present fixed trend copy as data', () => {

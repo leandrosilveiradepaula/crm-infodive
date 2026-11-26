@@ -23,7 +23,7 @@ export class ProposalService {
             createdAt: p.created_at,
             updatedAt: p.updated_at,
             dealId: p.deal_id,
-            content: p.content || p.content_json,
+            content: p.content_json ?? p.content,
         })) as Proposal[];
     }
 
@@ -57,7 +57,7 @@ export class ProposalService {
 
         return {
             ...data,
-            content: data.content || data.content_json,
+            content: data.content_json ?? data.content,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
             dealId: data.deal_id
@@ -142,7 +142,7 @@ export class ProposalService {
 
         return {
             ...data,
-            content: data.content || data.content_json,
+            content: data.content_json ?? data.content,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
             dealId: data.deal_id

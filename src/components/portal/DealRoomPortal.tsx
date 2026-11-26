@@ -40,13 +40,15 @@ interface PortalData {
 
 export function DealRoomPortal({ data }: { data: PortalData }) {
     const { deal, room } = data;
+    const products = Array.isArray(deal.products) ? deal.products : [];
+    const owner = deal.owner || { name: 'Responsável não informado', email: '', phone: '', avatar: '' };
     const themeColor = room.theme_color || dealRoomDefaultThemeColor;
 
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
+        <div data-slot="customer-portal" className="min-h-screen bg-background text-foreground font-ui selection:bg-primary/20">
             {/* Header / Navigation */}
             <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background">
-                <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+                <div className="container mx-auto px-3 sm:px-6 min-h-[var(--ds-header-height)] py-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-4">
                         <div className="h-10 w-10 bg-primary/10 rounded-[var(--radius-panel)] flex items-center justify-center border border-primary/20">
                             <ShieldCheck className="w-6 h-6 text-primary" />
@@ -60,26 +62,26 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                     <div className="flex items-center gap-4">
                         <div className="hidden md:flex flex-col items-end mr-4">
                             <span className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Responsável</span>
-                            <span className="text-body-ui font-black text-foreground">{deal.owner.name}</span>
+                            <span className="text-body-ui font-black text-foreground">{owner.name}</span>
                         </div>
                         <div className="h-11 w-11 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-black shadow-card-ui shadow-primary/10">
-                            {deal.owner.avatar || deal.owner.name.substring(0, 2).toUpperCase()}
+                            {owner.avatar || owner.name.substring(0, 2).toUpperCase()}
                         </div>
                     </div>
                 </div>
             </header>
 
-            <main className="container mx-auto px-6 py-12 max-w-6xl">
+            <main className="container mx-auto px-3 sm:px-6 py-6 sm:py-12 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                     {/* Main Content Column */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className="min-w-0 lg:col-span-2 space-y-8">
 
                         {/* Hero Section / Summary Card */}
                         <section className="relative overflow-hidden group">
                             <div className="absolute inset-0 bg-surface-subtle rounded-[var(--radius-panel)] -z-10 transition-all duration-500 group-hover:scale-105" />
-                            <div className="bg-card/40 backdrop-blur-md border border-border/50 p-10 rounded-[var(--radius-panel)] shadow-control-ui">
-                                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                            <div className="bg-card border border-border p-4 sm:p-6 xl:p-10 rounded-[var(--radius-panel)] shadow-control-ui">
+                                <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
                                     <div className="space-y-4">
                                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-success/10 text-success-readable dark:text-success-readable rounded-full border border-success/20 text-metadata-ui font-black uppercase tracking-widest">
                                             <CheckCircle2 className="w-3 h-3" />
@@ -88,7 +90,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                         <h2 className="text-metric-ui font-black tracking-tight text-foreground leading-[1.1]">
                                             {deal.title}
                                         </h2>
-                                        <div className="flex items-center gap-4 text-muted-foreground font-medium">
+                                        <div className="flex flex-wrap items-center gap-3 text-muted-foreground font-medium">
                                             <div className="flex items-center gap-2">
                                                 <Building2 className="w-4 h-4" />
                                                 <span>{deal.company}</span>
@@ -101,7 +103,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                         </div>
                                     </div>
 
-                                    <div className="bg-primary text-primary-foreground p-8 rounded-[var(--radius-panel)] shadow-card-ui shadow-primary/20 flex flex-col items-end min-w-[240px]">
+                                    <div className="bg-primary text-primary-foreground p-4 sm:p-6 rounded-[var(--radius-panel)] shadow-card-ui flex flex-col items-start xl:items-end min-w-0">
                                         <span className="text-metadata-ui font-black uppercase tracking-[0.2em] opacity-80 mb-2">Investimento Estimado</span>
                                         <span className="text-metric-ui font-black tabular-nums tracking-tighter">
                                             {formatCurrency(deal.value)}
@@ -119,12 +121,12 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                     Soluções Propostas
                                 </h3>
                                 <span className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest bg-muted px-3 py-1 rounded-full">
-                                    {deal.products.length} Itens
+                                    {products.length} Itens
                                 </span>
                             </div>
 
                             <div className="bg-card border border-border/60 rounded-[var(--radius-panel)] overflow-hidden shadow-control-ui">
-                                <div className="overflow-x-auto">
+                                <div role="region" aria-label="Itens da oportunidade" tabIndex={0} className="overflow-x-auto focus-ring">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-muted/30">
@@ -134,7 +136,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border/40">
-                                            {deal.products.map((product, idx) => (
+                                            {products.map((product, idx) => (
                                                 <tr key={idx} className="group hover:bg-muted/20 transition-colors">
                                                     <td className="px-8 py-6">
                                                         <div className="space-y-1">
@@ -166,7 +168,7 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
                                                     </td>
                                                 </tr>
                                             ))}
-                                            {deal.products.length === 0 && (
+                                            {products.length === 0 && (
                                                 <tr>
                                                     <td colSpan={3} className="px-8 py-16 text-center text-muted-foreground font-medium">
                                                         Os detalhes dos itens serão adicionados em breve.
@@ -216,31 +218,31 @@ export function DealRoomPortal({ data }: { data: PortalData }) {
 
                             <div className="flex items-center gap-4 py-2">
                                 <div className="h-16 w-16 rounded-[var(--radius-panel)] bg-white border border-primary/20 flex items-center justify-center shadow-card-ui shadow-primary/10 overflow-hidden">
-                                    {deal.owner.avatar ? (
-                                        <img src={deal.owner.avatar} alt={deal.owner.name} className="w-full h-full object-cover" />
+                                    {owner.avatar ? (
+                                        <img src={owner.avatar} alt={owner.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <User className="w-8 h-8 text-primary" />
                                     )}
                                 </div>
                                 <div>
-                                    <div className="text-section-title font-black tracking-tight">{deal.owner.name}</div>
+                                    <div className="text-section-title font-black tracking-tight">{owner.name}</div>
                                     <div className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-widest">Solutions Architect</div>
                                 </div>
                             </div>
 
                             <div className="space-y-3 pt-4 border-t border-primary/10">
-                                <a href={`mailto:${deal.owner.email}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
+                                {owner.email && <a href={`mailto:${owner.email}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
                                     <div className="h-9 w-9 bg-primary/10 rounded-[var(--radius-panel)] flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Mail className="w-4 h-4" />
                                     </div>
-                                    <span className="text-metadata-ui font-bold truncate max-w-[180px]">{deal.owner.email}</span>
-                                </a>
-                                {deal.owner.phone && (
-                                    <a href={`tel:${deal.owner.phone.replace(/\D/g, '')}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
+                                    <span className="text-metadata-ui font-bold truncate max-w-[180px]">{owner.email}</span>
+                                </a>}
+                                {owner.phone && /\d/.test(owner.phone) && (
+                                    <a href={`tel:${owner.phone.replace(/\D/g, '')}`} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-black/20 rounded-[var(--radius-panel)] border border-transparent hover:border-primary/30 hover:bg-white dark:hover:bg-black transition-all group">
                                         <div className="h-9 w-9 bg-success/10 rounded-[var(--radius-panel)] flex items-center justify-center text-success-readable group-hover:scale-110 transition-transform">
                                             <Phone className="w-4 h-4" />
                                         </div>
-                                        <span className="text-metadata-ui font-bold">{deal.owner.phone}</span>
+                                        <span className="text-metadata-ui font-bold">{owner.phone}</span>
                                     </a>
                                 )}
                             </div>
