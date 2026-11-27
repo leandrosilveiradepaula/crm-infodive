@@ -123,6 +123,32 @@ async function audit(page,name) {
         throw new Error('PRODUCT_QA_AXE_FINDINGS');
     }
 }
+async function assertEditorPrimaryButton(page) {
+    const button = page.getByRole('button', { name: 'Gerar PDF', exact: true });
+    await button.waitFor({ state: 'visible' });
+    check(await button.isEnabled(), 'EDITOR_PRIMARY_DISABLED');
+    await page.mouse.move(1, 1);
+    // Wait for any hover/colour transition before comparing computed styles.
+    await page.waitForTimeout(250);
+    const proof = await button.evaluate(element => {
+        const probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;color:var(--primary-foreground);background-color:var(--primary)';
+        element.appendChild(probe);
+        try {
+            const actual = getComputedStyle(element);
+            const expected = getComputedStyle(probe);
+            return {
+                variant: element.getAttribute('data-variant') === 'default',
+                foregroundMatches: actual.color === expected.color,
+                backgroundMatches: actual.backgroundColor === expected.backgroundColor
+            };
+        } finally {
+            probe.remove();
+        }
+    });
+    check(proof.variant && proof.foregroundMatches && proof.backgroundMatches, 'EDITOR_PRIMARY_TOKEN_PAIR');
+    return proof;
+}
 async function theme(page, wanted, authenticated) {
     if (authenticated) {
         if (await page.locator('html').evaluate(n=>n.classList.contains('dark')) !== (wanted==='dark'))
@@ -348,6 +374,7 @@ try {
             await page.getByRole('button',{name:'Próxima seção'}).click();
             await page.getByRole('button',{name:'Seção anterior'}).click();
             await audit(page,'editor-'+name);
+            return { primaryButton: await assertEditorPrimaryButton(page) };
         });
         await scenario('public-proposal-'+name,async()=>{
             check(external&&sentProposal,'DEPENDENCY');

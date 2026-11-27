@@ -392,12 +392,13 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Primary CTA */}
+                    {/* Keep the shared primary foreground, typography and size intact.
+                        Local text-* classes can conflict with color in class merging. */}
                     <Button
+                        variant="default"
                         size="sm"
                         onClick={handleGenerate}
                         disabled={isExporting || activeSections.length === 0}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 text-metadata-ui h-8 px-4 font-bold"
                     >
                         {state.isGenerating
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>

@@ -39,7 +39,10 @@ describe('Complementary product readiness contract', () => {
     it('preserves contrast and accessible real order actions in complementary pages', () => {
         expect(source('src/app/(dashboard)/sales/tabs/OrdersTab.tsx')).toContain('aria-label="Ações do pedido"');
         const editor = source('src/components/proposals/editor/ProposalEditorClient.tsx');
-        expect(editor).toContain('bg-primary hover:bg-primary/90 text-primary-foreground');
+        const primaryButton = editor.match(/<Button\s+variant="default"\s+size="sm"\s+onClick=\{handleGenerate\}[^>]*>/)?.[0];
+        expect(primaryButton).toBeDefined();
+        expect(primaryButton).not.toContain('className=');
+        expect(source('src/components/ui/button.tsx')).toContain('bg-primary text-primary-foreground shadow-control-ui');
         expect(editor).not.toContain("!section.enabled ? 'opacity-40'");
         expect(source('src/app/proposals/public/[token]/page.tsx')).toContain("viewed: { label: 'Visualizada', color: 'bg-info-subtle text-foreground' }");
         const portal = source('src/components/portal/DealRoomPortal.tsx');
@@ -49,6 +52,9 @@ describe('Complementary product readiness contract', () => {
         expect(runner).toContain('DEAL_FORM_INVALID');
         expect(runner).toContain('DEAL_FORM_VALUES');
         expect(runner).toContain('CRM_PRODUCT_QA_AXE_DETAIL=');
+        expect(runner).toContain('EDITOR_PRIMARY_TOKEN_PAIR');
+        expect(runner).toContain('actual.color === expected.color');
+        expect(runner).toContain('actual.backgroundColor === expected.backgroundColor');
     });
     it('does not certify or automatically export the environment-bound original', () => {
         const audit=source('scripts/audit-reusable-base.mjs');
