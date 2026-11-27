@@ -342,6 +342,8 @@
   --ds-command-overlay: rgb(0 0 0 / 0.5);
   --ds-command-max-width: 40rem;
   --ds-command-list-max-height: 25rem;
+  --ds-document-preview-scale: 0.55;
+  --ds-public-document-preview-scale: 0.6;
   --ds-command-input-size: 1rem;
   --ds-command-input-padding: 20px 24px;
   --ds-command-list-padding: 8px;

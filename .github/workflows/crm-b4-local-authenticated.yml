@@ -15,7 +15,7 @@ jobs:
   nextjs-local-e2e:
     if: github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'ux-ui/crm214-b4-integrated-qa' || github.head_ref == 'ux/commercial-directory-journeys-20261125' || (startsWith(github.head_ref, 'codex/issue-214-ux-recovery-') || startsWith(github.head_ref, 'design-system/central-semantic-core-')))
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -72,6 +72,9 @@ jobs:
           echo "CRM_B4_LOCAL_FIXTURE=READY; schema_reload=requested"
         env:
           PGPASSWORD: postgres
+      - name: Install actual public RPCs and product journey fixture compatibility
+        if: github.head_ref == 'codex/issue-214-ux-recovery-product-readiness-20261126'
+        run: node test/e2e/local-qa/bootstrap-product-journeys.mjs
       - name: Provision four real local Auth users and two isolated tenants
         run: node test/e2e/local-qa/provision-local-auth.mjs
       - name: Compile real Next.js application against local-only backend
@@ -101,12 +104,18 @@ jobs:
           test -n "$CHROME_PATH"
           export CRM_E2E_CAPTURE_SANITIZED=true
           export CRM_E2E_ARTIFACT_DIR="$RUNNER_TEMP/crm-b4-local-visual-evidence"
+          status=0
           if ! node test/e2e/run-authenticated-smoke.mjs; then
             # Safe diagnostic only: the Server Action emits a bounded PostgREST
             # error code, never profile IDs, SQL text, tokens or customer data.
             sed -n -E 's/.*CRM_THEME_WRITE_DIAGNOSTIC=([A-Za-z0-9_]{2,32}).*/CRM_THEME_WRITE_DIAGNOSTIC=\1/p' "$RUNNER_TEMP/crm-b4-next.log" | head -2 || true
-            exit 1
+            status=1
           fi
+          if [[ "$GITHUB_HEAD_REF" == "codex/issue-214-ux-recovery-product-readiness-20261126" ]]; then
+            node test/e2e/run-product-journeys.mjs || status=1
+            node scripts/audit-reusable-base.mjs > "$CRM_E2E_ARTIFACT_DIR/reusable-base.json" || status=1
+          fi
+          exit "$status"
       - name: Upload sanitized local visual evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

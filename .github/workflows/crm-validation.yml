@@ -24,7 +24,7 @@ jobs:
       # Source-only shallow checkout for the owner-authorized final audit.
       # The artifact excludes runner config, credentials, working data and history.
       - name: Package exact candidate shallow checkout for local audit
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125' || github.head_ref == 'codex/issue-214-ux-recovery-product-readiness-20261126')
         shell: bash
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
@@ -45,7 +45,7 @@ jobs:
           printf '%s\n%s\n' "$EXPECTED_SHA" "$(git rev-parse 'HEAD^{tree}')" > "$RUNNER_TEMP/crm-audit-checkout-evidence/provenance.txt"
           git branch -D crm-audit-source-snapshot
       - name: Upload exact candidate shallow checkout
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (github.head_ref == 'codex/issue-214-ux-recovery-final-audit-20261125' || github.head_ref == 'codex/issue-214-ux-recovery-product-readiness-20261126')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: crm-final-audit-source-${{ github.event.pull_request.head.sha }}

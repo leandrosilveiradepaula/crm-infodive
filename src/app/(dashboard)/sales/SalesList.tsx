@@ -9,10 +9,10 @@ import { InstallmentsTab } from './tabs/InstallmentsTab';
 import { CommissionsTab } from './tabs/CommissionsTab';
 import { Activity, LayoutDashboard, Package, CreditCard, Coins } from 'lucide-react';
 
-export default function SalesList() {
+export default function SalesList({ initialTab = 'dashboard' }: { initialTab?: 'dashboard' | 'orders' }) {
     const { fetchSalesOrders, updateSalesOrder, updateInstallment, loading } = useSalesOrders();
     const [orders, setOrders] = useState<SalesOrder[]>([]);
-    const [activeTab, setActiveTab] = useState('dashboard');
+    const [activeTab, setActiveTab] = useState<string>(initialTab);
     const [ordersFilter, setOrdersFilter] = useState<string | null>(null);
 
     const loadOrders = useCallback(async () => {

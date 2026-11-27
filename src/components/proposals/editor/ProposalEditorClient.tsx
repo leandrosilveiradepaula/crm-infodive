@@ -320,13 +320,14 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
     // RENDER
     // ═══════════════════════════════════════════════════════════════════
     return (
-        <div className="w-full h-[calc(100vh-4rem)] flex flex-col bg-background">
+        <div data-slot="proposal-editor" className="w-full min-w-0 flex flex-col bg-background xl:h-[calc(100dvh-4rem)]">
 
             {/* ── HEADER ─────────────────────────────────────────────── */}
-            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 z-40">
+            <header className="min-h-[var(--ds-header-height)] border-b border-border bg-card flex flex-wrap items-center justify-between gap-3 p-3 shrink-0 z-40">
                 <div className="flex items-center gap-3">
                     <Button
                         variant="ghost" size="icon"
+                        aria-label="Voltar à oportunidade"
                         onClick={() => router.push(`/pipeline?dealId=${deal.id}&tab=proposals`)}
                         className="text-muted-foreground hover:text-foreground h-8 w-8"
                     >
@@ -339,7 +340,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                     {/* Save */}
                     <Button
                         variant="ghost" size="sm"
@@ -358,7 +359,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         variant="outline" size="sm"
                         onClick={generateAISummary}
                         disabled={isGeneratingAI || isExporting}
-                        className="gap-1.5 text-metadata-ui h-8 text-info border-info hover:bg-info-subtle hover:text-info"
+                        className="gap-1.5 text-metadata-ui h-8 text-foreground border-border hover:bg-info-subtle hover:text-foreground"
                     >
                         {isGeneratingAI
                             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -391,12 +392,13 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Primary CTA */}
+                    {/* Keep the shared primary foreground, typography and size intact.
+                        Local text-* classes can conflict with color in class merging. */}
                     <Button
+                        variant="default"
                         size="sm"
                         onClick={handleGenerate}
                         disabled={isExporting || activeSections.length === 0}
-                        className="bg-primary hover:bg-primary/90 text-white gap-1.5 text-metadata-ui h-8 px-4 font-bold"
                     >
                         {state.isGenerating
                             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Gerando...</>
@@ -407,10 +409,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
             </header>
 
             {/* ── BODY: 3 columns ─────────────────────────────────────── */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 min-w-0 flex flex-col xl:flex-row xl:overflow-hidden">
 
                 {/* ── LEFT: Section List (240px) ──────────────────────── */}
-                <aside className="w-60 border-r border-border bg-card shrink-0 flex flex-col">
+                <aside aria-label="Seções e configurações da proposta" className="w-full xl:w-60 border-b xl:border-b-0 xl:border-r border-border bg-card shrink-0 flex flex-col">
                     <div className="p-3 border-b border-border">
                         <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">Seções da Proposta</p>
                     </div>
@@ -437,7 +439,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                         <div className="w-3" />
                                         <Icon className="w-3.5 h-3.5 text-muted-foreground" />
                                         <span className="text-metadata-ui flex-1 truncate text-foreground/80">{section.label}</span>
-                                        <Switch checked={section.enabled} className="scale-[0.55]" />
+                                        <Switch checked={section.enabled} aria-label={`Ativar ${section.label}`} className="scale-[0.55]" />
                                     </div>
                                 );
                             })
@@ -455,6 +457,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             <div key={item.key} className="flex items-center justify-between">
                                 <span className="text-metadata-ui text-foreground">{item.label}</span>
                                 <Switch
+                                    aria-label={item.label}
                                     checked={(state.config as any)[item.key]}
                                     onCheckedChange={v => updateConfig({ [item.key]: v })}
                                     className="scale-[0.65]"
@@ -465,12 +468,13 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                 </aside>
 
                 {/* ── CENTER: Preview ──────────────────────────────────── */}
-                <main className="flex-1 bg-muted/30 flex flex-col overflow-hidden">
+                <section aria-label="Prévia da proposta" className="flex-1 min-w-0 bg-surface-subtle flex flex-col overflow-hidden">
                     {/* Nav bar */}
-                    <div className="h-10 border-b border-border bg-card/50 flex items-center justify-between px-4 shrink-0">
+                    <div className="min-h-[var(--ds-control-height-large)] border-b border-border bg-card flex flex-wrap gap-2 items-center justify-between p-2 shrink-0">
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="ghost" size="icon"
+                                aria-label="Seção anterior"
                                 onClick={() => goToSection(-1)}
                                 disabled={selectedIndex <= 0}
                                 className="h-7 w-7"
@@ -482,6 +486,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             </span>
                             <Button
                                 variant="ghost" size="icon"
+                                aria-label="Próxima seção"
                                 onClick={() => goToSection(1)}
                                 disabled={selectedIndex >= activeSections.length - 1}
                                 className="h-7 w-7"
@@ -503,7 +508,7 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                     </div>
 
                     {/* Preview area */}
-                    <div className="flex-1 overflow-auto flex items-start justify-center p-6">
+                    <div role="region" aria-label="Documento da proposta" tabIndex={0} className="flex-1 overflow-auto flex items-start justify-start p-3 sm:p-6 focus-ring">
                         <AnimatePresence mode="wait">
                             {currentSection ? (
                                 <motion.div
@@ -512,10 +517,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ duration: 0.2 }}
-                                    className="bg-white rounded-[var(--radius-control)] shadow-card-ui border border-border overflow-hidden"
-                                    style={{ width: '210mm', transformOrigin: 'top center' }}
+                                    className="shrink-0 bg-white rounded-[var(--radius-control)] shadow-card-ui border border-border overflow-hidden"
+                                    style={{ width: 'fit-content' }}
                                 >
-                                    <div className="transform scale-[0.55] origin-top-left w-[210mm]" style={{ minHeight: 'calc(297mm * 0.55)' }}>
+                                    <div className="w-[210mm]" style={{ zoom: 'var(--ds-document-preview-scale)' }}>
                                         <PagePreview
                                             sectionId={currentSection.id}
                                             deal={previewDeal}
@@ -537,10 +542,10 @@ export function ProposalEditorClient({ deal, distributors = [], initialData }: P
                             )}
                         </AnimatePresence>
                     </div>
-                </main>
+                </section>
 
                 {/* ── RIGHT: Inspector ─────────────────────────────────── */}
-                <aside className="w-80 border-l border-border bg-card shrink-0 overflow-y-auto flex flex-col">
+                <aside aria-label="Propriedades da proposta" className="w-full xl:w-80 border-t xl:border-t-0 xl:border-l border-border bg-card shrink-0 overflow-y-auto flex flex-col">
                     <div className="p-3 border-b border-border">
                         <p className="text-metadata-ui font-bold text-muted-foreground uppercase tracking-wider">
                             {currentSection ? `Editar: ${currentSection.label}` : 'Propriedades'}
@@ -647,22 +652,26 @@ function SortableSectionItem({
                     ? 'bg-primary/8 border-l-2 border-primary'
                     : 'hover:bg-muted/50 border-l-2 border-transparent'
                 }
-                ${!section.enabled ? 'opacity-40' : ''}
+                ${!section.enabled ? 'cursor-default' : ''}
                 ${isDragging ? 'shadow-card-ui ring-1 ring-primary/20' : ''}
             `}
         >
             <div
                 {...attributes} {...listeners}
-                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Reordenar ${section.label}`}
+                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground focus-ring"
                 onClick={e => e.stopPropagation()}
             >
                 <GripVertical className="w-3 h-3" />
             </div>
             <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-            <span className={`text-metadata-ui flex-1 truncate ${isSelected ? 'font-bold text-foreground' : 'text-foreground/80'}`}>
+            <button type="button" aria-label={`Editar seção ${section.label}`} aria-pressed={isSelected} disabled={!section.enabled}
+                onClick={event => { event.stopPropagation(); onSelect(); }}
+                className={`text-metadata-ui flex-1 min-w-0 truncate text-left focus-ring ${isSelected ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
                 {section.label}
-            </span>
+            </button>
             <Switch
+                aria-label={`Ativar ${section.label}`}
                 checked={section.enabled}
                 onCheckedChange={() => onToggle()}
                 onClick={e => e.stopPropagation()}
@@ -694,6 +703,7 @@ function InspectorPanel({
                 <div className="space-y-4">
                     <FieldGroup label="Título da Proposta">
                         <Input
+                            aria-label="Título da proposta"
                             value={state.editableTexts.proposalTitle}
                             onChange={e => updateText('proposalTitle', e.target.value)}
                             className="text-metadata-ui h-9"
@@ -712,6 +722,7 @@ function InspectorPanel({
             return (
                 <FieldGroup label="Texto de Confidencialidade">
                     <textarea
+                        aria-label="Texto de confidencialidade"
                         value={state.editableTexts.confidentialityText}
                         onChange={e => updateText('confidentialityText', e.target.value)}
                         rows={8}

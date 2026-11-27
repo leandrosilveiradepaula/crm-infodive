@@ -8,13 +8,11 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface PageProps {
-    params: {
-        id: string;
-    }
+    params: Promise<{ id: string }>
 }
 
 export default async function DealRoomPortalPage({ params }: PageProps) {
-    const token = params.id;
+    const { id: token } = await params;
     const result = await fetchPublicRoomData(token);
 
     if (!result.success || !result.data) {

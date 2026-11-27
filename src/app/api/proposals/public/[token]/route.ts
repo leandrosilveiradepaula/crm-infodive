@@ -48,7 +48,8 @@ export async function GET(
             signedAt: data.signed_at,
             createdBy: data.created_by,
             dealTitle: data.deal_title, // If joined
-            content: data.content || data.content_json, // Try both just in case
+            content: data.content_json ?? data.content, // Current editor format, then legacy format
+            products: data.products_json ?? data.products,
         };
 
         return NextResponse.json(mappedData);
